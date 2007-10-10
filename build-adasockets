@@ -1,0 +1,48 @@
+
+# Prepare an adasocket-win archive for Windows
+
+version=1.2
+tarball=/archives/development/adasockets-$version.tar.gz
+
+
+rm -fr adasockets-$version
+
+tar xfz $tarball
+
+cd adasockets-$version
+PATH=/home/obry/dev-gnat/bin:$PATH
+./configure --build=i686-pc-mingw32
+make install prefix=d:/usr/Ada.Libraries/adasockets
+
+cp -fr /cygdrive/d/usr/Ada.Libraries/adasockets adasockets
+rm -f adasockets/lib/adasockets/*.o adasockets/lib/adasockets/*.ali
+rm -f adasockets/lib/libadasockets.*
+
+bat=adasockets/build.cmd
+
+echo cd lib\\adasockets > $bat
+echo gcc -c -O2 sockets.adb >> $bat
+echo gcc -c -O2 sockets-windows_link.adb >> $bat
+echo gcc -c -O2 sockets-utils.adb >> $bat
+echo gcc -c -O2 sockets-thin.adb >> $bat
+echo gcc -c -O2 sockets-stream_io.adb >> $bat
+echo gcc -c -O2 sockets-naming.adb >> $bat
+echo gcc -c -O2 sockets-multicast.adb >> $bat
+echo gcc -c -O2 sockets-link.ads >> $bat
+echo gcc -c -O2 sockets-constants.ads >> $bat
+echo ar cr libadasockets.a *.o >> $bat
+echo del *.o >> $bat
+echo move libadasockets.a .. >> $bat
+echo attrib +r *.ali >> $bat
+echo cd ..\\.. >> $bat
+
+tar cvf adasockets-win-$version.tar adasockets
+gzip -9 adasockets-win-$version.tar
+
+rm -fr adasockets
+
+
+##########################
+
+./configure --build=i686-pc-mingw32 --prefix=/opt/gnatlib/5.02a1/adasockets
+make install

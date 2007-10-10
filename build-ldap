@@ -1,0 +1,32 @@
+#! /bin/bash
+
+cdir=`pwd`
+dir=`cygpath --windows $cdir | sed 's,\\\,/,g;s,^.:,,'`
+
+####################################################################
+tardir='/archives/development'
+
+# version
+ldap_version=2.0.23
+
+# Tarball locations
+ldap_tarball=$tardir/openldap-$ldap_version.tgz
+
+####################################################################
+
+PATH=/bin:/usr/bin
+source /cygdrive/d/usr/bin/setgcc
+
+logdir=$dir/openldap/tmp
+
+rm -fr openldap
+mkdir openldap
+mkdir openldap/tmp
+cd openldap
+
+gzip -dc $ldap_tarball | tar xf - > $logdir/tar.out 2>&1
+
+if [ $? -ne 0 ]; then
+   echo "uncompress failed" > $logdir/result
+   exit 1
+fi

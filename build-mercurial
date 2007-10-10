@@ -1,0 +1,6 @@
+export PATH=/bin:/usr/bin
+export LD_LIBRARY_PATH=/bin:/lib/python2.4/config
+# copy the Python DLL otherwise the linker will not find it
+cp /bin/libpython2.5.dll .
+python setup.py build
+python setup.py install --force

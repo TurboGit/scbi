@@ -1,0 +1,9 @@
+./configure --without-zlib --without-threads --without-jp2 --without-tiff \
+    --without-wmf --without-lcms --without-png --without-gvc \
+    --without-rsvg --without-xml --without-openexr -without-fontconfig \
+    --without-perl --without-bzlib --without-djvu \
+    --enable-shared i686-pc-mingw32
+
+for file in magick/*.c; do echo $file; gcc -c -I. -o magick/`basename $file .c`.o $file; done
+
+gcc -shared -o magick.dll *.o
