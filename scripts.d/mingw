@@ -1,0 +1,117 @@
+
+function mingw-update()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $GREPO/mingw-w64 && git checkout master && git svn rebase
+}
+
+function mingw-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    mkdir -p $BDIR/mingw/$TARGET/mingh
+    mkdir -p $BDIR/mingw/$TARGET/mingrt
+    mkdir -p $BDIR/mingw/$TARGET/pgcc
+
+    if [ ! -d "src" ]; then
+	tar xf $TARBALL/mingw-w64-master.tar.bz2 &&
+	rm -f src &&
+	ln -s mingw* src
+    fi
+}
+
+function config-mingh()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $BDIR/mingw/$TARGET/mingh &&
+    $BDIR/mingw/src/mingw-w64-headers/configure \
+	--prefix=$PREFIX --build=$TARGET
+}
+
+function config-mingrt()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $BDIR/mingw/$TARGET/mingrt &&
+    $BDIR/mingw/src/mingw-w64-crt/configure \
+	--prefix=$PREFIX --host=$TARGET --target=$TARGET --build=$HOST
+}
+
+function config-pgcc()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $BDIR/mingw/$TARGET/pgcc &&
+    CFLAGS="-O1" $BDIR/gnat/src/configure \
+	--target=$TARGET --prefix=$PREFIX --build=$HOST \
+	--enable-thread=win32 --disable-nls --disable-multilib \
+        --disable-sjlj-exceptions --enable-languages=c
+}
+
+function mingw-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    config-mingh $PREFIX $TARGET && 
+    config-pgcc $PREFIX $TARGET
+}
+
+function build-pgcc()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    ilog mingw build pgcc
+    # The make will fail, but we install the partial C compiler
+    # which is sufficient to build the MingW runtime.
+    cd $BDIR/mingw/$TARGET/pgcc
+    make -j2
+    make -k install
+
+    return 0
+}
+
+function build-mingh()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    ilog mingw build mingh
+    cd $BDIR/mingw/$TARGET/mingh && make -j6 && make install
+}
+
+function build-mingrt()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    ilog mingw build mingrt
+    cd $BDIR/mingw/$TARGET/mingrt && make -j4
+}
+
+function mingw-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    build-mingh $PREFIX $TARGET &&
+    build-pgcc  $PREFIX $TARGET &&
+    config-mingrt $PREFIX $TARGET &&
+    build-mingrt $PREFIX $TARGET
+}
+
+function mingw-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $BDIR/mingw/$TARGET/mingrt && make install
+}

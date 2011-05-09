@@ -1,0 +1,2 @@
+# default GNAT path
+# export PATH=$PREFIX/bin:$PATH

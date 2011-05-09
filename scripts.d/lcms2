@@ -1,0 +1,49 @@
+
+function lcms2-update()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    git_co http://github.com/mm2/Little-CMS Little-CMS
+
+    cd $GREPO/Little-CMS && git pull
+}
+
+function lcms2-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ ! -d src ]; then
+        ln -s $GREPO/Little-CMS src
+    fi
+
+    export PATH=/usr/bin:/bin:/usr/local/bin
+    dprefix=/opt/darktable
+
+    mkdir -p $TARGET
+}
+
+function lcms2-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $TARGET && ../src/configure --prefix=$dprefix
+}
+
+function lcms2-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $TARGET && make -j4
+}
+
+function lcms2-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $TARGET && sudo make install
+}

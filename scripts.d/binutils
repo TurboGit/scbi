@@ -1,0 +1,44 @@
+
+function binutils-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    mkdir -p $BDIR/binutils/$TARGET
+
+    if [ ! -d "src" ]; then
+	tar xf $TARBALL/binutils.tar.gz &&
+	rm -f src &&
+	ln -s binutils* src
+    fi
+}
+
+function binutils-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ $HOST == $TARGET ]; then
+	cd $BDIR/binutils/$TARGET &&
+	$BDIR/binutils/src/configure --build=$HOST --prefix=$PREFIX
+    else
+	cd $BDIR/binutils/$TARGET &&
+	$BDIR/binutils/src/configure --target=$TARGET --prefix=$PREFIX
+    fi
+}
+
+function binutils-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $BDIR/binutils/$TARGET && make -j6
+}
+
+function binutils-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $BDIR/binutils/$TARGET && make install
+}

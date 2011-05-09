@@ -1,0 +1,45 @@
+
+function git-update()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $GREPO/git && git pull
+}
+
+function git-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ ! -d src ]; then
+        ln -s $GREPO/git src
+    fi
+
+    export PATH=/usr/bin:/bin:/usr/local/bin
+}
+
+function git-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src && make configure && ./configure --prefix=/usr/local CFLAGS="-O2"
+}
+
+function git-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src && make -j6 PREFIX=/usr/local all doc
+}
+
+function git-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src &&  sudo make PREFIX=/usr/local install install-doc &&
+    sudo cp contrib/completion/git-completion.bash /usr/local/etc/
+}

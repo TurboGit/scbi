@@ -1,0 +1,4 @@
+ROOT=$HOME/dev
+BDIR=$ROOT/builds
+PREFIX=$BDIR/install
+TARBALL=$BDIR/tar

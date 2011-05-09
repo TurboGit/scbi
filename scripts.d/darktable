@@ -1,0 +1,53 @@
+
+function darktable-update()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    git_co git://darktable.git.sf.net/gitroot/darktable/darktable darktable
+
+    cd $GREPO/darktable && git pull
+}
+
+function darktable-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ ! -d src ]; then
+        ln -s $GREPO/darktable src
+    fi
+
+    export PATH=/usr/bin:/bin:/usr/local/bin
+    dprefix=/opt/darktable
+
+    mkdir -p $TARGET
+}
+
+function darktable-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $TARGET && cmake ../src -DCMAKE_BUILD_TYPE=Release \
+	-DLCMS2_LIBRARY=$dprefix/lib/liblcms2.so \
+	-DLCMS2_INCLUDE_DIR=$dprefix/include \
+	-DCMAKE_INSTALL_PREFIX=$dprefix \
+	-DINSTALL_IOP_EXPERIMENTAL=On -DINSTALL_IOP_LEGACY=Off
+}
+
+function darktable-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $TARGET && make -j4
+}
+
+function darktable-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $TARGET && sudo make install
+}

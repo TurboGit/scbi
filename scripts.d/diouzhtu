@@ -1,0 +1,36 @@
+
+function diouzhtu-update()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $GREPO/diouzhtu && git pull
+}
+
+function diouzhtu-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ ! -d src ]; then
+        ln -s $GREPO/diouzhtu src
+    fi
+
+    export ARGWIAD_ROOT=$HOME/opt/gwiad
+}
+
+function diouzhtu-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src && PROCESSORS=4 make
+}
+
+function diouzhtu-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src &&  make install && make install_gwiad_plugins
+}

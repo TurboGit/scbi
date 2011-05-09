@@ -1,0 +1,26 @@
+
+function svn_co()
+{
+    URL=$1
+    NAME=$2
+
+    (
+	if [ ! -d $SREPO/$NAME ]; then
+	    cd $SREPO
+	    svn co $URL $NAME
+	fi
+    )
+}
+
+function git_co()
+{
+    URL=$1
+    NAME=$2
+
+    (
+	if [ ! -d $GREPO/$NAME ]; then
+	    cd $GREPO
+	    git clone $URL $NAME
+	fi
+    )
+}

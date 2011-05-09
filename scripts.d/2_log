@@ -1,0 +1,32 @@
+LOGS=$BDIR/logs
+
+############################## clog
+
+function clog()
+{
+    local module=$1
+    rm -f $LOGS/$TARGET-$module-report.log
+}
+
+############################## ilog
+
+function ilog()
+{
+    local module=$1
+    local ts=$(date +"%Y/%m/%d %H:%M")
+
+    shift
+    echo $ts : $*
+    echo $ts : $* >> $LOGS/$TARGET-$module-report.log
+}
+
+############################## elog
+
+function elog()
+{
+    local module=$1
+    shift
+
+    ilog $module \(FAILED\) $*
+    return 1
+}

@@ -1,0 +1,36 @@
+
+function v2p-update()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $GREPO/v2p && git pull
+}
+
+function v2p-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ ! -d src ]; then
+        ln -s $GREPO/v2p src
+    fi
+
+    export ARGWIAD_ROOT=$HOME/opt/gwiad
+}
+
+function v2p-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src && PROCESSORS=4 make
+}
+
+function v2p-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src &&  make install_gwiad_plugin
+}

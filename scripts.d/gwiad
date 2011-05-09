@@ -1,0 +1,42 @@
+
+function gwiad-update()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $GREPO/gwiad && git pull
+}
+
+function gwiad-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ ! -d src ]; then
+        ln -s $GREPO/gwiad src
+    fi
+}
+
+function gwiad-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src && rm mk.install
+}
+
+function gwiad-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src && PROCESSORS=4 make
+}
+
+function gwiad-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src &&  make install && make install_server
+}

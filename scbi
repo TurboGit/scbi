@@ -1,0 +1,226 @@
+#!/bin/bash
+#
+#  For all modules the following function can be implemented and are called
+#  in this specific order:
+#
+#    update   not done by default, to update repository
+#    setup    to setup build structure
+#    config   to configure, ./configure or other steps
+#    build    to build, make
+#    install  to install
+#
+
+CDPATH=
+
+HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
+TARGET=$HOST
+MODULES=
+DLOG=on-failure
+
+STEPS="setup config build install"
+
+############################## fn-exists
+
+function fn-exists()
+{
+    declare -f $1 > /dev/null
+}
+
+############################## module-wrapper
+
+function module-wrapper()
+{
+    module=$1
+    step=$2
+    log=$LOGS/$TARGET-$module-$step.log
+
+    ilog $module $step starting
+
+    mkdir -p $BDIR/$module > $log 2>&1
+    cd $BDIR/$module  >> $log 2>&1
+
+    if [ $DLOG = yes ]; then
+	$module-$step $PREFIX $TARGET | tee $log 2>&1
+    else
+	$module-$step $PREFIX $TARGET >> $log 2>&1
+    fi
+    res=$?
+
+    if [ $res != 0 ]; then
+	if [ $DLOG = on-failure ]; then
+	    tail -100 $log
+	fi
+	elog $module $step failed with error $res
+    else
+	ilog $module $step completed
+    fi
+}
+
+############################## usage
+
+function usage()
+{
+    local k=0
+
+    echo
+    echo $0 [tSIscbilv] module1 [module2 ... modulen]
+
+    echo "   -t target_name      specify the target to build for ($TARGET)"
+    echo "   -S | --no-setup     skip setup"
+    echo "   -I | --no-install   skip install"
+    echo "   -u | --update       do update"
+    echo "   -s | --setup        do setup"
+    echo "   -c | --config       do config"
+    echo "   -b | --build        do build"
+    echo "   -i | --install      do install"
+    echo "   -v | --verbose      display full log"
+    echo "   -l | --no-log       never display log"
+    echo "   -p | --purge        remove builds directories before building"
+    echo "   -P | --purge-only   only remove builds directories"
+
+    echo
+    echo -n modules:
+
+    for module in scripts.d/[^0-9]*; do
+	echo -n " $(basename $module)"
+	k=$(expr $k + 1)
+	[ $k == 7 ] && k=0 && echo && echo -n "        "
+    done
+    echo
+
+    exit 1
+}
+
+############################## module-wrapper
+
+function handle-module()
+{
+    module=$1
+    log=$LOGS/$TARGET-$module-report.log
+
+    cd $ROOT
+
+    [ ! -f scripts.d/$module ] && 
+    echo No description for module $module &&
+    exit 1
+
+    #  Then load module setup
+
+    source scripts.d/$module
+
+    clog $module
+
+    ilog build Building $module for target $TARGET | tee -a $log
+    ilog build steps : $STEPS | tee -a $log
+
+    #  Log current enviroment
+
+    env > $LOGS/$TARGET-$module-env.log
+    echo "===============================================" \
+	>> $LOGS/$TARGET-$module-env.log
+    gnat ls -v >> $LOGS/$TARGET-$module-env.log 2> /dev/null
+    which gcc >> $LOGS/$TARGET-$module-env.log 2> /dev/null
+
+    #  Call module routines
+
+    for step in $STEPS; do
+	fn-exists $module-$step && module-wrapper $module $step || exit 1
+    done
+    echo
+}
+
+############################## body
+
+NSTEPS=
+PURGE=no
+
+set -- $(getopt -u -o t:SIuscbilpP \
+    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only -- "$@")
+
+while [ $# -gt 0 ]; do
+    case $1 in
+	-t|--target)
+	    TARGET=$2; shift
+	    ;;
+	-S|--no-setup)
+	    STEPS=${STEPS/setup/}
+	    ;;
+	-I|--no-install)
+	    STEPS=${STEPS/install/}
+	    ;;
+	-u|--update)
+	    NSTEPS="$NSTEPS update"
+	    STEPS="update $STEPS"
+	    ;;
+	-s|--setup)
+	    NSTEPS="$NSTEPS setup"
+	    ;;
+	-c|--config)
+	    NSTEPS="$NSTEPS config"
+	    ;;
+	-b|--build)
+	    NSTEPS="$NSTEPS build"
+	    ;;
+	-i|--install)
+	    NSTEPS="$NSTEPS install"
+	    ;;
+	-l|--no-log)
+	    DLOG=no
+	    ;;
+	-v|--verbose)
+	    DLOG=yes
+	    ;;
+	-p|--purge)
+	    PURGE=yes
+	    ;;
+	-P|--purge-only)
+	    PURGE=only
+	    ;;
+	(--)
+	    ;;
+	(*)
+	    MODULES="$MODULES $1"
+	    ;;
+	(-*)
+	    echo "$0: error - unrecognized option $1" 1>&2; exit 1
+	    ;;
+    esac
+    shift
+done
+
+[ "$MODULES" = "" ] && usage
+
+#  If we have explicitly specified some steps, use them
+
+if [ "$NSTEPS" != "" -a "$NSTEPS" != " update" ]; then
+    STEPS=$NSTEPS
+fi
+
+#  First load any global settings
+
+rm -f scripts.d/*~
+
+for setup in scripts.d/[0-9]*; do
+    source $setup
+done
+
+#  Prepare log dir
+
+mkdir -p $LOGS
+
+#  If purge is asked, first remove current build structure
+
+if [ $PURGE = yes -o $PURGE = only ]; then
+    for module in $MODULES; do
+	ilog build Purging $module
+	rm -fr $BDIR/$module
+    done
+fi
+
+[ $PURGE = only ] && exit 0
+
+#  Run script for all modules
+
+for module in $MODULES; do
+    handle-module $module
+done
