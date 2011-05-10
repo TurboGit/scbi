@@ -16,6 +16,7 @@ HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
 TARGET=$HOST
 MODULES=
 DLOG=on-failure
+DEFS=$PWD/scripts.d
 
 STEPS="setup config build install"
 
@@ -83,7 +84,7 @@ function usage()
     echo
     echo -n modules:
 
-    for module in scripts.d/[^0-9]*; do
+    for module in $DEFS/[^0-9]*; do
 	echo -n " $(basename $module)"
 	k=$(expr $k + 1)
 	[ $k == 7 ] && k=0 && echo && echo -n "        "
@@ -102,13 +103,13 @@ function handle-module()
 
     cd $ROOT
 
-    [ ! -f scripts.d/$module ] && 
+    [ ! -f $DEFS/$module ] &&
     echo No description for module $module &&
     exit 1
 
     #  Then load module setup
 
-    source scripts.d/$module
+    source $DEFS/$module
 
     clog $module
 
@@ -200,9 +201,9 @@ fi
 
 #  First load any global settings
 
-rm -f scripts.d/*~
+rm -f $DEFS/*~
 
-for setup in scripts.d/[0-9]*; do
+for setup in $DEFS/[0-9]*; do
     source $setup
 done
 
