@@ -127,7 +127,10 @@ function handle-module()
     #  Call module routines
 
     for step in $STEPS; do
-	fn-exists $module-$step && ( module-wrapper $module $step || exit 1 )
+	fn-exists $module-$step
+	if [[ $? = 0 ]]; then
+	    module-wrapper $module $step || exit 1
+	fi
     done
     echo
 }
