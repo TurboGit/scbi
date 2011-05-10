@@ -18,12 +18,14 @@ function binutils-config()
     PREFIX=$1
     TARGET=$2
 
+    CONF_OPT="--prefix=$PREFIX --disable-multilib"
+
     if [ $HOST == $TARGET ]; then
 	cd $BDIR/binutils/$TARGET &&
-	$BDIR/binutils/src/configure --build=$HOST --prefix=$PREFIX
+	$BDIR/binutils/src/configure --build=$HOST $CONF_OPT
     else
 	cd $BDIR/binutils/$TARGET &&
-	$BDIR/binutils/src/configure --target=$TARGET --prefix=$PREFIX
+	$BDIR/binutils/src/configure --target=$TARGET $CONF_OPT
     fi
 }
 
