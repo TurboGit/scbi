@@ -15,8 +15,6 @@ function diouzhtu-setup()
     if [ ! -d src ]; then
         ln -s $GREPO/diouzhtu src
     fi
-
-    export ARGWIAD_ROOT=$HOME/opt/gwiad
 }
 
 function diouzhtu-build()
@@ -31,6 +29,8 @@ function diouzhtu-install()
 {
     PREFIX=$1
     TARGET=$2
+
+    export ARGWIAD_ROOT=$HOME/opt/gwiad
 
     cd src &&  make install && make install_gwiad_plugins
 }

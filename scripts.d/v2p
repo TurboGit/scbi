@@ -15,8 +15,6 @@ function v2p-setup()
     if [ ! -d src ]; then
         ln -s $GREPO/v2p src
     fi
-
-    export ARGWIAD_ROOT=$HOME/opt/gwiad
 }
 
 function v2p-build()
@@ -31,6 +29,8 @@ function v2p-install()
 {
     PREFIX=$1
     TARGET=$2
+
+    export ARGWIAD_ROOT=$HOME/opt/gwiad
 
     cd src &&  make install_gwiad_plugin
 }
