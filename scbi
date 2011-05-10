@@ -51,8 +51,10 @@ function module-wrapper()
 	    tail -100 $log
 	fi
 	elog $module $step failed with error $res
+	return $res
     else
 	ilog $module $step completed
+	return 0
     fi
 }
 
@@ -124,7 +126,7 @@ function handle-module()
     #  Call module routines
 
     for step in $STEPS; do
-	fn-exists $module-$step && module-wrapper $module $step || exit 1
+	fn-exists $module-$step && ( module-wrapper $module $step || exit 1 )
     done
     echo
 }
