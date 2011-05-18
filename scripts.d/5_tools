@@ -1,0 +1,21 @@
+
+function check_tool()
+{
+    if [ -z "$(which $1)" ]; then
+	echo Required tool $1 missing, please update the PATH
+	return 1
+    fi
+    return 0
+}
+
+function check_tools()
+{
+    res=0
+
+    while [ "$1" != "" ]; do
+	check_tool $1
+	res=$(expr $res + $?)
+	shift
+    done
+    return $res
+}
