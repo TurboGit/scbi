@@ -1,0 +1,34 @@
+
+function gnadelite-update()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd $GREPO/gnadelite && git pull
+}
+
+function gnadelite-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ ! -d src ]; then
+        ln -s $GREPO/gnadelite src
+    fi
+}
+
+function gnadelite-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src && PROCESSORS=4 make
+}
+
+function gnadelite-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd src &&  make install
+}
