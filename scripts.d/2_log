@@ -1,5 +1,7 @@
 TODAY=$(date +"%Y_%m_%d")
 LOGS=$BDIR/logs/$TODAY
+# keep logs for 4 months
+KEEP=120
 
 ############################## clog
 
@@ -31,3 +33,16 @@ function elog()
     ilog $module \(FAILED\) $*
     return 1
 }
+
+############################## clean old logs
+
+function clean_logs()
+{
+    find $LOGS -ctime +$KEEP -delete
+}
+
+############################## body
+
+[ ! -d $LOGS ] && mkdir -p $LOGS
+
+clean_logs
