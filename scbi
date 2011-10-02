@@ -223,7 +223,9 @@ for setup in $DEFS/[0-9]*; do
     source $setup
 done
 
+#  Then load user's settings if any
 
+[ -f $HOME/.scbi ] && source $HOME/.scbi
 
 #  Prepare log dir
 
