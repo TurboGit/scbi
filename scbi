@@ -17,6 +17,8 @@ TARGET=$HOST
 MODULES=
 DLOG=on-failure
 DEFS=$PWD/scripts.d
+PURGE=no
+NSTEPS=
 
 STEPS="setup config build install"
 
@@ -113,6 +115,20 @@ function handle-module()
 
     clog $module
 
+    #  If purge is asked, first remove current build structure
+
+    if [ $PURGE = yes -o $PURGE = only ]; then
+	ilog build Purging $module
+        fn-exists $module-purge
+        if [[ $? = 0 ]]; then
+            module-wrapper $module purge
+        else
+	    rm -fr $BDIR/$module
+        fi
+    fi
+
+    [ $PURGE = only ] && exit 0
+
     ilog build Building $module for target $TARGET | tee -a $log
     ilog build steps : $STEPS | tee -a $log
 
@@ -136,9 +152,6 @@ function handle-module()
 }
 
 ############################## body
-
-NSTEPS=
-PURGE=no
 
 set -- $(getopt -u -o t:SIuscbilpP \
     -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only -- "$@")
@@ -210,20 +223,11 @@ for setup in $DEFS/[0-9]*; do
     source $setup
 done
 
+
+
 #  Prepare log dir
 
 mkdir -p $LOGS
-
-#  If purge is asked, first remove current build structure
-
-if [ $PURGE = yes -o $PURGE = only ]; then
-    for module in $MODULES; do
-	ilog build Purging $module
-	rm -fr $BDIR/$module
-    done
-fi
-
-[ $PURGE = only ] && exit 0
 
 #  Run script for all modules
 
