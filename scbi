@@ -19,6 +19,7 @@ DLOG=on-failure
 DEFS=$PWD/scripts.d
 PURGE=no
 NSTEPS=
+TARGET_SPECIFIED=no
 
 STEPS="setup config build install"
 
@@ -122,6 +123,8 @@ function handle-module()
         fn-exists $module-purge
         if [[ $? = 0 ]]; then
             module-wrapper $module purge
+        elif [ $TARGET_SPECIFIED = yes ]; then
+	    rm -fr $BDIR/$module/$TARGET
         else
 	    rm -fr $BDIR/$module
         fi
@@ -160,6 +163,7 @@ while [ $# -gt 0 ]; do
     case $1 in
 	-t|--target)
 	    TARGET=$2; shift
+            TARGET_SPECIFIED=yes
 	    ;;
 	-S|--no-setup)
 	    STEPS=${STEPS/setup/}
