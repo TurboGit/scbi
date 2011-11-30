@@ -219,17 +219,17 @@ if [ "$NSTEPS" != "" -a "$NSTEPS" != " update" ]; then
     STEPS=$NSTEPS
 fi
 
-#  First load any global settings
-
 rm -f $DEFS/*~
+
+#  Load user's settings if any
+
+[ -f $HOME/.scbi ] && source $HOME/.scbi
+
+#  Then load any global settings, not overriding user's ones
 
 for setup in $DEFS/[0-9]*; do
     source $setup
 done
-
-#  Then load user's settings if any
-
-[ -f $HOME/.scbi ] && source $HOME/.scbi
 
 #  Prepare log dir
 

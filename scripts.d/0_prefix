@@ -1,4 +1,4 @@
-ROOT=$HOME/dev
-BDIR=$ROOT/builds
-PREFIX=$BDIR/install
-TARBALL=$BDIR/tar
+[ -z $ROOT ] && ROOT=$HOME/dev
+[ -z $BDIR ] && BDIR=$ROOT/builds
+[ -z $PREFIX ] && PREFIX=$BDIR/install
+[ -z $TARBALL ] && TARBALL=$BDIR/tar

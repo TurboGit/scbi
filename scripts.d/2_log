@@ -1,5 +1,6 @@
 TODAY=$(date +"%Y_%m_%d")
-LOGS=$BDIR/logs/$TODAY
+[ -z $LOGS ] && LOGS=$BDIR/logs/$TODAY
+
 # keep logs for 4 months
 KEEP=120
 
