@@ -31,8 +31,6 @@ function darktable-config()
     TARGET=$2
 
     cd $TARGET && cmake ../src -DCMAKE_BUILD_TYPE=Release \
-	-DLCMS2_LIBRARY=$dprefix/lib/liblcms2.so \
-	-DLCMS2_INCLUDE_DIR=$dprefix/include \
 	-DCMAKE_INSTALL_PREFIX=$dprefix \
 	-DINSTALL_IOP_EXPERIMENTAL=On -DINSTALL_IOP_LEGACY=Off
 }
