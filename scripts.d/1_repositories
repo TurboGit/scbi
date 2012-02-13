@@ -1,2 +1,2 @@
 [ -z $GREPO ] && GREPO=$ROOT/repositories/git
-[ -z $SREPO ] && SREPO=$HOME/repositories/svn
+[ -z $SREPO ] && SREPO=$ROOT/repositories/svn
