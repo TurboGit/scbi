@@ -123,7 +123,7 @@ function handle-module()
         fn-exists $module-purge
         if [[ $? = 0 ]]; then
             module-wrapper $module purge
-        elif [ $TARGET_SPECIFIED = yes ]; then
+        elif [ -d $BDIR/$module/$TARGET -o $TARGET_SPECIFIED = yes ]; then
 	    rm -fr $BDIR/$module/$TARGET
         else
 	    rm -fr $BDIR/$module
