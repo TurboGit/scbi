@@ -61,7 +61,7 @@ function mingw-config()
     PREFIX=$1
     TARGET=$2
 
-    config-mingh $PREFIX $TARGET && 
+    config-mingh $PREFIX $TARGET &&
     config-pgcc $PREFIX $TARGET
 }
 
