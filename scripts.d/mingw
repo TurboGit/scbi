@@ -39,7 +39,8 @@ function config-mingrt()
     TARGET=$2
 
     cd $BDIR/mingw/$TARGET/mingrt &&
-    $BDIR/mingw/src/mingw-w64-crt/configure \
+    C_INCLUDE_PATH=$PREFIX/$TARGET/include \
+        $BDIR/mingw/src/mingw-w64-crt/configure \
 	--prefix=$PREFIX --host=$TARGET --target=$TARGET --build=$HOST
 }
 
@@ -52,7 +53,7 @@ function config-pgcc()
     CFLAGS="-O1" $BDIR/gnat/src/configure \
 	--target=$TARGET --prefix=$PREFIX --build=$HOST \
 	--enable-thread=win32 --disable-nls --disable-multilib \
-        --disable-sjlj-exceptions --enable-languages=c
+        --disable-libada --enable-languages=c
 }
 
 function mingw-config()
@@ -94,7 +95,8 @@ function build-mingrt()
     TARGET=$2
 
     ilog mingw build mingrt
-    cd $BDIR/mingw/$TARGET/mingrt && make -j4
+    cd $BDIR/mingw/$TARGET/mingrt \
+       && C_INCLUDE_PATH=$PREFIX/$TARGET/include make -j4
 }
 
 function mingw-build()
