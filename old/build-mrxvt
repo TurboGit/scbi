@@ -1,3 +1,0 @@
-PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
-./configure --enable-everything --disable-debug --disable-greek --disable--cjk
-make

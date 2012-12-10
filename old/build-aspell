@@ -1,7 +1,0 @@
-
-PATH=/home/obry/dev-gnat/bin:/home/obry/dev-gnat/cnbuild/install/bin:/bin:/usr/bin
-./configure --disable-shared --build=i686-pc-mingw32
-
-make
-
-crash -> change pwd in the directory with mpwd
