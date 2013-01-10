@@ -1,4 +1,14 @@
 
+function binutils-update()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    git_co git://sourceware.org/git/binutils.git binutils
+
+    cd $GREPO/binutils && git checkout master && git pull
+}
+
 function binutils-setup()
 {
     PREFIX=$1
@@ -6,10 +16,8 @@ function binutils-setup()
 
     mkdir -p $BDIR/binutils/$TARGET
 
-    if [ ! -d "src" ]; then
-	tar xf $TARBALL/binutils.tar.gz &&
-	rm -f src &&
-	ln -s binutils* src
+    if [ ! -d src ]; then
+        ln -s $GREPO/binutils src
     fi
 }
 
