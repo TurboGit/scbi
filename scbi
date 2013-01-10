@@ -128,6 +128,9 @@ function handle-module()
         else
 	    rm -fr $BDIR/$module
         fi
+        if [ -h $BDIR/$module/src ]; then
+            rm $BDIR/$module/src
+        fi
     fi
 
     [ $PURGE = only ] && exit 0
