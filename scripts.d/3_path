@@ -1,5 +1,5 @@
 # default GNAT path
-# export PATH=$PREFIX/bin:$PATH
-export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
-export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu/
-export CPLUS_INCLUDE_PATH=/usr/include/x86_64-linux-gnu/
+export PATH=$PREFIX/bin:$PATH
+export LIBRARY_PATH=/usr/lib/$HOST:/usr/lib:$LIBRARY_PATH
+export C_INCLUDE_PATH=$PREFIX/$TARGET/include:/usr/include/$HOST:/usr/include:$C_INCLUDE_PATH
+export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH:$CPLUS_INCLUDE_PATH
