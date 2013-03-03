@@ -1,6 +1,6 @@
 # default GNAT path
 export PATH=$PREFIX/bin:$PATH
-export LIBRARY_PATH=/usr/lib/$HOST:/usr/lib:$LIBRARY_PATH
+export LIBRARY_PATH=/usr/lib/$HOST:/usr/lib${LIBRARY_PATH:+:$LIBRARY_PATH}
 export C_INCLUDE_PATH=/usr/include/$HOST:/usr/include${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
 export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}
 
