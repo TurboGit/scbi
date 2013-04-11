@@ -120,17 +120,7 @@ function handle-module()
 
     if [ $PURGE = yes -o $PURGE = only ]; then
 	ilog build Purging $module
-        fn-exists $module-purge
-        if [[ $? = 0 ]]; then
-            module-wrapper $module purge
-        elif [ -d $BDIR/$module/$TARGET -o $TARGET_SPECIFIED = yes ]; then
-	    rm -fr $BDIR/$module/$TARGET
-        else
-	    rm -fr $BDIR/$module
-        fi
-        if [ -h $BDIR/$module/src ]; then
-            rm $BDIR/$module/src
-        fi
+        [ -d $BDIR/$module ] && cd $BDIR/$module && module-purge $PREFIX $TARGET
     fi
 
     [ $PURGE = only ] && exit 0
