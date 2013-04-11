@@ -159,8 +159,8 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:SIuscbilpP \
-    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only -- "$@")
+set -- $(getopt -u -o t:SIuscbilpPv \
+    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
