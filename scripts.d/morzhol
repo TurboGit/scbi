@@ -12,8 +12,8 @@ function morzhol-setup()
     PREFIX=$1
     TARGET=$2
 
-    if [ ! -d src ]; then
-        ln -s $GREPO/morzhol src
+    if [ ! -d src_cp ]; then
+        ln -s $GREPO/morzhol src_cp
     fi
 }
 
@@ -22,7 +22,12 @@ function morzhol-build()
     PREFIX=$1
     TARGET=$2
 
-    cd src && PROCESSORS=4 make
+    cd build &&
+    if [ $HOST == $TARGET ]; then
+        PROCESSORS=4 make
+    else
+        PROCESSORS=4 make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
+    fi
 }
 
 function morzhol-install()
@@ -30,5 +35,10 @@ function morzhol-install()
     PREFIX=$1
     TARGET=$2
 
-    cd src &&  make install
+    cd build &&
+    if [ $HOST == $TARGET ]; then
+        make install
+    else
+        make OS=Windows_NT prefix=$PREFIX/$TARGET install
+    fi
 }
