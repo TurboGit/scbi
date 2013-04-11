@@ -57,8 +57,27 @@ function module-wrapper()
 	elog $module $step failed with error $res
 	return $res
     else
-	ilog $module $step completed
-	return 0
+        #  Apply any generic step
+        fn-exists module-$step
+        if [[ $? = 0 ]]; then
+            if [ $DLOG = yes ]; then
+                module-$step $PREFIX $TARGET | tee $log 2>&1
+            else
+                module-$step $PREFIX $TARGET >> $log 2>&1
+            fi
+        fi
+        res=$?
+
+        if [ $res != 0 ]; then
+	    if [ $DLOG = on-failure ]; then
+	        tail -100 $log
+	    fi
+	    elog generic module $step failed with error $res
+	    return $res
+        else
+	    ilog $module $step completed
+	    return 0
+        fi
     fi
 }
 
