@@ -19,3 +19,29 @@ function check_tools()
     done
     return $res
 }
+
+function module-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ -h src_cp ]; then
+        rsync -a --exclude=".git" --exclude=".svn" \
+            --link-dest=../src_cp src_cp/. $TARGET/
+        rm -f build
+        ln -s $TARGET build
+    fi
+}
+
+function module-purge()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ -h src_cp ]; then
+        rsync -aH --exclude=".git" --exclude=".svn" --delete \
+            --link-dest=../src_cp src_cp/. $TARGET/
+    elif [ -d $TARGET ]; then
+	rm -fr $TARGET
+    fi
+}
