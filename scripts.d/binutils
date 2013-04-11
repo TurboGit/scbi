@@ -26,14 +26,14 @@ function binutils-config()
     PREFIX=$1
     TARGET=$2
 
+    no-target-env
+
     CONF_OPT="--prefix=$PREFIX --disable-multilib"
 
     if [ $HOST == $TARGET ]; then
-	cd $BDIR/binutils/$TARGET &&
-	$BDIR/binutils/src/configure --build=$HOST $CONF_OPT
+	cd $TARGET && ../src/configure --build=$HOST $CONF_OPT
     else
-	cd $BDIR/binutils/$TARGET &&
-	$BDIR/binutils/src/configure --target=$TARGET $CONF_OPT
+	cd $TARGET && ../src/configure --target=$TARGET $CONF_OPT
     fi
 }
 
@@ -42,7 +42,7 @@ function binutils-build()
     PREFIX=$1
     TARGET=$2
 
-    cd $BDIR/binutils/$TARGET && make -j6
+    cd $TARGET && make -j6
 }
 
 function binutils-install()
@@ -50,5 +50,5 @@ function binutils-install()
     PREFIX=$1
     TARGET=$2
 
-    cd $BDIR/binutils/$TARGET && make install
+    cd $TARGET && make install
 }
