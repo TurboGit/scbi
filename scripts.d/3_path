@@ -4,9 +4,24 @@ export LIBRARY_PATH=/usr/lib/$HOST:/usr/lib${LIBRARY_PATH:+:$LIBRARY_PATH}
 export C_INCLUDE_PATH=/usr/include/$HOST:/usr/include${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
 export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}
 
+O_C_INCLUDE_PATH=$C_INCLUDE_PATH
+O_CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH
+O_LIBRARY_PATH=$LIBRARY_PATH
+
+function target-env()
+{
+    export C_INCLUDE_PATH=$PREFIX/$TARGET/include:$O_C_INCLUDE_PATH
+    export CPLUS_INCLUDE_PATH=$PREFIX/$TARGET/include:$O_CPLUS_INCLUDE_PATH
+    export LIBRARY_PATH=$PREFIX/$TARGET/lib:$O_LIBRARY_PATH
+}
+
+function no-target-env()
+{
+    export C_INCLUDE_PATH=$O_C_INCLUDE_PATH
+    export CPLUS_INCLUDE_PATH=$O_CPLUS_INCLUDE_PATH
+    export LIBRARY_PATH=$O_LIBRARY_PATH
+}
+
 if [ "$HOST" != "$TARGET" ]; then
-# following 2 lines should not be used for building GNAT
-    export C_INCLUDE_PATH=$PREFIX/$TARGET/include:$C_INCLUDE_PATH
-    export CPLUS_INCLUDE_PATH=$PREFIX/$TARGET/include:$CPLUS_INCLUDE_PATH
-    export LIBRARY_PATH=$PREFIX/$TARGET/lib:$LIBRARY_PATH
+    target-env
 fi
