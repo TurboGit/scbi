@@ -231,6 +231,10 @@ if [ "$NSTEPS" != "" -a "$NSTEPS" != " update" ]; then
     STEPS=$NSTEPS
 fi
 
+[ ! -d $DEFS ] && DEFS=$HOME/.scbi.d
+
+[ ! -d $DEFS ] && echo $0: cannot find module definition files && exit 1
+
 rm -f $DEFS/*~
 
 #  Load user's settings if any
