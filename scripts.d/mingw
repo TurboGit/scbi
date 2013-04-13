@@ -12,15 +12,21 @@ function mingw-setup()
     PREFIX=$1
     TARGET=$2
 
-    mkdir -p $BDIR/mingw/$TARGET/mingh
-    mkdir -p $BDIR/mingw/$TARGET/mingrt
-    mkdir -p $BDIR/mingw/$TARGET/pgcc
+    case $TARGET in
+	*mingw*)
+            mkdir -p $TARGET/mingh
+            mkdir -p $TARGET/mingrt
+            mkdir -p $TARGET/pgcc
 
-    if [ ! -d "src" ]; then
-	tar xf $TARBALL/mingw-w64-master.tar.bz2 &&
-	rm -f src &&
-	ln -s mingw* src
-    fi
+            if [ ! -d "src" ]; then
+                ln -s $GREPO/mingw-w64 src
+            fi
+	    ;;
+	*)
+            echo $TARGET not supported for mingw.
+            return 1
+	    ;;
+    esac
 }
 
 function config-mingh()
@@ -30,7 +36,7 @@ function config-mingh()
 
     cd $BDIR/mingw/$TARGET/mingh &&
     $BDIR/mingw/src/mingw-w64-headers/configure \
-	--prefix=$PREFIX --build=$TARGET
+	--prefix=$PREFIX/$TARGET --build=$TARGET
 }
 
 function config-mingrt()
@@ -41,7 +47,7 @@ function config-mingrt()
     cd $BDIR/mingw/$TARGET/mingrt &&
     C_INCLUDE_PATH=$PREFIX/$TARGET/include \
         $BDIR/mingw/src/mingw-w64-crt/configure \
-	--prefix=$PREFIX --host=$TARGET --target=$TARGET --build=$HOST
+	--prefix=$PREFIX/$TARGET --host=$TARGET --target=$TARGET --build=$HOST
 }
 
 function config-pgcc()
@@ -51,15 +57,17 @@ function config-pgcc()
 
     cd $BDIR/mingw/$TARGET/pgcc &&
     CFLAGS="-O1" $BDIR/gnat/src/configure \
-	--target=$TARGET --prefix=$PREFIX --build=$HOST \
+	--target=$TARGET --prefix=$PREFIX/$TARGET --build=$HOST \
 	--enable-thread=win32 --disable-nls --disable-multilib \
-        --disable-libada --enable-languages=c
+        --disable-libada --disable-sjlj-exceptions --enable-languages=c
 }
 
 function mingw-config()
 {
     PREFIX=$1
     TARGET=$2
+
+    no-target-env
 
     config-mingh $PREFIX $TARGET &&
     config-pgcc $PREFIX $TARGET
