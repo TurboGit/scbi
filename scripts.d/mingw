@@ -36,7 +36,7 @@ function config-mingh()
 
     cd $BDIR/mingw/$TARGET/mingh &&
     $BDIR/mingw/src/mingw-w64-headers/configure \
-	--prefix=$PREFIX/$TARGET --build=$TARGET
+	--prefix=$PREFIX --build=$TARGET
 }
 
 function config-mingrt()
@@ -44,10 +44,15 @@ function config-mingrt()
     PREFIX=$1
     TARGET=$2
 
-    cd $BDIR/mingw/$TARGET/mingrt &&
-    C_INCLUDE_PATH=$PREFIX/$TARGET/include \
-        $BDIR/mingw/src/mingw-w64-crt/configure \
-	--prefix=$PREFIX/$TARGET --host=$TARGET --target=$TARGET --build=$HOST
+    #  set PATH to pick-up the partial C compiler just built and which is
+    #  needed to build the mingw runtime.
+    (
+	target-env
+
+	cd $BDIR/mingw/$TARGET/mingrt &&
+        PATH=$PREFIX/$TARGET/bin:$PATH $BDIR/mingw/src/mingw-w64-crt/configure \
+	    --prefix=$PREFIX --host=$TARGET --target=$TARGET --build=$HOST
+    )
 }
 
 function config-pgcc()
@@ -67,10 +72,12 @@ function mingw-config()
     PREFIX=$1
     TARGET=$2
 
-    no-target-env
+    (
+	no-target-env
 
-    config-mingh $PREFIX $TARGET &&
-    config-pgcc $PREFIX $TARGET
+	config-mingh $PREFIX $TARGET &&
+	config-pgcc $PREFIX $TARGET
+    )
 }
 
 function build-pgcc()
@@ -78,12 +85,16 @@ function build-pgcc()
     PREFIX=$1
     TARGET=$2
 
-    ilog mingw build pgcc
-    # The make will fail, but we install the partial C compiler
-    # which is sufficient to build the MingW runtime.
-    cd $BDIR/mingw/$TARGET/pgcc
-    make -j2
-    make -k install
+    (
+	no-target-env
+
+	ilog mingw build pgcc
+        # The make will fail, but we install the partial C compiler
+        # which is sufficient to build the MingW runtime.
+	cd $BDIR/mingw/$TARGET/pgcc
+	make -j2
+	make -k install
+    )
 
     return 0
 }
@@ -103,8 +114,9 @@ function build-mingrt()
     TARGET=$2
 
     ilog mingw build mingrt
-    cd $BDIR/mingw/$TARGET/mingrt \
-       && C_INCLUDE_PATH=$PREFIX/$TARGET/include make -j4
+    #  set PATH to pick-up the partial C compiler just built
+    cd $BDIR/mingw/$TARGET/mingrt &&
+    PATH=$PREFIX/$TARGET/bin:$PATH make -j4
 }
 
 function mingw-build()
