@@ -223,6 +223,12 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+[ ! -d $DEFS ] && DEFS=$HOME/.scbi.d
+
+[ ! -d $DEFS ] && echo $0: cannot find module definition files && exit 1
+
+rm -f $DEFS/*~
+
 [ "$MODULES" = "" ] && usage
 
 #  If we have explicitly specified some steps, use them
@@ -230,12 +236,6 @@ done
 if [ "$NSTEPS" != "" -a "$NSTEPS" != " update" ]; then
     STEPS=$NSTEPS
 fi
-
-[ ! -d $DEFS ] && DEFS=$HOME/.scbi.d
-
-[ ! -d $DEFS ] && echo $0: cannot find module definition files && exit 1
-
-rm -f $DEFS/*~
 
 #  Load user's settings if any
 
