@@ -2,3 +2,4 @@
 [ -z $BDIR ] && BDIR=$ROOT/builds
 [ -z $PREFIX ] && PREFIX=$BDIR/install
 [ -z $TARBALL ] && TARBALL=$BDIR/tar
+[ -z $GTKV ] && GTKV=2.0

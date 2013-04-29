@@ -25,3 +25,5 @@ function no-target-env()
 if [ "$HOST" != "$TARGET" ]; then
     target-env
 fi
+
+export ADA_PROJECT_PATH=$PREFIX/lib/gnat${ADA_PROJECT_PATH:+:$ADA_PROJECT_PATH}
