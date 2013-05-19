@@ -22,6 +22,11 @@ function no-target-env()
     export LIBRARY_PATH=$O_LIBRARY_PATH
 }
 
+function gpython-env()
+{
+    export PATH=/opt/gpython/bin:$PATH
+}
+
 if [ "$HOST" != "$TARGET" ]; then
     target-env
 fi

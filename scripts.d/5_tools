@@ -45,3 +45,11 @@ function module-purge()
 	rm -fr $TARGET
     fi
 }
+
+function display-file()
+{
+    file=$1
+
+    echo File : $file
+    cat $file
+}

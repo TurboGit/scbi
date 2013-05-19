@@ -43,7 +43,7 @@ function module-wrapper()
     mkdir -p $BDIR/$module > $log 2>&1
     cd $BDIR/$module  >> $log 2>&1
 
-    if [ $DLOG = yes ]; then
+    if [[ $DLOG = yes || "$step" = "tests" ]]; then
 	$module-$step $PREFIX $TARGET | tee $log 2>&1
     else
 	$module-$step $PREFIX $TARGET >> $log 2>&1
@@ -98,6 +98,7 @@ function usage()
     echo "   -c | --config       do config"
     echo "   -b | --build        do build"
     echo "   -i | --install      do install"
+    echo "   -r | --tests        run the testsuite"
     echo "   -v | --verbose      display full log"
     echo "   -l | --no-log       never display log"
     echo "   -p | --purge        remove builds directories before building"
@@ -168,8 +169,8 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:SIuscbilpPv \
-    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix: -- "$@")
+set -- $(getopt -u -o t:SIuscbilpPvr \
+    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -201,6 +202,9 @@ while [ $# -gt 0 ]; do
 	    ;;
 	-l|--no-log)
 	    DLOG=no
+	    ;;
+	-r|--tests)
+	    NSTEPS="$NSTEPS tests"
 	    ;;
 	-v|--verbose)
 	    DLOG=yes
