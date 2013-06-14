@@ -16,7 +16,7 @@ HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
 TARGET=$HOST
 MODULES=
 DLOG=on-failure
-DEFS=$PWD/scripts.d
+DEFS="$PWD"/scripts.d
 PURGE=no
 NSTEPS=
 TARGET_SPECIFIED=no
@@ -230,11 +230,11 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-[ ! -d $DEFS ] && DEFS=$HOME/.scbi.d
+[ ! -d "$DEFS" ] && DEFS=$HOME/.scbi.d
 
-[ ! -d $DEFS ] && echo $0: cannot find module definition files && exit 1
+[ ! -d "$DEFS" ] && echo $0: cannot find module definition files && exit 1
 
-rm -f $DEFS/*~
+rm -f "$DEFS"/*~
 
 [ "$MODULES" = "" ] && usage
 
