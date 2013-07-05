@@ -26,7 +26,9 @@ function module-setup()
     TARGET=$2
 
     if [ -h src_cp ]; then
-        rsync -a --exclude=".git" --exclude=".svn" \
+        rsync -a --delete --exclude=".git" --exclude=".svn" \
+            --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
+            --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
             --link-dest=../src_cp src_cp/. $TARGET/
         rm -f build
         ln -s $TARGET build
