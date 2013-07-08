@@ -41,7 +41,9 @@ function module-purge()
     TARGET=$2
 
     if [ -h src_cp ]; then
-        rsync -aH --exclude=".git" --exclude=".svn" --delete \
+        rsync -aH --exclude=".git" --exclude=".svn" --delete --delete-excluded \
+            --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
+            --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
             --link-dest=../src_cp src_cp/. $TARGET/
     elif [ -d $TARGET ]; then
 	rm -fr $TARGET
