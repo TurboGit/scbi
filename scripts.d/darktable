@@ -33,8 +33,7 @@ function darktable-config()
     cd $TARGET && cmake ../src -DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=$dprefix \
 	-DGlibConfig_INCLUDE_DIR=/usr/lib/x86_64-linux-gnu/glib-2.0/include \
-	-DINSTALL_IOP_EXPERIMENTAL=On -DINSTALL_IOP_LEGACY=Off \
-	-DUSE_CAMERA_IMPORT=1
+	-DINSTALL_IOP_EXPERIMENTAL=On -DINSTALL_IOP_LEGACY=Off
 }
 
 function darktable-build()
