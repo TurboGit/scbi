@@ -13,6 +13,7 @@ function target-env()
     export C_INCLUDE_PATH=$PREFIX/$TARGET/include:$O_C_INCLUDE_PATH
     export CPLUS_INCLUDE_PATH=$PREFIX/$TARGET/include:$O_CPLUS_INCLUDE_PATH
     export LIBRARY_PATH=$PREFIX/$TARGET/lib:$O_LIBRARY_PATH
+    export ADA_PROJECT_PATH=$PREFIX/$TARGET/lib/gnat${ADA_PROJECT_PATH:+:$ADA_PROJECT_PATH}
 }
 
 function no-target-env()
@@ -20,6 +21,7 @@ function no-target-env()
     export C_INCLUDE_PATH=$O_C_INCLUDE_PATH
     export CPLUS_INCLUDE_PATH=$O_CPLUS_INCLUDE_PATH
     export LIBRARY_PATH=$O_LIBRARY_PATH
+    export ADA_PROJECT_PATH=$PREFIX/lib/gnat${ADA_PROJECT_PATH:+:$ADA_PROJECT_PATH}
 }
 
 function gpython-env()
@@ -30,5 +32,3 @@ function gpython-env()
 if [ "$HOST" != "$TARGET" ]; then
     target-env
 fi
-
-export ADA_PROJECT_PATH=$PREFIX/lib/gnat${ADA_PROJECT_PATH:+:$ADA_PROJECT_PATH}
