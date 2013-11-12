@@ -36,7 +36,7 @@ function config-mingh()
 
     cd $BDIR/mingw/$TARGET/mingh &&
     $BDIR/mingw/src/mingw-w64-headers/configure \
-	--prefix=$PREFIX --build=$TARGET
+	--prefix=$PREFIX/$TARGET --build=$TARGET
 }
 
 function config-mingrt()
@@ -51,7 +51,8 @@ function config-mingrt()
 
 	cd $BDIR/mingw/$TARGET/mingrt &&
         PATH=$PREFIX/$TARGET/bin:$PATH $BDIR/mingw/src/mingw-w64-crt/configure \
-	    --prefix=$PREFIX --host=$TARGET --target=$TARGET --build=$HOST
+	    --prefix=$PREFIX/$TARGET --host=$TARGET \
+            --target=$TARGET --build=$HOST
     )
 }
 
