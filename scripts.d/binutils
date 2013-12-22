@@ -28,7 +28,7 @@ function binutils-config()
 
     no-target-env
 
-    CONF_OPT="--prefix=$PREFIX --disable-multilib"
+    CONF_OPT="--prefix=$PREFIX --disable-multilib --disable-gdb"
 
     if [ $HOST == $TARGET ]; then
 	cd $TARGET && ../src/configure --build=$HOST $CONF_OPT
