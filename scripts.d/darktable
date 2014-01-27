@@ -30,7 +30,17 @@ function darktable-config()
     PREFIX=$1
     TARGET=$2
 
-    cd $TARGET && cmake ../src -DCMAKE_BUILD_TYPE=Release \
+    # need GPHOTO2 2.5.3 to work properly with USB-3
+    GINST=/opt/gphoto2/
+
+    if [ -d $GINST ]; then
+        GPOPTS="-DGPHOTO2CONFIG_EXECUTABLE=$GINST/bin/gphoto2-config \
+        -DGPHOTO2_INCLUDE_DIR=$GINST/include \
+        -DGPHOTO2_LIBRARY=$GINST/lib/libgphoto2.so \
+        -DGPHOTO2_PORT_LIBRARY=$GINST/lib/libgphoto2_port.so"
+    fi
+
+    cd $TARGET && cmake ../src -DCMAKE_BUILD_TYPE=Release $GPOPTS \
 	-DCMAKE_INSTALL_PREFIX=$dprefix \
 	-DINSTALL_IOP_EXPERIMENTAL=On
 }
