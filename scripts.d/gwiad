@@ -30,7 +30,7 @@ function gwiad-build()
     PREFIX=$1
     TARGET=$2
 
-    cd build && make setup && PROCESSORS=4 make
+    cd build && make setup && PROCESSORS=$JOBS make
 }
 
 function gwiad-install()

@@ -22,7 +22,7 @@ function gnadelite-build()
     PREFIX=$1
     TARGET=$2
 
-    cd src && PROCESSORS=4 make
+    cd src && PROCESSORS=$JOBS make
 }
 
 function gnadelite-install()

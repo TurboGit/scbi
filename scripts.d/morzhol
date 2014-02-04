@@ -24,9 +24,9 @@ function morzhol-build()
 
     cd build &&
     if [ $HOST == $TARGET ]; then
-        PROCESSORS=4 make
+        PROCESSORS=$JOBS make
     else
-        PROCESSORS=4 make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
+        PROCESSORS=$JOBS make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
     fi
 }
 

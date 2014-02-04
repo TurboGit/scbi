@@ -22,7 +22,7 @@ function v2p-build()
     PREFIX=$1
     TARGET=$2
 
-    cd build && PROCESSORS=4 make
+    cd build && PROCESSORS=$JOBS make
 }
 
 function v2p-install()
