@@ -30,10 +30,7 @@ function darktable-config()
     PREFIX=$1
     TARGET=$2
 
-    # need GPHOTO2 2.5.3 to work properly with USB-3
-    GINST=/opt/gphoto2/
-
-    if [ -d $GINST ]; then
+    if [ -d "$GINST" ]; then
         GPOPTS="-DGPHOTO2CONFIG_EXECUTABLE=$GINST/bin/gphoto2-config \
         -DGPHOTO2_INCLUDE_DIR=$GINST/include \
         -DGPHOTO2_LIBRARY=$GINST/lib/libgphoto2.so \
