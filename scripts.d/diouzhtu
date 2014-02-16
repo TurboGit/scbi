@@ -22,6 +22,7 @@ function diouzhtu-build()
     PREFIX=$1
     TARGET=$2
 
+    export AWS_BUILD=relocatable
     cd build && PROCESSORS=$JOBS make
 }
 
