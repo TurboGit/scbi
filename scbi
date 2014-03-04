@@ -21,6 +21,7 @@ PURGE=no
 NSTEPS=
 TARGET_SPECIFIED=no
 JOBS=0
+TARVERSION=
 
 STEPS="setup config build install"
 
@@ -94,6 +95,7 @@ function usage()
     echo "   -t | --target name  specify the target to build for ($TARGET)"
     echo "   -S | --no-setup     skip setup"
     echo "   -I | --no-install   skip install"
+    echo "   -a | --ar version   use sources tarball version-module.tar.gz"
     echo "   -u | --update       do update"
     echo "   -s | --setup        do setup"
     echo "   -c | --config       do config"
@@ -158,6 +160,43 @@ function handle-module()
     gnat ls -v >> $LOGS/$TARGET-$module-env.log 2> /dev/null
     which gcc >> $LOGS/$TARGET-$module-env.log 2> /dev/null
 
+    #  If building from tarball, extract it now
+
+    if [ ! -z $TARVERSION ]; then
+        [ ! -f $TARBALL/$TARVERSION-$module-src.tar.gz ] &&
+        echo Tarball $TARBALL/$TARVERSION-$module-src.tar.bz2 not found. &&
+        exit 1
+
+	ilog build Extract tarball $TARVERSION-$module-src.tar.gz
+
+        [ ! -d $BDIR/$module ] && mkdir -p $BDIR/$module > $log 2>&1
+
+        cd $BDIR/$module
+        ( rm -fr src && mkdir -p src ) > $log 2>&1
+        cd src
+
+        tar xf $TARBALL/$TARVERSION-$module-src.tar.gz
+        topdir=$(ls -d *)
+
+        if [ -d "$topdir" ]; then
+            mv $topdir/* .
+            rmdir $topdir
+            cd ..
+        else
+            echo Error, no top directory found.
+            exit 1
+        fi
+
+        # We set the link for the source so that no module will have to do it
+
+        rm -f src_cp
+        ln -s src src_cp
+    else
+        # We need to remove the link/sources to ensure proper setting by the
+        # module.
+        [ -d $BDIR/$module ] && cd $BDIR/$module && rm -fr src src_cp
+    fi
+
     #  Call module routines
 
     for step in $STEPS; do
@@ -171,8 +210,8 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:SIuscbilpPvr \
-    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests -- "$@")
+set -- $(getopt -u -o t:a:SIuscbilpPvr \
+    -l ar:,target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -186,6 +225,9 @@ while [ $# -gt 0 ]; do
 	-I|--no-install)
 	    STEPS=${STEPS/install/}
 	    ;;
+        -a|--ar)
+            TARVERSION=$2; shift
+            ;;
 	-u|--update)
 	    NSTEPS="$NSTEPS update"
 	    STEPS="update $STEPS"
