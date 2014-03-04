@@ -91,7 +91,7 @@ function usage()
     echo
     echo $0 [tSIscbilv] module1 [module2 ... modulen]
 
-    echo "   -t target_name      specify the target to build for ($TARGET)"
+    echo "   -t | --target name  specify the target to build for ($TARGET)"
     echo "   -S | --no-setup     skip setup"
     echo "   -I | --no-install   skip install"
     echo "   -u | --update       do update"
