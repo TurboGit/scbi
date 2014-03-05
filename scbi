@@ -95,7 +95,7 @@ function usage()
     echo "   -t | --target name  specify the target to build for ($TARGET)"
     echo "   -S | --no-setup     skip setup"
     echo "   -I | --no-install   skip install"
-    echo "   -a | --ar version   use sources tarball version-module.tar.gz"
+    echo "   -a | --ar version   use sources tarball version-module-src.tar.gz"
     echo "   -u | --update       do update"
     echo "   -s | --setup        do setup"
     echo "   -c | --config       do config"
