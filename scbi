@@ -138,6 +138,16 @@ function handle-module()
 
     source $DEFS/$module
 
+    #  Check meta-modules
+
+    fn-exists $module-modules
+    if [[ $? = 0 ]]; then
+        for module in $($module-modules); do
+            handle-module $module
+        done
+        return
+    fi
+
     clog $module
 
     #  If purge is asked, first remove current build structure
