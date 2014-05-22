@@ -1,5 +1,5 @@
 [ -z $ROOT ] && ROOT=$HOME/dev
 [ -z $BDIR ] && BDIR=$ROOT/builds
-[ -z $PREFIX ] && PREFIX=$BDIR/install
+[ -z $PREFIX ] && PREFIX=$(dirname $(dirname $(which gnatls)))
 [ -z $TARBALL ] && TARBALL=$BDIR/tar
 [ -z $GTKV ] && GTKV=2.0
