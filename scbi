@@ -174,7 +174,7 @@ function handle-module()
 
     if [ ! -z $TARVERSION ]; then
         [ ! -f $TARBALL/$TARVERSION-$module-src.tar.gz ] &&
-        echo Tarball $TARBALL/$TARVERSION-$module-src.tar.bz2 not found. &&
+        echo Tarball $TARBALL/$TARVERSION-$module-src.tar.gz not found. &&
         exit 1
 
 	ilog build Extract tarball $TARVERSION-$module-src.tar.gz
