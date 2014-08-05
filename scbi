@@ -59,7 +59,7 @@ function module-wrapper()
 	elog $module $step failed with error $res
 	return $res
     else
-        #  Apply any generic step
+        #  Apply any generic step (module-setup, module-purge)
         fn-exists module-$step
         if [[ $? = 0 ]]; then
             if [ $DLOG = yes ]; then
