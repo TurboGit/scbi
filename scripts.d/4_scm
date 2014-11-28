@@ -1,4 +1,3 @@
-
 function svn_co()
 {
     URL=$1
@@ -23,4 +22,72 @@ function git_co()
 	    git clone $URL $NAME
 	fi
     )
+}
+
+# $1       is the main branch to build
+# $2 .. $n are the branches to merge into the build branch
+function git_branch()
+{
+    BUILDB=scbi-build
+    BRANCH=$1
+
+    # first, let's update the repository
+
+    git fetch
+
+    # if no branch specified use master
+
+    if [ "$BRANCH" == "" ]; then
+        BRANCH=master
+    fi
+
+    # if there is no branch to merge, just build the current branch
+
+    if [ "$2" == "" ]; then
+        # and if the current branch is master and we want to build it, we
+        # want to update it now.
+        CBRANCH=$(git rev-parse --abbrev-ref HEAD)
+        if [ "$BRANCH" == "master" -a "$CBRANCH" == "master" ]; then
+            git pull
+        fi
+
+        [ -f .gitmodules ] && git submodule update
+
+        return 0
+    fi
+
+    # check that $BRANCH is a known branch
+
+    git show-ref --verify --quiet refs/heads/$BRANCH
+
+    if [ $? == 1 ]; then
+        git show-ref --verify --quiet refs/remotes/$BRANCH
+        if [ $? == 1 ]; then
+            return 1
+        fi
+    fi
+
+    # create the build branch if needed
+
+    git show-ref --verify --quiet refs/heads/$BUILDB
+
+    if [ $? == 1 ]; then
+        git branch $BUILDB
+    fi
+
+    # move to build branch, and initialize it
+
+    git checkout $BUILDB
+    git reset --hard $BRANCH
+
+    # merge all other branches
+
+    shift
+
+    while [ "$1" != "" ]; do
+        git merge $1
+        shift
+    done
+
+    [ -f .gitmodules ] && git submodule update
 }
