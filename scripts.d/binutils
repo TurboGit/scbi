@@ -4,7 +4,7 @@ function binutils-update()
     PREFIX=$1
     TARGET=$2
 
-    git_co git://sourceware.org/git/binutils.git binutils
+    git_co git://sourceware.org/git/binutils-gdb.git binutils
 
     cd $GREPO/binutils && git checkout master && git pull
 }
