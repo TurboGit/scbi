@@ -4,7 +4,9 @@ function mingw-update()
     PREFIX=$1
     TARGET=$2
 
-    cd $GREPO/mingw-w64 && git checkout master && git svn rebase
+    git_co git://git.code.sf.net/p/mingw-w64/mingw-w64 mingw-w64
+
+    cd $GREPO/mingw-w64 && git checkout master && git pull
 }
 
 function mingw-setup()
