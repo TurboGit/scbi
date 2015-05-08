@@ -28,8 +28,18 @@ function git_co()
 # $2 .. $n are the branches to merge into the build branch
 function git_branch()
 {
+    MODULE=$1
     BUILDB=scbi-build
-    BRANCH=$1
+    BRANCH=$2
+
+    # first, check that there is no un-committed modifications
+
+    git diff --exit-code --quiet HEAD
+
+    if [ $? == 1 ]; then
+       elog $MODULE cannot change branch with uncommitted changes
+       return 1
+    fi
 
     # first, let's update the repository
 
@@ -44,7 +54,7 @@ function git_branch()
 
     # if there is no branch to merge, just build the current branch
 
-    if [ "$2" == "" ]; then
+    if [ "$3" == "" ]; then
         # and if the current branch is master and we want to build it, we
         # want to update it now.
         CBRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -87,8 +97,8 @@ function git_branch()
     shift
 
     while [ "$1" != "" ]; do
-        git merge $1
         shift
+        git merge $1
     done
 
     [ -f .gitmodules ] && git submodule update
