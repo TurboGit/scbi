@@ -1,5 +1,7 @@
 
-function check_tool()
+############################## check-tool
+
+function check-tool()
 {
     if [ -z "$(which $1)" ]; then
 	echo Required tool $1 missing, please update the PATH
@@ -8,22 +10,26 @@ function check_tool()
     return 0
 }
 
-function check_tools()
+############################## check-tools
+
+function check-tools()
 {
-    res=0
+    local res=0
 
     while [ "$1" != "" ]; do
-	check_tool $1
+	check-tool $1
 	res=$(expr $res + $?)
 	shift
     done
     return $res
 }
 
+############################## module-setup
+
 function module-setup()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ -h src_cp ]; then
         rsync -a --delete --exclude=".git" --exclude=".svn" \
@@ -35,10 +41,12 @@ function module-setup()
     fi
 }
 
+############################## module-purge
+
 function module-purge()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ -h src_cp ]; then
         rsync -aH --exclude=".git" --exclude=".svn" --delete --delete-excluded \
@@ -50,9 +58,11 @@ function module-purge()
     fi
 }
 
+############################## display-file
+
 function display-file()
 {
-    file=$1
+    local file=$1
 
     echo File : $file
     cat $file

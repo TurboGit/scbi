@@ -1,4 +1,6 @@
-function svn_co()
+############################## svn-co
+
+function svn-co()
 {
     URL=$1
     NAME=$2
@@ -11,7 +13,9 @@ function svn_co()
     )
 }
 
-function git_co()
+############################## git-co
+
+function git-co()
 {
     URL=$1
     NAME=$2
@@ -24,9 +28,12 @@ function git_co()
     )
 }
 
+############################## git-branch
+
 # $1       is the main branch to build
 # $2 .. $n are the branches to merge into the build branch
-function git_branch()
+
+function git-branch()
 {
     MODULE=$1
     BUILDB=scbi-build
