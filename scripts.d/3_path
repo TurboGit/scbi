@@ -14,11 +14,11 @@ O_LIBRARY_PATH=$LIBRARY_PATH
 
 function target-env()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
-    export C_INCLUDE_PATH=$PREFIX/$TARGET/include:$O_C_INCLUDE_PATH
-    export CPLUS_INCLUDE_PATH=$PREFIX/$TARGET/include:$O_CPLUS_INCLUDE_PATH
+    export C_INCLUDE_PATH=$PREFIX/$TARGET/include
+    export CPLUS_INCLUDE_PATH=$PREFIX/$TARGET/include
     export LIBRARY_PATH=$PREFIX/$TARGET/lib:$O_LIBRARY_PATH
     export ADA_PROJECT_PATH=$PREFIX/$TARGET/lib/gnat${ADA_PROJECT_PATH:+:$ADA_PROJECT_PATH}
 }
@@ -40,6 +40,11 @@ function gpython-env()
     export PATH=/opt/gpython/bin:$PATH
 }
 
-if [ "$HOST" != "$TARGET" ]; then
-    target-env
-fi
+############################## system-compiler
+
+function system-compiler()
+{
+    no-target-env
+
+    export PATH=/usr/bin:/bin:/usr/local/bin
+}

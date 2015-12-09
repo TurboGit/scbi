@@ -1,0 +1,51 @@
+
+function mingw-header-vcs()
+{
+    echo git
+    echo git://git.code.sf.net/p/mingw-w64/mingw-w64
+}
+
+function mingw-header-version()
+{
+    return $VERSION_ERROR
+}
+
+function mingw-header-depends()
+{
+    echo binutils
+}
+
+function mingw-header-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    (
+        mkdir -p build/.oot-build &&
+            cd build/.oot-build &&
+            ../../src/mingw-w64-headers/configure \
+	        --prefix=$PREFIX/$TARGET --build=$TARGET
+    )
+}
+
+function mingw-header-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    #  set PATH to pick-up the partial C compiler just built
+
+    (
+        cd build/.oot-build &&
+            C_INCLUDE_PATH=$PREFIX/$TARGET/include &&
+            make -j6
+    )
+}
+
+function mingw-header-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cd build/.oot-build && make install
+}

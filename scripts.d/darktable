@@ -1,28 +1,8 @@
 
-function darktable-update()
+function darktable-vcs()
 {
-    PREFIX=$1
-    TARGET=$2
-
-    git_co git://darktable.git.sf.net/gitroot/darktable/darktable darktable
-
-    cd $GREPO/darktable && git pull
-}
-
-function darktable-setup()
-{
-    PREFIX=$1
-    TARGET=$2
-
-    if [ ! -d src ]; then
-        ln -s $GREPO/darktable src
-    fi
-
-    export PATH=/usr/bin:/bin:/usr/local/bin
-    export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
-    dprefix=/opt/darktable
-
-    mkdir -p $TARGET
+    echo git
+    echo http://github.com/darktable-org/darktable.git
 }
 
 function darktable-config()
@@ -37,9 +17,15 @@ function darktable-config()
         -DGPHOTO2_PORT_LIBRARY=$GINST/lib/libgphoto2_port.so"
     fi
 
-    cd $TARGET && cmake ../src -DCMAKE_BUILD_TYPE=Release $GPOPTS \
-	-DCMAKE_INSTALL_PREFIX=$dprefix \
-	-DINSTALL_IOP_EXPERIMENTAL=On
+    (
+        system-compiler
+
+        mkdir -p build/.oot-build &&
+        cd build/.oot-build &&
+            cmake ../../src -DCMAKE_BUILD_TYPE=Release $GPOPTS \
+	          -DCMAKE_INSTALL_PREFIX=$PREFIX \
+	          -DINSTALL_IOP_EXPERIMENTAL=On
+    )
 }
 
 function darktable-build()
@@ -47,7 +33,11 @@ function darktable-build()
     PREFIX=$1
     TARGET=$2
 
-    cd $TARGET && make -j4
+    (
+        system-compiler
+
+        cd build/.oot-build && make -j4
+    )
 }
 
 function darktable-install()
@@ -55,5 +45,14 @@ function darktable-install()
     PREFIX=$1
     TARGET=$2
 
-    cd $TARGET && sudo make install
+    (
+        system-compiler
+
+        cd build/.oot-build && make install
+    )
+}
+
+function darktable-prefix()
+{
+    echo /opt/darktable
 }

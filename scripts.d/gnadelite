@@ -1,20 +1,13 @@
 
-function gnadelite-update()
+function gnadelite-vcs()
 {
-    PREFIX=$1
-    TARGET=$2
-
-    cd $GREPO/gnadelite && git pull
+    echo git
+    echo git+ssh://repo.or.cz/srv/git/gnadelite.git
 }
 
-function gnadelite-setup()
+function gnadelite-depends()
 {
-    PREFIX=$1
-    TARGET=$2
-
-    if [ ! -d src ]; then
-        ln -s $GREPO/gnadelite src
-    fi
+    echo libsqlite3-dev
 }
 
 function gnadelite-build()
@@ -22,7 +15,7 @@ function gnadelite-build()
     PREFIX=$1
     TARGET=$2
 
-    cd src && PROCESSORS=$JOBS make
+    cd build && PROCESSORS=$JOBS make prefix=$PREFIX
 }
 
 function gnadelite-install()
@@ -30,5 +23,7 @@ function gnadelite-install()
     PREFIX=$1
     TARGET=$2
 
-    cd src &&  make install
+    cd build &&
+        make prefix=$PREFIX prepare_install &&
+        make prefix=$PREFIX install
 }

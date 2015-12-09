@@ -2,13 +2,19 @@
 
 function svn-co()
 {
-    URL=$1
-    NAME=$2
+    local URL=$1
+    local NAME=$2
 
     (
-	if [ ! -d $SREPO/$NAME ]; then
-	    cd $SREPO
-	    svn co $URL $NAME
+        cd $BDIR/$NAME &&
+	if [ ! -d vcs ]; then
+	    svn co $URL vcs
+        else
+            cd vcs
+            [ ! -d .svn ] &&
+                ilog build error: $(pwd) not a subversion repository &&
+                exit 1
+            svn update
 	fi
     )
 }
@@ -17,110 +23,99 @@ function svn-co()
 
 function git-co()
 {
-    URL=$1
-    NAME=$2
+    local URL=$1
+    local NAME=$2
 
     (
-	if [ ! -d $GREPO/$NAME ]; then
-	    cd $GREPO
-	    git clone $URL $NAME
+	cd $BDIR/$NAME &&
+        if [ ! -d vcs ]; then
+	    git clone --recursive $URL vcs
+        else
+            cd vcs
+            [ ! -d .git ] &&
+                ilog build error: $(pwd) not a git repository &&
+                exit 1
+            git fetch --recurse-submodules
 	fi
     )
 }
 
 ############################## git-branch
 
-# $1       is the main branch to build
-# $2 .. $n are the branches to merge into the build branch
-
 function git-branch()
 {
-    MODULE=$1
-    BUILDB=scbi-build
-    BRANCH=$2
+    local MODULE=$1
+    local BRANCH=$2
+    local BUILDB=scbi
 
-    # first, check that there is no un-committed modifications
+    (
+        cd $BDIR/$MODULE/vcs
 
-    git diff --exit-code --quiet HEAD
+        # first, let's update the repository
 
-    if [ $? == 1 ]; then
-       elog $MODULE cannot change branch with uncommitted changes
-       return 1
-    fi
+        git checkout master
+        git fetch
 
-    # first, let's update the repository
+        # if no branch specified use master
 
-    git checkout master
-    git fetch
-
-    # if no branch specified use master
-
-    if [ "$BRANCH" == "" ]; then
-        BRANCH=master
-    fi
-
-    # if there is no branch to merge, just build the current branch
-
-    if [ "$3" == "" ]; then
-        # and if the current branch is master and we want to build it, we
-        # want to update it now.
-        CBRANCH=$(git rev-parse --abbrev-ref HEAD)
-        if [ "$BRANCH" == "master" -a "$CBRANCH" == "master" ]; then
-            git pull
+        if [ "$BRANCH" == "" ]; then
+            BRANCH=master
         fi
+
+        # check that $BRANCH is a known branch
+
+        git show-ref --verify --quiet refs/remotes/origin/$BRANCH
+
+        if [ $? == 1 ]; then
+            git show-ref --verify --quiet refs/heads/$BRANCH
+            if [ $? == 1 ]; then
+                return 1
+            fi
+            BR=refs/heads/$BRANCH
+        else
+            BR=refs/remotes/origin/$BRANCH
+        fi
+
+        # create the build branch if needed
+
+        git show-ref --verify --quiet refs/heads/$BUILDB
+
+        if [ $? == 1 ]; then
+            git branch $BUILDB
+        fi
+
+        # move to build branch, and initialize it
+
+        git checkout $BUILDB
+        git reset --hard $BR
 
         [ -f .gitmodules ] && git submodule update
-    fi
-
-    # check that $BRANCH is a known branch
-
-    git show-ref --verify --quiet refs/heads/$BRANCH
-
-    if [ $? == 1 ]; then
-        git show-ref --verify --quiet refs/remotes/$BRANCH
-        if [ $? == 1 ]; then
-            return 1
-        fi
-        BR=refs/remotes/$BRANCH
-    else
-        BR=refs/heads/$BRANCH
-    fi
-
-    # create the build branch if needed
-
-    git show-ref --verify --quiet refs/heads/$BUILDB
-
-    if [ $? == 1 ]; then
-        git branch $BUILDB
-    fi
-
-    # move to build branch, and initialize it
-
-    git checkout $BUILDB
-    git reset --hard $BRANCH
-
-    # merge all other branches
-
-    shift
-
-    while [ "$1" != "" ]; do
-        shift
-        git merge $1
-    done
-
-    [ -f .gitmodules ] && git submodule update
+    )
 
     return 0
+}
+
+############################## svn-branch
+
+function svn-branch()
+{
+    local MODULE=$1
+    local BRANCH=$2
+
+    #  ??? call $module-vcs and get the URL for branches ${vcs[2]}
+
+    ilog build "error: switching branch not support for subversion"
+    return 1
 }
 
 ############################## get-vcs
 
 function get-vcs()
 {
-    VCS=$1
-    URL=$2
-    module=$3
-    version=$4
+    local VCS=$1
+    local URL=$2
+    local module=$3
+    local version=$4
 
     local res=0
 
@@ -129,34 +124,40 @@ function get-vcs()
             git-co $URL $module > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
-                echo "error: cannot get sources from $URL"
+                ilog build "error: cannot get sources from $URL"
                 exit 1
             fi
 
             if [ "$version" != "dev" ]; then
-                git-branch $module $version
+                git-branch $module $version > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
-                    echo "error: cannot switch to branch $version"
+                    ilog build "error: cannot switch to branch $version"
                     exit 1
                 fi
-            fi
-
-            if [ "$version" = "dev" -a -d $GREPO/$module ]; then
-                ln -s $GREPO/$module local-vcs
             fi
 
             ;;
         svn)
             svn-co $URL $module > $log 2>&1
 
-            if [  "$version" = "dev" -a -d $SREPO/$module ]; then
-                ln -s $GREPO/$module local-vcs
+            if [[ ! $? = 0 ]]; then
+                ilog build "error: cannot get sources from $URL"
+                exit 1
+            fi
+
+            if [ "$version" != "dev" -a "$version" != "" ]; then
+                svn-branch $module $version > $log 2>&1
+
+                if [[ ! $? = 0 ]]; then
+                    ilog build "error: cannot switch to branch $version"
+                    exit 1
+                fi
             fi
 
             ;;
         *)
-            echo "error: unknown vcs $VCS"
+            ilog build "error: unknown vcs $VCS"
             res=1
             ;;
     esac

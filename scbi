@@ -3,12 +3,49 @@
 #  For all modules the following function can be implemented and are called
 #  in this specific order:
 #
-#    update   not done by default, to update repository
-#    setup    to setup build structure
-#    config   to configure, ./configure or other steps
-#    build    to build, make
-#    install  to install
+#    <module>-vcs      parameter: NONE, return: array
+#                      describe the VCS to get the sources
+#                        1st item: protocole (git, svn)
+#                        2nd item: URL
 #
+#    <module>-tar      parameter: $VERSION, return: array
+#                      describe a way to get the sources as tarball
+#                        1st item: protocole (scp, none)
+#                        2st item: URL
+#                        3st item: archive name (with $VERSION)
+#
+#    <module>-version  parameter: $PREFIX $TARGET, return: <installed version>
+#                      returns the current version of the installed tool
+#                      It can returns $VERSION_OK or $VERSION_ERROR if it
+#                      is not possible to get the real version.
+#
+#    <module>-depends  parameter: NONE, return: array
+#                      list all modules required. these are either
+#                      source module handled by this script or a distrib
+#                      package. each module is <name>:<version>
+#
+#    <module>-setup    parameter: $PREFIX $TARGET, return NONE
+#                      to setup build structure (optional)
+#
+#    <module>-config   parameter: $PREFIX $TARGET, return NONE
+#                      to configure, ./configure or other steps
+#
+#    <module>-build    parameter: $PREFIX $TARGET, return NONE
+#                      to build, make
+#
+#    <module>-install  parameter: $PREFIX $TARGET, return NONE
+#                      to install (in $PREFIX)
+#
+#    <module>-tests    parameter: $PREFIX $TARGET, return NONE
+#                      to pass automatic tests
+#
+#  Note that all steps above are optional. And empty module will just do
+#  nothing.
+#
+#  The final step is to install into the final location, the copy is done
+#  by default.
+
+HANDLED=""
 
 CDPATH=
 
@@ -22,6 +59,11 @@ NSTEPS=
 TARGET_SPECIFIED=no
 JOBS=0
 TARVERSION=
+PREFIX=
+DOINSTALL=yes
+DOUPDATE=no
+DEFAULT_PREFIX=yes
+DEPS=no
 
 STEPS="setup config build install"
 
@@ -32,55 +74,64 @@ function fn-exists()
     declare -f $1 > /dev/null
 }
 
+############################## fn-exists
+
+function check-handled()
+{
+    local module=$1
+    local res=0
+
+    if [ "${HANDLED/ $module/}" = "$HANDLED" ]; then
+        HANDLED="$HANDLED $module"
+        return 0
+    else
+        return 1
+    fi
+}
+
 ############################## module-wrapper
 
 function module-wrapper()
 {
-    module=$1
-    step=$2
+    local PREFIX=$1
+    module=$2
+    step=$3
+
     log=$LOGS/$TARGET-$module-$step.log
 
     ilog $module $step starting
 
-    mkdir -p $BDIR/$module > $log 2>&1
-    cd $BDIR/$module  >> $log 2>&1
+    (
+        cd $BDIR/$module >> $log 2>&1
 
-    if [[ $DLOG = yes || "$step" = "tests" ]]; then
-	$module-$step $PREFIX $TARGET | tee $log 2>&1
-    else
-	$module-$step $PREFIX $TARGET >> $log 2>&1
-    fi
-    res=$?
+        #  Set cross-env is needed
 
-    if [ $res != 0 ]; then
-	if [ $DLOG = on-failure ]; then
-	    tail -100 $log
-	fi
-	elog $module $step failed with error $res
-	return $res
-    else
-        #  Apply any generic step (module-setup, module-purge)
-        fn-exists module-$step
-        if [[ $? = 0 ]]; then
-            if [ $DLOG = yes ]; then
-                module-$step $PREFIX $TARGET | tee $log 2>&1
-            else
-                module-$step $PREFIX $TARGET >> $log 2>&1
-            fi
+        if [ "$HOST" != "$TARGET" ]; then
+            target-env $PREFIX $TARGET
+        fi
+
+        #  Call module step
+
+        if [[ $DLOG = yes || "$step" = "tests" ]]; then
+	    $module-$step $PREFIX $TARGET | tee $log 2>&1
+        else
+	    $module-$step $PREFIX $TARGET >> $log 2>&1
         fi
         res=$?
+
+        #  Check for errors
 
         if [ $res != 0 ]; then
 	    if [ $DLOG = on-failure ]; then
 	        tail -100 $log
 	    fi
-	    elog generic module $step failed with error $res
+	    elog $module $step failed with error $res
 	    return $res
         else
 	    ilog $module $step completed
 	    return 0
         fi
-    fi
+    )
 }
 
 ############################## usage
@@ -90,12 +141,18 @@ function usage()
     local k=0
 
     echo
-    echo $0 [tSIscbilv] module1 [module2 ... modulen]
+    echo $0 [options] module1 [module2 ... modulen]
 
+    echo ""
+    echo "   modulen  <name>:<ver>         build from tarbal version <ver>"
+    echo "   modulen  <name>:<ver>:branch  build from repository version <ver>"
+    echo "   modulen  <name>:dev           build from repository user's dev branch"
+    echo "   modulen  <name>               build from repository main branch"
+    echo ""
+    echo "   -h | --help         this help message"
     echo "   -t | --target name  specify the target to build for ($TARGET)"
     echo "   -S | --no-setup     skip setup"
     echo "   -I | --no-install   skip install"
-    echo "   -a | --ar version   use sources tarball version-module-src.tar.gz"
     echo "   -u | --update       do update"
     echo "   -s | --setup        do setup"
     echo "   -c | --config       do config"
@@ -121,31 +178,127 @@ function usage()
     exit 1
 }
 
-############################## module-wrapper
+############################## handle-depends
+
+function handle-depends()
+{
+    name_ver=($(echo $1 | tr ":" " "))
+
+    module=${name_ver[0]}
+    version=${name_ver[1]}
+    branch=${name_ver[2]}
+
+    #  If we want latest version, just handle this module
+
+    if [ "$version" = "dev" ]; then
+        handle-module $1
+        return
+    fi
+
+    cd $ROOT
+
+    #  ??? Check for OS modules to install
+
+    [ ! -f $DEFS/$module ] &&
+        echo No description for module $module &&
+        exit 1
+
+    #  Check if the proper version is installed
+
+    source $DEFS/$module
+
+    fn-exists $module-version
+    if [[ $? = 0 ]]; then
+        pushd $(mktemp -d) > /dev/null 2>&1
+
+        mver=$($module-version $PREFIX $TARGET)
+
+        [ "${PWD:0:4}" = "/tmp" ] && rm -r $(pwd)
+
+        popd > /dev/null 2>&1
+    else
+        mver=$VERSION_OK
+    fi
+
+    #  Clean-up the version number (only digits and a single dot)
+
+    mver=$(get-version-number $mver)
+
+    cd $ROOT
+
+    [ "$version" = "" ] && version=0
+
+    if [[ "$mver" = "" \
+                || "$mver" = $VERSION_ERROR \
+                || $version > $mver ]];
+    then
+        ilog build Need building $module, \
+             current version $(display-version $mver) | tee -a $log
+        handle-module $1
+    fi
+}
+
+############################## handle-module
 
 function handle-module()
 {
-    module=$1
+    #  Check for module version name:version:branch
+
+    name_ver=($(echo $1 | tr ":" " "))
+
+    module=${name_ver[0]}
+    version=${name_ver[1]}
+    branch=${name_ver[2]}
+
     log=$LOGS/$TARGET-$module-report.log
+
+    #  Check if we have already handled this module
+
+    check-handled $module
+    if [[ $? = 1 ]]; then
+        return
+    fi
 
     cd $ROOT
 
     [ ! -f $DEFS/$module ] &&
-    echo No description for module $module &&
-    exit 1
+        echo No description for module $module &&
+        exit 1
 
     #  Then load module setup
 
     source $DEFS/$module
 
+    #  Create module environment now
+
+    mkdir -p $BDIR/$module/$TARGET > $log 2>&1
+
     #  Check meta-modules
 
     fn-exists $module-modules
     if [[ $? = 0 ]]; then
-        for module in $($module-modules); do
-            handle-module $module
-        done
+        (
+            for module in $($module-modules); do
+                handle-module $module
+            done
+        )
         return
+    fi
+
+    # Check for depends if any
+
+    if [ $DEPS = yes ]; then
+        fn-exists $module-depends
+        if [[ $? = 0 ]]; then
+            (
+                for module in $($module-depends); do
+                    handle-depends $module
+                done
+            )
+            if [[ ! $? = 0 ]]; then
+                exit 1
+            fi
+        fi
     fi
 
     clog $module
@@ -154,7 +307,9 @@ function handle-module()
 
     if [ $PURGE = yes -o $PURGE = only -o ! -z "$TARVERSION" ]; then
 	ilog build Purging $module
-        [ -d $BDIR/$module ] && cd $BDIR/$module && module-purge $PREFIX $TARGET
+        [ -d $BDIR/$module ] &&
+            cd $BDIR/$module &&
+            module-purge $BDIR/$module/install $TARGET
     fi
 
     [ $PURGE = only ] && exit 0
@@ -170,61 +325,127 @@ function handle-module()
     gnat ls -v >> $LOGS/$TARGET-$module-env.log 2> /dev/null
     which gcc >> $LOGS/$TARGET-$module-env.log 2> /dev/null
 
+    # We need to remove the link/sources to ensure proper setting by the module
+
+    [ -d $BDIR/$module ] && cd $BDIR/$module && rm -fr src local-vcs
+
     #  If building from tarball, extract it now
 
-    if [ ! -z $TARVERSION ]; then
-        [ ! -f $TARBALL/$TARVERSION-$module-src.tar.gz ] &&
-        echo Tarball $TARBALL/$TARVERSION-$module-src.tar.gz not found. &&
-        exit 1
+    if [ ! -z "$version" -a "$version" != "dev" -a -z "$branch" ]; then
+        fn-exists $module-tar
 
-	ilog build Extract tarball $TARVERSION-$module-src.tar.gz
-
-        [ ! -d $BDIR/$module ] && mkdir -p $BDIR/$module > $log 2>&1
-
-        cd $BDIR/$module
-        ( rm -fr src && mkdir -p src ) > $log 2>&1
-        cd src
-
-        tar xf $TARBALL/$TARVERSION-$module-src.tar.gz
-        topdir=$(ls -d *)
-
-        if [ -d "$topdir" ]; then
-            mv $topdir/* .
-            rmdir $topdir
-            cd ..
-        else
-            echo Error, no top directory found.
+        if [[ ! $? = 0 ]]; then
+            echo "error: $module-tar function not defined, cannot get tarball"
             exit 1
+        fi
+
+        if [ $DOUPDATE = yes -o ! -d tarsrc ]; then
+            get-tar $module $version >> $log 2>&1
+
+            if [[ ! $? = 0 ]]; then
+                exit 1
+            fi
         fi
 
         # We set the link for the source so that no module will have to do it
 
-        rm -f src_cp
-        ln -s src src_cp
+        ln -s tarsrc src
     else
-        # We need to remove the link/sources to ensure proper setting by the
-        # module.
-        [ -d $BDIR/$module ] && cd $BDIR/$module && rm -fr src src_cp
+        # Get sources from repository
+
+        fn-exists $module-vcs
+
+        if [[ $? = 0 ]]; then
+            vcs=( $($module-vcs) )
+
+	    ilog build get sources from ${vcs[0]}
+
+            if [ $DOUPDATE = yes -o ! -d vcs ]; then
+                get-vcs ${vcs[0]} ${vcs[1]} $module $version
+
+                if [[ ! $? = 0 ]]; then
+                    exit 1
+                fi
+            fi
+
+            if [ "$version" = "dev" -a -d $GREPO/$module ]; then
+                ln -s $GREPO/$module local-vcs
+            fi
+
+            ln -s vcs src
+        fi
+
+        #  If get-vcs is not defined then the $module-setup routine is in
+        #  charge of creating/populating the src directory.
     fi
 
     #  Call module routines
 
     for step in $STEPS; do
+        #  Apply module specific step if any
+
 	fn-exists $module-$step
+
 	if [[ $? = 0 ]]; then
-	    module-wrapper $module $step || exit 1
+	    module-wrapper $BDIR/$module/install $module $step || exit 1
 	fi
+
+        #  Apply any generic step (module-setup, module-purge)
+
+        fn-exists module-$step
+
+        if [[ $? = 0 ]]; then
+            if [ $DLOG = yes ]; then
+                module-$step $BDIR/$module/install $TARGET | tee $log 2>&1
+            else
+                module-$step $BDIR/$module/install $TARGET >> $log 2>&1
+            fi
+        fi
+        res=$?
+
+        if [ $res != 0 ]; then
+	    if [ $DLOG = on-failure ]; then
+	        tail -100 $log
+	    fi
+	    elog generic module $step failed with error $res
+	    return $res
+        fi
     done
+
+    #  Finaly copy to given prefix
+    SUDO=""
+
+    fn-exists $module-prefix
+
+    if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
+        IDIR=$($module-prefix)
+    else
+        IDIR=$PREFIX
+    fi
+
+    if [ ! -w $IDIR ]; then
+        SUDO=sudo
+    fi
+
+    if [ "$DOINSTALL" = "yes" -a -d $BDIR/$module/install ]; then
+	ilog build copy install into ..${IDIR/$BDIR/}
+        $SUDO rsync -a $BDIR/$module/install/. $IDIR/. > $log 2>&1
+    fi
+
     echo
 }
 
 ############################## body
 
-set -- $(getopt -u -o t:a:SIuscbilpPvr \
-    -l ar:,target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests -- "$@")
+set -- $(getopt -u -o t:dSIuscbilpPvrh \
+    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
+	-h|--help)
+            usage
+            exit
+	    ;;
 	-t|--target)
 	    TARGET=$2; shift
             TARGET_SPECIFIED=yes
@@ -233,14 +454,10 @@ while [ $# -gt 0 ]; do
 	    STEPS=${STEPS/setup/}
 	    ;;
 	-I|--no-install)
-	    STEPS=${STEPS/install/}
+            DOINSTALL=no
 	    ;;
-        -a|--ar)
-            TARVERSION=$2; shift
-            ;;
 	-u|--update)
-	    NSTEPS="$NSTEPS update"
-	    STEPS="update $STEPS"
+            DOUPDATE=yes
 	    ;;
 	-s|--setup)
 	    NSTEPS="$NSTEPS setup"
@@ -251,8 +468,12 @@ while [ $# -gt 0 ]; do
 	-b|--build)
 	    NSTEPS="$NSTEPS build"
 	    ;;
+	-d|--deps)
+	    DEPS=yes
+	    ;;
 	-i|--install)
 	    NSTEPS="$NSTEPS install"
+            DOINSTALL=yes
 	    ;;
 	-l|--no-log)
 	    DLOG=no
@@ -267,6 +488,7 @@ while [ $# -gt 0 ]; do
 	    PURGE=yes
 	    ;;
 	--prefix)
+            DEFAULT_PREFIX=no
 	    PREFIX=$2; shift
 	    ;;
 	-P|--purge-only)
@@ -297,7 +519,7 @@ rm -f "$DEFS"/*~
 
 #  If we have explicitly specified some steps, use them
 
-if [ "$NSTEPS" != "" -a "$NSTEPS" != " update" ]; then
+if [ "$NSTEPS" != "" ]; then
     STEPS=$NSTEPS
 fi
 

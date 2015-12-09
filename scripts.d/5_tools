@@ -2,9 +2,43 @@
 ############################## get-version-number
 # return a 2 digits version number for $1
 
+VERSION_OK=9999
+VERSION_ERROR=-1
+
 function get-version-number()
 {
-    echo "$1" | sed -e 's/[^0-9]*\([0-9]*\(\.[0-9]*\)\?\).*/\1/g'
+    echo -n "$1" | sed -e 's/[^0-9-]*\(\-\?[0-9]*\(\.[0-9]*\)\?\).*/\1/g'
+}
+
+############################## display-version
+
+function display-version()
+{
+    version=$1
+
+    if [ "$version" = "$VERSION_OK" ]; then
+        echo latest
+    elif [ "$version" = "$VERSION_ERROR" ]; then
+        echo not found
+    else
+        echo $version
+    fi
+}
+
+############################## gprbuild-project
+# for testing if a project compile and link
+
+function gprbuild-project()
+{
+    PRJ=$1
+
+    (
+        if [ $HOST == $TARGET ]; then
+            gprbuild -p -q $PRJ -cargs -gnatwA
+        else
+            gprbuild -p -q --target=$TARGET $PRJ -cargs -gnatwA
+        fi
+    )  > /dev/null 2>&1
 }
 
 ############################## check-tool
@@ -39,11 +73,23 @@ function module-setup()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ -h src_cp ]; then
+    #  we do not want to delete out-of-tree build in $TARGET
+    #  so we ignore the .oot-build
+
+    if [ -h src -o -d src ]; then
         rsync -a --delete --exclude=".git" --exclude=".svn" \
             --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
             --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --link-dest=../src_cp src_cp/. $TARGET/
+            --exclude ".oot-build" --link-dest=../src src/. $TARGET/
+        rm -f build
+        ln -s $TARGET build
+    fi
+
+    if [ -h local-vcs ]; then
+        rsync -a --delete --exclude=".git" --exclude=".svn" \
+            --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
+            --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
+            --exclude ".oot-build" --link-dest=../local-vcs local-vcs/. $TARGET/
         rm -f build
         ln -s $TARGET build
     fi
@@ -56,11 +102,11 @@ function module-purge()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ -h src_cp ]; then
+    if [ -h src -o -d src ]; then
         rsync -aH --exclude=".git" --exclude=".svn" --delete --delete-excluded \
             --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
             --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --link-dest=../src_cp src_cp/. $TARGET/
+            --link-dest=../src src/. $TARGET/
     elif [ -d $TARGET ]; then
 	rm -fr $TARGET
     fi
@@ -92,13 +138,17 @@ function get-tar()
 
     #  The tarball is not present, try downloading it
 
-    if [ ! -f $TARBALL/$tarsrc ]; then
+    if [ ! -f $TARBALL/$tarsrc && "$tarcp" != "none" && $tarurl != "" ]; then
         $tarcp $tarurl/$tarsrc $TARBALL/ > $log 2>&1
+
+        [[ ! $? = 0 ]] &&
+            echo "error: cannot get tar: $tarcp" &&
+            return 1
     fi
 
     [ ! -f $TARBALL/$tarsrc ] &&
         echo "error: tarball $tarsrc not found" &&
-        exit 1
+        return 1
 
     ilog build extract tarball $tarsrc
 

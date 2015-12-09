@@ -1,22 +1,8 @@
 
-function git-update()
+function git-vcs()
 {
-    PREFIX=$1
-    TARGET=$2
-
-    cd $GREPO/git && git pull
-}
-
-function git-setup()
-{
-    PREFIX=$1
-    TARGET=$2
-
-    if [ ! -d src ]; then
-        ln -s $GREPO/git src
-    fi
-
-    export PATH=/usr/bin:/bin:/usr/local/bin
+    echo git
+    echo git://git.kernel.org/pub/scm/git/git.git
 }
 
 function git-config()
@@ -24,7 +10,13 @@ function git-config()
     PREFIX=$1
     TARGET=$2
 
-    cd src && make configure && ./configure --prefix=/usr/local CFLAGS="-O2"
+    (
+        system-compiler
+
+        cd build &&
+            make configure &&
+            ./configure --prefix=$PREFIX CFLAGS="-O2"
+    )
 }
 
 function git-build()
@@ -32,7 +24,12 @@ function git-build()
     PREFIX=$1
     TARGET=$2
 
-    cd src && make -j6 PREFIX=/usr/local all doc
+    (
+        system-compiler
+
+        cd build && make -j6 PREFIX=$PREFIX all doc
+
+    )
 }
 
 function git-install()
@@ -40,6 +37,16 @@ function git-install()
     PREFIX=$1
     TARGET=$2
 
-    cd src &&  sudo make PREFIX=/usr/local install install-doc &&
-    sudo cp contrib/completion/git-completion.bash /usr/local/etc/
+    (
+        system-compiler
+
+        cd build &&
+            make PREFIX=$PREFIX install install-doc &&
+            sudo cp contrib/completion/git-completion.bash $PREFIX/etc/
+    )
+}
+
+function git-prefix()
+{
+    echo /opt/git
 }

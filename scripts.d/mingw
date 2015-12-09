@@ -1,12 +1,8 @@
 
-function mingw-update()
+function mingw-depends()
 {
-    PREFIX=$1
-    TARGET=$2
-
-    git_co git://git.code.sf.net/p/mingw-w64/mingw-w64 mingw-w64
-
-    cd $GREPO/mingw-w64 && git checkout master && git pull
+    echo mingw-header
+    echo pgcc
 }
 
 function mingw-setup()
@@ -16,13 +12,7 @@ function mingw-setup()
 
     case $TARGET in
 	*mingw*)
-            mkdir -p $TARGET/mingh
-            mkdir -p $TARGET/mingrt
-            mkdir -p $TARGET/pgcc
-
-            if [ ! -d "src" ]; then
-                ln -s $GREPO/mingw-w64 src
-            fi
+            ln -s $BDIR/mingw-header/src .
 	    ;;
 	*)
             echo $TARGET not supported for mingw.
@@ -31,95 +21,25 @@ function mingw-setup()
     esac
 }
 
-function config-mingh()
-{
-    PREFIX=$1
-    TARGET=$2
-
-    cd $BDIR/mingw/$TARGET/mingh &&
-    $BDIR/mingw/src/mingw-w64-headers/configure \
-	--prefix=$PREFIX/$TARGET --build=$TARGET
-}
-
-function config-mingrt()
-{
-    PREFIX=$1
-    TARGET=$2
-
-    #  set PATH to pick-up the partial C compiler just built and which is
-    #  needed to build the mingw runtime.
-    (
-	target-env
-
-	cd $BDIR/mingw/$TARGET/mingrt &&
-        PATH=$PREFIX/$TARGET/bin:$PATH $BDIR/mingw/src/mingw-w64-crt/configure \
-	    --prefix=$PREFIX/$TARGET --host=$TARGET \
-            --target=$TARGET --build=$HOST
-    )
-}
-
-function config-pgcc()
-{
-    PREFIX=$1
-    TARGET=$2
-
-    cd $BDIR/mingw/$TARGET/pgcc &&
-    CFLAGS="-O1" $BDIR/gnat/src/configure \
-	--target=$TARGET --prefix=$PREFIX/$TARGET --build=$HOST \
-	--enable-thread=win32 --disable-nls --disable-multilib \
-        --disable-libada --disable-sjlj-exceptions --enable-languages=c
-}
-
 function mingw-config()
 {
     PREFIX=$1
     TARGET=$2
 
-    (
-	no-target-env
-
-	config-mingh $PREFIX $TARGET &&
-	config-pgcc $PREFIX $TARGET
-    )
-}
-
-function build-pgcc()
-{
-    PREFIX=$1
-    TARGET=$2
+    #  set PATH to pick-up the partial C compiler just built and which is
+    #  needed to build the mingw runtime. Also set target-env to the mingw
+    #  header just built.
 
     (
-	no-target-env
+	target-env $BDIR/mingw-header/install $TARGET
 
-	ilog mingw build pgcc
-        # The make will fail, but we install the partial C compiler
-        # which is sufficient to build the MingW runtime.
-	cd $BDIR/mingw/$TARGET/pgcc
-	make -j2
-	make -k install
+        mkdir -p build/.oot-build &&
+	    cd build/.oot-build &&
+            PATH=$BDIR/pgcc/install/$TARGET/bin:$PATH &&
+            $BDIR/mingw/src/mingw-w64-crt/configure \
+	        --prefix=$PREFIX/$TARGET --host=$TARGET \
+                --target=$TARGET
     )
-
-    return 0
-}
-
-function build-mingh()
-{
-    PREFIX=$1
-    TARGET=$2
-
-    ilog mingw build mingh
-    cd $BDIR/mingw/$TARGET/mingh && make -j6 && make install
-}
-
-function build-mingrt()
-{
-    PREFIX=$1
-    TARGET=$2
-
-    ilog mingw build mingrt
-    #  set PATH to pick-up the partial C compiler just built
-    cd $BDIR/mingw/$TARGET/mingrt &&
-    PATH=$PREFIX/$TARGET/bin:$PATH make -j4
 }
 
 function mingw-build()
@@ -127,10 +47,15 @@ function mingw-build()
     PREFIX=$1
     TARGET=$2
 
-    build-mingh $PREFIX $TARGET &&
-    build-pgcc  $PREFIX $TARGET &&
-    config-mingrt $PREFIX $TARGET &&
-    build-mingrt $PREFIX $TARGET
+    ilog mingw build mingrt
+
+    (
+	target-env $BDIR/mingw-header/install $TARGET
+
+        cd build/.oot-build &&
+            PATH=$BDIR/pgcc/install/$TARGET/bin:$PATH &&
+            make -j4
+    )
 }
 
 function mingw-install()
@@ -138,5 +63,5 @@ function mingw-install()
     PREFIX=$1
     TARGET=$2
 
-    cd $BDIR/mingw/$TARGET/mingrt && make install
+    cd build/.oot-build && make install
 }

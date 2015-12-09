@@ -1,23 +1,25 @@
 
-function binutils-update()
+function binutils-vcs()
 {
-    PREFIX=$1
-    TARGET=$2
-
-    git_co git://sourceware.org/git/binutils-gdb.git binutils
-
-    cd $GREPO/binutils && git checkout master && git pull
+    echo git
+    echo git://sourceware.org/git/binutils-gdb.git
 }
 
-function binutils-setup()
+function binutils-version()
 {
     PREFIX=$1
     TARGET=$2
 
-    mkdir -p $BDIR/binutils/$TARGET
+    TOOL=ld
 
-    if [ ! -d src ]; then
-        ln -s $GREPO/binutils src
+    if [ $HOST != $TARGET ]; then
+        TOOL=${TARGET}-ld
+    fi
+
+    if [ "$(which $TOOL)" = "" ]; then
+        echo $VERSION_ERROR
+    else
+        echo $($TOOL --version | head -1 | cut -d' ' -f5)
     fi
 }
 
@@ -26,14 +28,12 @@ function binutils-config()
     PREFIX=$1
     TARGET=$2
 
-    no-target-env
-
     CONF_OPT="--prefix=$PREFIX --disable-multilib --disable-gdb"
 
     if [ $HOST == $TARGET ]; then
-	cd $TARGET && ../src/configure --build=$HOST $CONF_OPT
+	cd build && ../src/configure --build=$HOST $CONF_OPT
     else
-	cd $TARGET && ../src/configure --target=$TARGET $CONF_OPT
+	cd build && ../src/configure --target=$TARGET $CONF_OPT
     fi
 }
 
@@ -42,7 +42,7 @@ function binutils-build()
     PREFIX=$1
     TARGET=$2
 
-    cd $TARGET && make -j6
+    cd build && make -j6
 }
 
 function binutils-install()
@@ -50,5 +50,5 @@ function binutils-install()
     PREFIX=$1
     TARGET=$2
 
-    cd $TARGET && make install
+    cd build && make install
 }
