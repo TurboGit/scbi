@@ -75,3 +75,50 @@ function display-file()
     echo File : $file
     cat $file
 }
+
+############################## get-tar
+
+function get-tar()
+{
+    local module=$1
+    local version=$2
+    local res=0
+
+    tar=( $($module-tar $version) )
+
+    tarcp=${tar[0]}
+    tarurl=${tar[1]}
+    tarsrc=${tar[2]}
+
+    #  The tarball is not present, try downloading it
+
+    if [ ! -f $TARBALL/$tarsrc ]; then
+        $tarcp $tarurl/$tarsrc $TARBALL/ > $log 2>&1
+    fi
+
+    [ ! -f $TARBALL/$tarsrc ] &&
+        echo "error: tarball $tarsrc not found" &&
+        exit 1
+
+    ilog build extract tarball $tarsrc
+
+    [ ! -d $BDIR/$module ] && mkdir -p $BDIR/$module > $log 2>&1
+
+    cd $BDIR/$module
+    ( rm -fr tarsrc && mkdir -p tarsrc ) > $log 2>&1
+    cd tarsrc
+
+    tar xf $TARBALL/$tarsrc
+    topdir=$(ls -d *)
+
+    if [ -d "$topdir" ]; then
+        mv $topdir/* .
+        rmdir $topdir
+        cd ..
+    else
+        echo Error, no top directory found.
+        res=1
+    fi
+
+    return $res
+}
