@@ -62,6 +62,7 @@ TARVERSION=
 PREFIX=
 DOINSTALL=yes
 DOUPDATE=no
+DOARCHIVE=no
 DEFAULT_PREFIX=yes
 DEPS=no
 
@@ -159,6 +160,7 @@ function usage()
     echo "   -b | --build        do build"
     echo "   -i | --install      do install"
     echo "   -r | --tests        run the testsuite"
+    echo "   -a | --archive      build binary archive"
     echo "   -v | --verbose      display full log"
     echo "   -l | --no-log       never display log"
     echo "   -p | --purge        remove builds directories before building"
@@ -412,6 +414,14 @@ function handle-module()
         fi
     done
 
+    #  Create binary archive if needed
+
+    if [ $DOARCHIVE = yes ]; then
+        cd $BDIR/$module >> $log 2>&1
+        tar cf $module-bin.tar --directory=install .
+        bzip2 -9 $module-bin.tar
+    fi
+
     #  Finaly copy to given prefix
     SUDO=""
 
@@ -437,14 +447,17 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:dSIuscbilpPvrh \
-    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps -- "$@")
+set -- $(getopt -u -o t:adSIuscbilpPvrh \
+    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps,archive -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
 	-h|--help)
             usage
             exit
+	    ;;
+	-a|--archive)
+            DOARCHIVE=yes
 	    ;;
 	-t|--target)
 	    TARGET=$2; shift
