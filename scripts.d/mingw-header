@@ -15,17 +15,19 @@ function mingw-header-depends()
     echo binutils
 }
 
+function mingw-header-out-of-tree()
+{
+    echo true
+}
+
 function mingw-header-config()
 {
     PREFIX=$1
     TARGET=$2
 
-    (
-        mkdir -p build/.oot-build &&
-            cd build/.oot-build &&
-            ../../src/mingw-w64-headers/configure \
-	        --prefix=$PREFIX/$TARGET --build=$TARGET
-    )
+    no-target-env &&
+        ../src/mingw-w64-headers/configure \
+            --prefix=$PREFIX/$TARGET --build=$TARGET
 }
 
 function mingw-header-build()
@@ -33,13 +35,7 @@ function mingw-header-build()
     PREFIX=$1
     TARGET=$2
 
-    #  set PATH to pick-up the partial C compiler just built
-
-    (
-        cd build/.oot-build &&
-            C_INCLUDE_PATH=$PREFIX/$TARGET/include &&
-            make -j6
-    )
+    no-target-env && make -j6
 }
 
 function mingw-header-install()
@@ -47,5 +43,7 @@ function mingw-header-install()
     PREFIX=$1
     TARGET=$2
 
-    cd build/.oot-build && make install
+    no-target-env && make install &&
+        # install into the partial gcc compiler too
+        rsync -a ../install/. $BDIR/pgcc/install/
 }

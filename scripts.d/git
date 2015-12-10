@@ -13,9 +13,7 @@ function git-config()
     (
         system-compiler
 
-        cd build &&
-            make configure &&
-            ./configure --prefix=$PREFIX CFLAGS="-O2"
+        make configure && ./configure --prefix=$PREFIX CFLAGS="-O2"
     )
 }
 
@@ -27,7 +25,7 @@ function git-build()
     (
         system-compiler
 
-        cd build && make -j6 PREFIX=$PREFIX all doc
+        make -j6 PREFIX=$PREFIX all doc
 
     )
 }
@@ -40,8 +38,7 @@ function git-install()
     (
         system-compiler
 
-        cd build &&
-            make PREFIX=$PREFIX install install-doc &&
+        make PREFIX=$PREFIX install install-doc &&
             sudo cp contrib/completion/git-completion.bash $PREFIX/etc/
     )
 }

@@ -2,18 +2,29 @@
 #  A partial GCC C compiler for building a minimum runtime
 #  used to build a mingw32 cross-compiler
 
+function pgcc-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    mkdir -p $TARGET/build
+    rm -f build
+    ln -s $TARGET build
+}
+
 function pgcc-config()
 {
     PREFIX=$1
     TARGET=$2
 
     (
-        cd $TARGET &&
-            CFLAGS="-O1" $BDIR/gnat/src/configure \
-                  --target=$TARGET --prefix=$PREFIX/$TARGET --build=$HOST \
-	          --enable-thread=win32 --disable-nls --disable-multilib \
-                  --disable-libada --disable-sjlj-exceptions \
-                  --enable-languages=c
+        system-compiler
+
+        CFLAGS="-O1" $BDIR/gnat/src/configure \
+              --target=$TARGET --prefix=$PREFIX/$TARGET --host=$HOST \
+	      --enable-thread=win32 --disable-nls --disable-multilib \
+              --disable-libada --disable-sjlj-exceptions \
+              --enable-languages=c
     )
 }
 
@@ -23,12 +34,12 @@ function pgcc-build()
     TARGET=$2
 
     (
-	no-target-env
+	system-compiler
 
         # The make will fail, but we install the partial C compiler
         # which is sufficient to build the MingW runtime.
 
-	cd $TARGET && make -j2
+	make -j2
     )
 
     return 0
@@ -37,13 +48,19 @@ function pgcc-build()
 function pgcc-install()
 {
    (
-	no-target-env
+	system-compiler
 
         # The make will fail, but we install the partial C compiler
         # which is sufficient to build the MingW runtime.
 
-	cd $TARGET && make -k install
+	make -k install
    )
 
-    return 0
+   return 0
+}
+
+function pgcc-prefix()
+{
+    # install into the partial gcc compiler
+    echo $BDIR/pgcc/install
 }

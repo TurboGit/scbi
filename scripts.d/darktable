@@ -5,6 +5,11 @@ function darktable-vcs()
     echo http://github.com/darktable-org/darktable.git
 }
 
+function darktable-out-of-tree()
+{
+    echo true
+}
+
 function darktable-config()
 {
     PREFIX=$1
@@ -20,11 +25,9 @@ function darktable-config()
     (
         system-compiler
 
-        mkdir -p build/.oot-build &&
-        cd build/.oot-build &&
-            cmake ../../src -DCMAKE_BUILD_TYPE=Release $GPOPTS \
-	          -DCMAKE_INSTALL_PREFIX=$PREFIX \
-	          -DINSTALL_IOP_EXPERIMENTAL=On
+        cmake ../src -DCMAKE_BUILD_TYPE=Release $GPOPTS \
+	      -DCMAKE_INSTALL_PREFIX=$PREFIX \
+	      -DINSTALL_IOP_EXPERIMENTAL=On
     )
 }
 
@@ -36,7 +39,7 @@ function darktable-build()
     (
         system-compiler
 
-        cd build/.oot-build && make -j4
+        make -j4
     )
 }
 
@@ -48,7 +51,7 @@ function darktable-install()
     (
         system-compiler
 
-        cd build/.oot-build && make install
+        make install
     )
 }
 

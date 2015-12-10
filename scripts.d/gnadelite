@@ -15,7 +15,7 @@ function gnadelite-build()
     PREFIX=$1
     TARGET=$2
 
-    cd build && PROCESSORS=$JOBS make prefix=$PREFIX
+    PROCESSORS=$JOBS make prefix=$PREFIX
 }
 
 function gnadelite-install()
@@ -23,7 +23,5 @@ function gnadelite-install()
     PREFIX=$1
     TARGET=$2
 
-    cd build &&
-        make prefix=$PREFIX prepare_install &&
-        make prefix=$PREFIX install
+    make prefix=$PREFIX prepare_install && make prefix=$PREFIX install
 }

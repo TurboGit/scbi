@@ -21,24 +21,21 @@ function mingw-setup()
     esac
 }
 
+function mingw-out-of-tree()
+{
+    echo true
+}
+
 function mingw-config()
 {
     PREFIX=$1
     TARGET=$2
 
-    #  set PATH to pick-up the partial C compiler just built and which is
-    #  needed to build the mingw runtime. Also set target-env to the mingw
-    #  header just built.
-
     (
-	target-env $BDIR/mingw-header/install $TARGET
+        target-env $BDIR/pgcc/install $TARGET
 
-        mkdir -p build/.oot-build &&
-	    cd build/.oot-build &&
-            PATH=$BDIR/pgcc/install/$TARGET/bin:$PATH &&
-            $BDIR/mingw/src/mingw-w64-crt/configure \
-	        --prefix=$PREFIX/$TARGET --host=$TARGET \
-                --target=$TARGET
+        ../src/mingw-w64-crt/configure \
+	    --prefix=$PREFIX/$TARGET --host=$TARGET --target=$TARGET
     )
 }
 
@@ -47,14 +44,16 @@ function mingw-build()
     PREFIX=$1
     TARGET=$2
 
-    ilog mingw build mingrt
+    #  First fix makefile, we cannot build winrt/libruntimeobject.a on
+    #  lib32 not lib64.
+
+    sed -i 's/^winrt32_DATA/#winrt32_DATA/' Makefile
+    sed -i 's/^winrt64_DATA/#winrt64_DATA/' Makefile
 
     (
-	target-env $BDIR/mingw-header/install $TARGET
+        target-env $BDIR/pgcc/install $TARGET
 
-        cd build/.oot-build &&
-            PATH=$BDIR/pgcc/install/$TARGET/bin:$PATH &&
-            make -j4
+        make -j4
     )
 }
 
@@ -63,5 +62,9 @@ function mingw-install()
     PREFIX=$1
     TARGET=$2
 
-    cd build/.oot-build && make install
+    (
+        target-env $BDIR/pgcc/install $TARGET
+
+        make install
+    )
 }

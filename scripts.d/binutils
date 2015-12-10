@@ -5,6 +5,11 @@ function binutils-vcs()
     echo git://sourceware.org/git/binutils-gdb.git
 }
 
+function binutils-out-of-tree()
+{
+    echo true
+}
+
 function binutils-version()
 {
     PREFIX=$1
@@ -30,10 +35,11 @@ function binutils-config()
 
     CONF_OPT="--prefix=$PREFIX --disable-multilib --disable-gdb"
 
+    no-target-env &&
     if [ $HOST == $TARGET ]; then
-	cd build && ../src/configure --build=$HOST $CONF_OPT
+	../src/configure --build=$HOST $CONF_OPT
     else
-	cd build && ../src/configure --target=$TARGET $CONF_OPT
+	../src/configure --target=$TARGET $CONF_OPT
     fi
 }
 
@@ -42,7 +48,7 @@ function binutils-build()
     PREFIX=$1
     TARGET=$2
 
-    cd build && make -j6
+    no-target-env && make -j6
 }
 
 function binutils-install()
@@ -50,5 +56,10 @@ function binutils-install()
     PREFIX=$1
     TARGET=$2
 
-    cd build && make install
+    no-target-env && make install &&
+        if [ $HOST != $TARGET ]; then
+            # install into the partial gcc compiler too
+            mkdir -p $BDIR/pgcc/install/
+            rsync -a ../install/. $BDIR/pgcc/install/
+        fi
 }

@@ -72,26 +72,38 @@ function module-setup()
 {
     local PREFIX=$1
     local TARGET=$2
-
-    #  we do not want to delete out-of-tree build in $TARGET
-    #  so we ignore the .oot-build
+    local OOT=$3
 
     if [ -h src -o -d src ]; then
         rsync -a --delete --exclude=".git" --exclude=".svn" \
             --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
             --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --exclude ".oot-build" --link-dest=../src src/. $TARGET/
-        rm -f build
+            --link-dest=../src src/. $TARGET/src
+
+        rm -f build/build build
         ln -s $TARGET build
+
+        if [ "$OOT" = "yes" ]; then
+            mkdir -p build/build
+        else
+            ln -s src build/build
+        fi
     fi
 
     if [ -h local-vcs ]; then
         rsync -a --delete --exclude=".git" --exclude=".svn" \
             --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
             --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --exclude ".oot-build" --link-dest=../local-vcs local-vcs/. $TARGET/
-        rm -f build
+            --link-dest=../local-vcs local-vcs/. $TARGET/src
+
+        rm -f build/build build
         ln -s $TARGET build
+
+        if [ "$OOT" = "yes" ]; then
+            mkdir -p build/build
+        else
+            ln -s src build/build
+        fi
     fi
 }
 
@@ -101,12 +113,13 @@ function module-purge()
 {
     local PREFIX=$1
     local TARGET=$2
+    local OOT=$3
 
     if [ -h src -o -d src ]; then
         rsync -aH --exclude=".git" --exclude=".svn" --delete --delete-excluded \
             --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
             --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --link-dest=../src src/. $TARGET/
+            --link-dest=../src src/. $TARGET/src
     elif [ -d $TARGET ]; then
 	rm -fr $TARGET
     fi

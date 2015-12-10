@@ -65,6 +65,7 @@ DOUPDATE=no
 DOARCHIVE=no
 DEFAULT_PREFIX=yes
 DEPS=no
+ISOOT=no
 
 STEPS="setup config build install"
 
@@ -108,7 +109,15 @@ function module-wrapper()
         #  Set cross-env is needed
 
         if [ "$HOST" != "$TARGET" ]; then
-            target-env $PREFIX $TARGET
+            target-env $BDIR/install $TARGET
+        fi
+
+        #  Go to build directory
+
+        if [ "$step" = "setup" ]; then
+            cd $BDIR/$module
+        else
+            cd $BDIR/$module/build/build
         fi
 
         #  Call module step
@@ -147,7 +156,7 @@ function usage()
     echo ""
     echo "   modulen  <name>:<ver>         build from tarbal version <ver>"
     echo "   modulen  <name>:<ver>:branch  build from repository version <ver>"
-    echo "   modulen  <name>:dev           build from repository user's dev branch"
+    echo "   modulen  <name>:dev           build from user's repository current branch"
     echo "   modulen  <name>               build from repository main branch"
     echo ""
     echo "   -h | --help         this help message"
@@ -160,6 +169,7 @@ function usage()
     echo "   -b | --build        do build"
     echo "   -i | --install      do install"
     echo "   -r | --tests        run the testsuite"
+    echo "   -d | --deps         check/build dependencies"
     echo "   -a | --archive      build binary archive"
     echo "   -v | --verbose      display full log"
     echo "   -l | --no-log       never display log"
@@ -184,11 +194,13 @@ function usage()
 
 function handle-depends()
 {
-    name_ver=($(echo $1 | tr ":" " "))
+    local modref=$1
 
-    module=${name_ver[0]}
-    version=${name_ver[1]}
-    branch=${name_ver[2]}
+    local name_ver=($(echo $modref | tr ":" " "))
+
+    local module=${name_ver[0]}
+    local version=${name_ver[1]}
+    local branch=${name_ver[2]}
 
     #  If we want latest version, just handle this module
 
@@ -234,9 +246,12 @@ function handle-depends()
                 || "$mver" = $VERSION_ERROR \
                 || $version > $mver ]];
     then
-        ilog build Need building $module, \
+        echo
+        ilog build need building $module, \
              current version $(display-version $mver) | tee -a $log
-        handle-module $1
+        handle-module $modref
+    else
+        ilog build $modref found
     fi
 }
 
@@ -244,13 +259,15 @@ function handle-depends()
 
 function handle-module()
 {
+    local modref=$1
+
     #  Check for module version name:version:branch
 
-    name_ver=($(echo $1 | tr ":" " "))
+    local name_ver=($(echo $modref | tr ":" " "))
 
-    module=${name_ver[0]}
-    version=${name_ver[1]}
-    branch=${name_ver[2]}
+    local module=${name_ver[0]}
+    local version=${name_ver[1]}
+    local branch=${name_ver[2]}
 
     log=$LOGS/$TARGET-$module-report.log
 
@@ -300,6 +317,7 @@ function handle-module()
             if [[ ! $? = 0 ]]; then
                 exit 1
             fi
+            echo
         fi
     fi
 
@@ -342,6 +360,8 @@ function handle-module()
         fi
 
         if [ $DOUPDATE = yes -o ! -d tarsrc ]; then
+	    ilog build get sources from tar
+
             get-tar $module $version >> $log 2>&1
 
             if [[ ! $? = 0 ]]; then
@@ -360,9 +380,9 @@ function handle-module()
         if [[ $? = 0 ]]; then
             vcs=( $($module-vcs) )
 
-	    ilog build get sources from ${vcs[0]}
-
             if [ $DOUPDATE = yes -o ! -d vcs ]; then
+	        ilog build get sources from ${vcs[0]}
+
                 get-vcs ${vcs[0]} ${vcs[1]} $module $version
 
                 if [[ ! $? = 0 ]]; then
@@ -381,6 +401,12 @@ function handle-module()
         #  charge of creating/populating the src directory.
     fi
 
+    #  Check if envrionment is to be done for out-of-tree build
+
+    fn-exists $module-out-of-tree
+
+    [ $? = 0 ] && [ $($module-out-of-tree) = "true" ] && ISOOT=yes
+
     #  Call module routines
 
     for step in $STEPS; do
@@ -389,7 +415,7 @@ function handle-module()
 	fn-exists $module-$step
 
 	if [[ $? = 0 ]]; then
-	    module-wrapper $BDIR/$module/install $module $step || exit 1
+	    module-wrapper $BDIR/$module/build/install $module $step || exit 1
 	fi
 
         #  Apply any generic step (module-setup, module-purge)
@@ -397,10 +423,14 @@ function handle-module()
         fn-exists module-$step
 
         if [[ $? = 0 ]]; then
+            cd $BDIR/$module
+
             if [ $DLOG = yes ]; then
-                module-$step $BDIR/$module/install $TARGET | tee $log 2>&1
+                module-$step $BDIR/$module/build/install $TARGET $ISOOT \
+                    | tee $log 2>&1
             else
-                module-$step $BDIR/$module/install $TARGET >> $log 2>&1
+                module-$step $BDIR/$module/build/install $TARGET $ISOOT \
+                    >> $log 2>&1
             fi
         fi
         res=$?
@@ -417,7 +447,7 @@ function handle-module()
     #  Create binary archive if needed
 
     if [ $DOARCHIVE = yes ]; then
-        cd $BDIR/$module >> $log 2>&1
+        cd $BDIR/$module/build >> $log 2>&1
         tar cf $module-bin.tar --directory=install .
         bzip2 -9 $module-bin.tar
     fi
@@ -437,9 +467,9 @@ function handle-module()
         SUDO=sudo
     fi
 
-    if [ "$DOINSTALL" = "yes" -a -d $BDIR/$module/install ]; then
+    if [ "$DOINSTALL" = "yes" -a -d $BDIR/$module/build/install ]; then
 	ilog build copy install into ..${IDIR/$BDIR/}
-        $SUDO rsync -a $BDIR/$module/install/. $IDIR/. > $log 2>&1
+        $SUDO rsync -a $BDIR/$module/build/install/. $IDIR/. > $log 2>&1
     fi
 
     echo
