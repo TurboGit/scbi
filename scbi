@@ -211,11 +211,19 @@ function handle-depends()
 
     cd $ROOT
 
-    #  ??? Check for OS modules to install
+    #  If module not found, check for a possible distrib package
 
-    [ ! -f $DEFS/$module ] &&
-        echo No description for module $module &&
-        exit 1
+    if [ ! -f $DEFS/$module ]; then
+        check-pkg $module:$version
+
+        if [ $? = 0 ]; then
+            return 0
+        else
+            echo No description for module $module &&
+            echo And not found in the distrib  &&
+            exit 1
+        fi
+    fi
 
     #  Check if the proper version is installed
 

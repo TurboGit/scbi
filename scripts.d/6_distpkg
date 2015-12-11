@@ -1,0 +1,74 @@
+#  Support for distrib packages.
+#
+#  For adding a new distrib:
+#     - add distrib in get-distrib
+#     - implement check-<distrib>-pkg
+#     - add <pkg>-<distrib>-name routine for specific package name
+
+function get-distrib()
+{
+    echo deb
+}
+
+function check-deb-pkg()
+{
+    local pck=$1
+    local version=$(get-version-number $2)
+
+    #  First check that the package exists
+
+    dpkg -s $pck > /dev/null 2>&1 || return 2
+
+    #  If no version specified, if the package is installed all is ok
+
+    [ "$version" = "" ] && return 0
+
+    #  Then get the version
+
+    inst_ver=$(dpkg -s $pck | grep "^Version:" | cut -d' ' -f2)
+    inst_ver=$(get-version-number $inst_ver)
+
+    #  Is the installed version ok?
+
+    if [[ $inst_ver > $version ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function get-pkg-name()
+{
+    local pkg=$1
+
+    fn-exists $pkg-$(get-distrib)-name
+
+    if [[ $? = 0 ]]; then
+        echo $pkg-$(get-distrib)-name
+    else
+        echo $pkg
+    fi
+}
+
+function check-pkg()
+{
+    local name_ver=($(echo $1 | tr ":" " "))
+    local pkg=${name_ver[0]}
+    local version=${name_ver[1]}
+
+    distname=$(get-pkg-name $pkg)
+
+    check-$(get-distrib)-pkg $pkg $version
+
+    res=$?
+
+    if [ $res = 2 ]; then
+        echo "error: $pkg not found"
+        return 1
+    elif [ $res = 1 ]; then
+        echo "error: $pkg:$version should be installed."
+        return 1
+    else
+        return 0
+    fi
+}
