@@ -2,6 +2,20 @@
 #  A partial GCC C compiler for building a minimum runtime
 #  used to build a mingw32 cross-compiler
 
+function pgcc-version()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    INST=$BDIR/pgcc/install/$TARGET/bin
+
+    if [ -f $INST/$TARGET-gcc ]; then
+        return $VERSION_OK=9999
+    else
+        return $VERSION_ERROR
+    fi
+}
+
 function pgcc-setup()
 {
     PREFIX=$1
