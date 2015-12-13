@@ -45,28 +45,32 @@
 #  The final step is to install into the final location, the copy is done
 #  by default.
 
-HANDLED=""
-
 CDPATH=
 
+#  Environment
 HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
 TARGET=$HOST
-MODULES=
+TARGET_SPECIFIED=no
+
+#  General script setup
 DLOG=on-failure
 DEFS="$PWD"/scripts.d
+JOBS=0
+
+#  Modules to be handled and already handled
+MODULES=
+HANDLED=""
+
+#  Actions setup
 PURGE=no
 NSTEPS=
-TARGET_SPECIFIED=no
-JOBS=0
-TARVERSION=
 PREFIX=
+DEFAULT_PREFIX=yes
 DOINSTALL=yes
 DOUPDATE=no
 DOARCHIVE=no
-DEFAULT_PREFIX=yes
 DEPS=no
 ISOOT=no
-
 STEPS="setup config build install"
 
 ############################## fn-exists
@@ -333,7 +337,7 @@ function handle-module()
 
     #  If purge is asked, first remove current build structure
 
-    if [ $PURGE = yes -o $PURGE = only -o ! -z "$TARVERSION" ]; then
+    if [ $PURGE = yes -o $PURGE = only ]; then
 	ilog build Purging $module
         [ -d $BDIR/$module ] &&
             cd $BDIR/$module &&
