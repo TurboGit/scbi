@@ -20,14 +20,18 @@ function mingw-header-out-of-tree()
     echo true
 }
 
+function mingw-header-env()
+{
+    no-target-env
+}
+
 function mingw-header-config()
 {
     PREFIX=$1
     TARGET=$2
 
-    no-target-env &&
-        ../src/mingw-w64-headers/configure \
-            --prefix=$PREFIX/$TARGET --build=$TARGET
+    ../src/mingw-w64-headers/configure \
+        --prefix=$PREFIX/$TARGET --build=$TARGET
 }
 
 function mingw-header-build()
@@ -35,7 +39,7 @@ function mingw-header-build()
     PREFIX=$1
     TARGET=$2
 
-    no-target-env && make -j6
+    make -j6
 }
 
 function mingw-header-install()
@@ -43,7 +47,7 @@ function mingw-header-install()
     PREFIX=$1
     TARGET=$2
 
-    no-target-env && make install &&
+    make install &&
         # install into the partial gcc compiler too
         rsync -a ../install/. $BDIR/pgcc/install/
 }

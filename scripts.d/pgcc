@@ -10,10 +10,15 @@ function pgcc-version()
     INST=$BDIR/pgcc/install/$TARGET/bin
 
     if [ -f $INST/$TARGET-gcc ]; then
-        return $VERSION_OK=9999
+        return $VERSION_OK
     else
         return $VERSION_ERROR
     fi
+}
+
+function pgcc-env()
+{
+    system-compiler
 }
 
 function pgcc-setup()
@@ -31,15 +36,11 @@ function pgcc-config()
     PREFIX=$1
     TARGET=$2
 
-    (
-        system-compiler
-
-        CFLAGS="-O1" $BDIR/gnat/src/configure \
-              --target=$TARGET --prefix=$PREFIX/$TARGET --host=$HOST \
-	      --enable-thread=win32 --disable-nls --disable-multilib \
-              --disable-libada --disable-sjlj-exceptions \
-              --enable-languages=c
-    )
+    CFLAGS="-O1" $BDIR/gnat/src/configure \
+          --target=$TARGET --prefix=$PREFIX/$TARGET --host=$HOST \
+	  --enable-thread=win32 --disable-nls --disable-multilib \
+          --disable-libada --disable-sjlj-exceptions \
+          --enable-languages=c
 }
 
 function pgcc-build()
@@ -47,28 +48,20 @@ function pgcc-build()
     PREFIX=$1
     TARGET=$2
 
-    (
-	system-compiler
+    # The make will fail, but we install the partial C compiler
+    # which is sufficient to build the MingW runtime.
 
-        # The make will fail, but we install the partial C compiler
-        # which is sufficient to build the MingW runtime.
-
-	make -j2
-    )
+    make -j2
 
     return 0
 }
 
 function pgcc-install()
 {
-   (
-	system-compiler
+    # The make will fail, but we install the partial C compiler
+    # which is sufficient to build the MingW runtime.
 
-        # The make will fail, but we install the partial C compiler
-        # which is sufficient to build the MingW runtime.
-
-	make -k install
-   )
+    make -k install
 
    return 0
 }

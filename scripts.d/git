@@ -5,16 +5,17 @@ function git-vcs()
     echo git://git.kernel.org/pub/scm/git/git.git
 }
 
+function git-env()
+{
+    system-compiler
+}
+
 function git-config()
 {
     PREFIX=$1
     TARGET=$2
 
-    (
-        system-compiler
-
-        make configure && ./configure --prefix=$PREFIX CFLAGS="-O2"
-    )
+    make configure && ./configure --prefix=$PREFIX CFLAGS="-O2"
 }
 
 function git-build()
@@ -22,12 +23,7 @@ function git-build()
     PREFIX=$1
     TARGET=$2
 
-    (
-        system-compiler
-
-        make -j6 PREFIX=$PREFIX all doc
-
-    )
+    make -j6 PREFIX=$PREFIX all doc
 }
 
 function git-install()
@@ -35,12 +31,8 @@ function git-install()
     PREFIX=$1
     TARGET=$2
 
-    (
-        system-compiler
-
-        make PREFIX=$PREFIX install install-doc &&
-            sudo cp contrib/completion/git-completion.bash $PREFIX/etc/
-    )
+    make PREFIX=$PREFIX install install-doc &&
+        sudo cp contrib/completion/git-completion.bash $PREFIX/etc/
 }
 
 function git-prefix()

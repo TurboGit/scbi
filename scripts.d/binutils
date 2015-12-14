@@ -10,6 +10,11 @@ function binutils-out-of-tree()
     echo true
 }
 
+function binutils-env()
+{
+    system-compiler
+}
+
 function binutils-version()
 {
     PREFIX=$1
@@ -35,7 +40,6 @@ function binutils-config()
 
     CONF_OPT="--prefix=$PREFIX --disable-multilib --disable-gdb"
 
-    no-target-env &&
     if [ $HOST == $TARGET ]; then
 	../src/configure --build=$HOST $CONF_OPT
     else
@@ -48,7 +52,7 @@ function binutils-build()
     PREFIX=$1
     TARGET=$2
 
-    no-target-env && make -j6
+    make -j6
 }
 
 function binutils-install()
@@ -56,7 +60,7 @@ function binutils-install()
     PREFIX=$1
     TARGET=$2
 
-    no-target-env && make install &&
+    make install &&
         if [ $HOST != $TARGET ]; then
             # install into the partial gcc compiler too
             mkdir -p $BDIR/pgcc/install/

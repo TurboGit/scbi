@@ -10,6 +10,11 @@ function darktable-out-of-tree()
     echo true
 }
 
+function darktable-env()
+{
+    system-compiler
+}
+
 function darktable-config()
 {
     PREFIX=$1
@@ -22,13 +27,9 @@ function darktable-config()
         -DGPHOTO2_PORT_LIBRARY=$GINST/lib/libgphoto2_port.so"
     fi
 
-    (
-        system-compiler
-
-        cmake ../src -DCMAKE_BUILD_TYPE=Release $GPOPTS \
-	      -DCMAKE_INSTALL_PREFIX=$PREFIX \
-	      -DINSTALL_IOP_EXPERIMENTAL=On
-    )
+    cmake ../src -DCMAKE_BUILD_TYPE=Release $GPOPTS \
+	  -DCMAKE_INSTALL_PREFIX=$PREFIX \
+	  -DINSTALL_IOP_EXPERIMENTAL=On
 }
 
 function darktable-build()
@@ -36,11 +37,7 @@ function darktable-build()
     PREFIX=$1
     TARGET=$2
 
-    (
-        system-compiler
-
-        make -j4
-    )
+    make -j4
 }
 
 function darktable-install()
@@ -48,11 +45,7 @@ function darktable-install()
     PREFIX=$1
     TARGET=$2
 
-    (
-        system-compiler
-
-        make install
-    )
+    make install
 }
 
 function darktable-prefix()

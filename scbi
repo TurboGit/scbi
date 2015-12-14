@@ -24,6 +24,10 @@
 #                      source module handled by this script or a distrib
 #                      package. each module is <name>:<version>
 #
+#    <module>-env      parameter: $PREFIX $TARGET, return NONE
+#                      set environment to use when calling the routines
+#                      (setup, config, build, install, tests).
+#
 #    <module>-setup    parameter: $PREFIX $TARGET, return NONE
 #                      to setup build structure (optional)
 #
@@ -370,143 +374,155 @@ function handle-module()
     ilog build Building $module for target $TARGET | tee -a $log
     ilog build steps : $STEPS | tee -a $log
 
-    #  Log current enviroment
+    #  Set module environment if defined
 
-    env > $LOGS/$TARGET-$module-env.log
-    echo "===============================================" \
-	>> $LOGS/$TARGET-$module-env.log
-    gnat ls -v >> $LOGS/$TARGET-$module-env.log 2> /dev/null
-    which gcc >> $LOGS/$TARGET-$module-env.log 2> /dev/null
+    (
+        fn-exists $module-env
 
-    # We need to remove the link/sources to ensure proper setting by the module
-
-    [ -d $BDIR/$module ] && cd $BDIR/$module && rm -fr src local-vcs
-
-    #  If building from tarball, extract it now
-
-    if [ ! -z "$version" -a "$version" != "dev" -a -z "$branch" ]; then
-        fn-exists $module-tar
-
-        if [[ ! $? = 0 ]]; then
-            echo "error: $module-tar function not defined, cannot get tarball"
-            exit 1
+        if [ $? = 0 ]; then
+            $module-env $BDIR/$module/build/install $TARGET
         fi
 
-        if [ $DOUPDATE = yes -o ! -d tarsrc ]; then
-	    ilog build get sources from tar
+        #  Log module enviroment
 
-            vid=$(get-tar $module $version >> $log 2>&1)
+        env > $LOGS/$TARGET-$module-env.log
+        echo "===============================================" \
+	     >> $LOGS/$TARGET-$module-env.log
+        gnat ls -v >> $LOGS/$TARGET-$module-env.log 2> /dev/null
+        which gcc >> $LOGS/$TARGET-$module-env.log 2> /dev/null
+
+        #  We need to remove the link/sources to ensure proper setting by
+        #  the module.
+
+        [ -d $BDIR/$module ] && cd $BDIR/$module && rm -fr src local-vcs
+
+        #  If building from tarball, extract it now
+
+        if [ ! -z "$version" -a "$version" != "dev" -a -z "$branch" ]; then
+            fn-exists $module-tar
 
             if [[ ! $? = 0 ]]; then
+                echo "error: $module-tar function not defined, cannot get tarball"
                 exit 1
             fi
 
-            #  Compute and store the version id of the sources + compiler.
-            #  That is when the compiler is changed when want to rebuild the
-            #  software.
-            get-build-id $PREFIX $TARGET $vid > vid
-        fi
+            if [ $DOUPDATE = yes -o ! -d tarsrc ]; then
+	        ilog build get sources from tar
 
-        # We set the link for the source so that no module will have to do it
-
-        ln -s tarsrc src
-    else
-        # Get sources from repository
-
-        fn-exists $module-vcs
-
-        if [[ $? = 0 ]]; then
-            vcs=( $($module-vcs) )
-
-            if [ $DOUPDATE = yes -o ! -d vcs ]; then
-	        ilog build get sources from ${vcs[0]}
-
-                get-vcs ${vcs[0]} ${vcs[1]} $module $version
+                vid=$(get-tar $module $version >> $log 2>&1)
 
                 if [[ ! $? = 0 ]]; then
                     exit 1
                 fi
-            fi
-
-            if [ "$version" = "dev" -a -d $GREPO/$module ]; then
-                ln -s $GREPO/$module local-vcs
 
                 #  Compute and store the version id of the sources + compiler.
                 #  That is when the compiler is changed when want to rebuild
                 #  the software.
-
-                vcs-build-id $PREFIX $TARGET $(pwd)/local-vcs > build-id
-            else
-                #  Compute and store the version id of the sources + compiler.
-                #  That is when the compiler is changed when want to rebuild
-                #  the software.
-
-                vcs-build-id $PREFIX $TARGET $(pwd)/vcs > build-id
+                get-build-id $PREFIX $TARGET $vid > vid
             fi
 
-            ln -s vcs src
-        fi
+            #  We set the link for the source so that no module will have to
+            #  do it.
 
-        #  If get-vcs is not defined then the $module-setup routine is in
-        #  charge of creating/populating the src directory.
-    fi
+            ln -s tarsrc src
+        else
+            # Get sources from repository
 
-    #  Check if envrionment is to be done for out-of-tree build
-
-    fn-exists $module-out-of-tree
-
-    [ $? = 0 ] && [ $($module-out-of-tree) = "true" ] && ISOOT=yes
-
-    #  Call module routines
-
-    #  If force build, remove the current build id
-
-    [ $DOFORCE = yes ] && rm -f build/build-id
-
-    #  Check build id, only rebuild if mismatch
-
-    diff -q build-id build/build-id > /dev/null 2>&1
-
-    if [ $? = 0 ]; then
-	ilog build no build needed, version matches
-
-    else
-        for step in $STEPS; do
-            #  Apply module specific step if any
-
-	    fn-exists $module-$step
-
-	    if [[ $? = 0 ]]; then
-	        module-wrapper $BDIR/$module/build/install $module $step \
-                    || exit 1
-	    fi
-
-            #  Apply any generic step (module-setup, module-purge)
-
-            fn-exists module-$step
+            fn-exists $module-vcs
 
             if [[ $? = 0 ]]; then
-                cd $BDIR/$module
+                vcs=( $($module-vcs) )
 
-                if [ $DLOG = yes ]; then
-                    module-$step $BDIR/$module/build/install $TARGET $ISOOT \
-                        | tee $log 2>&1
-                else
-                    module-$step $BDIR/$module/build/install $TARGET $ISOOT \
-                                 >> $log 2>&1
+                if [ $DOUPDATE = yes -o ! -d vcs ]; then
+	            ilog build get sources from ${vcs[0]}
+
+                    get-vcs ${vcs[0]} ${vcs[1]} $module $version
+
+                    if [[ ! $? = 0 ]]; then
+                        exit 1
+                    fi
                 fi
-            fi
-            res=$?
 
-            if [ $res != 0 ]; then
-	        if [ $DLOG = on-failure ]; then
-	            tail -100 $log
-	        fi
-	        elog generic module $step failed with error $res
-	        return $res
+                if [ "$version" = "dev" -a -d $GREPO/$module ]; then
+                    ln -s $GREPO/$module local-vcs
+
+                    #  Compute and store the version id of the sources +
+                    #  compiler. That is when the compiler is changed we
+                    #  want to rebuild the software.
+
+                    vcs-build-id $PREFIX $TARGET $(pwd)/local-vcs > build-id
+                else
+                    #  Compute and store the version id of the sources +
+                    #  compiler. That is when the compiler is changed we
+                    #  want to rebuild the software.
+
+                    vcs-build-id $PREFIX $TARGET $(pwd)/vcs > build-id
+                fi
+
+                ln -s vcs src
             fi
-        done
-    fi
+
+            #  If get-vcs is not defined then the $module-setup routine is in
+            #  charge of creating/populating the src directory.
+        fi
+
+        #  Check if envrionment is to be done for out-of-tree build
+
+        fn-exists $module-out-of-tree
+
+        [ $? = 0 ] && [ $($module-out-of-tree) = "true" ] && ISOOT=yes
+
+        #  Call module routines
+
+        #  If force build, remove the current build id
+
+        [ $DOFORCE = yes ] && rm -f build/build-id
+
+        #  Check build id, only rebuild if mismatch
+
+        diff -q build-id build/build-id > /dev/null 2>&1
+
+        if [ $? = 0 ]; then
+	    ilog build no build needed, version matches
+
+        else
+            for step in $STEPS; do
+                #  Apply module specific step if any
+
+	        fn-exists $module-$step
+
+	        if [[ $? = 0 ]]; then
+	            module-wrapper $BDIR/$module/build/install $module $step \
+                        || exit 1
+	        fi
+
+                #  Apply any generic step (module-setup, module-purge)
+
+                fn-exists module-$step
+
+                if [[ $? = 0 ]]; then
+                    cd $BDIR/$module
+
+                    if [ $DLOG = yes ]; then
+                        module-$step $BDIR/$module/build/install \
+                                     $TARGET $ISOOT | tee $log 2>&1
+                    else
+                        module-$step $BDIR/$module/build/install \
+                                     $TARGET $ISOOT >> $log 2>&1
+                    fi
+                fi
+                res=$?
+
+                if [ $res != 0 ]; then
+	            if [ $DLOG = on-failure ]; then
+	                tail -100 $log
+	            fi
+	            elog generic module $step failed with error $res
+	            return $res
+                fi
+            done
+        fi
+    )
 
     #  Create binary archive if needed
 

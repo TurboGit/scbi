@@ -5,16 +5,17 @@ function lcms2-vcs()
     echo http://github.com/mm2/Little-CMS
 }
 
+function lcms2-env()
+{
+    system-compiler
+}
+
 function lcms2-config()
 {
     PREFIX=$1
     TARGET=$2
 
-    (
-        system-compiler
-
-        ../src/configure --prefix=$dprefix
-    )
+    ../src/configure --prefix=$PREFIX
 }
 
 function lcms2-build()
@@ -22,11 +23,7 @@ function lcms2-build()
     PREFIX=$1
     TARGET=$2
 
-    (
-        system-compiler
-
-        make -j4
-    )
+    make -j4
 }
 
 function lcms2-install()
@@ -34,11 +31,7 @@ function lcms2-install()
     PREFIX=$1
     TARGET=$2
 
-    (
-        system-compiler
-
-        make install
-    )
+    make install
 }
 
 function lcms2-prefix()

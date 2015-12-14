@@ -1,4 +1,12 @@
 
+function mingw-env()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    target-env $BDIR/pgcc/install $TARGET
+}
+
 function mingw-depends()
 {
     echo mingw-header
@@ -31,12 +39,8 @@ function mingw-config()
     PREFIX=$1
     TARGET=$2
 
-    (
-        target-env $BDIR/pgcc/install $TARGET
-
-        ../src/mingw-w64-crt/configure \
-	    --prefix=$PREFIX/$TARGET --host=$TARGET --target=$TARGET
-    )
+    ../src/mingw-w64-crt/configure \
+	--prefix=$PREFIX/$TARGET --host=$TARGET --target=$TARGET
 }
 
 function mingw-build()
@@ -50,11 +54,7 @@ function mingw-build()
     sed -i 's/^winrt32_DATA/#winrt32_DATA/' Makefile
     sed -i 's/^winrt64_DATA/#winrt64_DATA/' Makefile
 
-    (
-        target-env $BDIR/pgcc/install $TARGET
-
-        make -j4
-    )
+    make -j4
 }
 
 function mingw-install()
@@ -62,9 +62,5 @@ function mingw-install()
     PREFIX=$1
     TARGET=$2
 
-    (
-        target-env $BDIR/pgcc/install $TARGET
-
-        make install
-    )
+    make install
 }
