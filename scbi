@@ -44,6 +44,20 @@
 #
 #  The final step is to install into the final location, the copy is done
 #  by default.
+#
+#  Variables:
+#  ----------
+#
+#  ROOT       : default root directory to use
+#  BDIR       : the modules build root directory ($ROOT/builds)
+#  GREPO      : directory with local Git repositories ($ROOT/repositories/git)
+#  SREPO      : directory with local Svn repositories ($ROOT/repositories/svn)
+#  TARBALL    : directory where downloaded tarball are stores ($BDIR/tar)
+#  PREFIX     : directory where module are to be installed ($BDIR/install)
+#  HOST       : current host (gcc -dumpmachine)
+#  TARGET     : current target ($HOST)
+#  DEFS       : where module scripts are to be found
+#               ($PWD/.scripts.d $HOME/.scbi.d)
 
 CDPATH=
 
