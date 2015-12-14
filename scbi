@@ -69,6 +69,7 @@ DEFAULT_PREFIX=yes
 DOINSTALL=yes
 DOUPDATE=no
 DOARCHIVE=no
+DOFORCE=no
 DEPS=no
 ISOOT=no
 STEPS="setup config build install"
@@ -177,6 +178,7 @@ function usage()
     echo "   -a | --archive      build binary archive"
     echo "   -v | --verbose      display full log"
     echo "   -l | --no-log       never display log"
+    echo "   -f | --force        force rebuild, do not check build id"
     echo "   -p | --purge        remove builds directories before building"
     echo "   -P | --purge-only   only remove builds directories"
     echo "   -j | --jobs         max compilation jobs"
@@ -436,7 +438,13 @@ function handle-module()
 
     [ $? = 0 ] && [ $($module-out-of-tree) = "true" ] && ISOOT=yes
 
-    #  Call module routines if needed
+    #  Call module routines
+
+    #  If force build, remove the current build id
+
+    [ $DOFORCE = yes ] && rm -f build/build-id
+
+    #  Check build id, only rebuild if mismatch
 
     diff -q build-id build/build-id > /dev/null 2>&1
 
@@ -514,14 +522,17 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:adSIuscbilpPvrh \
-    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps,archive -- "$@")
+set -- $(getopt -u -o t:adfSIuscbilpPvrh \
+    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps,archive,force -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
 	-h|--help)
             usage
             exit
+	    ;;
+	-f|--force)
+            DOFORCE=yes
 	    ;;
 	-a|--archive)
             DOARCHIVE=yes
