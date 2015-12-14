@@ -66,65 +66,6 @@ function check-tools()
     return $res
 }
 
-############################## module-setup
-
-function module-setup()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local OOT=$3
-
-    if [ -h src -o -d src ]; then
-        rsync -a --delete --exclude=".git" --exclude=".svn" \
-            --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
-            --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --link-dest=../src src/. $TARGET/src
-
-        rm -f build/build build
-        ln -s $TARGET build
-
-        if [ "$OOT" = "yes" ]; then
-            mkdir -p build/build
-        else
-            ln -s src build/build
-        fi
-    fi
-
-    if [ -h local-vcs ]; then
-        rsync -a --delete --exclude=".git" --exclude=".svn" \
-            --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
-            --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --link-dest=../local-vcs local-vcs/. $TARGET/src
-
-        rm -f build/build build
-        ln -s $TARGET build
-
-        if [ "$OOT" = "yes" ]; then
-            mkdir -p build/build
-        else
-            ln -s src build/build
-        fi
-    fi
-}
-
-############################## module-purge
-
-function module-purge()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local OOT=$3
-
-    if [ -h src -o -d src ]; then
-        rsync -aH --exclude=".git" --exclude=".svn" --delete --delete-excluded \
-            --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
-            --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --link-dest=../src src/. $TARGET/src
-    elif [ -d $TARGET ]; then
-	rm -fr $TARGET
-    fi
-}
-
 ############################## display-file
 
 function display-file()
@@ -133,6 +74,24 @@ function display-file()
 
     echo File : $file
     cat $file
+}
+
+############################## get-build-id
+
+function get-build-id()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local vid=$3
+
+    if [ "$HOST" = "$TARGET" ]; then
+        echo -n $(gcc --version | head -1) "$vid" \
+            | md5sum | cut -d' ' -f1
+
+    else
+        echo -n $($TARGET-gcc --version | head -1) "$vid" \
+            | md5sum | cut -d' ' -f1
+    fi
 }
 
 ############################## get-tar

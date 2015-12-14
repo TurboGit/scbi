@@ -164,3 +164,29 @@ function get-vcs()
 
     return $res
 }
+
+# vcs-build-id
+
+function vcs-build-id()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local vcs=$3
+
+    [ ! -d $vcs ] && return 0
+
+    local vid=$(
+        cd $vcs
+
+        if [ -d .git ]; then
+            echo $(git rev-list -1 HEAD)
+        elif [ -d .svn ]; then
+            echo "r$(LANG=C svn info | \
+                  sed -n -e '/^Revision: \([0-9]*\).*$/s//\1/p')"
+        else
+            echo 0
+        fi
+       )
+
+    get-build-id $PREFIX $TARGET $vid
+}

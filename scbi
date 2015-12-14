@@ -374,11 +374,16 @@ function handle-module()
         if [ $DOUPDATE = yes -o ! -d tarsrc ]; then
 	    ilog build get sources from tar
 
-            get-tar $module $version >> $log 2>&1
+            vid=$(get-tar $module $version >> $log 2>&1)
 
             if [[ ! $? = 0 ]]; then
                 exit 1
             fi
+
+            #  Compute and store the version id of the sources + compiler.
+            #  That is when the compiler is changed when want to rebuild the
+            #  software.
+            get-build-id $PREFIX $TARGET $vid > vid
         fi
 
         # We set the link for the source so that no module will have to do it
@@ -404,6 +409,18 @@ function handle-module()
 
             if [ "$version" = "dev" -a -d $GREPO/$module ]; then
                 ln -s $GREPO/$module local-vcs
+
+                #  Compute and store the version id of the sources + compiler.
+                #  That is when the compiler is changed when want to rebuild
+                #  the software.
+
+                vcs-build-id $PREFIX $TARGET $(pwd)/local-vcs > build-id
+            else
+                #  Compute and store the version id of the sources + compiler.
+                #  That is when the compiler is changed when want to rebuild
+                #  the software.
+
+                vcs-build-id $PREFIX $TARGET $(pwd)/vcs > build-id
             fi
 
             ln -s vcs src
@@ -419,42 +436,50 @@ function handle-module()
 
     [ $? = 0 ] && [ $($module-out-of-tree) = "true" ] && ISOOT=yes
 
-    #  Call module routines
+    #  Call module routines if needed
 
-    for step in $STEPS; do
-        #  Apply module specific step if any
+    diff -q build-id build/build-id > /dev/null 2>&1
 
-	fn-exists $module-$step
+    if [ $? = 0 ]; then
+	ilog build no build needed, version matches
 
-	if [[ $? = 0 ]]; then
-	    module-wrapper $BDIR/$module/build/install $module $step || exit 1
-	fi
+    else
+        for step in $STEPS; do
+            #  Apply module specific step if any
 
-        #  Apply any generic step (module-setup, module-purge)
+	    fn-exists $module-$step
 
-        fn-exists module-$step
-
-        if [[ $? = 0 ]]; then
-            cd $BDIR/$module
-
-            if [ $DLOG = yes ]; then
-                module-$step $BDIR/$module/build/install $TARGET $ISOOT \
-                    | tee $log 2>&1
-            else
-                module-$step $BDIR/$module/build/install $TARGET $ISOOT \
-                    >> $log 2>&1
-            fi
-        fi
-        res=$?
-
-        if [ $res != 0 ]; then
-	    if [ $DLOG = on-failure ]; then
-	        tail -100 $log
+	    if [[ $? = 0 ]]; then
+	        module-wrapper $BDIR/$module/build/install $module $step \
+                    || exit 1
 	    fi
-	    elog generic module $step failed with error $res
-	    return $res
-        fi
-    done
+
+            #  Apply any generic step (module-setup, module-purge)
+
+            fn-exists module-$step
+
+            if [[ $? = 0 ]]; then
+                cd $BDIR/$module
+
+                if [ $DLOG = yes ]; then
+                    module-$step $BDIR/$module/build/install $TARGET $ISOOT \
+                        | tee $log 2>&1
+                else
+                    module-$step $BDIR/$module/build/install $TARGET $ISOOT \
+                                 >> $log 2>&1
+                fi
+            fi
+            res=$?
+
+            if [ $res != 0 ]; then
+	        if [ $DLOG = on-failure ]; then
+	            tail -100 $log
+	        fi
+	        elog generic module $step failed with error $res
+	        return $res
+            fi
+        done
+    fi
 
     #  Create binary archive if needed
 
