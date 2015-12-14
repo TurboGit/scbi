@@ -65,6 +65,7 @@ CDPATH=
 HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
 TARGET=$HOST
 TARGET_SPECIFIED=no
+ENV_NAME=
 
 #  General script setup
 DLOG=on-failure
@@ -178,24 +179,25 @@ function usage()
     echo "   modulen  <name>:dev           build from user's repository current branch"
     echo "   modulen  <name>               build from repository main branch"
     echo ""
-    echo "   -h | --help         this help message"
-    echo "   -t | --target name  specify the target to build for ($TARGET)"
-    echo "   -S | --no-setup     skip setup"
-    echo "   -I | --no-install   skip install"
-    echo "   -u | --update       do update"
-    echo "   -s | --setup        do setup"
-    echo "   -c | --config       do config"
-    echo "   -b | --build        do build"
-    echo "   -i | --install      do install"
-    echo "   -r | --tests        run the testsuite"
-    echo "   -d | --deps         check/build dependencies"
-    echo "   -a | --archive      build binary archive"
-    echo "   -v | --verbose      display full log"
-    echo "   -l | --no-log       never display log"
-    echo "   -f | --force        force rebuild, do not check build id"
-    echo "   -p | --purge        remove builds directories before building"
-    echo "   -P | --purge-only   only remove builds directories"
-    echo "   -j | --jobs         max compilation jobs"
+    echo "   -h | --help          this help message"
+    echo "   -e | --env=<name>    environment file ~/.scbi-<name>"
+    echo "   -t | --target=<name> specify the target to build for ($TARGET)"
+    echo "   -S | --no-setup      skip setup"
+    echo "   -I | --no-install    skip install"
+    echo "   -u | --update        do update"
+    echo "   -s | --setup         do setup"
+    echo "   -c | --config        do config"
+    echo "   -b | --build         do build"
+    echo "   -i | --install       do install"
+    echo "   -r | --tests         run the testsuite"
+    echo "   -d | --deps          check/build dependencies"
+    echo "   -a | --archive       build binary archive"
+    echo "   -v | --verbose       display full log"
+    echo "   -l | --no-log        never display log"
+    echo "   -f | --force         force rebuild, do not check build id"
+    echo "   -p | --purge         remove builds directories before building"
+    echo "   -P | --purge-only    only remove builds directories"
+    echo "   -j | --jobs=<n>      max compilation jobs"
 
     echo
     echo -n modules:
@@ -536,8 +538,8 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:adfSIuscbilpPvrh \
-    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps,archive,force -- "$@")
+set -- $(getopt -u -o t:adefSIuscbilpPvrh \
+    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps,archive,force,env: -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -550,6 +552,14 @@ while [ $# -gt 0 ]; do
 	    ;;
 	-a|--archive)
             DOARCHIVE=yes
+	    ;;
+	-e|--env)
+            ENV_NAME="-$2"
+            if [ ! -f $HOME/.scbi${ENV_NAME} ]; then
+                echo "error: scbi environment $2 not found"
+                exit 1
+            fi
+            shift
 	    ;;
 	-t|--target)
 	    TARGET=$2; shift
@@ -614,23 +624,25 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+#  Nothing to build
+
+[ "$MODULES" = "" ] && usage
+
+#  Load user's settings if any
+
+[ -f $HOME/.scbi${ENV_NAME} ] && source $HOME/.scbi${ENV_NAME}
+
+#  Load module definitions
+
 [ ! -d "$DEFS" ] && DEFS=$HOME/.scbi.d
 
 [ ! -d "$DEFS" ] && echo $0: cannot find module definition files && exit 1
-
-rm -f "$DEFS"/*~
-
-[ "$MODULES" = "" ] && usage
 
 #  If we have explicitly specified some steps, use them
 
 if [ "$NSTEPS" != "" ]; then
     STEPS=$NSTEPS
 fi
-
-#  Load user's settings if any
-
-[ -f $HOME/.scbi ] && source $HOME/.scbi
 
 #  Then load any global settings, not overriding user's ones
 
