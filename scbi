@@ -36,6 +36,9 @@
 #    <module>-install  parameter: $PREFIX $TARGET, return NONE
 #                      to install (in $PREFIX)
 #
+#    <module>-prefix   parameter: $PREFIX $TARGET, return string
+#                      the directory to install, default $BDIR/install
+#
 #    <module>-tests    parameter: $PREFIX $TARGET, return NONE
 #                      to pass automatic tests
 #
