@@ -165,7 +165,7 @@ function get-vcs()
     return $res
 }
 
-# vcs-build-id
+############################## vcs-build-id
 
 function vcs-build-id()
 {
@@ -179,7 +179,14 @@ function vcs-build-id()
         cd $vcs
 
         if [ -d .git ]; then
-            echo $(git rev-list -1 HEAD)
+            gver=$(git rev-list -1 HEAD)
+
+            git diff --exit-code --quiet HEAD
+
+            [[ $? == 1 ]] && gdif=$(git diff HEAD | md5sum | cut -d' ' -f1)
+
+            echo $gver$gdif
+
         elif [ -d .svn ]; then
             echo "r$(LANG=C svn info | \
                   sed -n -e '/^Revision: \([0-9]*\).*$/s//\1/p')"
