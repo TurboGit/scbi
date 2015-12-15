@@ -522,7 +522,7 @@ function handle-module()
                 fi
             done
         fi
-    )
+    ) || exit 1
 
     #  Create binary archive if needed
 
