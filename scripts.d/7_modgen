@@ -65,5 +65,21 @@ function module-install()
     local TARGET=$2
     local OOT=$3
 
+    if [ ! -f build-id ]; then
+        #  No build-id, this means that the sources have been installed by
+        #  the <module>-setup most probably. In this case just compute the
+        #  build-id to be the md5sum of all sources available in src directory.
+        #  If this directory does not exists, let's build a md5sum of the
+        #  current date/time as a build-id. In this case the build will always
+        #  been triggered.
+
+        if [ -d src ]; then
+            vid=$(cat src/* | md5sum | cut -d' ' -f1)
+            get-build-id $PREFIX $TARGET $vid > build-id
+        else
+            echo -n $(date) | md5sum | cut -d' ' -f1 > build-id
+        fi
+    fi
+
     cp build-id build/
 }
