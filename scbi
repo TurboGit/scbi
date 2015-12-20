@@ -364,9 +364,7 @@ function handle-module()
 
     if [ $PURGE = yes -o $PURGE = only ]; then
 	ilog build Purging $module
-        [ -d $BDIR/$module ] &&
-            cd $BDIR/$module &&
-            module-purge $BDIR/$module/install $TARGET
+        [ -d $BDIR/$module ] && module-purge $BDIR/$module $TARGET
     fi
 
     [ $PURGE = only ] && exit 0

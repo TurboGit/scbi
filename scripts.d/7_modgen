@@ -47,13 +47,8 @@ function module-purge()
     local TARGET=$2
     local OOT=$3
 
-    if [ -h src -o -d src ]; then
-        rsync -aH --exclude=".git" --exclude=".svn" --delete --delete-excluded \
-            --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
-            --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --link-dest=../src src/. $TARGET/src
-    elif [ -d $TARGET ]; then
-	rm -fr $TARGET
+    if [ -d $PREFIX/$TARGET/build ]; then
+        rm -fr $PREFIX/$TARGET/build
     fi
 }
 
