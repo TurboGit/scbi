@@ -27,9 +27,12 @@ function darktable-config()
         -DGPHOTO2_PORT_LIBRARY=$GINST/lib/libgphoto2_port.so"
     fi
 
-    cmake ../src -DCMAKE_BUILD_TYPE=Release $GPOPTS \
-	  -DCMAKE_INSTALL_PREFIX=$PREFIX \
-	  -DINSTALL_IOP_EXPERIMENTAL=On
+    #  needed to let cmake think that we are building from Git tree
+    #  this forces the use of -Werror
+    mkdir ../src/.git
+
+    cmake -DCMAKE_BUILD_TYPE=Release $GPOPTS \
+	  -DCMAKE_INSTALL_PREFIX=$PREFIX ../src
 }
 
 function darktable-build()
