@@ -49,6 +49,7 @@ function module-purge()
 
     if [ -d $PREFIX/$TARGET/build ]; then
         rm -fr $PREFIX/$TARGET/build
+        rm -fr $PREFIX/$TARGET/build-id
     fi
 }
 
