@@ -38,6 +38,7 @@ function no-target-env()
 function gpython-env()
 {
     export PATH=/opt/gpython/bin:$PATH
+    export PYTHONPATH=/usr/lib/python2.7/dist-packages:$PYTHONPATH
 }
 
 ############################## system-compiler
