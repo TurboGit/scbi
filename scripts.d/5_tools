@@ -84,7 +84,7 @@ function get-build-id()
     local TARGET=$2
     local vid=$3
 
-    if [ "$HOST" = "$TARGET" ]; then
+    if [ "$HOST" = "$TARGET" -o "$(which $TARGET-gcc)" = "" ]; then
         echo -n $(gcc --version | head -1) "$vid" \
             | md5sum | cut -d' ' -f1
 
