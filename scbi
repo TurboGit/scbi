@@ -139,6 +139,14 @@ function module-wrapper()
             target-env $BDIR/install $TARGET
         fi
 
+        #  And setup any module environment
+
+        fn-exists $module-env
+
+        if [ $? = 0 ]; then
+            $module-env $BDIR/$module/build/install $TARGET
+        fi
+
         #  Go to build directory
 
         if [ "$step" = "setup" ]; then
