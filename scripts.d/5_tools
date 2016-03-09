@@ -110,7 +110,7 @@ function get-tar()
 
     #  The tarball is not present, try downloading it
 
-    if [ ! -f $TARBALL/$tarsrc && "$tarcp" != "none" && $tarurl != "" ]; then
+    if [ ! -f $TARBALL/$tarsrc && "$tarcp" != "none" && "$tarurl" != "none" ]; then
         $tarcp $tarurl/$tarsrc $TARBALL/ > $log 2>&1
 
         [[ ! $? = 0 ]] &&
