@@ -412,14 +412,26 @@ function handle-module()
                 exit 1
             fi
 
-            if [ $DOUPDATE = yes -o ! -d tarsrc ]; then
+            #  We need to extract the tarball if the version do not match
+            #  the one currently extracted.
+
+            if [ -f tarsrc-version ]; then
+                if [ "$(cat tarsrc-version)" != "$version" ]; then
+                    rm -fr tarsrc
+                fi
+            fi
+
+            if [ $DOUPDATE = yes -o ! -d tarsrc  ]; then
 	        ilog build get sources from tar
 
                 vid=$(get-tar $module $version >> $log 2>&1)
 
                 if [[ ! $? = 0 ]]; then
+                    ilog build cannot get/find tar sources
                     exit 1
                 fi
+
+                echo -n $version > tarsrc-version
 
                 #  Compute and store the version id of the sources + compiler.
                 #  That is when the compiler is changed when want to rebuild
