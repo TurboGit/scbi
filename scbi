@@ -133,7 +133,7 @@ function module-wrapper()
     (
         cd $BDIR/$module >> $log 2>&1
 
-        #  Set cross-env if needed
+        #  Set cross-env is needed
 
         if [ "$HOST" != "$TARGET" ]; then
             target-env $BDIR/install $TARGET
