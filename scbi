@@ -478,6 +478,10 @@ function handle-module()
                 fi
 
                 ln -s vcs src
+
+            else
+                #  No VCS, not TAR, just rebuild the sources
+                get-build-id $PREFIX $TARGET "$(date)" > build-id
             fi
 
             #  If get-vcs is not defined then the $module-setup routine is in
