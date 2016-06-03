@@ -436,7 +436,7 @@ function handle-module()
                 #  Compute and store the version id of the sources + compiler.
                 #  That is when the compiler is changed when want to rebuild
                 #  the software.
-                get-build-id $PREFIX $TARGET $vid > vid
+                get-build-id $PREFIX $TARGET $vid > build-id
             fi
 
             #  We set the link for the source so that no module will have to
