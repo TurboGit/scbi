@@ -380,6 +380,10 @@ function handle-module()
     ilog build Building $module for target $TARGET | tee -a $log
     ilog build steps : $STEPS | tee -a $log
 
+    #  Create the build root directory if needed
+
+    [ -d $BDIR/$module/$TARGET ] || mkdir $BDIR/$module/$TARGET
+
     #  Set module environment if defined
 
     (
