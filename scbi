@@ -78,6 +78,8 @@ ENV_NAME=
 DLOG=on-failure
 DEFS="$PWD"/scripts.d
 JOBS=0
+MJOBS=4
+# MJOBS is for makefiles
 
 #  Modules to be handled and already handled
 MODULES=
