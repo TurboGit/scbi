@@ -97,6 +97,7 @@ DOFORCE=no
 DEPS=no
 ISOOT=no
 STEPS="setup config build install"
+BUILD_TARGET=
 
 ############################## fn-exists
 
@@ -130,7 +131,13 @@ function module-wrapper()
 
     log=$LOGS/$TARGET-$module-$step.log
 
-    ilog $module $step starting
+    if [ $step = "build" -a "$BUILD_TARGET" != "" ]; then
+        mstep=build-$BUILD_TARGET
+    else
+        mstep=$step
+    fi
+
+    ilog $module $mstep starting
 
     (
         cd $BDIR/$module >> $log 2>&1
@@ -162,7 +169,7 @@ function module-wrapper()
         if [[ $DLOG = yes || "$step" = "tests" ]]; then
 	    $module-$step $PREFIX $TARGET | tee $log 2>&1
         else
-	    $module-$step $PREFIX $TARGET >> $log 2>&1
+	    $module-$mstep $PREFIX $TARGET >> $log 2>&1
         fi
         res=$?
 
@@ -172,10 +179,10 @@ function module-wrapper()
 	    if [ $DLOG = on-failure ]; then
 	        tail -100 $log
 	    fi
-	    elog $module $step failed with error $res
+	    elog $module $mstep failed with error $res
 	    return $res
         else
-	    ilog $module $step completed
+	    ilog $module $mstep completed
 	    return 0
         fi
     )
@@ -586,7 +593,7 @@ function handle-module()
 ############################## body
 
 set -- $(getopt -u -o t:adefSIuscbilpPvrh \
-    -l target:,no-setup,no-install,update,setup,config,build,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps,archive,force,env: -- "$@")
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps,archive,force,env: -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -629,6 +636,9 @@ while [ $# -gt 0 ]; do
 	    ;;
 	-b|--build)
 	    NSTEPS="$NSTEPS build"
+	    ;;
+	--build-target)
+            BUILD_TARGET=$2; shift
 	    ;;
 	-d|--deps)
 	    DEPS=yes
