@@ -6,36 +6,41 @@ function module-setup()
     local TARGET=$2
     local OOT=$3
 
+    # if module-src soft link exists use it to copy the module sources into
+    # the pointed location. This is used when multiple modules are used
+    # together to create the set of source for the build. In this case we do
+    # not want to delete sources in rsync.
+
+    if [ -h module-src ]; then
+        SRCDIR=module-src
+        OPT=
+    else
+        SRCDIR=$TARGET/src
+        OPT=--delete
+    fi
+
     if [ -h src -o -d src ]; then
-        rsync -a --delete --exclude=".git" --exclude=".svn" \
+        rsync -a $OPT --exclude=".git" --exclude=".svn" \
             --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
             --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --link-dest=../src src/. $TARGET/src
+            --link-dest=../src src/. $SRCDIR/
 
-        rm -f build/build build
-        ln -s $TARGET build
-
-        if [ "$OOT" = "yes" ]; then
-            mkdir -p build/build
-        else
-            ln -s src build/build
-        fi
     fi
 
     if [ -h local-vcs ]; then
-        rsync -a --delete --exclude=".git" --exclude=".svn" \
+        rsync -a $OPT --exclude=".git" --exclude=".svn" \
             --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
             --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --link-dest=../local-vcs local-vcs/. $TARGET/src
+            --link-dest=../local-vcs local-vcs/. $SRCDIR/
+    fi
 
-        rm -f build/build build
-        ln -s $TARGET build
+    rm -f build/build build
+    ln -s $TARGET build
 
-        if [ "$OOT" = "yes" ]; then
-            mkdir -p build/build
-        else
-            ln -s src build/build
-        fi
+    if [ "$OOT" = "yes" ]; then
+        mkdir -p build/build
+    else
+        ln -s src build/build
     fi
 }
 
