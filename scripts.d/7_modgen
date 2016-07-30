@@ -10,6 +10,9 @@ function module-setup()
     # the pointed location. This is used when multiple modules are used
     # together to create the set of source for the build. In this case we do
     # not want to delete sources in rsync.
+    #
+    # Note: we do exclude gcc-interface directory here to avoid overwriting
+    #       the gcc-interface sources from GNAT.
 
     if [ -h module-src ]; then
         SRCDIR=module-src
@@ -23,6 +26,7 @@ function module-setup()
         rsync -a $OPT --exclude=".git" --exclude=".svn" \
             --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
             --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
+            --exclude "gcc-interface" \
             --link-dest=../src src/. $SRCDIR/
 
     fi
@@ -31,6 +35,7 @@ function module-setup()
         rsync -a $OPT --exclude=".git" --exclude=".svn" \
             --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
             --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
+            --exclude "gcc-interface" \
             --link-dest=../local-vcs local-vcs/. $SRCDIR/
     fi
 

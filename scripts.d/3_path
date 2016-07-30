@@ -2,7 +2,7 @@
 # default GNAT path
 
 export PATH=$PREFIX/bin:$PATH
-export LIBRARY_PATH=/usr/lib/$HOST:/usr/lib${LIBRARY_PATH:+:$LIBRARY_PATH}
+export LIBRARY_PATH=/usr/lib/$HOST:/lib/$HOST:/usr/lib${LIBRARY_PATH:+:$LIBRARY_PATH}
 export C_INCLUDE_PATH=/usr/include/$HOST:/usr/include${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
 export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}
 
@@ -27,8 +27,9 @@ function target-env()
 
 function no-target-env()
 {
+    unset CPLUS_INCLUDE_PATH
+
     export C_INCLUDE_PATH=$O_C_INCLUDE_PATH
-    export CPLUS_INCLUDE_PATH=$O_CPLUS_INCLUDE_PATH
     export LIBRARY_PATH=$O_LIBRARY_PATH
     export ADA_PROJECT_PATH=$PREFIX/lib/gnat${ADA_PROJECT_PATH:+:$ADA_PROJECT_PATH}
 }
