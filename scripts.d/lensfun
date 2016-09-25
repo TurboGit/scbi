@@ -1,0 +1,40 @@
+
+function lensfun-vcs()
+{
+    echo git
+    echo https://github.com/lensfun/lensfun.git
+}
+
+function lensfun-env()
+{
+    system-compiler
+}
+
+function lensfun-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX ../src
+}
+
+function lensfun-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -j4
+}
+
+function lensfun-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make install
+}
+
+function lensfun-prefix()
+{
+    echo /opt/lensfun
+}
