@@ -584,8 +584,9 @@ function handle-module()
 
     if [ "$DOINSTALL" = "yes" -a -d $BDIR/$module/build/install ]; then
 	ilog build copy install into ..${IDIR/$BDIR/}
+        $SUDO mkdir -p $IDIR/
         $SUDO rsync -a $BDIR/$module/build/install/. $IDIR/. > $log 2>&1
-    fi
+    fi || elog fail to copy to $IDIR
 
     echo
 }
