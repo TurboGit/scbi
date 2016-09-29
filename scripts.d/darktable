@@ -33,12 +33,11 @@ function darktable-config()
         -DLENSFUN_LIBRARY=$LINST/lib/liblensfun.so.1"
     fi
 
-    #  needed to let cmake think that we are building from Git tree
-    #  this forces the use of -Werror
-    mkdir ../src/.git
-
     cmake -DCMAKE_BUILD_TYPE=Release $GPOPTS \
-	  -DCMAKE_INSTALL_PREFIX=$PREFIX ../src
+      -DCMAKE_INSTALL_PREFIX=$PREFIX \
+          -DCMAKE_CXX_FLAGS_RELEASE="-Werror -O3 -DNDEBUG" \
+          -DCMAKE_C_FLAGS_RELEASE="-Werror -O3 -DNDEBUG" \
+          ../src
 }
 
 function darktable-build()
