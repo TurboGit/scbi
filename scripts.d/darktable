@@ -33,10 +33,8 @@ function darktable-config()
         -DLENSFUN_LIBRARY=$LINST/lib/liblensfun.so.1"
     fi
 
-    cmake -DCMAKE_BUILD_TYPE=Release $GPOPTS \
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo $GPOPTS \
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
-          -DCMAKE_CXX_FLAGS_RELEASE="-Werror -O3 -DNDEBUG" \
-          -DCMAKE_C_FLAGS_RELEASE="-Werror -O3 -DNDEBUG" \
           ../src
 }
 
