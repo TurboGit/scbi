@@ -1,6 +1,8 @@
 
+SCRDIR=$(HOME)/.config/scbi
+
 all:
 	cp scbi $(HOME)/bin
-	mkdir -p $(HOME)/.scbi.d
-	rm -f $(HOME)/.scbi.d/*~
-	cp scripts.d/*  $(HOME)/.scbi.d
+	mkdir -p $(SCRDIR)
+	rm -f $(SCRDIR)/*
+	cp scripts.d/*  $(SCRDIR)
