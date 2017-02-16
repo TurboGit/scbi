@@ -64,7 +64,7 @@
 #  HOST       : current host (gcc -dumpmachine)
 #  TARGET     : current target ($HOST)
 #  DEFS       : where module scripts are to be found
-#               ($PWD/.scripts.d $HOME/.config/scbi.d)
+#               ($PWD/.scripts.d $HOME/.config/scbi)
 
 CDPATH=
 
@@ -610,7 +610,7 @@ while [ $# -gt 0 ]; do
 	    ;;
 	-e|--env)
             ENV_NAME="-$2"
-            if [ ! -f $HOME/.config/scbi${ENV_NAME} ]; then
+            if [ ! -f $HOME/.config/scbi/.scbi${ENV_NAME} ]; then
                 echo "error: scbi environment $2 not found"
                 exit 1
             fi
@@ -688,7 +688,8 @@ done
 
 #  Load user's settings if any
 
-[ -f $HOME/.config/scbi${ENV_NAME} ] && source $HOME/.config/scbi${ENV_NAME}
+[ -f $HOME/.config/scbi/.scbi${ENV_NAME} ] &&
+    source $HOME/.config/scbi/.scbi${ENV_NAME}
 
 #  Load module definitions
 
