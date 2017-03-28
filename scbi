@@ -49,6 +49,9 @@
 #  Note that all steps above are optional. And empty module will just do
 #  nothing.
 #
+#  It is possible to build from a tarball, the tar must be placed into the
+#  TARBALL directory.
+#
 #  The final step is to install into the final location, the copy is done
 #  by default.
 #
