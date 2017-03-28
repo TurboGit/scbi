@@ -82,14 +82,17 @@ function get-build-id()
 {
     local PREFIX=$1
     local TARGET=$2
-    local vid="$3"
+    local MODULE=$3
+    local vid="$4"
+
+    local pid=$(cat $PATCHES/$MODULE-*.patch 2>&1 | md5sum | cut -d' ' -f1)
 
     if [ "$HOST" = "$TARGET" -o "$(which $TARGET-gcc)" = "" ]; then
-        echo -n $(gcc --version | head -1) "$vid" \
+        echo -n $(gcc --version | head -1) ",$vid,$pid" \
             | md5sum | cut -d' ' -f1
 
     else
-        echo -n $($TARGET-gcc --version | head -1) "$vid" \
+        echo -n $($TARGET-gcc --version | head -1) ",$vid,$pid" \
             | md5sum | cut -d' ' -f1
     fi
 }

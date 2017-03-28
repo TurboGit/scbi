@@ -52,6 +52,13 @@
 #  It is possible to build from a tarball, the tar must be placed into the
 #  TARBALL directory.
 #
+#  After the sources are setup, it is possible to apply some local patches.
+#  the patches must be placed into the PATCHES directory and named:
+#
+#     <module>-<numeric-id>-<some-name>.patch
+#
+#  patches are applied using <numeric-id> ordering.
+#
 #  The final step is to install into the final location, the copy is done
 #  by default.
 #
@@ -484,20 +491,22 @@ function handle-module()
                     #  compiler. That is when the compiler is changed we
                     #  want to rebuild the software.
 
-                    vcs-build-id $PREFIX $TARGET $(pwd)/local-vcs > build-id
+                    vcs-build-id $PREFIX $TARGET $module \
+                                 $(pwd)/local-vcs > build-id
                 else
                     #  Compute and store the version id of the sources +
                     #  compiler. That is when the compiler is changed we
                     #  want to rebuild the software.
 
-                    vcs-build-id $PREFIX $TARGET $(pwd)/vcs > build-id
+                    vcs-build-id $PREFIX $TARGET $module \
+                                 $(pwd)/vcs > build-id
                 fi
 
                 ln -s vcs src
 
             else
                 #  No VCS, not TAR, just rebuild the sources
-                get-build-id $PREFIX $TARGET "$(date)" > build-id
+                get-build-id $PREFIX $TARGET $module "$(date)" > build-id
             fi
 
             #  If get-vcs is not defined then the $module-setup routine is in
@@ -543,10 +552,10 @@ function handle-module()
 
                     if [ $DLOG = yes ]; then
                         module-$step $BDIR/$module/build/install \
-                                     $TARGET $ISOOT | tee $log 2>&1
+                                     $module $TARGET $ISOOT | tee $log 2>&1
                     else
                         module-$step $BDIR/$module/build/install \
-                                     $TARGET $ISOOT >> $log 2>&1
+                                     $module $TARGET $ISOOT >> $log 2>&1
                     fi
                 fi
                 res=$?

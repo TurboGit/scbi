@@ -8,4 +8,5 @@
         PREFIX=$(dirname $(dirname $(which gnatls)))
     fi
 [ -z $TARBALL ] && TARBALL=$BDIR/.tar
+[ -z $PATCHES ] && PATCHES=$BDIR/.patches
 [ -z $GTKV ] && GTKV=3.0

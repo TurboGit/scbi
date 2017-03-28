@@ -3,8 +3,9 @@
 function module-setup()
 {
     local PREFIX=$1
-    local TARGET=$2
-    local OOT=$3
+    local MODULE=$2
+    local TARGET=$3
+    local OOT=$4
 
     # if module-src soft link exists use it to copy the module sources into
     # the pointed location. This is used when multiple modules are used
@@ -39,6 +40,20 @@ function module-setup()
             --link-dest=../local-vcs local-vcs/. $SRCDIR/
     fi
 
+    #  If some patches are present, apply them now
+    (
+        cd $SRCDIR
+
+        for patch in $(ls $PATCHES/$MODULE-*.patch | sort); do
+	    ilog apply-patch filename $(basename $patch)
+            patch -p1 < $patch
+            [[ ! $? = 0 ]] && return 1
+        done
+        return 0
+    )
+
+    [[ ! $? = 0 ]] && return 1
+
     rm -f build/build build
     ln -s $TARGET build
 
@@ -47,6 +62,8 @@ function module-setup()
     else
         ln -s src build/build
     fi
+
+    return 0
 }
 
 ############################## module-purge
@@ -55,6 +72,7 @@ function module-purge()
 {
     local PREFIX=$1
     local TARGET=$2
+    local MODULE=$3
     local OOT=$3
 
     if [ -d $PREFIX/$TARGET ]; then
@@ -70,7 +88,8 @@ function module-install()
 {
     local PREFIX=$1
     local TARGET=$2
-    local OOT=$3
+    local MODULE=$3
+    local OOT=$4
 
     if [ ! -f build-id ]; then
         #  No build-id, this means that the sources have been installed by
@@ -82,7 +101,7 @@ function module-install()
 
         if [ -d src ]; then
             vid=$(cat src/* | md5sum | cut -d' ' -f1)
-            get-build-id $PREFIX $TARGET $vid > build-id
+            get-build-id $PREFIX $TARGET $MODULE $vid > build-id
         else
             echo -n $(date) | md5sum | cut -d' ' -f1 > build-id
         fi
