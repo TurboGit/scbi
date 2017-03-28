@@ -425,7 +425,7 @@ function handle-module()
                 exit 1
             fi
 
-            #  We need to extract the tarball if the version do not match
+            #  We need to extract the tarball if the version does not match
             #  the one currently extracted.
 
             if [ -f tarsrc-version ]; then
