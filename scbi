@@ -106,6 +106,7 @@ DOARCHIVE=no
 DOFORCE=no
 DEPS=no
 ISOOT=no
+PATCH=yes
 STEPS="setup config build install"
 BUILD_TARGET=
 
@@ -231,6 +232,7 @@ function usage()
     echo "   -f | --force         force rebuild, do not check build id"
     echo "   -p | --purge         remove builds directories before building"
     echo "   -P | --purge-only    only remove builds directories"
+    echo "   -n | --no-patch      do not apply patches"
     echo "   -j | --jobs=<n>      max compilation jobs"
 
     echo
@@ -605,8 +607,8 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:adefSIuscbilpPvrh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps,archive,force,env: -- "$@")
+set -- $(getopt -u -o t:adefSIuscbilnpPvrh \
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps,archive,force,env,no-patch: -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -671,6 +673,9 @@ while [ $# -gt 0 ]; do
 	    ;;
 	-p|--purge)
 	    PURGE=yes
+	    ;;
+	-n|--no-patch)
+	    PATCH=no
 	    ;;
 	--prefix)
             DEFAULT_PREFIX=no

@@ -41,18 +41,20 @@ function module-setup()
     fi
 
     #  If some patches are present, apply them now
-    (
-        cd $SRCDIR
+    if [ $PATCH == yes ]; then
+        (
+            cd $SRCDIR
 
-        for patch in $(ls $PATCHES/$MODULE-*.patch | sort); do
-	    ilog apply-patch filename $(basename $patch)
-            patch -p1 < $patch
-            [[ ! $? = 0 ]] && return 1
-        done
-        return 0
-    )
+            for patch in $(ls $PATCHES/$MODULE-*.patch | sort); do
+	        ilog apply-patch filename $(basename $patch)
+                patch -p1 < $patch
+                [[ ! $? = 0 ]] && return 1
+            done
+            return 0
+        )
 
-    [[ ! $? = 0 ]] && return 1
+        [[ ! $? = 0 ]] && return 1
+    fi
 
     rm -f build/build build
     ln -s $TARGET build
