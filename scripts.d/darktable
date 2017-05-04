@@ -21,6 +21,12 @@ function darktable-config()
     PREFIX=$1
     TARGET=$2
 
+    # fake build script which want the src dir to be a git repository
+
+    if [ ! -h ../src/.git ]; then
+        ln -s ../../src/.git ../src/.git
+    fi
+
     if [ -d "$GINST" ]; then
         GPOPTS="-DGPHOTO2CONFIG_EXECUTABLE=$GINST/bin/gphoto2-config \
         -DGPHOTO2_INCLUDE_DIR=$GINST/include \
@@ -52,6 +58,8 @@ function darktable-install()
     TARGET=$2
 
     make install
+
+    rm -f ../src/.git
 }
 
 function darktable-prefix()
