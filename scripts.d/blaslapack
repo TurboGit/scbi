@@ -1,0 +1,48 @@
+function blaslapack-tar()
+{
+    echo none
+    echo none
+    echo lapack.tgz
+}
+
+function blaslapack-out-of-tree()
+{
+    echo true
+}
+
+function blaslapack-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ $HOST != $TARGET ]; then
+        COPTS=-DCMAKE_Fortran_COMPILER=$BDIR/install/bin/$TARGET-gfortran
+    fi
+
+    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX $COPTS ../src
+}
+
+function blaslapack-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make PROCESSORS=$JOBS blas lapack
+}
+
+function blaslapack-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ $HOST == $TARGET ]; then
+        TPREFIX=$PREFIX
+        ranlib lib/*.a
+    else
+        TPREFIX=$PREFIX/$TARGET
+        $TARGET-ranlib lib/*.a
+    fi
+
+    mkdir -p $TPREFIX/lib
+    cp lib/*.a $TPREFIX/lib
+}
