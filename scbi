@@ -124,8 +124,8 @@ function check-handled()
     local module=$1
     local res=0
 
-    if [ "${HANDLED/ $module/}" = "$HANDLED" ]; then
-        HANDLED="$HANDLED $module"
+    if [ "${HANDLED/,$module,/}" = "$HANDLED" ]; then
+        HANDLED="$HANDLED,$module,"
         return 0
     else
         return 1
