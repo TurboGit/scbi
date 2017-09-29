@@ -87,7 +87,16 @@ function git-branch()
         # move to build branch, and initialize it
 
         git checkout $BUILDB
+
+        CUR=$(git rev-parse HEAD)
+
         git reset --hard $BR
+
+        NEW=$(git rev-parse HEAD)
+
+        if [ "$CUR" != "$NEW" ]; then
+            send-mail "scbi: $MODULE moved to $NEW"
+        fi
 
         [ -f .gitmodules ] && git submodule update
     )

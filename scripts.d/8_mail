@@ -1,0 +1,12 @@
+#  Support for sending mail notification
+
+[ -z $EMAIL ] && EMAIL=pascal@obry.net
+[ -z $EMAIL_NOTIFICATION ] && EMAIL_NOTIFICATION=yes
+
+function send-mail()
+{
+    local MSG="$1"
+    if [ "$EMAIL_NOTIFICATION" = "yes" ]; then
+        echo $(date) | mail -s "$MSG" $EMAIL
+    fi
+}
