@@ -113,7 +113,7 @@ function svn-branch()
 
     #  ??? call $module-vcs and get the URL for branches ${vcs[2]}
 
-    ilog build "error: switching branch not support for subversion"
+    ilog build "error: switching branch not supported for subversion"
     return 1
 }
 
