@@ -95,7 +95,8 @@ function git-branch()
         NEW=$(git rev-parse HEAD)
 
         if [ "$CUR" != "$NEW" ]; then
-            send-mail "scbi: $MODULE moved to $NEW"
+            send-mail "scbi: $MODULE moved from $CUR to $NEW"
+            ilog vcsid "scbi: $MODULE moved from $CUR to $NEW"
         fi
 
         [ -f .gitmodules ] && git submodule update
