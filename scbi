@@ -425,7 +425,7 @@ function handle-module()
         #  We need to remove the link/sources to ensure proper setting by
         #  the module.
 
-        [ -d $BDIR/$module ] && cd $BDIR/$module && rm -fr src local-vcs
+        [ -d $BDIR/$module ] && cd $BDIR/$module && rm -fr src vcs
 
         #  If building from tarball, extract it now
 
@@ -476,26 +476,30 @@ function handle-module()
             if [[ $? = 0 ]]; then
                 vcs=( $($module-vcs) )
 
-                if [ $DOUPDATE = yes -o ! -d vcs ]; then
-	            ilog build get sources from ${vcs[0]}
-
-                    get-vcs ${vcs[0]} ${vcs[1]} $module $version
-
-                    if [[ ! $? = 0 ]]; then
-                        exit 1
-                    fi
-                fi
-
                 if [ "$version" = "dev" -a -d $GREPO/$module ]; then
-                    ln -s $GREPO/$module local-vcs
+                    ln -s $GREPO/$module vcs
 
                     #  Compute and store the version id of the sources +
                     #  compiler. That is when the compiler is changed we
                     #  want to rebuild the software.
 
                     vcs-build-id $PREFIX $TARGET $module \
-                                 $(pwd)/local-vcs > build-id
+                                 $(pwd)/vcs > build-id
                 else
+                    REPO=$(basename ${vcs[1]} .git)
+
+                    if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
+	                ilog build get sources from ${vcs[0]}
+
+                        get-vcs ${vcs[0]} ${vcs[1]} $module $version
+
+                        if [[ ! $? = 0 ]]; then
+                            exit 1
+                        fi
+                    else
+                        ln -s ../.vcs/$REPO vcs
+                    fi
+
                     #  Compute and store the version id of the sources +
                     #  compiler. That is when the compiler is changed we
                     #  want to rebuild the software.

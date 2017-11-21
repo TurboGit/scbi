@@ -32,14 +32,6 @@ function module-setup()
 
     fi
 
-    if [ -h local-vcs ]; then
-        rsync -a $OPT --exclude=".git" --exclude=".svn" \
-            --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
-            --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
-            --exclude "gcc-interface" \
-            --link-dest=../local-vcs local-vcs/. $SRCDIR/
-    fi
-
     #  If some patches are present, apply them now
     if [ $PATCH == yes ]; then
         (
