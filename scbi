@@ -474,8 +474,6 @@ function handle-module()
             fn-exists $module-vcs
 
             if [[ $? = 0 ]]; then
-                vcs=( $($module-vcs) )
-
                 if [ "$version" = "dev" -a -d $GREPO/$module ]; then
                     ln -s $GREPO/$module vcs
 
@@ -486,12 +484,16 @@ function handle-module()
                     vcs-build-id $PREFIX $TARGET $module \
                                  $(pwd)/vcs > build-id
                 else
-                    REPO=$(basename ${vcs[1]} .git)
+                    vcs=( $($module-vcs) )
+                    VCS_NAME=${vcs[0]}
+                    VCS_URL=${vcs[1]}
+
+                    REPO=$(basename $VCS_URL .git)
 
                     if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
-	                ilog build get sources from ${vcs[0]}
+	                ilog build get sources from $VCS_NAME
 
-                        get-vcs ${vcs[0]} ${vcs[1]} $module $version
+                        get-vcs $VCS_NAME $VCS_URL $module $version
 
                         if [[ ! $? = 0 ]]; then
                             exit 1
