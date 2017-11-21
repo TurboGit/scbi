@@ -1,21 +1,36 @@
+#
+# Support for VCS
+#
+#    - the repositories are checked-out in $BDIR/.vcs
+#
+#    - a symbolic link is created in the directory for the module
+#      under name vcs
+#
+# This is done so to be able to share the repository across multiple
+# modules.
+
 ############################## svn-co
 
 function svn-co()
 {
     local URL=$1
     local NAME=$2
+    local REPO=$(basename $URL)
 
     (
-        cd $BDIR/$NAME &&
-	if [ ! -d vcs ]; then
-	    svn co $URL vcs
+        mkdir -p $BDIR/.vcs
+        cd $BDIR/.vcs &&
+        if [ ! -d $REPO ]; then
+	    svn co $URL $REPO
         else
-            cd vcs
+            cd $REPO
             [ ! -d .svn ] &&
                 ilog build error: $(pwd) not a subversion repository &&
                 exit 1
             svn update
-	fi
+	fi &&
+        cd $BDIR/$NAME &&
+        ln -s ../.vcs/$REPO vcs
     )
 }
 
@@ -25,18 +40,22 @@ function git-co()
 {
     local URL=$1
     local NAME=$2
+    local REPO=$(basename $URL .git)
 
     (
-	cd $BDIR/$NAME &&
-        if [ ! -d vcs ]; then
-	    git clone --recursive $URL vcs
+        mkdir -p $BDIR/.vcs
+        cd $BDIR/.vcs &&
+        if [ ! -d $REPO ]; then
+	    git clone --recursive $URL $REPO
         else
-            cd vcs
+            cd $REPO
             [ ! -d .git ] &&
                 ilog build error: $(pwd) not a git repository &&
                 exit 1
             git fetch --recurse-submodules
-	fi
+	fi &&
+        cd $BDIR/$NAME &&
+        ln -s ../.vcs/$REPO vcs
     )
 }
 
