@@ -392,7 +392,7 @@ function handle-module()
     #  If purge is asked, first remove current build structure
 
     if [ $PURGE = yes -o $PURGE = only ]; then
-	ilog build Purging $module
+	ilog build Purging $module for $TARGET
         [ -d $BDIR/$module ] && module-purge $BDIR/$module $TARGET
     fi
 
