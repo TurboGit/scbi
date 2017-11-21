@@ -30,15 +30,19 @@
 #
 #    <module>-setup    parameter: $PREFIX $TARGET, return NONE
 #                      to setup build structure (optional)
+#                      also: pre-setup / post-setup
 #
 #    <module>-config   parameter: $PREFIX $TARGET, return NONE
 #                      to configure, ./configure or other steps
+#                      also: pre-config / post-config
 #
 #    <module>-build    parameter: $PREFIX $TARGET, return NONE
 #                      to build, make
+#                      also: pre-build / post-build
 #
 #    <module>-install  parameter: $PREFIX $TARGET, return NONE
 #                      to install (in $PREFIX)
+#                      also: pre-install / post-install
 #
 #    <module>-prefix   parameter: $PREFIX $TARGET, return string
 #                      the directory to install, default $BDIR/install
@@ -47,7 +51,13 @@
 #                      to pass automatic tests
 #
 #  Note that all steps above are optional. And empty module will just do
-#  nothing.
+#  nothing. For setup, config, build, install it may exists version pre/post
+#  which may be used for complex module handling. The order is the following:
+#
+#     <module>-pre-<step>    - step done before
+#     <module>-<step>        - default step is done before generic one
+#     module-<step>          - the generic step handled internally
+#     <module>-post-<step>   - step done after
 #
 #  It is possible to build from a tarball, the tar must be placed into the
 #  TARBALL directory.
@@ -137,8 +147,8 @@ function check-handled()
 function module-wrapper()
 {
     local PREFIX=$1
-    module=$2
-    step=$3
+    local module=$2
+    local step=$3
 
     log=$LOGS/$TARGET-$module-$step.log
 
@@ -544,6 +554,13 @@ function handle-module()
             for step in $STEPS; do
                 #  Apply module specific step if any
 
+	        fn-exists $module-pre-$step
+
+	        if [[ $? = 0 ]]; then
+	            module-wrapper $BDIR/$module/build/install $module \
+                                   pre-$step || exit 1
+	        fi
+
 	        fn-exists $module-$step
 
 	        if [[ $? = 0 ]]; then
@@ -575,6 +592,14 @@ function handle-module()
 	            elog generic module $step failed with error $res
 	            return $res
                 fi
+
+	        fn-exists $module-post-$step
+
+	        if [[ $? = 0 ]]; then
+	            module-wrapper $BDIR/$module/build/install $module \
+                                   post-$step || exit 1
+	        fi
+
             done
         fi
     ) || exit 1
