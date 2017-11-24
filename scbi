@@ -54,10 +54,12 @@
 #  nothing. For setup, config, build, install it may exists version pre/post
 #  which may be used for complex module handling. The order is the following:
 #
+#     module-pre-<step>      - the generic pre step handled internally
 #     <module>-pre-<step>    - step done before
 #     <module>-<step>        - default step is done before generic one
 #     module-<step>          - the generic step handled internally
 #     <module>-post-<step>   - step done after
+#     module-post-<step>     - the generic post step handled internally
 #
 #  It is possible to build from a tarball, the tar must be placed into the
 #  TARBALL directory.
@@ -552,6 +554,33 @@ function handle-module()
 
         else
             for step in $STEPS; do
+                ########## PRE module
+
+                #  Apply any generic step (module-setup, module-purge)
+
+                fn-exists module-pre-$step
+
+                if [[ $? = 0 ]]; then
+                    cd $BDIR/$module
+
+                    if [ $DLOG = yes ]; then
+                        module-pre-$step $BDIR/$module/build/install \
+                                         $module $TARGET $ISOOT | tee $log 2>&1
+                    else
+                        module-pre-$step $BDIR/$module/build/install \
+                                         $module $TARGET $ISOOT >> $log 2>&1
+                    fi
+                fi
+                res=$?
+
+                if [ $res != 0 ]; then
+	            if [ $DLOG = on-failure ]; then
+	                tail -100 $log
+	            fi
+	            elog generic module pre-$step failed with error $res
+	            return $res
+                fi
+
                 #  Apply module specific step if any
 
 	        fn-exists $module-pre-$step
@@ -560,6 +589,8 @@ function handle-module()
 	            module-wrapper $BDIR/$module/build/install $module \
                                    pre-$step || exit 1
 	        fi
+
+                ########## module
 
 	        fn-exists $module-$step
 
@@ -593,6 +624,8 @@ function handle-module()
 	            return $res
                 fi
 
+                ########## POST module
+
 	        fn-exists $module-post-$step
 
 	        if [[ $? = 0 ]]; then
@@ -600,6 +633,28 @@ function handle-module()
                                    post-$step || exit 1
 	        fi
 
+                fn-exists module-post-$step
+
+                if [[ $? = 0 ]]; then
+                    cd $BDIR/$module
+
+                    if [ $DLOG = yes ]; then
+                        module-post-$step $BDIR/$module/build/install \
+                                          $module $TARGET $ISOOT | tee $log 2>&1
+                    else
+                        module-post-$step $BDIR/$module/build/install \
+                                          $module $TARGET $ISOOT >> $log 2>&1
+                    fi
+                fi
+                res=$?
+
+                if [ $res != 0 ]; then
+	            if [ $DLOG = on-failure ]; then
+	                tail -100 $log
+	            fi
+	            elog generic module post-$step failed with error $res
+	            return $res
+                fi
             done
         fi
     ) || exit 1
