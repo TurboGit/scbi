@@ -69,8 +69,13 @@ function module-purge()
     local TARGET=$3
     local OOT=$3
 
+    # note that we keep the module install directory to be sure that we
+    # can clean-up the final install destination.
+
     if [ -d $PREFIX/$TARGET ]; then
-        rm -fr $PREFIX/$TARGET
+        rm -fr $PREFIX/$TARGET/build
+        rm -fr $PREFIX/$TARGET/src
+        rm -fr $PREFIX/$TARGET/build-id
         rm -fr $PREFIX/build-id
         rm -f $PREFIX/build
     fi
