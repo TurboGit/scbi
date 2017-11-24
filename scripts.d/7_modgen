@@ -81,6 +81,46 @@ function module-purge()
     fi
 }
 
+############################## module-pre-install
+
+function module-pre-install()
+{
+    local MPREFIX=$1
+    local MODULE=$2
+    local TARGET=$3
+    local OOT=$4
+
+    #  Finaly copy to given prefix
+    local SUDO=""
+    local IDIR=""
+
+    fn-exists $MODULE-prefix
+
+    if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
+        IDIR=$($MODULE-prefix)
+    else
+        IDIR=$PREFIX
+    fi
+
+    if [ ! -w $IDIR ]; then
+        SUDO=sudo
+    fi
+
+    # note that we do not want to fail here
+    # delete files in the final destination installation prefix.
+    # then delete the module install location (double check that the
+    # directory is the right one).
+
+    cd $MPREFIX &&
+        find . -type f | while read file; do
+            $SUDO rm -f $IDIR/$file
+        done &&
+        if [ $(basename $MPREFIX) = "install"
+             -a $(basename $(dirname $MPREFIX)) = "$MODULE" ]; then
+            rm -fr .
+        fi
+}
+
 ############################## module-install
 
 function module-install()
