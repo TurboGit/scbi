@@ -107,15 +107,15 @@ function git-branch()
 
         git checkout $BUILDB
 
-        CUR=$(git rev-parse HEAD)
+        CUR=$(git rev-parse --short HEAD)
 
         git reset --hard $BR
 
-        NEW=$(git rev-parse HEAD)
+        NEW=$(git rev-parse --short HEAD)
 
         if [ "$CUR" != "$NEW" ]; then
-            send-mail "scbi: $MODULE moved from $CUR to $NEW"
-            ilog vcsid "scbi: $MODULE moved from $CUR to $NEW"
+            send-mail "scbi: $MODULE updated $CUR..$NEW"
+            ilog vcsid "scbi: $MODULE updated $CUR..$NEW"
         fi
 
         [ -f .gitmodules ] && git submodule update
