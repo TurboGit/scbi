@@ -65,8 +65,8 @@ function module-setup()
 function module-purge()
 {
     local PREFIX=$1
-    local TARGET=$2
-    local MODULE=$3
+    local MODULE=$2
+    local TARGET=$3
     local OOT=$3
 
     if [ -d $PREFIX/$TARGET ]; then
@@ -81,8 +81,8 @@ function module-purge()
 function module-install()
 {
     local PREFIX=$1
-    local TARGET=$2
-    local MODULE=$3
+    local MODULE=$2
+    local TARGET=$3
     local OOT=$4
 
     if [ ! -f build-id ]; then

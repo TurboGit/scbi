@@ -403,7 +403,7 @@ function handle-module()
 
     if [ $PURGE = yes -o $PURGE = only ]; then
 	ilog build Purging $module for $TARGET
-        [ -d $BDIR/$module ] && module-purge $BDIR/$module $TARGET
+        [ -d $BDIR/$module ] && module-purge $BDIR/$module $module $TARGET
     fi
 
     [ $PURGE = only ] && exit 0
