@@ -111,14 +111,16 @@ function module-pre-install()
     # then delete the module install location (double check that the
     # directory is the right one).
 
-    cd $MPREFIX &&
-        find . -type f | while read file; do
-            $SUDO rm -f $IDIR/$file
-        done &&
-        if [ $(basename $MPREFIX) = "install"
-             -a $(basename $(dirname $MPREFIX)) = "$MODULE" ]; then
-            rm -fr .
-        fi
+    if [ -d $MPREFIX ]; then
+        cd $MPREFIX &&
+            find . -type f | while read file; do
+                $SUDO rm -f $IDIR/$file
+            done &&
+            if [ $(basename $MPREFIX) = "install" \
+                 -a $(basename $(dirname $MPREFIX)) = "$MODULE" ]; then
+                rm -fr .
+            fi
+    fi
 }
 
 ############################## module-install
