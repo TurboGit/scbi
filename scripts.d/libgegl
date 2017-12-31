@@ -1,0 +1,45 @@
+
+function libgegl-vcs()
+{
+    echo git
+    echo git://git.gnome.org/gegl
+}
+
+function libgegl-out-of-tree()
+{
+    echo false
+}
+
+function libgegl-env()
+{
+    system-compiler
+}
+
+function libgegl-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    ./autogen.sh && ./configure --prefix=$PREFIX
+}
+
+function libgegl-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -j$MJOBS
+}
+
+function libgegl-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make install
+}
+
+function libgegl-prefix()
+{
+    echo /opt/gimp/libgegl
+}
