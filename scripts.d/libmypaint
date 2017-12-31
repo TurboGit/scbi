@@ -1,0 +1,45 @@
+
+function libmypaint-vcs()
+{
+    echo git
+    echo https://github.com/mypaint/libmypaint.git
+}
+
+function libmypaint-out-of-tree()
+{
+    echo false
+}
+
+function libmypaint-env()
+{
+    system-compiler
+}
+
+function libmypaint-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    ./autogen.sh && ./configure --prefix=$PREFIX
+}
+
+function libmypaint-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -j$MJOBS
+}
+
+function libmypaint-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make install
+}
+
+function libmypaint-prefix()
+{
+    echo /opt/gimp/libmypaint
+}
