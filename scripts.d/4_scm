@@ -88,9 +88,17 @@ function git-branch()
         if [ $? == 1 ]; then
             git show-ref --verify --quiet refs/heads/$BRANCH
             if [ $? == 1 ]; then
-                return 1
+                # maybe a tag then
+                git show-ref --verify --quiet refs/tags/$BRANCH
+
+                if [ $? == 1 ]; then
+                    # version not found
+                    return 1
+                fi
+                BR=$BRANCH
+            else
+                BR=refs/heads/$BRANCH
             fi
-            BR=refs/heads/$BRANCH
         else
             BR=refs/remotes/origin/$BRANCH
         fi
