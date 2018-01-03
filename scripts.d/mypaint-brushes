@@ -1,0 +1,45 @@
+
+function mypaint-brushes-vcs()
+{
+    echo git
+    echo https://github.com/Jehan/mypaint-brushes
+}
+
+function mypaint-brushes-out-of-tree()
+{
+    echo false
+}
+
+function mypaint-brushes-env()
+{
+    system-compiler
+}
+
+function mypaint-brushes-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    ./autogen.sh && ./configure --prefix=$PREFIX
+}
+
+function mypaint-brushes-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -j$MJOBS
+}
+
+function mypaint-brushes-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make install
+}
+
+function mypaint-brushes-prefix()
+{
+    echo /opt/gimp/mypaint-brushes
+}
