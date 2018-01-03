@@ -13,6 +13,7 @@ function gimp-out-of-tree()
 function gimp-depends()
 {
     echo libmypaint:v1.3.0:branch
+    echo mypaint-brushes:v1.3.0:branch
     echo libgegl:dev
     echo gtk-doc-tools
     echo libbabl-dev
@@ -38,9 +39,11 @@ function gimp-config()
     TARGET=$2
 
     LMP=/opt/gimp/libmypaint
+    MPB=/opt/gimp/mypaint-brushes
     LGL=/opt/gimp/libgegl
 
     export PKG_CONFIG_PATH=$LMP/lib/pkgconfig:$LGL/lib/pkgconfig
+    export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$MPB/share/pkgconfig
     export PATH=$LGL/bin:$PATH
 
     ./autogen.sh --prefix=$PREFIX
