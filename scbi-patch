@@ -1,0 +1,73 @@
+#! /bin/bash
+
+# create patches to apply on top of master, move them into the build env
+# under .patches
+
+function usage()
+{
+    echo 'scbi-patch <git-branch>'
+    exit 1
+}
+
+#  Load user's settings if any
+
+[ -f $HOME/.config/scbi/.scbi${ENV_NAME} ] &&
+    source $HOME/.config/scbi/.scbi${ENV_NAME}
+
+#  Load module definitions
+
+[ ! -d "$DEFS" ] && DEFS=$HOME/.config/scbi
+
+[ ! -d "$DEFS" ] && echo $0: cannot find module definition files && exit 1
+
+#  Then load any global settings, not overriding user's ones
+
+for setup in $DEFS/[0-9]*; do
+    source $setup
+done
+
+CLEAN=no
+
+############################## body
+
+set -- $(getopt -u -o ch -l clean,help -- "$@")
+
+while [ $# -gt 0 ]; do
+    case $1 in
+	-h|--help)
+            usage
+            exit
+	    ;;
+	-c|--clean)
+            CLEAN=yes
+	    ;;
+	(--)
+	    ;;
+	(*)
+	    BRANCH=$1
+	    ;;
+	(-*)
+	    echo "$0: error - unrecognized option $1" 1>&2; exit 1
+	    ;;
+    esac
+    shift
+done
+
+REPO_NAME=$(basename $PWD)
+
+if [ $CLEAN == yes ]; then
+    rm -f $PATCHES/$REPO_NAME*
+    exit
+fi
+
+BRCH_NAME=$(basename $BRANCH)
+
+# default action
+
+rm -f 0*patch
+
+git format-patch --quiet $BRANCH ^master
+
+for f in 0*patch; do
+    mv $f $PATCHES/$REPO_NAME-$BRCH_NAME-$f
+done
