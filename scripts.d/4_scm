@@ -46,14 +46,14 @@ function git-co()
         mkdir -p $BDIR/.vcs
         cd $BDIR/.vcs &&
         if [ ! -d $REPO ]; then
-	    git clone --recursive $URL $REPO
+            git clone --recursive $URL $REPO
         else
             cd $REPO
             [ ! -d .git ] &&
                 ilog build error: $(pwd) not a git repository &&
                 exit 1
             git fetch --recurse-submodules
-	fi &&
+        fi &&
         cd $BDIR/$NAME &&
         ln -s ../.vcs/$REPO vcs
     )
