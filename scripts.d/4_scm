@@ -52,6 +52,8 @@ function git-co()
             [ ! -d .git ] &&
                 ilog build error: $(pwd) not a git repository &&
                 exit 1
+            # we set the URL in case the repo has been relocated
+            git remote set-url origin $URL
             git fetch --recurse-submodules
         fi &&
         cd $BDIR/$NAME &&
