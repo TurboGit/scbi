@@ -74,8 +74,9 @@ function module-purge()
 
     if [ -d $PREFIX/$TARGET ]; then
         rm -fr $PREFIX/$TARGET/build
-        rm -fr $PREFIX/$TARGET/src
         rm -fr $PREFIX/$TARGET/build-id
+        rm -fr $PREFIX/$TARGET/install
+        rm -fr $PREFIX/$TARGET/src
         rm -fr $PREFIX/build-id
         rm -f $PREFIX/build
     fi
@@ -111,15 +112,14 @@ function module-pre-install()
     # then delete the module install location (double check that the
     # directory is the right one).
 
-    if [ -d $MPREFIX ]; then
-        cd $MPREFIX &&
-            find . -type f | while read file; do
-                $SUDO rm -f $IDIR/$file
-            done &&
-            if [ $(basename $MPREFIX) = "install" \
-                 -a $(basename $(dirname $MPREFIX)) = "$MODULE" ]; then
-                rm -fr .
-            fi
+    if [ -f $MPREFIX/../manifest ]; then
+        cat $MPREFIX/../manifest | while read file; do
+            $SUDO rm -f $IDIR/$file
+        done &&
+        if [ $(basename $MPREFIX) = "install" \
+             -a $(basename $(dirname $MPREFIX)) = "$MODULE" ]; then
+            cd $MPREFIX && rm -fr .
+        fi
     fi
 }
 
@@ -147,6 +147,13 @@ function module-install()
             echo -n $(date) | md5sum | cut -d' ' -f1 > build-id
         fi
     fi
+
+    # get all installed files
+
+    (
+        cd ./build/install
+        find . -type f > ../manifest
+    )
 
     cp build-id build/
 }
