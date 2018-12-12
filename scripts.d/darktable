@@ -16,7 +16,6 @@ function darktable-depends()
     echo libsqlite3-dev
     echo libpng-dev
     echo libjpeg-dev
-    echo libopenjpeg-dev
     echo libpugixml-dev
     echo libxml2-dev
     echo liblcms2-dev

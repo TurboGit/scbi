@@ -12,8 +12,8 @@ function gimp-out-of-tree()
 
 function gimp-depends()
 {
-    echo libmypaint:v1.3.0:branch
-    echo mypaint-brushes:v1.3.0:branch
+    echo libmypaint:v1.3.0
+    echo mypaint-brushes:v1.3.0
     echo libgegl:dev
     echo gtk-doc-tools
     echo libbabl-dev

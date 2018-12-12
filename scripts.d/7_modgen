@@ -4,8 +4,9 @@ function module-setup()
 {
     local PREFIX=$1
     local MODULE=$2
-    local TARGET=$3
-    local OOT=$4
+    local VARIANT=$3
+    local TARGET=$4
+    local OOT=$5
 
     # if module-src soft link exists use it to copy the module sources into
     # the pointed location. This is used when multiple modules are used
@@ -19,7 +20,7 @@ function module-setup()
         SRCDIR=module-src
         OPT=
     else
-        SRCDIR=$TARGET/src
+        SRCDIR=$TARGET-$VARIANT/src
         OPT=--delete
     fi
 
@@ -49,7 +50,7 @@ function module-setup()
     fi
 
     rm -f build/build build
-    ln -s $TARGET build
+    ln -s $TARGET-$VARIANT build
 
     if [ "$OOT" = "yes" ]; then
         mkdir -p build/build
@@ -66,17 +67,18 @@ function module-purge()
 {
     local PREFIX=$1
     local MODULE=$2
-    local TARGET=$3
-    local OOT=$3
+    local VARIANT=$3
+    local TARGET=$4
+    local OOT=$5
 
     # note that we keep the module install directory to be sure that we
     # can clean-up the final install destination.
 
-    if [ -d $PREFIX/$TARGET ]; then
-        rm -fr $PREFIX/$TARGET/build
-        rm -fr $PREFIX/$TARGET/build-id
-        rm -fr $PREFIX/$TARGET/install
-        rm -fr $PREFIX/$TARGET/src
+    if [ -d $PREFIX/$TARGET-$VARIANT ]; then
+        rm -fr $PREFIX/$TARGET-$VARIANT/build
+        rm -fr $PREFIX/$TARGET-$VARIANT/build-id
+        rm -fr $PREFIX/$TARGET-$VARIANT/install
+        rm -fr $PREFIX/$TARGET-$VARIANT/src
         rm -fr $PREFIX/build-id
         rm -f $PREFIX/build
     fi
@@ -88,19 +90,25 @@ function module-pre-install()
 {
     local MPREFIX=$1
     local MODULE=$2
-    local TARGET=$3
-    local OOT=$4
+    local VARIANT=$3
+    local TARGET=$4
+    local OOT=$5
 
     #  Finaly copy to given prefix
     local SUDO=""
     local IDIR=""
 
-    fn-exists $MODULE-prefix
+    fn-exists $MODULE-$VARIANT-prefix
 
     if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
         IDIR=$($MODULE-prefix)
     else
-        IDIR=$PREFIX
+        fn-exists $MODULE-prefix
+        if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
+            IDIR=$($MODULE-prefix)
+        else
+            IDIR=$PREFIX
+        fi
     fi
 
     if [ ! -w $IDIR ]; then
@@ -129,8 +137,9 @@ function module-install()
 {
     local PREFIX=$1
     local MODULE=$2
-    local TARGET=$3
-    local OOT=$4
+    local VARIANT=$3
+    local TARGET=$4
+    local OOT=$5
 
     if [ ! -f build-id ]; then
         #  No build-id, this means that the sources have been installed by
