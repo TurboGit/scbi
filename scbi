@@ -644,7 +644,7 @@ function handle-module()
                     if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
 	                ilog build get sources from $VCS_NAME
 
-                        get-vcs $VCS_NAME $VCS_URL $module $ref
+                        get-vcs $VCS_NAME $VCS_URL $module $kind $ref
 
                         if [[ ! $? = 0 ]]; then
                             exit 1

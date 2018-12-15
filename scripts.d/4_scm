@@ -79,7 +79,7 @@ function git-branch()
 
         # if no branch specified use master
 
-        if [ "$BRANCH" == "" ]; then
+        if [ $BRANCH == NONE ]; then
             BRANCH=master
         fi
 
@@ -154,7 +154,8 @@ function get-vcs()
     local VCS=$1
     local URL=$2
     local module=$3
-    local version=$4
+    local kind=$4
+    local version=$5
 
     local res=0
 
@@ -167,7 +168,7 @@ function get-vcs()
                 exit 1
             fi
 
-            if [ "$version" != "dev" ]; then
+            if [ $kind != DEV ]; then
                 git-branch $module $version > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
@@ -185,7 +186,7 @@ function get-vcs()
                 exit 1
             fi
 
-            if [ "$version" != "dev" -a "$version" != "" ]; then
+            if [ $kind != DEV -a $version != NONE ]; then
                 svn-branch $module $version > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
