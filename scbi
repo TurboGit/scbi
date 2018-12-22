@@ -544,7 +544,8 @@ function handle-module()
 
     [ $PURGE = only ] && exit 0
 
-    ilog build Building $module-$variant for target $TARGET | tee -a $log
+    ilog build Building $module-$variant | tee -a $log
+    ilog build target $TARGET | tee -a $log
     ilog build steps : $STEPS | tee -a $log
 
     #  Create the build root directory if needed
