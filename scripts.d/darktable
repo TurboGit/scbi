@@ -38,6 +38,24 @@ function darktable-env()
     export PERL5LIB=.
 }
 
+function darktable-clang-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    CLANG_VER=3.9
+
+    # fake build script which want the src dir to be a git repository
+
+    if [ ! -h ../src/.git ]; then
+        ln -s ../../src/.git ../src/.git
+    fi
+
+    CC=clang-$CLANG_VER CXX=clang++-$CLANG_VER cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_OPENMP=OFF $GPOPTS \
+      -DCMAKE_INSTALL_PREFIX=$PREFIX \
+          ../src
+}
+
 function darktable-config()
 {
     PREFIX=$1
