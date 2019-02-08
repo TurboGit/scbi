@@ -15,14 +15,9 @@ function check-deb-pkg()
     local pck=$1
     local version=$(get-version-number $2)
 
-    #  First check that the package exists
+    #  First check that the package is installed
 
-    apt-cache show $pck > /dev/null 2>&1 || return 2
-
-    # Now check if the package is installed
-
-    [ "$(apt-cache policy $pck | grep Installed \
-           | cut -d':' -f2)" = " (none)" ] && return 1
+    [ "$(dpkg-query -l $pck | tail -1 | cut -c2)" != "i" ] && return 1
 
     #  If no version specified, if the package is installed all is ok
 
