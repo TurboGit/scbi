@@ -181,7 +181,7 @@ function module-wrapper()
     local variant=$3
     local step=$4
 
-    log=$LOGS/$TARGET-$module-$step.log
+    log=$LOGS/$TARGET-$module-$variant-$step.log
 
     if [ $step = "build" -a "$BUILD_TARGET" != "" ]; then
         mstep=build-$BUILD_TARGET
@@ -514,7 +514,7 @@ function handle-module()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    log=$LOGS/$TARGET-$variant-$module-report.log
+    log=$LOGS/$TARGET-$module-$variant-report.log
 
     #  Check if we have already handled this module
 
