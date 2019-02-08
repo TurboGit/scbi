@@ -449,7 +449,7 @@ function handle-depends()
     #  If module not found, check for a possible distrib package
 
     if [ ! -f $DEFS/$module ]; then
-        check-pkg $module:$version
+        check-pkg $module:$ref
 
         if [ $? = 0 ]; then
             return 0
@@ -483,7 +483,7 @@ function handle-depends()
 
     cd $ROOT
 
-    [ "$version" = "NONE" ] && version=0
+    [ "$ref" = "NONE" ] && ref=0
 
     if [[ "$mver" = "" \
                 || "$mver" = $VERSION_ERROR \
@@ -639,7 +639,7 @@ function handle-module()
             #  the one currently extracted.
 
             if [ -f tarsrc-version ]; then
-                if [ "$(cat tarsrc-version)" != "$version" ]; then
+                if [ "$(cat tarsrc-version)" != "$ref" ]; then
                     rm -fr tarsrc
                 fi
             fi
@@ -647,14 +647,14 @@ function handle-module()
             if [ $DOUPDATE = yes -o ! -d tarsrc  ]; then
 	        ilog build get sources from tar
 
-                vid=$(get-tar $module $version >> $log 2>&1)
+                vid=$(get-tar $module $ref >> $log 2>&1)
 
                 if [[ ! $? = 0 ]]; then
                     ilog build cannot get/find tar sources
                     exit 1
                 fi
 
-                echo -n $version > tarsrc-version
+                echo -n $ref > tarsrc-version
 
                 #  Compute and store the version id of the sources + compiler.
                 #  That is when the compiler is changed when want to rebuild
