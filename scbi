@@ -485,7 +485,13 @@ function handle-depends()
 
     [ "$ref" = "NONE" ] && ref=0
 
-    if [[ ! -d $BDIR/$module/build/install \
+    [ $DOFORCE = yes ] && rm -f $BDIR/$module/build/build-id
+
+    #  Check build id, only rebuild if mismatch
+
+    diff -q $BDIR/$module/build-id $BDIR/$module/build/build-id > /dev/null 2>&1
+
+    if [[ $? != 0 \
               || "$mver" = "" \
               || "$mver" = $VERSION_ERROR \
               || $ref > $mver ]];
