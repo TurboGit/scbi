@@ -485,9 +485,10 @@ function handle-depends()
 
     [ "$ref" = "NONE" ] && ref=0
 
-    if [[ "$mver" = "" \
-                || "$mver" = $VERSION_ERROR \
-                || $version > $mver ]];
+    if [[ ! -d $BDIR/$module/build/install \
+              || "$mver" = "" \
+              || "$mver" = $VERSION_ERROR \
+              || $ref > $mver ]];
     then
         echo
         ilog build need building $module, \
