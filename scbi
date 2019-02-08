@@ -369,6 +369,61 @@ function parse-module-ref()
     echo $version
 }
 
+############################## handle-env
+
+function handle-env()
+{
+    local modref=$1
+
+    #  Get module information
+
+    local module_info=( $(parse-module-ref $modref) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    #  Then load module
+
+    if [ -f $DEFS/$module ]; then
+        source $DEFS/$module
+
+        # setup depends recursively if any
+
+        fn-exists $module-$variant-depends
+
+        if [ $? = 0 ]; then
+            for dmodule in $($module-$variant-depends); do
+                handle-env $dmodule
+            done
+        else
+            fn-exists $module-depends
+
+            if [ $? = 0 ]; then
+                for dmodule in $($module-depends); do
+                    handle-env $dmodule
+                done
+            fi
+        fi
+
+        # then setup the current module
+
+        fn-exists $module-$variant-env
+
+        if [ $? = 0 ]; then
+            $module-$variant-env $BDIR/$module/build/install $TARGET
+        else
+            fn-exists $module-env
+
+            if [ $? = 0 ]; then
+                $module-env $BDIR/$module/build/install $TARGET
+            fi
+        fi
+    fi
+}
+
+
 ############################## handle-depends
 
 function handle-depends()
@@ -555,17 +610,7 @@ function handle-module()
     #  Set module environment if defined
 
     (
-        fn-exists $module-$variant-env
-
-        if [ $? = 0 ]; then
-            $module-$variant-env $BDIR/$module/build/install $TARGET
-        else
-            fn-exists $module-env
-
-            if [ $? = 0 ]; then
-                $module-env $BDIR/$module/build/install $TARGET
-            fi
-        fi
+        handle-env $modref
 
         #  Log module enviroment
 
