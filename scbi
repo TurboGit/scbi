@@ -115,6 +115,37 @@
 #  TARGET     : current target ($HOST)
 #  DEFS       : where module scripts are to be found
 #               ($PWD/.scripts.d $HOME/.config/scbi)
+#
+#  Structure:
+#  ----------
+#
+#  $BDIR
+#    |
+#    |__ .vcs
+#    |     |__ <module>            # module checkout, all sources
+#    |
+#    |__ .patches
+#    |
+#    |__ .tar
+#    |     |__ <module>-<version>-src.tar.gz
+#    |
+#    |__ <module>
+#          |__ build
+#          |__ build-id
+#          |__ src                 # symlink to sources (vcs or tarball)
+#          |__ tarsrc              # extract of tarball
+#          |__ tarsrc-version      # version of extracted tarball
+#          |__ vcs                 # sources
+#          |__ <target>-<variant>
+#                 |
+#                 |_ build         # build directory
+#                 |_ build-id      # sha1 to identify the build
+#                 |_ install       # installation directory
+#                 |_ manifest      # list of all files in install above
+#                 |_ src           # rsync of ../src
+#
+#    vcs : is either a copy of .vcs/<module> or a symlib to user's local checkout
+#    src : is either a link to [vcs] or [tarsrc]
 
 CDPATH=
 
