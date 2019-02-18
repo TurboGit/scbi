@@ -79,7 +79,7 @@ function module-purge()
         rm -fr $PREFIX/$TARGET-$VARIANT/build-id
         rm -fr $PREFIX/$TARGET-$VARIANT/install
         rm -fr $PREFIX/$TARGET-$VARIANT/src
-        rm -fr $PREFIX/build-id
+        rm -fr $PREFIX/build-id-$VARIANT
         rm -f $PREFIX/build
     fi
 }
@@ -141,7 +141,7 @@ function module-install()
     local TARGET=$4
     local OOT=$5
 
-    if [ ! -f build-id ]; then
+    if [ ! -f build-id-$VARIANT ]; then
         #  No build-id, this means that the sources have been installed by
         #  the <module>-setup most probably. In this case just compute the
         #  build-id to be the md5sum of all sources available in src directory.
@@ -151,9 +151,9 @@ function module-install()
 
         if [ -d src ]; then
             vid=$(cat src/* | md5sum | cut -d' ' -f1)
-            get-build-id $PREFIX $TARGET $MODULE $vid > build-id
+            get-build-id $PREFIX $TARGET $MODULE $vid > build-id-$VARIANT
         else
-            echo -n $(date) | md5sum | cut -d' ' -f1 > build-id
+            echo -n $(date) | md5sum | cut -d' ' -f1 > build-id-$VARIANT
         fi
     fi
 
@@ -164,5 +164,5 @@ function module-install()
         find . -type f > ../manifest
     )
 
-    cp build-id build/
+    cp build-id-$VARIANT $TARGET-$VARIANT/build-id
 }

@@ -121,31 +121,31 @@
 #
 #  $BDIR
 #    |
-#    |__ .vcs
-#    |     |__ <module>            # module checkout, all sources
+#    |_ .vcs
+#    |    |_ <module>             # module checkout, all sources
 #    |
-#    |__ .patches
+#    |_ .patches
 #    |
-#    |__ .tar
-#    |     |__ <module>-<version>-src.tar.gz
+#    |_ .tar
+#    |    |_ <module>-<version>-src.tar.gz
 #    |
-#    |__ <module>
-#          |__ build
-#          |__ build-id
-#          |__ src                 # symlink to sources (vcs or tarball)
-#          |__ tarsrc              # extract of tarball
-#          |__ tarsrc-version      # version of extracted tarball
-#          |__ vcs                 # sources
-#          |__ <target>-<variant>
-#                 |
-#                 |_ build         # build directory
-#                 |_ build-id      # sha1 to identify the build
-#                 |_ install       # installation directory
-#                 |_ manifest      # list of all files in install above
-#                 |_ src           # rsync of ../src
+#    |_ <module>
+#         |_ build                # symlink to current/latest target build dir
+#         |_ build-id-<variant>   # build id to check for changes
+#         |_ src                  # symlink to sources (vcs or tarball)
+#         |_ tarsrc               # extract of tarball
+#         |_ tarsrc-version       # version of extracted tarball
+#         |_ vcs                  # sources
+#         |_ <target>-<variant>
+#                |
+#                |_ build         # build directory
+#                |_ build-id      # sha1 to identify the build
+#                |_ install       # installation directory
+#                |_ manifest      # list of all files in install above
+#                |_ src           # rsync of ../src
 #
-#    vcs : is either a copy of .vcs/<module> or a symlib to user's local checkout
-#    src : is either a link to [vcs] or [tarsrc]
+#  vcs : is either a copy of .vcs/<module> or a symlib to user's local checkout
+#  src : is either a link to [vcs] or [tarsrc]
 
 CDPATH=
 
@@ -697,7 +697,7 @@ function handle-module()
                 #  Compute and store the version id of the sources + compiler.
                 #  That is when the compiler is changed when want to rebuild
                 #  the software.
-                get-build-id $PREFIX $TARGET $vid > build-id
+                get-build-id $PREFIX $TARGET $vid > build-id-$variant
             fi
 
             #  We set the link for the source so that no module will have to
@@ -717,7 +717,8 @@ function handle-module()
                     #  compiler. That is when the compiler is changed we
                     #  want to rebuild the software.
 
-                    vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs > build-id
+                    vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs \
+                                 > build-id-$variant
                 else
                     vcs=( $($module-vcs) )
                     VCS_NAME=${vcs[0]}
@@ -741,14 +742,16 @@ function handle-module()
                     #  compiler. That is when the compiler is changed we
                     #  want to rebuild the software.
 
-                    vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs > build-id
+                    vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs \
+                                 > build-id-$variant
                 fi
 
                 ln -s vcs src
 
             else
                 #  No VCS, not TAR, just rebuild the sources
-                get-build-id $PREFIX $TARGET $module "$(date)" > build-id
+                get-build-id $PREFIX $TARGET $module "$(date)" \
+                             > build-id-$variant
             fi
 
             #  If get-vcs is not defined then the $module-setup routine is in
@@ -769,7 +772,7 @@ function handle-module()
 
         #  Check build id, only rebuild if mismatch
 
-        diff -q build-id build/build-id > /dev/null 2>&1
+        diff -q build-id-$variant build/build-id > /dev/null 2>&1
 
         if [ $? = 0 ]; then
 	    ilog build no build needed, version matches
