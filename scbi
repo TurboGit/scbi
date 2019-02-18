@@ -545,6 +545,121 @@ function handle-depends()
     fi
 }
 
+############################## handle-sources
+#
+#  get the module sources from a tar or a vcs
+#
+
+function handle-sources()
+{
+    local modref=$1
+
+    #  Get module information
+
+    local module_info=( $(parse-module-ref $modref) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    #  If building from tarball, extract it now
+
+    if [ $kind == VERSION ]; then
+        fn-exists $module-tar
+
+        if [[ ! $? = 0 ]]; then
+            echo "error: $module-tar function not defined, cannot get tarball"
+            exit 1
+        fi
+
+        #  We need to extract the tarball if the version does not match
+        #  the one currently extracted.
+
+        if [ -f tarsrc-version ]; then
+            if [ "$(cat tarsrc-version)" != "$ref" ]; then
+                rm -fr tarsrc
+            fi
+        fi
+
+        if [ $DOUPDATE = yes -o ! -d tarsrc  ]; then
+	    ilog build get sources from tar
+
+            vid=$(get-tar $module $ref >> $log 2>&1)
+
+            if [[ ! $? = 0 ]]; then
+                ilog build cannot get/find tar sources
+                exit 1
+            fi
+
+            echo -n $ref > tarsrc-version
+
+            #  Compute and store the version id of the sources + compiler.
+            #  That is when the compiler is changed when want to rebuild
+            #  the software.
+            get-build-id $PREFIX $TARGET $vid > build-id-$variant
+        fi
+
+        #  We set the link for the source so that no module will have to
+        #  do it.
+
+        ln -s tarsrc src
+
+    else
+        # Get sources from repository
+
+        fn-exists $module-vcs
+
+        if [[ $? = 0 ]]; then
+            if [ $kind = DEV -a -d $GREPO/$module ]; then
+                ln -s $GREPO/$module vcs
+
+                #  Compute and store the version id of the sources +
+                #  compiler. That is when the compiler is changed we
+                #  want to rebuild the software.
+
+                vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs \
+                             > build-id-$variant
+            else
+                vcs=( $($module-vcs) )
+                VCS_NAME=${vcs[0]}
+                VCS_URL=${vcs[1]}
+
+                REPO=$(basename $VCS_URL .git)
+
+                if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
+	            ilog build get sources from $VCS_NAME
+
+                    get-vcs $VCS_NAME $VCS_URL $module $kind $ref
+
+                    if [[ ! $? = 0 ]]; then
+                        exit 1
+                    fi
+                else
+                    ln -s ../.vcs/$REPO vcs
+                fi
+
+                #  Compute and store the version id of the sources +
+                #  compiler. That is when the compiler is changed we
+                #  want to rebuild the software.
+
+                vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs \
+                             > build-id-$variant
+            fi
+
+            ln -s vcs src
+
+        else
+            #  No VCS, not TAR, just rebuild the sources
+            get-build-id $PREFIX $TARGET $module "$(date)" \
+                         > build-id-$variant
+        fi
+
+        #  If get-vcs is not defined then the $module-setup routine is in
+        #  charge of creating/populating the src directory.
+    fi
+}
+
 ############################## handle-module
 
 function handle-module()
@@ -679,100 +794,7 @@ function handle-module()
 
         [ -d $BDIR/$module ] && cd $BDIR/$module && rm -fr src vcs
 
-        #  If building from tarball, extract it now
-
-        if [ $kind == VERSION ]; then
-            fn-exists $module-tar
-
-            if [[ ! $? = 0 ]]; then
-                echo "error: $module-tar function not defined, cannot get tarball"
-                exit 1
-            fi
-
-            #  We need to extract the tarball if the version does not match
-            #  the one currently extracted.
-
-            if [ -f tarsrc-version ]; then
-                if [ "$(cat tarsrc-version)" != "$ref" ]; then
-                    rm -fr tarsrc
-                fi
-            fi
-
-            if [ $DOUPDATE = yes -o ! -d tarsrc  ]; then
-	        ilog build get sources from tar
-
-                vid=$(get-tar $module $ref >> $log 2>&1)
-
-                if [[ ! $? = 0 ]]; then
-                    ilog build cannot get/find tar sources
-                    exit 1
-                fi
-
-                echo -n $ref > tarsrc-version
-
-                #  Compute and store the version id of the sources + compiler.
-                #  That is when the compiler is changed when want to rebuild
-                #  the software.
-                get-build-id $PREFIX $TARGET $vid > build-id-$variant
-            fi
-
-            #  We set the link for the source so that no module will have to
-            #  do it.
-
-            ln -s tarsrc src
-        else
-            # Get sources from repository
-
-            fn-exists $module-vcs
-
-            if [[ $? = 0 ]]; then
-                if [ $kind = DEV -a -d $GREPO/$module ]; then
-                    ln -s $GREPO/$module vcs
-
-                    #  Compute and store the version id of the sources +
-                    #  compiler. That is when the compiler is changed we
-                    #  want to rebuild the software.
-
-                    vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs \
-                                 > build-id-$variant
-                else
-                    vcs=( $($module-vcs) )
-                    VCS_NAME=${vcs[0]}
-                    VCS_URL=${vcs[1]}
-
-                    REPO=$(basename $VCS_URL .git)
-
-                    if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
-	                ilog build get sources from $VCS_NAME
-
-                        get-vcs $VCS_NAME $VCS_URL $module $kind $ref
-
-                        if [[ ! $? = 0 ]]; then
-                            exit 1
-                        fi
-                    else
-                        ln -s ../.vcs/$REPO vcs
-                    fi
-
-                    #  Compute and store the version id of the sources +
-                    #  compiler. That is when the compiler is changed we
-                    #  want to rebuild the software.
-
-                    vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs \
-                                 > build-id-$variant
-                fi
-
-                ln -s vcs src
-
-            else
-                #  No VCS, not TAR, just rebuild the sources
-                get-build-id $PREFIX $TARGET $module "$(date)" \
-                             > build-id-$variant
-            fi
-
-            #  If get-vcs is not defined then the $module-setup routine is in
-            #  charge of creating/populating the src directory.
-        fi
+        handle-sources $modref
 
         #  Check if envrionment is to be done for out-of-tree build
 
