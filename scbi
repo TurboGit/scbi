@@ -204,6 +204,8 @@ function check-handled()
 }
 
 ############################## module-wrapper
+#
+# called for each module and step
 
 function module-wrapper()
 {
@@ -277,7 +279,10 @@ function module-wrapper()
     )
 }
 
-############################## module-wrapper
+############################## module-variant-wrapper
+#
+# called for each module, variant and step, switch to proper step to call
+# depending on the existence of the variant.
 
 function module-variant-wrapper()
 {
@@ -353,7 +358,7 @@ function usage()
 }
 
 ############################## parse-module-ref
-
+#
 # Returns an array with the following information:
 # ( module ["default"|variant] [DEV|VERSION|BRANCH|NONE] [branch|version|NONE] )
 
@@ -401,6 +406,8 @@ function parse-module-ref()
 }
 
 ############################## handle-env
+#
+# recursively set the environment for the module based on the dependencies
 
 function handle-env()
 {
@@ -454,8 +461,10 @@ function handle-env()
     fi
 }
 
-
 ############################## handle-depends
+#
+# check for module dependencies, handle them if build scripts found for
+# them. Also check for distrib packages if exists.
 
 function handle-depends()
 {
@@ -570,13 +579,14 @@ function handle-module()
 
     source $DEFS/$module
 
-    #  Create module environment now
+    #  Create module build directory
 
     mkdir -p $BDIR/$module/$TARGET-$variant > $log 2>&1
 
-    #  Check meta-modules
+    #  Check if meta-module, if so call handle-module for each one
 
     fn-exists $module-$variant-modules
+
     if [[ $? = 0 ]]; then
         (
             for module in $($module-$variant-modules); do
@@ -596,10 +606,11 @@ function handle-module()
         fi
     fi
 
-    # Check for depends if any
+    # Check for depends if any, and handle them if any
 
     if [ $DEPS = yes ]; then
         fn-exists $module-$variant-depends
+
         if [[ $? = 0 ]]; then
             (
                 for module in $($module-$variant-depends); do
@@ -612,6 +623,7 @@ function handle-module()
             echo
         else
             fn-exists $module-depends
+
             if [[ $? = 0 ]]; then
                 (
                     for module in $($module-depends); do
@@ -635,13 +647,17 @@ function handle-module()
         [ -d $BDIR/$module ] && module-purge $BDIR/$module $module $variant $TARGET
     fi
 
+    #  If purge-only, stop there
+
     [ $PURGE = only ] && exit 0
 
     ilog build Building $module-$variant | tee -a $log
     ilog build target $TARGET | tee -a $log
     ilog build steps : $STEPS | tee -a $log
 
-    #  Create the build root directory if needed
+    #  Create the build root directory if needed, note that we do check here
+    #  even if already created when entering this routine. This is because
+    #  in case of a purge the build directory could have been removed.
 
     [ -d $BDIR/$module/$TARGET-$variant ] || mkdir $BDIR/$module/$TARGET-$variant
 
