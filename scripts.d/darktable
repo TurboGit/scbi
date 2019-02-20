@@ -55,6 +55,22 @@ function darktable-clang-config()
           ../src
 }
 
+function darktable-release-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    # fake build script which want the src dir to be a git repository
+
+    if [ ! -h ../src/.git ]; then
+        ln -s ../../src/.git ../src/.git
+    fi
+
+    cmake -DCMAKE_BUILD_TYPE=Release $GPOPTS \
+      -DCMAKE_INSTALL_PREFIX=$PREFIX \
+          ../src
+}
+
 function darktable-config()
 {
     PREFIX=$1
