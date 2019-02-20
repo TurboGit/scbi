@@ -72,22 +72,31 @@
 #  nothing. For setup, config, build, install it may exists version pre/post
 #  which may be used for complex module handling. The order is the following:
 #
-#     module-pre-<step>      - the generic pre step handled internally
-#     <module>-pre-<step>    - done before step
-#     <module>-<step>        - default step is done before generic one
-#     module-<step>          - the generic step handled internally
-#     <module>-post-<step>   - done after step
-#     module-post-<step>     - the generic post step handled internally
+#     1. module-pre-<step>      - the generic pre step handled internally
+#     2. <module>-pre-<step>    - done before step
+#     3. <module>-<step>        - default step is done before generic one
+#     4. module-<step>          - the generic step handled internally
+#     5. <module>-post-<step>   - done after step
+#     6. module-post-<step>     - the generic post step handled internally
 #
-#  The following steps can have variants:
+#  The following steps (2, 4 and 5 above) can have variants and/or cross
+#  hooks:
 #
-#     <module>-<variant>-depends
-#     <module>-<variant>-env
-#     <module>-<variant>-setup
-#     <module>-<variant>-config
-#     <module>-<variant>-build
-#     <module>-<variant>-install
-#     <module>-<variant>-prefix
+#     <module>-<variant>[-cross]-depends
+#     <module>-<variant>[-cross]-env
+#     <module>-<variant>[-cross]-setup
+#     <module>-<variant>[-cross]-config
+#     <module>-<variant>[-cross]-build
+#     <module>-<variant>[-cross]-install
+#     <module>-<variant>[-cross]-prefix
+#
+#  The steps routines (for 2, 4 and 5) are checked in the following order and
+#  the first found is called:
+#
+#     <module>-<variant>-cross-<step>
+#     <module>-cross-<step>
+#     <module>-<variant>-<step>
+#     <module>-<step>
 #
 #  It is possible to build from a tarball, the tar must be placed into the
 #  TARBALL directory.
@@ -290,6 +299,24 @@ function module-variant-wrapper()
     local module=$2
     local variant=$3
     local step=$4
+
+    if [ "$HOST" != "$TARGET" ]; then
+        fn-exists $module-$variant-cross-$step
+
+        if [[ $? = 0 ]]; then
+	    module-wrapper $BDIR/$module/build/install $module \
+                           $variant $variant-cross-$step || exit 1
+            return 0
+        else
+            fn-exists $module-cross-$step
+
+            if [[ $? = 0 ]]; then
+	        module-wrapper $BDIR/$module/build/install $module \
+                               $variant cross-$step || exit 1
+                return 0
+            fi
+        fi
+    fi
 
     fn-exists $module-$variant-$step
 
