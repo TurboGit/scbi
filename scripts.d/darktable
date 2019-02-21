@@ -50,9 +50,10 @@ function darktable-clang-config()
         ln -s ../../src/.git ../src/.git
     fi
 
-    CC=clang-$CLANG_VER CXX=clang++-$CLANG_VER cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_OPENMP=OFF $GPOPTS \
+    CC=clang-$CLANG_VER CXX=clang++-$CLANG_VER cmake \
+      -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_OPENMP=OFF $GPOPTS \
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
-          ../src
+      ../src
 }
 
 function darktable-release-config()
@@ -67,7 +68,7 @@ function darktable-release-config()
     fi
 
     cmake -DCMAKE_BUILD_TYPE=Release $GPOPTS \
-      -DCMAKE_INSTALL_PREFIX=$PREFIX \
+          -DCMAKE_INSTALL_PREFIX=$PREFIX \
           ../src
 }
 
@@ -95,7 +96,7 @@ function darktable-config()
     fi
 
     cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo $GPOPTS \
-      -DCMAKE_INSTALL_PREFIX=$PREFIX \
+          -DCMAKE_INSTALL_PREFIX=$PREFIX \
           ../src
 }
 
