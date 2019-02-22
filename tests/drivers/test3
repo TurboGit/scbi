@@ -1,0 +1,3 @@
+# check that the second does not trigger a new build
+./scbi test3
+./scbi test3

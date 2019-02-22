@@ -1,0 +1,6 @@
+
+ROOT=$PWD/.root
+BDIR=$ROOT/builds
+PREFIX=$BDIR/install
+TARBALL=$ROOT/.tar
+PATCHES=$BDIR/.patches

@@ -1,0 +1,14 @@
+
+function test1-vcs()
+{
+   echo git
+   echo ${TESTREPOS}/test1.bundle
+}
+
+function test1-config()
+{
+   PREFIX=$1
+   TARGET=$2
+
+   ./configure
+}

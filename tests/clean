@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# clean previous build/tree
+rm -fr .root/builds
+rm -f scripts.d/*~
+rm -f scbi
+rm -f scripts.d/[2-9]*
+rm -fr logs
+rm -f *~

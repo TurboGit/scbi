@@ -1,0 +1,10 @@
+# check that different version are properly built
+#
+# use local environment
+export LIBRARY_PATH=.:$LIBRARY_PATH
+export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+./scbi --tests test4
+./scbi --tests test4:v1
+./scbi --tests test4:v2
+./scbi --tests test4:#v1.2
+./scbi --tests test4

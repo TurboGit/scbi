@@ -1,0 +1,52 @@
+#!/bin/bash
+
+declare -A TEST_OPTS=(
+    [test1]="-s -c"
+)
+
+function run-test()
+{
+    local TEST=$1
+
+    (
+        if [ -f drivers/$TEST ]; then
+            cp drivers/$TEST . && ./$TEST && rm $TEST
+        else
+            ./scbi ${TEST_OPTS[$TEST]} $TEST
+        fi
+    )
+}
+
+./clean
+
+# copy scripts
+cp ../scbi .
+cp ../scripts.d/[2-9]* scripts.d/
+
+# the repository directory
+export TESTREPOS=$PWD/.root/repos
+
+# kill mail for testing
+export EMAIL_NOTIFICATION=no
+
+# be sure the global install directory exists
+mkdir -p $PWD/.root/builds/install
+
+# create the log dirs
+mkdir -p $PWD/logs
+
+for file in scripts.d/test*; do
+    bfile=$(basename $file)
+    echo -n "========== $bfile "
+    run-test $bfile 2>&1 > logs/$bfile.log
+
+    sed -i 's/[0-9]/x/g' logs/$bfile.log
+
+    diff -q logs/$bfile.log expected/$bfile.exp 2>&1 > /dev/null
+
+    if [ $? == 0 ]; then
+        echo OK
+    else
+        echo NOK
+    fi
+done
