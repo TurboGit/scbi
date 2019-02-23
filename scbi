@@ -143,7 +143,7 @@
 #         |_ build-id-<variant>   # build id to check for changes
 #         |_ src                  # symlink to sources (vcs or tarball)
 #         |_ tarsrc               # extract of tarball
-#         |_ tarsrc-version       # version of extracted tarball
+#         |_ source-id            # version of the source (tar or vcs)
 #         |_ vcs                  # sources
 #         |_ <target>-<variant>
 #                |
@@ -603,11 +603,13 @@ function handle-sources()
         #  We need to extract the tarball if the version does not match
         #  the one currently extracted.
 
-        if [ -f tarsrc-version ]; then
-            if [ "$(cat tarsrc-version)" != "$ref" ]; then
+        if [ -f source-id ]; then
+            if [ "$(cat source-id)" != "tar-$ref" ]; then
                 rm -fr tarsrc
             fi
         fi
+
+        echo -n tar-$ref > source-id
 
         if [ $DOUPDATE = yes -o ! -d tarsrc  ]; then
 	    ilog build get sources from tar
@@ -618,8 +620,6 @@ function handle-sources()
                 ilog build cannot get/find tar sources
                 exit 1
             fi
-
-            echo -n $ref > tarsrc-version
 
             #  Compute and store the version id of the sources + compiler.
             #  That is when the compiler is changed when want to rebuild
@@ -653,6 +653,15 @@ function handle-sources()
                 VCS_URL=${vcs[1]}
 
                 REPO=$(basename $VCS_URL .git)
+
+                if [ -f source-id ]; then
+                    if [ "$(cat source-id)" != "vcs-$ref" ]; then
+                        # a different version is needed
+                        DOUPDATE=yes
+                    fi
+                fi
+
+                echo -n vcs-$ref > source-id
 
                 if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
 	            ilog build get sources from $VCS_NAME
