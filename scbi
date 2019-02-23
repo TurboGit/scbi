@@ -1043,7 +1043,8 @@ while [ $# -gt 0 ]; do
 	-l|--no-log)
 	    DLOG=no
 	    ;;
-	-r|--tests)
+	--tests)
+	    NSTEPS="$NSTEPS setup config build install tests"
 	    NSTEPS="$NSTEPS tests"
 	    ;;
 	-v|--verbose)
