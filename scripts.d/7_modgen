@@ -25,7 +25,7 @@ function module-setup()
     fi
 
     if [ -h src -o -d src ]; then
-        rsync -a $OPT --exclude=".git" --exclude=".svn" \
+        rsync -a -c $OPT --exclude=".git" --exclude=".svn" \
             --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
             --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
             --exclude "gcc-interface" \
