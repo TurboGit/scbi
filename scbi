@@ -985,8 +985,8 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:adefSIuscbilnpPvrh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,help,deps,archive,force,env,no-patch: -- "$@")
+set -- $(getopt -u -o t:adefSIuscbilnpPvh \
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env,no-patch: -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1045,6 +1045,8 @@ while [ $# -gt 0 ]; do
 	    ;;
 	--tests)
 	    NSTEPS="$NSTEPS setup config build install tests"
+	    ;;
+	--tests-only)
 	    NSTEPS="$NSTEPS tests"
 	    ;;
 	-v|--verbose)
