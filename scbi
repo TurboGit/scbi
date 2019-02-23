@@ -846,7 +846,8 @@ function handle-module()
 
         #  Check build id, only rebuild if mismatch
 
-        diff -q build-id-$variant build/build-id > /dev/null 2>&1
+        diff -q build-id-$variant \
+             $BDIR/$module/$TARGET-$variant/build-id > /dev/null 2>&1
 
         if [ $? = 0 ]; then
 	    ilog build no build needed, version matches
