@@ -35,7 +35,13 @@ mkdir -p $PWD/.root/builds/install
 # create the log dirs
 mkdir -p $PWD/logs
 
-for file in scripts.d/test*; do
+if [ -z $1 ]; then
+    TESTS='drivers/test*'
+else
+    TESTS=drivers/$1
+fi
+
+for file in $TESTS; do
     bfile=$(basename $file)
     echo -n "========== $bfile "
     run-test $bfile 2>&1 > logs/$bfile.log
