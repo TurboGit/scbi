@@ -7,3 +7,4 @@ rm -f scbi
 rm -f scripts.d/[2-9]*
 rm -fr logs
 rm -f *~
+rm -f drivers/*~
