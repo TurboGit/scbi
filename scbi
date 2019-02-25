@@ -819,11 +819,22 @@ function handle-module()
 
         #  Log module enviroment
 
-        env > $LOGS/$TARGET-$module-$variant-env.log
-        echo "===============================================" \
-	     >> $LOGS/$TARGET-$module-$variant-env.log
-        gnat ls -v >> $LOGS/$TARGET-$module-$variant-env.log 2> /dev/null
-        which gcc >> $LOGS/$TARGET-$module-$variant-env.log 2> /dev/null
+        ENVLOG=$LOGS/$TARGET-$module-$variant-env.log
+
+        echo "==================== env " > $ENVLOG
+        env >> $ENVLOG
+
+        [ ! -z $(which gprls) ] &&
+            (
+                echo "==================== gprls " >> $ENVLOG
+                gprls -v 2>&1 >> $ENVLOG
+            )
+
+        [ ! -z $(which gcc) ] &&
+            (
+                echo "==================== gcc " >> $ENVLOG
+                gcc -v &>> $ENVLOG
+            )
 
         #  We need to remove the link/sources to ensure proper setting by
         #  the module.
