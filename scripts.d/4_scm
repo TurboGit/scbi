@@ -125,7 +125,7 @@ function git-branch()
 
         if [ "$CUR" != "$NEW" ]; then
             send-mail "scbi: $MODULE updated $CUR..$NEW"
-            ilog vcsid "scbi: $MODULE updated $CUR..$NEW"
+            ilog $MODULE "scbi: $MODULE updated $CUR..$NEW"
         fi
 
         [ -f .gitmodules ] && git submodule update
