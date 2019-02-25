@@ -85,7 +85,13 @@ function get-build-id()
     local MODULE=$3
     local vid="$4"
 
-    local pid=$(cat $PATCHES/$MODULE-*.patch 2>&1 | md5sum | cut -d' ' -f1)
+    local pid=no-patch-found
+
+    if [ -d $PATCHES ]; then
+        if [ ! -z $(ls $PATCHES/$MODULE-*.patch 2> /dev/null) ]; then
+            local pid=$(cat $PATCHES/$MODULE-*.patch 2>&1 | md5sum | cut -d' ' -f1)
+        fi
+    fi
 
     if [ "$HOST" = "$TARGET" -o "$(which $TARGET-gcc)" = "" ]; then
         echo -n $(gcc --version | head -1) ",$vid,$pid" \
