@@ -144,6 +144,7 @@
 #         |_ src                  # symlink to sources (vcs or tarball)
 #         |_ tarsrc               # extract of tarball
 #         |_ source-id            # version of the source (tar or vcs)
+#         |_ install-id           # version of the installed module
 #         |_ vcs                  # sources
 #         |_ <target>-<variant>
 #                |
@@ -182,6 +183,7 @@ PREFIX=
 DEFAULT_PREFIX=yes
 DOINSTALL=yes
 DOUPDATE=no
+DOTEST=no
 DOARCHIVE=no
 DOFORCE=no
 DEPS=no
@@ -360,7 +362,8 @@ function usage()
     echo "   -c | --config        do config"
     echo "   -b | --build         do build"
     echo "   -i | --install       do install"
-    echo "   -r | --tests         run the testsuite"
+    echo "      | --tests         run the testsuite, build if necessary"
+    echo "      | --tests-only    run the testsuite"
     echo "   -d | --deps          check/build dependencies"
     echo "   -a | --archive       build binary archive"
     echo "   -v | --verbose       display full log"
@@ -473,6 +476,12 @@ function handle-env()
         fi
 
         # then setup the current module
+
+        if [ -d $BDIR/$module/$TARGET-$variant/install ]; then
+            cd $BDIR/$module/$TARGET-$variant/install
+        else
+            cd $BDIR/$module/$TARGET-$variant
+        fi
 
         fn-exists $module-$variant-env
 
@@ -638,15 +647,25 @@ function handle-sources()
         fn-exists $module-vcs
 
         if [[ $? = 0 ]]; then
-            if [ $kind = DEV -a -d $GREPO/$module ]; then
-                ln -s $GREPO/$module vcs
+            if [ $kind = DEV ]; then
+                if [ -d $GREPO/$module ]; then
+                    ln -s $GREPO/$module vcs
 
-                #  Compute and store the version id of the sources +
-                #  compiler. That is when the compiler is changed we
-                #  want to rebuild the software.
+                    #  Compute and store the version id of the sources +
+                    #  compiler. That is when the compiler is changed we
+                    #  want to rebuild the software.
 
-                vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs \
-                             > build-id-$variant
+                    vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs \
+                                 > build-id-$variant
+
+                    echo -n $ref > source-id
+
+                else
+                    ilog build cannot find local dev repository:
+                    ilog build $GREPO/$module
+                    exit 1
+                fi
+
             else
                 vcs=( $($module-vcs) )
                 VCS_NAME=${vcs[0]}
@@ -795,7 +814,8 @@ function handle-module()
 
     if [ $PURGE = yes -o $PURGE = only ]; then
 	ilog build Purging $module for $TARGET/$variant
-        [ -d $BDIR/$module ] && module-purge $BDIR/$module $module $variant $TARGET
+        [ -d $BDIR/$module ] &&
+            module-purge $BDIR/$module $module $variant $TARGET
     fi
 
     #  If purge-only, stop there
@@ -861,101 +881,125 @@ function handle-module()
              $BDIR/$module/$TARGET-$variant/build-id > /dev/null 2>&1
 
         if [ $? = 0 ]; then
-	    ilog build no build needed, version matches
+	    ilog build no build needed, versions match
 
-        else
-            for step in $STEPS; do
-                ########## PRE module
+            STEPS=""
 
-                #  Apply any generic step (module-setup, module-purge)
+            # if install variant changed, do install
 
-                fn-exists module-pre-$step
+            if [ $(cat install-id) != $variant ]; then
+                STEPS="install"
+                DOINSTALL=yes
 
-                if [[ $? = 0 ]]; then
-                    cd $BDIR/$module
+                # then make sure the current build softlink is
+                # pointing to the variant. this is needed as the setup
+                # won't be done.
 
-                    if [ $DLOG = yes ]; then
-                        module-pre-$step $BDIR/$module/build/install $module \
-                                         $variant $TARGET $ISOOT | tee $log 2>&1
-                    else
-                        module-pre-$step $BDIR/$module/build/install $module \
-                                         $variant $TARGET $ISOOT >> $log 2>&1
-                    fi
-                fi
-                res=$?
+                cd $BDIR/$module
+                [ -h build ] && rm -f build
+                ln -s $TARGET-$variant build
+            fi
 
-                if [ $res != 0 ]; then
-	            if [ $DLOG = on-failure ]; then
-	                tail -100 $log
-	            fi
-	            elog generic module pre-$step failed with error $res
-	            return $res
-                fi
+            # if testing is expected, at least do that
 
-                #  Apply module specific step if any
-
-                module-variant-wrapper $BDIR/$module/build/install $module \
-                                       $variant pre-$step || exit 1
-
-                ########## module
-
-                module-variant-wrapper $BDIR/$module/build/install $module \
-                                       $variant $step || exit 1
-
-                #  Apply any generic step (module-setup, module-purge)
-
-                fn-exists module-$step
-
-                if [[ $? = 0 ]]; then
-                    cd $BDIR/$module
-
-                    if [ $DLOG = yes ]; then
-                        module-$step $BDIR/$module/build/install $module \
-                                     $variant $TARGET $ISOOT | tee $log 2>&1
-                    else
-                        module-$step $BDIR/$module/build/install $module \
-                                     $variant $TARGET $ISOOT >> $log 2>&1
-                    fi
-                fi
-                res=$?
-
-                if [ $res != 0 ]; then
-	            if [ $DLOG = on-failure ]; then
-	                tail -100 $log
-	            fi
-	            elog generic module $step failed with error $res
-	            return $res
-                fi
-
-                ########## POST module
-
-                module-variant-wrapper $BDIR/$module/build/install $module \
-                                       $variant post-$step || exit 1
-
-                fn-exists module-post-$step
-
-                if [[ $? = 0 ]]; then
-                    cd $BDIR/$module
-
-                    if [ $DLOG = yes ]; then
-                        module-post-$step $BDIR/$module/build/install $module \
-                                          $variant $TARGET $ISOOT | tee $log 2>&1
-                    else
-                        module-post-$step $BDIR/$module/build/install $module \
-                                          $variant $TARGET $ISOOT >> $log 2>&1
-                    fi
-                fi
-                res=$?
-
-                if [ $res != 0 ]; then
-	            if [ $DLOG = on-failure ]; then
-	                tail -100 $log
-	            fi
-	            elog generic module post-$step failed with error $res
-	            return $res
-                fi
-            done
+            if [ $DOTEST = true ]; then
+                STEPS="$STEPS tests"
+            fi
         fi
+
+        for step in $STEPS; do
+            ########## PRE module
+
+            #  Apply any generic step (module-setup, module-purge)
+
+            fn-exists module-pre-$step
+
+            if [[ $? = 0 ]]; then
+                cd $BDIR/$module
+
+                if [ $DLOG = yes ]; then
+                    module-pre-$step $BDIR/$module/build/install $module \
+                                     $variant $TARGET $ISOOT | tee $log 2>&1
+                else
+                    module-pre-$step $BDIR/$module/build/install $module \
+                                     $variant $TARGET $ISOOT >> $log 2>&1
+                fi
+            fi
+            res=$?
+
+            if [ $res != 0 ]; then
+	        if [ $DLOG = on-failure ]; then
+	            tail -100 $log
+	        fi
+	        elog generic module pre-$step failed with error $res
+	        return $res
+            fi
+
+            #  Apply module specific step if any
+
+            module-variant-wrapper $BDIR/$module/build/install $module \
+                                   $variant pre-$step || exit 1
+
+            ########## module
+
+            module-variant-wrapper $BDIR/$module/build/install $module \
+                                   $variant $step || exit 1
+
+            #  Apply any generic step (module-setup, module-purge)
+
+            fn-exists module-$step
+
+            if [[ $? = 0 ]]; then
+                cd $BDIR/$module
+
+                if [ $DLOG = yes ]; then
+                    module-$step $BDIR/$module/build/install $module \
+                                 $variant $TARGET $ISOOT | tee $log 2>&1
+                else
+                    module-$step $BDIR/$module/build/install $module \
+                                 $variant $TARGET $ISOOT >> $log 2>&1
+                fi
+            fi
+            res=$?
+
+            if [ $res != 0 ]; then
+	        if [ $DLOG = on-failure ]; then
+	            tail -100 $log
+	        fi
+	        elog generic module $step failed with error $res
+	        return $res
+            fi
+
+            ########## POST module
+
+            module-variant-wrapper $BDIR/$module/build/install $module \
+                                   $variant post-$step || exit 1
+
+            fn-exists module-post-$step
+
+            if [[ $? = 0 ]]; then
+                cd $BDIR/$module
+
+                if [ $DLOG = yes ]; then
+                    module-post-$step $BDIR/$module/build/install $module \
+                                      $variant $TARGET $ISOOT | tee $log 2>&1
+                else
+                    module-post-$step $BDIR/$module/build/install $module \
+                                      $variant $TARGET $ISOOT >> $log 2>&1
+                fi
+            fi
+            res=$?
+
+            if [ $res != 0 ]; then
+	        if [ $DLOG = on-failure ]; then
+	            tail -100 $log
+	        fi
+	        elog generic module post-$step failed with error $res
+	        return $res
+            fi
+
+            [ $step == install ] && echo -n $variant > install-id || true
+        done
     ) || exit 1
 
     #  Create binary archive if needed
@@ -1057,9 +1101,11 @@ while [ $# -gt 0 ]; do
 	    ;;
 	--tests)
 	    NSTEPS="$NSTEPS setup config build install tests"
+            DOTEST=true
 	    ;;
 	--tests-only)
 	    NSTEPS="$NSTEPS tests"
+            DOTEST=true
 	    ;;
 	-v|--verbose)
 	    DLOG=yes

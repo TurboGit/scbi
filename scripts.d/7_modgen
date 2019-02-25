@@ -51,7 +51,7 @@ function module-setup()
         [[ ! $? = 0 ]] && return 1
     fi
 
-    rm -f build/build build
+    rm -f $TARGET-$VARIANT/build build
     ln -s $TARGET-$VARIANT build
 
     if [ "$OOT" = "yes" ]; then

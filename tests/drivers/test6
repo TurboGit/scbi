@@ -1,0 +1,31 @@
+# check purge and purge-only
+echo '==== no build expected'
+./scbi lib1
+echo '==== purge and re-build'
+./scbi --purge lib1
+echo '==== no build expected'
+./scbi lib1
+
+echo '==== purge-only, no build expected'
+
+REP=$PWD/.root/builds/lib1
+
+if [ -h $REP/x86_64-linux-gnu-default/build ]; then
+    echo OK build directory present before purge
+else
+    echo NOK build directory should have been present $BDIR
+fi
+
+./scbi --purge-only lib1
+
+# some checks
+if [ $(ls $REP/x86_64-linux-gnu-default) == "manifest" ]; then
+    echo OK build directory removed, only manifest found
+else
+    echo NOK build directory still present
+fi
+
+unset REP
+
+echo '==== re-build after purge'
+./scbi lib1

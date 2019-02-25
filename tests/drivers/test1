@@ -1,0 +1,2 @@
+# simple check
+./scbi -s -c test1

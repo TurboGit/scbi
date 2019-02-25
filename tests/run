@@ -1,19 +1,12 @@
 #!/bin/bash
 
-declare -A TEST_OPTS=(
-    [test1]="-s -c"
-)
-
 function run-test()
 {
     local TEST=$1
 
     (
-        if [ -f drivers/$TEST ]; then
-            cp drivers/$TEST . && ./$TEST && rm $TEST
-        else
-            ./scbi ${TEST_OPTS[$TEST]} $TEST
-        fi
+        cp drivers/$TEST . && source ./$TEST
+        rm -f $TEST
     )
 }
 

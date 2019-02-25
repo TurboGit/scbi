@@ -1,0 +1,13 @@
+# check that we properly rebuild/install variants
+echo '========== build/install lib2'
+./scbi --tests lib2
+echo '========== build/install lib2/variant'
+./scbi --tests lib2/variant1
+echo '========== install lib2'
+./scbi --tests lib2
+echo '========== build/install lib2/variant v2'
+./scbi --tests lib2/variant1:v2.0
+echo '========== build/install lib2/variant tag v1.0.0'
+./scbi --tests lib2/variant1:v1.0.0
+echo '========== just test lib2/variant tag v1.0.0'
+./scbi --tests lib2/variant1:v1.0.0

@@ -1,11 +1,11 @@
 
-function test4-vcs()
+function lib1-vcs()
 {
    echo git
    echo ${TESTREPOS}/lib1.bundle
 }
 
-function test4-tar()
+function lib1-tar()
 {
     VERSION=$1
 
@@ -14,7 +14,17 @@ function test4-tar()
     echo lib1-$VERSION-src.tar.bz2
 }
 
-function test4-build()
+function lib1-env()
+{
+   PREFIX=$1
+   TARGET=$2
+
+   export C_INCLUDE_PATH=$PWD/include:$C_INCLUDE_PATH
+   export LIBRARY_PATH=.:$PWD/lib:$LIBRARY_PATH
+   export LD_LIBRARY_PATH=.:$PWD/lib:$LD_LIBRARY_PATH
+}
+
+function lib1-build()
 {
    PREFIX=$1
    TARGET=$2
@@ -23,7 +33,7 @@ function test4-build()
    make
 }
 
-function test4-install()
+function lib1-install()
 {
    PREFIX=$1
    TARGET=$2
@@ -34,7 +44,7 @@ function test4-install()
    cp lib1.h $PREFIX/include
 }
 
-function test4-tests()
+function lib1-tests()
 {
    PREFIX=$1
    TARGET=$2
