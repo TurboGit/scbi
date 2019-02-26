@@ -18,6 +18,11 @@ export CDPATH=
 cp ../scbi .
 cp ../scripts.d/[2-9]* scripts.d/
 
+# patch rsync to use safe mode (checksum) as the tests repositories are small,
+# have a some files with same time-stamp.
+
+sed -i 's/rsync -a/rsync -a -c/g' scripts.d/7_modgen
+
 # the repository directory
 export TESTREPOS=$PWD/.root/repos
 
