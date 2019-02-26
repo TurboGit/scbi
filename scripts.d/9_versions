@@ -1,0 +1,86 @@
+############################## load-module-plan
+#
+#
+
+declare -A MODVER=[]
+
+function load-module-plan()
+{
+    PLAN=$DEFS/plan-$1
+
+    if [ -f $PLAN ]; then
+        while read modref; do
+            local module_info=( $(parse-module-ref $modref) )
+            local module=${module_info[0]}
+            MODVER[$module]=$modref
+        done < $PLAN
+    else
+        elog build build plan plan-$1 does not exists
+        exit 1
+    fi
+}
+
+############################## parse-module-ref
+#
+# Returns an array with the following information:
+# ( module ["default"|variant] [DEV|VERSION|BRANCH|NONE] [branch|version|NONE] )
+
+function parse-module-ref()
+{
+    # full module reference is name[/variant][:version]
+    local modref="$1"
+
+    # check for version
+    local mver=($(echo $modref | tr ":" " "))
+
+    if [ -z ${mver[1]} ]; then
+        local KIND=NONE
+        local version=NONE
+    else
+        local vb=${mver[1]:0:1}
+
+        if [ ${mver[1]} = dev ]; then
+            KIND=DEV
+            local version=${mver[1]}
+        elif [ $vb = '#' ]; then
+            KIND=VERSION
+            local version=${mver[1]:1}
+        else
+            KIND=BRANCH
+            local version=${mver[1]}
+        fi
+    fi
+
+    # check for variant
+    local mvar=($(echo ${mver[0]} | tr "/" " "))
+
+    if [ -z ${mvar[1]} ]; then
+        local variant=default
+    else
+        local variant=${mvar[1]}
+    fi
+
+    local module=${mvar[0]}
+
+    echo $module
+    echo $variant
+    echo $KIND
+    echo $version
+}
+
+function get-module-ref()
+{
+    local module_info=( $(parse-module-ref $modref) )
+    local module=${module_info[0]}
+
+    local modplan=${MODVER[$module]}
+
+    if [ ! -z $modplan ]; then
+        module_info=( $(parse-module-ref $modplan) )
+    fi
+
+    echo ${module_info[0]}
+    echo ${module_info[1]}
+    echo ${module_info[2]}
+    echo ${module_info[3]}
+}

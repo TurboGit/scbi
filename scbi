@@ -382,54 +382,6 @@ function usage()
     exit 1
 }
 
-############################## parse-module-ref
-#
-# Returns an array with the following information:
-# ( module ["default"|variant] [DEV|VERSION|BRANCH|NONE] [branch|version|NONE] )
-
-function parse-module-ref()
-{
-    # full module reference is name[/variant][:version]
-    local modref="$1"
-
-    # check for version
-    local mver=($(echo $modref | tr ":" " "))
-
-    if [ -z ${mver[1]} ]; then
-        local KIND=NONE
-        local version=NONE
-    else
-        local vb=${mver[1]:0:1}
-
-        if [ ${mver[1]} = dev ]; then
-            KIND=DEV
-            local version=${mver[1]}
-        elif [ $vb = '#' ]; then
-            KIND=VERSION
-            local version=${mver[1]:1}
-        else
-            KIND=BRANCH
-            local version=${mver[1]}
-        fi
-    fi
-
-    # check for variant
-    local mvar=($(echo ${mver[0]} | tr "/" " "))
-
-    if [ -z ${mvar[1]} ]; then
-        local variant=default
-    else
-        local variant=${mvar[1]}
-    fi
-
-    local module=${mvar[0]}
-
-    echo $module
-    echo $variant
-    echo $KIND
-    echo $version
-}
-
 ############################## handle-env
 #
 # recursively set the environment for the module based on the dependencies
