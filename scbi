@@ -191,6 +191,7 @@ ISOOT=no
 PATCH=yes
 STEPS="setup config build install"
 BUILD_TARGET=
+PLAN=
 
 ############################## check-handled
 #
@@ -366,6 +367,7 @@ function usage()
     echo "   -f | --force         force rebuild, do not check build id"
     echo "   -p | --purge         remove builds directories before building"
     echo "   -P | --purge-only    only remove builds directories"
+    echo "      | --plan          add a build plan for modules"
     echo "   -n | --no-patch      do not apply patches"
     echo "   -j | --jobs=<n>      max compilation jobs"
 
@@ -392,7 +394,7 @@ function handle-env()
 
     #  Get module information
 
-    local module_info=( $(parse-module-ref $modref) )
+    local module_info=( $(get-module-ref $modref) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -453,7 +455,7 @@ function handle-depends()
 {
     local modref=$1
 
-    local module_info=( $(parse-module-ref $modref) )
+    local module_info=( $(get-module-ref $modref) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -539,7 +541,7 @@ function handle-sources()
 
     #  Get module information
 
-    local module_info=( $(parse-module-ref $modref) )
+    local module_info=( $(get-module-ref $modref) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -670,7 +672,7 @@ function handle-module()
 
     #  Get module information
 
-    local module_info=( $(parse-module-ref $modref) )
+    local module_info=( $(get-module-ref $modref) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -989,7 +991,7 @@ function handle-module()
 ############################## body
 
 set -- $(getopt -u -o t:adefSIuscbilnpPvh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env,no-patch: -- "$@")
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env,no-patch:,plan: -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1073,6 +1075,9 @@ while [ $# -gt 0 ]; do
         -j|--jobs)
             JOBS=$2; shift
             ;;
+        --plan)
+            PLAN=$2; shift
+            ;;
 	(--)
 	    ;;
 	(*)
@@ -1111,6 +1116,10 @@ fi
 for setup in $DEFS/[0-9]*; do
     source $setup
 done
+
+#  Load build plan if any
+
+[ ! -z $PLAN ] && load-module-plan $PLAN
 
 #  Prepare log dir
 

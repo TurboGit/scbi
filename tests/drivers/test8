@@ -1,0 +1,16 @@
+# test build plan
+
+./scbi --purge-only lib1 &> /dev/null
+./scbi --purge-only lib2 &> /dev/null
+
+echo '=================== plan v2 (lib1:v2 lib2)'
+./scbi --tests --plan=v2 --deps mainmult
+
+echo '=================== plan var (lib1:v1 lib2/variant1:v2)'
+./scbi --tests --plan=var --deps mainmult
+
+echo '=================== second run plan var (no build)'
+./scbi --tests --plan=var --deps mainmult
+
+echo '=================== second run plan var (test-only)'
+./scbi --tests-only --plan=var --deps mainmult
