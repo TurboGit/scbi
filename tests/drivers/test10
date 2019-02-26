@@ -1,0 +1,15 @@
+# check that patches are properly applied if present
+
+mkdir -p .root/.patches
+cp .root/repos/*.patch .root/.patches/
+
+echo '========== lib1 patched version'
+./scbi --tests lib1
+
+echo '========== lib1 standard version'
+./scbi --tests --no-patch lib1
+
+echo '========== lib1 patych again'
+./scbi --tests lib1
+
+rm .root/.patches/*

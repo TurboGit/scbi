@@ -1,0 +1,11 @@
+diff --git lib1.c lib1.c
+index e9cd99b..eca9dc8 100644
+--- a/lib1.c
++++ b/lib1.c
+@@ -3,5 +3,5 @@
+ 
+ void lib1(void)
+ {
+-  printf("liba.C master\n");
++  printf("liba.C patched version\n");
+ }
