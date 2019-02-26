@@ -12,6 +12,8 @@ function run-test()
 
 ./clean
 
+export CDPATH=
+
 # copy scripts
 cp ../scbi .
 cp ../scripts.d/[2-9]* scripts.d/

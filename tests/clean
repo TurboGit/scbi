@@ -2,6 +2,7 @@
 
 # clean previous build/tree
 rm -fr .root/builds
+rm -fr .root/git
 rm -f scripts.d/*~
 rm -f scbi
 rm -f scripts.d/[2-9]*
