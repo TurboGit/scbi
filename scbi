@@ -192,7 +192,9 @@ PATCH=yes
 STEPS="setup config build install"
 BUILD_TARGET=
 
-############################## fn-exists
+############################## check-handled
+#
+# check wether a module has already been handled
 
 function check-handled()
 {
