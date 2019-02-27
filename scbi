@@ -336,8 +336,6 @@ function module-variant-wrapper()
 
 function usage()
 {
-    local k=0
-
     echo
     echo $0 [options] module1 [module2 ... modulen]
 
@@ -374,10 +372,17 @@ function usage()
     echo
     echo -n modules:
 
+    local linelen=0
+
     for module in $DEFS/[^0-9]*; do
-	echo -n " $(basename $module)"
-	k=$(expr $k + 1)
-	[ $k == 7 ] && k=0 && echo && echo -n "        "
+        bn=$(basename $module)
+        linelen=$(expr $linelen + ${#bn} + 1)
+        if [ $linelen -gt 70 ]; then
+            echo
+            echo -n "        "
+            linelen=${#bn}
+        fi
+	echo -n " $bn"
     done
     echo
 
