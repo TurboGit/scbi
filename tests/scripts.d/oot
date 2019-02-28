@@ -1,0 +1,34 @@
+
+function oot-vcs()
+{
+   echo git
+   echo ${TESTREPOS}/lib1.bundle
+}
+
+function oot-out-of-tree()
+{
+   echo true
+}
+
+function oot-build()
+{
+   PREFIX=$1
+   TARGET=$2
+
+   gcc -I../src -c ../src/lib1.c -o lib1.o
+   gcc -I../src ../src/main.c lib1.o -o main
+}
+
+function oot-tests()
+{
+   PREFIX=$1
+   TARGET=$2
+
+   if [ -f ../src/lib1.o ]; then
+       echo OOT NOK
+   else
+       echo OOT OK
+   fi
+
+   ./main
+}

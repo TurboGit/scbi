@@ -1,0 +1,4 @@
+# check that OOT (Out Of Tree) build
+
+echo '========== lib1 patched version'
+./scbi --tests oot
