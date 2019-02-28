@@ -138,9 +138,9 @@
 #
 #  ROOT       : default root directory to use
 #  BDIR       : the modules build root directory ($ROOT/builds)
-#  GREPO      : directory with local Git repositories ($ROOT/repositories/git)
-#  SREPO      : directory with local Svn repositories ($ROOT/repositories/svn)
-#  TARBALL    : directory where downloaded tarball are stores ($BDIR/tar)
+#  GIT_REPO   : directory with local Git repositories ($ROOT/repositories/git)
+#  SVN_REPO   : directory with local Svn repositories ($ROOT/repositories/svn)
+#  TARBALL    : directory where downloaded tarball are stores ($BDIR/.tar)
 #  PREFIX     : directory where module are to be installed ($BDIR/install)
 #  HOST       : current host (gcc -dumpmachine)
 #  TARGET     : current target ($HOST)
@@ -626,8 +626,8 @@ function handle-sources()
 
         if [[ $? = 0 ]]; then
             if [ $kind = DEV ]; then
-                if [ -d $GREPO/$module ]; then
-                    ln -s $GREPO/$module vcs
+                if [ -d $GIT_REPO/$module ]; then
+                    ln -s $GIT_REPO/$module vcs
 
                     #  Compute and store the version id of the sources +
                     #  compiler. That is when the compiler is changed we
@@ -640,7 +640,7 @@ function handle-sources()
 
                 else
                     ilog build cannot find local dev repository:
-                    ilog build $GREPO/$module
+                    ilog build $GIT_REPO/$module
                     exit 1
                 fi
 

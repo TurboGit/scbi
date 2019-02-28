@@ -4,7 +4,7 @@ function diouzhtu-update()
     PREFIX=$1
     TARGET=$2
 
-    cd $GREPO/diouzhtu && git pull
+    cd $GIT_REPO/diouzhtu && git pull
 }
 
 function diouzhtu-setup()
@@ -13,7 +13,7 @@ function diouzhtu-setup()
     TARGET=$2
 
     if [ ! -d src_cp ]; then
-        ln -s $GREPO/diouzhtu src_cp
+        ln -s $GIT_REPO/diouzhtu src_cp
     fi
 }
 

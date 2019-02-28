@@ -4,7 +4,7 @@ function v2p-update()
     PREFIX=$1
     TARGET=$2
 
-    cd $GREPO/v2p && git pull
+    cd $GIT_REPO/v2p && git pull
 }
 
 function v2p-setup()
@@ -13,7 +13,7 @@ function v2p-setup()
     TARGET=$2
 
     if [ ! -d src_cp ]; then
-        ln -s $GREPO/v2p src_cp
+        ln -s $GIT_REPO/v2p src_cp
     fi
 }
 
