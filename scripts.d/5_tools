@@ -171,8 +171,8 @@ function display-stat()
     echo
     echo stats
     echo -----
-    echo "install prefix        : $PREFIX"
     echo "build dir             : $BDIR"
+    echo "install prefix        : $PREFIX"
     echo "tar dir               : $TARBALL"
     echo "patches dir           : $PATCHES"
     echo "user's Git repository : $GIT_REPO"

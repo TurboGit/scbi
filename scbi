@@ -1124,10 +1124,6 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-#  Nothing to build
-
-[ "$MODULES" = "" ] && usage
-
 #  Load user's settings if any
 
 [ -f $HOME/.config/scbi/.scbi${ENV_NAME} ] &&
@@ -1154,6 +1150,10 @@ done
 #  Load build plan if any
 
 [ ! -z $PLAN ] && load-module-plan $PLAN
+
+#  Nothing to build, display usage
+
+[ "$MODULES" = "" ] && usage
 
 [ $DOSTAT == yes ] && display-stat
 
