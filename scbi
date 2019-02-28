@@ -210,6 +210,7 @@ DOUPDATE=no
 DOTEST=no
 DOARCHIVE=no
 DOFORCE=no
+DOSTAT=no
 DEPS=no
 ISOOT=no
 PATCH=yes
@@ -361,6 +362,8 @@ function module-variant-wrapper()
 function usage()
 {
     echo
+    echo SCBI $VERSION
+    echo
     echo $0 [options] module1 [module2 ... modulen]
 
     echo ""
@@ -390,6 +393,7 @@ function usage()
     echo "   -p | --purge         remove builds directories before building"
     echo "   -P | --purge-only    only remove builds directories"
     echo "      | --plan          add a build plan for modules"
+    echo "      | --stat          display some status of current setup"
     echo "   -n | --no-patch      do not apply patches"
     echo "   -j | --jobs=<n>      max compilation jobs \$JOBS"
 
@@ -409,8 +413,6 @@ function usage()
 	echo -n " $bn"
     done
     echo
-
-    exit 1
 }
 
 ############################## handle-env
@@ -1020,7 +1022,7 @@ function handle-module()
 ############################## body
 
 set -- $(getopt -u -o t:adefSIuscbilnpPvh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env,no-patch:,plan: -- "$@")
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1107,6 +1109,9 @@ while [ $# -gt 0 ]; do
         --plan)
             PLAN=$2; shift
             ;;
+        --stat)
+            DOSTAT=yes;
+            ;;
 	(--)
 	    ;;
 	(*)
@@ -1149,6 +1154,8 @@ done
 #  Load build plan if any
 
 [ ! -z $PLAN ] && load-module-plan $PLAN
+
+[ $DOSTAT == yes ] && display-stat
 
 #  Prepare log dir
 
