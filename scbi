@@ -1,22 +1,38 @@
 #!/bin/bash
 #
-#  This is a script to build applications from sources. The simplest usage is:
+#  SCBI - (C) Pascal Obry - 2007-2019
+#
+#  SCBI stands for Setup Config Build Install
+#
+#  The goal is to automate the build procedures from sources. One of
+#  the main goal is to allow building from VCS repositories, a tar of
+#  sources and a user's repository checkout. This last point is
+#  important for developpers whereas the other steps are good to
+#  nightly automation for example.
+#
+#  SCBI is a set of main scripts, the builds driver and a module for
+#  each tool to handle.
+#
+#  The simplest usage is:
 #
 #     $ scbi darktable
 #
 #  To build an application called darktable. An application can be given a
-#  variant build:
+#  variant build (whatever it means, like a debug build):
 #
 #     $ scbi darktable/debug
 #
 #  And eventually a branch (in the repository) or a version for the tarball.
 #
 #     $ scbi darktable/debug:release-2.4.x
+#     $ scbi darktable/debug#2.6.0
 #
-#  To differenciate a version from a branch, the version string starts with '#'.
+#  To differenciate a tar version from a branch, the version string
+#  starts with '#'.
 #
-#  Finally darktable is a module for which a set of function is given in the
-#  darktable source file.
+#  The darktable module provides a set of function for each build
+#  process step. Like building or configuring and also to retrieve the
+#  VCS reference from which to get the sources.
 #
 #  For all modules the following function can be implemented and are called
 #  in this specific order:
@@ -40,7 +56,8 @@
 #    <module>-depends  parameter: NONE, return: array
 #                      list all modules required. these are either
 #                      source module handled by this script or a distrib
-#                      package. each module is <name>:<version>
+#                      package. A dependent module can be given a variant
+#                      and/or version.
 #
 #    <module>-env      parameter: $PREFIX $TARGET, return NONE
 #                      set environment to use when calling the routines
@@ -111,6 +128,11 @@
 #  The final step is to install into the final location, the copy is done
 #  by default.
 #
+#  The build plan is a file listing all or parts of the module to be
+#  compiled with a given variant and/or version. This makes it
+#  possible to have a specific build with precise versions for all
+#  dependencies.
+#
 #  Variables:
 #  ----------
 #
@@ -156,6 +178,8 @@
 #
 #  vcs : is either a copy of .vcs/<module> or a symlib to user's local checkout
 #  src : is either a link to [vcs] or [tarsrc]
+
+VERSION=1.0
 
 CDPATH=
 
@@ -367,7 +391,7 @@ function usage()
     echo "   -P | --purge-only    only remove builds directories"
     echo "      | --plan          add a build plan for modules"
     echo "   -n | --no-patch      do not apply patches"
-    echo "   -j | --jobs=<n>      max compilation jobs"
+    echo "   -j | --jobs=<n>      max compilation jobs \$JOBS"
 
     echo
     echo -n modules:
