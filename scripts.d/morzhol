@@ -1,20 +1,16 @@
 
-function morzhol-update()
+function morzhol-vcs()
 {
-    PREFIX=$1
-    TARGET=$2
-
-    cd $GIT_REPO/morzhol && git pull
+    echo git
+    echo https://github.com/TurboGit/morzhol.git
 }
 
-function morzhol-setup()
+function morzhol-cross-build()
 {
     PREFIX=$1
     TARGET=$2
 
-    if [ ! -d src_cp ]; then
-        ln -s $GIT_REPO/morzhol src_cp
-    fi
+    PROCESSORS=$JOBS make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
 }
 
 function morzhol-build()
@@ -22,12 +18,18 @@ function morzhol-build()
     PREFIX=$1
     TARGET=$2
 
-    cd build &&
-    if [ $HOST == $TARGET ]; then
-        PROCESSORS=$JOBS make
-    else
-        PROCESSORS=$JOBS make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
-    fi
+    PROCESSORS=$JOBS make
+}
+
+function morzhol-cross-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    # mkdir should be part of makefile
+    mkdir -p $PREFIX/$TARGET/bin
+
+    make OS=Windows_NT prefix=$PREFIX/$TARGET install
 }
 
 function morzhol-install()
@@ -35,10 +37,5 @@ function morzhol-install()
     PREFIX=$1
     TARGET=$2
 
-    cd build &&
-    if [ $HOST == $TARGET ]; then
-        make install
-    else
-        make OS=Windows_NT prefix=$PREFIX/$TARGET install
-    fi
+    make install
 }
