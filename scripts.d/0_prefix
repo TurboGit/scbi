@@ -1,12 +1,6 @@
 
 [ -z $ROOT ] && ROOT=$HOME/dev
 [ -z $BDIR ] && BDIR=$ROOT/builds
-[ -z $PREFIX ] &&
-    if [ -z $(which gnatls) ]; then
-        PREFIX=$BDIR/install
-    else
-        PREFIX=$(dirname $(dirname $(which gnatls)))
-    fi
+[ -z $PREFIX ] && PREFIX=$BDIR/install
 [ -z $TARBALL ] && TARBALL=$BDIR/.tar
 [ -z $PATCHES ] && PATCHES=$BDIR/.patches
-[ -z $GTKV ] && GTKV=3.0
