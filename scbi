@@ -46,53 +46,56 @@
 #  For all modules the following function can be implemented and are called
 #  in this specific order:
 #
-#    <module>-vcs      parameter: NONE, return: array
-#                      describe the VCS to get the sources
-#                        1st item: protocole (git, svn)
-#                        2nd item: URL
+#    <module>-vcs       parameter: NONE, return: array
+#                       describe the VCS to get the sources
+#                         1st item: protocole (git, svn)
+#                         2nd item: URL
 #
-#    <module>-tar      parameter: $VERSION, return: array
-#                      describe a way to get the sources as tarball
-#                        1st item: protocole (scp, none)
-#                        2st item: URL
-#                        3st item: archive name (with $VERSION)
+#    <module>-tar       parameter: $VERSION, return: array
+#                       describe a way to get the sources as tarball
+#                         1st item: protocole (scp, none)
+#                         2st item: URL
+#                         3st item: archive name (with $VERSION)
 #
-#    <module>-version  parameter: $PREFIX $TARGET, return: <installed version>
-#                      returns the current version of the installed tool
-#                      It can returns $VERSION_OK or $VERSION_ERROR if it
-#                      is not possible to get the real version.
+#    <module>-version   parameter: $PREFIX $TARGET, return: <installed version>
+#                       returns the current version of the installed tool
+#                       It can returns $VERSION_OK or $VERSION_ERROR if it
+#                       is not possible to get the real version.
 #
-#    <module>-depends  parameter: NONE, return: array
-#                      list all modules required. these are either
-#                      source module handled by this script or a distrib
-#                      package. A dependent module can be given a variant
-#                      and/or version.
+#    <module>-depends   parameter: NONE, return: array
+#                       list all modules required. these are either
+#                       source module handled by this script or a distrib
+#                       package. A dependent module can be given a variant
+#                       and/or version.
 #
-#    <module>-env      parameter: $PREFIX $TARGET, return NONE
-#                      set environment to use when calling the routines
-#                      (setup, config, build, install, tests).
+#    <module>-env       parameter: $PREFIX $TARGET, return NONE
+#                       set environment to use this module as a dependency
 #
-#    <module>-setup    parameter: $PREFIX $TARGET, return NONE
-#                      to setup build structure (optional)
-#                      also: pre-setup / post-setup
+#    <module>-build-env parameter: $PREFIX $TARGET, return NONE
+#                       set environment to use when calling the routines
+#                       (setup, config, build, install, tests).
 #
-#    <module>-config   parameter: $PREFIX $TARGET, return NONE
-#                      to configure, ./configure or other steps
-#                      also: pre-config / post-config
+#    <module>-setup     parameter: $PREFIX $TARGET, return NONE
+#                       to setup build structure (optional)
+#                       also: pre-setup / post-setup
 #
-#    <module>-build    parameter: $PREFIX $TARGET, return NONE
-#                      to build, make
-#                      also: pre-build / post-build
+#    <module>-config    parameter: $PREFIX $TARGET, return NONE
+#                       to configure, ./configure or other steps
+#                       also: pre-config / post-config
 #
-#    <module>-install  parameter: $PREFIX $TARGET, return NONE
-#                      to install (in $PREFIX)
-#                      also: pre-install / post-install
+#    <module>-build     parameter: $PREFIX $TARGET, return NONE
+#                       to build, make
+#                       also: pre-build / post-build
 #
-#    <module>-prefix   parameter: $PREFIX $TARGET, return string
-#                      the directory to install, default $BDIR/install
+#    <module>-install   parameter: $PREFIX $TARGET, return NONE
+#                       to install (in $PREFIX)
+#                       also: pre-install / post-install
 #
-#    <module>-tests    parameter: $PREFIX $TARGET, return NONE
-#                      to pass automatic tests
+#    <module>-prefix    parameter: $PREFIX $TARGET, return string
+#                       the directory to install, default $BDIR/install
+#
+#    <module>-tests     parameter: $PREFIX $TARGET, return NONE
+#                       to pass automatic tests
 #
 #  Note that all steps above are optional. And empty module will just do
 #  nothing. For setup, config, build, install it may exists version pre/post
@@ -279,12 +282,6 @@ function module-wrapper()
     (
         cd $BDIR/$module >> $log 2>&1
 
-        #  Set cross-env is needed
-
-        if [ "$HOST" != "$TARGET" ]; then
-            target-env $BDIR/install $TARGET
-        fi
-
         #  Go to build directory
 
         if [ "$step" = "setup" ]; then
@@ -441,6 +438,43 @@ function usage()
     fi
 }
 
+############################## handle-modue-env
+#
+# call module ENV, checking for variant
+
+function handle-module-env()
+{
+    local modref=$1
+    local ENV=$2
+
+    #  Get module information
+
+    local module_info=( $(get-module-ref $modref) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+
+    # Then setup the current module
+
+    if [ -d $BDIR/$module/$TARGET-$variant/install ]; then
+        cd $BDIR/$module/$TARGET-$variant/install
+    else
+        cd $BDIR/$module/$TARGET-$variant
+    fi
+
+    fn-exists $module-$variant-$ENV
+
+    if [ $? = 0 ]; then
+        $module-$variant-$ENV $BDIR/$module/build/install $TARGET
+    else
+        fn-exists $module-$ENV
+
+        if [ $? = 0 ]; then
+            $module-$ENV $BDIR/$module/build/install $TARGET
+        fi
+    fi
+}
+
 ############################## handle-env
 #
 # recursively set the environment for the module based on the dependencies
@@ -463,7 +497,7 @@ function handle-env()
     if [ -f $DEFS/$module ]; then
         source $DEFS/$module
 
-        # setup depends recursively if any
+        # Setup depends recursively if any
 
         fn-exists $module-$variant-depends
 
@@ -481,25 +515,7 @@ function handle-env()
             fi
         fi
 
-        # then setup the current module
-
-        if [ -d $BDIR/$module/$TARGET-$variant/install ]; then
-            cd $BDIR/$module/$TARGET-$variant/install
-        else
-            cd $BDIR/$module/$TARGET-$variant
-        fi
-
-        fn-exists $module-$variant-env
-
-        if [ $? = 0 ]; then
-            $module-$variant-env $BDIR/$module/build/install $TARGET
-        else
-            fn-exists $module-env
-
-            if [ $? = 0 ]; then
-                $module-env $BDIR/$module/build/install $TARGET
-            fi
-        fi
+        handle-module-env $modref env
     fi
 }
 
@@ -841,7 +857,19 @@ function handle-module()
     #  Set module environment if defined
 
     (
+        #  Set cross-env if needed
+
+        if [ "$HOST" != "$TARGET" ]; then
+            target-env $BDIR/install $TARGET
+        fi
+
+        #  Setup recursively the environment to use depends
+
         handle-env $modref
+
+        #  Then setup the build environment for the current module
+
+        handle-module-env $modref build-env
 
         #  Log module enviroment
 

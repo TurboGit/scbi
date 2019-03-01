@@ -27,9 +27,8 @@ function target-env()
 
 function no-target-env()
 {
-    unset CPLUS_INCLUDE_PATH
-
     export C_INCLUDE_PATH=$O_C_INCLUDE_PATH
+    export CPLUS_INCLUDE_PATH=$O_CPLUS_INCLUDE_PATH
     export LIBRARY_PATH=$O_LIBRARY_PATH
     export ADA_PROJECT_PATH=$PREFIX/lib/gnat${ADA_PROJECT_PATH:+:$ADA_PROJECT_PATH}
 }
@@ -49,4 +48,7 @@ function system-compiler()
     no-target-env
 
     export PATH=/usr/bin:/bin:/usr/local/bin
+    export C_INCLUDE_PATH=/usr/include/$HOST:/usr/include
+    export CPLUS_INCLUDE_PATH=/usr/include/$HOST:/usr/include
+    export LIBRARY_PATH=/usr/lib/$HOST:/lib/$HOST:/usr/lib
 }
