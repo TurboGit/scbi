@@ -133,6 +133,17 @@
 #  possible to have a specific build with precise versions for all
 #  dependencies.
 #
+#  Finally a module can be defined as a super-module. That is, it
+#  lists the set of modules to build. In this case, the module just
+#  define the function:
+#
+#     <module>-modules
+#
+#  This function is a single echo with the name of all modules to
+#  handle. This makes it possible to build multiple projects/modules
+#  not directly related. It is in fact equivalent to calling scbi with
+#  all the modules listed as arguments.
+#
 #  Variables:
 #  ----------
 #
