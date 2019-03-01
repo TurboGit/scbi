@@ -185,22 +185,5 @@ function display-stat()
         echo " $EMAIL"
     fi
 
-    echo -n "build plans           :"
-    local linelen=0
-
-    if [ -z "$(ls $DEFS/plan-* 2> /dev/null)" ]; then
-        echo " none"
-    else
-        for module in $DEFS/plan-*; do
-            bn=$(basename $module)
-            linelen=$(expr $linelen + ${#bn} + 1)
-            if [ $linelen -gt 70 ]; then
-                echo
-                echo -n "                       "
-                linelen=${#bn}
-            fi
-	    echo -n " ${bn/plan-/}"
-        done
-    fi
     echo
 }

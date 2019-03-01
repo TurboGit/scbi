@@ -137,7 +137,7 @@
 #  The final step is to install into the final location, the copy is done
 #  by default.
 #
-#  The build plan is a file listing all or parts of the module to be
+#  The build plan is a file listing all or parts of the modules to be
 #  compiled with a given variant and/or version. This makes it
 #  possible to have a specific build with precise versions for all
 #  dependencies.
@@ -373,11 +373,11 @@ function usage()
     echo $0 [options] module1 [module2 ... modulen]
 
     echo ""
+    echo "   modulen  <name>           build from repository main branch"
     echo "   modulen  <name>/<variant> build <variant> from repository version"
     echo "   modulen  <name>:<branch>  build from repository version <branch>"
     echo "   modulen  <name>:#<ver>    build from tarbal version <ver>"
     echo "   modulen  <name>:dev       build from user's repository current branch"
-    echo "   modulen  <name>           build from repository main branch"
     echo ""
     echo "   -h | --help          this help message"
     echo "   -e | --env=<name>    environment file ~/.scbi-<name>"
@@ -404,7 +404,7 @@ function usage()
     echo "   -j | --jobs=<n>      max compilation jobs \$JOBS"
 
     echo
-    echo -n modules:
+    echo -n "modules:"
 
     local linelen=0
 
@@ -419,6 +419,26 @@ function usage()
 	echo -n " $bn"
     done
     echo
+    echo
+
+    echo -n "plans  :"
+    local linelen=0
+
+    if [ -z "$(ls $DEFS/.plan-* 2> /dev/null)" ]; then
+        echo " none"
+    else
+        for module in $DEFS/.plan-*; do
+            bn=$(basename $module)
+            linelen=$(expr $linelen + ${#bn} + 1)
+            if [ $linelen -gt 70 ]; then
+                echo
+                echo -n "        "
+                linelen=${#bn}
+            fi
+	    echo -n " ${bn/.plan-/}"
+        done
+        echo
+    fi
 }
 
 ############################## handle-env
