@@ -31,7 +31,7 @@ _scbi_plan()
 {
     local IFS=$'\n'
 
-    for r in $(ls $HOME/.config/scbi/plan-* 2>/dev/null); do
+    for r in $(ls $HOME/.config/scbi/.plan-* 2>/dev/null); do
         printf %s$'\n' "${r#$HOME/.config/scbi/.plan-} "
     done
 }
