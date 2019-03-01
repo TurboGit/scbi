@@ -6,10 +6,10 @@
 (
     mkdir -p .root/git
     cd .root/git
-    git clone ../repos/mainmult.bundle &> /dev/null
-    sed -i 's/main on master/better main in dev/g' ./mainmult/main.c
-    git clone ../repos/lib2.bundle &> /dev/null
-    sed -i 's/libb.B master/libb.B next version/g' ./lib2/lib2.c
+    git clone ../repos/mainmult.bundle mainmult.bundle &> /dev/null
+    sed -i 's/main on master/better main in dev/g' ./mainmult.bundle/main.c
+    git clone ../repos/lib2.bundle lib2.bundle &> /dev/null
+    sed -i 's/libb.B master/libb.B next version/g' ./lib2.bundle/lib2.c
 )
 
 echo '=================== plan v2 (lib1:v2 lib2 & mainmult:dev)'

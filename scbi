@@ -624,9 +624,15 @@ function handle-sources()
         fn-exists $module-vcs
 
         if [[ $? = 0 ]]; then
+            vcs=( $($module-vcs) )
+            VCS_NAME=${vcs[0]}
+            VCS_URL=${vcs[1]}
+
+            REPO=$(basename $VCS_URL .git)
+
             if [ $kind = DEV ]; then
-                if [ -d $GIT_REPO/$module ]; then
-                    ln -s $GIT_REPO/$module vcs
+                if [ -d $GIT_REPO/$REPO ]; then
+                    ln -s $GIT_REPO/$REPO vcs
 
                     #  Compute and store the version id of the sources +
                     #  compiler. That is when the compiler is changed we
@@ -639,17 +645,11 @@ function handle-sources()
 
                 else
                     ilog build cannot find local dev repository:
-                    ilog build $GIT_REPO/$module
+                    ilog build $GIT_REPO/$REPO
                     exit 1
                 fi
 
             else
-                vcs=( $($module-vcs) )
-                VCS_NAME=${vcs[0]}
-                VCS_URL=${vcs[1]}
-
-                REPO=$(basename $VCS_URL .git)
-
                 if [ -f source-id ]; then
                     if [ "$(cat source-id)" != "vcs-$ref" ]; then
                         # a different version is needed
