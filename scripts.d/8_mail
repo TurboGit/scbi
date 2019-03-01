@@ -1,7 +1,9 @@
 #  Support for sending mail notification
+#
+# EMAIL              : can be set to an e-mail, recipient of notifications
+# EMAIL_NOTIFICATION : [yes/no] to activate or not the notifications
 
-[ -z $EMAIL ] && EMAIL=pascal@obry.net
-[ -z $EMAIL_NOTIFICATION ] && EMAIL_NOTIFICATION=yes
+[ -z $EMAIL_NOTIFICATION ] && EMAIL_NOTIFICATION=no
 
 function send-mail()
 {
