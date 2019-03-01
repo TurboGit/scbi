@@ -1,6 +1,6 @@
 
-[ -z $ROOT ] && ROOT=$HOME/dev
-[ -z $BDIR ] && BDIR=$ROOT/builds
+[ -z $SCBI_ROOT ] && SCBI_ROOT=$HOME/dev
+[ -z $BDIR ] && BDIR=$SCBI_ROOT/builds
 [ -z $PREFIX ] && PREFIX=$BDIR/install
 [ -z $TARBALL ] && TARBALL=$BDIR/.tar
 [ -z $PATCHES ] && PATCHES=$BDIR/.patches

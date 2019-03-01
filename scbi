@@ -156,10 +156,10 @@
 #  Variables:
 #  ----------
 #
-#  ROOT       : default root directory to use
-#  BDIR       : the modules build root directory ($ROOT/builds)
-#  GIT_REPO   : directory with local Git repositories ($ROOT/repositories/git)
-#  SVN_REPO   : directory with local Svn repositories ($ROOT/repositories/svn)
+#  SCBI_ROOT  : default root directory to use
+#  BDIR       : the modules build root directory ($SCBI_ROOT/builds)
+#  GIT_REPO   : directory with local Git repositories ($SCBI_ROOT/repositories/git)
+#  SVN_REPO   : directory with local Svn repositories ($SCBI_ROOT/repositories/svn)
 #  TARBALL    : directory where downloaded tarball are stores ($BDIR/.tar)
 #  PREFIX     : directory where module are to be installed ($BDIR/install)
 #  HOST       : current host (gcc -dumpmachine)
@@ -526,7 +526,7 @@ function handle-depends()
         return
     fi
 
-    cd $ROOT
+    cd $SCBI_ROOT
 
     #  If module not found, check for a possible distrib package
 
@@ -563,7 +563,7 @@ function handle-depends()
 
     mver=$(get-version-number $mver)
 
-    cd $ROOT
+    cd $SCBI_ROOT
 
     [ "$ref" = "NONE" ] && ref=0
 
@@ -745,7 +745,7 @@ function handle-module()
         return
     fi
 
-    cd $ROOT
+    cd $SCBI_ROOT
 
     [ ! -f $DEFS/$module ] &&
         echo No description for module $module &&

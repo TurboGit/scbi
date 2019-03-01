@@ -1,2 +1,2 @@
-[ -z $GIT_REPO ] && GIT_REPO=$ROOT/repositories/git
-[ -z $SVN_REPO ] && SVN_REPO=$ROOT/repositories/svn
+[ -z $GIT_REPO ] && GIT_REPO=$SCBI_ROOT/repositories/git
+[ -z $SVN_REPO ] && SVN_REPO=$SCBI_ROOT/repositories/svn
