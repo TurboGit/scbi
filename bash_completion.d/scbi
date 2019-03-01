@@ -1,0 +1,111 @@
+# Completion command and options for scbi builds driver
+
+_SCBI_ARGS="-t -S --no-setup -I --no-install -u --update -s --setup
+-c --config -b --build -i --install -r --tests -v --verbose
+-l --no-log -p --purge -P --purge-only -d --deps -a --archive -h --help
+-j --jobs --target= --env= -e --tests-only --plan= -n --no-patch"
+
+_gnat_targets()
+{
+    local ROOT r b
+    local IFS=$'\n'
+
+    ROOT=$(dirname $(which gcc))
+
+    for r in $(ls -d $ROOT/../libexec/gcc/* 2>/dev/null); do
+        b=$(basename $r)
+        printf %s$'\n' "${b} "
+    done
+}
+
+_scbi_env()
+{
+    local IFS=$'\n'
+
+    for r in $(ls $HOME/.config/scbi/.env-* 2>/dev/null); do
+        printf %s$'\n' "${r#$HOME/.config/scbi/.env-} "
+    done
+}
+
+_scbi_plan()
+{
+    local IFS=$'\n'
+
+    for r in $(ls $HOME/.config/scbi/plan-* 2>/dev/null); do
+        printf %s$'\n' "${r#$HOME/.config/scbi/.plan-} "
+    done
+}
+
+_scbi_complete()
+{
+    complete -o bashdefault -o default -o nospace -F _$1 $1
+}
+
+_scbicomp_1 ()
+{
+	local c IFS=' '$'\t'$'\n'
+	for c in $1; do
+		case "$c$2" in
+		-*=*)  printf %s$'\n' "$c$2" ;;
+		*.)    printf %s$'\n' "$c$2" ;;
+		*)     printf %s$'\n' "$c$2 " ;;
+		esac
+	done
+}
+
+# generates completion reply with compgen
+_scbicomp ()
+{
+	local cur="${COMP_WORDS[COMP_CWORD]}"
+	if [ $# -gt 2 ]; then
+	    cur="$3"
+	fi
+
+	case "$cur" in
+	    -*=)
+                 COMPREPLY=()
+		 ;;
+	      *)
+	         local IFS=$'\n'
+		 COMPREPLY=($(compgen -P "${2-}" \
+		     -W "$(_scbicomp_1 "${1-}" "${4-}")" \
+		     -- "$cur"))
+		 ;;
+	esac
+}
+
+_scbi()
+{
+    COMPREPLY=()
+    cur=$(_get_cword =)
+    prev=${COMP_WORDS[COMP_CWORD-1]}
+
+    case "$cur" in
+        --target=*)
+            _scbicomp "$(_gnat_targets)" "" "${cur##--target=}"
+            return 0
+            ;;
+        --plan=*)
+            _scbicomp "$(_scbi_plan)" "" "${cur##--plan=}"
+            return 0
+            ;;
+        --env=*)
+            _scbicomp "$(_scbi_env)" "" "${cur##--env=}"
+            return 0
+            ;;
+        -*)
+            _scbicomp "$_SCBI_ARGS"
+            ;;
+         *)
+            case "$prev" in
+                -t)
+                    _scbicomp "$(_gnat_targets)" "" "${cur##--target=}"
+                    return 0
+                    ;;
+                *)
+                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*)"
+                    ;;
+            esac
+    esac
+} &&
+_scbi_complete scbi
