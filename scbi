@@ -4,11 +4,20 @@
 #
 #  SCBI stands for Setup Config Build Install
 #
-#  The goal is to automate the build procedures from sources. One of
-#  the main goal is to allow building from VCS repositories, a tar of
-#  sources and a user's repository checkout. This last point is
-#  important for developpers whereas the other steps are good to
-#  nightly automation for example.
+#  The goal is to automate the build procedures from sources. The main
+#  features are:
+#
+#     - Allow recursive build of dependencies
+#     - Building from a VCS (currently supported Git and SVN)
+#     - Supports build variants
+#     - Supports for cross compilation
+#     - Building a specific branch or tag (Git only)
+#     - Building from a tarball
+#     - Building from a user's checkout for easy debug
+#     - Support for build plan (modules with specific variant and/or version)
+#     - All setup, source copy and installation is transparent, users just need
+#       to fill functions to configure, build and install (generally just
+#       calling configure autotool or cmake and make)
 #
 #  SCBI is a set of main scripts, the builds driver and a module for
 #  each tool to handle.
