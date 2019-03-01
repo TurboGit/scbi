@@ -73,8 +73,8 @@ function module-purge()
     local TARGET=$4
     local OOT=$5
 
-    # note that we keep the module install directory to be sure that we
-    # can clean-up the final install destination.
+    # note that we keep the manifest to be sure that we can clean-up
+    # the final install destination.
 
     if [ -d $PREFIX/$TARGET-$VARIANT ]; then
         rm -fr $PREFIX/$TARGET-$VARIANT/build
