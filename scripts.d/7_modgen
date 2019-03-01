@@ -159,12 +159,16 @@ function module-install()
         fi
     fi
 
-    # get all installed files
+    # get all installed files, do that only if the installation has
+    # been done. module just bringing sources for another module won't
+    # install anything.
 
-    (
-        cd ./build/install
-        find . -type f > ../manifest
-    )
+    if [ -d ./build/install ]; then
+        (
+            cd ./build/install
+            find . -type f > ../manifest
+        )
+    fi
 
     cp build-id-$VARIANT $TARGET-$VARIANT/build-id
 }
