@@ -265,20 +265,6 @@ function module-wrapper()
             target-env $BDIR/install $TARGET
         fi
 
-        #  And setup any module environment
-
-        fn-exists $module-$variant-env
-
-        if [ $? = 0 ]; then
-            $module-$variant-env $BDIR/$module/build/install $TARGET
-        else
-            fn-exists $module-env
-
-            if [ $? = 0 ]; then
-                $module-env $BDIR/$module/build/install $TARGET
-            fi
-        fi
-
         #  Go to build directory
 
         if [ "$step" = "setup" ]; then
