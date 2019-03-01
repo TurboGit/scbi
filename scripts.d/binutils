@@ -10,11 +10,6 @@ function binutils-out-of-tree()
     echo true
 }
 
-function binutils-env()
-{
-    system-compiler
-}
-
 function binutils-version()
 {
     PREFIX=$1
