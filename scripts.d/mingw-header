@@ -20,7 +20,30 @@ function mingw-header-out-of-tree()
     echo true
 }
 
+function mingw-header-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    case $TARGET in
+	*mingw*)
+	    ;;
+	*)
+            echo $TARGET not supported for mingw.
+            return 1
+	    ;;
+    esac
+}
+
 function mingw-header-env()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    export C_INCLUDE_PATH=$BDIR/mingw-header/$TARGET-default/install/$TARGET/include:$C_INCLUDE_PATH
+}
+
+function mingw-header-build-env()
 {
     no-target-env
 }

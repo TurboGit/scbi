@@ -1,10 +1,16 @@
 
-function mingw-env()
+function mingw-vcs()
+{
+    echo git
+    echo git://git.code.sf.net/p/mingw-w64/mingw-w64
+}
+
+function mingw-build-env()
 {
     PREFIX=$1
     TARGET=$2
 
-    target-env $BDIR/pgcc/install $TARGET
+    target-env $BDIR/pgcc/install/$TARGET
 }
 
 function mingw-depends()
@@ -20,7 +26,6 @@ function mingw-setup()
 
     case $TARGET in
 	*mingw*)
-            ln -s $BDIR/mingw-header/src .
 	    ;;
 	*)
             echo $TARGET not supported for mingw.
@@ -39,8 +44,10 @@ function mingw-config()
     PREFIX=$1
     TARGET=$2
 
-    ../src/mingw-w64-crt/configure \
-	--prefix=$PREFIX/$TARGET --host=$TARGET --target=$TARGET
+    env > /tmp/env
+
+    ../src/mingw-w64-crt/configure --enable-wildcard \
+	--prefix=$PREFIX/$TARGET --host=$TARGET --build=$HOST
 }
 
 function mingw-build()
