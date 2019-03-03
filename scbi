@@ -458,8 +458,10 @@ function handle-module-env()
 
     if [ -d $BDIR/$module/$TARGET-$variant/install ]; then
         cd $BDIR/$module/$TARGET-$variant/install
-    else
+    elif [ -d $BDIR/$module/$TARGET-$variant ]; then
         cd $BDIR/$module/$TARGET-$variant
+    else
+        cd $BDIR/$module
     fi
 
     fn-exists $module-$variant-$ENV

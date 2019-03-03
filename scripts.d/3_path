@@ -2,13 +2,36 @@
 # default GNAT path
 
 export PATH=$PREFIX/bin:$PATH
-export LIBRARY_PATH=/usr/lib/$HOST:/lib/$HOST:/usr/lib${LIBRARY_PATH:+:$LIBRARY_PATH}
-export C_INCLUDE_PATH=/usr/include/$HOST:/usr/include${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
-export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}
 
-O_C_INCLUDE_PATH=$C_INCLUDE_PATH
-O_CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH
-O_LIBRARY_PATH=$LIBRARY_PATH
+DEFAUL_C_INCLUDE_PATH=$C_INCLUDE_PATH
+DEFAUL_CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH
+DEFAUL_LIBRARY_PATH=$LIBRARY_PATH
+DEFAULT_ADA_PROJECT_PATH=$ADA_PROJECT_PATH
+
+############################## set-compiler-paths
+
+function set-compiler-paths()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    VER=$(gcc -dumpversion)
+
+    if [ -z $TARGET ]; then
+        I=$PREFIX/include
+        IT=$PREFIX/include/$HOST
+        P=$PREFIX/share/gpr
+    else
+        I=$PREFIX/include
+        IT=$PREFIX/include/$TARGET
+        P=$PREFIX/$TARGET/share/gpr
+    fi
+
+    export C_INCLUDE_PATH=$IT:$I
+    export CPLUS_INCLUDE_PATH=$IT:$IT/c++/$VER:$I/c++/$VER:$I
+    export LIBRARY_PATH=/usr/lib/$HOST:/lib/$HOST:/usr/lib
+    export ADA_PROJECT_PATH=$P
+}
 
 ############################## target-env
 
@@ -17,20 +40,32 @@ function target-env()
     local PREFIX=$1
     local TARGET=$2
 
-    export C_INCLUDE_PATH=$PREFIX/$TARGET/include
-    export CPLUS_INCLUDE_PATH=$PREFIX/$TARGET/include
-    export LIBRARY_PATH=$PREFIX/$TARGET/lib:$O_LIBRARY_PATH
-    export ADA_PROJECT_PATH=$PREFIX/$TARGET/lib/gnat${ADA_PROJECT_PATH:+:$ADA_PROJECT_PATH}
+    if [ -z $TARGET ]; then
+        B=$PREFIX/bin
+    else
+        B=$PREFIX/$TARGET/bin
+    fi
+
+    export PATH=$B:$PATH
+
+    set-compiler-paths $PREFIX $TARGET
 }
 
 ############################## no-target-env
 
 function no-target-env()
 {
-    export C_INCLUDE_PATH=$O_C_INCLUDE_PATH
-    export CPLUS_INCLUDE_PATH=$O_CPLUS_INCLUDE_PATH
-    export LIBRARY_PATH=$O_LIBRARY_PATH
-    export ADA_PROJECT_PATH=$PREFIX/lib/gnat${ADA_PROJECT_PATH:+:$ADA_PROJECT_PATH}
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [ -z $TARGET ]; then
+        B=$PREFIX/bin
+    else
+        B=$PREFIX/$TARGET/bin
+    fi
+
+    export PATH=$B:$PATH
+    set-compiler-paths $PREFIX $HOST
 }
 
 ############################## gpython-env
@@ -48,7 +83,9 @@ function system-compiler()
     no-target-env
 
     export PATH=/usr/bin:/bin:/usr/local/bin
-    export C_INCLUDE_PATH=/usr/include/$HOST:/usr/include
-    export CPLUS_INCLUDE_PATH=/usr/include/$HOST:/usr/include
-    export LIBRARY_PATH=/usr/lib/$HOST:/lib/$HOST:/usr/lib
+
+    set-compiler-paths
 }
+
+export PATH=$PREFIX/bin:$PATH
+set-compiler-paths /usr
