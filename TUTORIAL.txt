@@ -132,7 +132,7 @@ And that's all is needed to build this project. Now to build it:
 
       $ scbi lcms
       2019/03/01 06:54 : Building lcms-default
-      2019/03/01 06:54 : target x86_64-linux-gnu
+      2019/03/01 06:54 : native x86_64-linux-gnu
       2019/03/01 06:54 : steps : setup config build install
       2019/03/01 06:54 : get sources from git
       2019/03/01 06:54 : config starting
@@ -148,7 +148,7 @@ sources have not changed:
 
       $ scbi lcms
       2019/03/01 06:55 : Building lcms-default
-      2019/03/01 06:55 : target x86_64-linux-gnu
+      2019/03/01 06:55 : native x86_64-linux-gnu
       2019/03/01 06:55 : steps : setup config build install
       2019/03/01 06:55 : no build needed, versions match
       2019/03/01 06:55 : copy install into ../install
@@ -172,7 +172,7 @@ And then build the release version:
 
       $ scbi lcms/release
       2019/03/01 07:09 : Building lcms-release
-      2019/03/01 07:09 : target x86_64-linux-gnu
+      2019/03/01 07:09 : native x86_64-linux-gnu
       2019/03/01 07:09 : steps : setup config build install
       2019/03/01 07:09 : release-config starting
       2019/03/01 07:09 : release-config completed
@@ -194,7 +194,7 @@ repository and rebuild if some modifications are found:
 
       $ scbi -u lcms/release
       2019/03/01 07:14 : Building lcms-release
-      2019/03/01 07:14 : target x86_64-linux-gnu
+      2019/03/01 07:14 : native x86_64-linux-gnu
       2019/03/01 07:14 : steps : setup config build install
       2019/03/01 07:14 : get sources from git
       2019/03/01 07:14 : no build needed, versions match
@@ -206,7 +206,7 @@ of Little-CMS is 2.9, tagged as lcms2.9, to build it it is as simple as:
 
       $ scbi -u lcms/release:lcms2.9
       2019/03/01 07:16 : Building lcms-release
-      2019/03/01 07:16 : target x86_64-linux-gnu
+      2019/03/01 07:16 : native x86_64-linux-gnu
       2019/03/01 07:16 : steps : setup config build install
       2019/03/01 07:16 : get sources from git
       2019/03/01 07:16 : release-config starting
@@ -252,7 +252,7 @@ version to scbi:
 
       $ scbi lcms:dev
       2019/03/01 07:39 : Building lcms-default
-      2019/03/01 07:39 : target x86_64-linux-gnu
+      2019/03/01 07:39 : native x86_64-linux-gnu
       2019/03/01 07:39 : steps : setup config build install
       2019/03/01 07:39 : config starting
       2019/03/01 07:39 : config completed

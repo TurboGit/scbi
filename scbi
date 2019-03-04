@@ -847,7 +847,13 @@ function handle-module()
     [ $PURGE = only ] && exit 0
 
     ilog build Building $module-$variant | tee -a $log
-    ilog build target $TARGET | tee -a $log
+
+    if [ $HOST == $TARGET ]; then
+        ilog build native $TARGET | tee -a $log
+    else
+        ilog build cross $TARGET | tee -a $log
+    fi
+
     ilog build steps : $STEPS | tee -a $log
 
     #  Create the build root directory if needed, note that we do check here
