@@ -2,7 +2,7 @@
 function mingw-header-vcs()
 {
     echo git
-    echo git://git.code.sf.net/p/mingw-w64/mingw-w64
+    echo https://github.com/mirror/mingw-w64.git
 }
 
 function mingw-header-version()

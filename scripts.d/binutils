@@ -2,7 +2,7 @@
 function binutils-vcs()
 {
     echo git
-    echo git://sourceware.org/git/binutils-gdb.git
+    echo http://sourceware.org/git/binutils-gdb.git
 }
 
 function binutils-out-of-tree()
