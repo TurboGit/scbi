@@ -6,6 +6,19 @@ function fn-exists()
     declare -f $1 > /dev/null
 }
 
+############################## add-to-var
+# add DIR to environment variable VAR, does nothing if DIR does not exists
+
+function add-to-var()
+{
+    VAR=$1
+    DIR=$2
+
+    if [ -d "$DIR" ] && [[ ":${!VAR}:" != *":$DIR:"* ]]; then
+       export $VAR="$DIR:${!VAR}"
+    fi
+}
+
 ############################## get-version-number
 # return a 2 digits version number for $1
 
