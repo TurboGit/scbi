@@ -40,6 +40,10 @@ function target-env()
     local PREFIX=$1
     local TARGET=$2
 
+    if [ -z $PREFIX ]; then
+        PREFIX=$(dirname $(dirname $(which gcc)))
+    fi
+
     if [ -z $TARGET ]; then
         B=$PREFIX/bin
     else
@@ -58,6 +62,17 @@ function no-target-env()
     local PREFIX=$1
     local TARGET=$2
 
+    if [ -z $PREFIX ]; then
+        PREFIX=$(dirname $(dirname $(which gcc)))
+
+        # check if gcc is inside a target specific dir
+        # <prefix>/<target>/bin
+
+        if [ -x $PREFIX/../bin/gcc ]; then
+            PREFIX=$(dirname $PREFIX)
+        fi
+    fi
+
     if [ -z $TARGET ]; then
         B=$PREFIX/bin
     else
@@ -65,6 +80,7 @@ function no-target-env()
     fi
 
     export PATH=$B:$PATH
+
     set-compiler-paths $PREFIX $HOST
 }
 
@@ -80,12 +96,30 @@ function gpython-env()
 
 function system-compiler()
 {
-    no-target-env
-
     export PATH=/usr/bin:/bin:/usr/local/bin
 
-    set-compiler-paths
+    set-compiler-paths /usr
+}
+
+############################## built-compiler
+
+function built-compiler()
+{
+    local PREFIX=$BDIR/install
+
+    export PATH=$PREFIX/bin:$PATH
+
+    set-compiler-paths $PREFIX
 }
 
 export PATH=$PREFIX/bin:$PATH
 set-compiler-paths /usr
+
+# make an alias for x86_64-linux if necessary
+
+if [ -e $PREFIX/x86_64-linux-gnu -a ! -e $PREFIX/x86_64-linux ]; then
+    (
+        cd $PREFIX
+        ln -s x86_64-linux-gnu x86_64-linux
+    )
+fi
