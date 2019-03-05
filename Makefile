@@ -4,9 +4,10 @@
 SCRDIR=$(HOME)/.config/scbi
 
 all:
+	mkdir -p $(HOME)/bin
 	cp scbi $(HOME)/bin
 	mkdir -p $(SCRDIR)
-	rm -f $(SCRDIR)/*
+	rm -f $(SCRDIR)/*~
 	cp scripts.d/*  $(SCRDIR)
 
 test:
