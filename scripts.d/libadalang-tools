@@ -1,0 +1,27 @@
+
+function libadalang-tools-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/libadalang-tools
+}
+
+function libadalang-tools-depends()
+{
+    echo libadalang
+}
+
+function libadalang-tools-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make
+}
+
+function libadalang-tools-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make install-strip DESTDIR=$PREFIX
+}
