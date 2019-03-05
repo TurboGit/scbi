@@ -7,7 +7,7 @@ function langkit-vcs()
 
 function langkit-depends()
 {
-    echo gnatcoll
+    echo gnatcoll-core
 }
 
 function langkit-version()
