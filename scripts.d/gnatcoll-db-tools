@@ -7,10 +7,7 @@ function gnatcoll-db-tools-vcs()
 
 function gnatcoll-db-tools-depends()
 {
-    echo gnatutil
-    echo xmlada
-    echo libgpr
-    echo gtkada
+    echo gnatcoll-core
 }
 
 function gnatcoll-db-tools-tar()
@@ -28,9 +25,11 @@ function gnatcoll-db-tools-config()
     TARGET=$2
 
     if [ $HOST == $TARGET ]; then
-        make -C gnatcoll_db2ada setup
+        make -C gnatcoll_db2ada setup &&
+            make -C xref setup
     else
-        make -C gnatcoll_db2ada TARGET=$TARGET setup
+        make -C gnatcoll_db2ada TARGET=$TARGET setup &&
+            make -C xref TARGET=$TARGET setup
     fi
 }
 
@@ -39,7 +38,8 @@ function gnatcoll-db-tools-build()
     PREFIX=$1
     TARGET=$2
 
-    PROCESSORS=$JOBS make -C gnatcoll_db2ada
+    PROCESSORS=$JOBS make -C gnatcoll_db2ada &&
+        PROCESSORS=$JOBS make -C xref
 }
 
 function gnatcoll-db-tools-install()
@@ -47,5 +47,6 @@ function gnatcoll-db-tools-install()
     PREFIX=$1
     TARGET=$2
 
-    make -C gnatcoll_db2ada install
+    make -C gnatcoll_db2ada install &&
+        make -C xref install
 }
