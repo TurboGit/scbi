@@ -32,7 +32,9 @@ function gnatcoll-bindings-python-build()
 
     GOPTS="-j$JOBS -p -XBUILD=PROD --target=$TARGET"
 
-    gprbuild -v $GOPTS python/gnatcoll_python.gpr
+    for kind in static relocatable; do
+        gprbuild -v $GOPTS -XLIBRARY_TYPE=$kind python/gnatcoll_python.gpr
+    done
 }
 
 function gnatcoll-bindings-python-install()
@@ -49,6 +51,10 @@ function gnatcoll-bindings-python-install()
         gprinstall $GOPTS --uninstall gnatcoll_python
     fi
 
-    gprinstall $GOPTS --build-var=GNATCOLL.PYTHON_BUILD \
-               python/gnatcoll_python.gpr
+    for kind in static relocatable; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
+                   --build-var=GNATCOLL.PYTHON_BUILD \
+                   --build-name=$kind \
+                   python/gnatcoll_python.gpr
+    done
 }
