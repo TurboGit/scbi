@@ -1,0 +1,58 @@
+
+function gnatcoll-bindings-gmp-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gnatcoll-bindings
+}
+
+function gnatcoll-bindings-gmp-depends()
+{
+    echo gnatcoll-core
+}
+
+function gnatcoll-bindings-gmp-tar()
+{
+    VERSION=$1
+
+    echo none
+    echo none
+    echo gnatcoll-bindings-$VERSION-src.tar.gz
+}
+
+function gnatcoll-bindings-gmp-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    GOPTS="-j$JOBS -p -XBUILD=PROD --target=$TARGET"
+
+    if [ $HOST == $TARGET ]; then
+        for kind in static relocatable static-pic; do
+            gprbuild $GOPTS -XLIBRARY_TYPE=$kind gmp/gnatcoll_gmp.gpr
+        done
+    fi
+}
+
+function gnatcoll-bindings-gmp-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
+    GOPTS="$GOPTS --build-var=LIBRARY_TYPE"
+
+    PM=$PREFIX/$TARGET/install/$TARGET/share/gpr/manifests
+
+    if [ -f $PM/gnatcoll_gmp ]; then
+        gprinstall $GOPTS --uninstall gnatcoll_gmp
+    fi
+
+    if [ $HOST == $TARGET ]; then
+        for kind in static relocatable static-pic; do
+            gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
+                       --build-var=GNATCOLL.ICONV_BUILD \
+                       --install-name=gnatcoll_gmp \
+                       --build-name=$kind gmp/gnatcoll_gmp.gpr
+        done
+    fi
+}

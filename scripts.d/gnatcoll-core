@@ -1,0 +1,54 @@
+
+function gnatcoll-core-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gnatcoll-core.git
+}
+
+function gnatcoll-core-depends()
+{
+    echo gnatutil
+    echo libgpr
+}
+
+function gnatcoll-core-tar()
+{
+    VERSION=$1
+
+    echo none
+    echo none
+    echo gnatcoll-core-$VERSION-src.tar.gz
+}
+
+function gnatcoll-core-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ $HOST == $TARGET ]; then
+        MMAP=yes
+        GOS=unix
+    else
+        MMAP=no
+        GOS=windows
+    fi
+
+    make INTEGRATED=yes prefix=$PREFIX GNATCOLL_MMAP=$MMAP GNATCOLL_OS=$GOS \
+         TARGET=$TARGET NORMALIZED_TARGET=$TARGET setup
+}
+
+function gnatcoll-core-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    PROCESSORS=$JOBS make NORMALIZED_TARGET=$TARGET
+}
+
+function gnatcoll-core-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make NORMALIZED_TARGET=$TARGET install
+}

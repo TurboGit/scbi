@@ -1,0 +1,54 @@
+
+function gnatcoll-bindings-python-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gnatcoll-bindings
+}
+
+function gnatcoll-bindings-python-depends()
+{
+    echo gnatcoll-core
+}
+
+function gnatcoll-bindings-python-tar()
+{
+    VERSION=$1
+
+    echo none
+    echo none
+    echo gnatcoll-bindings-$VERSION-src.tar.gz
+}
+
+function gnatcoll-bindings-python-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ $HOST == $TARGET ]; then
+        export GNATCOLL_PYTHON_CFLAGS="-I/usr/include/python2.7"
+    else
+        export GNATCOLL_PYTHON_CFLAGS="-I$BDIR/install/$TARGET/Python27/include"
+    fi;
+
+    GOPTS="-j$JOBS -p -XBUILD=PROD --target=$TARGET"
+
+    gprbuild -v $GOPTS python/gnatcoll_python.gpr
+}
+
+function gnatcoll-bindings-python-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
+    GOPTS="$GOPTS --build-var=LIBRARY_TYPE"
+
+    PM=$PREFIX/$TARGET/install/$TARGET/share/gpr/manifests
+
+    if [ -f $PM/gnatcoll_python ]; then
+        gprinstall $GOPTS --uninstall gnatcoll_python
+    fi
+
+    gprinstall $GOPTS --build-var=GNATCOLL.PYTHON_BUILD \
+               python/gnatcoll_python.gpr
+}

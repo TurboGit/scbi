@@ -1,0 +1,48 @@
+
+function alt-ergo-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/alt-ergo
+}
+
+function alt-ergo-depends()
+{
+    echo ocaml
+    echo libzarith-ocaml-dev
+    echo libzarith-ocaml
+    echo libzip-ocaml-dev
+    echo ocplib-simplex-ocaml-dev
+    echo liblablgtksourceview2-ocaml-dev
+}
+
+function alt-ergo-build-env()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    system-compiler
+}
+
+function alt-ergo-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    ./configure --prefix=$PREFIX
+}
+
+function alt-ergo-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -j$MJOBS
+}
+
+function alt-ergo-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make install
+}

@@ -1,0 +1,50 @@
+
+function gnatcoll-db-libs-sql-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gnatcoll-db
+}
+
+function gnatcoll-db-libs-sql-depends()
+{
+    echo gnatcoll-core
+}
+
+function gnatcoll-db-libs-sql-tar()
+{
+    VERSION=$1
+
+    echo none
+    echo none
+    echo gnatcoll-db-libs-sql-sql-$VERSION-src.tar.gz
+}
+
+function gnatcoll-db-libs-sql-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ $HOST == $TARGET ]; then
+        make -C sql prefix=$PREFIX INTEGRATED=yes \
+         TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
+    else
+        make -C sql TARGET=$TARGET prefix=$PREFIX INTEGRATED=yes \
+             TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
+    fi
+}
+
+function gnatcoll-db-libs-sql-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -C sql NORMALIZED_TARGET=$TARGET
+}
+
+function gnatcoll-db-libs-sql-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -C sql NORMALIZED_TARGET=$TARGET install
+}

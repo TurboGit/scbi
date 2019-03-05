@@ -1,0 +1,40 @@
+
+function tparser-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/templates-parser
+}
+
+function tparser-cross-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    rm -f makefile.setup &&
+        make prefix=$PREFIX TARGET=$TARGET setup
+}
+
+function tparser-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    rm -f makefile.setup &&
+        make prefix=$PREFIX setup
+}
+
+function tparser-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make
+}
+
+function tparser-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make install
+}

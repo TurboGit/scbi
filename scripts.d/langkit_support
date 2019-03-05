@@ -1,0 +1,63 @@
+
+function langkit_support-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/libadalang
+}
+
+function langkit_support-depends()
+{
+    echo libyaml-dev
+    echo langkit
+}
+
+function langkit_support-env()
+{
+    export QUEX_PATH=/opt/quex/quex-0.65.4
+    export LIBLANG_SUPPORT_EXTERNALLY_BUILT=false
+    gpython-env
+}
+
+function langkit_support-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    [ ! -d langkit ] && mkdir langkit
+    rsync -a --exclude=".git" $BDIR/langkit/src/* langkit
+
+    export PYTHONPATH=$PWD/langkit
+    python ada/manage.py --enable-static --enable-shared generate
+}
+
+function langkit_support-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    GOPTS=-"p -m -j$MJOBS"
+
+    PRJ=./build/lib/gnat/langkit_support.gpr
+
+    gprbuild $GOPTS -XLIBRARY_TYPE=static $PRJ
+    gprbuild $GOPTS -XLIBRARY_TYPE=static-pic -XXMLADA_BUILD=static-pic $PRJ
+    gprbuild $GOPTS -XLIBRARY_TYPE=relocatable -XXMLADA_BUILD=relocatable $PRJ
+}
+
+function langkit_support-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    gprinstall --prefix=$PREFIX --uninstall langkit_support
+
+    GOPTS="-p --prefix=$PREFIX"
+
+    PRJ=./build/lib/gnat/langkit_support.gpr
+
+    gprinstall $GOPTS -XLIBRARY_TYPE=static --build-name=static $PRJ
+    gprinstall $GOPTS -XLIBRARY_TYPE=relocatable -XXMLADA_BUILD=relocatable \
+               --build-name=relocatable $PRJ
+    gprinstall $GOPTS -XLIBRARY_TYPE=static-pic -XXMLADA_BUILD=static-pic \
+               --build-name=static-pic $PRJ
+}

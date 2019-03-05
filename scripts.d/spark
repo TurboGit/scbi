@@ -1,0 +1,41 @@
+
+function spark-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/spark2014
+}
+
+function spark-depends()
+{
+    echo cvc4
+    echo alt-ergo
+    echo menhir
+}
+
+function spark-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    rm -f gnat2why/gnat_src
+    ln -s $BDIR/gnat/src gnat2why/gnat_src
+
+    make setup
+}
+
+function spark-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make
+}
+
+function spark-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    mkdir -p $PREFIX
+    make install-all && cp -r install/* $PREFIX/ && rm -fr install
+}

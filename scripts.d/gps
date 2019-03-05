@@ -1,0 +1,50 @@
+
+function gps-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gps
+}
+
+function gps-depends()
+{
+    echo libclang-dev
+    echo gnatutil
+    echo xmlada
+    echo gtkada:3.0
+}
+
+function gps-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    (
+        mkdir -p gnat
+        cp $BDIR/gnat/vcs/impunit.adb gnat/
+
+        export LIBRARY_PATH=$LIBRARY_PATH:/usr/lib/llvm-3.8/lib
+        ./configure --prefix=$PREFIX --with-gtk=$GTKV --without-gmp \
+                    --with-sqlite=embedded --disable-syslog \
+                    --without-postgresql   --disable-readline \
+                    --disable-shared --with-clang=/usr/lib/llvm-3.8/lib \
+                    --with-gnatcoll=$PREFIX --with-clang=$PREFIX/lib/
+    )
+}
+
+function gps-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    (
+        export LIBRARY_PATH=$LIBRARY_PATH:/usr/lib/llvm-3.8/lib
+        PROCESSORS=$JOBS make -j1
+    )
+}
+
+function gps-install() {
+    PREFIX=$1
+    TARGET=$2
+
+    make install
+}

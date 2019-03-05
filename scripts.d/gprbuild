@@ -1,0 +1,49 @@
+
+# we want to disable the pre-install for GPRbuild as the cleanup
+# would remove the current used tool for installation.
+function module-pre-install()
+{
+    echo ""
+}
+
+function gprbuild-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gprbuild
+}
+
+function gprbuild-out-of-tree()
+{
+    echo true
+}
+
+function gprbuild-depends()
+{
+    echo gnatutil
+    echo libgpr
+    echo xmlada
+}
+
+function gprbuild-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$JOBS setup
+}
+
+function gprbuild-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -f ../src/Makefile
+}
+
+function gprbuild-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -f ../src/Makefile install
+}

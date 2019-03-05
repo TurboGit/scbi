@@ -1,0 +1,6 @@
+
+function ada-tools-modules()
+{
+    echo xmlada libgpr gtkada gnatcoll gprbuild langkit
+    echo libadalang langkit_support aunit aws
+}

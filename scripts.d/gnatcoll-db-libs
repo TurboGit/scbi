@@ -1,0 +1,4 @@
+function gnatcoll-db-libs-modules()
+{
+    echo gnatcoll-db-libs-sql gnatcoll-db-libs-sqlite
+}

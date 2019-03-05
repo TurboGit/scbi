@@ -1,0 +1,47 @@
+
+function cvc4-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/cvc4
+}
+
+function cvc4-depends()
+{
+    echo antlr3
+    echo libantlr3c-dev
+    echo libboost-dev
+}
+
+function cvc4-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    system-compiler
+
+    (
+        cd cvc4
+        ./autogen.sh
+        ./configure --prefix=$PREFIX
+    )
+}
+
+function cvc4-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    system-compiler
+
+    cd cvc4 && make -j$MJOBS
+}
+
+function cvc4-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    system-compiler
+
+    cd cvc4 && make install
+}

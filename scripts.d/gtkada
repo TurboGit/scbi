@@ -1,0 +1,67 @@
+
+function gtkada-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gtkada
+}
+
+function gtkada-version()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cat <<EOF > prj.gpr
+       with "gtkada";
+       project prj is
+          for main use ("main.adb");
+       end prj;
+EOF
+
+    cat <<EOF > main.adb
+       with gtkada.canvas;
+       with gtk;
+       with gnat.io;
+       with gnat.formatted_string;
+       procedure main is
+          use gnat.formatted_string;
+          c : gtkada.canvas.interactive_canvas_record;
+       begin
+          gnat.io.put
+            (- (+"%d.%d"
+                & integer (gtk.major_version)
+                & integer (gtk.minor_version)));
+       end main;
+EOF
+
+    gprbuild-project prj.gpr
+
+    if [[ $? = 0 ]]; then
+        echo $(./main)
+    else
+        echo $VERSION_ERROR
+    fi
+}
+
+function gtkada-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    ./configure --prefix=$PREFIX --with-GL=no
+}
+
+function gtkada-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    PROCESSORS=$JOBS make
+}
+
+function gtkada-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make install
+}

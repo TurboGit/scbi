@@ -1,0 +1,88 @@
+
+function wposix-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/wposix
+}
+
+function wposix-depends()
+{
+    echo win32ada
+}
+
+function wposix-version()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cat <<EOF > prj.gpr
+       with "wposix";
+       project prj is
+       end prj;
+EOF
+
+    cat <<EOF > main.adb
+       with posix;
+       procedure main is
+          b : posix.filename_truncation := true;
+       begin
+          null;
+       end main;
+EOF
+
+    gprbuild-project prj.gpr
+
+    if [[ $? = 0 ]]; then
+        echo $VERSION_OK
+    else
+        echo $VERSION_ERROR
+    fi
+}
+
+function wposix-cross-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make TARGET=$TARGET prefix=$PREFIX DEBUG=false setup
+}
+
+function wposix-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make prefix=$PREFIX DEBUG=false setup
+}
+
+function wposix-cross-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    case $TARGET in
+	*mingw*)
+	    make
+	    ;;
+	*)
+	    echo Cannot build for target : $TARGET
+	    false
+	    ;;
+    esac
+}
+
+function wposix-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make PROCESSORS=$JOBS
+}
+
+function wposix-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make install
+}

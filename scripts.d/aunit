@@ -1,0 +1,66 @@
+
+function aunit-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/aunit
+}
+
+function aunit-tar()
+{
+    echo none
+    echo none
+    echo aunit-$VERSION-tar.gz
+}
+
+function aunit-version()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cat <<EOF > prj.gpr
+       with "aunit";
+       project prj is
+       end prj;
+EOF
+
+    cat <<EOF > main.adb
+       with aunit;
+       procedure main is
+          s : aunit.status;
+       begin
+          null;
+       end main;
+EOF
+
+    gprbuild-project prj.gpr
+
+    if [[ $? = 0 ]]; then
+        echo $VERSION_OK
+    else
+        echo $VERSION_ERROR
+    fi
+}
+
+function aunit-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ "$HOST" = "$TARGET" ]; then
+        PROCESSORS=$JOBS make INSTALL=$PREFIX
+    else
+        PROCESSORS=$JOBS make TARGET=$TARGET INSTALL=$PREFIX
+    fi
+}
+
+function aunit-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ "$HOST" = "$TARGET" ]; then
+	make install INSTALL=$PREFIX
+    else
+	make TARGET=$TARGET INSTALL=$PREFIX/$TARGET install
+    fi
+}

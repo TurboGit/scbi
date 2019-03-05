@@ -1,0 +1,51 @@
+
+function gnatcoll-db-tools-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gnatcoll-db
+}
+
+function gnatcoll-db-tools-depends()
+{
+    echo gnatutil
+    echo xmlada
+    echo libgpr
+    echo gtkada
+}
+
+function gnatcoll-db-tools-tar()
+{
+    VERSION=$1
+
+    echo none
+    echo none
+    echo gnatcoll-db-tools-$VERSION-src.tar.gz
+}
+
+function gnatcoll-db-tools-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ $HOST == $TARGET ]; then
+        make -C gnatcoll_db2ada setup
+    else
+        make -C gnatcoll_db2ada TARGET=$TARGET setup
+    fi
+}
+
+function gnatcoll-db-tools-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    PROCESSORS=$JOBS make -C gnatcoll_db2ada
+}
+
+function gnatcoll-db-tools-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -C gnatcoll_db2ada install
+}

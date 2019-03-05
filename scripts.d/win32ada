@@ -1,0 +1,60 @@
+
+function win32ada-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/win32ada
+}
+
+function win32ada-version()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    cat <<EOF > prj.gpr
+       with "win32ada";
+       project prj is
+       end prj;
+EOF
+
+    cat <<EOF > main.adb
+       with win32;
+       procedure main is
+          n : win32.dword;
+       begin
+          null;
+       end main;
+EOF
+
+    gprbuild-project prj.gpr
+
+    if [[ $? = 0 ]]; then
+        echo $VERSION_OK
+    else
+        echo $VERSION_ERROR
+    fi
+}
+
+function win32ada-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ "$HOST" = "$TARGET" ]; then
+	make PROCESSORS=$JOBS
+    else
+        make PROCESSORS=$JOBS prefix=$PREFIX \
+             TARGET=$TARGET DEBUG=false build
+    fi
+}
+
+function win32ada-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ "$HOST" = "$TARGET" ]; then
+	make install
+    else
+        make prefix=$PREFIX TARGET=$TARGET DEBUG=false install
+    fi
+}

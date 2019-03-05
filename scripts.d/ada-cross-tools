@@ -1,0 +1,5 @@
+
+function ada-cross-tools-modules()
+{
+    echo xmlada libgpr gnatcoll win32ada wposix aws tparser
+}

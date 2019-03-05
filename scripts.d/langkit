@@ -1,0 +1,16 @@
+
+function langkit-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/langkit
+}
+
+function langkit-depends()
+{
+    echo gnatcoll
+}
+
+function langkit-version()
+{
+    return 0
+}

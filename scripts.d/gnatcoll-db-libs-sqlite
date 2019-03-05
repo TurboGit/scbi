@@ -1,0 +1,51 @@
+
+function gnatcoll-db-libs-sqlite-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gnatcoll-db
+}
+
+function gnatcoll-db-libs-sqlite-depends()
+{
+    echo gnatcoll-core
+    echo gnatcoll-db-libs-sql
+}
+
+function gnatcoll-db-libs-sqlite-tar()
+{
+    VERSION=$1
+
+    echo none
+    echo none
+    echo gnatcoll-db-libs-sqlite-sqlite-$VERSION-src.tar.gz
+}
+
+function gnatcoll-db-libs-sqlite-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ $HOST == $TARGET ]; then
+        make -C sqlite prefix=$PREFIX INTEGRATED=yes \
+         TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
+    else
+        make -C sqlite TARGET=$TARGET prefix=$PREFIX INTEGRATED=yes \
+             TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
+    fi
+}
+
+function gnatcoll-db-libs-sqlite-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -C sqlite NORMALIZED_TARGET=$TARGET
+}
+
+function gnatcoll-db-libs-sqlite-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -C sqlite NORMALIZED_TARGET=$TARGET install
+}

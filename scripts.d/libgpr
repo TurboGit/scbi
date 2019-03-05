@@ -1,0 +1,45 @@
+
+function libgpr-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gprbuild
+}
+
+function libgpr-out-of-tree()
+{
+    echo true
+}
+
+function libgpr-depends()
+{
+    echo gnatutil
+}
+
+function libgpr-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    if [ $HOST == $TARGET ]; then
+        make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$JOBS setup
+    else
+        make -f ../src/Makefile prefix=$PREFIX/$TARGET PROCESSORS=$JOBS \
+             TARGET=$TARGET setup
+    fi
+}
+
+function libgpr-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -f ../src/Makefile libgpr.build
+}
+
+function libgpr-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -f ../src/Makefile libgpr.install
+}

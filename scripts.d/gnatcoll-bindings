@@ -1,0 +1,6 @@
+
+function gnatcoll-bindings-modules()
+{
+    ROOT="gnatcoll-bindings"
+    echo $ROOT-python $ROOT-readline $ROOT-iconv $ROOT-gmp
+}
