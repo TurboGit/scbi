@@ -7,8 +7,8 @@ all:
 	mkdir -p $(HOME)/bin
 	cp scbi $(HOME)/bin
 	mkdir -p $(SCRDIR)
-	rm -f $(SCRDIR)/*~
-	cp scripts.d/*  $(SCRDIR)
+	rm -f $(SCRDIR)/*~ scripts.d/*~
+	cp scripts.d/* $(SCRDIR)
 
 test:
 	make -C tests test
