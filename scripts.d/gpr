@@ -1,0 +1,42 @@
+
+function gpr-vcs()
+{
+    echo git
+    echo https://github.com/AdaCore/gpr
+}
+
+function gpr-depends()
+{
+    echo gnatcoll-core
+    echo langkit_support
+}
+
+function gpr-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    (
+        gpython-env
+        add-to-var PYTHONPATH \
+                   $BDIR/langkit_support/$TARGET-default/build/langkit
+
+        make setup
+    )
+}
+
+function gpr-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make
+}
+
+function gpr-install()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make install
+}
