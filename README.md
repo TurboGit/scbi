@@ -131,7 +131,7 @@ By default the scbi build directories can be displayed with --stat option (outpu
 
    Note that this is equivalent to calling scbi with --prefix parameter:
 
-      `$ scbi --prefix lcms`
+      `$ scbi --prefix=/opt/lcms lcms`
 
    If the final install prefix is not writable by user, a sudo
    password will be asked.
@@ -177,7 +177,7 @@ to build with just "-O3" at configuration step:
           TARGET=$2
           CFLAGS="-O3" ../src/configure --prefix=$PREFIX
       }
-     
+
 And then build the release version:
 
       $ scbi lcms/release
