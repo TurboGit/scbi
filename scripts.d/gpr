@@ -11,18 +11,35 @@ function gpr-depends()
     echo langkit_support
 }
 
-function gpr-config()
+function do-config()
 {
     PREFIX=$1
     TARGET=$2
+    GPROPTS="$3"
 
     (
         gpython-env
         add-to-var PYTHONPATH \
                    $BDIR/langkit_support/$TARGET-default/build/langkit
 
-        make setup
+        make $GPROPTS setup
     )
+}
+
+function gpr-debug-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    do-config $PREFIX $TARGET "BUILD=debug"
+}
+
+function gpr-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    do-config $PREFIX $TARGET "BUILD=release"
 }
 
 function gpr-build()
