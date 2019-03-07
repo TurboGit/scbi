@@ -248,7 +248,6 @@ PLAN=
 function check-handled()
 {
     local module=$1
-    local res=0
 
     if [ "${HANDLED/,$module,/}" = "$HANDLED" ]; then
         HANDLED="$HANDLED,$module,"
