@@ -10,11 +10,6 @@ function libgpr-out-of-tree()
     echo true
 }
 
-function libgpr-depends()
-{
-    echo gnatutil
-}
-
 function libgpr-config()
 {
     PREFIX=$1

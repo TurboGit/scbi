@@ -19,7 +19,6 @@ function gprbuild-out-of-tree()
 
 function gprbuild-depends()
 {
-    echo gnatutil
     echo libgpr
     echo xmlada
 }

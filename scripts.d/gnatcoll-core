@@ -7,7 +7,6 @@ function gnatcoll-core-vcs()
 
 function gnatcoll-core-depends()
 {
-    echo gnatutil
     echo libgpr
 }
 
