@@ -221,7 +221,7 @@ MJOBS=4
 
 #  Modules to be handled and already handled
 MODULES=
-HANDLED=""
+HANDLED=$(mktemp)
 
 #  Actions setup
 PURGE=no
@@ -249,12 +249,23 @@ function check-handled()
 {
     local module=$1
 
-    if [ "${HANDLED/,$module,/}" = "$HANDLED" ]; then
-        HANDLED="$HANDLED,$module,"
+    grep "^$module" $HANDLED &> /dev/null
+
+    if [ $? = 1 ]; then
+        echo $module >> $HANDLED
         return 0
     else
         return 1
     fi
+}
+
+############################## clean-up
+#
+# clean-up before exit
+
+function clean-up()
+{
+    rm -f $HANDLED
 }
 
 ############################## module-wrapper
@@ -759,6 +770,7 @@ function handle-module()
 
     check-handled $module+$variant
     if [[ $? = 1 ]]; then
+        ilog build skip $module, already handled
         return
     fi
 
@@ -1184,6 +1196,8 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
+
+trap clean-up EXIT
 
 #  Load user's settings if any
 
