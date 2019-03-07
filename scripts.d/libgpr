@@ -10,6 +10,11 @@ function libgpr-out-of-tree()
     echo true
 }
 
+function libgpr-depends()
+{
+    echo xmlada
+}
+
 function libgpr-cross-config()
 {
     PREFIX=$1

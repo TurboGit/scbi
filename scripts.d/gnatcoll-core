@@ -8,6 +8,7 @@ function gnatcoll-core-vcs()
 function gnatcoll-core-depends()
 {
     echo libgpr
+    echo xmlada
 }
 
 function gnatcoll-core-tar()

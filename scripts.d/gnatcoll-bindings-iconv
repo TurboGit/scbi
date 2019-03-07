@@ -8,6 +8,7 @@ function gnatcoll-bindings-iconv-vcs()
 function gnatcoll-bindings-iconv-depends()
 {
     echo gnatcoll-core
+    echo xmlada
 }
 
 function gnatcoll-bindings-iconv-tar()

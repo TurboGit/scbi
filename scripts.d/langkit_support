@@ -9,6 +9,7 @@ function langkit_support-depends()
 {
     echo libyaml-dev
     echo langkit
+    echo xmlada
 }
 
 function langkit_support-env()

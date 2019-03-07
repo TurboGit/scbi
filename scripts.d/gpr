@@ -8,6 +8,8 @@ function gpr-vcs()
 function gpr-depends()
 {
     echo gnatcoll-core
+    echo gnatcoll-bindings-iconv
+    echo gnatcoll-bindings-gmp
     echo langkit_support
 }
 
