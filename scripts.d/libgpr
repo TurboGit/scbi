@@ -10,17 +10,21 @@ function libgpr-out-of-tree()
     echo true
 }
 
+function libgpr-cross-config()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    make -f ../src/Makefile prefix=$PREFIX/$TARGET PROCESSORS=$JOBS \
+         TARGET=$TARGET setup
+}
+
 function libgpr-config()
 {
     PREFIX=$1
     TARGET=$2
 
-    if [ $HOST == $TARGET ]; then
-        make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$JOBS setup
-    else
-        make -f ../src/Makefile prefix=$PREFIX/$TARGET PROCESSORS=$JOBS \
-             TARGET=$TARGET setup
-    fi
+    make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$JOBS setup
 }
 
 function libgpr-build()
