@@ -197,6 +197,51 @@ function display-stat()
     else
         echo " $EMAIL"
     fi
+}
 
+############################## display-modules
+
+function display-modules()
+{
     echo
+    echo -n "modules:"
+
+    local linelen=0
+
+    for module in $DEFS/[^0-9]*; do
+        bn=$(basename $module)
+        linelen=$(expr $linelen + ${#bn} + 1)
+        if [ $linelen -gt 70 ]; then
+            echo
+            echo -n "        "
+            linelen=${#bn}
+        fi
+	echo -n " $bn"
+    done
+    echo
+}
+
+############################## display-plans
+
+function display-plans()
+{
+    echo
+    echo -n "plans  :"
+    local linelen=0
+
+    if [ -z "$(ls $DEFS/.plan-* 2> /dev/null)" ]; then
+        echo " none"
+    else
+        for module in $DEFS/.plan-*; do
+            bn=$(basename $module)
+            linelen=$(expr $linelen + ${#bn} + 1)
+            if [ $linelen -gt 70 ]; then
+                echo
+                echo -n "        "
+                linelen=${#bn}
+            fi
+	    echo -n " ${bn/.plan-/}"
+        done
+        echo
+    fi
 }

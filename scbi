@@ -409,43 +409,6 @@ function usage()
     echo "      | --stat          display some status of current setup"
     echo "   -n | --no-patch      do not apply patches"
     echo "   -j | --jobs=<n>      max compilation jobs \$JOBS"
-
-    echo
-    echo -n "modules:"
-
-    local linelen=0
-
-    for module in $DEFS/[^0-9]*; do
-        bn=$(basename $module)
-        linelen=$(expr $linelen + ${#bn} + 1)
-        if [ $linelen -gt 70 ]; then
-            echo
-            echo -n "        "
-            linelen=${#bn}
-        fi
-	echo -n " $bn"
-    done
-    echo
-    echo
-
-    echo -n "plans  :"
-    local linelen=0
-
-    if [ -z "$(ls $DEFS/.plan-* 2> /dev/null)" ]; then
-        echo " none"
-    else
-        for module in $DEFS/.plan-*; do
-            bn=$(basename $module)
-            linelen=$(expr $linelen + ${#bn} + 1)
-            if [ $linelen -gt 70 ]; then
-                echo
-                echo -n "        "
-                linelen=${#bn}
-            fi
-	    echo -n " ${bn/.plan-/}"
-        done
-        echo
-    fi
 }
 
 ############################## handle-modue-env
@@ -1100,8 +1063,7 @@ set -- $(getopt -u -o t:adefSIuscbilnpPvh \
 while [ $# -gt 0 ]; do
     case $1 in
 	-h|--help)
-            usage
-            exit
+            break
 	    ;;
 	-f|--force)
             DOFORCE=yes
@@ -1228,9 +1190,11 @@ done
 
 #  Nothing to build, display usage
 
-[ "$MODULES" = "" ] && usage
+[ "$MODULES" = "" -a $DOSTAT == no ] && usage
 
 [ $DOSTAT == yes ] && display-stat
+
+[ "$MODULES" = "" -o $DOSTAT == yes ] && display-modules && display-plans
 
 #  Prepare log dir
 
