@@ -9,7 +9,7 @@ KEEP=120
 function clog()
 {
     local module=$1
-    rm -f $LOGS/$TARGET-$module-report.log
+    echo >> $LOGS/$TARGET-$module-report.log
 }
 
 ############################## ilog

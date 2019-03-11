@@ -570,11 +570,11 @@ function handle-depends()
               || $ref > $mver ]];
     then
         echo
-        ilog build need building $module, \
+        ilog $module need building $module, \
              current version $(display-version $mver) | tee -a $log
         handle-module $modref
     else
-        ilog build $modref found
+        ilog $module $modref found
     fi
 }
 
@@ -618,12 +618,12 @@ function handle-sources()
         echo -n tar-$ref > source-id
 
         if [ $DOUPDATE = yes -o ! -d tarsrc  ]; then
-	    ilog build get sources from tar
+	    ilog $module get sources from tar
 
             vid=$(get-tar $module $ref >> $log 2>&1)
 
             if [[ ! $? = 0 ]]; then
-                ilog build cannot get/find tar sources
+                ilog $module cannot get/find tar sources
                 exit 1
             fi
 
@@ -664,8 +664,8 @@ function handle-sources()
                     echo -n $ref > source-id
 
                 else
-                    ilog build cannot find local dev repository:
-                    ilog build $GIT_REPO/$REPO
+                    ilog $module cannot find local dev repository:
+                    ilog $module $GIT_REPO/$REPO
                     exit 1
                 fi
 
@@ -680,7 +680,7 @@ function handle-sources()
                 echo -n vcs-$ref > source-id
 
                 if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
-	            ilog build get sources from $VCS_NAME
+	            ilog $module get sources from $VCS_NAME
 
                     get-vcs $VCS_NAME $VCS_URL $module $kind $ref
 
@@ -733,7 +733,7 @@ function handle-module()
 
     check-handled $module+$variant
     if [[ $? = 1 ]]; then
-        ilog build skip $module, already handled
+        ilog $module skip $module, already handled
         return
     fi
 
@@ -811,7 +811,7 @@ function handle-module()
     #  If purge is asked, first remove current build structure
 
     if [ $PURGE = yes -o $PURGE = only ]; then
-	ilog build Purging $module for $TARGET/$variant
+	ilog $module Purging $module for $TARGET/$variant
         [ -d $BDIR/$module ] &&
             module-purge $BDIR/$module $module $variant $TARGET
     fi
@@ -820,15 +820,15 @@ function handle-module()
 
     [ $PURGE = only ] && exit 0
 
-    ilog build Building $module-$variant | tee -a $log
+    ilog $module Building $module-$variant | tee -a $log
 
     if [ $HOST == $TARGET ]; then
-        ilog build native $TARGET | tee -a $log
+        ilog $module native $TARGET | tee -a $log
     else
-        ilog build cross $TARGET | tee -a $log
+        ilog $module cross $TARGET | tee -a $log
     fi
 
-    ilog build steps : $STEPS | tee -a $log
+    ilog $module steps : $STEPS | tee -a $log
 
     #  Create the build root directory if needed, note that we do check here
     #  even if already created when entering this routine. This is because
@@ -897,7 +897,7 @@ function handle-module()
              $BDIR/$module/$TARGET-$variant/build-id > /dev/null 2>&1
 
         if [ $? = 0 ]; then
-	    ilog build no build needed, versions match
+	    ilog $module no build needed, versions match
 
             STEPS=""
 
@@ -1047,7 +1047,7 @@ function handle-module()
     fi
 
     if [ "$DOINSTALL" = "yes" -a -d $BDIR/$module/build/install ]; then
-	ilog build copy install into ..${IDIR/$BDIR/}
+	ilog $module copy install into ..${IDIR/$BDIR/}
         $SUDO mkdir -p $IDIR/
         $SUDO rsync -a $BDIR/$module/$TARGET-$variant/install/. $IDIR/. > $log 2>&1
     fi || elog fail to copy to $IDIR
