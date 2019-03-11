@@ -73,8 +73,8 @@ function get-min-avr-max()
     local sum=0
 
     for value in $LIST; do
-        [[ $value > $max ]] && max=$value
-        [[ $value < $min ]] && min=$value
+        [[ $value -gt $max ]] && max=$value
+        [[ $value -lt $min ]] && min=$value
         sum=$(($sum + $value))
         n=$(($n + 1))
     done
