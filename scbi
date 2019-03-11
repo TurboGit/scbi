@@ -1052,6 +1052,8 @@ function handle-module()
         $SUDO rsync -a $BDIR/$module/$TARGET-$variant/install/. $IDIR/. > $log 2>&1
     fi || elog fail to copy to $IDIR
 
+    ilog $module End building $module-$variant | tee -a $log
+
     echo
 }
 
@@ -1195,6 +1197,8 @@ done
 [ $DOSTAT == yes ] && display-stat
 
 [ "$MODULES" = "" -o $DOSTAT == yes ] && display-modules && display-plans
+
+[ $DOSTAT == yes ] && display-log-stat
 
 #  Prepare log dir
 

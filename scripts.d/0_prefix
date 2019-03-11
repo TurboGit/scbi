@@ -1,6 +1,9 @@
 
+TODAY=$(date +"%Y_%m_%d")
+
 [ -z $SCBI_ROOT ] && SCBI_ROOT=$HOME/dev
 [ -z $BDIR ] && BDIR=$SCBI_ROOT/builds
 [ -z $PREFIX ] && PREFIX=$BDIR/install
 [ -z $TARBALL ] && TARBALL=$BDIR/.tar
 [ -z $PATCHES ] && PATCHES=$BDIR/.patches
+[ -z $LOGS ] && LOGS=$BDIR/logs/$TODAY

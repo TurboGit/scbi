@@ -1,7 +1,4 @@
-TODAY=$(date +"%Y_%m_%d")
-[ -z $LOGS ] && LOGS=$BDIR/logs/$TODAY
-
-# keep logs for 4 months
+# keep logs for 4 months (120 days)
 KEEP=120
 
 ############################## clog
@@ -17,7 +14,7 @@ function clog()
 function ilog()
 {
     local module=$1
-    local ts=$(date +"%Y/%m/%d %H:%M")
+    local ts=$(date +"%Y/%m/%d %H:%M:%S")
 
     shift
     echo $ts : $*
@@ -37,13 +34,98 @@ function elog()
 
 ############################## clean old logs
 
-function clean_logs()
+function clean-scbi-logs()
 {
     find $LOGS -ctime +$KEEP -delete
+}
+
+############################## display log-stat
+
+declare -A STATS
+
+function compute-log-stat-file()
+{
+    local file="$1"
+    local module=""
+    local start_time=0
+    local end_time=0
+    local duration=0
+
+    while read date time x action word; do
+        if [ "$action" == "Building" ]; then
+            module=$word
+            start_time=$(date +"%s" --date="$date $time")
+        elif [ "$action" == "End" -a "$module" != "" ]; then
+            end_time=$(date +"%s" --date="$date $time")
+            duration=$(($end_time - $start_time))
+            STATS[$module]="${STATS[$module]} $duration"
+        fi
+    done < $file
+}
+
+function get-min-avr-max()
+{
+    local LIST="$1"
+    local min=999999
+    local avr=0
+    local max=0
+    local n=0
+    local sum=0
+
+    for value in $LIST; do
+        [[ $value > $max ]] && max=$value
+        [[ $value < $min ]] && min=$value
+        sum=$(($sum + $value))
+        n=$(($n + 1))
+    done
+
+    avr=$(($sum / $n))
+
+    echo $min
+    echo $avr
+    echo $max
+}
+
+function display-time()
+{
+    echo -n $(date --date=@$1 -u +"%M:%S")
+}
+
+function display-log-stat()
+{
+    local module=$1
+
+    FILES=$(find $LOGS/.. -name "*$module-report.log")
+
+    for file in $FILES; do
+        compute-log-stat-file $file
+    done
+
+    echo
+    echo "build time (min, average, max):"
+    echo
+
+    for key in "${!STATS[@]}"; do
+        values="${STATS[$key]}"
+        mam=( $(get-min-avr-max "$values") )
+
+        echo -n $key
+        for s in $(seq ${#key} 25); do
+            echo -n ' '
+        done
+
+        echo -n ": "
+        display-time ${mam[0]}
+        echo -n "   "
+        display-time ${mam[1]}
+        echo -n "   "
+        display-time ${mam[2]}
+        echo
+    done
 }
 
 ############################## body
 
 [ ! -d $LOGS ] && mkdir -p $LOGS
 
-clean_logs
+clean-scbi-logs
