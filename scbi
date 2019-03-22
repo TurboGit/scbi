@@ -161,8 +161,10 @@
 #
 #  SCBI_ROOT  : default root directory to use
 #  BDIR       : the modules build root directory ($SCBI_ROOT/builds)
-#  GIT_REPO   : directory with local Git repositories ($SCBI_ROOT/repositories/git)
-#  SVN_REPO   : directory with local Svn repositories ($SCBI_ROOT/repositories/svn)
+#  GIT_REPO   : directory with local Git repositories
+#               ($SCBI_ROOT/repositories/git)
+#  SVN_REPO   : directory with local Svn repositories
+#               ($SCBI_ROOT/repositories/svn)
 #  TARBALL    : directory where downloaded tarball are stores ($BDIR/.tar)
 #  PREFIX     : directory where module are to be installed ($BDIR/install)
 #  HOST       : current host (gcc -dumpmachine)
@@ -834,7 +836,8 @@ function handle-module()
     #  even if already created when entering this routine. This is because
     #  in case of a purge the build directory could have been removed.
 
-    [ -d $BDIR/$module/$TARGET-$variant ] || mkdir $BDIR/$module/$TARGET-$variant
+    [ -d $BDIR/$module/$TARGET-$variant ] ||
+        mkdir $BDIR/$module/$TARGET-$variant
 
     #  Set module environment if defined
 
