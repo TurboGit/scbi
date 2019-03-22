@@ -1,11 +1,12 @@
-xxxx/xx/xx xx:xx : Building testx-default
-xxxx/xx/xx xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx : steps : setup config build install
-xxxx/xx/xx xx:xx : config starting
-xxxx/xx/xx xx:xx : config completed
-xxxx/xx/xx xx:xx : build starting
-xxxx/xx/xx xx:xx : build completed
-xxxx/xx/xx xx:xx : install starting
-xxxx/xx/xx xx:xx : install completed
-xxxx/xx/xx xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : Building testx-default
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End building testx-default
 

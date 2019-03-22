@@ -1,7 +1,8 @@
-xxxx/xx/xx xx:xx : Building testx-default
-xxxx/xx/xx xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx : steps : setup config
-xxxx/xx/xx xx:xx : get sources from git
-xxxx/xx/xx xx:xx : config starting
-xxxx/xx/xx xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : Building testx-default
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End building testx-default
 

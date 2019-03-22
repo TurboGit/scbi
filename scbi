@@ -907,12 +907,9 @@ function handle-module()
             # if install variant changed, do install
 
             if [ $(cat install-id) != $variant ]; then
-                STEPS="install"
-                DOINSTALL=yes
-
-                # then make sure the current build softlink is
-                # pointing to the variant. this is needed as the setup
-                # won't be done.
+                # make sure the current build softlink is pointing to
+                # the variant. this is needed as the setup won't be
+                # done.
 
                 cd $BDIR/$module
                 [ -h build ] && rm -f build
