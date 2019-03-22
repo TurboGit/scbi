@@ -26,11 +26,8 @@ function module-setup()
 
     if [ -h src -o -d src ]; then
         rsync -a $OPT --exclude=".git" --exclude=".svn" \
-            --exclude "*.o" --exclude "*.a" --exclude "*.dll" \
-            --exclude "*.so" --exclude "*.so.*" --exclude "*.ali" \
             --exclude "gcc-interface" \
             --link-dest=../src src/. $SRCDIR/
-
     fi
 
     #  If some patches are present, apply them now
