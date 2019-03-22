@@ -51,12 +51,16 @@ function module-setup()
         [[ ! $? = 0 ]] && return 1
     fi
 
-    rm -f $TARGET-$VARIANT/build build
+    rm -f build
     ln -s $TARGET-$VARIANT build
 
     if [ "$OOT" = "yes" ]; then
+        # build must be a dir, delete link if it exists
+        rm -f $TARGET-$VARIANT/build
         mkdir -p build/build
     else
+        # build must be a link, delete dir if it exists
+        rm -fr $TARGET-$VARIANT/build
         ln -s src build/build
     fi
 
