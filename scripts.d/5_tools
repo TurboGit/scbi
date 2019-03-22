@@ -159,16 +159,18 @@ function get-tar()
     [ ! -d $BDIR/$module ] && mkdir -p $BDIR/$module > $log 2>&1
 
     cd $BDIR/$module
-    ( rm -fr tarsrc && mkdir -p tarsrc ) > $log 2>&1
-    cd tarsrc
+
+    rm -fr tarsrc > $log 2>&1
+    ( rm -fr tartmp && mkdir -p tartmp ) > $log 2>&1
+    cd tartmp
 
     tar xf $TARBALL/$tarsrc
     topdir=$(ls -d *)
 
     if [ -d "$topdir" ]; then
-        mv $topdir/* .
-        rmdir $topdir
+        mv "$topdir" ../tarsrc
         cd ..
+        rmdir tartmp
     else
         echo Error, no top directory found.
         res=1
