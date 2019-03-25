@@ -42,7 +42,7 @@ function darktable-clang-config()
     PREFIX=$1
     TARGET=$2
 
-    CLANG_VER=3.9
+    CLANG_VER=8
 
     # fake build script which want the src dir to be a git repository
 
