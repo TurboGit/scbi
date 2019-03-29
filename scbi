@@ -860,13 +860,13 @@ function handle-module()
             target-env $BDIR/install $TARGET
         fi
 
-        #  Setup recursively the environment to use depends
-
-        handle-env $modref
-
-        #  Then setup the build environment for the current module
+        #  Setup the build environment for the current module
 
         handle-module-env $modref build-env
+
+        #  And then setup recursively the environment to use dependencies
+
+        handle-env $modref
 
         #  Log module enviroment
 
