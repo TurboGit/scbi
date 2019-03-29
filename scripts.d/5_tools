@@ -160,7 +160,7 @@ function get-tar()
 
     cd $BDIR/$module
 
-    rm -fr tarsrc > $log 2>&1
+    rm -fr tarsrc tar > $log 2>&1
     ( rm -fr tartmp && mkdir -p tartmp ) > $log 2>&1
     cd tartmp
 
@@ -171,6 +171,7 @@ function get-tar()
         mv "$topdir" ../tarsrc
         cd ..
         rmdir tartmp
+        ln -s $(realpath --relative-to="$PWD" $TARBALL/$tarsrc) tar
     else
         echo Error, no top directory found.
         res=1

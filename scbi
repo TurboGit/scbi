@@ -189,6 +189,7 @@
 #         |_ build                # symlink to current/latest target build dir
 #         |_ build-id-<variant>   # build id to check for changes
 #         |_ src                  # symlink to sources (vcs or tarball)
+#         |_ tar                  # link to extracted tarball
 #         |_ tarsrc               # extract of tarball
 #         |_ source-id            # version of the source (tar or vcs)
 #         |_ install-id           # version of the installed module
