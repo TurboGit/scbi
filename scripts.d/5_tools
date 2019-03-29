@@ -126,6 +126,34 @@ function get-build-id()
     fi
 }
 
+############################## check-tar-exists
+# check if the tarball exists locally, do not try to download it
+# exit status 0 = FOUND / 1 = NOT_FOUND
+
+function check-tar-exists()
+{
+    local module=$1
+    local version=$2
+
+    fn-exists $module-tar
+
+    if [[ ! $? = 0 ]]; then
+        return 1
+    fi
+
+    tar=( $($module-tar $version) )
+
+    tarcp=${tar[0]}
+    tarurl=${tar[1]}
+    tarsrc=${tar[2]}
+
+    if [ -f $TARBALL/$tarsrc ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 ############################## get-tar
 
 function get-tar()

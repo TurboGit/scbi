@@ -3,7 +3,7 @@
 _SCBI_ARGS="-t -S --no-setup -I --no-install -u --update -s --setup
 -c --config -b --build -i --install -r --tests -v --verbose
 -l --no-log -p --purge -P --purge-only -d --deps -a --archive -h --help
--j --jobs --target= --env= -e --tests-only --plan= -n --no-patch"
+-j --jobs --target= --env= -e --tests-only --plan= -n --no-patch --tar"
 
 _gnat_targets()
 {

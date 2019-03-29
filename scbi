@@ -243,6 +243,7 @@ PATCH=yes
 STEPS="setup config build install"
 BUILD_TARGET=
 PLAN=
+TAR_CACHE=no
 
 ############################## check-handled
 #
@@ -399,6 +400,7 @@ function usage()
     echo "   -c | --config        do config"
     echo "   -b | --build         do build"
     echo "   -i | --install       do install"
+    echo "      | --tar           check for tar before using repository"
     echo "      | --tests         run the testsuite, build if necessary"
     echo "      | --tests-only    run the testsuite"
     echo "   -d | --deps          check/build dependencies"
@@ -598,6 +600,15 @@ function handle-sources()
     local variant=${module_info[1]}
     local kind=${module_info[2]}
     local ref=${module_info[3]}
+
+    #  Check if a given tar exists even if a standard branch ref has
+    #  been provided. This is an optimization to used a local tar
+    #  instead of a repository branch.
+
+    if [ $kind == BRANCH -a "$TAR_CACHE" == "yes" ]; then
+        check-tar-exists $module $ref
+        [ $? == 0 ] && kind=VERSION
+    fi
 
     #  If building from tarball, extract it now
 
@@ -1061,7 +1072,7 @@ function handle-module()
 ############################## body
 
 set -- $(getopt -u -o t:adefSIuscbilnpPvh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat -- "$@")
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1081,6 +1092,9 @@ while [ $# -gt 0 ]; do
                 exit 1
             fi
             shift
+	    ;;
+	--tar)
+	    TAR_CACHE=yes
 	    ;;
 	-t|--target)
 	    TARGET=$2; shift
