@@ -51,7 +51,8 @@ function libadalang-install()
 
     gprinstall --prefix=$PREFIX --uninstall libadalang
 
-    GOPTS="-p --prefix=$PREFIX"
+    BV="--build-var=LIBADALANG_BUILD --build-var=LIBRARY_TYPE"
+    GOPTS="-p --prefix=$PREFIX $BV"
     PRJ=./build/lib/gnat/libadalang.gpr
 
     gprinstall $GOPTS -XLIBRARY_TYPE=static --build-name=static $PRJ
