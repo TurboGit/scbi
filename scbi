@@ -237,6 +237,7 @@ DOTEST=no
 DOARCHIVE=no
 DOFORCE=no
 DOSTAT=no
+DODEPS=no
 DEPS=no
 ISOOT=no
 PATCH=yes
@@ -472,6 +473,8 @@ function handle-env()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
+    [ $DODEPS == yes ] && echo $modref
+
     #  Then load module
 
     if [ -f $DEFS/$module ]; then
@@ -482,6 +485,11 @@ function handle-env()
         fn-exists $module-$variant-depends
 
         if [ $? = 0 ]; then
+            [ $DODEPS == yes ] &&
+                for dmodule in $($module-$variant-depends); do
+                    echo "   $dmodule"
+                done
+
             for dmodule in $($module-$variant-depends); do
                 handle-env $dmodule
             done
@@ -489,13 +497,18 @@ function handle-env()
             fn-exists $module-depends
 
             if [ $? = 0 ]; then
+                [ $DODEPS == yes ] &&
+                    for dmodule in $($module-depends); do
+                        echo "   $dmodule"
+                    done
+
                 for dmodule in $($module-depends); do
                     handle-env $dmodule
                 done
             fi
         fi
 
-        handle-module-env $modref env
+        [ $DODEPS == no ] && handle-module-env $modref env
     fi
 }
 
@@ -1072,7 +1085,7 @@ function handle-module()
 ############################## body
 
 set -- $(getopt -u -o t:adefSIuscbilnpPvh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar -- "$@")
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1164,6 +1177,9 @@ while [ $# -gt 0 ]; do
         --stat)
             DOSTAT=yes;
             ;;
+        --list-depends)
+            DODEPS=yes;
+            ;;
 	(--)
 	    ;;
 	(*)
@@ -1214,6 +1230,13 @@ done
 [ "$MODULES" = "" -o $DOSTAT == yes ] && display-modules && display-plans
 
 [ $DOSTAT == yes ] && display-log-stat
+
+if [ $DODEPS == yes ]; then
+    for module in $MODULES; do
+        handle-env $module
+    done
+    exit 0
+fi
 
 #  Prepare log dir
 
