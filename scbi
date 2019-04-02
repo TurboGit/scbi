@@ -1044,11 +1044,11 @@ function handle-module()
     fn-exists $module-$variant-prefix
 
     if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
-        IDIR=$($module-$variant-prefix)
+        IDIR=$($module-$variant-prefix $BDIR/$module/build/install $TARGET)
     else
         fn-exists $module-prefix
         if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
-            IDIR=$($module-prefix)
+            IDIR=$($module-prefix $BDIR/$module/build/install $TARGET)
         else
             IDIR=$PREFIX
         fi
