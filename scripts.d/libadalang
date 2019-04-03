@@ -28,7 +28,7 @@ function libadalang-config()
     rsync -a --exclude=".git" $BDIR/langkit/src/* langkit
 
     export PYTHONPATH=$PWD/langkit
-    python ada/manage.py --enable-static --enable-shared generate
+    python ada/manage.py generate
 }
 
 function libadalang-build()
