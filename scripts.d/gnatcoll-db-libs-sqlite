@@ -25,13 +25,8 @@ function gnatcoll-db-libs-sqlite-config()
     PREFIX=$1
     TARGET=$2
 
-    if [ $HOST == $TARGET ]; then
-        make -C sqlite prefix=$PREFIX INTEGRATED=yes \
+    make -C sqlite prefix=$PREFIX INTEGRATED=yes \
          TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
-    else
-        make -C sqlite TARGET=$TARGET prefix=$PREFIX INTEGRATED=yes \
-             TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
-    fi
 }
 
 function gnatcoll-db-libs-sqlite-build()

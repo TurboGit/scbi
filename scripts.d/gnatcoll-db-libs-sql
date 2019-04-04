@@ -24,13 +24,8 @@ function gnatcoll-db-libs-sql-config()
     PREFIX=$1
     TARGET=$2
 
-    if [ $HOST == $TARGET ]; then
-        make -C sql prefix=$PREFIX INTEGRATED=yes \
+    make -C sql prefix=$PREFIX INTEGRATED=yes \
          TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
-    else
-        make -C sql TARGET=$TARGET prefix=$PREFIX INTEGRATED=yes \
-             TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
-    fi
 }
 
 function gnatcoll-db-libs-sql-build()
