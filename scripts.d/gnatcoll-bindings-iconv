@@ -20,6 +20,15 @@ function gnatcoll-bindings-iconv-tar()
     echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 
+function gnatcoll-bindings-iconv-cross-build()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    echo Not supported on cross $TARGET
+    return 1
+}
+
 function gnatcoll-bindings-iconv-build()
 {
     PREFIX=$1
@@ -27,11 +36,9 @@ function gnatcoll-bindings-iconv-build()
 
     GOPTS="-j$JOBS -p -XBUILD=PROD --target=$TARGET -XGNATCOLL_ICONV_OPT="
 
-    if [ $HOST == $TARGET ]; then
-        for kind in static relocatable static-pic; do
-            gprbuild $GOPTS -XLIBRARY_TYPE=$kind iconv/gnatcoll_iconv.gpr
-        done
-    fi
+    for kind in static relocatable static-pic; do
+        gprbuild $GOPTS -XLIBRARY_TYPE=$kind iconv/gnatcoll_iconv.gpr
+    done
 }
 
 function gnatcoll-bindings-iconv-install()
@@ -49,12 +56,10 @@ function gnatcoll-bindings-iconv-install()
         gprinstall $GOPTS --uninstall gnatcoll_iconv
     fi
 
-    if [ $HOST == $TARGET ]; then
-        for kind in static relocatable static-pic; do
-            gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
-                       --build-var=GNATCOLL.ICONV_BUILD \
-                       --install-name=gnatcoll_iconv \
-                       --build-name=$kind iconv/gnatcoll_iconv.gpr
-        done
-    fi
+    for kind in static relocatable static-pic; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
+                   --build-var=GNATCOLL.ICONV_BUILD \
+                   --install-name=gnatcoll_iconv \
+                   --build-name=$kind iconv/gnatcoll_iconv.gpr
+    done
 }
