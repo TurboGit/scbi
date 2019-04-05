@@ -922,7 +922,13 @@ function handle-module()
 
     [ $PURGE = only ] && exit 0
 
-    ilog $module Building $module-$variant | tee -a $log
+    if [ $ref == NONE ]; then
+        DISPREF=master
+    else
+        DISPREF=$ref
+    fi
+
+    ilog $module Building $module-$variant \($DISPREF\) | tee -a $log
 
     if [ $HOST == $TARGET ]; then
         ilog $module native $TARGET | tee -a $log

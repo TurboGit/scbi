@@ -1,5 +1,5 @@
 ========== build/install libx
-xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : Building libx-default (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -17,7 +17,7 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
 ========== build/install libx/variant
-xxxx/xx/xx xx:xx:xx : Building libx-variantx
+xxxx/xx/xx xx:xx:xx : Building libx-variantx (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : variantx-config starting
@@ -34,7 +34,7 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-variantx
 
 ========== install libx
-xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : Building libx-default (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
@@ -46,7 +46,7 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
 ========== build/install libx/variant vx
-xxxx/xx/xx xx:xx:xx : Building libx-variantx
+xxxx/xx/xx xx:xx:xx : Building libx-variantx (vx.x)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -64,7 +64,7 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-variantx
 
 ========== build/install libx/variant tag vx.x.x
-xxxx/xx/xx xx:xx:xx : Building libx-variantx
+xxxx/xx/xx xx:xx:xx : Building libx-variantx (vx.x.x)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -82,7 +82,7 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-variantx
 
 ========== just test libx/variant tag vx.x.x
-xxxx/xx/xx xx:xx:xx : Building libx-variantx
+xxxx/xx/xx xx:xx:xx : Building libx-variantx (vx.x.x)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match

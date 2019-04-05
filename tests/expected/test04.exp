@@ -1,4 +1,4 @@
-xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : Building libx-default (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -13,7 +13,7 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
-xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : Building libx-default (vx)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -28,7 +28,7 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
-xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : Building libx-default (vx)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -44,7 +44,7 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
 OK tar not present
-xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : Building libx-default (vx.x)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from tar
@@ -60,7 +60,7 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
 OK tar present
-xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : Building libx-default (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
