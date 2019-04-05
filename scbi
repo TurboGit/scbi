@@ -91,6 +91,10 @@
 #                       to install (in $PREFIX)
 #                       also: pre-install / post-install
 #
+#    <module>-wrapup    parameter: $PREFIX $TARGET, return NONE
+#                       to wrapup build structure (optional)
+#                       also: pre-wrapup / post-wrapup
+#
 #    <module>-prefix    parameter: $PREFIX $TARGET, return string
 #                       the directory to install, default $BDIR/install
 #
@@ -250,7 +254,7 @@ DODEPS=no
 DEPS=no
 ISOOT=no
 PATCH=yes
-STEPS="setup config build install"
+STEPS="setup config build install wrapup"
 BUILD_TARGET=
 PLAN=
 TAR_CACHE=no
@@ -309,7 +313,7 @@ function module-wrapper()
 
         #  Go to build directory
 
-        if [ "$step" = "setup" ]; then
+        if [ "$step" = "setup" -o "$step" = "wrapup" ]; then
             cd $BDIR/$module
         else
             cd $BDIR/$module/build/build
@@ -1135,6 +1139,9 @@ while [ $# -gt 0 ]; do
 	-S|--no-setup)
 	    STEPS=${STEPS/setup/}
 	    ;;
+	-W|--no-wrapup)
+	    STEPS=${STEPS/wrapup/}
+	    ;;
 	-I|--no-install)
             DOINSTALL=no
 	    ;;
@@ -1164,7 +1171,7 @@ while [ $# -gt 0 ]; do
 	    DLOG=no
 	    ;;
 	--tests)
-	    NSTEPS="$NSTEPS setup config build install tests"
+	    NSTEPS="$NSTEPS setup config build install tests wrapup"
             DOTEST=true
 	    ;;
 	--tests-only)

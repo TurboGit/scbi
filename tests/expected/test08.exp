@@ -3,7 +3,7 @@
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
 xxxx/xx/xx xx:xx:xx : Building libx-default
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
@@ -20,7 +20,7 @@ xxxx/xx/xx xx:xx:xx : End building libx-default
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
 xxxx/xx/xx xx:xx:xx : Building libx-default
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
@@ -38,7 +38,7 @@ xxxx/xx/xx xx:xx:xx : End building libx-default
 
 xxxx/xx/xx xx:xx:xx : Building mainmult-default
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
@@ -57,7 +57,7 @@ xxxx/xx/xx xx:xx:xx : End building mainmult-default
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
 xxxx/xx/xx xx:xx:xx : Building libx-default
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
@@ -74,7 +74,7 @@ xxxx/xx/xx xx:xx:xx : End building libx-default
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
 xxxx/xx/xx xx:xx:xx : Building libx-variantx
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : variantx-config starting
 xxxx/xx/xx xx:xx:xx : variantx-config completed
@@ -92,7 +92,7 @@ xxxx/xx/xx xx:xx:xx : End building libx-variantx
 
 xxxx/xx/xx xx:xx:xx : Building mainmult-default
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : tests starting
 main on master
@@ -107,7 +107,7 @@ xxxx/xx/xx xx:xx:xx : End building mainmult-default
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
 xxxx/xx/xx xx:xx:xx : Building libx-default
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : tests starting
 main
@@ -120,7 +120,7 @@ xxxx/xx/xx xx:xx:xx : End building libx-default
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
 xxxx/xx/xx xx:xx:xx : Building libx-variantx
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : tests starting
 main
@@ -132,7 +132,7 @@ xxxx/xx/xx xx:xx:xx : End building libx-variantx
 
 xxxx/xx/xx xx:xx:xx : Building mainmult-default
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : tests starting
 main on master

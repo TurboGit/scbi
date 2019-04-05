@@ -1,7 +1,7 @@
 ========== libx patched version
 xxxx/xx/xx xx:xx:xx : Building oot-default
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : tests starting
