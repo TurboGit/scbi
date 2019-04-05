@@ -1,0 +1,107 @@
+========== build supermod
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End building libx-default
+
+xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+libb.B master (default)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End building libx-default
+
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+========== build supermod plan smx
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.A br_a
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End building libx-default
+
+xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+libb.B master (default)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End building libx-default
+
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+========== build supermod variant best (plan var)
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : Building libx-default
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.A br_a
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End building libx-default
+
+xxxx/xx/xx xx:xx:xx : Building libx-variantx
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : variantx-config starting
+xxxx/xx/xx xx:xx:xx : variantx-config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+libb.B vx (variantx)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End building libx-variantx
+
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+do setup
+do wrapup
+do setup
+do wrapup
+do setup
+do wrapup

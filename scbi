@@ -169,6 +169,20 @@
 #  not directly related. It is in fact equivalent to calling scbi with
 #  all the modules listed as arguments.
 #
+#  A super module can have the following optional function definitions:
+#
+#     <module>-setup    parameter: $PREFIX $TARGET, return NONE
+#                       to setup build structure (optional)
+#                       PREFIX is the global install directory
+#
+#     <module>-wrapup   parameter: $PREFIX $TARGET, return NONE
+#                       to setup build structure (optional)
+#                       PREFIX is the global install directory
+#
+#     <module>-plan     parameter: $PREFIX $TARGET, return string
+#                       the name of the build plan to use
+#                       PREFIX is the global install directory
+#
 #  Variables:
 #  ----------
 #
@@ -359,14 +373,14 @@ function module-variant-wrapper()
         fn-exists $module-$variant-cross-$step
 
         if [[ $? = 0 ]]; then
-	    module-wrapper $BDIR/$module/build/install $module \
+	    module-wrapper $PREFIX $module \
                            $variant $variant-cross-$step || exit 1
             return 0
         else
             fn-exists $module-cross-$step
 
             if [[ $? = 0 ]]; then
-	        module-wrapper $BDIR/$module/build/install $module \
+	        module-wrapper $PREFIX $module \
                                $variant cross-$step || exit 1
                 return 0
             fi
@@ -376,15 +390,13 @@ function module-variant-wrapper()
     fn-exists $module-$variant-$step
 
     if [[ $? = 0 ]]; then
-	module-wrapper $BDIR/$module/build/install $module \
-                       $variant $variant-$step || exit 1
+	module-wrapper $PREFIX $module $variant $variant-$step || exit 1
 
     else
         fn-exists $module-$step
 
         if [[ $? = 0 ]]; then
-	    module-wrapper $BDIR/$module/build/install $module \
-                           $variant $step || exit 1
+	    module-wrapper $PREFIX $module $variant $step || exit 1
         fi
     fi
 }
@@ -757,6 +769,50 @@ function handle-sources()
 
 ############################## handle-module
 
+function handle-super-module()
+{
+    local supermodule=$1
+    local variant=$2
+
+    # check for plan
+
+    fn-exists $supermodule-$variant-plan
+
+    if [[ $? = 0 ]]; then
+        PLAN=$($supermodule-$variant-plan)
+        echo $PLAN > /tmp/plan
+        load-module-plan $PLAN
+    else
+        fn-exists $supermodule-plan
+        if [[ $? = 0 ]]; then
+            PLAN=$($supermodule-plan)
+            load-module-plan $PLAN
+        fi
+    fi
+
+    # check for setup
+
+    module-variant-wrapper $BDIR/install $supermodule $variant setup || exit 1
+
+    fn-exists $supermodule-$variant-modules
+
+    if [[ $? = 0 ]]; then
+        FCT=$supermodule-$variant-modules
+    else
+        FCT=$supermodule-modules
+    fi
+
+    for module in $($FCT); do
+        handle-module $module
+    done
+
+    # check for wrapup
+
+    module-variant-wrapper $BDIR/install $supermodule $variant wrapup || exit 1
+}
+
+############################## handle-module
+
 function handle-module()
 {
     local modref=$1
@@ -802,18 +858,14 @@ function handle-module()
 
     if [[ $? = 0 ]]; then
         (
-            for module in $($module-$variant-modules); do
-                handle-module $module
-            done
+            handle-super-module $module $variant
         )
         return
     else
         fn-exists $module-modules
         if [[ $? = 0 ]]; then
             (
-                for module in $($module-modules); do
-                    handle-module $module
-                done
+                handle-super-module $module $variant
             )
             return
         fi

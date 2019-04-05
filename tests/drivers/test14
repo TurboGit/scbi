@@ -1,0 +1,20 @@
+# check for super-module
+#
+
+./scbi --purge-only lib1 &> /dev/null
+./scbi --purge-only lib2 &> /dev/null
+
+echo "========== build supermod"
+./scbi --tests supermod
+
+echo "========== build supermod plan sm1"
+./scbi --tests --plan=sm1 supermod
+
+echo "========== build supermod variant best (plan var)"
+./scbi --tests supermod/best
+
+if [ -f .root/builds/install/supermod ]; then
+    cat .root/builds/install/supermod
+else
+    echo no file .root/builds/install/supermod
+fi
