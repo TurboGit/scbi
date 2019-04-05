@@ -245,6 +245,7 @@ STEPS="setup config build install"
 BUILD_TARGET=
 PLAN=
 TAR_CACHE=no
+DRY_RUN=no
 
 ############################## check-handled
 #
@@ -587,9 +588,11 @@ function handle-depends()
               || "$mver" = $VERSION_ERROR \
               || $ref > $mver ]];
     then
-        echo
-        ilog $module need building $module, \
-             current version $(display-version $mver) | tee -a $log
+        if [ $DRY_RUN == no ]; then
+            echo
+            ilog $module need building $module, \
+                 current version $(display-version $mver) | tee -a $log
+        fi
         handle-module $modref
     else
         ilog $module $modref found
@@ -760,7 +763,9 @@ function handle-module()
 
     check-handled $module+$variant
     if [[ $? = 1 ]]; then
-        ilog $module skip $module, already handled
+        if [ $DRY_RUN == no ]; then
+            ilog $module skip $module, already handled
+        fi
         return
     fi
 
@@ -815,7 +820,7 @@ function handle-module()
             if [[ ! $? = 0 ]]; then
                 exit 1
             fi
-            echo
+            [ $DRY_RUN == no ] && echo
         else
             fn-exists $module-depends
 
@@ -828,9 +833,14 @@ function handle-module()
                 if [[ ! $? = 0 ]]; then
                     exit 1
                 fi
-                echo
+                [ $DRY_RUN == no ] && echo
             fi
         fi
+    fi
+
+    if [ $DRY_RUN == yes ]; then
+        echo $modref
+        return 0
     fi
 
     clog $module
@@ -1085,7 +1095,7 @@ function handle-module()
 ############################## body
 
 set -- $(getopt -u -o t:adefSIuscbilnpPvh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends -- "$@")
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,dry-run -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1180,6 +1190,9 @@ while [ $# -gt 0 ]; do
         --list-depends)
             DODEPS=yes;
             ;;
+        --dry-run)
+            DRY_RUN=yes;
+            ;;
 	(--)
 	    ;;
 	(*)
@@ -1241,6 +1254,15 @@ fi
 #  Prepare log dir
 
 mkdir -p $LOGS
+
+if [ $DRY_RUN == yes ]; then
+    PURGE=no
+    DOINSTALL=no
+    DOARCHIVE=no
+    DOUPDATE=no
+    DOFORCE=no
+    STEPS=""
+fi
 
 #  Run script for all modules
 

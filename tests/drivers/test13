@@ -1,0 +1,7 @@
+# check for dry-run
+
+echo just mainlib:
+./scbi --dry-run mainlib
+
+echo mainlib and deps:
+./scbi --dry-run --deps mainlib
