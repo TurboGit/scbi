@@ -6,7 +6,13 @@ declare -A MODVER=[]
 
 function load-module-plan()
 {
-    PLAN=$DEFS/.plan-$1
+    local PLAN=$DEFS/.plan-$1
+
+    # if not found in definitions install dir, look in current directory
+
+    if [ ! -f $PLAN ]; then
+        PLAN=$PWD/.plan-$1
+    fi
 
     if [ -f $PLAN ]; then
         while read modref; do
