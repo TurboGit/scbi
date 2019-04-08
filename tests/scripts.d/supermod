@@ -1,0 +1,27 @@
+
+function supermod-setup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    echo do setup >> $PREFIX/supermod
+}
+
+function supermod-best-plan()
+{
+    echo var
+}
+
+function supermod-modules()
+{
+    echo lib1
+    echo lib2
+}
+
+function supermod-wrapup()
+{
+    PREFIX=$1
+    TARGET=$2
+
+    echo do wrapup >> $PREFIX/supermod
+}
