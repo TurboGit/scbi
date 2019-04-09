@@ -1,0 +1,23 @@
+# check for local plan
+#
+
+./scbi --purge-only lib1 &> /dev/null
+./scbi --purge-only lib2 &> /dev/null
+
+(
+    mkdir -p .root/git
+    cd .root/git
+    if [ ! -d lib2.bundle ]; then
+        git clone ../repos/lib2.bundle lib2.bundle &> /dev/null
+        sed -i 's/libb.B master/libb.B next version/g' ./lib2.bundle/lib2.c
+    fi
+)
+
+echo "========== build supermod"
+./scbi --tests supermod
+
+echo "========== build supermod with local plan myplan"
+echo lib1:v1 > .plan-myplan
+echo lib2:dev >> .plan-myplan
+./scbi --tests --plan=myplan supermod
+rm .plan-myplan
