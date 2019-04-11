@@ -61,6 +61,32 @@ function git-co()
     )
 }
 
+############################## hg-co
+
+function hg-co()
+{
+    local URL=$1
+    local NAME=$2
+    local REPO=$(basename $URL .git)
+
+    (
+        mkdir -p $BDIR/.vcs
+        cd $BDIR/.vcs &&
+        if [ ! -d $REPO ]; then
+            hg clone $URL $REPO
+        else
+            cd $REPO
+            [ ! -d .git ] &&
+                ilog build error: $(pwd) not a git repository &&
+                exit 1
+            # we set the URL in case the repo has been relocated
+            hg pull
+        fi &&
+        cd $BDIR/$NAME &&
+        ln -s ../.vcs/$REPO vcs
+    )
+}
+
 ############################## git-branch
 
 function git-branch()
@@ -135,6 +161,38 @@ function git-branch()
     return 0
 }
 
+############################## hg-branch
+
+function hg-branch()
+{
+    local MODULE=$1
+    local BRANCH=$2
+    local BUILDB=scbi
+
+    (
+        cd $BDIR/$MODULE/vcs
+
+        # first, let's update the repository
+
+        hg pull
+
+        # if no branch specified use default
+
+        if [ $BRANCH == NONE ]; then
+            BRANCH=default
+        fi
+
+        hg branch -f $BRANCH
+
+        if [ $? != 0 ]; then
+            ilog build "error: switching mercurial branch"
+            return 1
+        fi
+    )
+
+    return 0
+}
+
 ############################## svn-branch
 
 function svn-branch()
@@ -177,8 +235,26 @@ function get-vcs()
                     exit 1
                 fi
             fi
-
             ;;
+
+        hg|mercurial)
+            hg-co $URL $module > $log 2>&1
+
+            if [[ ! $? = 0 ]]; then
+                ilog build "error: cannot get sources from $URL"
+                exit 1
+            fi
+
+            if [ $kind != DEV ]; then
+                hg-branch $module $version > $log 2>&1
+
+                if [[ ! $? = 0 ]]; then
+                    ilog build "error: cannot switch to branch $version"
+                    exit 1
+                fi
+            fi
+            ;;
+
         svn|subversion)
             svn-co $URL $module > $log 2>&1
 

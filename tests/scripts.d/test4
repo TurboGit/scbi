@@ -1,0 +1,30 @@
+
+function test4-vcs()
+{
+   echo mercurial
+   echo ${TESTREPOS}/simple.mercurial.bundle
+}
+
+function test4-config()
+{
+   PREFIX=$1
+   TARGET=$2
+
+   ./configure
+}
+
+function test4-build()
+{
+   PREFIX=$1
+   TARGET=$2
+
+   make
+}
+
+function test4-tests()
+{
+   PREFIX=$1
+   TARGET=$2
+
+   ./main
+}

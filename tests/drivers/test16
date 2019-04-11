@@ -1,0 +1,2 @@
+# simple check for mercurial repository
+./scbi --tests test4
