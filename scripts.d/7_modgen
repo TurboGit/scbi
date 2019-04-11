@@ -25,7 +25,7 @@ function module-setup()
     fi
 
     if [ -h src -o -d src ]; then
-        rsync -a $OPT --exclude=".git" --exclude=".svn" \
+        rsync -a $OPT --exclude=".git" --exclude=".gitignore" --exclude=".svn" \
             --exclude "gcc-interface" \
             --link-dest=../src src/. $SRCDIR/
     fi
