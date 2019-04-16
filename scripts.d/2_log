@@ -110,7 +110,7 @@ function display-log-stat()
         mam=( $(get-min-avr-max "$values") )
 
         echo -n $key
-        for s in $(seq ${#key} 25); do
+        for s in $(seq ${#key} 40); do
             echo -n ' '
         done
 
