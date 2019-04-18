@@ -1056,7 +1056,7 @@ function handle-module()
 	        if [ $DLOG = on-failure ]; then
 	            tail -100 $log
 	        fi
-	        elog generic module pre-$step failed with error $res
+	        elog $module generic module pre-$step failed with error $res
 	        return $res
             fi
 
@@ -1091,7 +1091,7 @@ function handle-module()
 	        if [ $DLOG = on-failure ]; then
 	            tail -100 $log
 	        fi
-	        elog generic module $step failed with error $res
+	        elog $module generic module $step failed with error $res
 	        return $res
             fi
 
@@ -1119,7 +1119,7 @@ function handle-module()
 	        if [ $DLOG = on-failure ]; then
 	            tail -100 $log
 	        fi
-	        elog generic module post-$step failed with error $res
+	        elog $module generic module post-$step failed with error $res
 	        return $res
             fi
 
@@ -1159,7 +1159,7 @@ function handle-module()
 	ilog $module copy install into ..${IDIR/$BDIR/}
         $SUDO mkdir -p $IDIR/
         $SUDO rsync -a $BDIR/$module/$TARGET-$variant/install/. $IDIR/. > $log 2>&1
-    fi || elog fail to copy to $IDIR
+    fi || elog $module fail to copy to $IDIR
 
     ilog $module End building $module-$variant
 
