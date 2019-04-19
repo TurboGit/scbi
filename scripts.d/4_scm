@@ -308,6 +308,10 @@ function vcs-build-id()
         elif [ -d .svn ]; then
             echo "r$(LANG=C svn info | \
                   sed -n -e '/^Revision: \([0-9]*\).*$/s//\1/p')"
+        elif [ -d .hg ]; then
+            hver=$(hg identify --num)
+            hdif=$(hg diff | tail -n+4 | md5sum | cut -d' ' -f1)
+            echo $hver$hdif
         else
             echo 0
         fi
