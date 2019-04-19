@@ -288,7 +288,7 @@ function vcs-build-id()
 {
     local PREFIX=$1
     local TARGET=$2
-    local MODULE=$3
+    local MODREF=$3
     local vcs=$4
 
     [ ! -d $vcs ] && return 0
@@ -317,5 +317,5 @@ function vcs-build-id()
         fi
           )
 
-    get-build-id $PREFIX $TARGET $MODULE $vid
+    get-build-id $PREFIX $TARGET $MODREF $vid
 }
