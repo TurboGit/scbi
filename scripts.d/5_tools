@@ -96,33 +96,117 @@ function display-file()
     cat $file
 }
 
+############################## get-md5
+
+function get-md5()
+{
+    md5sum | cut -d' ' -f1
+}
+
+############################## get-depends-build-id
+
+function _internal_get-depends-build-id()
+{
+    local MODREF=$1
+    local DOCOMPUTE=$2
+
+    #  Get module information
+
+    local module_info=( $(get-module-ref $MODREF) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    #  Then load module
+
+    if [ -f $DEFS/$module ]; then
+        source $DEFS/$module
+
+        # Setup depends recursively if any
+
+        fn-exists $module-$variant-depends
+
+        if [ $? = 0 ]; then
+            for dmodule in $($module-$variant-depends); do
+                _internal_get-depends-build-id $dmodule 1
+            done
+        else
+            fn-exists $module-depends
+
+            if [ $? = 0 ]; then
+                for dmodule in $($module-depends); do
+                    _internal_get-depends-build-id $dmodule 1
+                done
+            fi
+        fi
+
+        # Only compute for dependencies, not for the root module
+
+        if [ $DOCOMPUTE == 1 ]; then
+            if [ -f $BDIR/$module/install-id ]; then
+                var=$(cat $BDIR/$module/install-id)
+
+                if [ -f $BDIR/$module/build-id-$var ]; then
+                    cat $BDIR/$module/build-id-$var
+                else
+                    echo $(date)
+            fi
+            else
+                echo $(date)
+            fi
+        fi
+    fi
+}
+
+function get-depends-build-id()
+{
+    (
+        _internal_get-depends-build-id $1 0 | get-md5
+    )
+}
+
 ############################## get-build-id
 
 function get-build-id()
 {
     local PREFIX=$1
     local TARGET=$2
-    local MODULE=$3
+    local MODREF=$3
     local vid="$4"
+
+    #  Get module information
+
+    local module_info=( $(get-module-ref $MODREF) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    # If patch activated and patches dir exists
 
     local pid=no-patch-found
 
-    # if patch activated and patches dir exists
-
     if [ $PATCH = yes -a -d $PATCHES ]; then
-        if [ ! -z $(ls $PATCHES/$MODULE-*.patch 2> /dev/null) ]; then
-            local pid=$(cat $PATCHES/$MODULE-*.patch 2>&1 |
-                            md5sum | cut -d' ' -f1)
+        if [ ! -z $(ls $PATCHES/$module-*.patch 2> /dev/null) ]; then
+            local pid=$(cat $PATCHES/$module-*.patch 2>&1 | get-md5)
         fi
     fi
 
+    # Also compute id from dependencies to ensure we rebuild if one
+    # dependency has changed.
+
+    local did=$(get-depends-build-id $MODREF)
+
+    # Now compute final id add compile version
+
     if [ "$HOST" = "$TARGET" -o "$(which $TARGET-gcc)" = "" ]; then
-        echo -n $(gcc --version | head -1) ",$vid,$pid" \
-            | md5sum | cut -d' ' -f1
+        echo -n $(gcc --version | head -1) ",$vid,$pid,$did" | get-md5
 
     else
-        echo -n $($TARGET-gcc --version | head -1) ",$vid,$pid" \
-            | md5sum | cut -d' ' -f1
+        echo -n $($TARGET-gcc --version | head -1) ",$vid,$pid,$did" | get-md5
     fi
 }
 

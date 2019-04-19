@@ -89,7 +89,10 @@ xxxx/xx/xx xx:xx:xx : End building libx-variantx
 xxxx/xx/xx xx:xx:xx : Building mainmult-default (dev)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : tests starting
 better main in dev
 liba.A br_a

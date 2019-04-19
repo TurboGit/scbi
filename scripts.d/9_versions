@@ -76,7 +76,9 @@ function parse-module-ref()
 
 function get-module-ref()
 {
-    local module_info=( $(parse-module-ref $modref) )
+    local MODREF=$1
+
+    local module_info=( $(parse-module-ref $MODREF) )
     local module=${module_info[0]}
 
     local modplan=${MODVER[$module]}

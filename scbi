@@ -678,7 +678,7 @@ function handle-sources()
         if [ $DOUPDATE = yes -o ! -d tarsrc  ]; then
 	    ilog $module get sources from tar
 
-            vid=$(get-tar $module $ref >> $log 2>&1)
+            get-tar $module $ref >> $log 2>&1
 
             if [[ ! $? = 0 ]]; then
                 ilog $module cannot get/find tar sources
@@ -688,7 +688,7 @@ function handle-sources()
             #  Compute and store the version id of the sources + compiler.
             #  That is when the compiler is changed when want to rebuild
             #  the software.
-            get-build-id $PREFIX $TARGET $vid > build-id-$variant
+            get-build-id $PREFIX $TARGET $modref tar-$ref > build-id-$variant
         fi
 
         #  We set the link for the source so that no module will have to
@@ -716,10 +716,10 @@ function handle-sources()
                     #  compiler. That is when the compiler is changed we
                     #  want to rebuild the software.
 
-                    vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs \
-                                 > build-id-$variant
-
                     echo -n $ref > source-id
+
+                    vcs-build-id $PREFIX $TARGET $modref $(pwd)/vcs \
+                                 > build-id-$variant
 
                 else
                     ilog $module cannot find local dev repository:
@@ -753,7 +753,7 @@ function handle-sources()
                 #  compiler. That is when the compiler is changed we
                 #  want to rebuild the software.
 
-                vcs-build-id $PREFIX $TARGET $module $(pwd)/vcs \
+                vcs-build-id $PREFIX $TARGET $modref $(pwd)/vcs \
                              > build-id-$variant
             fi
 
@@ -761,7 +761,7 @@ function handle-sources()
 
         else
             #  No VCS, not TAR, just rebuild the sources
-            get-build-id $PREFIX $TARGET $module "$(date)" \
+            get-build-id $PREFIX $TARGET $modref "$(date)" \
                          > build-id-$variant
         fi
 
