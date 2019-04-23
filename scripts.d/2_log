@@ -124,6 +124,28 @@ function display-log-stat()
     done
 }
 
+############################## show-command
+# display bash command with original command and with substitued
+# variables
+
+function show-command()
+{
+    local CMD=$1
+    shift
+
+    echo "# $CMD"
+    echo '('
+
+    # first output current working directory
+
+    echo "   cd $PWD"
+
+    echo -n "  "
+    eval echo -e \"$(type $CMD | sed '1,3d;$d')\"
+
+    echo ')'
+}
+
 ############################## body
 
 [ ! -d $LOGS ] && mkdir -p $LOGS
