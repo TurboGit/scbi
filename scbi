@@ -1145,9 +1145,6 @@ function handle-module()
         bzip2 -9 $module-bin.tar
     fi
 
-    #  Finaly copy to given prefix
-    SUDO=""
-
     fn-exists $module-$variant-prefix
 
     if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
@@ -1161,12 +1158,21 @@ function handle-module()
         fi
     fi
 
-    if [ ! -w $IDIR ]; then
-        SUDO=sudo
-    fi
-
     if [ "$DOINSTALL" = "yes" -a -d $BDIR/$module/build/install ]; then
 	ilog $module copy install into ..${IDIR/$BDIR/}
+
+        #  Finaly copy to given prefix
+        SUDO=""
+
+        if [ ! -d $IDIR ]; then
+	    mkdir -p $IDIR &> /dev/null
+	    [ ! $? = 0 ] && SUDO=sudo
+	fi
+
+        if [ ! -w $IDIR ]; then
+            SUDO=sudo
+        fi
+
         $SUDO mkdir -p $IDIR/
         $SUDO rsync -a $BDIR/$module/$TARGET-$variant/install/. $IDIR/. > $log 2>&1
     fi || elog $module fail to copy to $IDIR
