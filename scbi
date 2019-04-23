@@ -685,7 +685,7 @@ function handle-sources()
 
         echo -n tar-$ref > source-id
 
-        if [ $DOUPDATE = yes -o ! -d tarsrc  ]; then
+        if [ $DOUPDATE = yes -o ! -d tarsrc -o ! -f tar ]; then
 	    ilog $module get sources from tar
 
             get-tar $module $ref >> $log 2>&1
