@@ -1291,7 +1291,8 @@ trap clean-up EXIT
 
 #  Load module definitions
 
-[ ! -d "$DEFS" ] && DEFS=$HOME/.config/scbi
+[ ! -d "$DEFS" -o -z "$(ls $DEFS/[0-9]* 2> /dev/null)" ] &&
+    DEFS=$HOME/.config/scbi
 
 [ ! -d "$DEFS" ] && echo $0: cannot find module definition files && exit 1
 
