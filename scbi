@@ -1339,9 +1339,10 @@ if [ $DODEPS == yes ]; then
     exit 0
 fi
 
-#  Prepare log dir
+#  Prepare log dir and tarball dir
 
 mkdir -p $LOGS
+mkdir -p $TARBALL
 
 if [ $DRY_RUN == yes ]; then
     PURGE=no
