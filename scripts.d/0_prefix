@@ -6,4 +6,4 @@ TODAY=$(date +"%Y_%m_%d")
 [ -z $PREFIX ] && PREFIX=$BDIR/install
 [ -z $TARBALL ] && TARBALL=$BDIR/.tar
 [ -z $PATCHES ] && PATCHES=$BDIR/.patches
-[ -z $LOGS ] && LOGS=$BDIR/logs/$TODAY
+[ -z $LOGS ] && LOGS=$BDIR/.logs

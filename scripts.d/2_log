@@ -6,7 +6,7 @@ KEEP=120
 function clog()
 {
     local module=$1
-    echo >> $LOGS/$TARGET-$module-report.log
+    echo >> $LOGS/$TODAY/$TARGET-$module-report.log
 }
 
 ############################## ilog
@@ -18,7 +18,7 @@ function ilog()
 
     shift
     echo $ts : $*
-    echo $ts : $* >> $LOGS/$TARGET-$module-report.log
+    echo $ts : $* >> $LOGS/$TODAY/$TARGET-$module-report.log
 }
 
 ############################## elog
@@ -95,7 +95,7 @@ function display-log-stat()
 {
     local module=$1
 
-    FILES=$(find $LOGS/.. -name "*$module-report.log")
+    FILES=$(find $LOGS -name "*$module-report.log")
 
     for file in $FILES; do
         compute-log-stat-file $file
@@ -148,6 +148,6 @@ function show-command()
 
 ############################## body
 
-[ ! -d $LOGS ] && mkdir -p $LOGS
+[ ! -d $LOGS/$TODAY ] && mkdir -p $LOGS/$TODAY
 
 clean-scbi-logs
