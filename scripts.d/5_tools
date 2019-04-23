@@ -254,17 +254,20 @@ function get-tar()
 
     #  The tarball is not present, try downloading it
 
-    if [ ! -f $TARBALL/$tarsrc && "$tarcp" != "none" && "$tarurl" != "none" ]; then
-        $tarcp $tarurl/$tarsrc $TARBALL/ > $log 2>&1
+    if [ ! -f $TARBALL/$tarsrc -a "$tarcp" != "none" -a "$tarurl" != "none" ]; then
+	if [ $tarcp == wget ]; then
+	    $tarcp $tarurl/$tarsrc -O $TARBALL/$tarsrc > $log 2>&1
+	elif  [ $tarcp == curl ]; then
+	    $tarcp $tarurl/$tarsrc --output $TARBALL/$tarsrc > $log 2>&1
+        else
+            elog $module error: unknown tar protocol $tarcp
+	fi
 
-        [[ ! $? = 0 ]] &&
-            echo "error: cannot get tar: $tarcp" &&
-            return 1
+        [[ ! $? = 0 ]] && elog $module error: cannot get tar: $tarcp
     fi
 
     [ ! -f $TARBALL/$tarsrc ] &&
-        echo "error: tarball $tarsrc not found" &&
-        return 1
+        elog $module error: tarball $tarsrc not found
 
     ilog build extract tarball $tarsrc
 
