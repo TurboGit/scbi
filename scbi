@@ -312,13 +312,18 @@ function module-wrapper()
     local variant=$3
     local step=$4
 
-    log=$LOGS/$TARGET-$module-$variant-$step.log
-
     if [ $step = "build" -a "$BUILD_TARGET" != "" ]; then
         mstep=build-$BUILD_TARGET
     else
         mstep=$step
     fi
+
+    # global logs
+    log=$LOGS/$TARGET-$module-$variant-$mstep.log
+
+    # local log for last module command
+    mlog=$BDIR/$module/$TARGET-$variant/.log/$mstep.log
+    clog=$BDIR/$module/$TARGET-$variant/.log/$mstep.cmd
 
     ilog $module $mstep starting
 
@@ -333,12 +338,18 @@ function module-wrapper()
             cd $BDIR/$module/build/build
         fi
 
+        #  Record run command
+
+        (
+            show-command $module-$mstep $PREFIX $TARGET 2&> $clog
+        )
+
         #  Call module step
 
         if [[ $DLOG = yes || "$step" = "tests" ]]; then
-	    $module-$step $PREFIX $TARGET | tee $log 2>&1
+	    $module-$mstep $PREFIX $TARGET 2>&1 | tee -a $log | tee $mlog
         else
-	    $module-$mstep $PREFIX $TARGET >> $log 2>&1
+	    $module-$mstep $PREFIX $TARGET 2>&1 | tee $mlog >> $log
         fi
         res=$?
 
@@ -853,7 +864,7 @@ function handle-module()
 
     #  Create module build directory
 
-    mkdir -p $BDIR/$module/$TARGET-$variant > $log 2>&1
+    mkdir -p $BDIR/$module/$TARGET-$variant/.log > $log 2>&1
 
     #  Check if meta-module, if so call handle-module for each one
 
