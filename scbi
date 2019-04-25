@@ -352,7 +352,8 @@ function module-wrapper()
         else
 	    $module-$mstep $PREFIX $TARGET 2>&1 | tee $mlog >> $log
         fi
-        res=$?
+        #  We want the status of the first command and not the tee ones
+        res=${PIPESTATUS[0]}
 
         #  Check for errors
 
