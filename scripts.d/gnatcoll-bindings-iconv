@@ -15,6 +15,7 @@ function gnatcoll-bindings-iconv-tar()
 {
     VERSION=$1
 
+    echo default
     echo none
     echo none
     echo gnatcoll-bindings-$VERSION-src.tar.gz

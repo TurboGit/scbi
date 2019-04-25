@@ -7,6 +7,9 @@ function aunit-vcs()
 
 function aunit-tar()
 {
+    VERSION=$1
+
+    echo default
     echo none
     echo none
     echo aunit-$VERSION-tar.gz

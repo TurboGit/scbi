@@ -53,9 +53,10 @@
 #
 #    <module>-tar       parameter: $VERSION, return: array
 #                       describe a way to get the sources as tarball
-#                         1st item: protocole (scp, none)
-#                         2st item: URL
-#                         3st item: archive name (with $VERSION)
+#                         1st item: proxy name (proxy-$name)
+#                         2nd item: protocole (scp, none)
+#                         3rd item: URL (none)
+#                         4st item: archive name (with $VERSION)
 #
 #    <module>-version   parameter: $PREFIX $TARGET, return: <installed version>
 #                       returns the current version of the installed tool

@@ -15,6 +15,7 @@ function aws-tar()
 {
     VERSION=$1
 
+    echo default
     echo none
     echo none
     echo aws-$VERSION-src.tar.gz

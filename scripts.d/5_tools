@@ -248,22 +248,31 @@ function get-tar()
 
     tar=( $($module-tar $version) )
 
-    tarcp=${tar[0]}
-    tarurl=${tar[1]}
-    tarsrc=${tar[2]}
+    proxy=${tar[0]}
+    tarcp=${tar[1]}
+    tarurl=${tar[2]}
+    tarsrc=${tar[3]}
 
     #  The tarball is not present, try downloading it
 
-    if [ ! -f $TARBALL/$tarsrc -a "$tarcp" != "none" -a "$tarurl" != "none" ]; then
-	if [ $tarcp == wget ]; then
-	    $tarcp $tarurl/$tarsrc -O $TARBALL/$tarsrc > $log 2>&1
-	elif  [ $tarcp == curl ]; then
-	    $tarcp $tarurl/$tarsrc --output $TARBALL/$tarsrc > $log 2>&1
-        else
-            elog $module error: unknown tar protocol $tarcp
-	fi
+    if [ ! -f $TARBALL/$tarsrc \
+           -a "$tarcp" != "none" -a "$tarurl" != "none" ];
+    then
+        (
+            fn-exists proxy-$proxy
 
-        [[ ! $? = 0 ]] && elog $module error: cannot get tar: $tarcp
+            [[ $? = 0 ]] && proxy-$proxy
+
+	    if [ $tarcp == wget ]; then
+	        $tarcp $tarurl/$tarsrc -O $TARBALL/$tarsrc > $log 2>&1
+	    elif  [ $tarcp == curl ]; then
+	        $tarcp $tarurl/$tarsrc --output $TARBALL/$tarsrc > $log 2>&1
+            else
+                elog $module error: unknown tar protocol $tarcp
+	    fi
+
+            [[ ! $? = 0 ]] && elog $module error: cannot get tar: $tarcp
+        )
     fi
 
     [ ! -f $TARBALL/$tarsrc ] &&

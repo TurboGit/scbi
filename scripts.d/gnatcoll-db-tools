@@ -14,6 +14,7 @@ function gnatcoll-db-tools-tar()
 {
     VERSION=$1
 
+    echo default
     echo none
     echo none
     echo gnatcoll-db-tools-$VERSION-src.tar.gz

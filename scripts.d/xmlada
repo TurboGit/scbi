@@ -9,6 +9,7 @@ function xmlada-tar()
 {
     VERSION=$1
 
+    echo default
     echo none
     echo none
     echo xmlada-$VERSION-src.tar.gz
