@@ -1150,34 +1150,35 @@ function handle-module()
     fn-exists $module-$variant-prefix
 
     if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
-        IDIR=$($module-$variant-prefix $BDIR/$module/build/install $TARGET)
+        _IDIR=$($module-$variant-prefix $BDIR/$module/build/install $TARGET)
     else
         fn-exists $module-prefix
         if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
-            IDIR=$($module-prefix $BDIR/$module/build/install $TARGET)
+            _IDIR=$($module-prefix $BDIR/$module/build/install $TARGET)
         else
-            IDIR=$PREFIX
+            _IDIR=$PREFIX
         fi
     fi
 
     if [ "$DOINSTALL" = "yes" -a -d $BDIR/$module/build/install ]; then
-	ilog $module copy install into ..${IDIR/$BDIR/}
+	ilog $module copy install into ..${_IDIR/$BDIR/}
 
         #  Finaly copy to given prefix
         SUDO=""
 
-        if [ ! -d $IDIR ]; then
-	    mkdir -p $IDIR &> /dev/null
+        if [ ! -d ${_IDIR} ]; then
+	    mkdir -p ${_IDIR} &> /dev/null
 	    [ ! $? = 0 ] && SUDO=sudo
 	fi
 
-        if [ ! -w $IDIR ]; then
+        if [ ! -w ${_IDIR} ]; then
             SUDO=sudo
         fi
 
-        $SUDO mkdir -p $IDIR/
-        $SUDO rsync -a $BDIR/$module/$TARGET-$variant/install/. $IDIR/. > $log 2>&1
-    fi || elog $module fail to copy to $IDIR
+        $SUDO mkdir -p ${_IDIR}/
+        $SUDO rsync -a $BDIR/$module/$TARGET-$variant/install/. \
+	      ${_IDIR}/. > $log 2>&1
+    fi || elog $module fail to copy to ${_IDIR}
 
     ilog $module End building $module-$variant
 

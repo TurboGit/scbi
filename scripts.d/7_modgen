@@ -99,22 +99,22 @@ function module-pre-install()
 
     #  Finaly copy to given prefix
     local SUDO=""
-    local IDIR=""
+    local _IDIR=""
 
     fn-exists $MODULE-$VARIANT-prefix
 
     if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
-        IDIR=$($MODULE-prefix)
+        _IDIR=$($MODULE-prefix)
     else
         fn-exists $MODULE-prefix
         if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
-            IDIR=$($MODULE-prefix)
+            _IDIR=$($MODULE-prefix)
         else
-            IDIR=$PREFIX
+            _IDIR=$PREFIX
         fi
     fi
 
-    if [ ! -w $IDIR ]; then
+    if [ ! -w ${_IDIR} ]; then
         SUDO=sudo
     fi
 
@@ -125,7 +125,7 @@ function module-pre-install()
 
     if [ -f $MPREFIX/../manifest ]; then
         cat $MPREFIX/../manifest | while read file; do
-            $SUDO rm -f $IDIR/$file
+            $SUDO rm -f ${_IDIR}/$file
         done &&
         if [ $(basename $MPREFIX) = "install" \
              -a $(basename $(dirname $MPREFIX)) = "$MODULE" ]; then
