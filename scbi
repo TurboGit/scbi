@@ -113,7 +113,7 @@
 #     5. <module>-post-<step>   - done after step
 #     6. module-post-<step>     - the generic post step handled internally
 #
-#  The following steps (2, 4 and 5 above) can have variants and/or cross
+#  The following steps (2, 3 and 5 above) can have variants and/or cross
 #  hooks:
 #
 #     <module>-<variant>[-cross]-depends
@@ -124,7 +124,7 @@
 #     <module>-<variant>[-cross]-install
 #     <module>-<variant>[-cross]-prefix
 #
-#  The steps routines (for 2, 4 and 5) are checked in the following order and
+#  The steps routines (for 2, 3 and 5) are checked in the following order and
 #  the first found is called:
 #
 #     <module>-<variant>-cross-<step>
