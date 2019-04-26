@@ -17,8 +17,8 @@ function binutils-build-env()
 
 function binutils-version()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     TOOL=ld
 
@@ -35,8 +35,8 @@ function binutils-version()
 
 function binutils-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     CONF_OPT="--prefix=$PREFIX --disable-multilib --disable-gdb"
 
@@ -49,16 +49,16 @@ function binutils-config()
 
 function binutils-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -j6
 }
 
 function binutils-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install &&
         if [ $HOST != $TARGET ]; then

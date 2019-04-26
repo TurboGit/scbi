@@ -12,7 +12,7 @@ function gnatcoll-bindings-readline-depends()
 
 function gnatcoll-bindings-readline-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -22,8 +22,8 @@ function gnatcoll-bindings-readline-tar()
 
 function gnatcoll-bindings-readline-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     GOPTS="-j$JOBS -p -XBUILD=PROD --target=$TARGET"
 
@@ -36,8 +36,8 @@ function gnatcoll-bindings-readline-build()
 
 function gnatcoll-bindings-readline-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
     GOPTS="$GOPTS --build-var=LIBRARY_TYPE"

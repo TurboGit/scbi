@@ -25,24 +25,24 @@ function gprbuild-depends()
 
 function gprbuild-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$JOBS setup
 }
 
 function gprbuild-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -f ../src/Makefile
 }
 
 function gprbuild-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -f ../src/Makefile install
 }

@@ -17,24 +17,24 @@ function mypaint-brushes-env()
 
 function mypaint-brushes-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     ./autogen.sh && ./configure --prefix=$PREFIX
 }
 
 function mypaint-brushes-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -j$MJOBS
 }
 
 function mypaint-brushes-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }

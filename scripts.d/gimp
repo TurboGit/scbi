@@ -35,8 +35,8 @@ function gimp-env()
 
 function gimp-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     LMP=/opt/gimp/libmypaint
     MPB=/opt/gimp/mypaint-brushes
@@ -51,16 +51,16 @@ function gimp-config()
 
 function gimp-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -j$MJOBS
 }
 
 function gimp-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }

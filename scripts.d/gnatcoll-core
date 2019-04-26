@@ -13,7 +13,7 @@ function gnatcoll-core-depends()
 
 function gnatcoll-core-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -23,8 +23,8 @@ function gnatcoll-core-tar()
 
 function gnatcoll-core-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ $HOST == $TARGET ]; then
         MMAP=yes
@@ -40,16 +40,16 @@ function gnatcoll-core-config()
 
 function gnatcoll-core-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     PROCESSORS=$JOBS make NORMALIZED_TARGET=$TARGET
 }
 
 function gnatcoll-core-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make NORMALIZED_TARGET=$TARGET install
 }

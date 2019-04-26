@@ -13,7 +13,7 @@ function gnatcoll-bindings-gmp-depends()
 
 function gnatcoll-bindings-gmp-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -23,8 +23,8 @@ function gnatcoll-bindings-gmp-tar()
 
 function gnatcoll-bindings-gmp-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     GOPTS="-j$JOBS -p -XBUILD=PROD --target=$TARGET"
 
@@ -37,8 +37,8 @@ function gnatcoll-bindings-gmp-build()
 
 function gnatcoll-bindings-gmp-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
     GOPTS="$GOPTS --build-var=LIBRARY_TYPE"

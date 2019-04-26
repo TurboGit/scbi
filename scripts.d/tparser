@@ -7,8 +7,8 @@ function tparser-vcs()
 
 function tparser-cross-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     rm -f makefile.setup &&
         make prefix=$PREFIX TARGET=$TARGET setup
@@ -16,8 +16,8 @@ function tparser-cross-config()
 
 function tparser-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     rm -f makefile.setup &&
         make prefix=$PREFIX setup
@@ -25,16 +25,16 @@ function tparser-config()
 
 function tparser-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make
 }
 
 function tparser-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }

@@ -17,24 +17,24 @@ function libmypaint-env()
 
 function libmypaint-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     ./autogen.sh && ./configure --prefix=$PREFIX
 }
 
 function libmypaint-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -j$MJOBS
 }
 
 function libmypaint-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }

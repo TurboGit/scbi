@@ -14,8 +14,8 @@ function spark-depends()
 
 function spark-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     rm -f gnat2why/gnat_src
     ln -s $BDIR/gnat/src gnat2why/gnat_src
@@ -25,16 +25,16 @@ function spark-config()
 
 function spark-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make
 }
 
 function spark-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     mkdir -p $PREFIX
     make install-all && cp -r install/* $PREFIX/ && rm -fr install

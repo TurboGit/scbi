@@ -17,8 +17,8 @@ function libgpr-depends()
 
 function libgpr-cross-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -f ../src/Makefile prefix=$PREFIX/$TARGET PROCESSORS=$JOBS \
          TARGET=$TARGET setup
@@ -26,24 +26,24 @@ function libgpr-cross-config()
 
 function libgpr-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$JOBS setup
 }
 
 function libgpr-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -f ../src/Makefile libgpr.build
 }
 
 function libgpr-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -f ../src/Makefile libgpr.install
 }

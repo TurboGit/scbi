@@ -7,8 +7,8 @@ function gtkada-vcs()
 
 function gtkada-version()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     cat <<EOF > prj.gpr
        with "gtkada";
@@ -44,24 +44,24 @@ EOF
 
 function gtkada-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     ./configure --prefix=$PREFIX --with-GL=no
 }
 
 function gtkada-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     PROCESSORS=$JOBS make
 }
 
 function gtkada-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }

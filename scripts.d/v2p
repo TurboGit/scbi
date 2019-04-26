@@ -1,16 +1,16 @@
 
 function v2p-update()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     cd $GIT_REPO/v2p && git pull
 }
 
 function v2p-setup()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ ! -d src_cp ]; then
         ln -s $GIT_REPO/v2p src_cp
@@ -19,8 +19,8 @@ function v2p-setup()
 
 function v2p-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     export AWS_BUILD=relocatable
     cd build && PROCESSORS=$JOBS make
@@ -28,8 +28,8 @@ function v2p-build()
 
 function v2p-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     export ARGWIAD_ROOT=$HOME/opt/gwiad
 

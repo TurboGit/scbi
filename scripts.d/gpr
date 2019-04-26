@@ -15,8 +15,8 @@ function gpr-depends()
 
 function do-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
     GPROPTS="$3"
 
     (
@@ -30,32 +30,32 @@ function do-config()
 
 function gpr-debug-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     do-config $PREFIX $TARGET "BUILD=debug"
 }
 
 function gpr-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     do-config $PREFIX $TARGET "BUILD=release"
 }
 
 function gpr-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make
 }
 
 function gpr-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }

@@ -1,6 +1,6 @@
 function blaslapack-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -15,8 +15,8 @@ function blaslapack-out-of-tree()
 
 function blaslapack-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ $HOST != $TARGET ]; then
         COPTS=-DCMAKE_Fortran_COMPILER=$BDIR/install/bin/$TARGET-gfortran
@@ -27,16 +27,16 @@ function blaslapack-config()
 
 function blaslapack-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make PROCESSORS=$JOBS blas lapack
 }
 
 function blaslapack-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ $HOST == $TARGET ]; then
         TPREFIX=$PREFIX

@@ -7,7 +7,7 @@ function xmlada-vcs()
 
 function xmlada-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -17,8 +17,8 @@ function xmlada-tar()
 
 function xmlada-version()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     cat <<EOF > prj.gpr
        with "xmlada";
@@ -46,32 +46,32 @@ EOF
 
 function xmlada-cross-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     ./configure --prefix=$PREFIX --target=$TARGET
 }
 
 function xmlada-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     ./configure --prefix=$PREFIX
 }
 
 function xmlada-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make PROCESSORS=$JOBS -j2
 }
 
 function xmlada-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }

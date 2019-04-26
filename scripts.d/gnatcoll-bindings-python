@@ -12,7 +12,7 @@ function gnatcoll-bindings-python-depends()
 
 function gnatcoll-bindings-python-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -22,8 +22,8 @@ function gnatcoll-bindings-python-tar()
 
 function gnatcoll-bindings-python-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ $HOST == $TARGET ]; then
         export GNATCOLL_PYTHON_CFLAGS="-I/usr/include/python2.7"
@@ -40,8 +40,8 @@ function gnatcoll-bindings-python-build()
 
 function gnatcoll-bindings-python-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
     GOPTS="$GOPTS --build-var=LIBRARY_TYPE"

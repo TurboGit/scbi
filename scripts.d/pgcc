@@ -4,8 +4,8 @@
 
 function pgcc-version()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     INST=$BDIR/pgcc/install/$TARGET/bin
 
@@ -23,8 +23,8 @@ function pgcc-build-env()
 
 function pgcc-setup()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     mkdir -p $TARGET-default/src
     rm -f build
@@ -34,8 +34,8 @@ function pgcc-setup()
 
 function pgcc-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     CFLAGS="-O1" $BDIR/gnat/build/src/configure \
           --target=$TARGET --prefix=$PREFIX/$TARGET --host=$HOST \
@@ -46,8 +46,8 @@ function pgcc-config()
 
 function pgcc-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     # The make will fail, but we install the partial C compiler
     # which is sufficient to build the MingW runtime.

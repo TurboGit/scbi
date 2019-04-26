@@ -12,7 +12,7 @@ function gnatcoll-db-tools-depends()
 
 function gnatcoll-db-tools-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -22,32 +22,32 @@ function gnatcoll-db-tools-tar()
 
 function gnatcoll-db-tools-cross-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -C gnatcoll_db2ada TARGET=$TARGET setup
 }
 
 function gnatcoll-db-tools-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -C gnatcoll_db2ada setup && make -C xref setup
 }
 
 function gnatcoll-db-tools-cross-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     PROCESSORS=$JOBS make -C gnatcoll_db2ada
 }
 
 function gnatcoll-db-tools-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     PROCESSORS=$JOBS make -C gnatcoll_db2ada &&
         PROCESSORS=$JOBS make -C xref
@@ -55,16 +55,16 @@ function gnatcoll-db-tools-build()
 
 function gnatcoll-db-tools-cross-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -C gnatcoll_db2ada install
 }
 
 function gnatcoll-db-tools-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -C gnatcoll_db2ada install &&
         make -C xref install

@@ -7,24 +7,24 @@ function morzhol-vcs()
 
 function morzhol-cross-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     PROCESSORS=$JOBS make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
 }
 
 function morzhol-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     PROCESSORS=$JOBS make
 }
 
 function morzhol-cross-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     # mkdir should be part of makefile
     mkdir -p $PREFIX/$TARGET/bin
@@ -34,8 +34,8 @@ function morzhol-cross-install()
 
 function morzhol-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }

@@ -22,8 +22,8 @@ function mingw-header-out-of-tree()
 
 function mingw-header-setup()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     case $TARGET in
 	*mingw*)
@@ -37,8 +37,8 @@ function mingw-header-setup()
 
 function mingw-header-env()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     export C_INCLUDE_PATH=$BDIR/mingw-header/$TARGET-default/install/$TARGET/include:$C_INCLUDE_PATH
 }
@@ -50,8 +50,8 @@ function mingw-header-build-env()
 
 function mingw-header-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     ../src/mingw-w64-headers/configure \
         --prefix=$PREFIX/$TARGET --build=$TARGET
@@ -59,16 +59,16 @@ function mingw-header-config()
 
 function mingw-header-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -j6
 }
 
 function mingw-header-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install &&
         # install into the partial gcc compiler too

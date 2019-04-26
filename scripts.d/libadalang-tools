@@ -12,16 +12,16 @@ function libadalang-tools-depends()
 
 function libadalang-tools-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make
 }
 
 function libadalang-tools-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install-strip DESTDIR=$PREFIX
 }

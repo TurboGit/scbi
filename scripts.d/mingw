@@ -7,8 +7,8 @@ function mingw-vcs()
 
 function mingw-build-env()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     target-env $BDIR/pgcc/install/$TARGET
 }
@@ -21,8 +21,8 @@ function mingw-depends()
 
 function mingw-setup()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     case $TARGET in
 	*mingw*)
@@ -41,8 +41,8 @@ function mingw-out-of-tree()
 
 function mingw-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     env > /tmp/env
 
@@ -52,8 +52,8 @@ function mingw-config()
 
 function mingw-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     #  First fix makefile, we cannot build winrt/libruntimeobject.a on
     #  lib32 not lib64.
@@ -66,8 +66,8 @@ function mingw-build()
 
 function mingw-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }

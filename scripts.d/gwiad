@@ -1,16 +1,16 @@
 
 function gwiad-update()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     cd $GIT_REPO/gwiad && git pull
 }
 
 function gwiad-setup()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ ! -d src_cp ]; then
         ln -s $GIT_REPO/gwiad src_cp
@@ -19,16 +19,16 @@ function gwiad-setup()
 
 function gwiad-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     cd build && rm mk.install
 }
 
 function gwiad-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     export AWS_BUILD=relocatable
     cd build && make setup && PROCESSORS=$JOBS make
@@ -36,8 +36,8 @@ function gwiad-build()
 
 function gwiad-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     cd build && make install && make install_server
 }

@@ -1,16 +1,16 @@
 
 function diouzhtu-update()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     cd $GIT_REPO/diouzhtu && git pull
 }
 
 function diouzhtu-setup()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ ! -d src_cp ]; then
         ln -s $GIT_REPO/diouzhtu src_cp
@@ -19,8 +19,8 @@ function diouzhtu-setup()
 
 function diouzhtu-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     export AWS_BUILD=relocatable
     cd build && PROCESSORS=$JOBS make
@@ -28,8 +28,8 @@ function diouzhtu-build()
 
 function diouzhtu-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     export ARGWIAD_ROOT=$HOME/opt/gwiad
 

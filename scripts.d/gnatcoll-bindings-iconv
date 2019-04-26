@@ -13,7 +13,7 @@ function gnatcoll-bindings-iconv-depends()
 
 function gnatcoll-bindings-iconv-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -23,8 +23,8 @@ function gnatcoll-bindings-iconv-tar()
 
 function gnatcoll-bindings-iconv-cross-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     echo Not supported on cross $TARGET
     return 1
@@ -32,8 +32,8 @@ function gnatcoll-bindings-iconv-cross-build()
 
 function gnatcoll-bindings-iconv-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     GOPTS="-j$JOBS -p -XBUILD=PROD --target=$TARGET -XGNATCOLL_ICONV_OPT="
 
@@ -44,8 +44,8 @@ function gnatcoll-bindings-iconv-build()
 
 function gnatcoll-bindings-iconv-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
     GOPTS="$GOPTS --build-var=LIBRARY_TYPE"

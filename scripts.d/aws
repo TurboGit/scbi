@@ -13,7 +13,7 @@ function aws-depends()
 
 function aws-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -23,8 +23,8 @@ function aws-tar()
 
 function aws-cross-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     rm -f makefile.setup &&
         make prefix=$PREFIX ASIS=false ZLIB=false TARGET=$TARGET setup
@@ -32,8 +32,8 @@ function aws-cross-config()
 
 function aws-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     rm -f makefile.setup &&
         make prefix=$PREFIX setup
@@ -41,24 +41,24 @@ function aws-config()
 
 function aws-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make
 }
 
 function aws-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }
 
 function aws-tests()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     (
         gpython-env

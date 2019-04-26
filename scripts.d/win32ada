@@ -7,8 +7,8 @@ function win32ada-vcs()
 
 function win32ada-version()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     cat <<EOF > prj.gpr
        with "win32ada";
@@ -36,8 +36,8 @@ EOF
 
 function win32ada-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ "$HOST" = "$TARGET" ]; then
 	make PROCESSORS=$JOBS
@@ -49,8 +49,8 @@ function win32ada-build()
 
 function win32ada-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ "$HOST" = "$TARGET" ]; then
 	make install

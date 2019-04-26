@@ -13,7 +13,7 @@ function gnatcoll-db-libs-sqlite-depends()
 
 function gnatcoll-db-libs-sqlite-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -23,8 +23,8 @@ function gnatcoll-db-libs-sqlite-tar()
 
 function gnatcoll-db-libs-sqlite-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -C sqlite prefix=$PREFIX INTEGRATED=yes \
          TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
@@ -32,16 +32,16 @@ function gnatcoll-db-libs-sqlite-config()
 
 function gnatcoll-db-libs-sqlite-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -C sqlite NORMALIZED_TARGET=$TARGET
 }
 
 function gnatcoll-db-libs-sqlite-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -C sqlite NORMALIZED_TARGET=$TARGET install
 }

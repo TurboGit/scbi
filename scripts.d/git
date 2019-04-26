@@ -12,24 +12,24 @@ function git-env()
 
 function git-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make configure && ./configure --prefix=$PREFIX CFLAGS="-O2"
 }
 
 function git-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -j6 PREFIX=$PREFIX all doc
 }
 
 function git-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make PREFIX=$PREFIX install install-doc &&
         sudo cp contrib/completion/git-completion.bash $PREFIX/etc/

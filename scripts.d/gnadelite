@@ -12,16 +12,16 @@ function gnadelite-depends()
 
 function gnadelite-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     PROCESSORS=$JOBS make prefix=$PREFIX
 }
 
 function gnadelite-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make prefix=$PREFIX prepare_install && make prefix=$PREFIX install
 }

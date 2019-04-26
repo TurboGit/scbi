@@ -17,32 +17,32 @@ function alt-ergo-depends()
 
 function alt-ergo-build-env()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     system-compiler
 }
 
 function alt-ergo-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     ./configure --prefix=$PREFIX
 }
 
 function alt-ergo-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -j$MJOBS
 }
 
 function alt-ergo-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }

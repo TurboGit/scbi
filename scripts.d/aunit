@@ -7,7 +7,7 @@ function aunit-vcs()
 
 function aunit-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -17,8 +17,8 @@ function aunit-tar()
 
 function aunit-version()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     cat <<EOF > prj.gpr
        with "aunit";
@@ -46,8 +46,8 @@ EOF
 
 function aunit-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ "$HOST" = "$TARGET" ]; then
         PROCESSORS=$JOBS make INSTALL=$PREFIX
@@ -58,8 +58,8 @@ function aunit-build()
 
 function aunit-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     if [ "$HOST" = "$TARGET" ]; then
 	make install INSTALL=$PREFIX

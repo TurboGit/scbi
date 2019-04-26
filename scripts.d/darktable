@@ -39,8 +39,8 @@ function darktable-env()
 
 function darktable-clang-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     CLANG_VER=8
 
@@ -58,8 +58,8 @@ function darktable-clang-config()
 
 function darktable-release-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     # fake build script which want the src dir to be a git repository
 
@@ -74,8 +74,8 @@ function darktable-release-config()
 
 function darktable-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     # fake build script which want the src dir to be a git repository
 
@@ -102,16 +102,16 @@ function darktable-config()
 
 function darktable-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -j4
 }
 
 function darktable-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 

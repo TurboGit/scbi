@@ -21,8 +21,8 @@ function langkit_support-env()
 
 function langkit_support-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     [ ! -d langkit ] && mkdir langkit
     rsync -a --exclude=".git" $BDIR/langkit/src/* langkit
@@ -33,8 +33,8 @@ function langkit_support-config()
 
 function langkit_support-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     GOPTS=-"p -m -j$MJOBS"
 
@@ -47,8 +47,8 @@ function langkit_support-build()
 
 function langkit_support-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     gprinstall --prefix=$PREFIX --uninstall langkit_support
 

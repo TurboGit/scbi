@@ -12,7 +12,7 @@ function gnatcoll-db-libs-sql-depends()
 
 function gnatcoll-db-libs-sql-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
     echo default
     echo none
@@ -22,8 +22,8 @@ function gnatcoll-db-libs-sql-tar()
 
 function gnatcoll-db-libs-sql-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -C sql prefix=$PREFIX INTEGRATED=yes \
          TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
@@ -31,16 +31,16 @@ function gnatcoll-db-libs-sql-config()
 
 function gnatcoll-db-libs-sql-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -C sql NORMALIZED_TARGET=$TARGET
 }
 
 function gnatcoll-db-libs-sql-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make -C sql NORMALIZED_TARGET=$TARGET install
 }

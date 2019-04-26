@@ -7,8 +7,8 @@ function polyorb-vcs()
 
 function polyorb-config()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     ./support/reconfig
     ./configure --prefix=$PREFIX --with-appli-perso="corba dsa"
@@ -16,16 +16,16 @@ function polyorb-config()
 
 function polyorb-build()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make
 }
 
 function polyorb-install()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     make install
 }
