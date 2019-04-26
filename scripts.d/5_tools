@@ -11,8 +11,8 @@ function fn-exists()
 
 function add-to-var()
 {
-    VAR=$1
-    DIR=$2
+    local VAR=$1
+    local DIR=$2
 
     if [ -d "$DIR" ] && [[ ":${!VAR}:" != *":$DIR:"* ]]; then
        export $VAR="$DIR:${!VAR}"
@@ -34,7 +34,7 @@ function get-version-number()
 
 function display-version()
 {
-    version=$1
+    local version=$1
 
     if [ "$version" = "$VERSION_OK" ]; then
         echo latest
@@ -50,7 +50,7 @@ function display-version()
 
 function gprbuild-project()
 {
-    PRJ=$1
+    local PRJ=$1
 
     (
         if [ $HOST == $TARGET ]; then
@@ -225,11 +225,12 @@ function check-tar-exists()
         return 1
     fi
 
-    tar=( $($module-tar $version) )
+    local tar=( $($module-tar $version) )
 
-    tarcp=${tar[0]}
-    tarurl=${tar[1]}
-    tarsrc=${tar[2]}
+    local proxy=${tar[0]}
+    local tarcp=${tar[1]}
+    local tarurl=${tar[2]}
+    local tarsrc=${tar[3]}
 
     if [ -f $TARBALL/$tarsrc ]; then
         return 0
@@ -246,12 +247,12 @@ function get-tar()
     local version=$2
     local res=0
 
-    tar=( $($module-tar $version) )
+    local tar=( $($module-tar $version) )
 
-    proxy=${tar[0]}
-    tarcp=${tar[1]}
-    tarurl=${tar[2]}
-    tarsrc=${tar[3]}
+    local proxy=${tar[0]}
+    local tarcp=${tar[1]}
+    local tarurl=${tar[2]}
+    local tarsrc=${tar[3]}
 
     #  The tarball is not present, try downloading it
 
