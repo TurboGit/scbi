@@ -1,8 +1,8 @@
 
 function supermod-setup()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     echo do setup >> $PREFIX/supermod
 }
@@ -20,8 +20,8 @@ function supermod-modules()
 
 function supermod-wrapup()
 {
-    PREFIX=$1
-    TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
     echo do wrapup >> $PREFIX/supermod
 }

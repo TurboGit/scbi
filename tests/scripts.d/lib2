@@ -7,8 +7,8 @@ function lib2-vcs()
 
 function lib2-env()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    export C_INCLUDE_PATH=$PWD/include:$C_INCLUDE_PATH
    export LIBRARY_PATH=.:$PWD/lib:$LIBRARY_PATH
@@ -17,32 +17,32 @@ function lib2-env()
 
 function lib2-variant1-config()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    echo '#define VARIANT "variant1"' > config.h
 }
 
 function lib2-config()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    echo '#define VARIANT "default"' > config.h
 }
 
 function lib2-build()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    make
 }
 
 function lib2-install()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    mkdir -p $PREFIX/include
    mkdir -p $PREFIX/lib
@@ -52,8 +52,9 @@ function lib2-install()
 
 function lib2-tests()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    ./main2
+   return 0
 }

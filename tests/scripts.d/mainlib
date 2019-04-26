@@ -12,8 +12,8 @@ function mainlib-depends()
 
 function mainlib-build()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    rm *.o
    make
@@ -21,8 +21,8 @@ function mainlib-build()
 
 function mainlib-install()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    mkdir -p $PREFIX/bin
    cp mainlib $PREFIX/bin
@@ -30,8 +30,9 @@ function mainlib-install()
 
 function mainlib-tests()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    ./mainlib
+   return 0
 }

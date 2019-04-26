@@ -7,8 +7,9 @@ function lib1-vcs()
 
 function lib1-tar()
 {
-    VERSION=$1
+    local VERSION=$1
 
+    echo default
     echo none
     echo none
     echo lib1-$VERSION-src.tar.bz2
@@ -16,8 +17,8 @@ function lib1-tar()
 
 function lib1-env()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    export C_INCLUDE_PATH=$PWD/include:$C_INCLUDE_PATH
    export LIBRARY_PATH=.:$PWD/lib:$LIBRARY_PATH
@@ -26,8 +27,8 @@ function lib1-env()
 
 function lib1-build()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    rm *.o
    make
@@ -35,8 +36,8 @@ function lib1-build()
 
 function lib1-install()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    mkdir -p $PREFIX/include
    mkdir -p $PREFIX/lib
@@ -46,8 +47,9 @@ function lib1-install()
 
 function lib1-tests()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    ./main
+   return 0
 }

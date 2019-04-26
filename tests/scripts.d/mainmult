@@ -13,8 +13,8 @@ function mainmult-depends()
 
 function mainmult-build()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    rm *.o
    make
@@ -22,8 +22,8 @@ function mainmult-build()
 
 function mainmult-install()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    mkdir -p $PREFIX/bin
    cp mainmult $PREFIX/bin
@@ -31,8 +31,9 @@ function mainmult-install()
 
 function mainmult-tests()
 {
-   PREFIX=$1
-   TARGET=$2
+   local PREFIX=$1
+   local TARGET=$2
 
    ./mainmult
+   return 0
 }
