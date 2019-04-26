@@ -1176,7 +1176,8 @@ function handle-module()
         fi
 
         $SUDO mkdir -p ${_IDIR}/
-        $SUDO rsync -a $BDIR/$module/$TARGET-$variant/install/. \
+        $SUDO rsync -a --force \
+              $BDIR/$module/$TARGET-$variant/install/. \
 	      ${_IDIR}/. > $log 2>&1
     fi || elog $module fail to copy to ${_IDIR}
 
