@@ -1,5 +1,5 @@
 # keep logs for 4 months (120 days)
-KEEP=120
+[ -z $KEEP_LOG_DAYS ] && KEEP_LOG_DAYS=120
 
 ############################## clog
 
@@ -36,7 +36,7 @@ function elog()
 
 function clean-scbi-logs()
 {
-    find $LOGS -ctime +$KEEP -delete
+    find $LOGS -ctime +$KEEP_LOG_DAYS -delete
 }
 
 ############################## display log-stat
