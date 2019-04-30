@@ -1,4 +1,6 @@
 
+declare -A SCBI_LOADED=[]
+
 ############################## fn-exists
 
 function fn-exists()
@@ -103,6 +105,27 @@ function get-md5()
     md5sum | cut -d' ' -f1
 }
 
+############################## load-module
+#
+#
+
+function load-module()
+{
+    local module=$1
+
+    if [ -z "${SCBI_LOADED[$module]}" ]; then
+	if [ -f $DEFS/$module ]; then
+            source $DEFS/$module
+	    SCBI_LOADED[$module]=yes
+	    return 0
+	else
+	    return 1
+	fi
+    else
+	return 0
+    fi
+}
+
 ############################## get-depends-build-id
 
 function _internal_get-depends-build-id()
@@ -121,8 +144,10 @@ function _internal_get-depends-build-id()
 
     #  Then load module
 
-    if [ -f $DEFS/$module ]; then
-        source $DEFS/$module
+    load-module $module
+
+    if [ $? = 0 -a -z "${SCBI_CHECKED[$module]}" ]; then
+	SCBI_CHECKED[$module]=yes
 
         # Setup depends recursively if any
 
@@ -163,6 +188,7 @@ function _internal_get-depends-build-id()
 function get-depends-build-id()
 {
     (
+        declare -A SCBI_CHECKED=[]
         _internal_get-depends-build-id $1 0 | get-md5
     )
 }
