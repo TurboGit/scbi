@@ -39,7 +39,7 @@ function pgcc-config()
 
     CFLAGS="-O1" $BDIR/gnat/build/src/configure \
           --target=$TARGET --prefix=$PREFIX/$TARGET --host=$HOST \
-	  --enable-thread=win32 --disable-nls --disable-multilib \
+          --enable-thread=win32 --disable-nls --disable-multilib \
           --disable-libada --disable-sjlj-exceptions \
           --enable-languages=c
 }

@@ -62,8 +62,8 @@ function aunit-install()
     local TARGET=$2
 
     if [ "$HOST" = "$TARGET" ]; then
-	make install INSTALL=$PREFIX
+        make install INSTALL=$PREFIX
     else
-	make TARGET=$TARGET INSTALL=$PREFIX/$TARGET install
+        make TARGET=$TARGET INSTALL=$PREFIX/$TARGET install
     fi
 }

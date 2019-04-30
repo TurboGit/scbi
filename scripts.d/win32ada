@@ -40,7 +40,7 @@ function win32ada-build()
     local TARGET=$2
 
     if [ "$HOST" = "$TARGET" ]; then
-	make PROCESSORS=$JOBS
+        make PROCESSORS=$JOBS
     else
         make PROCESSORS=$JOBS prefix=$PREFIX \
              TARGET=$TARGET DEBUG=false build
@@ -53,7 +53,7 @@ function win32ada-install()
     local TARGET=$2
 
     if [ "$HOST" = "$TARGET" ]; then
-	make install
+        make install
     else
         make prefix=$PREFIX TARGET=$TARGET DEBUG=false install
     fi

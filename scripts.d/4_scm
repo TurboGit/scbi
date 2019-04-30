@@ -21,14 +21,14 @@ function svn-co()
         mkdir -p $BDIR/.vcs
         cd $BDIR/.vcs &&
         if [ ! -d $REPO ]; then
-	    svn co $URL $REPO
+            svn co $URL $REPO
         else
             cd $REPO
             [ ! -d .svn ] &&
                 ilog build error: $(pwd) not a subversion repository &&
                 exit 1
             svn update
-	fi &&
+        fi &&
         cd $BDIR/$NAME &&
         ln -s ../.vcs/$REPO vcs
     )

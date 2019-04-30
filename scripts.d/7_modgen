@@ -37,7 +37,7 @@ function module-setup()
 
             if [ -d $PATCHES  ]; then
                 for patch in $(ls $PATCHES/$MODULE-*.patch | sort); do
-	            ilog $MODULE apply-patch filename $(basename $patch)
+                    ilog $MODULE apply-patch filename $(basename $patch)
                     patch -p1 < $patch
                     [[ ! $? = 0 ]] && return 1
                 done

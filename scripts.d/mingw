@@ -25,12 +25,12 @@ function mingw-setup()
     local TARGET=$2
 
     case $TARGET in
-	*mingw*)
-	    ;;
-	*)
+        *mingw*)
+            ;;
+        *)
             echo $TARGET not supported for mingw.
             return 1
-	    ;;
+            ;;
     esac
 }
 
@@ -47,7 +47,7 @@ function mingw-config()
     env > /tmp/env
 
     ../src/mingw-w64-crt/configure --enable-wildcard \
-	--prefix=$PREFIX/$TARGET --host=$TARGET --build=$HOST
+        --prefix=$PREFIX/$TARGET --host=$TARGET --build=$HOST
 }
 
 function mingw-build()

@@ -26,12 +26,12 @@ function mingw-header-setup()
     local TARGET=$2
 
     case $TARGET in
-	*mingw*)
-	    ;;
-	*)
+        *mingw*)
+            ;;
+        *)
             echo $TARGET not supported for mingw.
             return 1
-	    ;;
+            ;;
     esac
 }
 

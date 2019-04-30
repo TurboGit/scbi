@@ -68,8 +68,8 @@ function gprbuild-project()
 function check-tool()
 {
     if [ -z "$(which $1)" ]; then
-	echo Required tool $1 missing, please update the PATH
-	return 1
+        echo Required tool $1 missing, please update the PATH
+        return 1
     fi
     return 0
 }
@@ -81,9 +81,9 @@ function check-tools()
     local res=0
 
     while [ "$1" != "" ]; do
-	check-tool $1
-	res=$(expr $res + $?)
-	shift
+        check-tool $1
+        res=$(expr $res + $?)
+        shift
     done
     return $res
 }
@@ -114,15 +114,15 @@ function load-module()
     local module=$1
 
     if [ -z "${SCBI_LOADED[$module]}" ]; then
-	if [ -f $DEFS/$module ]; then
+        if [ -f $DEFS/$module ]; then
             source $DEFS/$module
-	    SCBI_LOADED[$module]=yes
-	    return 0
-	else
-	    return 1
-	fi
+            SCBI_LOADED[$module]=yes
+            return 0
+        else
+            return 1
+        fi
     else
-	return 0
+        return 0
     fi
 }
 
@@ -147,7 +147,7 @@ function _internal_get-depends-build-id()
     load-module $module
 
     if [ $? = 0 -a -z "${SCBI_CHECKED[$module]}" ]; then
-	SCBI_CHECKED[$module]=yes
+        SCBI_CHECKED[$module]=yes
 
         # Setup depends recursively if any
 
@@ -290,13 +290,13 @@ function get-tar()
 
             [[ $? = 0 ]] && proxy-$proxy
 
-	    if [ $tarcp == wget ]; then
-	        $tarcp $tarurl/$tarsrc -O $TARBALL/$tarsrc > $log 2>&1
-	    elif  [ $tarcp == curl ]; then
-	        $tarcp $tarurl/$tarsrc --output $TARBALL/$tarsrc > $log 2>&1
+            if [ $tarcp == wget ]; then
+                $tarcp $tarurl/$tarsrc -O $TARBALL/$tarsrc > $log 2>&1
+            elif  [ $tarcp == curl ]; then
+                $tarcp $tarurl/$tarsrc --output $TARBALL/$tarsrc > $log 2>&1
             else
                 elog $module error: unknown tar protocol $tarcp
-	    fi
+            fi
 
             [[ ! $? = 0 ]] && elog $module error: cannot get tar: $tarcp
         )
@@ -370,7 +370,7 @@ function display-modules()
             echo -n "        "
             linelen=${#bn}
         fi
-	echo -n " $bn"
+        echo -n " $bn"
     done
     echo
 }
@@ -394,7 +394,7 @@ function display-plans()
                 echo -n "        "
                 linelen=${#bn}
             fi
-	    echo -n " ${bn/.plan-/}"
+            echo -n " ${bn/.plan-/}"
         done
         echo
     fi

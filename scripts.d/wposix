@@ -61,13 +61,13 @@ function wposix-cross-build()
     local TARGET=$2
 
     case $TARGET in
-	*mingw*)
-	    make
-	    ;;
-	*)
-	    echo Cannot build for target : $TARGET
-	    false
-	    ;;
+        *mingw*)
+            make
+            ;;
+        *)
+            echo Cannot build for target : $TARGET
+            false
+            ;;
     esac
 }
 

@@ -348,9 +348,9 @@ function module-wrapper()
         #  Call module step
 
         if [[ $DLOG = yes || "$step" = "tests" ]]; then
-	    $module-$mstep $PREFIX $TARGET 2>&1 | tee -a $log | tee $mlog
+            $module-$mstep $PREFIX $TARGET 2>&1 | tee -a $log | tee $mlog
         else
-	    $module-$mstep $PREFIX $TARGET 2>&1 | tee $mlog >> $log
+            $module-$mstep $PREFIX $TARGET 2>&1 | tee $mlog >> $log
         fi
         #  We want the status of the first command and not the tee ones
         res=${PIPESTATUS[0]}
@@ -358,14 +358,14 @@ function module-wrapper()
         #  Check for errors
 
         if [ $res != 0 ]; then
-	    if [ $DLOG = on-failure ]; then
-	        tail -100 $log
-	    fi
-	    elog $module $mstep failed with error $res
-	    return $res
+            if [ $DLOG = on-failure ]; then
+                tail -100 $log
+            fi
+            elog $module $mstep failed with error $res
+            return $res
         else
-	    ilog $module $mstep completed
-	    return 0
+            ilog $module $mstep completed
+            return 0
         fi
     )
 }
@@ -386,14 +386,14 @@ function module-variant-wrapper()
         fn-exists $module-$variant-cross-$step
 
         if [[ $? = 0 ]]; then
-	    module-wrapper $PREFIX $module \
+            module-wrapper $PREFIX $module \
                            $variant $variant-cross-$step || exit 1
             return $?
         else
             fn-exists $module-cross-$step
 
             if [[ $? = 0 ]]; then
-	        module-wrapper $PREFIX $module \
+                module-wrapper $PREFIX $module \
                                $variant cross-$step || exit 1
                 return $?
             fi
@@ -403,13 +403,13 @@ function module-variant-wrapper()
     fn-exists $module-$variant-$step
 
     if [[ $? = 0 ]]; then
-	module-wrapper $PREFIX $module $variant $variant-$step || exit 1
+        module-wrapper $PREFIX $module $variant $variant-$step || exit 1
 
     else
         fn-exists $module-$step
 
         if [[ $? = 0 ]]; then
-	    module-wrapper $PREFIX $module $variant $step || exit 1
+            module-wrapper $PREFIX $module $variant $step || exit 1
         fi
     fi
 }
@@ -523,7 +523,7 @@ function _internal_handle-env()
     load-module $module
 
     if [ $? = 0 -a -z "${SCBI_CHECKED[$module]}" ]; then
-	SCBI_CHECKED[$module]=yes
+        SCBI_CHECKED[$module]=yes
 
         # Setup depends recursively if any
 
@@ -698,7 +698,7 @@ function handle-sources()
         echo -n tar-$ref > source-id
 
         if [ $DOUPDATE = yes -o ! -d tarsrc -o ! -f tar ]; then
-	    ilog $module get sources from tar
+            ilog $module get sources from tar
 
             get-tar $module $ref >> $log 2>&1
 
@@ -760,7 +760,7 @@ function handle-sources()
                 echo -n vcs-$ref > source-id
 
                 if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
-	            ilog $module get sources from $VCS_NAME
+                    ilog $module get sources from $VCS_NAME
 
                     get-vcs $VCS_NAME $VCS_URL $module $kind $ref
 
@@ -938,7 +938,7 @@ function handle-module()
     #  If purge is asked, first remove current build structure
 
     if [ $PURGE = yes -o $PURGE = only ]; then
-	ilog $module Purging $module for $TARGET/$variant
+        ilog $module Purging $module for $TARGET/$variant
         [ -d $BDIR/$module ] &&
             module-purge $BDIR/$module $module $variant $TARGET
     fi
@@ -1031,7 +1031,7 @@ function handle-module()
              $BDIR/$module/$TARGET-$variant/build-id > /dev/null 2>&1
 
         if [ $? = 0 ]; then
-	    ilog $module no build needed, versions match
+            ilog $module no build needed, versions match
 
             STEPS=""
 
@@ -1070,11 +1070,11 @@ function handle-module()
             res=$?
 
             if [ $res != 0 ]; then
-	        if [ $DLOG = on-failure ]; then
-	            tail -100 $log
-	        fi
-	        elog $module generic module pre-$step failed with error $res
-	        return $res
+                if [ $DLOG = on-failure ]; then
+                    tail -100 $log
+                fi
+                elog $module generic module pre-$step failed with error $res
+                return $res
             fi
 
             #  Apply module specific step if any
@@ -1105,11 +1105,11 @@ function handle-module()
             res=$?
 
             if [ $res != 0 ]; then
-	        if [ $DLOG = on-failure ]; then
-	            tail -100 $log
-	        fi
-	        elog $module generic module $step failed with error $res
-	        return $res
+                if [ $DLOG = on-failure ]; then
+                    tail -100 $log
+                fi
+                elog $module generic module $step failed with error $res
+                return $res
             fi
 
             ########## POST module
@@ -1133,11 +1133,11 @@ function handle-module()
             res=$?
 
             if [ $res != 0 ]; then
-	        if [ $DLOG = on-failure ]; then
-	            tail -100 $log
-	        fi
-	        elog $module generic module post-$step failed with error $res
-	        return $res
+                if [ $DLOG = on-failure ]; then
+                    tail -100 $log
+                fi
+                elog $module generic module post-$step failed with error $res
+                return $res
             fi
 
             [ $step == install ] && echo -n $variant > install-id || true
@@ -1166,15 +1166,15 @@ function handle-module()
     fi
 
     if [ "$DOINSTALL" = "yes" -a -d $BDIR/$module/build/install ]; then
-	ilog $module copy install into ..${_IDIR/$BDIR/}
+        ilog $module copy install into ..${_IDIR/$BDIR/}
 
         #  Finaly copy to given prefix
         SUDO=""
 
         if [ ! -d ${_IDIR} ]; then
-	    mkdir -p ${_IDIR} &> /dev/null
-	    [ ! $? = 0 ] && SUDO=sudo
-	fi
+            mkdir -p ${_IDIR} &> /dev/null
+            [ ! $? = 0 ] && SUDO=sudo
+        fi
 
         if [ ! -w ${_IDIR} ]; then
             SUDO=sudo
@@ -1183,7 +1183,7 @@ function handle-module()
         $SUDO mkdir -p ${_IDIR}/
         $SUDO rsync -a --force \
               $BDIR/$module/$TARGET-$variant/install/. \
-	      ${_IDIR}/. > $log 2>&1
+              ${_IDIR}/. > $log 2>&1
     fi || elog $module fail to copy to ${_IDIR}
 
     ilog $module End building $module-$variant
@@ -1198,88 +1198,88 @@ set -- $(getopt -u -o t:adefSIuscbilnpPvh \
 
 while [ $# -gt 0 ]; do
     case $1 in
-	-h|--help)
+        -h|--help)
             break
-	    ;;
-	-f|--force)
+            ;;
+        -f|--force)
             DOFORCE=yes
-	    ;;
-	-a|--archive)
+            ;;
+        -a|--archive)
             DOARCHIVE=yes
-	    ;;
-	-e|--env)
+            ;;
+        -e|--env)
             ENV_NAME="-$2"
             if [ ! -f $HOME/.config/scbi/.env${ENV_NAME} ]; then
                 echo "error: scbi environment $2 not found"
                 exit 1
             fi
             shift
-	    ;;
-	--tar)
-	    TAR_CACHE=yes
-	    ;;
-	-t|--target)
-	    TARGET=$2; shift
+            ;;
+        --tar)
+            TAR_CACHE=yes
+            ;;
+        -t|--target)
+            TARGET=$2; shift
             TARGET_SPECIFIED=yes
-	    ;;
-	-S|--no-setup)
-	    STEPS=${STEPS/setup/}
-	    ;;
-	-W|--no-wrapup)
-	    STEPS=${STEPS/wrapup/}
-	    ;;
-	-I|--no-install)
+            ;;
+        -S|--no-setup)
+            STEPS=${STEPS/setup/}
+            ;;
+        -W|--no-wrapup)
+            STEPS=${STEPS/wrapup/}
+            ;;
+        -I|--no-install)
             DOINSTALL=no
-	    ;;
-	-u|--update)
+            ;;
+        -u|--update)
             DOUPDATE=yes
-	    ;;
-	-s|--setup)
-	    NSTEPS="$NSTEPS setup"
-	    ;;
-	-c|--config)
-	    NSTEPS="$NSTEPS config"
-	    ;;
-	-b|--build)
-	    NSTEPS="$NSTEPS build"
-	    ;;
-	--build-target)
+            ;;
+        -s|--setup)
+            NSTEPS="$NSTEPS setup"
+            ;;
+        -c|--config)
+            NSTEPS="$NSTEPS config"
+            ;;
+        -b|--build)
+            NSTEPS="$NSTEPS build"
+            ;;
+        --build-target)
             BUILD_TARGET=$2; shift
-	    ;;
-	-d|--deps)
-	    DEPS=yes
-	    ;;
-	-i|--install)
-	    NSTEPS="$NSTEPS install"
+            ;;
+        -d|--deps)
+            DEPS=yes
+            ;;
+        -i|--install)
+            NSTEPS="$NSTEPS install"
             DOINSTALL=yes
-	    ;;
-	-l|--no-log)
-	    DLOG=no
-	    ;;
-	--tests)
-	    NSTEPS="$NSTEPS setup config build install tests wrapup"
+            ;;
+        -l|--no-log)
+            DLOG=no
+            ;;
+        --tests)
+            NSTEPS="$NSTEPS setup config build install tests wrapup"
             DOTEST=true
-	    ;;
-	--tests-only)
-	    NSTEPS="$NSTEPS tests"
+            ;;
+        --tests-only)
+            NSTEPS="$NSTEPS tests"
             DOTEST=true
-	    ;;
-	-v|--verbose)
-	    DLOG=yes
-	    ;;
-	-p|--purge)
-	    PURGE=yes
-	    ;;
-	-n|--no-patch)
-	    PATCH=no
-	    ;;
-	--prefix)
+            ;;
+        -v|--verbose)
+            DLOG=yes
+            ;;
+        -p|--purge)
+            PURGE=yes
+            ;;
+        -n|--no-patch)
+            PATCH=no
+            ;;
+        --prefix)
             DEFAULT_PREFIX=no
-	    PREFIX=$2; shift
-	    ;;
-	-P|--purge-only)
-	    PURGE=only
-	    ;;
+            PREFIX=$2; shift
+            ;;
+        -P|--purge-only)
+            PURGE=only
+            ;;
         -j|--jobs)
             JOBS=$2; shift
             ;;
@@ -1295,14 +1295,14 @@ while [ $# -gt 0 ]; do
         --dry-run)
             DRY_RUN=yes;
             ;;
-	(--)
-	    ;;
-	(*)
-	    MODULES="$MODULES $1"
-	    ;;
-	(-*)
-	    echo "$0: error - unrecognized option $1" 1>&2; exit 1
-	    ;;
+        (--)
+            ;;
+        (*)
+            MODULES="$MODULES $1"
+            ;;
+        (-*)
+            echo "$0: error - unrecognized option $1" 1>&2; exit 1
+            ;;
     esac
     shift
 done
