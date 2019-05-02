@@ -1,0 +1,5 @@
+./scbi test17
+
+cat .root/builds/.logs/*test17*config.log
+cat .root/builds/.logs/*test17*build.log
+cat .root/builds/.logs/*test17*install.log

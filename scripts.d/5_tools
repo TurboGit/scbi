@@ -16,8 +16,12 @@ function add-to-var()
     local VAR=$1
     local DIR=$2
 
-    if [ -d "$DIR" ] && [[ ":${!VAR}:" != *":$DIR:"* ]]; then
-       export $VAR="$DIR:${!VAR}"
+    # If adding to PATH, do so only if DIR exists
+
+    if [ -d "$DIR" -o "${VAR}" != "PATH" ] &&
+           [[ ":${!VAR}:" != *":$DIR:"* ]];
+    then
+       export $VAR="${DIR}${!VAR:+:}${!VAR}"
     fi
 }
 
