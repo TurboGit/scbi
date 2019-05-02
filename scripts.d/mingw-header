@@ -40,7 +40,7 @@ function mingw-header-env()
     local PREFIX=$1
     local TARGET=$2
 
-    export C_INCLUDE_PATH=$BDIR/mingw-header/$TARGET-default/install/$TARGET/include:$C_INCLUDE_PATH
+    add-to-var C_INCLUDE_PATH $BDIR/mingw-header/$TARGET-default/install/$TARGET/include
 }
 
 function mingw-header-build-env()

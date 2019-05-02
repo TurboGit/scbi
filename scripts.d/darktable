@@ -34,7 +34,7 @@ function darktable-depends()
 function darktable-env()
 {
     system-compiler
-    export PERL5LIB=.
+    add-to-var PERL5LIB .
 }
 
 function darktable-clang-config()

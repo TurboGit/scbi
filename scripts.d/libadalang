@@ -14,8 +14,8 @@ function libadalang-depends()
 
 function libadalang-env()
 {
-    export QUEX_PATH=/opt/quex/quex-0.65.4
-    export LIBLANG_SUPPORT_EXTERNALLY_BUILT=false
+    add-to-var QUEX_PATH /opt/quex/quex-0.65.4
+    add-to-var LIBLANG_SUPPORT_EXTERNALLY_BUILT false
     gpython-env
 }
 
