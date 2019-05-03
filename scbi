@@ -34,7 +34,7 @@
 #  And eventually a branch (in the repository) or a version for the tarball.
 #
 #     $ scbi darktable/debug:release-2.4.x
-#     $ scbi darktable/debug#2.6.0
+#     $ scbi darktable/debug:#2.6.0
 #
 #  To differenciate a tar version from a branch, the version string
 #  starts with '#'.
