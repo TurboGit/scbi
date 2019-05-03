@@ -140,6 +140,10 @@ function show-command()
 
     echo "   cd $PWD"
 
+    # then source env.cmd if present
+
+    echo "   [ -f ../.log/env.cmd ] && source ../.log/env.cmd"
+
     echo -n "  "
     eval echo -e \"$(type $CMD | sed '1,3d;$d')\"
 
