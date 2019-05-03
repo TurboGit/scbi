@@ -21,7 +21,16 @@ function add-to-var()
     if [ -d "$DIR" -o "${VAR}" != "PATH" ] &&
            [[ ":${!VAR}:" != *":$DIR:"* ]];
     then
-       export $VAR="${DIR}${!VAR:+:}${!VAR}"
+        # If SCBI_ENV_MODULE file exists, record the change into
+        # it. This is used internally by scbi to record .log/env.cmd
+        # for each module. This env file can then be sourced to replay
+        # the commands manually.
+
+        if [ ! -z $SCBI_ENV_MODULE ]; then
+            echo export $VAR="${DIR}${!VAR:+:\$${VAR}}" >> $SCBI_ENV_MODULE
+        fi
+
+        export $VAR="${DIR}${!VAR:+:}${!VAR}"
     fi
 }
 
