@@ -462,6 +462,8 @@ function usage()
 #
 # call module ENV, checking for variant
 
+SCBI_ENV_MODULE=
+
 function handle-module-env()
 {
     local modref=$1
@@ -559,8 +561,27 @@ function _internal_handle-env()
 
 function handle-env()
 {
+    local modref=$1
+
+    #  Get module information
+
+    local module_info=( $(get-module-ref $modref) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
     declare -A SCBI_CHECKED=[]
-    _internal_handle-env $1
+
+    if [ -d $BDIR/$module/$TARGET-$variant ]; then
+        SCBI_ENV_MODULE=$BDIR/$module/$TARGET-$variant/.log/env.cmd
+        rm -f $SCBI_ENV_MODULE
+    fi
+
+    _internal_handle-env $modref
+
+    SCBI_ENV_MODULE=
 }
 
 ############################## handle-depends

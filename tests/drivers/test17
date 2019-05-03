@@ -3,3 +3,11 @@
 cat .root/builds/.logs/*test17*config.log
 cat .root/builds/.logs/*test17*build.log
 cat .root/builds/.logs/*test17*install.log
+
+echo In driver:
+PATH=/bin:/usr/bin
+source .root/builds/test17/build/.log/env.cmd
+echo "ROOT_DIR $ROOT_DIR"
+echo "ABC_ROOT $ABC_ROOT"
+echo "PATH     $PATH"
+echo "CONF17   $CONF17"

@@ -17,31 +17,33 @@ function test17-env()
     add-to-var ABC_ROOT /perfect/here
     add-to-var CONF17 one
     add-to-var CONF17 two
+    add-to-var PATH /usr/bin
+    add-to-var PATH /var
 }
 
 function test17-config()
 {
     echo in config
-    echo ROOT_DIR $ROOT_DIR
-    echo ABC_ROOT $ABC_ROOT
-    echo PATH     $PATH
-    echo CONF17   $CONF17
+    echo "ROOT_DIR $ROOT_DIR"
+    echo "ABC_ROOT $ABC_ROOT"
+    echo "PATH     $PATH"
+    echo "CONF17   $CONF17"
 }
 
 function test17-build()
 {
     echo in build
-    echo ROOT_DIR $ROOT_DIR
-    echo ABC_ROOT $ABC_ROOT
-    echo PATH     $PATH
-    echo CONF17   $CONF17
+    echo "ROOT_DIR $ROOT_DIR"
+    echo "ABC_ROOT $ABC_ROOT"
+    echo "PATH     $PATH"
+    echo "CONF17   $CONF17"
 }
 
 function test17-install()
 {
     echo in install
-    echo ROOT_DIR $ROOT_DIR
-    echo ABC_ROOT $ABC_ROOT
-    echo PATH     $PATH
-    echo CONF17   $CONF17
+    echo "ROOT_DIR $ROOT_DIR"
+    echo "ABC_ROOT $ABC_ROOT"
+    echo "PATH     $PATH"
+    echo "CONF17   $CONF17"
 }
