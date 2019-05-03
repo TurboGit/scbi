@@ -222,7 +222,7 @@
 #         |_ tarsrc               # extract of tarball
 #         |_ source-id            # version of the source (tar or vcs)
 #         |_ install-id           # version of the installed module
-#         |_ vcs   ->             # symlink to repository
+#         |_ vcs   ->             # symlink to repository (.vcs or user checkout)
 #         |_ <target>-<variant>
 #                |
 #                |_ .log          # commands & output for each steps
@@ -231,11 +231,8 @@
 #                |_ install       # installation directory
 #                |_ manifest      # list of all files in install above
 #                |_ src           # rsync of ../src
-#
-#  vcs : is either a copy of .vcs/<module> or a symlib to user's local checkout
-#  src : is either a link to [vcs] or [tarsrc]
 
-VERSION=2.0
+VERSION=2.1
 
 CDPATH=
 
