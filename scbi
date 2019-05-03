@@ -98,6 +98,7 @@
 #
 #    <module>-prefix    parameter: $PREFIX $TARGET, return string
 #                       the directory to install, default $BDIR/install
+#                       or NONE to skip the global installation step.
 #
 #    <module>-tests     parameter: $PREFIX $TARGET, return NONE
 #                       to pass automatic tests
@@ -1186,7 +1187,10 @@ function handle-module()
         fi
     fi
 
-    if [ "$DOINSTALL" = "yes" -a -d $BDIR/$module/build/install ]; then
+    if [ $_IDIR == NONE ]; then
+        ilog $module skip global install
+
+    elif [ "$DOINSTALL" = "yes" -a -d $BDIR/$module/build/install ]; then
         ilog $module copy install into ..${_IDIR/$BDIR/}
 
         #  Finaly copy to given prefix

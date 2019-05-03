@@ -1,0 +1,48 @@
+
+function test18-vcs()
+{
+    echo git
+    echo ${TESTREPOS}/test1.bundle
+}
+
+function test18-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./configure
+}
+
+function test18-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make
+}
+
+function test18-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $PREFIX/bin $PREFIX/include
+    cp main $PREFIX/bin
+    cp incl.h $PREFIX/include
+}
+
+function test18-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo NONE
+}
+
+function test18-alt-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo $BDIR/local-install
+}
