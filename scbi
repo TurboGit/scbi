@@ -215,16 +215,17 @@
 #    |    |_ <module>-<version>-src.tar.gz
 #    |
 #    |_ <module>
-#         |_ build                # symlink to current/latest target build dir
+#         |_ build ->             # symlink to current/latest target build dir
 #         |_ build-id-<variant>   # build id to check for changes
-#         |_ src                  # symlink to sources (vcs or tarball)
-#         |_ tar                  # link to extracted tarball
+#         |_ src   ->             # symlink to sources (vcs or tarball)
+#         |_ tar   ->             # symlink to extracted tarball
 #         |_ tarsrc               # extract of tarball
 #         |_ source-id            # version of the source (tar or vcs)
 #         |_ install-id           # version of the installed module
-#         |_ vcs                  # sources
+#         |_ vcs   ->             # symlink to repository
 #         |_ <target>-<variant>
 #                |
+#                |_ .log          # commands & output for each steps
 #                |_ build         # build directory
 #                |_ build-id      # sha1 to identify the build
 #                |_ install       # installation directory
