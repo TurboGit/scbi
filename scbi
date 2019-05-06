@@ -332,7 +332,7 @@ function module-wrapper()
 
         #  Go to build directory
 
-        if [ "$step" = "setup" -o "$step" = "wrapup" ]; then
+        if [[ "$step" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
             cd $BDIR/$module
         else
             cd $BDIR/$module/build/build

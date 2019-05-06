@@ -1,0 +1,11 @@
+rm -f .root/builds/.logs/*test19*
+
+echo ====================== test19
+./scbi test19
+
+echo ====================== test19/alt
+./scbi test19/alt
+
+for kind in config setup build install wrapup; do
+    grep -h '@@@' .root/builds/.logs/*test19*$kind*
+done
