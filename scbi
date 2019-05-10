@@ -1224,8 +1224,8 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:adefSIuscbilnpPvh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,dry-run -- "$@")
+set -- $(getopt -u -o t:j:adefSIuscbilnpPvh \
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,dry-run,jobs: -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in

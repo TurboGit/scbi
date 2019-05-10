@@ -1,0 +1,7 @@
+./scbi -j1 test20
+./scbi -f --jobs=7 test20
+
+for kind in config build install; do
+    grep -h '@@@' .root/builds/.logs/*test20*$kind* \
+        | sed 's/1/one/g;s/7/seven/g'
+done
