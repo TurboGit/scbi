@@ -10,6 +10,11 @@ function lcms2-env()
     system-compiler
 }
 
+function lcms2-out-of-tree()
+{
+    echo false
+}
+
 function lcms2-config()
 {
     local PREFIX=$1

@@ -46,62 +46,65 @@
 #  For all modules the following function can be implemented and are called
 #  in this specific order:
 #
-#    <module>-vcs       parameters: NONE, return: array
-#                       describe the VCS to get the sources
-#                         1st item: protocole (git, svn)
-#                         2nd item: URL
+#    <module>-vcs         parameters: NONE, return: array
+#                         describe the VCS to get the sources
+#                           1st item: protocole (git, svn)
+#                           2nd item: URL
 #
-#    <module>-tar       parameters: $VERSION, return: array
-#                       describe a way to get the sources as tarball
-#                         1st item: proxy name (proxy-$name)
-#                         2nd item: protocole (scp, none)
-#                         3rd item: URL (none)
-#                         4st item: archive name (with $VERSION)
+#    <module>-tar         parameters: $VERSION, return: array
+#                         describe a way to get the sources as tarball
+#                           1st item: proxy name (proxy-$name)
+#                           2nd item: protocole (scp, none)
+#                           3rd item: URL (none)
+#                           4st item: archive name (with $VERSION)
 #
-#    <module>-version   parameters: $PREFIX $TARGET, return: <installed version>
-#                       returns the current version of the installed tool
-#                       It can returns $VERSION_OK or $VERSION_ERROR if it
-#                       is not possible to get the real version.
+#    <module>-version     parameters: $PREFIX $TARGET, return: <version>
+#                         returns the current version of the installed tool
+#                         It can returns $VERSION_OK or $VERSION_ERROR if it
+#                         is not possible to get the real version.
 #
-#    <module>-depends   parameters: NONE, return: array
-#                       list all modules required. these are either
-#                       source module handled by this script or a distrib
-#                       package. A dependent module can be given a variant
-#                       and/or version.
+#    <module>-depends     parameters: NONE, return: array
+#                         list all modules required. these are either
+#                         source module handled by this script or a distrib
+#                         package. A dependent module can be given a variant
+#                         and/or version.
 #
-#    <module>-env       parameters: $PREFIX $TARGET, return NONE
-#                       set environment to use this module as a dependency
+#    <module>-env         parameters: $PREFIX $TARGET, return NONE
+#                         set environment to use this module as a dependency
 #
-#    <module>-build-env parameters: $PREFIX $TARGET, return NONE
-#                       set environment to use when calling the routines
-#                       (setup, config, build, install, tests).
+#    <module>-build-env   parameters: $PREFIX $TARGET, return NONE
+#                         set environment to use when calling the routines
+#                         (setup, config, build, install, tests).
 #
-#    <module>-setup     parameters: $PREFIX $TARGET, return NONE
-#                       to setup build structure (optional)
-#                       also: pre-setup / post-setup
+#    <module>-setup       parameters: $PREFIX $TARGET, return NONE
+#                         to setup build structure (optional)
+#                         also: pre-setup / post-setup
 #
-#    <module>-config    parameters: $PREFIX $TARGET, return NONE
-#                       to configure, ./configure or other steps
-#                       also: pre-config / post-config
+#    <module>-out-of-tree parameters: NONE, return [true|false]
+#                         whether a module will build out-of-tree or not
 #
-#    <module>-build     parameters: $PREFIX $TARGET, return NONE
-#                       to build, make
-#                       also: pre-build / post-build
+#    <module>-config      parameters: $PREFIX $TARGET, return NONE
+#                         to configure, ./configure or other steps
+#                         also: pre-config / post-config
 #
-#    <module>-install   parameters: $PREFIX $TARGET, return NONE
-#                       to install (in $PREFIX)
-#                       also: pre-install / post-install
+#    <module>-build       parameters: $PREFIX $TARGET, return NONE
+#                         to build, make
+#                         also: pre-build / post-build
 #
-#    <module>-wrapup    parameters: $PREFIX $TARGET, return NONE
-#                       to wrapup build structure (optional)
-#                       also: pre-wrapup / post-wrapup
+#    <module>-install     parameters: $PREFIX $TARGET, return NONE
+#                         to install (in $PREFIX)
+#                         also: pre-install / post-install
 #
-#    <module>-prefix    parameters: $PREFIX $TARGET, return string
-#                       the directory to install, default $BDIR/install
-#                       or NONE to skip the global installation step.
+#    <module>-wrapup      parameters: $PREFIX $TARGET, return NONE
+#                         to wrapup build structure (optional)
+#                         also: pre-wrapup / post-wrapup
 #
-#    <module>-tests     parameters: $PREFIX $TARGET, return NONE
-#                       to pass automatic tests
+#    <module>-prefix      parameters: $PREFIX $TARGET, return string
+#                         the directory to install, default $BDIR/install
+#                         or NONE to skip the global installation step.
+#
+#    <module>-tests       parameters: $PREFIX $TARGET, return NONE
+#                         to pass automatic tests
 #
 #  Note that all steps above are optional. And empty module will just do
 #  nothing. For setup, config, build, install it may exists version pre/post
@@ -266,7 +269,7 @@ DOFORCE=no
 DOSTAT=no
 DODEPS=no
 DEPS=no
-ISOOT=no
+ISOOT=yes
 PATCH=yes
 STEPS="setup config build install wrapup"
 BUILD_TARGET=
@@ -1045,7 +1048,7 @@ function handle-module()
 
         fn-exists $module-out-of-tree
 
-        [ $? = 0 ] && [ $($module-out-of-tree) = "true" ] && ISOOT=yes
+        [ $? = 0 ] && [ $($module-out-of-tree) = "false" ] && ISOOT=false
 
         #  Call module routines
 

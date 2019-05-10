@@ -5,6 +5,11 @@ function test1-vcs()
    echo ${TESTREPOS}/test1.bundle
 }
 
+function test1-out-of-tree()
+{
+    echo false
+}
+
 function test1-config()
 {
    local PREFIX=$1

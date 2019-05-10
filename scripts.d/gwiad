@@ -17,6 +17,11 @@ function gwiad-setup()
     fi
 }
 
+function gwiad-out-of-tree()
+{
+    echo false
+}
+
 function gwiad-config()
 {
     local PREFIX=$1

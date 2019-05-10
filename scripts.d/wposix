@@ -39,6 +39,11 @@ EOF
     fi
 }
 
+function wposix-out-of-tree()
+{
+    echo false
+}
+
 function wposix-cross-config()
 {
     local PREFIX=$1

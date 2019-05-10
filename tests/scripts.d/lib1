@@ -25,6 +25,11 @@ function lib1-env()
    export LD_LIBRARY_PATH=.:$PWD/lib:$LD_LIBRARY_PATH
 }
 
+function lib1-out-of-tree()
+{
+    echo false
+}
+
 function lib1-build()
 {
    local PREFIX=$1

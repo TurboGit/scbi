@@ -32,6 +32,11 @@ function pgcc-setup()
     mkdir -p install
 }
 
+function pgcc-out-of-tree()
+{
+    echo false
+}
+
 function pgcc-config()
 {
     local PREFIX=$1

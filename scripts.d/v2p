@@ -17,6 +17,11 @@ function v2p-setup()
     fi
 }
 
+function v2p-out-of-tree()
+{
+    echo false
+}
+
 function v2p-build()
 {
     local PREFIX=$1

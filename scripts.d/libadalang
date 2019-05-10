@@ -19,6 +19,11 @@ function libadalang-env()
     gpython-env
 }
 
+function libadalang-out-of-tree()
+{
+    echo false
+}
+
 function libadalang-config()
 {
     local PREFIX=$1

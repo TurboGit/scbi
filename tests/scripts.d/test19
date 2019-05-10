@@ -21,6 +21,11 @@ function test19-alt-pre-setup()
 
 ####################################################### CONFIG
 
+function test19-out-of-tree()
+{
+    echo false
+}
+
 function test19-config()
 {
    local PREFIX=$1

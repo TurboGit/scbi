@@ -20,6 +20,11 @@ function gnatcoll-db-tools-tar()
     echo gnatcoll-db-tools-$VERSION-src.tar.gz
 }
 
+function gnatcoll-db-tools-out-of-tree()
+{
+    echo false
+}
+
 function gnatcoll-db-tools-cross-config()
 {
     local PREFIX=$1

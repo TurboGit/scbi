@@ -10,6 +10,11 @@ function libadalang-tools-depends()
     echo libadalang
 }
 
+function libadalang-tools-out-of-tree()
+{
+    echo false
+}
+
 function libadalang-tools-build()
 {
     local PREFIX=$1

@@ -19,6 +19,11 @@ function langkit_support-env()
     gpython-env
 }
 
+function langkit_support-out-of-tree()
+{
+    echo false
+}
+
 function langkit_support-config()
 {
     local PREFIX=$1

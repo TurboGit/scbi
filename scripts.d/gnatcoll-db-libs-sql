@@ -20,6 +20,11 @@ function gnatcoll-db-libs-sql-tar()
     echo gnatcoll-db-libs-sql-sql-$VERSION-src.tar.gz
 }
 
+function gnatcoll-db-libs-sql-out-of-tree()
+{
+    echo false
+}
+
 function gnatcoll-db-libs-sql-config()
 {
     local PREFIX=$1

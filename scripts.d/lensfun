@@ -10,6 +10,11 @@ function lensfun-env()
     system-compiler
 }
 
+function lensfun-out-of-tree()
+{
+    echo false
+}
+
 function lensfun-config()
 {
     local PREFIX=$1

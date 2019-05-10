@@ -20,6 +20,11 @@ function gnatcoll-bindings-python-tar()
     echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 
+function gnatcoll-binding-python-out-of-tree()
+{
+    echo false
+}
+
 function gnatcoll-bindings-python-build()
 {
     local PREFIX=$1

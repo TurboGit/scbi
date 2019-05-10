@@ -28,6 +28,11 @@ function do-config()
     )
 }
 
+function gpr-out-of-tree()
+{
+    echo false
+}
+
 function gpr-debug-config()
 {
     local PREFIX=$1

@@ -13,6 +13,11 @@ function morzhol-cross-build()
     PROCESSORS=$JOBS make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
 }
 
+function morzhol-out-of-tree()
+{
+    echo false
+}
+
 function morzhol-build()
 {
     local PREFIX=$1

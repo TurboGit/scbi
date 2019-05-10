@@ -12,6 +12,11 @@ function spark-depends()
     echo menhir
 }
 
+function spark-out-of-tree()
+{
+    echo false
+}
+
 function spark-config()
 {
     local PREFIX=$1

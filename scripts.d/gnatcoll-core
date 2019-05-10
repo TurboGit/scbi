@@ -21,6 +21,11 @@ function gnatcoll-core-tar()
     echo gnatcoll-core-$VERSION-src.tar.gz
 }
 
+function gnatcoll-core-out-of-tree()
+{
+    echo false
+}
+
 function gnatcoll-core-config()
 {
     local PREFIX=$1

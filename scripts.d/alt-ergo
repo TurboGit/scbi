@@ -23,6 +23,11 @@ function alt-ergo-build-env()
     system-compiler
 }
 
+function alt-ergo-out-of-tree()
+{
+    echo false
+}
+
 function alt-ergo-config()
 {
     local PREFIX=$1

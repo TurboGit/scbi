@@ -10,6 +10,11 @@ function gnadelite-depends()
     echo libsqlite3-dev
 }
 
+function gnadelite-out-of-tree()
+{
+    echo false
+}
+
 function gnadelite-build()
 {
     local PREFIX=$1

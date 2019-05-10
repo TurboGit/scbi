@@ -5,6 +5,11 @@ function tparser-vcs()
     echo https://github.com/AdaCore/templates-parser
 }
 
+function tparser-out-of-tree()
+{
+    echo false
+}
+
 function tparser-cross-config()
 {
     local PREFIX=$1

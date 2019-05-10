@@ -21,6 +21,11 @@ function gnatcoll-bindings-gmp-tar()
     echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 
+function gnatcoll-bindings-out-of-tree()
+{
+    echo false
+}
+
 function gnatcoll-bindings-gmp-build()
 {
     local PREFIX=$1

@@ -44,6 +44,11 @@ EOF
     fi
 }
 
+function aunit-out-of-tree()
+{
+    echo false
+}
+
 function aunit-build()
 {
     local PREFIX=$1

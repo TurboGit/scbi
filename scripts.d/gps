@@ -13,6 +13,11 @@ function gps-depends()
     echo libadalang-tool
 }
 
+function gps-out-of-tree()
+{
+    echo false
+}
+
 function gps-config()
 {
     local PREFIX=$1

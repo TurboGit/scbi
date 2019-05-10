@@ -5,6 +5,11 @@ function polyorb-vcs()
     echo https://github.com/AdaCore/PolyORB.git
 }
 
+function polyorb-out-of-tree()
+{
+    echo false
+}
+
 function polyorb-config()
 {
     local PREFIX=$1

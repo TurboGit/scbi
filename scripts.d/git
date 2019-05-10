@@ -10,6 +10,11 @@ function git-env()
     system-compiler
 }
 
+function git-out-of-tree()
+{
+    echo false
+}
+
 function git-config()
 {
     local PREFIX=$1

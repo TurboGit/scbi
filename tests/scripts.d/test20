@@ -7,6 +7,11 @@ function test20-setup()
    mkdir -p $TARGET-default/src
 }
 
+function test20-out-of-tree()
+{
+    echo false
+}
+
 function test20-config()
 {
    local PREFIX=$1

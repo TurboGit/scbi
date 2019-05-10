@@ -5,6 +5,11 @@ function test4-vcs()
    echo ${TESTREPOS}/simple.mercurial.bundle
 }
 
+function test4-out-of-tree()
+{
+    echo false
+}
+
 function test4-config()
 {
    local PREFIX=$1

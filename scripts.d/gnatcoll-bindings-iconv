@@ -21,6 +21,11 @@ function gnatcoll-bindings-iconv-tar()
     echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 
+function gnatcoll-binding-icon-out-of-tree()
+{
+    echo false
+}
+
 function gnatcoll-bindings-iconv-cross-build()
 {
     local PREFIX=$1

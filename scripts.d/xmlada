@@ -44,6 +44,11 @@ EOF
     fi
 }
 
+function xmlada-out-of-tree()
+{
+    echo false
+}
+
 function xmlada-cross-config()
 {
     local PREFIX=$1

@@ -11,6 +11,11 @@ function mainmult-depends()
    echo lib2
 }
 
+function mainmult-out-of-tree()
+{
+    echo false
+}
+
 function mainmult-build()
 {
    local PREFIX=$1

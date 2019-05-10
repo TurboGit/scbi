@@ -17,6 +17,11 @@ function diouzhtu-setup()
     fi
 }
 
+function diouzhtu-out-of-tree()
+{
+    echo false
+}
+
 function diouzhtu-build()
 {
     local PREFIX=$1

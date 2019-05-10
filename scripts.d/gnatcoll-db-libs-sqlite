@@ -21,6 +21,11 @@ function gnatcoll-db-libs-sqlite-tar()
     echo gnatcoll-db-libs-sqlite-sqlite-$VERSION-src.tar.gz
 }
 
+function gnatcoll-db-libs-sqlite-out-of-tree()
+{
+    echo false
+}
+
 function gnatcoll-db-libs-sqlite-config()
 {
     local PREFIX=$1

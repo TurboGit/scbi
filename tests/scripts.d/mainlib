@@ -10,6 +10,11 @@ function mainlib-depends()
    echo lib1
 }
 
+function mainlib-out-of-tree()
+{
+    echo false
+}
+
 function mainlib-build()
 {
    local PREFIX=$1

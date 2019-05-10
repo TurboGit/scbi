@@ -21,6 +21,11 @@ function aws-tar()
     echo aws-$VERSION-src.tar.gz
 }
 
+function aws-out-of-tree()
+{
+    echo false
+}
+
 function aws-cross-config()
 {
     local PREFIX=$1

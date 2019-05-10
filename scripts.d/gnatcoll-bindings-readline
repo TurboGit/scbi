@@ -20,6 +20,11 @@ function gnatcoll-bindings-readline-tar()
     echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 
+function gnatcoll-binding-readline-out-of-tree()
+{
+    echo false
+}
+
 function gnatcoll-bindings-readline-build()
 {
     local PREFIX=$1

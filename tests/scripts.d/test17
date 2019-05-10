@@ -21,6 +21,11 @@ function test17-env()
     add-to-var PATH /var
 }
 
+function test17-out-of-tree()
+{
+    echo false
+}
+
 function test17-config()
 {
     echo in config

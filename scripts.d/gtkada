@@ -42,6 +42,11 @@ EOF
     fi
 }
 
+function gtkada-out-of-tree()
+{
+    echo false
+}
+
 function gtkada-config()
 {
     local PREFIX=$1

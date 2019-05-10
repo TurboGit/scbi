@@ -12,6 +12,11 @@ function cvc4-depends()
     echo libboost-dev
 }
 
+function cvc4-out-of-tree()
+{
+    echo false
+}
+
 function cvc4-config()
 {
     local PREFIX=$1
