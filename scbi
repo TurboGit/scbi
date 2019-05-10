@@ -488,11 +488,19 @@ function handle-module-env()
     fn-exists $module-$variant-$ENV
 
     if [ $? = 0 ]; then
+        if [ ! -z $SCBI_ENV_MODULE ]; then
+            echo >> $SCBI_ENV_MODULE
+            echo "# $module" >> $SCBI_ENV_MODULE
+        fi
         $module-$variant-$ENV $BDIR/$module/build/install $TARGET
     else
         fn-exists $module-$ENV
 
         if [ $? = 0 ]; then
+            if [ ! -z $SCBI_ENV_MODULE ]; then
+                echo >> $SCBI_ENV_MODULE
+                echo "# $module" >> $SCBI_ENV_MODULE
+            fi
             $module-$ENV $BDIR/$module/build/install $TARGET
         fi
     fi
