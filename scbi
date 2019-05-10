@@ -274,7 +274,7 @@ PATCH=yes
 STEPS="setup config build install wrapup"
 BUILD_TARGET=
 PLAN=
-TAR_CACHE=no
+TAR_CACHE=yes
 DRY_RUN=no
 
 ############################## check-handled
@@ -442,7 +442,7 @@ function usage()
     echo "   -c | --config        do config"
     echo "   -b | --build         do build"
     echo "   -i | --install       do install"
-    echo "      | --tar           check for tar before using repository"
+    echo "      | --tar           check for tar only if explicitly specified"
     echo "      | --tests         run the testsuite, build if necessary"
     echo "      | --tests-only    run the testsuite"
     echo "   -d | --deps          check/build dependencies"
@@ -1250,7 +1250,7 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         --tar)
-            TAR_CACHE=yes
+            TAR_CACHE=no
             ;;
         -t|--target)
             TARGET=$2; shift
