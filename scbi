@@ -513,59 +513,16 @@ function handle-module-env()
 #
 # recursively set the environment for the module based on the dependencies
 
-declare -A SCBI_CHECKED=[]
-
-function _internal_handle-env()
+function handle-env-callback()
 {
-    local modref=$1
+    local MODULE=$1
+    local MODREF=$2
+    local IS_ROOT=$3
 
-    #  Get module information
-
-    local module_info=( $(get-module-ref $modref) )
-
-    local module=${module_info[0]}
-    local variant=${module_info[1]}
-    local kind=${module_info[2]}
-    local ref=${module_info[3]}
-
-    [ $DODEPS == yes ] && echo $modref
-
-    #  Then load module
-
-    load-module $module
-
-    if [ $? = 0 -a -z "${SCBI_CHECKED[$module]}" ]; then
-        SCBI_CHECKED[$module]=yes
-
-        # Setup depends recursively if any
-
-        fn-exists $module-$variant-depends
-
-        if [ $? = 0 ]; then
-            [ $DODEPS == yes ] &&
-                for dmodule in $($module-$variant-depends); do
-                    echo "   $dmodule"
-                done
-
-            for dmodule in $($module-$variant-depends); do
-                _internal_handle-env $dmodule
-            done
-        else
-            fn-exists $module-depends
-
-            if [ $? = 0 ]; then
-                [ $DODEPS == yes ] &&
-                    for dmodule in $($module-depends); do
-                        echo "   $dmodule"
-                    done
-
-                for dmodule in $($module-depends); do
-                    _internal_handle-env $dmodule
-                done
-            fi
-        fi
-
-        [ $DODEPS == no ] && handle-module-env $modref env
+    if [ $DODEPS == yes ]; then
+        echo $MODREF
+    else
+        handle-module-env $MODREF env
     fi
 }
 
@@ -582,14 +539,12 @@ function handle-env()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    declare -A SCBI_CHECKED=[]
-
     if [ -d $BDIR/$module/$TARGET-$variant ]; then
         SCBI_ENV_MODULE=$BDIR/$module/$TARGET-$variant/.log/env.cmd
         rm -f $SCBI_ENV_MODULE
     fi
 
-    _internal_handle-env $modref
+    for-all-modules handle-env-callback $modref
 
     SCBI_ENV_MODULE=
 }

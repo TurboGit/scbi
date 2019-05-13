@@ -1,0 +1,7 @@
+
+function dmain-depends()
+{
+    echo depA
+    echo depB
+    echo dmod
+}
