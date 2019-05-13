@@ -453,6 +453,8 @@ function usage()
     echo "   -p | --purge         remove builds directories before building"
     echo "   -P | --purge-only    only remove builds directories"
     echo "      | --list-depends  recursivelly list module's dependencies"
+    echo "      | --list-depends-with-meta"
+    echo "                        as above, taking into account meta modules"
     echo "      | --dry-run       only list modules handled"
     echo "      | --plan          add a build plan for modules"
     echo "      | --stat          display some status of current setup"
@@ -509,6 +511,18 @@ function handle-module-env()
     fi
 }
 
+############################## display-env-callback
+# used for --list-depends and --list-depends-with-meta
+
+function display-env-callback()
+{
+    local MODULE=$1
+    local MODREF=$2
+    local IS_ROOT=$3
+
+    echo $MODREF
+}
+
 ############################## handle-env
 #
 # recursively set the environment for the module based on the dependencies
@@ -519,11 +533,7 @@ function handle-env-callback()
     local MODREF=$2
     local IS_ROOT=$3
 
-    if [ $DODEPS == yes ]; then
-        echo $MODREF
-    else
-        handle-module-env $MODREF env
-    fi
+    handle-module-env $MODREF env
 }
 
 function handle-env()
@@ -1183,7 +1193,7 @@ function handle-module()
 ############################## body
 
 set -- $(getopt -u -o t:j:adefSIuscbilnpPvh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,dry-run,jobs: -- "$@")
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs: -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1281,6 +1291,9 @@ while [ $# -gt 0 ]; do
         --list-depends)
             DODEPS=yes;
             ;;
+        --list-depends-with-meta)
+            DODEPS=yes-meta;
+            ;;
         --dry-run)
             DRY_RUN=yes;
             ;;
@@ -1338,7 +1351,12 @@ done
 
 if [ $DODEPS == yes ]; then
     for module in $MODULES; do
-        handle-env $module
+        for-all-modules display-env-callback $module
+    done
+    exit 0
+elif [ $DODEPS == yes-meta ]; then
+    for module in $MODULES; do
+        for-all-modules-with-meta display-env-callback $module
     done
     exit 0
 fi

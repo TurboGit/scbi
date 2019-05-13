@@ -144,8 +144,10 @@ function load-module()
 function _internal_for-all-modules()
 {
     local CALLBACK=$1
-    local IS_ROOT=$2
-    local MODREF=$3
+    local WITH_META=$2
+    local IS_ROOT=$3
+    local MODREF=$4
+    shift
     shift
     shift
     shift
@@ -166,20 +168,48 @@ function _internal_for-all-modules()
     if [ $? = 0 -a -z "${SCBI_CHECKED[$module]}" ]; then
         SCBI_CHECKED[$module]=yes
 
+        if [ $WITH_META == true ]; then
+            # check for meta-modules if present
+
+            fn-exists $module-$variant-modules
+
+            if [ $? = 0 ]; then
+                for dmodule in $($module-$variant-modules); do
+                    _internal_for-all-modules $CALLBACK $WITH_META false \
+                                              $dmodule $@
+                done
+                $CALLBACK $module $MODREF $IS_ROOT $@
+                return
+            else
+                fn-exists $module-modules
+
+                if [ $? = 0 ]; then
+                    for dmodule in $($module-modules); do
+                        _internal_for-all-modules $CALLBACK $WITH_META false \
+                                                  $dmodule $@
+                    done
+                    $CALLBACK $module $MODREF $IS_ROOT $@
+                    return
+                fi
+            fi
+        fi
+
         # Setup depends recursively if any
 
         fn-exists $module-$variant-depends
 
         if [ $? = 0 ]; then
             for dmodule in $($module-$variant-depends); do
-                _internal_for-all-modules $CALLBACK false $dmodule $@
+                _internal_for-all-modules $CALLBACK $WITH_META false \
+                                          $dmodule $@
             done
         else
             fn-exists $module-depends
 
             if [ $? = 0 ]; then
                 for dmodule in $($module-depends); do
-                    _internal_for-all-modules $CALLBACK false $dmodule $@
+                    _internal_for-all-modules $CALLBACK $WITH_META false \
+                                              $dmodule $@
                 done
             fi
         fi
@@ -196,7 +226,18 @@ function for-all-modules()
     shift
 
     declare -A SCBI_CHECKED=[]
-    _internal_for-all-modules $CALLBACK true $MODREF $@
+    _internal_for-all-modules $CALLBACK false true $MODREF $@
+}
+
+function for-all-modules-with-meta()
+{
+    local CALLBACK=$1
+    local MODREF=$2
+    shift
+    shift
+
+    declare -A SCBI_CHECKED=[]
+    _internal_for-all-modules $CALLBACK true true $MODREF $@
 }
 
 ############################## get-depends-build-id
