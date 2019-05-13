@@ -453,6 +453,8 @@ function usage()
     echo "   -p | --purge         remove builds directories before building"
     echo "   -P | --purge-only    only remove builds directories"
     echo "      | --list-depends  recursivelly list module's dependencies"
+    echo "      | --list-depends-with-meta"
+    echo "                        as above, taking into account meta modules"
     echo "      | --dry-run       only list modules handled"
     echo "      | --plan          add a build plan for modules"
     echo "      | --stat          display some status of current setup"
@@ -509,64 +511,29 @@ function handle-module-env()
     fi
 }
 
+############################## display-env-callback
+# used for --list-depends and --list-depends-with-meta
+
+function display-env-callback()
+{
+    local MODULE=$1
+    local MODREF=$2
+    local IS_ROOT=$3
+
+    echo $MODREF
+}
+
 ############################## handle-env
 #
 # recursively set the environment for the module based on the dependencies
 
-declare -A SCBI_CHECKED=[]
-
-function _internal_handle-env()
+function handle-env-callback()
 {
-    local modref=$1
+    local MODULE=$1
+    local MODREF=$2
+    local IS_ROOT=$3
 
-    #  Get module information
-
-    local module_info=( $(get-module-ref $modref) )
-
-    local module=${module_info[0]}
-    local variant=${module_info[1]}
-    local kind=${module_info[2]}
-    local ref=${module_info[3]}
-
-    [ $DODEPS == yes ] && echo $modref
-
-    #  Then load module
-
-    load-module $module
-
-    if [ $? = 0 -a -z "${SCBI_CHECKED[$module]}" ]; then
-        SCBI_CHECKED[$module]=yes
-
-        # Setup depends recursively if any
-
-        fn-exists $module-$variant-depends
-
-        if [ $? = 0 ]; then
-            [ $DODEPS == yes ] &&
-                for dmodule in $($module-$variant-depends); do
-                    echo "   $dmodule"
-                done
-
-            for dmodule in $($module-$variant-depends); do
-                _internal_handle-env $dmodule
-            done
-        else
-            fn-exists $module-depends
-
-            if [ $? = 0 ]; then
-                [ $DODEPS == yes ] &&
-                    for dmodule in $($module-depends); do
-                        echo "   $dmodule"
-                    done
-
-                for dmodule in $($module-depends); do
-                    _internal_handle-env $dmodule
-                done
-            fi
-        fi
-
-        [ $DODEPS == no ] && handle-module-env $modref env
-    fi
+    handle-module-env $MODREF env
 }
 
 function handle-env()
@@ -582,14 +549,12 @@ function handle-env()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    declare -A SCBI_CHECKED=[]
-
     if [ -d $BDIR/$module/$TARGET-$variant ]; then
         SCBI_ENV_MODULE=$BDIR/$module/$TARGET-$variant/.log/env.cmd
         rm -f $SCBI_ENV_MODULE
     fi
 
-    _internal_handle-env $modref
+    for-all-modules handle-env-callback $modref
 
     SCBI_ENV_MODULE=
 }
@@ -1228,7 +1193,7 @@ function handle-module()
 ############################## body
 
 set -- $(getopt -u -o t:j:adefSIuscbilnpPvh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,dry-run,jobs: -- "$@")
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs: -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1326,6 +1291,9 @@ while [ $# -gt 0 ]; do
         --list-depends)
             DODEPS=yes;
             ;;
+        --list-depends-with-meta)
+            DODEPS=yes-meta;
+            ;;
         --dry-run)
             DRY_RUN=yes;
             ;;
@@ -1383,7 +1351,12 @@ done
 
 if [ $DODEPS == yes ]; then
     for module in $MODULES; do
-        handle-env $module
+        for-all-modules display-env-callback $module
+    done
+    exit 0
+elif [ $DODEPS == yes-meta ]; then
+    for module in $MODULES; do
+        for-all-modules-with-meta display-env-callback $module
     done
     exit 0
 fi

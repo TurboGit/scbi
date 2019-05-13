@@ -1,0 +1,6 @@
+
+function dmod-modules()
+{
+    echo depA
+    echo oot
+}

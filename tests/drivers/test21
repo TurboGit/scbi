@@ -1,0 +1,5 @@
+echo "========== dmain"
+./scbi --list-depends dmain
+
+echo "========== dmain with meta"
+./scbi --list-depends-with-meta dmain

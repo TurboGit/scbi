@@ -139,12 +139,18 @@ function load-module()
     fi
 }
 
-############################## get-depends-build-id
+############################## for-all-modules
 
-function _internal_get-depends-build-id()
+function _internal_for-all-modules()
 {
-    local MODREF=$1
-    local DOCOMPUTE=$2
+    local CALLBACK=$1
+    local WITH_META=$2
+    local IS_ROOT=$3
+    local MODREF=$4
+    shift
+    shift
+    shift
+    shift
 
     #  Get module information
 
@@ -162,38 +168,99 @@ function _internal_get-depends-build-id()
     if [ $? = 0 -a -z "${SCBI_CHECKED[$module]}" ]; then
         SCBI_CHECKED[$module]=yes
 
+        if [ $WITH_META == true ]; then
+            # check for meta-modules if present
+
+            fn-exists $module-$variant-modules
+
+            if [ $? = 0 ]; then
+                for dmodule in $($module-$variant-modules); do
+                    _internal_for-all-modules $CALLBACK $WITH_META false \
+                                              $dmodule $@
+                done
+                $CALLBACK $module $MODREF $IS_ROOT $@
+                return
+            else
+                fn-exists $module-modules
+
+                if [ $? = 0 ]; then
+                    for dmodule in $($module-modules); do
+                        _internal_for-all-modules $CALLBACK $WITH_META false \
+                                                  $dmodule $@
+                    done
+                    $CALLBACK $module $MODREF $IS_ROOT $@
+                    return
+                fi
+            fi
+        fi
+
         # Setup depends recursively if any
 
         fn-exists $module-$variant-depends
 
         if [ $? = 0 ]; then
             for dmodule in $($module-$variant-depends); do
-                _internal_get-depends-build-id $dmodule 1
+                _internal_for-all-modules $CALLBACK $WITH_META false \
+                                          $dmodule $@
             done
         else
             fn-exists $module-depends
 
             if [ $? = 0 ]; then
                 for dmodule in $($module-depends); do
-                    _internal_get-depends-build-id $dmodule 1
+                    _internal_for-all-modules $CALLBACK $WITH_META false \
+                                              $dmodule $@
                 done
             fi
         fi
 
-        # Only compute for dependencies, not for the root module
+        $CALLBACK $module $MODREF $IS_ROOT $@
+    fi
+}
 
-        if [ $DOCOMPUTE == 1 ]; then
-            if [ -f $BDIR/$module/install-id ]; then
-                var=$(cat $BDIR/$module/install-id)
+function for-all-modules()
+{
+    local CALLBACK=$1
+    local MODREF=$2
+    shift
+    shift
 
-                if [ -f $BDIR/$module/build-id-$var ]; then
-                    cat $BDIR/$module/build-id-$var
-                else
-                    echo $(date)
-            fi
+    declare -A SCBI_CHECKED=[]
+    _internal_for-all-modules $CALLBACK false true $MODREF $@
+}
+
+function for-all-modules-with-meta()
+{
+    local CALLBACK=$1
+    local MODREF=$2
+    shift
+    shift
+
+    declare -A SCBI_CHECKED=[]
+    _internal_for-all-modules $CALLBACK true true $MODREF $@
+}
+
+############################## get-depends-build-id
+
+function get-build-id-callback()
+{
+    local MODULE=$1
+    local MODREF=$2
+    local IS_ROOT=$3
+
+    # Only compute for dependencies, not for the root module
+
+    if [ $IS_ROOT == false ]; then
+        if [ -f $BDIR/$MODULE/install-id ]; then
+            var=$(cat $BDIR/$MODULE/install-id)
+
+            if [ -f $BDIR/$MODULE/build-id-$var ]; then
+                cat $BDIR/$MODULE/build-id-$var
             else
                 echo $(date)
             fi
+        else
+            echo $(date)
         fi
     fi
 }
@@ -201,8 +268,7 @@ function _internal_get-depends-build-id()
 function get-depends-build-id()
 {
     (
-        declare -A SCBI_CHECKED=[]
-        _internal_get-depends-build-id $1 0 | get-md5
+        for-all-modules get-build-id-callback $1 | get-md5
     )
 }
 

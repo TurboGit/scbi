@@ -1,0 +1,11 @@
+========== dmain
+depA
+depB
+dmod
+dmain
+========== dmain with meta
+depA
+depB
+oot
+dmod
+dmain
