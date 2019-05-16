@@ -1032,6 +1032,8 @@ function handle-module()
 
         handle-sources $modref
 
+        [ ! $? = 0 ] && exit 1
+
         #  Check if envrionment is to be done for out-of-tree build
 
         fn-exists $module-out-of-tree

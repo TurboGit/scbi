@@ -157,8 +157,6 @@ function git-branch()
 
         [ -f .gitmodules ] && git submodule update
     )
-
-    return 0
 }
 
 ############################## hg-branch
@@ -189,8 +187,6 @@ function hg-branch()
             return 1
         fi
     )
-
-    return 0
 }
 
 ############################## svn-branch
