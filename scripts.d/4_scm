@@ -120,9 +120,14 @@ function git-branch()
                 git show-ref --verify --quiet refs/tags/$BRANCH
 
                 if [ $? == 1 ]; then
-                    # version not found
-                    ilog build "error: switching git branch"
-                    return 1
+                    # check for a sha1
+                    git rev-parse -q --verify $BRANCH^{commit} &> /dev/null
+
+                    if [ $? == 1 ]; then
+                        # version not found
+                        ilog build "error: switching git branch"
+                        return 1
+                    fi
                 fi
                 BR=$BRANCH
             else
