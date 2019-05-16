@@ -304,6 +304,29 @@ function clean-up()
     rm -f $HANDLED
 }
 
+############################## load-module-env
+#
+# load an environment description, this cannot be in 5_tools as an
+# envrionment script must be loaded before any other.
+
+function load-module-env()
+{
+    local ENV=$DEFS/.env$1
+
+    # if not found in definitions install dir, look in current directory
+
+    if [ ! -f $ENV ]; then
+        ENV=$PWD/.env$1
+    fi
+
+    if [ -f $ENV ]; then
+        source $ENV
+    else
+        echo build environment .env$1 not found
+        exit 1
+    fi
+}
+
 ############################## module-wrapper
 #
 # called for each module and step
@@ -1208,10 +1231,6 @@ while [ $# -gt 0 ]; do
             ;;
         -e|--env)
             ENV_NAME="-$2"
-            if [ ! -f $HOME/.config/scbi/.env${ENV_NAME} ]; then
-                echo "error: scbi environment $2 not found"
-                exit 1
-            fi
             shift
             ;;
         --tar)
@@ -1311,17 +1330,16 @@ done
 
 trap clean-up EXIT
 
-#  Load user's settings if any
-
-[ -f $HOME/.config/scbi/.env${ENV_NAME} ] &&
-    source $HOME/.config/scbi/.env${ENV_NAME}
-
 #  Load module definitions
 
 [ ! -d "$DEFS" -o -z "$(ls $DEFS/[0-9]* 2> /dev/null)" ] &&
     DEFS=$HOME/.config/scbi
 
 [ ! -d "$DEFS" ] && echo $0: cannot find module definition files && exit 1
+
+#  Load user's environment if any now that DEFS is set
+
+[ ! -z $ENV_NAME ] && load-module-env $ENV_NAME
 
 #  If we have explicitly specified some steps, use them
 
