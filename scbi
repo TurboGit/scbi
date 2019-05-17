@@ -714,8 +714,6 @@ function handle-sources()
             fi
         fi
 
-        echo -n tar-$ref > source-id
-
         if [ $DOUPDATE = yes -o ! -d tarsrc -o ! -f tar ]; then
             ilog $module get sources from tar
 
@@ -731,6 +729,8 @@ function handle-sources()
             #  the software.
             get-build-id $PREFIX $TARGET $modref tar-$ref > build-id-$variant
         fi
+
+        echo -n tar-$ref > source-id
 
         #  We set the link for the source so that no module will have to
         #  do it.
@@ -776,8 +776,6 @@ function handle-sources()
                     fi
                 fi
 
-                echo -n vcs-$ref > source-id
-
                 if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
                     ilog $module get sources from $VCS_NAME
 
@@ -789,6 +787,8 @@ function handle-sources()
                 else
                     ln -s ../.vcs/$REPO vcs
                 fi
+
+                echo -n vcs-$ref > source-id
 
                 #  Compute and store the version id of the sources +
                 #  compiler. That is when the compiler is changed we
