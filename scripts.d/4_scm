@@ -160,7 +160,7 @@ function git-branch()
             ilog $MODULE "scbi: $MODULE updated $CUR..$NEW"
         fi
 
-        [ -f .gitmodules ] && git submodule update
+        [ -f .gitmodules ] && git submodule update --init --recursive
     )
 }
 
