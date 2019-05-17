@@ -895,6 +895,14 @@ function handle-module()
     #  Create module build directory
 
     mkdir -p $BDIR/$module/$TARGET-$variant/.log > $log 2>&1
+    fct=$BDIR/$module/$TARGET-$variant/.log/fct.cmd
+
+    echo "function add-to-var()" > $fct
+    echo "{"                                         >> $fct
+    echo '    local VAR=$1'                          >> $fct
+    echo '    local DIR=$2'                          >> $fct
+    echo '    export $VAR="${DIR}${!VAR:+:}${!VAR}"' >> $fct
+    echo "}"                                         >> $fct
 
     #  Check if meta-module, if so call handle-module for each one
 

@@ -27,7 +27,7 @@ function add-to-var()
         # the commands manually.
 
         if [ ! -z $SCBI_ENV_MODULE ]; then
-            echo export $VAR="${DIR}${!VAR:+:\$${VAR}}" >> $SCBI_ENV_MODULE
+            echo add-to-var $VAR $DIR >> $SCBI_ENV_MODULE
         fi
 
         export $VAR="${DIR}${!VAR:+:}${!VAR}"

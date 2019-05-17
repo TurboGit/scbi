@@ -142,11 +142,17 @@ function show-command()
 
     # then source env.cmd if present
 
+    echo "   source ../.log/fct.cmd"
     echo "   [ -f ../.log/env.cmd ] && source ../.log/env.cmd"
+    echo ""
 
-    echo -n "  "
+    echo "   function $CMD()"
+    echo "   {"
+    echo -n "    "
     eval echo -e \"$(type $CMD | sed '1,3d;$d')\"
-
+    echo "   }"
+    echo ""
+    echo "   $CMD"
     echo ')'
 }
 
