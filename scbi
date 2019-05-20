@@ -1349,7 +1349,7 @@ trap clean-up EXIT
 
 #  Load user's environment if any now that DEFS is set
 
-[ ! -z $ENV_NAME ] && load-module-env $ENV_NAME
+load-module-env $ENV_NAME
 
 #  If we have explicitly specified some steps, use them
 
