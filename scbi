@@ -1225,8 +1225,8 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:j:adefSIuscbilnpPvh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs: -- "$@")
+set -- $(getopt -u -o t:j:adefSIuscbilnpPvwWh \
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs:,no-wrapup,wrapup -- "$@")
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1255,6 +1255,9 @@ while [ $# -gt 0 ]; do
             ;;
         -W|--no-wrapup)
             STEPS=${STEPS/wrapup/}
+            ;;
+        -w|--wrapup)
+            NSTEPS="$NSTEPS wrapup"
             ;;
         -I|--no-install)
             DOINSTALL=no
