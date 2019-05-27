@@ -478,3 +478,20 @@ function display-plans()
         echo
     fi
 }
+
+############################## get-build-type
+
+function get-build-type()
+{
+    local KIND=$1
+    local MODULE=$2
+    local DEFAULT=$3
+
+    VAR_GENERIC=${KIND}_BUILD_TYPE
+    VAR_MODULE=${MODULE}_BUILD_TYPE
+
+    [ ! -z ${!VAR_GENERIC} ] && DEFAULT=${!VAR_GENERIC}
+    [ ! -z ${!VAR_MODULE} ] && DEFAULT=${!VAR_MODULE}
+
+    echo $DEFAULT
+}
