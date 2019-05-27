@@ -32,7 +32,8 @@ function aws-cross-config()
     local TARGET=$2
 
     rm -f makefile.setup &&
-        make prefix=$PREFIX ASIS=false ZLIB=false TARGET=$TARGET setup
+        make prefix=$PREFIX ASIS=false ZLIB=false \
+             DEBUG=$(get-build-type GPR aws true) TARGET=$TARGET setup
 }
 
 function aws-config()
@@ -41,7 +42,7 @@ function aws-config()
     local TARGET=$2
 
     rm -f makefile.setup &&
-        make prefix=$PREFIX setup
+        make prefix=$PREFIX DEBUG=$(get-build-type GPR aws true) setup
 }
 
 function aws-build()
