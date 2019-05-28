@@ -298,7 +298,7 @@ function vcs-build-id()
         cd $vcs
 
         if [ -d .git ]; then
-            gver=$(git rev-list -1 HEAD)
+            local gver=$(git rev-list -1 HEAD)
 
             git diff --exit-code --quiet HEAD
 
@@ -311,8 +311,9 @@ function vcs-build-id()
                   sed -n -e '/^Revision: \([0-9]*\).*$/s//\1/p')"
 
         elif [ -d .hg ]; then
-            hver=$(hg identify --num)
-            hdif=$(hg diff | tail -n+4 | md5sum | cut -d' ' -f1)
+            local hver=$(hg identify --num)
+            local hdif=$(hg diff | tail -n+4 | md5sum | cut -d' ' -f1)
+
             echo $hver$hdif
 
         else
