@@ -321,7 +321,7 @@ function load-module-env()
 
     if [ -f $ENV ]; then
         source $ENV
-    else
+    elif [ ! -z $1 ]; then
         echo build environment .env$1 not found
         exit 1
     fi
