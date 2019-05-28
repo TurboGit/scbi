@@ -4,6 +4,14 @@ cat .root/builds/.logs/*test17*config.log
 cat .root/builds/.logs/*test17*build.log
 cat .root/builds/.logs/*test17*install.log
 
+function add-to-var()
+{
+    local VAR=$1
+    local DIR=$2
+
+    export $VAR="${DIR}${!VAR:+:}${!VAR}"
+}
+
 echo In driver:
 PATH=/bin:/usr/bin
 source .root/builds/test17/build/.log/env.cmd

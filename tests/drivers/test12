@@ -6,4 +6,4 @@
 ./scbi --tests lib1:v1
 ./scbi --tests lib1:v1.2
 ./scbi --tests lib1:v2
-./scbi --tests --tar lib1:v1.2
+./scbi --tests --tar lib1:#v1.2

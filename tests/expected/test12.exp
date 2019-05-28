@@ -60,14 +60,14 @@ xxxx/xx/xx xx:xx:xx : End building libx-default
 xxxx/xx/xx xx:xx:xx : Building libx-default (vx.x)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : get sources from tar
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : tests starting
 main
-liba.C master
+lib from tar
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
