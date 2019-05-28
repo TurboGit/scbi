@@ -26,6 +26,10 @@ _scbi_env()
     for r in $(ls $HOME/.config/scbi/.env-* 2>/dev/null); do
         printf %s$'\n' "${r#$HOME/.config/scbi/.env-} "
     done
+
+    for r in $(ls $PWD/.env-* 2>/dev/null); do
+        printf %s$'\n' "${r#$PWD/.env-} "
+    done
 }
 
 _scbi_plan()
@@ -34,6 +38,10 @@ _scbi_plan()
 
     for r in $(ls $HOME/.config/scbi/.plan-* 2>/dev/null); do
         printf %s$'\n' "${r#$HOME/.config/scbi/.plan-} "
+    done
+
+    for r in $(ls $PWD/.plan-* 2>/dev/null); do
+        printf %s$'\n' "${r#$PWD/.plan-} "
     done
 }
 
