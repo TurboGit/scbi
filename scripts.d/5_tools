@@ -9,6 +9,21 @@ function fn-exists()
     declare -f $1 > /dev/null
 }
 
+############################## is-enabled
+# check wether a feature is enabled (see option --enable-<feature>)
+
+function is-enabled()
+{
+    local VAR=SCBI_$1_SET
+
+    if [ "${!VAR}" = "true" ]; then
+        echo "true"
+        true
+    else
+        false
+    fi
+}
+
 ############################## add-to-var
 # add DIR to environment variable VAR, does nothing if DIR does not exists
 
