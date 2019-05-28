@@ -4,7 +4,7 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 -s --setup -c --config -b --build -i --install -r --tests -v --verbose
 -l --no-log -p --purge -P --purge-only -d --deps -a --archive -h --help
 -j --jobs= --target= --env= -e --tests-only --plan= -n --no-patch --tar
---list-depends --dry-run -w --wrapup --force"
+--list-depends --dry-run -w --wrapup --force --enable-"
 
 _gnat_targets()
 {
@@ -45,6 +45,16 @@ _scbi_plan()
     done
 }
 
+_scbi_feature()
+{
+    local IFS=$'\n'
+
+    for r in $(grep '$(is-enabled' $HOME/.config/scbi/* |
+                   sed 's/.*is-enabled \([a-zA-Z]*\).*/--enable-\1/g'); do
+        printf %s$'\n' "$r "
+    done
+}
+
 _scbi_complete()
 {
     complete -o bashdefault -o default -o nospace -F _$1 $1
@@ -52,35 +62,35 @@ _scbi_complete()
 
 _scbicomp_1 ()
 {
-	local c IFS=' '$'\t'$'\n'
-	for c in $1; do
-		case "$c$2" in
-		-*=*)  printf %s$'\n' "$c$2" ;;
-		*.)    printf %s$'\n' "$c$2" ;;
-		*)     printf %s$'\n' "$c$2 " ;;
-		esac
-	done
+    local c IFS=' '$'\t'$'\n'
+    for c in $1; do
+	case "$c$2" in
+	    -*=*)  printf %s$'\n' "$c$2" ;;
+	    *.)    printf %s$'\n' "$c$2" ;;
+	    *)     printf %s$'\n' "$c$2 " ;;
+	esac
+    done
 }
 
 # generates completion reply with compgen
 _scbicomp ()
 {
-	local cur="${COMP_WORDS[COMP_CWORD]}"
-	if [ $# -gt 2 ]; then
-	    cur="$3"
-	fi
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    if [ $# -gt 2 ]; then
+	cur="$3"
+    fi
 
-	case "$cur" in
-	    -*=)
-                 COMPREPLY=()
-		 ;;
-	      *)
-	         local IFS=$'\n'
-		 COMPREPLY=($(compgen -P "${2-}" \
-		     -W "$(_scbicomp_1 "${1-}" "${4-}")" \
-		     -- "$cur"))
-		 ;;
-	esac
+    case "$cur" in
+	-*=)
+            COMPREPLY=()
+	    ;;
+	*)
+	    local IFS=$'\n'
+	    COMPREPLY=($(compgen -P "${2-}" \
+		                 -W "$(_scbicomp_1 "${1-}" "${4-}")" \
+		                 -- "$cur"))
+	    ;;
+    esac
 }
 
 _scbi()
@@ -100,6 +110,10 @@ _scbi()
             ;;
         --env=*)
             _scbicomp "$(_scbi_env)" "" "${cur##--env=}"
+            return 0
+            ;;
+        --enable-*)
+            _scbicomp "$(_scbi_feature)" "" "${cur}"
             return 0
             ;;
         -*)

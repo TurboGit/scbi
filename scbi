@@ -1225,8 +1225,25 @@ function handle-module()
 
 ############################## body
 
-set -- $(getopt -u -o t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs:,no-wrapup,wrapup -- "$@")
+# first we check for --enable-* options
+
+SCBIOPTS=""
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        --enable-*)
+            VAR=${1/--enable-/}
+            export SCBI_${VAR}_SET=true
+            ;;
+        *)
+            SCBIOPTS="$SCBIOPTS $1"
+            ;;
+    esac
+    shift
+done
+
+set -- $(getopt -q -u -o t:j:adefSIuscbilnpPvwWh \
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs:,no-wrapup,wrapup -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in

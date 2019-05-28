@@ -1,0 +1,11 @@
+# check for enable
+
+echo "=== not activated"
+./scbi -f test22
+
+echo "=== activated"
+./scbi -f --enable-light test22
+
+for kind in config; do
+    grep -h '@@@' .root/builds/.logs/*test22*$kind*
+done
