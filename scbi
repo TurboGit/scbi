@@ -457,6 +457,7 @@ function usage()
     echo ""
     echo "   -h | --help          this help message"
     echo "   -e | --env=<name>    environment file ~/.scbi-<name>"
+    echo "      | --enable-<name> enable feature name"
     echo "   -t | --target=<name> specify the target to build for ($TARGET)"
     echo "   -S | --no-setup      skip setup"
     echo "   -I | --no-install    skip install"
