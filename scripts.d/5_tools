@@ -17,7 +17,7 @@ function is-enabled()
     local VAR=SCBI_$1_SET
 
     if [ "${!VAR}" = "true" ]; then
-        echo "true"
+        echo "yes"
         true
     else
         false
