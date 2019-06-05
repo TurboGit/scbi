@@ -812,7 +812,7 @@ function handle-sources()
     fi
 }
 
-############################## handle-module
+############################## handle-super-module
 
 function handle-super-module()
 {
