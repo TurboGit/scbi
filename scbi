@@ -302,6 +302,7 @@ function check-handled()
 function clean-up()
 {
     rm -f $HANDLED
+    rm -f $SCBI_LINE_SEP
 }
 
 ############################## load-module-env
@@ -659,7 +660,6 @@ function handle-depends()
               || $ref > $mver ]];
     then
         if [ $DRY_RUN == no ]; then
-            echo
             ilog $module need building $module, \
                  current version $(display-version $mver) | tee -a $log
         fi
@@ -837,7 +837,11 @@ function handle-super-module()
 
     # check for setup
 
+    line-sep
+    ilog $supermodule Supermodule $supermodule-$variant setup | tee -a $log
     module-variant-wrapper $BDIR/install $supermodule $variant setup || exit 1
+    ilog $supermodule End supermodule $supermodule-$variant setup | tee -a $log
+    line-sep
 
     fn-exists $supermodule-$variant-modules
 
@@ -853,7 +857,11 @@ function handle-super-module()
 
     # check for wrapup
 
+    line-sep
+    ilog $supermodule Supermodule $supermodule-$variant wrapup | tee -a $log
     module-variant-wrapper $BDIR/install $supermodule $variant wrapup || exit 1
+    ilog $supermodule End Supermodule $supermodule-$variant wrapup | tee -a $log
+    line-sep
 }
 
 ############################## handle-module
@@ -898,7 +906,7 @@ function handle-module()
     mkdir -p $BDIR/$module/$TARGET-$variant/.log > $log 2>&1
     fct=$BDIR/$module/$TARGET-$variant/.log/fct.cmd
 
-    echo "function add-to-var()" > $fct
+    echo "function add-to-var()"                      > $fct
     echo "{"                                         >> $fct
     echo '    local VAR=$1'                          >> $fct
     echo '    local DIR=$2'                          >> $fct
@@ -938,7 +946,7 @@ function handle-module()
             if [[ ! $? = 0 ]]; then
                 exit 1
             fi
-            [ $DRY_RUN == no ] && echo
+            [ $DRY_RUN == no ] && line-sep
         else
             fn-exists $module-depends
 
@@ -951,7 +959,7 @@ function handle-module()
                 if [[ ! $? = 0 ]]; then
                     exit 1
                 fi
-                [ $DRY_RUN == no ] && echo
+                [ $DRY_RUN == no ] && line-sep
             fi
         fi
     fi
@@ -981,6 +989,7 @@ function handle-module()
         DISPREF=$ref
     fi
 
+    line-sep
     ilog $module Building $module-$variant \($DISPREF\) | tee -a $log
 
     if [ $HOST == $TARGET ]; then
@@ -1220,8 +1229,7 @@ function handle-module()
     fi || elog $module fail to copy to ${_IDIR}
 
     ilog $module End building $module-$variant
-
-    echo
+    line-sep
 }
 
 ############################## body

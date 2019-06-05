@@ -1,12 +1,24 @@
 # keep logs for 4 months (120 days)
 [ -z $KEEP_LOG_DAYS ] && KEEP_LOG_DAYS=120
 
+SCBI_LINE_SEP=$(mktemp)
+echo -n 1 > $SCBI_LINE_SEP
+
 ############################## clog
 
 function clog()
 {
     local module=$1
     echo >> $LOGS/$TODAY/$TARGET-$module-report.log
+}
+
+############################## line-sep
+# add an empty line when needed
+
+function line-sep()
+{
+    [ $(cat $SCBI_LINE_SEP) = 0 ] && echo
+    echo -n 1 > $SCBI_LINE_SEP
 }
 
 ############################## dlog
@@ -21,6 +33,7 @@ function dlog()
     shift
     echo $ts : "  $*" > $(tty)
     echo $ts : "  $*" >> $LOGS/$TODAY/$TARGET-$module-report.log
+    echo -n 0 > $SCBI_LINE_SEP
 }
 
 ############################## ilog
@@ -33,6 +46,7 @@ function ilog()
     shift
     echo $ts : $*
     echo $ts : $* >> $LOGS/$TODAY/$TARGET-$module-report.log
+    echo -n 0 > $SCBI_LINE_SEP
 }
 
 ############################## elog
