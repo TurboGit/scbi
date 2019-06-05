@@ -9,6 +9,20 @@ function clog()
     echo >> $LOGS/$TODAY/$TARGET-$module-report.log
 }
 
+############################## dlog
+# just force display on the console
+# useful in user's hooks
+
+function dlog()
+{
+    local module=$1
+    local ts=$(date +"%Y/%m/%d %H:%M:%S")
+
+    shift
+    echo $ts : "  $*" > $(tty)
+    echo $ts : "  $*" >> $LOGS/$TODAY/$TARGET-$module-report.log
+}
+
 ############################## ilog
 
 function ilog()
