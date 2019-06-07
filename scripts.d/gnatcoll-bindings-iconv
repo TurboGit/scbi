@@ -21,7 +21,7 @@ function gnatcoll-bindings-iconv-tar()
     echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 
-function gnatcoll-binding-icon-out-of-tree()
+function gnatcoll-bindings-iconv-out-of-tree()
 {
     echo false
 }
