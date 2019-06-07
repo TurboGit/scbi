@@ -160,10 +160,10 @@
 #  possible to have a specific build with precise versions for all
 #  dependencies.
 #
-#  Super Module
-#  ------------
+#  Meta Module
+#  -----------
 #
-#  Finally a module can be defined as a super-module. That is, it
+#  Finally a module can be defined as a meta-module. That is, it
 #  lists the set of modules to build. In this case, the module just
 #  define the function:
 #
@@ -174,7 +174,7 @@
 #  not directly related. It is in fact equivalent to calling scbi with
 #  all the modules listed as arguments.
 #
-#  A super module can have the following optional function definitions:
+#  A meta module can have the following optional function definitions:
 #
 #     <module>-setup    parameters: $PREFIX $TARGET, return NONE
 #                       to setup build structure (optional)
@@ -812,25 +812,25 @@ function handle-sources()
     fi
 }
 
-############################## handle-super-module
+############################## handle-meta-module
 
-function handle-super-module()
+function handle-meta-module()
 {
-    local supermodule=$1
+    local metamodule=$1
     local variant=$2
 
     # check for plan
 
-    fn-exists $supermodule-$variant-plan
+    fn-exists $metamodule-$variant-plan
 
     if [[ $? = 0 ]]; then
-        PLAN=$($supermodule-$variant-plan)
+        PLAN=$($metamodule-$variant-plan)
         echo $PLAN > /tmp/plan
         load-module-plan $PLAN
     else
-        fn-exists $supermodule-plan
+        fn-exists $metamodule-plan
         if [[ $? = 0 ]]; then
-            PLAN=$($supermodule-plan)
+            PLAN=$($metamodule-plan)
             load-module-plan $PLAN
         fi
     fi
@@ -838,17 +838,17 @@ function handle-super-module()
     # check for setup
 
     line-sep
-    ilog $supermodule Supermodule $supermodule-$variant setup | tee -a $log
-    module-variant-wrapper $BDIR/install $supermodule $variant setup || exit 1
-    ilog $supermodule End supermodule $supermodule-$variant setup | tee -a $log
+    ilog $metamodule Metamodule $metamodule-$variant setup | tee -a $log
+    module-variant-wrapper $BDIR/install $metamodule $variant setup || exit 1
+    ilog $metamodule End metamodule $metamodule-$variant setup | tee -a $log
     line-sep
 
-    fn-exists $supermodule-$variant-modules
+    fn-exists $metamodule-$variant-modules
 
     if [[ $? = 0 ]]; then
-        FCT=$supermodule-$variant-modules
+        FCT=$metamodule-$variant-modules
     else
-        FCT=$supermodule-modules
+        FCT=$metamodule-modules
     fi
 
     for module in $($FCT); do
@@ -858,9 +858,9 @@ function handle-super-module()
     # check for wrapup
 
     line-sep
-    ilog $supermodule Supermodule $supermodule-$variant wrapup | tee -a $log
-    module-variant-wrapper $BDIR/install $supermodule $variant wrapup || exit 1
-    ilog $supermodule End Supermodule $supermodule-$variant wrapup | tee -a $log
+    ilog $metamodule Metamodule $metamodule-$variant wrapup | tee -a $log
+    module-variant-wrapper $BDIR/install $metamodule $variant wrapup || exit 1
+    ilog $metamodule End metamodule $metamodule-$variant wrapup | tee -a $log
     line-sep
 }
 
@@ -919,14 +919,14 @@ function handle-module()
 
     if [[ $? = 0 ]]; then
         (
-            handle-super-module $module $variant
+            handle-meta-module $module $variant
         )
         return
     else
         fn-exists $module-modules
         if [[ $? = 0 ]]; then
             (
-                handle-super-module $module $variant
+                handle-meta-module $module $variant
             )
             return
         fi
