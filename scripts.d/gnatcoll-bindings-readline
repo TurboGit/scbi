@@ -20,7 +20,7 @@ function gnatcoll-bindings-readline-tar()
     echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 
-function gnatcoll-binding-readline-out-of-tree()
+function gnatcoll-bindings-readline-out-of-tree()
 {
     echo false
 }
