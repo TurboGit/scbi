@@ -55,9 +55,9 @@ function aunit-build()
     local TARGET=$2
 
     if [ "$HOST" = "$TARGET" ]; then
-        PROCESSORS=$JOBS make INSTALL=$PREFIX
+        PROCESSORS=$SCBI_JOBS make INSTALL=$PREFIX
     else
-        PROCESSORS=$JOBS make TARGET=$TARGET INSTALL=$PREFIX
+        PROCESSORS=$SCBI_JOBS make TARGET=$TARGET INSTALL=$PREFIX
     fi
 }
 

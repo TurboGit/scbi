@@ -31,7 +31,7 @@ function gnatcoll-db-libs-sql-config()
     local TARGET=$2
 
     make -C sql prefix=$PREFIX INTEGRATED=yes \
-         TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
+         TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$SCBI_JOBS setup
 }
 
 function gnatcoll-db-libs-sql-build()

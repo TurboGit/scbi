@@ -28,7 +28,7 @@ function libgegl-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j$MJOBS
+    make -j$MSCBI_JOBS
 }
 
 function libgegl-install()

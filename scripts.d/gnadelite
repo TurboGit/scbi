@@ -20,7 +20,7 @@ function gnadelite-build()
     local PREFIX=$1
     local TARGET=$2
 
-    PROCESSORS=$JOBS make prefix=$PREFIX
+    PROCESSORS=$SCBI_JOBS make prefix=$PREFIX
 }
 
 function gnadelite-install()

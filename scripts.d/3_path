@@ -109,7 +109,7 @@ function system-compiler()
 
 function built-compiler()
 {
-    local PREFIX=$BDIR/install
+    local PREFIX=$SCBI_BDIR/install
 
     export PATH=$PREFIX/bin:$PATH
 

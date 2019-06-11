@@ -35,8 +35,8 @@ function module-setup()
         (
             cd $SRCDIR
 
-            if [ -d $PATCHES  ]; then
-                for patch in $(ls $PATCHES/$MODULE-*.patch | sort); do
+            if [ -d $SCBI_PATCH  ]; then
+                for patch in $(ls $SCBI_PATCH/$MODULE-*.patch | sort); do
                     ilog $MODULE apply-patch filename $(basename $patch)
                     patch -p1 < $patch
                     [[ ! $? = 0 ]] && return 1
@@ -103,14 +103,14 @@ function module-pre-install()
 
     fn-exists $MODULE-$VARIANT-prefix
 
-    if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
+    if [ $? = 0 -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
         _IDIR=$($MODULE-prefix)
     else
         fn-exists $MODULE-prefix
-        if [ $? = 0 -a "$DEFAULT_PREFIX" = "yes" ]; then
+        if [ $? = 0 -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
             _IDIR=$($MODULE-prefix)
         else
-            _IDIR=$PREFIX
+            _IDIR=$SCBI_PREFIX
         fi
     fi
 

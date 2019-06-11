@@ -33,10 +33,10 @@ function gnatcoll-bindings-python-build()
     if [ $HOST == $TARGET ]; then
         export GNATCOLL_PYTHON_CFLAGS="-I/usr/include/python2.7"
     else
-        export GNATCOLL_PYTHON_CFLAGS="-I$BDIR/install/$TARGET/Python27/include"
+        export GNATCOLL_PYTHON_CFLAGS="-I$SCBI_BDIR/install/$TARGET/Python27/include"
     fi;
 
-    GOPTS="-j$JOBS -p -XBUILD=PROD --target=$TARGET"
+    GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
 
     for kind in static relocatable; do
         gprbuild -v $GOPTS -XLIBRARY_TYPE=$kind python/gnatcoll_python.gpr

@@ -20,7 +20,7 @@ function libgpr-cross-config()
     local PREFIX=$1
     local TARGET=$2
 
-    make -f ../src/Makefile prefix=$PREFIX/$TARGET PROCESSORS=$JOBS \
+    make -f ../src/Makefile prefix=$PREFIX/$TARGET PROCESSORS=$SCBI_JOBS \
          TARGET=$TARGET setup
 }
 
@@ -29,7 +29,7 @@ function libgpr-config()
     local PREFIX=$1
     local TARGET=$2
 
-    make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$JOBS setup
+    make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$SCBI_JOBS setup
 }
 
 function libgpr-build()

@@ -1,7 +1,7 @@
 #
 # Support for VCS
 #
-#    - the repositories are checked-out in $BDIR/.vcs
+#    - the repositories are checked-out in $SCBI_BDIR/.vcs
 #
 #    - a symbolic link is created in the directory for the module
 #      under name vcs
@@ -18,8 +18,8 @@ function svn-co()
     local REPO=$(basename $URL)
 
     (
-        mkdir -p $BDIR/.vcs
-        cd $BDIR/.vcs &&
+        mkdir -p $SCBI_BDIR/.vcs
+        cd $SCBI_BDIR/.vcs &&
         if [ ! -d $REPO ]; then
             svn co $URL $REPO
         else
@@ -29,7 +29,7 @@ function svn-co()
                 exit 1
             svn update
         fi &&
-        cd $BDIR/$NAME &&
+        cd $SCBI_BDIR/$NAME &&
         ln -s ../.vcs/$REPO vcs
     )
 }
@@ -43,8 +43,8 @@ function git-co()
     local REPO=$(basename $URL .git)
 
     (
-        mkdir -p $BDIR/.vcs
-        cd $BDIR/.vcs &&
+        mkdir -p $SCBI_BDIR/.vcs
+        cd $SCBI_BDIR/.vcs &&
         if [ ! -d $REPO ]; then
             git clone --recursive $URL $REPO
         else
@@ -56,7 +56,7 @@ function git-co()
             git remote set-url origin $URL
             git fetch --recurse-submodules
         fi &&
-        cd $BDIR/$NAME &&
+        cd $SCBI_BDIR/$NAME &&
         ln -s ../.vcs/$REPO vcs
     )
 }
@@ -70,8 +70,8 @@ function hg-co()
     local REPO=$(basename $URL .git)
 
     (
-        mkdir -p $BDIR/.vcs
-        cd $BDIR/.vcs &&
+        mkdir -p $SCBI_BDIR/.vcs
+        cd $SCBI_BDIR/.vcs &&
         if [ ! -d $REPO ]; then
             hg clone $URL $REPO
         else
@@ -82,7 +82,7 @@ function hg-co()
             # we set the URL in case the repo has been relocated
             hg pull
         fi &&
-        cd $BDIR/$NAME &&
+        cd $SCBI_BDIR/$NAME &&
         ln -s ../.vcs/$REPO vcs
     )
 }
@@ -96,7 +96,7 @@ function git-branch()
     local BUILDB=scbi
 
     (
-        cd $BDIR/$MODULE/vcs
+        cd $SCBI_BDIR/$MODULE/vcs
 
         # first, let's update the repository
 
@@ -173,7 +173,7 @@ function hg-branch()
     local BUILDB=scbi
 
     (
-        cd $BDIR/$MODULE/vcs
+        cd $SCBI_BDIR/$MODULE/vcs
 
         # first, let's update the repository
 

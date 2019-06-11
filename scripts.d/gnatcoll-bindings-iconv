@@ -40,7 +40,7 @@ function gnatcoll-bindings-iconv-build()
     local PREFIX=$1
     local TARGET=$2
 
-    GOPTS="-j$JOBS -p -XBUILD=PROD --target=$TARGET -XGNATCOLL_ICONV_OPT="
+    GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET -XGNATCOLL_ICONV_OPT="
 
     for kind in static relocatable static-pic; do
         gprbuild $GOPTS -XLIBRARY_TYPE=$kind iconv/gnatcoll_iconv.gpr

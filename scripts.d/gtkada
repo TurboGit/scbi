@@ -60,7 +60,7 @@ function gtkada-build()
     local PREFIX=$1
     local TARGET=$2
 
-    PROCESSORS=$JOBS make
+    PROCESSORS=$SCBI_JOBS make
 }
 
 function gtkada-install()

@@ -10,7 +10,7 @@ function mingw-build-env()
     local PREFIX=$1
     local TARGET=$2
 
-    target-env $BDIR/pgcc/install/$TARGET
+    target-env $SCBI_BDIR/pgcc/install/$TARGET
 }
 
 function mingw-depends()

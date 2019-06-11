@@ -22,7 +22,7 @@ function do-config()
     (
         gpython-env
         add-to-var PYTHONPATH \
-                   $BDIR/langkit_support/$TARGET-default/build/langkit
+                   $SCBI_BDIR/langkit_support/$TARGET-default/build/langkit
 
         make $GPROPTS setup
     )

@@ -32,7 +32,7 @@ function gnatcoll-db-libs-sqlite-config()
     local TARGET=$2
 
     make -C sqlite prefix=$PREFIX INTEGRATED=yes \
-         TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
+         TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$SCBI_JOBS setup
 }
 
 function gnatcoll-db-libs-sqlite-build()

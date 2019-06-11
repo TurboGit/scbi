@@ -46,7 +46,7 @@ function gnatcoll-db-tools-cross-build()
     local PREFIX=$1
     local TARGET=$2
 
-    PROCESSORS=$JOBS make -C gnatcoll_db2ada
+    PROCESSORS=$SCBI_JOBS make -C gnatcoll_db2ada
 }
 
 function gnatcoll-db-tools-build()
@@ -54,8 +54,8 @@ function gnatcoll-db-tools-build()
     local PREFIX=$1
     local TARGET=$2
 
-    PROCESSORS=$JOBS make -C gnatcoll_db2ada &&
-        PROCESSORS=$JOBS make -C xref
+    PROCESSORS=$SCBI_JOBS make -C gnatcoll_db2ada &&
+        PROCESSORS=$SCBI_JOBS make -C xref
 }
 
 function gnatcoll-db-tools-cross-install()

@@ -38,7 +38,7 @@ function cvc4-build()
 
     system-compiler
 
-    cd cvc4 && make -j$MJOBS
+    cd cvc4 && make -j$MSCBI_JOBS
 }
 
 function cvc4-install()

@@ -40,7 +40,7 @@ function mingw-header-env()
     local PREFIX=$1
     local TARGET=$2
 
-    add-to-var C_INCLUDE_PATH $BDIR/mingw-header/$TARGET-default/install/$TARGET/include
+    add-to-var C_INCLUDE_PATH $SCBI_BDIR/mingw-header/$TARGET-default/install/$TARGET/include
 }
 
 function mingw-header-build-env()
@@ -72,5 +72,5 @@ function mingw-header-install()
 
     make install &&
         # install into the partial gcc compiler too
-        rsync -a ../install/. $BDIR/pgcc/install/
+        rsync -a ../install/. $SCBI_BDIR/pgcc/install/
 }

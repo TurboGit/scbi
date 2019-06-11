@@ -30,7 +30,7 @@ function langkit_support-config()
     local TARGET=$2
 
     [ ! -d langkit ] && mkdir langkit
-    rsync -a --exclude=".git" $BDIR/langkit/src/* langkit
+    rsync -a --exclude=".git" $SCBI_BDIR/langkit/src/* langkit
 
     export PYTHONPATH=$PWD/langkit
     python ada/manage.py generate
@@ -41,7 +41,7 @@ function langkit_support-build()
     local PREFIX=$1
     local TARGET=$2
 
-    GOPTS=-"p -m -j$MJOBS"
+    GOPTS=-"p -m -j$MSCBI_JOBS"
 
     PRJ=./build/lib/gnat/langkit_support.gpr
 

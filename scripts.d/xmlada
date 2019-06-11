@@ -70,7 +70,7 @@ function xmlada-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make PROCESSORS=$JOBS -j2
+    make PROCESSORS=$SCBI_JOBS -j2
 }
 
 function xmlada-install()
