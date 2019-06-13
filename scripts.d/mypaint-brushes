@@ -13,6 +13,7 @@ function mypaint-brushes-out-of-tree()
 function mypaint-brushes-env()
 {
     system-compiler
+    add-to-var PKG_CONFIG_PATH $PREFIX/share/pkgconfig
 }
 
 function mypaint-brushes-config()

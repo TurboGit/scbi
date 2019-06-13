@@ -13,6 +13,9 @@ function libgegl-out-of-tree()
 function libgegl-env()
 {
     system-compiler
+
+    add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+    add-to-var PATH            $PREFIX/bin
 }
 
 function libgegl-config()
