@@ -3,6 +3,8 @@
 
 SCRDIR=$(HOME)/.config/scbi
 
+install: all
+
 all:
 	mkdir -p $(HOME)/bin
 	cp scbi $(HOME)/bin
@@ -15,3 +17,8 @@ test:
 
 test-clean:
 	make -C tests clean
+
+doc: force
+	make -C doc
+
+force:

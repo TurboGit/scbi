@@ -1,0 +1,1157 @@
+\documentclass[a4paper,12pt,twoside]{article}
+
+\nonstopmode
+\newcommand{\timestamp}{28/06/2019}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{pslatex}  % pour une meilleure portabilité des polices...
+\usepackage{hyperref} % pour avoir la structure du document dans acroread
+\usepackage[english]{babel}
+\usepackage{a4}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[all]{xy}
+\usepackage{ltablex}
+\usepackage{alltt}
+\usepackage{ulem}
+\usepackage{cite}
+\usepackage{varioref,multicol,multirow,xspace,rotating,moreverb}
+\usepackage{makeidx}
+\usepackage{enumitem}
+\usepackage{tabto}
+\usepackage{dirtree}
+
+\widowpenalty=400
+\clubpenalty=400
+\setlength{\parskip}{1ex plus 1ex minus 1ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SETTINGS
+
+\hyphenation{Raven-SPARK}
+
+\lstset{numbers=none,
+	numberstyle=\tiny,
+	stepnumber=1,
+	numbersep=8pt,
+	numberfirstline=true,
+	frame=leftline,
+	language=Bash,
+	tabsize=2,
+	breaklines=true,
+	xleftmargin=1cm,
+	emph={label},
+	basicstyle=\small\ttfamily
+}
+
+% used to add some spacing before a new item (description)
+\let\olditem=\item
+\def\myitem[#1]{\vspace{10pt}\olditem[#1]}
+%\let\oldbegin\begin
+%\def\begin{\let\item\olditem\oldbegin}
+
+% always start the description text in a new line
+\setlist[description]{%
+	style=nextline,
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMMANDS
+
+\newenvironment{shellcommand}{
+	\begin{list}{ % item
+			\bfseries\texttt \$
+		}{ % body
+			\ttfamily
+			\setlength{\topsep}{-0.3ex}
+			\setlength{\labelwidth}{1in}
+			\setlength{\leftmargin}{0.7in}
+			\setlength{\labelsep}{0.5ex}
+			\setlength{\rightmargin}{0.5in}
+			\setlength{\itemsep}{1ex}
+			\setlength{\parsep}{0ex}
+			\setlength{\listparindent}{0.5in}
+		}
+	}{
+	\end{list}
+}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\tbd}[1]{\fbox{{\smallpencil #1 }}}
+\renewcommand{\emph}[1]{\textit{#1}}
+\newcommand{\seeref}[1]{see section \ref{#1} p.\pageref{#1}}
+\newcommand{\file}[1]{'{\path{#1}}'}
+\newcommand{\des}[1]{\tabto{4.5cm}\scriptsize\textit{: #1}}
+%\newcommand{\cmd}[1]{\tabto{1cm}$\arrowvert$\hspace{0.5cm}\texttt{\$ #1}}
+\newcommand{\cmd}[1]{\tabto{1cm}\hspace{0.5cm}\texttt{\textbf{\$} #1}}
+
+\setitemize[0]{font=\bfseries, label=$\bullet$ }
+
+% let section start on a new page
+\let\stdsection\section
+\renewcommand\section{\newpage\stdsection}
+\newcommand{\ddash}{-{}-}
+\setlength{\parindent}{0in}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TITRE
+
+\title{\huge{S C B I} \\ Build Driver}
+\author{Pascal Obry}
+\date{June 2019}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TOC
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
+
+\section{Introduction}
+
+SCBI stands for Setup Config Build Install.
+
+The goal is to automate the build procedures from sources. The main features are:
+
+\begin{itemize}
+	\item Allow recursive build of dependencies
+	\item Building from a VCS (currently supported \emph{Git}, \emph{Subversion} and \emph{Mercurial})
+	\item Supports build variants
+	\item Supports for cross compilation
+	\item Building a specific branch or tag (Git only)
+	\item Building from a tarball
+	\item Building from a user's checkout for easy debug with controlled environment
+	\item Support for build plans (modules with specific variant and/or version)
+\end{itemize}
+
+The driver and plug-in modules are all written in \code{bash} scripts.
+
+For developer of new plug-in modules in SCBI, all setup, source copy and installation are transparent actions, developers just need to fill functions to configure, build and install (generally just calling configure from \code{autotool} or \code{cmake} and \code{make}).
+
+Those functions are very close to what would have been typed when building manually from the command line. The goal is to reduce as much as possible the gap between a common manual build and the commands used on plug-in modules.
+
+When properly setup building any software should be as easy as:
+
+\cmd{scbi \ddash{}plan=ver mysoft}
+
+We'll see how to achieve that in this document.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
+
+\section{Using}
+
+\subsection{Module reference}
+\label{modref}
+
+Each module is described in an SCBI plug-in script. It can be referenced in different places with the following format which is called a \emph{module reference}:
+
+\code{name[/variant][:version]}
+\label{dev}
+
+\begin{description}[style=nextline]
+	\item[name] The name of the module. This is the main reference for the module. The module script must named identically and located in \code{\$SCBI\_DEFS}.
+
+	\item[variant] \label{variant}This is a name to identify a build variant for the module. For example an application can be built with different configuration and or dependencies.
+
+	\item[version] The version to build. This version string can be either a reference to a VCS version (branch or a Git sha1 for example), a tar version or a reference to the user's checkout when set to \code{DEV}.
+\end{description}
+
+The following are examples of module references:
+
+\begin{description}[style=nextline]
+	\item[lcms2] Build \code{lcms2} from repository main (master/trunk) branch.
+
+	\item[lcms2/fast] Build \code{lcms2} \emph{fast} variant from repository main (master/trunk) branch.
+
+	\item[lcms2:v2.0] Build \code{lcms2} from repository using branch (or tag) \emph{2.0}.
+
+	\item[lcms2/fast:v2.0] Build \code{lcms2} \emph{fast} variable from repository using branch (or tag) \emph{2.0}.
+
+	\item[lcms2:bfaf7b82ed] Build \code{lcms2} from repository using sources from SHA-1 \emph{bfaf7b82ed} (Git only).
+
+	\item[lcms2:\#v1.0] Build \code{lcms2} using sources from tar version \emph{1.0}.
+
+	\item[lcms2:dev] Build \code{lcms2} using sources from user's repository checkout found in \code{\$SCBI\_GIT\_REPO} (assuming \code{lcms2} is using Git). For a discussion about user's check-out \seeref{userco}.
+\end{description}
+
+\subsection{Environment}
+\label{build-env}
+
+An environment is a set of shell variables used to control the build environment. SCBI come with defaults that can be used as-is, but one can fine tune the build environment using the following variables.
+
+\subsubsection{Description}
+
+\begin{description}[before=\let\item\myitem]
+	\item[SCBI\_DEFS] The directories where the SCBI modules and plug-ins are located. \\Default is \file{$HOME/.config/.scbi}.
+
+	\item[SCBI\_ROOT] The default root directory to use by SCBI. \\Default is \file{$HOME/dev}.
+
+	\item[SCBI\_BDIR] The default directory for build environment.  This is also called the sandboxes directory. \\Default is \file{$SCBI\_ROOT/builds}.
+
+	\item[SCBI\_PREFIX] The default global install directory. Each module after being installed into the sandbox are copied into this global installation directory. \\Default is \file{$SCBI_BDIR/install}. Each module can disable global installation (\seeref{global-install}).
+
+	\item[SCBI\_GIT\_REPO] The directories where the user's Git checkouts are to be found. \\Default is \file{$SCBI_ROOT/repositories/git}.
+
+	\item[SCBI\_SVN\_REPO] The directories where the user's Subversion checkouts are to be found. \\Default is \file{$SCBI_ROOT/repositories/svn}.
+
+	\item[SCBI\_HG\_REPO] The directories where the user's Mercurial checkouts are to be found. \\Default is \file{$SCBI_ROOT/repositories/hg}.
+
+	\item[SCBI\_TAR] The directories where the tarball are located. \\Default is \file{$SCBI_ROOT/.tar}.
+
+	\item[SCBI\_LOGS] The directories where the logs are located. \\Default is \file{$SCBI_ROOT/.logs}.
+
+	\item[SCBI\_PATCH] The directories where the patches are located. \\Default is \file{$SCBI_ROOT/.patches}.
+
+	\item[SCBI\_HOST] The host triplet identifying the running environment.
+
+	\item[SCBI\_TARGET] The target triplet for the builds. \\Default is \code{\$SCBI\_HOST}.
+
+	\item[SCBI\_JOBS] The number of simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores.
+	\label{njobs}
+	
+	\item[SCBI\_MAKE\_JOBS] The number of simultaneous jobs to use for \code{make}. \\Default set to \code{\$SCBI\_JOBS / 2}.
+\label{njobs}
+\end{description}
+
+\subsubsection{Environment files}
+
+The environment can be set in the following files searched in this exact order:
+
+\begin{description}
+	\item[\code{\$PWD/.env}] The local environment found in the current working directory.
+
+	\item[\code{\$SCBI\_DEFS/.env}] The default global environment used for all builds.
+\end{description}
+
+Also note that instead of the default \file{.env} a specific environment file can be specified with the \code{\ddash{}env=<name>} command line option. (\seeref{cmdline}).
+
+Example, to use environment \file{.env-next} to build \code{lcms2}:
+
+\cmd{scbi \ddash{}env=next lcms2}
+
+\subsection{Build plans}
+\label{build-plan}
+
+A build-plan is a file listing for each module a specific version to build. It is equivalent to list all versions on the command line:
+
+\cmd{scbi lcms2:v2 aws:v1}
+
+But this solution is not safe as not reproducible and not recorded in a version control. It is therefore easy to make mistakes and not actually build the proper version of the softwares.
+
+To avoid those issues, the solution is to use a build-plan which is a file named \file{.plan-<name>} and listing the versions (\seeref{modref} about module references) for each software:
+
+File \file{.plan-next}:
+\begin{lstlisting}
+ lcms2:v2
+ aws:v1
+\end{lstlisting}
+
+And finally, to build one just need to pass the build plan as option:
+
+\cmd{scbi \ddash{}plan=next lcms2 aws}
+
+A build-plan can be set in the following files searched in this exact order:
+
+\begin{description}
+	\item[\code{\$PWD/.plan-<name>}] A local build plane found in the current working directory.
+
+	\item[\code{\$SCBI\_DEFS/.plan-<name>}] A global build-plan.
+\end{description}
+
+\subsection{Command line}
+
+\subsubsection{Description}
+
+The SCBI command line:
+
+\cmd{scbi [options] module-ref1 [module-ref2 ... module-refn]}
+
+For a description of the module reference, \seeref{modref}.
+
+It is possible to list the module currently supported by running \code{scbi} with \code{\ddash{}help} or \code{\ddash{}stat} option or with \code{[TAB]} key if completion support is activated (\seeref{completion}).
+
+\subsubsection{Options}
+\label{cmdline}
+
+The following options are supported:
+
+\begin{description}[font=\texttt]
+	\item[-h | \ddash{}help] List options and usage information.
+
+	\item[\ddash{}prefix=<dir>] The installation directory to use instead of the default \file{$SCBI_PREFIX}.
+
+	\item[-e | \ddash{}env=<name>] Use environment file \code{.env-<name>} instead of the default \code{.env}. (\seeref{build-env})
+
+	\item[\ddash{}plan=<name>] Use build plan file \code{.plan-<name>}. (\seeref{build-plan}).
+
+	\item[\ddash{}enable-<name>] Enable feature \emph{name}, (\seeref{enable-feature}).
+
+	\item[-t | \ddash{}target=<name>] Specify the target to build for, the default is same as the host. This is needed for cross-compilation only.
+
+	\item[-S | \ddash{}no-setup] Skip the setup step.
+
+	\item[-W | \ddash{}no-wrapup] Skip the wrapup step.
+
+	\item[-I | \ddash{}no-install] Skip the install step.
+
+	\item[-u | \ddash{}update] Update the repositories before building.
+
+	\item[-s | \ddash{}setup] Do the setup step (default)
+
+	\item[-c | \ddash{}config] Do the config step (default)
+
+	\item[-b | \ddash{}build]  Do the build step (default)
+
+	\item[-i | \ddash{}install] Do the install step (default)
+
+	\item[-w | \ddash{}wrapup] Do the wrapup step (default).
+
+	\item[\ddash{}tar] Check for tar only if explicitly specified in the module reference.
+
+	\item[\ddash{}tests] Do a standard build cycle and run the testsuite if any.
+
+	\item[\ddash{}tests-only] Run the testsuite if any.
+
+	\item[-d | \ddash{}deps] Check all dependencies and build them if necessary.
+
+	\item[-a | \ddash{}archive] Build binary archive when build is successful.
+
+	\item[-v | \ddash{}verbose] Display full log when running.
+
+	\item[-l | \ddash{}no-log] Never display log.
+
+	\item[-f | \ddash{}force] Do not check if build id is matching, force a rebuild.
+
+	\item[-p | \ddash{}purge] Remove module build directory before building.
+
+	\item[-P | \ddash{}purge-only] Only remove module build directory, do not rebuild.
+
+	\item[\ddash{}list-depends] Recursively list module's dependencies.
+
+	\item[\ddash{}list-depends-with-meta] As above, taking into account meta modules.
+
+	\item[\ddash{}dry-run] Only list modules to be handled.
+
+	\item[\ddash{}stat] Display some statistics about of current setup.
+
+	\item[-n | \ddash{}no-patch] Do not apply patches.
+
+	\item[-j | \ddash{}jobs=<n>] Max compilation jobs, set variable \code{SCBI\_JOBS} which can be used in module scripts. (\seeref{njobs}).
+
+\end{description}
+
+A completion support for bash is provided. If activated many options will give hints about possible values like listing plans for \code{\ddash{}plan=} option or listing the supported modules.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
+
+\section{Creating plug-in modules}
+
+To create a new module description for SCBI you need to create a single \code{bash} script (one per module) named as the module and placed into \code{\$SCBI\_DEFS}.
+
+The module script will describe the steps for building in different hooks. One for configuring, one for building and one for installing. These are the mains steps generally used to build all software.
+
+Separate steps are described by a simple \code{bash} code snippet. Some hooks are just descriptions to retrieve artifacts (like VCS sources or tar file).
+
+In the following section all the supported hooks are described. Then the calling order conducted by SCBI is described in the section just after.
+
+\subsection{Hooks}
+
+The hooks must be prefixed by the name of the module. Each of them are optional.
+
+\subsubsection{Description}
+
+\begin{description}[font=\large\texttt]
+
+	\item[<module>-vcs] Describe the module source VCS.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} NONE
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+			\item proxy : name of a proxy, or \emph{default} to use default system one. (\seeref{proxy}).
+			\item options : comma separated list of options, possible values are \emph{none}, \emph{no-recursive}
+			\item protocol : \emph{git}, \emph{svn}, \emph{hg}
+			\item URL : repository location with protocol
+		\end{enumerate}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+	function lcms2-vcs()
+	{
+		echo default
+		echo none
+		echo git
+		echo http://github.com/mm2/Little-CMS
+	}
+	\end{lstlisting}
+
+	\item[<module>-tar] Describe the tar filename and location of the tar containing the module sources.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$VERSION}
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+		\item proxy : name of a proxy, or \emph{default} to use default system one. (\seeref{proxy}).
+		\item protocol: \emph{scp}, \emph{cp}, \emph{wget}, \emph{curl}, \emph{none}.
+		\item URL: location where the tarball can be downloaded.
+		\item filename : name of the archive with a possible \$VERSION in the pattern.
+		\end{enumerate}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+	function cmake-tar()
+	{
+		local VERSION=$1
+
+		echo default
+		echo wget
+		echo http://some.server.fr/sources
+		echo cmake-$VERSION.tar.gz
+	}
+	\end{lstlisting}
+
+	\item[<module>-version] Returns the current version of the installed module.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[return] \tabto{2cm} version or \code{\$VERSION\_OK} or \code{\$VERSION\_ERROR}
+		\begin{enumerate}
+			\item the version as a string corresponding to the current installed version. Can be \$VERSION\_OK or \$VERSION\_ERROR if the actual version cannot be determined.
+		\end{enumerate}
+	\end{description}
+
+	\item[<module>-depends] Lists all modules required to build the actual module. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} NONE
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+			\item echo <module1>
+			\item echo <module2>
+			\item ...
+		\end{enumerate}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+	function aws-depends()
+	{
+		echo xmlada
+		echo asis
+	}
+	\end{lstlisting}
+
+	\item[<module>-env] Set the environment to use this module as a dependency. This is the exported environment. The environment must be set using \code{add-to-var} function.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\begin{enumerate}
+			\item \code{add-to-var} <name> <value>
+			\item ...
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+	function libgegl-env()
+	{
+		local PREFIX=$1
+		local TARGET=$2
+
+		add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+		add-to-var PATH            $PREFIX/bin
+	}
+	\end{lstlisting}
+
+	\item[<module>-build-env] Set the environment needed to build this module. The environment must be set using \code{add-to-var} function. Those settings are not exported and only used for the module.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\begin{enumerate}
+			\item \code{add-to-var} <name> <value>
+			\item ...
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[<module>-setup] To put in place the sources just before configuration step. This is generally not needed as the sources are setup by \code{scbi} using the information provided by the tar or vcs hook. This may be needed in some complex case or if the sources are generated based on the running environment.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[<module>-out-of-tree] Whether to build out of the source tree or not.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} NONE
+		\item[return] \tabto{2cm} \code{true | false}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+	function lcms2-out-of-tree()
+	{
+		echo false
+	}
+	\end{lstlisting}
+
+	\item[<module>-config] To configure the sources before starting the build. This is generally a call to GNU \code{configure} or \code{cmake}. The source tree is always accessible as \code{../src}.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\begin{enumerate}
+			\item ./configure \ddash{}prefix=\$PREFIX ../src
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[<module>-build] The command to build the application. This is most of the case a simple call to \code{make}.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\begin{enumerate}
+			\item make
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+	function lcms2-build()
+	{
+		local PREFIX=$1
+		local TARGET=$2
+
+		make -J$SCBI_MAKE_JOBS
+	}
+	\end{lstlisting}
+
+	\item[<module>-install] The command to install the application. This is most of the case a simple call to \code{make} with target \code{install}.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\begin{enumerate}
+			\item make install
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[<module>-wrapup] This is to do whatever is needed after the installation step.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[<module>-prefix] The directory for the installation of the module. The returned value can be set to NONE to skip the installation step. If this hook is not defined the module will be installed into \code{\$SCBI\_PREFIX}.
+	\label{global-install}
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[return] \tabto{2cm} string
+		\begin{enumerate}
+			\item echo <install\_dir>
+			\\ or
+			\item echo NONE
+		\end{enumerate}
+	\end{description}
+
+	\item[<module>-tests] Set of commands to run the tests.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+\end{description}
+
+\subsubsection{Calling order}
+
+Some of the hooks are called by the main scbi driver when needed as they are returning information of some artifacts. Those hooks do not have specific calling order:
+
+\begin{itemize}
+	\item vcs
+	\item tar
+	\item version
+	\item out-of-tree
+	\item prefix
+	\item env
+	\item build-env
+	\item depends
+\end{itemize}
+
+For all other hooks there is a specific calling order which is:
+
+\begin{enumerate}
+	\item setup
+	\item config
+	\item build
+	\item install
+	\item wrapup
+\end{enumerate}
+
+It must be noted that for those steps we have generic internal version and \code{pre}, \code{post} corresponding steps:
+
+\begin{description}[font=\texttt,style=nextline]
+	\item[module-pre-<step>] The generic pre step handled internally by scbi driver. Must not be redefined.
+	\item[<module>-pre-<step>] The pre step action done before the main step.
+	\item[<module>-<step>] The default step.
+	\item[module-<step>] The generic step handled internally. Must not be redefined.
+	\item[<module>-post-<step>] The post step action.
+	\item[module-post-<step>] The generic post step handled internally. Must not be redefined.
+\end{description}
+
+For example, the generic internal setup step (\code{module-setup}) is used by the scbi driver to setup the sources (creating the build environment and populating the proper sources to compile) using the \code{vcs}, \code{version}, \code{tar} and \code{out-of-tree} hooks.
+
+For the non internal steps there is cross and variant hooks. The hook name is finally:
+
+\code{<module>[-<variant][-cross]-step}
+
+The \code{cross} hook is used when the target is different than the host.
+
+When \emph{variant} (\seeref{variant}) and/or \emph{cross} hooks are present, they are checked in the following order and the first found is called:
+
+\begin{enumerate}
+	\item <module>-<variant>-cross-<step>
+	\item <module>-cross-<step>
+	\item <module>-<variant>-<step>
+	\item <module>-<step>
+\end{enumerate}
+
+\subsection{Meta-module}
+\label{meta-module}
+
+A meta-module is a module listing a set of modules to build. This can be used to aggregate some related modules that are generally built together but not depending on each others.
+
+Other modules can depend on a meta-module.
+
+A module defining the hook \code{<module>-modules} becomes a meta-module.
+
+\begin{description}[style=nextline]
+	\item[<module>-modules] Lists the aggregated modules.
+		\begin{description}[font=\textit,style=standard]
+			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+			\item[return] \tabto{2cm} array
+				\begin{enumerate}
+					\item echo <module1>
+					\item echo <module2>
+		\end{enumerate}
+	\end{description}
+\end{description}
+
+And can list a build-plan to use for building all listed modules:
+
+\begin{description}
+	\item[<module>-plan] Returns the build-plan to use.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} NONE
+		\item[return] \tabto{2cm} string
+		\begin{enumerate}
+			\item echo <plan-name>
+		\end{enumerate}
+	\end{description}
+\end{description}
+
+Example:
+
+\begin{lstlisting}
+ function gnatcoll-plan()
+ {
+		echo stable
+ }
+
+ function gnatcoll-modules()
+ {
+		echo gnatcoll-core gnatcoll-bindings gnatcoll-db
+ }
+\end{lstlisting}
+
+A module listed in a meta-module can itself be a meta-module. A meta-module can define only a limited set of hooks, that is:
+
+\begin{itemize}[font=\texttt]
+	\item {[variant]-setup}
+	\item {[variant]-plan}
+	\item {[variant]-prefix}
+	\item {[variant]-wrapup}
+\end{itemize}
+
+\subsection{Setting a proxy}
+\label{proxy}
+
+When a Web protocol is used to retrieve a tar archive with the sources or a VCS it may be necessary to pass through a proxy. In the tar and vcs hook description the name of a proxy can be given. This name corresponds to a bash function named \code{proxy-<name>} that is used to set the proxy.
+
+\begin{description}[style=nextline]
+	\item[proxy-<name>] Set a proxy.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} NONE
+		\item[return] \tabto{2cm} NONE
+		\begin{enumerate}
+			\item export https\_proxy=...
+		\end{enumerate}
+	\end{description}
+\end{description}
+
+A typical setting is:
+
+\begin{lstlisting}
+ function proxy-enterprise()
+ {
+    export http_proxy=http:/myproxy.org:3128
+    export https_proxy=http:/myproxy.org:3128
+    export no_proxy=localhost,.net
+ }
+\end{lstlisting}
+
+This routine can be set into the environment file (\seeref{build-env}) or in the meta-module (\seeref{meta-module})description depending on use cases.
+
+Also, note that this setting will be available only during the download of the archive file or the VCS and won't be polluting other module download not requiring a proxy.
+
+\subsection{Feature}
+\label{enable-feature}
+
+It is possible to enable a feature that can be checked in the scripts using the command line \code{\ddash{}enable-<name>}. This option activate the feature named \code{name}. This is a convenience function and it is up to the user to decide about the semantic of the enabled feature. For SCBI driver this is only a flag set or not.
+
+In the module scripts the feature can be checked with \code{is-enabled} function. This function set the return code to 0 (true) if activated and returns "yes". If the feature is not activated the function set the return code to 1 (as for errors).
+
+Some example, for a single feature check:
+
+\begin{lstlisting}
+ if [ $(is-enabled installer) ]; then
+\end{lstlisting}
+
+For checking two features:
+
+\begin{lstlisting}
+ if [ "$(is-enabled appli)" = "yes"
+         -o "$(is-enabled installer)" = "yes" ];
+ then
+\end{lstlisting}
+
+\subsection{Build kind}
+
+One of the most generic build variant that must be handled is the \code{Release} vs \code{Debug} one. To support this more easily without requiring to create a specific variant hook there is a simple support using the function \code{get-build-type}:
+
+\cmd{get-build-type <config> <module> <default>}
+
+The \code{<config>} represents the configuration tool (CMAKE or CONFIGURE for example). But it can be whatever string.
+
+This function will return the build-kind for the given module and system type (\code{cmake} or \code{configure}) and if not specified the default value is returned.
+
+To check the actual build kind for the given module, this function will look at some environment variables in the following specific order:
+
+\begin{description}[style=nextline]
+	\item [<module>\_BUILD\_TYPE] Build kind for this specific module.
+	\item [<CONFIG>\_BUILD\_TYPE] Build kind for the builder kind.
+\end{description}
+
+And then this can be used in the \code{config} hook simply with:
+
+\begin{lstlisting}
+  function lcms2-config()
+  {
+    local PREFIX=$1
+    local TARGET=$1
+
+    local BUILD_TYPE=$(get-build-type CMAKE lcms2 Release)
+
+    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+          ../src
+  }
+\end{lstlisting}
+
+With the above example, if no variables are set in the environment to set the build type the default \code{Release} will be used. To force a \code{Debug} build one can set in the environment file or in the current shell:
+
+\begin{lstlisting}
+ export CMAKE_BUILD_TYPE=Debug
+\end{lstlisting}
+
+Which will force a \code{Debug} build for all modules using \code{cmake}, or:
+
+\begin{lstlisting}
+ export lcms2_BUILD_TYPE=Debug
+\end{lstlisting}
+
+With will force a \code{Debug} build for the \code{lcms2} module only. In both cases, the corresponding module must have been coded to use the \code{get-build-type} routine as seen above. Note that the \code{export} must use \emph{underscores} instead of dashes in module name as dashes are forbidden in variable name.
+
+\subsection{Check installed tools}
+
+It may be needed to check for the existence of a tool installed on the machine. It may not be a direct dependency but a tool needed for a specific need. For example the need to have \code{makeself} installed to create a self installer.
+
+Two helper routines are provided for this:
+
+\begin{description}
+	\item[check-tool] Take the name of a tool as parameter, returns status code different than 0 if not found.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} tool-name
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+	check-tool makeself
+	if [ $? != 0 ]; then
+	   echo Required tool makeself missing
+	   exit 1
+	fi
+	\end{lstlisting}
+
+	\item[check-tools] Take a list of tools as parameter, returns status code different that 0 if not found.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} tool-name1 [tool-name2...]
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+	check-tool wget rsync
+	if [ $? != 0 ]; then
+		echo Required tools wget and/or rsync missing
+		exit 1
+	fi
+	\end{lstlisting}
+\end{description}
+
+\subsection{Completion support}
+\label{completion}
+
+A script is provided to support bash completion for scbi. The script is \file{bash_completion.d/scbi} and must be copied into \file{/etc/bash_completion.d/} OS directory.
+
+Note that for this to work, the bash completion package must be installed, on Debian based distributions this is achieved with:
+
+\cmd{apt install bash-completion}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
+
+\section{Use Cases}
+
+\subsubsection{User's checkout}
+\label{userco}
+
+This is certainly the most important use case. A complex software is built with SCBI, but a bug is found in one module. We need to debug this module and fix it, so the complete cycle would be:
+
+\begin{itemize}
+	\item Check-out the module
+	\item Compile manually in debug mode
+	\item Debug the application
+	\item Fix the code
+	\item Commit the changes
+	\item Push, integrate the new changes (possibly in a new branch)
+\end{itemize}
+
+SCBI does support this scenario directly by allowing a user's checkout to be used instead of the sources in the sandbox for the module. It is highly discouraged to modify the sources in the sandbox which should stay untouched by users.
+
+The recommended steps are (we assume the current VCS for the module is Git):
+
+\begin{description}[style=nextline]
+	\item[Checkout the module] The user need to manually checkout the module. This can be done in any directory usually used to do development:
+
+	\begin{shellcommand}
+	\item cd \$HOME/dev
+	\item git clone http://github.com/mm2/Little-CMS
+	\end{shellcommand}
+
+	\item[Setup SCBI enviroment] The variable SCBI\_GIT\_REPO must be modified to point to the directory containing the user's Git checkouts. This is done by creating a new environment file, for example \file{.env-debug}:
+
+	\begin{shellcommand}
+	\item export SCBI\_GIT\_REPO=\$HOME/dev
+	\end{shellcommand}
+
+	If the default value is used this step is not needed.
+
+	\item[Create a build plan] The build plan will list all modules that must be compiled using a user's checkout. For example \file{.plan-debug}:
+
+	\begin{lstlisting}
+	lcms2:dev
+	\end{lstlisting}
+
+	Remember, \code{dev} is the special version referencing a user's checkout. (\seeref{dev}).
+
+	\item[Modify the module's sources] As a standard development step we modify the sources in the local checkout to fix the issue:
+
+	\begin{shellcommand}
+	\item cd \$HOME/dev/Little-CMS
+	\item emacs somefile.c
+	\end{shellcommand}
+
+\end{description}
+
+When this is setup, building the new software (\code{Little-CMS} in this example) with a development check-out, one can just do:
+
+\cmd{scbi \ddash{}env=debug \ddash{}plan=debug \ddash{}deps lcms2}
+
+We can further simplify by adding the build-plan reference in the environment file \file{.env-debug}:
+
+\begin{lstlisting}
+	export SCBI_GIT_REPO=$HOME/dev
+	PLAN=debug
+\end{lstlisting}
+
+And then the new equivalent command line is:
+
+\cmd{scbi \ddash{}env=debug \ddash{}deps lcms2}
+
+If a single software with no dependencies are to be debugged it is possible to just call SCBI with a dev reference for the module. In this case there is no need to create an environment file nor a build-plan and we can simply call:
+
+\cmd{scbi lcms2:dev}
+
+Mercurial and Subversion VCS are also supported, the variables for each are:
+
+\begin{description}[style=standard]
+	\item[Git] \tabto{3cm} SCBI\_GIT\_REPO
+	\item[Mercurial] \tabto{3cm} SCBI\_HG\_REPO
+	\item[Subversion] \tabto{3cm} SCBI\_SVN\_REPO
+\end{description}
+
+\subsubsection{Analyzing build failures}
+\label{debugging}
+
+When a build fails it may be needed to look at the full logs and the actual commands executed for the failing step (configure, build, install...).
+
+The SCBI driver does record all needed information in the sandbox directory \file{<module>/build/.log/}. 
+
+The files created in this directory are:
+
+\begin{description}[font=\file,style=standard]
+	\item[fct.cmd] \tabto{3cm} The needed function to set the environment
+	\item[env.cmd] \tabto{3cm} The environment set to configure, build or install the module.
+	\item[config.cmd] \tabto{3cm} The commands executed to configure.
+	\item[config.log] \tabto{3cm} The full log issued during the configuration.
+	\item[build.cmd] \tabto{3cm} The commands executed to build.
+	\item[build.log] \tabto{3cm} The full log issued during the build.
+	\item[install.cmd] \tabto{3cm} The commands executed to install.
+	\item[install.log] \tabto{3cm} The full log issued during the installation.
+\end{description}
+
+It is possible to replay the configure, build or install step just by sourcing the corresponding \code{.cmd} file.
+
+As an example, the build command file for \code{cmake} looks like this:
+
+\begin{lstlisting}
+# cmake-build
+(
+	cd <...>/cmake/build/build
+	source ../.log/fct.cmd
+	[ -f ../.log/env.cmd ] && source ../.log/env.cmd
+
+	function cmake-build()
+	{
+		local PREFIX=$1
+		local TARGET=$2
+		make -j24
+	}
+
+	cmake-build <...>/cmake/build/install x86_64-linux-gnu
+)
+\end{lstlisting}
+
+Note that this script is executed in a sub-shell and so won't pollute the working bash shell environment.
+
+Note also that the sources in the sandbox can be overwritten at any time. So the sources should not be edited directly on the sandbox. When the issue is found the recommended solution is to use a user's checkout, \seeref{userco}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
+
+\section{The Sandbox}
+
+We describe in this section the sandbox structure. Yet, it is generally not needed to go inside this hierarchy of directories except for debugging a new module being written (\seeref{debugging}).
+
+\vspace{1cm}
+
+\dirtree{%
+	.1 \textbf{[\$SCBI\_BDIR]}.
+	.2 .vcs.
+	.3 \textbf{[<module>]} \des{sources checkout}.
+	.2 .patches.
+	.2 .tar.
+	.3 <module>-<version>-src.tar.gz.
+	.2 \textbf{[.logs]} \des{global log directory with history}.
+	.3 \textbf{[YYYY-MM-DD]}.
+	.4 *.log.
+	.2 \textbf{[<module>]}.
+	.3 build $\rightarrow$ \des{symlink to current/latest target build dir}.
+	.3 build-id-<variant> \des{build id to check for changes}.
+	.3 src $\rightarrow$ \des{symlink to sources (vcs or tarball)}.
+	.3 tar $\rightarrow$ \des{symlink to extracted tarball}.
+	.3 tarsrc \des{extract of tarball}.
+	.3 source-id \des{version of the source (tar or vcs)}.
+	.3 install-id \des{version of the installed module}.
+	.3 vcs $\rightarrow$ \des{symlink to repository (.vcs or user's checkout)}.
+	.3 \textbf{[<target>-<variant>]}.
+	.4 .log \des{commands \& output for each steps}.
+	.4 \textbf{[build]} \des{build directory}.
+	.4 build-id \des{sha1 to identify the build}.
+	.4 \textbf{[install]} \des{installation directory}.
+	.4 manifest \des{list of all files in install above}.
+	.4 src \des{rsync of ../src}.
+}
+
+\section{Complete example}
+
+Many scripts come with \code{scbi}, they are all good examples to learn about different features.
+
+As a complete example here, let's build latest GIMP version. The plug-in module script is called \file{gimp} (placed into \file{$SCBI_DEFS/.config/scbi}) and all hook functions in this script are prefixed by \code{gimp-}.
+
+Note that this was compiling at the time this doc was written, but some dependencies on the OS may required the script to be updated.
+
+\begin{itemize}
+	\item We describe the VCS, sources are handled in Git:
+
+	\begin{lstlisting}
+	function gimp-vcs()
+	{
+		echo default
+		echo none
+		echo git
+		echo https://github.com/GNOME/gimp
+	}
+	\end{lstlisting}
+
+	\item We won't build GIMP out-of-tree, that is the build will be done in the source directory:
+
+	\begin{lstlisting}
+	function gimp-out-of-tree()
+	{
+		echo false
+	}
+	\end{lstlisting}
+
+	\item We list all dependencies, most of them are standard Debian packages except \code{libmypaint}, \code{libmypaint-brushes} and \code{libegl}.
+
+	\begin{lstlisting}
+	function gimp-depends()
+	{
+		echo gtk-doc-tools
+		echo libbabl-dev
+		echo libgegl-dev
+		echo libgexiv2-dev
+		echo libpoppler-glib-dev
+		echo python-gtk2-dev
+		echo python-cairo-dev
+		echo mypaint
+		echo libmng-dev
+		echo libxpm-dev
+
+		echo libmypaint
+		echo mypaint-brushes
+		echo libgegl
+	}
+	\end{lstlisting}
+
+	\item We configure GIMP, note that the environment for the three dependent modules are set in the corresponding plug-in module:
+
+	\begin{lstlisting}
+	function gimp-config()
+	{
+		local PREFIX=$1
+		local TARGET=$2
+
+		./autogen.sh --prefix=$PREFIX
+	}
+	\end{lstlisting}
+
+	\item We build GIMP:
+
+	\begin{lstlisting}
+	function gimp-build()
+	{
+		local PREFIX=$1
+		local TARGET=$2
+
+		make -j$SCBI_MAKE_JOBS
+	}
+	\end{lstlisting}
+
+	\item We install it, this is the installation into the sandbox install directory for this module:
+
+	\begin{lstlisting}
+	function gimp-install()
+	{
+		local PREFIX=$1
+		local TARGET=$2
+
+		make install
+	}
+	\end{lstlisting}
+
+	\item The global installation is set to point to \file{/opt/gimp}:
+
+	\begin{lstlisting}
+	function gimp-prefix()
+	{
+		echo /opt/gimp
+	}
+	\end{lstlisting}
+
+\end{itemize}
+
+As seen above, \code{gimp} module depends on three other modules and we do need some configuration from those dependencies during the configuration. The exported environment for the three dependencies are:
+
+\begin{itemize}
+	\item Hook \code{libmypaint-env}:
+
+	\begin{lstlisting}
+	function libmypaint-env()
+	{
+		local PREFIX=$1
+		local TARGET=$2
+
+		add-to-var PKG_CONFIG_PATH \
+					$PREFIX/lib/pkgconfig
+	}
+	\end{lstlisting}
+
+	\item Hook \code{mypaint-brushes-env}:
+
+	\begin{lstlisting}
+	function mypaint-brushes-env()
+	{
+		local PREFIX=$1
+		local TARGET=$2
+
+		add-to-var PKG_CONFIG_PATH \
+					$PREFIX/share/pkgconfig
+	}
+	\end{lstlisting}
+
+	\item Hook \code{libegl-env}:
+
+	\begin{lstlisting}
+	function libgegl-env()
+	{
+		local PREFIX=$1
+		local TARGET=$2
+
+		add-to-var PKG_CONFIG_PATH \
+					$PREFIX/lib/pkgconfig
+		add-to-var PATH            \
+					$PREFIX/bin
+	}
+	\end{lstlisting}
+
+\end{itemize}
+
+The full description for those three modules are provided with scbi.
+
+For this version of GIMP we need specific versions of the dependencies. A build-plan \code{.plan-gimpdev} is used to describe this:
+
+\begin{lstlisting}
+ libmypaint:v1.3.0
+ mypaint-brushes:v1.3.0
+\end{lstlisting}
+
+That is, we need version 1.3.0 of \code{libmypaint} and \code{mypaint-brushes}.
+
+At this point we can build GIMP with a simple:
+
+\cmd{scbi \ddash{}plan=gimpdev \ddash{}deps gimp}
+
+\printindex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
+
+\end{document}
+
+%%% Local Variables:
+%%% TeX-open-quote: "« "
+%%% TeX-close-quote: " »"
+%%% time-stamp-start: "\\\\newcommand{\\\\timestamp}{"
+%%% time-stamp-end: "}"
+%%% time-stamp-format: "%02d/%02m/%04y"
+%%% End:
+
+% LocalWords:  typographiées PDF Eureka
