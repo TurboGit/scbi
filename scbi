@@ -235,7 +235,7 @@
 #                |_ manifest      # list of all files in install above
 #                |_ src           # rsync of ../src
 
-VERSION=2.1
+VERSION=2.2
 
 CDPATH=
 
@@ -248,8 +248,8 @@ ENV_NAME=
 #  General script setup
 DLOG=on-failure
 SCBI_DEFS="$PWD"/scripts.d
-SCBI_JOBS=0
-MSCBI_JOBS=4
+SCBI_JOBS=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+MSCBI_JOBS=$(expr $SCBI_JOBS / 2)
 # MSCBI_JOBS is for makefiles
 
 #  Modules to be handled and already handled
