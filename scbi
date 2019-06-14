@@ -728,7 +728,8 @@ function handle-sources()
             #  Compute and store the version id of the sources + compiler.
             #  That is when the compiler is changed when want to rebuild
             #  the software.
-            get-build-id $SCBI_PREFIX $SCBI_TARGET $modref tar-$ref > build-id-$variant
+            get-build-id $SCBI_PREFIX $SCBI_TARGET \
+                         $modref tar-$ref > build-id-$variant
         fi
 
         echo -n tar-$ref > source-id
@@ -839,7 +840,8 @@ function handle-meta-module()
 
     line-sep
     ilog $metamodule Metamodule $metamodule-$variant setup | tee -a $log
-    module-variant-wrapper $SCBI_BDIR/install $metamodule $variant setup || exit 1
+    module-variant-wrapper $SCBI_BDIR/install \
+                           $metamodule $variant setup || exit 1
     ilog $metamodule End metamodule $metamodule-$variant setup | tee -a $log
     line-sep
 
@@ -859,7 +861,8 @@ function handle-meta-module()
 
     line-sep
     ilog $metamodule Metamodule $metamodule-$variant wrapup | tee -a $log
-    module-variant-wrapper $SCBI_BDIR/install $metamodule $variant wrapup || exit 1
+    module-variant-wrapper $SCBI_BDIR/install \
+                           $metamodule $variant wrapup || exit 1
     ilog $metamodule End metamodule $metamodule-$variant wrapup | tee -a $log
     line-sep
 }
