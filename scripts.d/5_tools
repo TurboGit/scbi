@@ -92,31 +92,6 @@ function gprbuild-project()
     )  > /dev/null 2>&1
 }
 
-############################## check-tool
-
-function check-tool()
-{
-    if [ -z "$(which $1)" ]; then
-        echo Required tool $1 missing, please update the PATH
-        return 1
-    fi
-    return 0
-}
-
-############################## check-tools
-
-function check-tools()
-{
-    local res=0
-
-    while [ "$1" != "" ]; do
-        check-tool $1
-        res=$(expr $res + $?)
-        shift
-    done
-    return $res
-}
-
 ############################## display-file
 
 function display-file()
