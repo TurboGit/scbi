@@ -31,7 +31,7 @@ function set-compiler-paths()
     fi
 
     export C_INCLUDE_PATH=$IT:$I
-    export CPLUS_INCLUDE_PATH=$IT:$IT/c++/$VER:$I/c++/$VER:$I
+    export CPLUS_INCLUDE_PATH=$IT/c++/$VER:$I/c++/$VER:$IT:$I
     export LIBRARY_PATH=$L:/usr/lib
     export LD_LIBRARY_PATH=$L:/usr/lib
     export ADA_PROJECT_PATH=$P
