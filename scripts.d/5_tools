@@ -381,6 +381,8 @@ function get-tar()
            -a "$tarcp" != "none" -a "$tarurl" != "none" ];
     then
         (
+            check-tool $tarcp || exit 1
+
             fn-exists proxy-$proxy
 
             [[ $? = 0 ]] && proxy-$proxy
