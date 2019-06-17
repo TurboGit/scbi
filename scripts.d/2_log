@@ -161,6 +161,9 @@ function show-command()
     local CMD=$1
     shift
 
+    local PREFIX=$1
+    local TARGET=$2
+
     echo "# $CMD"
     echo '('
 
@@ -177,10 +180,13 @@ function show-command()
     echo "   function $CMD()"
     echo "   {"
     echo -n "    "
-    eval echo -e \"$(type $CMD | sed '1,3d;$d')\"
+
+    # We want to keep $1, $2 (the parameters) and the $PREFIX
+    # and $TARGET references.
+    eval echo -e \"$(type $CMD | sed '1,3d;$d;s/$PREFIX/\\$PREFIX/g;s/$TARGET/\\$TARGET/g;s/$1/\\$1/g;s/$2/\\$2/g;')\"
     echo "   }"
     echo ""
-    echo "   $CMD"
+    echo "   $CMD $PREFIX $TARGET"
     echo ')'
 }
 
