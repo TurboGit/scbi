@@ -14,7 +14,7 @@ function fn-exists()
 
 function is-enabled()
 {
-    local VAR=SCBI_$1_SET
+    local VAR=SCBI_${1/-/_}_SET
 
     if [ "${!VAR}" = "true" ]; then
         echo "yes"

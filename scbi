@@ -1275,7 +1275,7 @@ while [ $# -gt 0 ]; do
     case $1 in
         --enable-*)
             VAR=${1/--enable-/}
-            export SCBI_${VAR}_SET=true
+            export SCBI_${VAR/-/_}_SET=true
             ;;
         *)
             SCBIOPTS="$SCBIOPTS $1"
