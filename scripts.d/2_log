@@ -56,7 +56,7 @@ function elog()
     local module=$1
     shift
 
-    ilog $module \(FAILED\) $*
+    ilog $module $module \(FAILED\) $*
     return 1
 }
 
