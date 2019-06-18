@@ -1,8 +1,10 @@
 
 function test1-vcs()
 {
-   echo git
-   echo ${TESTREPOS}/test1.bundle
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/test1.bundle
 }
 
 function test1-out-of-tree()
@@ -12,8 +14,8 @@ function test1-out-of-tree()
 
 function test1-config()
 {
-   local PREFIX=$1
-   local TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
-   ./configure
+    ./configure
 }

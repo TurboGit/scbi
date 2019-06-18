@@ -8,6 +8,8 @@ function module-pre-install()
 
 function gprbuild-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/gprbuild
 }

@@ -1,6 +1,8 @@
 
 function test18-vcs()
 {
+    echo default
+    echo none
     echo git
     echo ${TESTREPOS}/test1.bundle
 }

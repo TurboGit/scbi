@@ -1,6 +1,8 @@
 
 function binutils-vcs()
 {
+    echo default
+    echo none
     echo git
     echo http://sourceware.org/git/binutils-gdb.git
 }

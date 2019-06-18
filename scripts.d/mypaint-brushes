@@ -1,6 +1,8 @@
 
 function mypaint-brushes-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/Jehan/mypaint-brushes
 }

@@ -1,6 +1,8 @@
 
 function langkit-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/langkit
 }

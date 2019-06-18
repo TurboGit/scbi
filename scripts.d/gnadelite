@@ -1,6 +1,8 @@
 
 function gnadelite-vcs()
 {
+    echo default
+    echo none
     echo git
     echo git+ssh://repo.or.cz/srv/git/gnadelite.git
 }

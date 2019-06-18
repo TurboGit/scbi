@@ -774,8 +774,8 @@ function handle-sources()
 
         if [[ $? = 0 ]]; then
             vcs=( $($module-vcs) )
-            VCS_NAME=${vcs[0]}
-            VCS_URL=${vcs[1]}
+            VCS_NAME=${vcs[2]}
+            VCS_URL=${vcs[3]}
 
             REPO=$(basename $VCS_URL .git)
 
@@ -809,7 +809,7 @@ function handle-sources()
                 if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
                     ilog $module get sources from $VCS_NAME
 
-                    get-vcs $VCS_NAME $VCS_URL $module $kind $ref
+                    get-vcs $module $kind $ref
 
                     if [[ ! $? = 0 ]]; then
                         exit 1

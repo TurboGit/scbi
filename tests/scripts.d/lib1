@@ -1,8 +1,10 @@
 
 function lib1-vcs()
 {
-   echo git
-   echo ${TESTREPOS}/lib1.bundle
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
 }
 
 function lib1-tar()
@@ -17,12 +19,12 @@ function lib1-tar()
 
 function lib1-env()
 {
-   local PREFIX=$1
-   local TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
-   export C_INCLUDE_PATH=$PWD/include:$C_INCLUDE_PATH
-   export LIBRARY_PATH=.:$PWD/lib:$LIBRARY_PATH
-   export LD_LIBRARY_PATH=.:$PWD/lib:$LD_LIBRARY_PATH
+    export C_INCLUDE_PATH=$PWD/include:$C_INCLUDE_PATH
+    export LIBRARY_PATH=.:$PWD/lib:$LIBRARY_PATH
+    export LD_LIBRARY_PATH=.:$PWD/lib:$LD_LIBRARY_PATH
 }
 
 function lib1-out-of-tree()
@@ -32,29 +34,29 @@ function lib1-out-of-tree()
 
 function lib1-build()
 {
-   local PREFIX=$1
-   local TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
-   rm *.o
-   make
+    rm *.o
+    make
 }
 
 function lib1-install()
 {
-   local PREFIX=$1
-   local TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
-   mkdir -p $PREFIX/include
-   mkdir -p $PREFIX/lib
-   cp liblib1.so $PREFIX/lib
-   cp lib1.h $PREFIX/include
+    mkdir -p $PREFIX/include
+    mkdir -p $PREFIX/lib
+    cp liblib1.so $PREFIX/lib
+    cp lib1.h $PREFIX/include
 }
 
 function lib1-tests()
 {
-   local PREFIX=$1
-   local TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
-   ./main
-   return 0
+    ./main
+    return 0
 }

@@ -1,6 +1,8 @@
 
 function gnatcoll-bindings-iconv-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/gnatcoll-bindings
 }

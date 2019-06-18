@@ -335,6 +335,17 @@ function check-tar-exists()
     fi
 }
 
+############################## set-proxy
+
+function set-proxy()
+{
+    local NAME=$1
+
+    fn-exists proxy-$NAME
+
+    [[ $? = 0 ]] && proxy-$NAME
+}
+
 ############################## get-tar
 
 function get-tar()
@@ -358,9 +369,7 @@ function get-tar()
         (
             check-tool $tarcp || exit 1
 
-            fn-exists proxy-$proxy
-
-            [[ $? = 0 ]] && proxy-$proxy
+            set-proxy $proxy
 
             if [ $tarcp == wget ]; then
                 $tarcp $tarurl/$tarsrc -O $SCBI_TAR/$tarsrc > $log 2>&1

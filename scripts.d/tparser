@@ -1,6 +1,8 @@
 
 function tparser-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/templates-parser
 }

@@ -13,11 +13,15 @@
 
 function svn-co()
 {
-    local URL=$1
-    local NAME=$2
+    local PROXY=$1
+    local URL=$2
+    local OPTIONS=$3
+    local NAME=$4
     local REPO=$(basename $URL)
 
     (
+        set-proxy $PROXY
+
         mkdir -p $SCBI_BDIR/.vcs
         cd $SCBI_BDIR/.vcs &&
         if [ ! -d $REPO ]; then
@@ -38,15 +42,26 @@ function svn-co()
 
 function git-co()
 {
-    local URL=$1
-    local NAME=$2
+    local PROXY=$1
+    local URL=$2
+    local OPTIONS=$3
+    local NAME=$4
     local REPO=$(basename $URL .git)
+    local GOPTS1=""
+    local GOPTS2=""
+
+    if [ ! -z ${OPTIONS##*no-recursive*} ]; then
+        GOPTS1="--recursive"
+        GOPTS2="--recurse-submodules"
+    fi
 
     (
+        set-proxy $PROXY
+
         mkdir -p $SCBI_BDIR/.vcs
         cd $SCBI_BDIR/.vcs &&
         if [ ! -d $REPO ]; then
-            git clone --recursive $URL $REPO
+            git clone $GOPTS1 $URL $REPO
         else
             cd $REPO
             [ ! -d .git ] &&
@@ -54,7 +69,7 @@ function git-co()
                 exit 1
             # we set the URL in case the repo has been relocated
             git remote set-url origin $URL
-            git fetch --recurse-submodules
+            git fetch $GOPTS2
         fi &&
         cd $SCBI_BDIR/$NAME &&
         ln -s ../.vcs/$REPO vcs
@@ -65,11 +80,15 @@ function git-co()
 
 function hg-co()
 {
-    local URL=$1
-    local NAME=$2
+    local PROXY=$1
+    local URL=$2
+    local OPTIONS=$3
+    local NAME=$4
     local REPO=$(basename $URL .git)
 
     (
+        set-proxy $PROXY
+
         mkdir -p $SCBI_BDIR/.vcs
         cd $SCBI_BDIR/.vcs &&
         if [ ! -d $REPO ]; then
@@ -91,11 +110,15 @@ function hg-co()
 
 function git-branch()
 {
-    local MODULE=$1
-    local BRANCH=$2
+    local PROXY=$1
+    local OPTIONS=$2
+    local MODULE=$3
+    local BRANCH=$4
     local BUILDB=scbi
 
     (
+        set-proxy $PROXY
+
         cd $SCBI_BDIR/$MODULE/vcs
 
         # first, let's update the repository
@@ -160,7 +183,8 @@ function git-branch()
             ilog $MODULE "scbi: $MODULE updated $CUR..$NEW"
         fi
 
-        [ -f .gitmodules ] && git submodule update --init --recursive || true
+        [ ! -z ${OPTIONS##*no-recursive*} -a -f .gitmodules ] &&
+            git submodule update --init --recursive || true
     )
 }
 
@@ -168,11 +192,15 @@ function git-branch()
 
 function hg-branch()
 {
-    local MODULE=$1
-    local BRANCH=$2
+    local PROXY=$1
+    local OPTIONS=$2
+    local MODULE=$3
+    local BRANCH=$4
     local BUILDB=scbi
 
     (
+        set-proxy $PROXY
+
         cd $SCBI_BDIR/$MODULE/vcs
 
         # first, let's update the repository
@@ -198,8 +226,10 @@ function hg-branch()
 
 function svn-branch()
 {
-    local MODULE=$1
-    local BRANCH=$2
+    local PROXY=$1
+    local OPTIONS=$2
+    local MODULE=$3
+    local BRANCH=$4
 
     #  ??? call $module-vcs and get the URL for branches ${vcs[2]}
 
@@ -211,25 +241,29 @@ function svn-branch()
 
 function get-vcs()
 {
-    local VCS=$1
-    local URL=$2
-    local module=$3
-    local kind=$4
-    local version=$5
+    local module=$1
+    local kind=$2
+    local version=$3
 
     local res=0
 
-    case $VCS in
+    vcs=( $($module-vcs) )
+    local VCS_PROXY=${vcs[0]}
+    local VCS_OPTIONS=${vcs[1]}
+    local VCS_NAME=${vcs[2]}
+    local VCS_URL=${vcs[3]}
+
+    case $VCS_NAME in
         git)
-            git-co $URL $module > $log 2>&1
+            git-co $VCS_PROXY $VCS_URL $VCS_OPTIONS $module > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
-                ilog build "error: cannot get sources from $URL"
+                ilog build "error: cannot get sources from $VCS_URL"
                 exit 1
             fi
 
             if [ $kind != DEV ]; then
-                git-branch $module $version > $log 2>&1
+                git-branch $VCS_PROXY $VCS_OPTIONS $module $version > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
                     ilog build "error: cannot switch to branch $version"
@@ -239,15 +273,15 @@ function get-vcs()
             ;;
 
         hg|mercurial)
-            hg-co $URL $module > $log 2>&1
+            hg-co $VCS_PROXY $VCS_URL $VCS_OPTIONS $module > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
-                ilog build "error: cannot get sources from $URL"
+                ilog build "error: cannot get sources from $VCS_URL"
                 exit 1
             fi
 
             if [ $kind != DEV ]; then
-                hg-branch $module $version > $log 2>&1
+                hg-branch $VCS_PROXY $VCS_OPTIONS $module $version > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
                     ilog build "error: cannot switch to branch $version"
@@ -257,15 +291,15 @@ function get-vcs()
             ;;
 
         svn|subversion)
-            svn-co $URL $module > $log 2>&1
+            svn-co $VCS_PROXY $VCS_URL $VCS_OPTIONS $module > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
-                ilog build "error: cannot get sources from $URL"
+                ilog build "error: cannot get sources from $VCS_URL"
                 exit 1
             fi
 
             if [ $kind != DEV -a $version != NONE ]; then
-                svn-branch $module $version > $log 2>&1
+                svn-branch $VCS_PROXY $VCS_OPTIONS $module $version > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
                     ilog build "error: cannot switch to branch $version"
@@ -275,7 +309,7 @@ function get-vcs()
 
             ;;
         *)
-            ilog build "error: unknown vcs $VCS"
+            ilog build "error: unknown vcs $VCS_NAME"
             res=1
             ;;
     esac

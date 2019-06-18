@@ -1,6 +1,8 @@
 
 function libgegl-vcs()
 {
+    echo default
+    echo none
     echo git
     echo git://git.gnome.org/gegl
 }

@@ -1,6 +1,8 @@
 
 function win32ada-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/win32ada
 }
