@@ -1,6 +1,8 @@
 
 function win32ada-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/win32ada
 }
@@ -45,9 +47,9 @@ function win32ada-build()
     local TARGET=$2
 
     if [ "$HOST" = "$TARGET" ]; then
-        make PROCESSORS=$JOBS
+        make PROCESSORS=$SCBI_JOBS
     else
-        make PROCESSORS=$JOBS prefix=$PREFIX \
+        make PROCESSORS=$SCBI_JOBS prefix=$PREFIX \
              TARGET=$TARGET DEBUG=false build
     fi
 }

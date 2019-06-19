@@ -1,6 +1,8 @@
 
 function mypaint-brushes-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/Jehan/mypaint-brushes
 }
@@ -13,6 +15,7 @@ function mypaint-brushes-out-of-tree()
 function mypaint-brushes-env()
 {
     system-compiler
+    add-to-var PKG_CONFIG_PATH $PREFIX/share/pkgconfig
 }
 
 function mypaint-brushes-config()
@@ -28,7 +31,7 @@ function mypaint-brushes-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j$MJOBS
+    make -j$MSCBI_JOBS
 }
 
 function mypaint-brushes-install()

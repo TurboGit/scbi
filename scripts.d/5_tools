@@ -14,7 +14,7 @@ function fn-exists()
 
 function is-enabled()
 {
-    local VAR=SCBI_$1_SET
+    local VAR=SCBI_${1/-/_}_SET
 
     if [ "${!VAR}" = "true" ]; then
         echo "yes"
@@ -92,31 +92,6 @@ function gprbuild-project()
     )  > /dev/null 2>&1
 }
 
-############################## check-tool
-
-function check-tool()
-{
-    if [ -z "$(which $1)" ]; then
-        echo Required tool $1 missing, please update the PATH
-        return 1
-    fi
-    return 0
-}
-
-############################## check-tools
-
-function check-tools()
-{
-    local res=0
-
-    while [ "$1" != "" ]; do
-        check-tool $1
-        res=$(expr $res + $?)
-        shift
-    done
-    return $res
-}
-
 ############################## display-file
 
 function display-file()
@@ -143,8 +118,8 @@ function load-module()
     local module=$1
 
     if [ -z "${SCBI_LOADED[$module]}" ]; then
-        if [ -f $DEFS/$module ]; then
-            source $DEFS/$module
+        if [ -f $SCBI_DEFS/$module ]; then
+            source $SCBI_DEFS/$module
             SCBI_LOADED[$module]=yes
             return 0
         else
@@ -267,11 +242,11 @@ function get-build-id-callback()
     # Only compute for dependencies, not for the root module
 
     if [ $IS_ROOT == false ]; then
-        if [ -f $BDIR/$MODULE/install-id ]; then
-            var=$(cat $BDIR/$MODULE/install-id)
+        if [ -f $SCBI_BDIR/$MODULE/install-id ]; then
+            var=$(cat $SCBI_BDIR/$MODULE/install-id)
 
-            if [ -f $BDIR/$MODULE/build-id-$var ]; then
-                cat $BDIR/$MODULE/build-id-$var
+            if [ -f $SCBI_BDIR/$MODULE/build-id-$var ]; then
+                cat $SCBI_BDIR/$MODULE/build-id-$var
             else
                 echo $(date)
             fi
@@ -310,9 +285,9 @@ function get-build-id()
 
     local pid=no-patch-found
 
-    if [ $PATCH = yes -a -d $PATCHES ]; then
-        if [ ! -z $(ls $PATCHES/$module-*.patch 2> /dev/null) ]; then
-            local pid=$(cat $PATCHES/$module-*.patch 2>&1 | get-md5)
+    if [ $PATCH = yes -a -d $SCBI_PATCH ]; then
+        if [ ! -z $(ls $SCBI_PATCH/$module-*.patch 2> /dev/null) ]; then
+            local pid=$(cat $SCBI_PATCH/$module-*.patch 2>&1 | get-md5)
         fi
     fi
 
@@ -353,11 +328,22 @@ function check-tar-exists()
     local tarurl=${tar[2]}
     local tarsrc=${tar[3]}
 
-    if [ -f $TARBALL/$tarsrc ]; then
+    if [ -f $SCBI_TAR/$tarsrc ]; then
         return 0
     else
         return 1
     fi
+}
+
+############################## set-proxy
+
+function set-proxy()
+{
+    local NAME=$1
+
+    fn-exists proxy-$NAME
+
+    [[ $? = 0 ]] && proxy-$NAME
 }
 
 ############################## get-tar
@@ -377,18 +363,18 @@ function get-tar()
 
     #  The tarball is not present, try downloading it
 
-    if [ ! -f $TARBALL/$tarsrc \
+    if [ ! -f $SCBI_TAR/$tarsrc \
            -a "$tarcp" != "none" -a "$tarurl" != "none" ];
     then
         (
-            fn-exists proxy-$proxy
+            check-tool $tarcp || exit 1
 
-            [[ $? = 0 ]] && proxy-$proxy
+            set-proxy $proxy
 
             if [ $tarcp == wget ]; then
-                $tarcp $tarurl/$tarsrc -O $TARBALL/$tarsrc > $log 2>&1
+                $tarcp $tarurl/$tarsrc -O $SCBI_TAR/$tarsrc > $log 2>&1
             elif  [ $tarcp == curl ]; then
-                $tarcp $tarurl/$tarsrc --output $TARBALL/$tarsrc > $log 2>&1
+                $tarcp $tarurl/$tarsrc --output $SCBI_TAR/$tarsrc > $log 2>&1
             else
                 elog $module error: unknown tar protocol $tarcp
             fi
@@ -397,27 +383,27 @@ function get-tar()
         )
     fi
 
-    [ ! -f $TARBALL/$tarsrc ] &&
+    [ ! -f $SCBI_TAR/$tarsrc ] &&
         elog $module error: tarball $tarsrc not found
 
     ilog build extract tarball $tarsrc
 
-    [ ! -d $BDIR/$module ] && mkdir -p $BDIR/$module > $log 2>&1
+    [ ! -d $SCBI_BDIR/$module ] && mkdir -p $SCBI_BDIR/$module > $log 2>&1
 
-    cd $BDIR/$module
+    cd $SCBI_BDIR/$module
 
     rm -fr tarsrc tar > $log 2>&1
     ( rm -fr tartmp && mkdir -p tartmp ) > $log 2>&1
     cd tartmp
 
-    tar xf $TARBALL/$tarsrc
+    tar xf $SCBI_TAR/$tarsrc
     topdir=$(ls -d *)
 
     if [ -d "$topdir" ]; then
         mv "$topdir" ../tarsrc
         cd ..
         rmdir tartmp
-        ln -s $(realpath --relative-to="$PWD" $TARBALL/$tarsrc) tar
+        ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc) tar
     else
         echo Error, no top directory found.
         res=1
@@ -433,12 +419,12 @@ function display-stat()
     echo
     echo stats
     echo -----
-    echo "build dir             : $BDIR"
-    echo "install prefix        : $PREFIX"
-    echo "tar dir               : $TARBALL"
-    echo "patches dir           : $PATCHES"
-    echo "user's Git repository : $GIT_REPO"
-    echo "user's SVN repository : $SVN_REPO"
+    echo "build dir             : $SCBI_BDIR"
+    echo "install prefix        : $SCBI_PREFIX"
+    echo "tar dir               : $SCBI_TAR"
+    echo "patches dir           : $SCBI_PATCH"
+    echo "user's Git repository : $SCBI_GIT_REPO"
+    echo "user's SVN repository : $SCBI_SVN_REPO"
     echo -n "e-mail notification   :"
 
     if [ $EMAIL_NOTIFICATION == no ]; then
@@ -457,7 +443,7 @@ function display-modules()
 
     local linelen=0
 
-    for module in $DEFS/[^0-9]*; do
+    for module in $SCBI_DEFS/[^0-9]*; do
         bn=$(basename $module)
         linelen=$(expr $linelen + ${#bn} + 1)
         if [ $linelen -gt 70 ]; then
@@ -478,10 +464,10 @@ function display-plans()
     echo -n "plans  :"
     local linelen=0
 
-    if [ -z "$(ls $DEFS/.plan-* 2> /dev/null)" ]; then
+    if [ -z "$(ls $SCBI_DEFS/.plan-* 2> /dev/null)" ]; then
         echo " none"
     else
-        for module in $DEFS/.plan-*; do
+        for module in $SCBI_DEFS/.plan-*; do
             bn=$(basename $module)
             linelen=$(expr $linelen + ${#bn} + 1)
             if [ $linelen -gt 70 ]; then

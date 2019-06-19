@@ -1,6 +1,8 @@
 
 function binutils-vcs()
 {
+    echo default
+    echo none
     echo git
     echo http://sourceware.org/git/binutils-gdb.git
 }
@@ -63,7 +65,7 @@ function binutils-install()
     make install &&
         if [ $HOST != $TARGET ]; then
             # install into the partial gcc compiler too
-            mkdir -p $BDIR/pgcc/install/
-            rsync -a ../install/. $BDIR/pgcc/install/
+            mkdir -p $SCBI_BDIR/pgcc/install/
+            rsync -a ../install/. $SCBI_BDIR/pgcc/install/
         fi
 }

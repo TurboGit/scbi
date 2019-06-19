@@ -1,6 +1,8 @@
 
 function gnatcoll-bindings-readline-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
@@ -30,7 +32,7 @@ function gnatcoll-bindings-readline-build()
     local PREFIX=$1
     local TARGET=$2
 
-    GOPTS="-j$JOBS -p -XBUILD=PROD --target=$TARGET"
+    GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
 
     if [ $HOST == $TARGET ]; then
         for kind in static relocatable static-pic; do

@@ -1,6 +1,8 @@
 
 function xmlada-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/xmlada
 }
@@ -70,7 +72,7 @@ function xmlada-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make PROCESSORS=$JOBS -j2
+    make PROCESSORS=$SCBI_JOBS -j2
 }
 
 function xmlada-install()

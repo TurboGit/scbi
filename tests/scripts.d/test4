@@ -1,8 +1,10 @@
 
 function test4-vcs()
 {
-   echo mercurial
-   echo ${TESTREPOS}/simple.mercurial.bundle
+    echo default
+    echo none
+    echo mercurial
+    echo ${TESTREPOS}/simple.mercurial.bundle
 }
 
 function test4-out-of-tree()
@@ -12,25 +14,25 @@ function test4-out-of-tree()
 
 function test4-config()
 {
-   local PREFIX=$1
-   local TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
-   ./configure
+    ./configure
 }
 
 function test4-build()
 {
-   local PREFIX=$1
-   local TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
-   make
+    make
 }
 
 function test4-tests()
 {
-   local PREFIX=$1
-   local TARGET=$2
+    local PREFIX=$1
+    local TARGET=$2
 
-   ./main
-   return 0
+    ./main
+    return 0
 }

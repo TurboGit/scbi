@@ -4,7 +4,7 @@ function diouzhtu-update()
     local PREFIX=$1
     local TARGET=$2
 
-    cd $GIT_REPO/diouzhtu && git pull
+    cd $SCBI_GIT_REPO/diouzhtu && git pull
 }
 
 function diouzhtu-setup()
@@ -13,7 +13,7 @@ function diouzhtu-setup()
     local TARGET=$2
 
     if [ ! -d src_cp ]; then
-        ln -s $GIT_REPO/diouzhtu src_cp
+        ln -s $SCBI_GIT_REPO/diouzhtu src_cp
     fi
 }
 
@@ -28,7 +28,7 @@ function diouzhtu-build()
     local TARGET=$2
 
     export AWS_BUILD=relocatable
-    cd build && PROCESSORS=$JOBS make
+    cd build && PROCESSORS=$SCBI_JOBS make
 }
 
 function diouzhtu-install()

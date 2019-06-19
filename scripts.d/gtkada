@@ -1,6 +1,8 @@
 
 function gtkada-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/gtkada
 }
@@ -60,7 +62,7 @@ function gtkada-build()
     local PREFIX=$1
     local TARGET=$2
 
-    PROCESSORS=$JOBS make
+    PROCESSORS=$SCBI_JOBS make
 }
 
 function gtkada-install()

@@ -8,6 +8,8 @@ function module-pre-install()
 
 function gprbuild-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/gprbuild
 }
@@ -28,7 +30,7 @@ function gprbuild-config()
     local PREFIX=$1
     local TARGET=$2
 
-    make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$JOBS setup
+    make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$SCBI_JOBS setup
 }
 
 function gprbuild-build()

@@ -19,7 +19,7 @@ function blaslapack-config()
     local TARGET=$2
 
     if [ $HOST != $TARGET ]; then
-        COPTS=-DCMAKE_Fortran_COMPILER=$BDIR/install/bin/$TARGET-gfortran
+        COPTS=-DCMAKE_Fortran_COMPILER=$SCBI_BDIR/install/bin/$TARGET-gfortran
     fi
 
     cmake -DCMAKE_INSTALL_PREFIX=$PREFIX $COPTS ../src
@@ -30,7 +30,7 @@ function blaslapack-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make PROCESSORS=$JOBS blas lapack
+    make PROCESSORS=$SCBI_JOBS blas lapack
 }
 
 function blaslapack-install()

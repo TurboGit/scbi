@@ -1,6 +1,8 @@
 
 function gpr-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/gpr
 }
@@ -22,7 +24,7 @@ function do-config()
     (
         gpython-env
         add-to-var PYTHONPATH \
-                   $BDIR/langkit_support/$TARGET-default/build/langkit
+                   $SCBI_BDIR/langkit_support/$TARGET-default/build/langkit
 
         make $GPROPTS setup
     )

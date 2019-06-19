@@ -1,6 +1,8 @@
 
 function alt-ergo-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/alt-ergo
 }
@@ -41,7 +43,7 @@ function alt-ergo-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j$MJOBS
+    make -j$MSCBI_JOBS
 }
 
 function alt-ergo-install()

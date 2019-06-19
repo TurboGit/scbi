@@ -1,6 +1,8 @@
 
 function gnatcoll-core-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/gnatcoll-core.git
 }
@@ -48,7 +50,7 @@ function gnatcoll-core-build()
     local PREFIX=$1
     local TARGET=$2
 
-    PROCESSORS=$JOBS make NORMALIZED_TARGET=$TARGET
+    PROCESSORS=$SCBI_JOBS make NORMALIZED_TARGET=$TARGET
 }
 
 function gnatcoll-core-install()

@@ -1,6 +1,8 @@
 
 function gps-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/gps
 }
@@ -25,11 +27,11 @@ function gps-config()
 
     (
         rm -fr gnat
-        ln -s $BDIR/gnat/src gnat
+        ln -s $SCBI_BDIR/gnat/src gnat
 
         rm -fr laltools
         mkdir -p laltools/obj
-        ln -s $BDIR/libadalang-tools/$TARGET-default/src/src laltools/
+        ln -s $SCBI_BDIR/libadalang-tools/$TARGET-default/src/src laltools/
 
         ./configure --prefix=$PREFIX --with-gtk=$GTKV --without-gmp \
                     --with-sqlite=embedded --disable-syslog \
@@ -44,7 +46,7 @@ function gps-build()
     local PREFIX=$1
     local TARGET=$2
 
-    PROCESSORS=$JOBS make -j1
+    PROCESSORS=$SCBI_JOBS make -j1
 }
 
 function gps-install()

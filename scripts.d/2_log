@@ -9,7 +9,7 @@ echo -n 1 > $SCBI_LINE_SEP
 function clog()
 {
     local module=$1
-    echo >> $LOGS/$TODAY/$TARGET-$module-report.log
+    echo >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-report.log
 }
 
 ############################## line-sep
@@ -32,7 +32,7 @@ function dlog()
 
     shift
     echo $ts : "  $*" > $(tty)
-    echo $ts : "  $*" >> $LOGS/$TODAY/$TARGET-$module-report.log
+    echo $ts : "  $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }
 
@@ -45,7 +45,7 @@ function ilog()
 
     shift
     echo $ts : $*
-    echo $ts : $* >> $LOGS/$TODAY/$TARGET-$module-report.log
+    echo $ts : $* >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }
 
@@ -56,7 +56,7 @@ function elog()
     local module=$1
     shift
 
-    ilog $module \(FAILED\) $*
+    ilog $module $module \(FAILED\) $*
     return 1
 }
 
@@ -64,7 +64,7 @@ function elog()
 
 function clean-scbi-logs()
 {
-    find $LOGS -ctime +$KEEP_LOG_DAYS -delete
+    find $SCBI_LOGS -ctime +$KEEP_LOG_DAYS -delete
 }
 
 ############################## display log-stat
@@ -123,7 +123,7 @@ function display-log-stat()
 {
     local module=$1
 
-    FILES=$(find $LOGS -name "*$module-report.log")
+    FILES=$(find $SCBI_LOGS -name "*$module-report.log")
 
     for file in $FILES; do
         compute-log-stat-file $file
@@ -161,6 +161,9 @@ function show-command()
     local CMD=$1
     shift
 
+    local PREFIX=$1
+    local TARGET=$2
+
     echo "# $CMD"
     echo '('
 
@@ -177,15 +180,18 @@ function show-command()
     echo "   function $CMD()"
     echo "   {"
     echo -n "    "
-    eval echo -e \"$(type $CMD | sed '1,3d;$d')\"
+
+    # We want to keep $1, $2 (the parameters) and the $PREFIX
+    # and $TARGET references.
+    eval echo -e \"$(type $CMD | sed '1,3d;$d;s/$PREFIX/\\$PREFIX/g;s/$TARGET/\\$TARGET/g;s/$1/\\$1/g;s/$2/\\$2/g;')\"
     echo "   }"
     echo ""
-    echo "   $CMD"
+    echo "   $CMD $PREFIX $TARGET"
     echo ')'
 }
 
 ############################## body
 
-[ ! -d $LOGS/$TODAY ] && mkdir -p $LOGS/$TODAY
+[ ! -d $SCBI_LOGS/$TODAY ] && mkdir -p $SCBI_LOGS/$TODAY
 
 clean-scbi-logs

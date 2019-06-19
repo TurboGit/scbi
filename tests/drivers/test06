@@ -13,7 +13,7 @@ REP=$PWD/.root/builds/lib1
 if [ -h $REP/x86_64-linux-gnu-default/build ]; then
     echo OK build directory present before purge
 else
-    echo NOK build directory should have been present $BDIR
+    echo NOK build directory should have been present $SCBI_BDIR
 fi
 
 ./scbi --purge-only lib1

@@ -1,6 +1,8 @@
 
 function gnatcoll-db-libs-sql-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/gnatcoll-db
 }
@@ -31,7 +33,7 @@ function gnatcoll-db-libs-sql-config()
     local TARGET=$2
 
     make -C sql prefix=$PREFIX INTEGRATED=yes \
-         TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$JOBS setup
+         TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$SCBI_JOBS setup
 }
 
 function gnatcoll-db-libs-sql-build()

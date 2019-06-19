@@ -66,7 +66,11 @@ function check-pkg()
         echo "error: $pkg not found"
         return 1
     elif [ $res = 1 ]; then
-        echo "error: $pkg:$version should be installed."
+        if [ $version == NONE ]; then
+            echo "error: $pkg should be installed."
+        else
+            echo "error: $pkg:$version should be installed."
+        fi
         return 1
     else
         return 0

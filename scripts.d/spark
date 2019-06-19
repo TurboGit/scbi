@@ -1,6 +1,8 @@
 
 function spark-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/spark2014
 }
@@ -23,7 +25,7 @@ function spark-config()
     local TARGET=$2
 
     rm -f gnat2why/gnat_src
-    ln -s $BDIR/gnat/src gnat2why/gnat_src
+    ln -s $SCBI_BDIR/gnat/src gnat2why/gnat_src
 
     make setup
 }

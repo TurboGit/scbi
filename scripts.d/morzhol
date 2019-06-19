@@ -1,6 +1,8 @@
 
 function morzhol-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/TurboGit/morzhol.git
 }
@@ -10,7 +12,7 @@ function morzhol-cross-build()
     local PREFIX=$1
     local TARGET=$2
 
-    PROCESSORS=$JOBS make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
+    PROCESSORS=$SCBI_JOBS make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
 }
 
 function morzhol-out-of-tree()
@@ -23,7 +25,7 @@ function morzhol-build()
     local PREFIX=$1
     local TARGET=$2
 
-    PROCESSORS=$JOBS make
+    PROCESSORS=$SCBI_JOBS make
 }
 
 function morzhol-cross-install()

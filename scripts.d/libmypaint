@@ -1,6 +1,8 @@
 
 function libmypaint-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/mypaint/libmypaint.git
 }
@@ -13,6 +15,7 @@ function libmypaint-out-of-tree()
 function libmypaint-env()
 {
     system-compiler
+    add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
 }
 
 function libmypaint-config()
@@ -28,7 +31,7 @@ function libmypaint-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j$MJOBS
+    make -j$MSCBI_JOBS
 }
 
 function libmypaint-install()

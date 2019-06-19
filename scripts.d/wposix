@@ -1,6 +1,8 @@
 
 function wposix-vcs()
 {
+    echo default
+    echo none
     echo git
     echo https://github.com/AdaCore/wposix
 }
@@ -81,7 +83,7 @@ function wposix-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make PROCESSORS=$JOBS
+    make PROCESSORS=$SCBI_JOBS
 }
 
 function wposix-install()

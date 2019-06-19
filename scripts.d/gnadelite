@@ -1,6 +1,8 @@
 
 function gnadelite-vcs()
 {
+    echo default
+    echo none
     echo git
     echo git+ssh://repo.or.cz/srv/git/gnadelite.git
 }
@@ -20,7 +22,7 @@ function gnadelite-build()
     local PREFIX=$1
     local TARGET=$2
 
-    PROCESSORS=$JOBS make prefix=$PREFIX
+    PROCESSORS=$SCBI_JOBS make prefix=$PREFIX
 }
 
 function gnadelite-install()

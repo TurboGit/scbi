@@ -7,7 +7,7 @@ function pgcc-version()
     local PREFIX=$1
     local TARGET=$2
 
-    INST=$BDIR/pgcc/install/$TARGET/bin
+    INST=$SCBI_BDIR/pgcc/install/$TARGET/bin
 
     if [ -f $INST/$TARGET-gcc ]; then
         return $VERSION_OK
@@ -42,7 +42,7 @@ function pgcc-config()
     local PREFIX=$1
     local TARGET=$2
 
-    CFLAGS="-O1" $BDIR/gnat/build/src/configure \
+    CFLAGS="-O1" $SCBI_BDIR/gnat/build/src/configure \
           --target=$TARGET --prefix=$PREFIX/$TARGET --host=$HOST \
           --enable-thread=win32 --disable-nls --disable-multilib \
           --disable-libada --disable-sjlj-exceptions \
@@ -75,5 +75,5 @@ function pgcc-install()
 function pgcc-prefix()
 {
     # install into the partial gcc compiler
-    echo $BDIR/pgcc/install
+    echo $SCBI_BDIR/pgcc/install
 }

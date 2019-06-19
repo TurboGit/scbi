@@ -3,10 +3,10 @@
 
 export PATH=$PREFIX/bin:$PATH
 
-DEFAUL_C_INCLUDE_PATH=$C_INCLUDE_PATH
-DEFAUL_CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH
-DEFAUL_LIBRARY_PATH=$LIBRARY_PATH
-DEFAUL_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+DEFAULT_C_INCLUDE_PATH=$C_INCLUDE_PATH
+DEFAULT_CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH
+DEFAULT_LIBRARY_PATH=$LIBRARY_PATH
+DEFAULT_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 DEFAULT_ADA_PROJECT_PATH=$ADA_PROJECT_PATH
 
 ############################## set-compiler-paths
@@ -31,7 +31,7 @@ function set-compiler-paths()
     fi
 
     export C_INCLUDE_PATH=$IT:$I
-    export CPLUS_INCLUDE_PATH=$IT:$IT/c++/$VER:$I/c++/$VER:$I
+    export CPLUS_INCLUDE_PATH=$IT/c++/$VER:$I/c++/$VER:$IT:$I
     export LIBRARY_PATH=$L:/usr/lib
     export LD_LIBRARY_PATH=$L:/usr/lib
     export ADA_PROJECT_PATH=$P
@@ -109,7 +109,7 @@ function system-compiler()
 
 function built-compiler()
 {
-    local PREFIX=$BDIR/install
+    local PREFIX=$SCBI_BDIR/install
 
     export PATH=$PREFIX/bin:$PATH
 

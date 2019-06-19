@@ -1,6 +1,8 @@
 
 function git-vcs()
 {
+    echo default
+    echo none
     echo git
     echo git://git.kernel.org/pub/scm/git/git.git
 }

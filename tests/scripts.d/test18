@@ -1,6 +1,8 @@
 
 function test18-vcs()
 {
+    echo default
+    echo none
     echo git
     echo ${TESTREPOS}/test1.bundle
 }
@@ -49,5 +51,5 @@ function test18-alt-prefix()
     local PREFIX=$1
     local TARGET=$2
 
-    echo $BDIR/local-install
+    echo $SCBI_BDIR/local-install
 }

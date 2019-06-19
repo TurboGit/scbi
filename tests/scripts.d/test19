@@ -7,7 +7,7 @@ function test19-pre-setup()
    local TARGET=$2
 
     mkdir $TARGET-default/src
-    echo "@@@ PRE-SETUP " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ PRE-SETUP " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-alt-pre-setup()
@@ -16,7 +16,7 @@ function test19-alt-pre-setup()
    local TARGET=$2
 
     mkdir $TARGET-alt/src
-    echo "@@@ ALT/PRE-SETUP " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ ALT/PRE-SETUP " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 ####################################################### CONFIG
@@ -31,7 +31,7 @@ function test19-config()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ CONFIG " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ CONFIG " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-post-config()
@@ -39,7 +39,7 @@ function test19-post-config()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ POST-CONFIG " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ POST-CONFIG " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-alt-config()
@@ -47,7 +47,7 @@ function test19-alt-config()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ ALT/CONFIG " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ ALT/CONFIG " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-alt-post-config()
@@ -55,7 +55,7 @@ function test19-alt-post-config()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ ALT/POST-CONFIG " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ ALT/POST-CONFIG " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 ####################################################### BUILD
@@ -65,7 +65,7 @@ function test19-pre-build()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ PRE-BUILD " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ PRE-BUILD " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-build()
@@ -73,7 +73,7 @@ function test19-build()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ BUILD " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ BUILD " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-post-build()
@@ -81,7 +81,7 @@ function test19-post-build()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ POST-BUILD " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ POST-BUILD " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 ####################################################### INSTALL
@@ -91,7 +91,7 @@ function test19-pre-install()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ PRE-INSTALL " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ PRE-INSTALL " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-install()
@@ -99,7 +99,7 @@ function test19-install()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ INSTALL " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ INSTALL " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-alt-install()
@@ -107,7 +107,7 @@ function test19-alt-install()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ ALT/INSTALL " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ ALT/INSTALL " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-alt-post-install()
@@ -115,7 +115,7 @@ function test19-alt-post-install()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ POST-INSTALL " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ POST-INSTALL " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 ####################################################### WRAPUP
@@ -125,7 +125,7 @@ function test19-pre-wrapup()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ PRE-WRAPUP " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ PRE-WRAPUP " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-wrapup()
@@ -133,7 +133,7 @@ function test19-wrapup()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ WRAPUP " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ WRAPUP " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-alt-wrapup()
@@ -141,7 +141,7 @@ function test19-alt-wrapup()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ ALT/WRAPUP " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ ALT/WRAPUP " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }
 
 function test19-alt-post-wrapup()
@@ -149,5 +149,5 @@ function test19-alt-post-wrapup()
    local PREFIX=$1
    local TARGET=$2
 
-    echo "@@@ ALT/POST-WRAPUP " $(realpath --relative-to=$BDIR $PWD)
+    echo "@@@ ALT/POST-WRAPUP " $(realpath --relative-to=$SCBI_BDIR $PWD)
 }

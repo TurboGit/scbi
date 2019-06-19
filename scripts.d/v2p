@@ -4,7 +4,7 @@ function v2p-update()
     local PREFIX=$1
     local TARGET=$2
 
-    cd $GIT_REPO/v2p && git pull
+    cd $SCBI_GIT_REPO/v2p && git pull
 }
 
 function v2p-setup()
@@ -13,7 +13,7 @@ function v2p-setup()
     local TARGET=$2
 
     if [ ! -d src_cp ]; then
-        ln -s $GIT_REPO/v2p src_cp
+        ln -s $SCBI_GIT_REPO/v2p src_cp
     fi
 }
 
@@ -28,7 +28,7 @@ function v2p-build()
     local TARGET=$2
 
     export AWS_BUILD=relocatable
-    cd build && PROCESSORS=$JOBS make
+    cd build && PROCESSORS=$SCBI_JOBS make
 }
 
 function v2p-install()
