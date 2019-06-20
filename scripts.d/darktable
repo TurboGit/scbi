@@ -31,6 +31,8 @@ function darktable-depends()
     echo libgraphicsmagick1-dev
     echo libcolord-dev
     echo libgomp1
+    echo libgmic-dev
+    echo libcups-dev
 }
 
 function darktable-env()
