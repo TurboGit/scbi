@@ -490,7 +490,7 @@ function get-build-type()
     local DEFAULT=$3
 
     VAR_GENERIC=${KIND}_BUILD_TYPE
-    VAR_MODULE=${MODULE}_BUILD_TYPE
+    VAR_MODULE=${MODULE/-/_}_BUILD_TYPE
 
     [ ! -z ${!VAR_GENERIC} ] && DEFAULT=${!VAR_GENERIC}
     [ ! -z ${!VAR_MODULE} ] && DEFAULT=${!VAR_MODULE}
