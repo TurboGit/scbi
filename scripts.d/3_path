@@ -20,9 +20,10 @@ function set-compiler-paths()
 
     if [ -z $TARGET ]; then
         I=$PREFIX/include
-        IT=$PREFIX/include/$HOST
+        IT=$PREFIX/include/$SCBI_HOST
+        IL=$PREFIX/lib/gcc/$SCBI_HOST
         P=$PREFIX/share/gpr
-        L=$PREFIX/lib/$HOST:$PREFIX/lib
+        L=$PREFIX/lib/$SCBI_HOST:$PREFIX/lib
     else
         I=$PREFIX/include
         IT=$PREFIX/include/$TARGET
@@ -32,6 +33,7 @@ function set-compiler-paths()
 
     export C_INCLUDE_PATH=$IT:$I
     export CPLUS_INCLUDE_PATH=$IT/c++/$VER:$I/c++/$VER:$IT:$I
+    export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$IL/include:$IL/include-fixed
     export LIBRARY_PATH=$L:/usr/lib
     export LD_LIBRARY_PATH=$L:/usr/lib
     export ADA_PROJECT_PATH=$P
@@ -85,7 +87,7 @@ function no-target-env()
 
     export PATH=$B:$PATH
 
-    set-compiler-paths $PREFIX $HOST
+    set-compiler-paths $PREFIX $SCBI_HOST
 }
 
 ############################## gpython-env
