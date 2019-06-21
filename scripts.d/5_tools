@@ -18,9 +18,9 @@ function is-enabled()
 
     if [ "${!VAR}" = "true" ]; then
         echo "yes"
-        true
+        return 0
     else
-        false
+        return 1
     fi
 }
 
