@@ -367,7 +367,11 @@ function get-tar()
            -a "$tarcp" != "none" -a "$tarurl" != "none" ];
     then
         (
-            check-tool $tarcp || exit 1
+            check-tool $tarcp
+            if [ $? != 0 ]; then
+                elog $module Required tool $tarcp missing
+                exit 1
+            fi
 
             set-proxy $proxy
 

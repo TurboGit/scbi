@@ -242,7 +242,6 @@ VERSION=2.2
 function check-tool()
 {
     if [ -z "$(which $1)" ]; then
-        echo Required tool $1 missing, please update the PATH > $(tty)
         return 1
     fi
     return 0
@@ -263,7 +262,11 @@ function check-tools()
 }
 
 # check for tools used by scbi itself
-check-tools gcc python3 rsync sed || exit 1
+check-tools gcc python3 rsync sed
+if [ $? != 0 ]; then
+    echo Required tools gcc python3 rsync sed missing, please install
+    exit 1
+fi
 
 CDPATH=
 
