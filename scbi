@@ -783,8 +783,25 @@ function handle-sources()
             REPO=$(basename $VCS_URL .git)
 
             if [ $kind = DEV ]; then
-                if [ -d $SCBI_GIT_REPO/$REPO ]; then
-                    ln -s $SCBI_GIT_REPO/$REPO vcs
+                local SCBI_VCS_REPO=
+
+                case $VCS_NAME in
+                    git)
+                        SCBI_VCS_REPO=$SCBI_GIT_REPO
+                        ;;
+                    svn|subversion)
+                        SCBI_VCS_REPO=$SCBI_SVN_REPO
+                        ;;
+                    hg)
+                        SCBI_VCS_REPO=$SCBI_HG_REPO
+                        ;;
+                    *)
+                        elog $module unsupported VCS $VCS_NAME
+                        exit 1
+                esac
+
+                if [ -d $SCBI_VCS_REPO/$REPO ]; then
+                    ln -s $SCBI_VCS_REPO/$REPO vcs
 
                     #  Compute and store the version id of the sources +
                     #  compiler. That is when the compiler is changed we
@@ -797,7 +814,7 @@ function handle-sources()
 
                 else
                     ilog $module cannot find local dev repository:
-                    ilog $module $SCBI_GIT_REPO/$REPO
+                    ilog $module $SCBI_VCS_REPO/$REPO
                     exit 1
                 fi
 
