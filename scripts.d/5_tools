@@ -323,9 +323,9 @@ function check-tar-exists()
 
     local tar=( $($module-tar $version) )
 
-    local proxy=${tar[0]}
-    local tarcp=${tar[1]}
-    local tarurl=${tar[2]}
+    #local proxy=${tar[0]}
+    #local tarcp=${tar[1]}
+    #local tarurl=${tar[2]}
     local tarsrc=${tar[3]}
 
     if [ -f $SCBI_TAR/$tarsrc ]; then
