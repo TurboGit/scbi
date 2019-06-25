@@ -683,7 +683,8 @@ function handle-depends()
 
     #  Check build id, only rebuild if mismatch
 
-    diff -q $SCBI_BDIR/$module/build-id $SCBI_BDIR/$module/build/build-id > /dev/null 2>&1
+    diff -q $SCBI_BDIR/$module/build-id \
+            $SCBI_BDIR/$module/build/build-id > /dev/null 2>&1
 
     if [[ $? != 0 \
               || "$mver" = "" \
