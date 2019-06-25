@@ -6,12 +6,12 @@ declare -A MODVER=[]
 
 function load-module-plan()
 {
-    local PLAN=$SCBI_DEFS/.plan-$1
+    local PLAN=$PWD/.plan-$1
 
     # if not found in definitions install dir, look in current directory
 
     if [ ! -f $PLAN ]; then
-        PLAN=$PWD/.plan-$1
+        PLAN=$SCBI_DEFS/.plan-$1
     fi
 
     if [ -f $PLAN ]; then
