@@ -1,0 +1,19 @@
+function recb-depends()
+{
+    echo recc
+}
+
+function recb-config()
+{
+    true
+}
+
+function recb-build()
+{
+    true
+}
+
+function recb-install()
+{
+    echo NONE
+}

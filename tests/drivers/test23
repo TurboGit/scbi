@@ -1,0 +1,14 @@
+# check for recursive dependencies
+
+mkdir -p .root/builds/reca
+mkdir -p .root/builds/recb
+mkdir -p .root/builds/recc
+
+echo ========== deps A
+./scbi --deps reca
+
+echo ========== list-depends A
+./scbi --list-depends reca
+
+echo ========== list-depends B
+./scbi --list-depends recb

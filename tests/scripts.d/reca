@@ -1,0 +1,19 @@
+function reca-depends()
+{
+    echo recb
+}
+
+function reca-config()
+{
+    true
+}
+
+function reca-build()
+{
+    true
+}
+
+function reca-install()
+{
+    echo NONE
+}
