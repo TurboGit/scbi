@@ -72,7 +72,7 @@ ISOOT=yes
 PATCH=yes
 STEPS="setup config build install wrapup"
 BUILD_SCBI_TARGET=
-PLAN=
+SCBI_PLAN=
 TAR_CACHE=yes
 DRY_RUN=no
 
@@ -642,14 +642,13 @@ function handle-meta-module()
     fn-exists $metamodule-$variant-plan
 
     if [[ $? = 0 ]]; then
-        PLAN=$($metamodule-$variant-plan)
-        echo $PLAN > /tmp/plan
-        load-module-plan $PLAN
+        SCBI_PLAN=$($metamodule-$variant-plan)
+        load-module-plan $SCBI_PLAN
     else
         fn-exists $metamodule-plan
         if [[ $? = 0 ]]; then
-            PLAN=$($metamodule-plan)
-            load-module-plan $PLAN
+            SCBI_PLAN=$($metamodule-plan)
+            load-module-plan $SCBI_PLAN
         fi
     fi
 
@@ -1163,7 +1162,7 @@ while [ $# -gt 0 ]; do
             SCBI_JOBS=$2; shift
             ;;
         --plan)
-            PLAN=$2; shift
+            SCBI_PLAN=$2; shift
             ;;
         --stat)
             DOSTAT=yes;
@@ -1216,7 +1215,7 @@ done
 
 #  Load build plan if any
 
-[ ! -z $PLAN ] && load-module-plan $PLAN
+[ ! -z $SCBI_PLAN ] && load-module-plan $SCBI_PLAN
 
 #  Nothing to build, display usage
 

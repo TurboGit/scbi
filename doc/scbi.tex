@@ -185,6 +185,8 @@ An environment is a set of shell variables used to control the build environment
 \begin{description}[before=\let\item\myitem]
 	\item[SCBI\_DEFS] The directories where the SCBI modules and plug-ins are located. \\Default is \file{$HOME/.config/.scbi}.
 
+	\item[SCBI\_PLAN] The name of the build-plan to use if any.
+
 	\item[SCBI\_ROOT] The default root directory to use by SCBI. \\Default is \file{$HOME/dev}.
 
 	\item[SCBI\_BDIR] The default directory for build environment.  This is also called the sandboxes directory. \\Default is \file{$SCBI\_ROOT/builds}.
@@ -879,7 +881,7 @@ We can further simplify by adding the build-plan reference in the environment fi
 
 \begin{lstlisting}
 	export SCBI_GIT_REPO=$HOME/dev
-	PLAN=debug
+	SCBI_PLAN=debug
 \end{lstlisting}
 
 And then the new equivalent command line is:
