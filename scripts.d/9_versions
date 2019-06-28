@@ -15,10 +15,14 @@ function load-module-plan()
     fi
 
     if [ -f $PLAN ]; then
-        while read modref; do
-            local module_info=( $(parse-module-ref $modref) )
-            local module=${module_info[0]}
-            MODVER[$module]=$modref
+        while read modref file; do
+            if [ "$modref" = "@load" ]; then
+                load-module-plan $file
+            elif [ "$modref" != "#" ]; then
+                local module_info=( $(parse-module-ref $modref) )
+                local module=${module_info[0]}
+                MODVER[$module]=$modref
+            fi
         done < $PLAN
     else
         elog build build plan .plan-$1 does not exists

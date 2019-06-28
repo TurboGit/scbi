@@ -249,6 +249,17 @@ File \file{.plan-next}:
  aws:v1
 \end{lstlisting}
 
+In a build plan a line starting with \code{\#} is a comment. It is also possible to load another build-plan as base and then modify only some of the versions. This is simple way to derive a build plan from another one.
+
+File \file{.plan-next}:
+
+\begin{lstlisting}
+ # the next line will load build plan standard
+ @load standard
+ lcms2:v2
+ aws:v1
+\end{lstlisting}
+
 And finally, to build one just need to pass the build plan as option:
 
 \cmd{scbi \ddash{}plan=next lcms2 aws}
