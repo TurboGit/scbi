@@ -31,7 +31,7 @@ function mypaint-brushes-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j$MSCBI_JOBS
+    make -j$SCBI_MAKE_JOBS
 }
 
 function mypaint-brushes-install()

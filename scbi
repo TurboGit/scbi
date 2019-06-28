@@ -280,8 +280,8 @@ ENV_NAME=
 DLOG=on-failure
 SCBI_DEFS="$PWD"/scripts.d
 SCBI_JOBS=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
-MSCBI_JOBS=$(expr $SCBI_JOBS / 2)
-# MSCBI_JOBS is for makefiles
+SCBI_MAKE_JOBS=$(expr $SCBI_JOBS / 2)
+# SCBI_MAKE_JOBS is for makefiles
 
 #  Modules to be handled and already handled
 MODULES=

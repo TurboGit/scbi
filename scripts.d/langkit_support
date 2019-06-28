@@ -43,7 +43,7 @@ function langkit_support-build()
     local PREFIX=$1
     local TARGET=$2
 
-    GOPTS=-"p -m -j$MSCBI_JOBS"
+    GOPTS=-"p -m -j$SCBI_JOBS"
 
     PRJ=./build/lib/gnat/langkit_support.gpr
 
