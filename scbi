@@ -3,7 +3,7 @@
 #  SCBI - (C) Pascal Obry - 2007-2019
 #
 
-SCBI_VERSION=1.0
+SCBI_VERSION=2.0
 
 ############################## check-tool
 
