@@ -95,14 +95,21 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TITRE
 
-\title{{\Huge S C B I} \\ {\large  A Build Driver} \\ User's Guide}
+\input{version}
+
+\title{{\Huge S C B I} \\
+	{\large  A Build Driver v\version} \\
+	User's Guide}
 \author{Pascal Obry}
 \date{June 2019}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TOC
+
 \begin{document}
 
 \maketitle
+
+%\include{version}
 
 \tableofcontents
 
@@ -183,6 +190,9 @@ An environment is a set of shell variables used to control the build environment
 \subsubsection{Description}
 
 \begin{description}[before=\let\item\myitem]
+	\item[SCBI\_VERSION] The scbi driver version string.
+	\\This version is \version.
+
 	\item[SCBI\_DEFS] The directories where the SCBI modules and plug-ins are located. \\Default is \file{$HOME/.config/.scbi}.
 
 	\item[SCBI\_PLAN] The name of the build-plan to use if any.

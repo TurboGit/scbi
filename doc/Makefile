@@ -5,11 +5,13 @@ PDF = $(NAM).pdf
 
 all: $(PDF)
 
-force:
+version:
+	sed -n 's/SCBI_VERSION=\(.*\)/\\providecommand{\\version}{\1}/p' \
+	../scbi > version.tex
 
 # %.pdf: %.tex $(DIF) $(BIB)
 
-$(PDF): $(TEX) $(DIF) $(BIB) force
+$(PDF): $(TEX) $(DIF) $(BIB) version
 	-latex $(TEX)
 	-bibtex $(NAM)
 	-makeindex $(NAM)
