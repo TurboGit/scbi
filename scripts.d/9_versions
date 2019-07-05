@@ -6,7 +6,7 @@ declare -A MODVER=[]
 
 function load-module-plan()
 {
-    local PLAN=$PWD/.plan-$1
+    local PLAN=$PWD/.scbi-plan-$1
 
     # if not found in definitions install dir, look in current directory
 
