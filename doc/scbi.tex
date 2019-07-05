@@ -231,12 +231,14 @@ An environment is a set of shell variables used to control the build environment
 The environment can be set in the following files searched in this exact order:
 
 \begin{description}
-	\item[\code{\$PWD/.env}] The local environment found in the current working directory.
+	\item[\code{\$PWD/.scbi-env}] The local environment found in the current working directory.
+
+	\item[\code{\$PWD/../.scbi-env}] The local environment found in the parent if the working directory. This environment can then be shared for a set of repositories.
 
 	\item[\code{\$SCBI\_DEFS/.env}] The default global environment used for all builds.
 \end{description}
 
-Also note that instead of the default \file{.env} a specific environment file can be specified with the \code{\ddash{}env=<name>} command line option. (\seeref{cmdline}).
+Also note that instead of the default \file{.env} (or \file{.scbi-env} for local environment files) a specific environment file can be specified with the \code{\ddash{}env=<name>} command line option. (\seeref{cmdline}).
 
 Example, to use environment \file{.env-next} to build \code{lcms2}:
 

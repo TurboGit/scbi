@@ -111,12 +111,17 @@ function clean-up()
 
 function load-module-env()
 {
-    local ENV=$PWD/.env$1
+    local ENV=$PWD/.scbi-env$1
 
-    # if not found in definitions install dir, look in current directory
+    # if not found in current directory look in definitions install dir
 
     if [ ! -f $ENV ]; then
-        ENV=$SCBI_DEFS/.env$1
+        # look for it in parent directory too
+        ENV=$PWD/../.scbi-env$1
+
+        if [ ! -f $ENV ]; then
+            ENV=$SCBI_DEFS/.env$1
+        fi
     fi
 
     if [ -f $ENV ]; then
