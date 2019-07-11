@@ -69,7 +69,7 @@ function clean-scbi-logs()
 
 ############################## display log-stat
 
-declare -A STATS
+declare -A SCBI_STATS
 
 function compute-log-stat-file()
 {
@@ -86,7 +86,7 @@ function compute-log-stat-file()
         elif [ "$action" == "End" -a "$module" != "" ]; then
             end_time=$(date +"%s" --date="$date $time")
             duration=$(($end_time - $start_time))
-            STATS[$module]="${STATS[$module]} $duration"
+            SCBI_STATS[$module]="${SCBI_STATS[$module]} $duration"
         fi
     done < $file
 }
@@ -133,8 +133,8 @@ function display-log-stat()
     echo "build time (min, average, max):"
     echo
 
-    for key in "${!STATS[@]}"; do
-        values="${STATS[$key]}"
+    for key in "${!SCBI_STATS[@]}"; do
+        values="${SCBI_STATS[$key]}"
         mam=( $(get-min-avr-max "$values") )
 
         echo -n $key
