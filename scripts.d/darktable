@@ -32,7 +32,7 @@ function darktable-depends()
     echo libcolord-dev
     echo libgomp1
     echo libgmic-dev
-    echo libcups-dev
+    echo libcups2-dev
 }
 
 function darktable-env()
