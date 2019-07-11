@@ -56,11 +56,11 @@ function check-pkg()
     local pkg=${name_ver[0]}
     local version=${name_ver[1]}
 
-    distname=$(get-pkg-name $pkg)
+    local distname=$(get-pkg-name $pkg)
 
     check-$(get-distrib)-pkg $pkg $version
 
-    res=$?
+    local res=$?
 
     if [ $res = 2 ]; then
         echo "error: $pkg not found"
