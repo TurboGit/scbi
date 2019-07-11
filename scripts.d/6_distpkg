@@ -2,38 +2,60 @@
 #
 #  For adding a new distrib:
 #     - add distrib in get-distrib
+#     - implement init-<distrib>-pkg
 #     - implement check-<distrib>-pkg
 #     - add <pkg>-<distrib>-name routine for specific package name
+
+declare -A SCBI_PKGS
 
 function get-distrib()
 {
     echo deb
 }
 
+######################################
+# cache all installed packages
+
+function init-deb-pkg()
+{
+    while read ii pkg version dummy; do
+        SCBI_PKGS["$pkg"]=$version
+    done < <( dpkg-query -l | tail -n+6 | sed 's/:amd64//g' )
+}
+
+######################################
+# check-deb-pkg should return:
+#   3 - package not found
+#   2 - package found but not installed
+#   1 - package installed but wrong version
+#   0 - package installed with proper version
+
 function check-deb-pkg()
 {
     local pck=$1
     local version=$(get-version-number $2)
 
-    #  First check that the package is installed
+    local inst_ver=${SCBI_PKGS[$pck]}
 
-    [ "$(dpkg-query -l $pck | tail -1 | cut -c2)" != "i" ] && return 1
+    if [ -z $inst_ver ]; then
+        #  Package is not installed, check if it exists
 
-    #  If no version specified, if the package is installed all is ok
+        dpkg-query -l $pck &> /dev/null
 
-    [ "$version" = "" ] && return 0
+        if [ $? = 0 ]; then
+            return 2
+        else
+            return 3
+        fi
 
-    #  Then get the version
-
-    inst_ver=$(dpkg -s $pck | grep "^Version:" | cut -d' ' -f2)
-    inst_ver=$(get-version-number $inst_ver)
-
-    #  Is the installed version ok?
-
-    if [[ $inst_ver > $version ]]; then
-        return 0
     else
-        return 1
+        #  Is the installed version ok?
+
+        if [[ $inst_ver > $version ]]; then
+            return 0
+        else
+            return 1
+        fi
     fi
 }
 
@@ -62,17 +84,22 @@ function check-pkg()
 
     local res=$?
 
-    if [ $res = 2 ]; then
+    if [ $res = 3 ]; then
         echo "error: $pkg not found"
         return 1
-    elif [ $res = 1 ]; then
+    elif [ $res = 2 ]; then
         if [ $version == NONE ]; then
             echo "error: $pkg should be installed."
         else
             echo "error: $pkg:$version should be installed."
         fi
         return 1
+    elif [ $res = 1 ]; then
+        echo "error: $pkg:$version should be installed."
+        return 1
     else
         return 0
     fi
 }
+
+init-$(get-distrib)-pkg
