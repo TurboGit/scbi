@@ -64,7 +64,9 @@ function elog()
 
 function clean-scbi-logs()
 {
-    find $SCBI_LOGS -ctime +$KEEP_LOG_DAYS -delete
+    # no output as the parent directory is created before the files inside,
+    # so it could be deleted before all files inside are deleted.
+    find $SCBI_LOGS -ctime +$KEEP_LOG_DAYS -delete &> /dev/null
 }
 
 ############################## display log-stat
