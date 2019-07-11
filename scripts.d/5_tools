@@ -211,60 +211,66 @@ function _internal_for-all-modules()
 
     load-module $module
 
-    if [ $? = 0 -a -z "${SCBI_CHECKED[$module]}" ]; then
-        push-dependency-tree $module
-        SCBI_CHECKED[$module]=yes
+    if [ $? = 0 ]; then
+        if [ -z "${SCBI_CHECKED[$module]}" ]; then
+            push-dependency-tree $module
+            SCBI_CHECKED[$module]=yes
 
-        if [ $WITH_META == true ]; then
-            # check for meta-modules if present
+            if [ $WITH_META == true ]; then
+                # check for meta-modules if present
 
-            fn-exists $module-$variant-modules
-
-            if [ $? = 0 ]; then
-                for dmodule in $($module-$variant-modules); do
-                    _internal_for-all-modules $CALLBACK $WITH_META false \
-                                              $dmodule $@
-                done
-                $CALLBACK $module $MODREF $IS_ROOT $@
-                pop-dependency-tree
-                return
-            else
-                fn-exists $module-modules
+                fn-exists $module-$variant-modules
 
                 if [ $? = 0 ]; then
-                    for dmodule in $($module-modules); do
+                    for dmodule in $($module-$variant-modules); do
                         _internal_for-all-modules $CALLBACK $WITH_META false \
                                                   $dmodule $@
                     done
                     $CALLBACK $module $MODREF $IS_ROOT $@
                     pop-dependency-tree
                     return
+                else
+                    fn-exists $module-modules
+
+                    if [ $? = 0 ]; then
+                        for dmodule in $($module-modules); do
+                            _internal_for-all-modules $CALLBACK $WITH_META false \
+                                                      $dmodule $@
+                        done
+                        $CALLBACK $module $MODREF $IS_ROOT $@
+                        pop-dependency-tree
+                        return
+                    fi
                 fi
             fi
-        fi
 
-        # Setup depends recursively if any
+            # Setup depends recursively if any
 
-        fn-exists $module-$variant-depends
-
-        if [ $? = 0 ]; then
-            for dmodule in $($module-$variant-depends); do
-                _internal_for-all-modules $CALLBACK $WITH_META false \
-                                          $dmodule $@
-            done
-        else
-            fn-exists $module-depends
+            fn-exists $module-$variant-depends
 
             if [ $? = 0 ]; then
-                for dmodule in $($module-depends); do
+                for dmodule in $($module-$variant-depends); do
                     _internal_for-all-modules $CALLBACK $WITH_META false \
                                               $dmodule $@
                 done
+            else
+                fn-exists $module-depends
+
+                if [ $? = 0 ]; then
+                    for dmodule in $($module-depends); do
+                        _internal_for-all-modules $CALLBACK $WITH_META false \
+                                                  $dmodule $@
+                    done
+                fi
             fi
+
+            $CALLBACK $module $MODREF $IS_ROOT $@
+            pop-dependency-tree
         fi
 
-        $CALLBACK $module $MODREF $IS_ROOT $@
-        pop-dependency-tree
+    else
+        # module does not exists, this is an external dependency
+        check-pkg $module:$ref
     fi
 }
 
