@@ -35,7 +35,7 @@ function gnatcoll-bindings-gmp-build()
 
     GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
 
-    if [ $HOST == $TARGET ]; then
+    if [ $SCBI_HOST == $TARGET ]; then
         for kind in static relocatable static-pic; do
             gprbuild $GOPTS -XLIBRARY_TYPE=$kind gmp/gnatcoll_gmp.gpr
         done
@@ -56,7 +56,7 @@ function gnatcoll-bindings-gmp-install()
         gprinstall $GOPTS --uninstall gnatcoll_gmp
     fi
 
-    if [ $HOST == $TARGET ]; then
+    if [ $SCBI_HOST == $TARGET ]; then
         for kind in static relocatable static-pic; do
             gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
                        --build-var=GNATCOLL.ICONV_BUILD \

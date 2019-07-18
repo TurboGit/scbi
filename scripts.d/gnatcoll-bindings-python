@@ -32,7 +32,7 @@ function gnatcoll-bindings-python-build()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ $HOST == $TARGET ]; then
+    if [ $SCBI_HOST == $TARGET ]; then
         export GNATCOLL_PYTHON_CFLAGS="-I/usr/include/python2.7"
     else
         export GNATCOLL_PYTHON_CFLAGS="-I$SCBI_BDIR/install/$TARGET/Python27/include"

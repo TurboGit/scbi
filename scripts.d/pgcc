@@ -43,7 +43,7 @@ function pgcc-config()
     local TARGET=$2
 
     CFLAGS="-O1" $SCBI_BDIR/gnat/build/src/configure \
-          --target=$TARGET --prefix=$PREFIX/$TARGET --host=$HOST \
+          --target=$TARGET --prefix=$PREFIX/$TARGET --host=$SCBI_HOST \
           --enable-thread=win32 --disable-nls --disable-multilib \
           --disable-libada --disable-sjlj-exceptions \
           --enable-languages=c

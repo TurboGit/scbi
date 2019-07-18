@@ -33,7 +33,7 @@ function gnatcoll-core-config()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ $HOST == $TARGET ]; then
+    if [ $SCBI_HOST == $TARGET ]; then
         MMAP=yes
         GOS=unix
     else

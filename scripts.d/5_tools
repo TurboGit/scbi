@@ -85,7 +85,7 @@ function gprbuild-project()
     local PRJ=$1
 
     (
-        if [ $HOST == $TARGET ]; then
+        if [ $SCBI_HOST == $TARGET ]; then
             gprbuild -p -q $PRJ -cargs -gnatwA
         else
             gprbuild -p -q --target=$TARGET $PRJ -cargs -gnatwA
@@ -365,7 +365,7 @@ function get-build-id()
 
     # Now compute final id add compile version
 
-    if [ "$HOST" = "$TARGET" -o "$(which $TARGET-gcc)" = "" ]; then
+    if [ "$SCBI_HOST" = "$TARGET" -o "$(which $TARGET-gcc)" = "" ]; then
         echo -n $(gcc --version | head -1) ",$vid,$pid,$did" | get-md5
 
     else

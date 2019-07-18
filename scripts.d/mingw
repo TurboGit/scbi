@@ -49,7 +49,7 @@ function mingw-config()
     env > /tmp/env
 
     ../src/mingw-w64-crt/configure --enable-wildcard \
-        --prefix=$PREFIX/$TARGET --host=$TARGET --build=$HOST
+        --prefix=$PREFIX/$TARGET --host=$TARGET --build=$SCBI_HOST
 }
 
 function mingw-build()

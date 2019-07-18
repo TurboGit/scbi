@@ -24,7 +24,7 @@ function binutils-version()
 
     TOOL=ld
 
-    if [ $HOST != $TARGET ]; then
+    if [ $SCBI_HOST != $TARGET ]; then
         TOOL=${TARGET}-ld
     fi
 
@@ -42,8 +42,8 @@ function binutils-config()
 
     CONF_OPT="--prefix=$PREFIX --disable-multilib --disable-gdb"
 
-    if [ $HOST == $TARGET ]; then
-        ../src/configure --build=$HOST $CONF_OPT
+    if [ $SCBI_HOST == $TARGET ]; then
+        ../src/configure --build=$SCBI_HOST $CONF_OPT
     else
         ../src/configure --target=$TARGET $CONF_OPT
     fi
@@ -63,7 +63,7 @@ function binutils-install()
     local TARGET=$2
 
     make install &&
-        if [ $HOST != $TARGET ]; then
+        if [ $SCBI_HOST != $TARGET ]; then
             # install into the partial gcc compiler too
             mkdir -p $SCBI_BDIR/pgcc/install/
             rsync -a ../install/. $SCBI_BDIR/pgcc/install/

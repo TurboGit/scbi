@@ -34,7 +34,7 @@ function gnatcoll-bindings-readline-build()
 
     GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
 
-    if [ $HOST == $TARGET ]; then
+    if [ $SCBI_HOST == $TARGET ]; then
         for kind in static relocatable static-pic; do
             gprbuild $GOPTS -XLIBRARY_TYPE=$kind readline/gnatcoll_readline.gpr
         done
@@ -55,7 +55,7 @@ function gnatcoll-bindings-readline-install()
         gprinstall $GOPTS --uninstall gnatcoll_readline
     fi
 
-    if [ $HOST == $TARGET ]; then
+    if [ $SCBI_HOST == $TARGET ]; then
         for kind in static relocatable static-pic; do
             gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
                        --build-var=GNATCOLL.READLINE_BUILD \
