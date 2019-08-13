@@ -35,6 +35,16 @@ function binutils-version()
     fi
 }
 
+function binutils-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    CONF_OPT="--prefix=$PREFIX --disable-multilib --disable-gdb"
+
+    ../src/configure --target=$TARGET $CONF_OPT
+}
+
 function binutils-config()
 {
     local PREFIX=$1
@@ -42,11 +52,7 @@ function binutils-config()
 
     CONF_OPT="--prefix=$PREFIX --disable-multilib --disable-gdb"
 
-    if [ $SCBI_HOST == $TARGET ]; then
-        ../src/configure --build=$SCBI_HOST $CONF_OPT
-    else
-        ../src/configure --target=$TARGET $CONF_OPT
-    fi
+    ../src/configure --build=$SCBI_HOST $CONF_OPT
 }
 
 function binutils-build()
@@ -54,7 +60,27 @@ function binutils-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j6
+    DEBUG=$(get-build-type MAKE binutils false)
+
+    if [ $DEBUG == true ]; then
+       CFLAGS="-O0 -g -Wno-error"
+    else
+       CFLAGS="-O2 -g -Wno-error"
+    fi
+
+    make -j6 CFLAGS="$CFLAGS" CC=gcc
+}
+
+function binutils-cross-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    # install into the partial gcc compiler too
+
+    make install &&
+        mkdir -p $SCBI_BDIR/pgcc/install/ &&
+        rsync -a ../install/. $SCBI_BDIR/pgcc/install/
 }
 
 function binutils-install()
@@ -62,10 +88,5 @@ function binutils-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make install &&
-        if [ $SCBI_HOST != $TARGET ]; then
-            # install into the partial gcc compiler too
-            mkdir -p $SCBI_BDIR/pgcc/install/
-            rsync -a ../install/. $SCBI_BDIR/pgcc/install/
-        fi
+    make install
 }
