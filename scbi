@@ -805,7 +805,7 @@ function handle-module()
 
     #  If purge-only, stop there
 
-    [ $PURGE = only ] && exit 0
+    [ $PURGE = only ] && return 0
 
     if [ $ref == NONE ]; then
         DISPREF=master
