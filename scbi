@@ -910,6 +910,15 @@ function handle-module()
             if [ $DOTEST = true ]; then
                 STEPS="$STEPS tests"
             fi
+
+        else
+            # If install is requested and we already have a local install
+            # directory, clean it to ensure no old versions are installed
+            # into the same location.
+
+            if [ $DOINSTALL = yes -a -d $SCBI_BDIR/$module/build/install ]; then
+                rm -fr $SCBI_BDIR/$module/build/install
+            fi
         fi
 
         for step in $STEPS; do
