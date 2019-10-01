@@ -568,3 +568,13 @@ function get-build-type()
 
     echo $DEFAULT
 }
+
+############################## last-modified-directory
+# returns the newest (last modified) directory matching pattern
+
+function last-modified-directory()
+{
+    local PATTERN="$1"
+
+    ls -td $PATTERN 2> /dev/null | head -1
+}
