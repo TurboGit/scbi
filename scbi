@@ -73,6 +73,7 @@ PATCH=yes
 STEPS="setup config build install wrapup"
 BUILD_SCBI_TARGET=
 SCBI_PLAN=
+SCBI_PLAN_CL=
 TAR_CACHE=yes
 DRY_RUN=no
 
@@ -1176,7 +1177,7 @@ while [ $# -gt 0 ]; do
             SCBI_JOBS=$2; shift
             ;;
         --plan)
-            SCBI_PLAN=$2; shift
+            SCBI_PLAN_CL=$2; shift
             ;;
         --stat)
             DOSTAT=yes;
@@ -1226,6 +1227,11 @@ fi
 for setup in $SCBI_DEFS/[0-9]*; do
     source $setup
 done
+
+# If a plan passed on the command line ensure that it is used instead
+# of any other possibly set in the environment file.
+
+[ ! -z $SCBI_PLAN_CL ] && SCBI_PLAN=$SCBI_PLAN_CL
 
 #  Load build plan if any
 
