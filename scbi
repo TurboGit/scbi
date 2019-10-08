@@ -918,6 +918,7 @@ function handle-module()
 
             if [ $DOINSTALL = yes -a -d $SCBI_BDIR/$module/build/install ]; then
                 rm -fr $SCBI_BDIR/$module/build/install
+                rm -fr $SCBI_BDIR/$module/install-id
             fi
         fi
 
