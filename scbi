@@ -890,20 +890,20 @@ function handle-module()
 
         #  Check build id, only rebuild if mismatch
 
+        # make sure the current build softlink is pointing to
+        # the variant. this is needed as the setup won't be
+        # done.
+
+        [ -h build ] && rm -f build
+        ln -s $SCBI_TARGET-$variant build
+
         diff -q build-id-$variant \
-             $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
+             $SCBI_BDIR/$module/build/build-id > /dev/null 2>&1
 
         if [ $? = 0 ]; then
             ilog $module no build needed, versions match
 
             STEPS=""
-
-            # make sure the current build softlink is pointing to
-            # the variant. this is needed as the setup won't be
-            # done.
-
-            [ -h build ] && rm -f build
-            ln -s $SCBI_TARGET-$variant build
 
             # if testing is expected, at least do that
 
