@@ -1,0 +1,31 @@
+
+function oot2-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function oot2-out-of-tree()
+{
+    echo true
+}
+
+function oot2-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    gcc -I../src -c ../src/lib1.c -o lib1.o
+    gcc -I../src ../src/main.c lib1.o -o main
+}
+
+function oot2-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $PREFIX
+    cp lib1.o main $PREFIX
+}
