@@ -364,6 +364,8 @@ The following options are supported:
 
 	\item[-j | \ddash{}jobs=<n>] Max compilation jobs, set variable \code{SCBI\_JOBS} which can be used in module scripts. (\seeref{njobs}).
 
+	\item[\ddash{}safe] Build in safe mode. If a module needs to be built the previous build directory is removed. This ensures that the old configuration and/or build artifacts won't interact in any way with new build.
+
 \end{description}
 
 A completion support for bash is provided. If activated many options will give hints about possible values like listing plans for \code{\ddash{}plan=} option or listing the supported modules.

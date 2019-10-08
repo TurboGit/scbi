@@ -76,6 +76,7 @@ SCBI_PLAN=
 SCBI_PLAN_CL=
 TAR_CACHE=yes
 DRY_RUN=no
+SAFE_MODE=false
 
 ############################## check-handled
 #
@@ -891,20 +892,20 @@ function handle-module()
 
         #  Check build id, only rebuild if mismatch
 
+        # make sure the current build softlink is pointing to
+        # the variant. this is needed as the setup won't be
+        # done.
+
+        [ -h build ] && rm -f build
+        ln -s $SCBI_TARGET-$variant build
+
         diff -q build-id-$variant \
-             $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
+             $SCBI_BDIR/$module/build/build-id > /dev/null 2>&1
 
         if [ $? = 0 ]; then
             ilog $module no build needed, versions match
 
             STEPS=""
-
-            # make sure the current build softlink is pointing to
-            # the variant. this is needed as the setup won't be
-            # done.
-
-            [ -h build ] && rm -f build
-            ln -s $SCBI_TARGET-$variant build
 
             # if testing is expected, at least do that
 
@@ -919,6 +920,21 @@ function handle-module()
 
             if [ $DOINSTALL = yes -a -d $SCBI_BDIR/$module/build/install ]; then
                 rm -fr $SCBI_BDIR/$module/build/install
+                rm -fr $SCBI_BDIR/$module/install-id
+            fi
+
+            # Build is needed, on safe mode we remove the current
+            # build directory to ensure that old configuration and/or
+            # build artifacts are not going to break new build.
+            #
+            # Note that we do that only for out-of-tree build as in
+            # the build in-tree the sources are fully syncronized from
+            # src directory (deleting all non existing files in source
+            # location)
+
+            if [ $SAFE_MODE = yes -a $ISOOT = yes ]; then
+                rm -fr $SCBI_BDIR/$module/build/build
+                rm -fr $SCBI_BDIR/$module/build/build-id
             fi
         fi
 
@@ -1088,7 +1104,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs:,no-wrapup,wrapup -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs:,no-wrapup,wrapup,safe -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1190,6 +1206,9 @@ while [ $# -gt 0 ]; do
             ;;
         --dry-run)
             DRY_RUN=yes;
+            ;;
+        --safe)
+            SAFE_MODE=yes;
             ;;
         (--)
             ;;
