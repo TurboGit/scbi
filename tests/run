@@ -46,7 +46,7 @@ for file in $TESTS; do
     echo -n "========== $bfile "
     run-test $bfile 2>&1 > logs/$bfile.log
 
-    sed -i 's/[0-9]/x/g' logs/$bfile.log
+    sed -i 's/[0-9]/x/g;${/^$/d;}' logs/$bfile.log
 
     diff -q logs/$bfile.log expected/$bfile.exp 2>&1 > /dev/null
 
