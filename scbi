@@ -600,6 +600,8 @@ function handle-sources()
                         # a different version is needed
                         DOUPDATE=yes
                     fi
+                else
+                    DOUPDATE=yes
                 fi
 
                 if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
