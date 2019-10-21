@@ -9,6 +9,7 @@ function libadalang-vcs()
 
 function libadalang-depends()
 {
+    echo gnatcoll-bindings-gmp
     echo libyaml-dev
     echo langkit
     echo langkit_support
