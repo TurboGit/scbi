@@ -9,6 +9,7 @@ function langkit_support-vcs()
 
 function langkit_support-depends()
 {
+    echo gnatcoll-bindings-iconv
     echo libyaml-dev
     echo langkit
     echo xmlada
