@@ -31,7 +31,10 @@ function dlog()
     local ts=$(date +"%Y/%m/%d %H:%M:%S")
 
     shift
-    echo $ts : "  $*" > $(tty)
+
+    # output to console only if present
+    tty --silent
+    [ $? == 0 ] && echo $ts : "  $*" > $(tty)
     echo $ts : "  $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }
