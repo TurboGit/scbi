@@ -4,6 +4,7 @@
 #     - add distrib in get-distrib
 #     - implement init-<distrib>-pkg
 #     - implement check-<distrib>-pkg
+#     - implement get-<distrib>-lib-for-dev (optional)
 #     - add <pkg>-<distrib>-name routine for specific package name
 
 declare -A SCBI_PKGS
@@ -59,6 +60,31 @@ function check-deb-pkg()
     fi
 }
 
+function get-deb-lib-for-dev()
+{
+    local pkg=$1
+
+    if [ ${pkg: -4} != "-dev" ]; then
+        echo "error: $pkg is not a dev package (should end with -dev)"
+        return 1
+    fi
+
+    # package name without trailing -dev
+    local base=${pkg:1:-4}
+
+    local res=$(LANG=c apt-cache depends $1 | grep 'Depends:' \
+                    | grep "$base" | cut -d':' -f2)
+
+    for D in $res; do
+        if [ "${D: -4}" = "-dev" ]; then
+            get-deb-lib-for-dev "$D"
+        else
+            echo $D;
+        fi
+    done
+}
+
+# returns the package name for the current distribution
 function get-pkg-name()
 {
     local pkg=$1
@@ -70,6 +96,14 @@ function get-pkg-name()
     else
         echo $pkg
     fi
+}
+
+# returns the library for the given dev package
+function get-lib-for-dev()
+{
+    local pkg=$(get-pkg-name $1)
+
+    get-$(get-distrib)-lib-for-dev $pkg
 }
 
 function check-pkg()
