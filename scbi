@@ -3,7 +3,7 @@
 #  SCBI - (C) Pascal Obry - 2007-2019
 #
 
-SCBI_VERSION=2.0
+SCBI_VERSION=2.1
 
 ############################## check-tool
 
@@ -144,6 +144,13 @@ function module-wrapper()
     local module=$2
     local variant=$3
     local step=$4
+    local p_variant
+
+    if [ "$variant" == "default" ]; then
+        pvariant=""
+    else
+        pvariant=$variant
+    fi
 
     if [ $step = "build" -a "$BUILD_SCBI_TARGET" != "" ]; then
         mstep=build-$BUILD_SCBI_TARGET
@@ -180,9 +187,11 @@ function module-wrapper()
         #  Call module step
 
         if [[ $DLOG = yes || "$step" = "tests" ]]; then
-            $module-$mstep $PREFIX $SCBI_TARGET 2>&1 | tee -a $log | tee $mlog
+            $module-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
+                | tee -a $log | tee $mlog
         else
-            $module-$mstep $PREFIX $SCBI_TARGET 2>&1 | tee $mlog >> $log
+            $module-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
+                | tee $mlog >> $log
         fi
         #  We want the status of the first command and not the tee ones
         res=${PIPESTATUS[0]}
@@ -337,7 +346,7 @@ function handle-module-env()
                 echo >> $SCBI_ENV_MODULE
                 echo "# $module" >> $SCBI_ENV_MODULE
             fi
-            $module-$ENV $SCBI_BDIR/$module/build/install $SCBI_TARGET
+            $module-$ENV $SCBI_BDIR/$module/build/install $SCBI_TARGET $variant
         fi
     fi
 }
@@ -780,7 +789,7 @@ function handle-module()
 
             if [[ $? = 0 ]]; then
                 (
-                    for module in $($module-depends); do
+                    for module in $($module-depends $variant); do
                         handle-depends $module
                     done
                 )
@@ -952,7 +961,8 @@ function handle-module()
 
                 if [ $DLOG = yes ]; then
                     module-pre-$step $SCBI_BDIR/$module/build/install $module \
-                                     $variant $SCBI_TARGET $ISOOT | tee $log 2>&1
+                                     $variant $SCBI_TARGET $ISOOT \
+                        | tee $log 2>&1
                 else
                     module-pre-$step $SCBI_BDIR/$module/build/install $module \
                                      $variant $SCBI_TARGET $ISOOT >> $log 2>&1
@@ -1015,7 +1025,8 @@ function handle-module()
 
                 if [ $DLOG = yes ]; then
                     module-post-$step $SCBI_BDIR/$module/build/install $module \
-                                      $variant $SCBI_TARGET $ISOOT | tee $log 2>&1
+                                      $variant $SCBI_TARGET $ISOOT \
+                        | tee $log 2>&1
                 else
                     module-post-$step $SCBI_BDIR/$module/build/install $module \
                                       $variant $SCBI_TARGET $ISOOT >> $log 2>&1
@@ -1048,11 +1059,13 @@ function handle-module()
     fn-exists $module-$variant-prefix
 
     if [ $? = 0 -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
-        _IDIR=$($module-$variant-prefix $SCBI_BDIR/$module/build/install $SCBI_TARGET)
+        _IDIR=$($module-$variant-prefix $SCBI_BDIR/$module/build/install \
+                                        $SCBI_TARGET)
     else
         fn-exists $module-prefix
         if [ $? = 0 -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
-            _IDIR=$($module-prefix $SCBI_BDIR/$module/build/install $SCBI_TARGET)
+            _IDIR=$($module-prefix $SCBI_BDIR/$module/build/install \
+                                   $SCBI_TARGET $variant)
         else
             _IDIR=$SCBI_PREFIX
         fi

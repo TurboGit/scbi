@@ -578,3 +578,16 @@ function last-modified-directory()
 
     ls -td $PATTERN 2> /dev/null | head -1
 }
+
+############################## split all variants
+# returns all variants separated with spaces, usage:
+#
+# for v in $(all-variants $VARIANT); do
+#    ...
+# done
+
+function all-variants()
+{
+    local VARIANTS=$1
+    echo "${VARIANTS//./ }"
+}

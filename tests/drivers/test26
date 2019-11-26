@@ -1,0 +1,17 @@
+# check that we properly pass variants
+echo '========== build/install var'
+./scbi var
+echo '========== build/install var/one'
+./scbi var/one
+echo '========== build/install var/two'
+./scbi var/two
+echo '========== build/install var/one.two'
+./scbi var/one.two
+echo '========== build/install var/two.one'
+./scbi var/two.one
+echo '========== build/install var/one.two.three.four'
+./scbi var/one.two.three.four
+
+for file in $(ls -t .root/builds/.logs/*-var*); do
+    grep -h '@@@' $file
+done

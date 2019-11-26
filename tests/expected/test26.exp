@@ -1,0 +1,120 @@
+========== build/install var
+xxxx/xx/xx xx:xx:xx : Building var-default (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End building var-default
+
+========== build/install var/one
+xxxx/xx/xx xx:xx:xx : Building var-one (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End building var-one
+
+========== build/install var/two
+xxxx/xx/xx xx:xx:xx : Building var-two (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End building var-two
+
+========== build/install var/one.two
+xxxx/xx/xx xx:xx:xx : Building var-one.two (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End building var-one.two
+
+========== build/install var/two.one
+xxxx/xx/xx xx:xx:xx : Building var-two.one (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End building var-two.one
+
+========== build/install var/one.two.three.four
+xxxx/xx/xx xx:xx:xx : Building var-one.two.three.four (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End building var-one.two.three.four
+
+@@@ install var: one.two.three.four
+@@@ install      one
+@@@ install      two
+@@@ install      three
+@@@ install      four
+@@@ build var: one.two.three.four
+@@@ build      one
+@@@ build      two
+@@@ build      three
+@@@ build      four
+@@@ config var: one.two.three.four
+@@@ config      one
+@@@ config      two
+@@@ config      three
+@@@ config      four
+@@@ install var: two.one
+@@@ install      two
+@@@ install      one
+@@@ build var: two.one
+@@@ build      two
+@@@ build      one
+@@@ config var: two.one
+@@@ config      two
+@@@ config      one
+@@@ install var: one.two
+@@@ install      one
+@@@ install      two
+@@@ build var: one.two
+@@@ build      one
+@@@ build      two
+@@@ config var: one.two
+@@@ config      one
+@@@ config      two
+@@@ install var: two
+@@@ install      two
+@@@ build var: two
+@@@ build      two
+@@@ config var: two
+@@@ config      two
+@@@ install var: one
+@@@ install      one
+@@@ build var: one
+@@@ build      one
+@@@ config var: one
+@@@ config      one
+@@@ install var: 
+@@@ build var: 
+@@@ config var: 

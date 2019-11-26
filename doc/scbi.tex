@@ -101,7 +101,7 @@
 	{\large  A Build Driver v\version} \\
 	User's Guide}
 \author{Pascal Obry}
-\date{June 2019}
+\date{November 2019}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TOC
 
@@ -441,7 +441,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 	\item[<module>-version] Returns the current version of the installed module.
 
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\item[return] \tabto{2cm} version or \code{\$VERSION\_OK} or \code{\$VERSION\_ERROR}
 		\begin{enumerate}
 			\item the version as a string corresponding to the current installed version. Can be \$VERSION\_OK or \$VERSION\_ERROR if the actual version cannot be determined.
@@ -451,7 +451,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 	\item[<module>-depends] Lists all modules required to build the actual module. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
 
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} NONE
+		\item[parameter] \tabto{2cm} [\$VARIANT]
 		\item[return] \tabto{2cm} array
 		\begin{enumerate}
 			\item echo <module1>
@@ -471,7 +471,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 
 	\item[<module>-env] Set the environment to use this module as a dependency. This is the exported environment. The environment must be set using \code{add-to-var} function.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\begin{enumerate}
 			\item \code{add-to-var} <name> <value>
 			\item ...
@@ -493,7 +493,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 
 	\item[<module>-build-env] Set the environment needed to build this module. The environment must be set using \code{add-to-var} function. Those settings are not exported and only used for the module.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\begin{enumerate}
 			\item \code{add-to-var} <name> <value>
 			\item ...
@@ -503,7 +503,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 
 	\item[<module>-setup] To put in place the sources just before configuration step. This is generally not needed as the sources are setup by \code{scbi} using the information provided by the tar or vcs hook. This may be needed in some complex case or if the sources are generated based on the running environment.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
@@ -523,7 +523,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 
 	\item[<module>-config] To configure the sources before starting the build. This is generally a call to GNU \code{configure} or \code{cmake}. The source tree is always accessible as \code{../src}.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\begin{enumerate}
 			\item ./configure \ddash{}prefix=\$PREFIX ../src
 		\end{enumerate}
@@ -532,7 +532,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 
 	\item[<module>-build] The command to build the application. This is most of the case a simple call to \code{make}.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\begin{enumerate}
 			\item make
 		\end{enumerate}
@@ -552,7 +552,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 
 	\item[<module>-install] The command to install the application. This is most of the case a simple call to \code{make} with target \code{install}.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\begin{enumerate}
 			\item make install
 		\end{enumerate}
@@ -561,14 +561,14 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 
 	\item[<module>-wrapup] This is to do whatever is needed after the installation step.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
 	\item[<module>-prefix] The directory for the installation of the module. The returned value can be set to NONE to skip the installation step. If this hook is not defined the module will be installed into \code{\$SCBI\_PREFIX}.
 	\label{global-install}
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\item[return] \tabto{2cm} string
 		\begin{enumerate}
 			\item echo <install\_dir>
@@ -579,7 +579,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 
 	\item[<module>-tests] Set of commands to run the tests.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
@@ -638,6 +638,31 @@ When \emph{variant} (\seeref{variant}) and/or \emph{cross} hooks are present, th
 	\item <module>-<step>
 \end{enumerate}
 
+If a \emph{variant} hook is not present then the main hook is called and the variant string is passed to it as third parameter. That's why the variant parameter in the hook description is optional.
+
+For example, if we have the module reference:
+
+\code{lcms2/fast}
+
+For configuration step, we first check if the following hook exists and if so we call it:
+
+\code{lcms2-fast-config}
+
+If it does not exist we call the standard \emph{lcms2-config} hook with \emph{fast} as parameter. An helper routine \emph{all-variants} is provided to loop on all variants:
+
+\begin{lstlisting}
+function lcms2-config()
+{
+	local PREFIX=$1
+	local TARGET=$2
+	local VARIANT=$3
+
+	for v in $(all-variants $VARIANT); do
+	   ...
+	done
+}
+\end{lstlisting}
+
 \subsection{Meta-module}
 \label{meta-module}
 
@@ -650,7 +675,7 @@ A module defining the hook \code{<module>-modules} becomes a meta-module.
 \begin{description}[style=nextline]
 	\item[<module>-modules] Lists the aggregated modules.
 		\begin{description}[font=\textit,style=standard]
-			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET}
+			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 			\item[return] \tabto{2cm} array
 				\begin{enumerate}
 					\item echo <module1>
