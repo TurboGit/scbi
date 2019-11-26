@@ -233,7 +233,7 @@ function _internal_for-all-modules()
                     fn-exists $module-modules
 
                     if [ $? = 0 ]; then
-                        for dmodule in $($module-modules); do
+                        for dmodule in $($module-modules $variant); do
                             _internal_for-all-modules $CALLBACK $WITH_META false \
                                                       $dmodule $@
                         done
@@ -257,7 +257,7 @@ function _internal_for-all-modules()
                 fn-exists $module-depends
 
                 if [ $? = 0 ]; then
-                    for dmodule in $($module-depends); do
+                    for dmodule in $($module-depends $variant); do
                         _internal_for-all-modules $CALLBACK $WITH_META false \
                                                   $dmodule $@
                     done
