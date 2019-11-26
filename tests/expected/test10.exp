@@ -1,5 +1,5 @@
 ========== libx patched version
-xxxx/xx/xx xx:xx:xx : Building libx-default (master)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -15,7 +15,7 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
 ========== libx standard version
-xxxx/xx/xx xx:xx:xx : Building libx-default (master)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : build starting
@@ -30,7 +30,7 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
 ========== libx patych again
-xxxx/xx/xx xx:xx:xx : Building libx-default (master)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : build starting

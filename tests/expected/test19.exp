@@ -1,5 +1,5 @@
 ====================== testxx
-xxxx/xx/xx xx:xx:xx : Building testxx-default (master)
+xxxx/xx/xx xx:xx:xx : Building testxx [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : pre-setup starting
@@ -25,7 +25,7 @@ xxxx/xx/xx xx:xx:xx : wrapup completed
 xxxx/xx/xx xx:xx:xx : End building testxx-default
 
 ====================== testxx/alt
-xxxx/xx/xx xx:xx:xx : Building testxx-alt (master)
+xxxx/xx/xx xx:xx:xx : Building testxx [alt] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : alt-pre-setup starting
@@ -34,20 +34,20 @@ xxxx/xx/xx xx:xx:xx : alt-config starting
 xxxx/xx/xx xx:xx:xx : alt-config completed
 xxxx/xx/xx xx:xx:xx : alt-post-config starting
 xxxx/xx/xx xx:xx:xx : alt-post-config completed
-xxxx/xx/xx xx:xx:xx : pre-build starting
-xxxx/xx/xx xx:xx:xx : pre-build completed
-xxxx/xx/xx xx:xx:xx : build starting
-xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : post-build starting
-xxxx/xx/xx xx:xx:xx : post-build completed
-xxxx/xx/xx xx:xx:xx : pre-install starting
-xxxx/xx/xx xx:xx:xx : pre-install completed
+xxxx/xx/xx xx:xx:xx : pre-build [alt] starting
+xxxx/xx/xx xx:xx:xx : pre-build [alt] completed
+xxxx/xx/xx xx:xx:xx : build [alt] starting
+xxxx/xx/xx xx:xx:xx : build [alt] completed
+xxxx/xx/xx xx:xx:xx : post-build [alt] starting
+xxxx/xx/xx xx:xx:xx : post-build [alt] completed
+xxxx/xx/xx xx:xx:xx : pre-install [alt] starting
+xxxx/xx/xx xx:xx:xx : pre-install [alt] completed
 xxxx/xx/xx xx:xx:xx : alt-install starting
 xxxx/xx/xx xx:xx:xx : alt-install completed
 xxxx/xx/xx xx:xx:xx : alt-post-install starting
 xxxx/xx/xx xx:xx:xx : alt-post-install completed
-xxxx/xx/xx xx:xx:xx : pre-wrapup starting
-xxxx/xx/xx xx:xx:xx : pre-wrapup completed
+xxxx/xx/xx xx:xx:xx : pre-wrapup [alt] starting
+xxxx/xx/xx xx:xx:xx : pre-wrapup [alt] completed
 xxxx/xx/xx xx:xx:xx : alt-wrapup starting
 xxxx/xx/xx xx:xx:xx : alt-wrapup completed
 xxxx/xx/xx xx:xx:xx : alt-post-wrapup starting

@@ -4,7 +4,7 @@ xxxx/xx/xx xx:xx:xx : setup starting
 xxxx/xx/xx xx:xx:xx : setup completed
 xxxx/xx/xx xx:xx:xx : End metamodule supermod-default setup
 
-xxxx/xx/xx xx:xx:xx : Building libx-default (master)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -19,7 +19,7 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
-xxxx/xx/xx xx:xx:xx : Building libx-default (master)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -47,7 +47,7 @@ xxxx/xx/xx xx:xx:xx : setup starting
 xxxx/xx/xx xx:xx:xx : setup completed
 xxxx/xx/xx xx:xx:xx : End metamodule supermod-default setup
 
-xxxx/xx/xx xx:xx:xx : Building libx-default (vx)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -62,7 +62,7 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
-xxxx/xx/xx xx:xx:xx : Building libx-default (master)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
@@ -80,11 +80,11 @@ xxxx/xx/xx xx:xx:xx : End metamodule supermod-default wrapup
 
 ========== build supermod variant best (plan var)
 xxxx/xx/xx xx:xx:xx : Metamodule supermod-best setup
-xxxx/xx/xx xx:xx:xx : setup starting
-xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : setup [best] starting
+xxxx/xx/xx xx:xx:xx : setup [best] completed
 xxxx/xx/xx xx:xx:xx : End metamodule supermod-best setup
 
-xxxx/xx/xx xx:xx:xx : Building libx-default (vx)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
@@ -95,26 +95,26 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
-xxxx/xx/xx xx:xx:xx : Building libx-variantx (vx.x)
+xxxx/xx/xx xx:xx:xx : Building libx [variantx] (vx.x)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : variantx-config starting
 xxxx/xx/xx xx:xx:xx : variantx-config completed
-xxxx/xx/xx xx:xx:xx : build starting
-xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : install starting
-xxxx/xx/xx xx:xx:xx : install completed
-xxxx/xx/xx xx:xx:xx : tests starting
+xxxx/xx/xx xx:xx:xx : build [variantx] starting
+xxxx/xx/xx xx:xx:xx : build [variantx] completed
+xxxx/xx/xx xx:xx:xx : install [variantx] starting
+xxxx/xx/xx xx:xx:xx : install [variantx] completed
+xxxx/xx/xx xx:xx:xx : tests [variantx] starting
 main
 libb.B vx (variantx)
-xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : tests [variantx] completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-variantx
 
 xxxx/xx/xx xx:xx:xx : Metamodule supermod-best wrapup
-xxxx/xx/xx xx:xx:xx : wrapup starting
-xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : wrapup [best] starting
+xxxx/xx/xx xx:xx:xx : wrapup [best] completed
 xxxx/xx/xx xx:xx:xx : End metamodule supermod-best wrapup
 
 do setup

@@ -144,12 +144,19 @@ function module-wrapper()
     local module=$2
     local variant=$3
     local step=$4
-    local p_variant
+    local pvariant=""
+    local dvariant=""
 
-    if [ "$variant" == "default" ]; then
-        pvariant=""
-    else
+    # set variant parameter if different than default
+
+    if [ "$variant" != "default" ]; then
         pvariant=$variant
+    fi
+
+    # set variant display if not part of step and not default
+
+    if [ ${step/$variant/} == $step -a "$variant" != "default" ]; then
+        dvariant=" [${variant//./ }]"
     fi
 
     if [ $step = "build" -a "$BUILD_SCBI_TARGET" != "" ]; then
@@ -165,7 +172,7 @@ function module-wrapper()
     mlog=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/$mstep.log
     clog=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/$mstep.cmd
 
-    ilog $module $mstep starting
+    ilog $module $mstep$dvariant starting
 
     (
         cd $SCBI_BDIR/$module >> $log 2>&1
@@ -205,7 +212,7 @@ function module-wrapper()
             elog $module $mstep failed with error $res
             return $res
         else
-            ilog $module $mstep completed
+            ilog $module $mstep$dvariant completed
             return 0
         fi
     )
@@ -827,7 +834,7 @@ function handle-module()
     fi
 
     line-sep
-    ilog $module Building $module-$variant \($DISPREF\) | tee -a $log
+    ilog $module Building $module [${variant//./ }] \($DISPREF\) | tee -a $log
 
     if [ $SCBI_HOST == $SCBI_TARGET ]; then
         ilog $module native $SCBI_TARGET | tee -a $log

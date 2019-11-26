@@ -1,7 +1,7 @@
 ============ build testx + deps (no compilation of libx expected)
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx-default (master)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
@@ -12,7 +12,7 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
-xxxx/xx/xx xx:xx:xx : Building mainlib-default (master)
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -28,7 +28,7 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building mainlib-default
 
 ============ re-build testx on vx
-xxxx/xx/xx xx:xx:xx : Building libx-default (vx)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -42,7 +42,7 @@ xxxx/xx/xx xx:xx:xx : End building libx-default
 ============ build testx + deps (compilation of libx expected)
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx-default (master)
+xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -57,7 +57,7 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
 
-xxxx/xx/xx xx:xx:xx : Building mainlib-default (master)
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
