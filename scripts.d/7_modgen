@@ -1,3 +1,55 @@
+############################## module-patch
+
+function module-apply-patch()
+{
+    local PATCH_FILE="$1"
+
+    local patch=""
+
+    if [ -f "$SCBI_PATCH/$PATCH_FILE" ]; then
+        patch="$SCBI_PATCH/$PATCH_FILE"
+    elif [ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]; then
+        patch="$SCBI_DEFS/patches/$PATCH_FILE"
+    else
+        elog $MODULE patch filename $(basename $patch) not found
+        return 1
+    fi
+
+    dlog $MODULE apply-patch filename $(basename $patch)
+    patch -p1 < $patch > /dev/null
+    [[ ! $? = 0 ]] && return 1
+}
+
+############################## module-patch
+
+function module-patch()
+{
+    local PREFIX=$1
+    local MODULE=$2
+    local VARIANT=$3
+    local TARGET=$4
+    local OOT=$5
+
+    fn-exists $MODULE-$VARIANT-patches
+
+    if [ $? = 0 ]; then
+        for patch in $($MODULE-$VARIANT-patches $PREFIX $TARGET); do
+            module-apply-patch "$patch"
+            [[ ! $? = 0 ]] && return 1
+        done
+
+    else
+        fn-exists $MODULE-patches
+
+        for patch in $($MODULE-patches $PREFIX $TARGET $VARIANT); do
+            module-apply-patch "$patch"
+            [[ ! $? = 0 ]] && return 1
+        done
+    fi
+
+    return 0
+}
+
 ############################## module-setup
 
 function module-setup()
@@ -35,17 +87,10 @@ function module-setup()
         (
             cd $SRCDIR
 
-            if [ -d $SCBI_PATCH  ]; then
-                for patch in $(ls $SCBI_PATCH/$MODULE-*.patch | sort); do
-                    ilog $MODULE apply-patch filename $(basename $patch)
-                    patch -p1 < $patch
-                    [[ ! $? = 0 ]] && return 1
-                done
-            fi
-            return 0
-        )
+            module-patch $PREFIX $MODULE $VARIANT $TARGET $OOT
 
-        [[ ! $? = 0 ]] && return 1
+            [[ ! $? = 0 ]] && return 1
+        )
     fi
 
     rm -f build

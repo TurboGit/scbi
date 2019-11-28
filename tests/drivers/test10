@@ -12,4 +12,7 @@ echo '========== lib1 standard version'
 echo '========== lib1 patched again'
 ./scbi --tests lib1
 
+echo '========== lib1 variant no patch'
+./scbi --tests lib1/variant-no-patch
+
 rm .root/.patches/*

@@ -17,6 +17,24 @@ function lib1-tar()
     echo lib1-$VERSION-src.tar.bz2
 }
 
+function lib1-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo lib1-0-fix.patch
+}
+
+function lib1-variant-no-patch-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo
+}
+
 function lib1-env()
 {
     local PREFIX=$1

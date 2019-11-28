@@ -43,3 +43,18 @@ liba.C patched version
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End building libx-default
+
+========== libx variant no patch
+xxxx/xx/xx xx:xx:xx : Building libx [variant-no-patch] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : build [variant-no-patch] starting
+xxxx/xx/xx xx:xx:xx : build [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : install [variant-no-patch] starting
+xxxx/xx/xx xx:xx:xx : install [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : tests [variant-no-patch] starting
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End building libx-variant-no-patch
