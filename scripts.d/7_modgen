@@ -149,11 +149,11 @@ function module-pre-install()
     fn-exists $MODULE-$VARIANT-prefix
 
     if [ $? = 0 -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
-        _IDIR=$($MODULE-prefix)
+        _IDIR=$($MODULE-$VARIANT-prefix $MPREFIX $TARGET)
     else
         fn-exists $MODULE-prefix
         if [ $? = 0 -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
-            _IDIR=$($MODULE-prefix)
+            _IDIR=$($MODULE-prefix $MPREFIX $TARGET $VARIANT)
         else
             _IDIR=$SCBI_PREFIX
         fi
