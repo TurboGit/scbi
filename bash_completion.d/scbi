@@ -49,7 +49,7 @@ _scbi_feature()
 {
     local IFS=$'\n'
 
-    for r in $(grep '$(is-enabled' $HOME/.config/scbi/* |
+    for r in $(grep -s '$(is-enabled' $HOME/.config/scbi/* |
                    sed 's/.*is-enabled \([a-zA-Z]*\).*/--enable-\1/g'); do
         printf %s$'\n' "$r "
     done
