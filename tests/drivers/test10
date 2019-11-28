@@ -9,7 +9,7 @@ echo '========== lib1 patched version'
 echo '========== lib1 standard version'
 ./scbi --tests --no-patch lib1
 
-echo '========== lib1 patych again'
+echo '========== lib1 patched again'
 ./scbi --tests lib1
 
 rm .root/.patches/*
