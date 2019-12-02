@@ -16,7 +16,7 @@ $(PDF): $(TEX) $(DIF) $(BIB) version
 	-bibtex $(NAM)
 	-makeindex $(NAM)
 	-latex $(TEX)
-	latex $(TEX)
+	pdflatex $(TEX)
 
 clean:
 	rm -f *.bbl *.blg *.log *.out *.toc *.aux $(PDF)
