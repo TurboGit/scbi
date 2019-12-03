@@ -51,6 +51,8 @@ By default the scbi build directories can be displayed with --stat option (outpu
       ```
       function lcms-vcs()
       {
+             echo default
+             echo none
              echo git
              echo http://github.com/mm2/Little-CMS
       }
@@ -142,27 +144,29 @@ By default the scbi build directories can be displayed with --stat option (outpu
 And that's all is needed to build this project. Now to build it:
 
       $ scbi lcms
-      2019/03/01 06:54 : Building lcms-default
-      2019/03/01 06:54 : native x86_64-linux-gnu
-      2019/03/01 06:54 : steps : setup config build install
-      2019/03/01 06:54 : get sources from git
-      2019/03/01 06:54 : config starting
-      2019/03/01 06:54 : config completed
-      2019/03/01 06:54 : build starting
-      2019/03/01 06:54 : build completed
-      2019/03/01 06:54 : install starting
-      2019/03/01 06:54 : install completed
-      2019/03/01 06:54 : copy install into ../install
+      2019/12/03 13:16:24 : Building lcms [default] (master)
+      2019/12/03 13:16:24 : native x86_64-linux-gnu
+      2019/12/03 13:16:24 : steps : setup config build install wrapup
+      2019/12/03 13:16:24 : get sources from git
+      2019/12/03 13:16:33 : config starting
+      2019/12/03 13:16:39 : config completed
+      2019/12/03 13:16:39 : build starting
+      2019/12/03 13:16:45 : build completed
+      2019/12/03 13:16:45 : install starting
+      2019/12/03 13:16:46 : install completed
+      2019/12/03 13:16:46 : copy install into ../opt/lcms
+      2019/12/03 13:16:46 : End building lcms-default
 
 If you call it again, nothing will happen as scbi will detect that the
 sources have not changed:
 
       $ scbi lcms
-      2019/03/01 06:55 : Building lcms-default
-      2019/03/01 06:55 : native x86_64-linux-gnu
-      2019/03/01 06:55 : steps : setup config build install
-      2019/03/01 06:55 : no build needed, versions match
-      2019/03/01 06:55 : copy install into ../install
+      2019/12/03 13:18:01 : Building lcms [default] (master)
+      2019/12/03 13:18:01 : native x86_64-linux-gnu
+      2019/12/03 13:18:01 : steps : setup config build install wrapup
+      2019/12/03 13:18:01 : no build needed, versions match
+      2019/12/03 13:18:01 : copy install into ../opt/lcms
+      2019/12/03 13:18:01 : End building lcms-default
 
 
 ## A release variant
@@ -181,16 +185,17 @@ to build with just "-O3" at configuration step:
 And then build the release version:
 
       $ scbi lcms/release
-      2019/03/01 07:09 : Building lcms-release
-      2019/03/01 07:09 : native x86_64-linux-gnu
-      2019/03/01 07:09 : steps : setup config build install
-      2019/03/01 07:09 : release-config starting
-      2019/03/01 07:09 : release-config completed
-      2019/03/01 07:09 : build starting
-      2019/03/01 07:09 : build completed
-      2019/03/01 07:09 : install starting
-      2019/03/01 07:09 : install completed
-      2019/03/01 07:09 : copy install into ../install
+      2019/12/03 13:18:23 : Building lcms [release] (master)
+      2019/12/03 13:18:23 : native x86_64-linux-gnu
+      2019/12/03 13:18:23 : steps : setup config build install wrapup
+      2019/12/03 13:18:24 : release-config starting
+      2019/12/03 13:18:28 : release-config completed
+      2019/12/03 13:18:28 : build [release] starting
+      2019/12/03 13:18:35 : build [release] completed
+      2019/12/03 13:18:35 : install [release] starting
+      2019/12/03 13:18:35 : install [release] completed
+      2019/12/03 13:18:35 : copy install into ../opt/lcms
+      2019/12/03 13:18:35 : End building lcms-release
 
 Note that the variant release-config is properly called above.
 
@@ -202,29 +207,31 @@ there, each time we call scbi we can update the source from upstream
 repository and rebuild if some modifications are found:
 
       $ scbi -u lcms/release
-      2019/03/01 07:14 : Building lcms-release
-      2019/03/01 07:14 : native x86_64-linux-gnu
-      2019/03/01 07:14 : steps : setup config build install
-      2019/03/01 07:14 : get sources from git
-      2019/03/01 07:14 : no build needed, versions match
-      2019/03/01 07:14 : copy install into ../install
+      2019/12/03 13:21:30 : Building lcms [release] (master)
+      2019/12/03 13:21:30 : native x86_64-linux-gnu
+      2019/12/03 13:21:30 : steps : setup config build install wrapup
+      2019/12/03 13:21:30 : get sources from git
+      2019/12/03 13:21:32 : no build needed, versions match
+      2019/12/03 13:21:32 : copy install into ../opt/lcms
+      2019/12/03 13:21:32 : End building lcms-release
 
 There was no modification, so nothing built. But for our project we
 want a stable version properly identified and tagged. Latest version
-of Little-CMS is 2.9, tagged as lcms2.9, to build it it is as simple as:
+of Little-CMS is 2.9, tagged as lcms.9, to build it it is as simple as:
 
       $ scbi -u lcms/release:lcms2.9
-      2019/03/01 07:16 : Building lcms-release
-      2019/03/01 07:16 : native x86_64-linux-gnu
-      2019/03/01 07:16 : steps : setup config build install
-      2019/03/01 07:16 : get sources from git
-      2019/03/01 07:16 : release-config starting
-      2019/03/01 07:16 : release-config completed
-      2019/03/01 07:16 : build starting
-      2019/03/01 07:16 : build completed
-      2019/03/01 07:16 : install starting
-      2019/03/01 07:16 : install completed
-      2019/03/01 07:16 : copy install into ../install
+      2019/12/03 13:22:59 : Building lcms [release] (lcms2.9)
+      2019/12/03 13:22:59 : native x86_64-linux-gnu
+      2019/12/03 13:22:59 : steps : setup config build install wrapup
+      2019/12/03 13:22:59 : get sources from git
+      2019/12/03 13:23:01 : release-config starting
+      2019/12/03 13:23:05 : release-config completed
+      2019/12/03 13:23:05 : build [release] starting
+      2019/12/03 13:23:12 : build [release] completed
+      2019/12/03 13:23:12 : install [release] starting
+      2019/12/03 13:23:12 : install [release] completed
+      2019/12/03 13:23:12 : copy install into ../opt/lcms
+      2019/12/03 13:23:13 : End building lcms-release
 
 
 ## Developing lcms
@@ -259,16 +266,17 @@ And to test this new developer's version, we need to pass :dev as
 version to scbi:
 
       $ scbi lcms:dev
-      2019/03/01 07:39 : Building lcms-default
-      2019/03/01 07:39 : native x86_64-linux-gnu
-      2019/03/01 07:39 : steps : setup config build install
-      2019/03/01 07:39 : config starting
-      2019/03/01 07:39 : config completed
-      2019/03/01 07:39 : build starting
-      2019/03/01 07:39 : build completed
-      2019/03/01 07:39 : install starting
-      2019/03/01 07:39 : install completed
-      2019/03/01 07:39 : copy install into ../opt/lcms
+      2019/12/03 13:24:33 : Building lcms [default] (dev)
+      2019/12/03 13:24:33 : native x86_64-linux-gnu
+      2019/12/03 13:24:33 : steps : setup config build install wrapup
+      2019/12/03 13:24:33 : config starting
+      2019/12/03 13:24:38 : config completed
+      2019/12/03 13:24:38 : build starting
+      2019/12/03 13:24:45 : build completed
+      2019/12/03 13:24:45 : install starting
+      2019/12/03 13:24:45 : install completed
+      2019/12/03 13:24:45 : copy install into ../opt/lcms
+      2019/12/03 13:24:45 : End building lcms-default
 
 Building a dev version also supports the variant:
 
