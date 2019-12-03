@@ -1102,7 +1102,8 @@ function handle-module()
               ${_IDIR}/. > $log 2>&1
     fi || elog $module fail to copy to ${_IDIR}
 
-    ilog $module End building $module-$variant
+    ilog $module End Building $module [${variant//./ }] \($DISPREF\) \
+        | tee -a $log
     line-sep
 }
 

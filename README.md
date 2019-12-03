@@ -155,7 +155,7 @@ And that's all is needed to build this project. Now to build it:
       2019/12/03 13:16:45 : install starting
       2019/12/03 13:16:46 : install completed
       2019/12/03 13:16:46 : copy install into ../opt/lcms
-      2019/12/03 13:16:46 : End building lcms-default
+      2019/12/03 13:16:46 : End building lcms [default] (master)
 
 If you call it again, nothing will happen as scbi will detect that the
 sources have not changed:
@@ -166,7 +166,7 @@ sources have not changed:
       2019/12/03 13:18:01 : steps : setup config build install wrapup
       2019/12/03 13:18:01 : no build needed, versions match
       2019/12/03 13:18:01 : copy install into ../opt/lcms
-      2019/12/03 13:18:01 : End building lcms-default
+      2019/12/03 13:18:01 : End building lcms [default] (master)
 
 
 ## A release variant
@@ -195,7 +195,7 @@ And then build the release version:
       2019/12/03 13:18:35 : install [release] starting
       2019/12/03 13:18:35 : install [release] completed
       2019/12/03 13:18:35 : copy install into ../opt/lcms
-      2019/12/03 13:18:35 : End building lcms-release
+      2019/12/03 13:18:35 : End building lcms [release] (master)
 
 Note that the variant release-config is properly called above.
 
@@ -213,7 +213,7 @@ repository and rebuild if some modifications are found:
       2019/12/03 13:21:30 : get sources from git
       2019/12/03 13:21:32 : no build needed, versions match
       2019/12/03 13:21:32 : copy install into ../opt/lcms
-      2019/12/03 13:21:32 : End building lcms-release
+      2019/12/03 13:21:32 : End building lcms [release] (master)
 
 There was no modification, so nothing built. But for our project we
 want a stable version properly identified and tagged. Latest version
@@ -231,7 +231,7 @@ of Little-CMS is 2.9, tagged as lcms.9, to build it it is as simple as:
       2019/12/03 13:23:12 : install [release] starting
       2019/12/03 13:23:12 : install [release] completed
       2019/12/03 13:23:12 : copy install into ../opt/lcms
-      2019/12/03 13:23:13 : End building lcms-release
+      2019/12/03 13:23:13 : End building lcms [release] (lcms2.9)
 
 
 ## Developing lcms
@@ -276,7 +276,7 @@ version to scbi:
       2019/12/03 13:24:45 : install starting
       2019/12/03 13:24:45 : install completed
       2019/12/03 13:24:45 : copy install into ../opt/lcms
-      2019/12/03 13:24:45 : End building lcms-default
+      2019/12/03 13:24:45 : End building lcms [default] (dev)
 
 Building a dev version also supports the variant:
 
