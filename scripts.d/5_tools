@@ -652,6 +652,54 @@ function copy-module-src-callback()
 
         if [ -f $SCBI_DEFS/$MODULE ]; then
             cp -p $SCBI_DEFS/$MODULE $DEST/scripts.d
+
+            # and then copy patches if any
+            (
+                function cp-patch()
+                {
+                    local PATCH_FILE="$1"
+
+                    local patch=""
+
+                    if [ -f "$SCBI_PATCH/$PATCH_FILE" ]; then
+                        patch="$SCBI_PATCH/$PATCH_FILE"
+                    elif [ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]; then
+                        patch="$SCBI_DEFS/patches/$PATCH_FILE"
+                    else
+                        elog standalone patch filename \
+                             $(basename $PATCH_FILE) not found
+                        return 1
+                    fi
+
+                    cp $patch $DEST/patches
+                }
+
+                local module_info=( $(get-module-ref $MODREF) )
+
+                local module=${module_info[0]}
+                local variant=${module_info[1]}
+                local kind=${module_info[2]}
+                local ref=${module_info[3]}
+
+                load-module $MODULE
+
+                fn-exists $module-$variant-patches
+
+                if [ $? = 0 ]; then
+                    for patch in $($module-$Variant-patches $PREFIX $TARGET); do
+                        cp-patch $patch
+                    done
+
+                else
+                    fn-exists $MODULE-patches
+
+                    if [ $? = 0 ]; then
+                        for patch in $($module-patches $PREFIX $TARGET $variant); do
+                            cp-patch $patch
+                        done
+                    fi
+                fi
+            )
         fi
     fi
 }
@@ -675,7 +723,7 @@ function create-standalone-package()
 
         # copy scbi scripts
 
-        mkdir bin .vcs .tar scripts.d
+        mkdir bin .vcs .tar patches scripts.d
 
         # The main SCBI script, the runtime scripts and the current plan
 
