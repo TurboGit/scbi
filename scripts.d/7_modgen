@@ -41,12 +41,13 @@ function module-patch()
     else
         fn-exists $MODULE-patches
 
-        for patch in $($MODULE-patches $PREFIX $TARGET $VARIANT); do
-            module-apply-patch "$patch"
-            [[ ! $? = 0 ]] && return 1
-        done
+        if [ $? = 0 ]; then
+            for patch in $($MODULE-patches $PREFIX $TARGET $VARIANT); do
+                module-apply-patch "$patch"
+                [[ ! $? = 0 ]] && return 1
+            done
+        fi
     fi
-
     return 0
 }
 
