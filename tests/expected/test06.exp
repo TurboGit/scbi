@@ -4,7 +4,7 @@ xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
 
 ==== purge and re-build
 xxxx/xx/xx xx:xx:xx : Purging libx for xxx_xx-linux-gnu/default
@@ -17,7 +17,7 @@ xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
 
 ==== no build expected
 xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
@@ -25,7 +25,7 @@ xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
 
 ==== purge-only, no build expected
 OK build directory present before purge
@@ -40,4 +40,4 @@ xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)

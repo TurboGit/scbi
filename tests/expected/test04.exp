@@ -11,7 +11,7 @@ main
 liba.C master
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
@@ -26,7 +26,7 @@ main
 liba.A br_a
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
 
 xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
@@ -41,7 +41,7 @@ main
 liba.D br_b
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
 
 OK tar not present
 xxxx/xx/xx xx:xx:xx : Building libx [default] (vx.x)
@@ -57,7 +57,7 @@ main
 lib from tar
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx.x)
 
 OK tar present
 xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
@@ -73,4 +73,4 @@ main
 liba.C master
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)

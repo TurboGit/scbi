@@ -10,7 +10,7 @@ main
 liba.C master
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
@@ -25,7 +25,7 @@ main on master
 liba.C master
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building mainlib-default
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
 
 ============ re-build testx on vx
 xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
@@ -37,7 +37,7 @@ xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
 
 ============ build testx + deps (compilation of libx expected)
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
@@ -55,7 +55,7 @@ main
 liba.C master
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
@@ -66,4 +66,4 @@ main on master
 liba.C master
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building mainlib-default
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)

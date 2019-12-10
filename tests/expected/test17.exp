@@ -9,7 +9,7 @@ xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
-xxxx/xx/xx xx:xx:xx : End building testxx-default
+xxxx/xx/xx xx:xx:xx : End Building testxx [default] (master)
 
 in config
 ROOT_DIR /this/is/it

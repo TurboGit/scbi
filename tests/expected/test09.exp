@@ -14,7 +14,7 @@ main
 liba.D br_b
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
 
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
 
@@ -33,7 +33,7 @@ main
 libb.B master (default)
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (dev)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
@@ -48,7 +48,7 @@ liba.D br_b
 libb.B master (default)
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building mainmult-default
+xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (dev)
 
 =================== plan vx (libx:vx libx:dev & mainmult:dev)
 xxxx/xx/xx xx:xx:xx : need building libx, current version latest
@@ -66,7 +66,7 @@ main
 liba.A br_a
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-default
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
 
 xxxx/xx/xx xx:xx:xx : Building libx [variantx] (dev)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
@@ -82,7 +82,7 @@ main
 libb.B next version (variantx)
 xxxx/xx/xx xx:xx:xx : tests [variantx] completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building libx-variantx
+xxxx/xx/xx xx:xx:xx : End Building libx [variantx] (dev)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (dev)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
@@ -97,4 +97,4 @@ liba.A br_a
 libb.B next version (variantx)
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End building mainmult-default
+xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (dev)

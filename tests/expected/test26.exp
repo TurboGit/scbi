@@ -8,7 +8,7 @@ xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
-xxxx/xx/xx xx:xx:xx : End building var-default
+xxxx/xx/xx xx:xx:xx : End Building var [default] (master)
 
 ========== build/install var/one
 xxxx/xx/xx xx:xx:xx : Building var [one] (master)
@@ -20,7 +20,7 @@ xxxx/xx/xx xx:xx:xx : build [one] starting
 xxxx/xx/xx xx:xx:xx : build [one] completed
 xxxx/xx/xx xx:xx:xx : install [one] starting
 xxxx/xx/xx xx:xx:xx : install [one] completed
-xxxx/xx/xx xx:xx:xx : End building var-one
+xxxx/xx/xx xx:xx:xx : End Building var [one] (master)
 
 ========== build/install var/two
 xxxx/xx/xx xx:xx:xx : Building var [two] (master)
@@ -32,7 +32,7 @@ xxxx/xx/xx xx:xx:xx : build [two] starting
 xxxx/xx/xx xx:xx:xx : build [two] completed
 xxxx/xx/xx xx:xx:xx : install [two] starting
 xxxx/xx/xx xx:xx:xx : install [two] completed
-xxxx/xx/xx xx:xx:xx : End building var-two
+xxxx/xx/xx xx:xx:xx : End Building var [two] (master)
 
 ========== build/install var/one.two
 xxxx/xx/xx xx:xx:xx : Building var [one two] (master)
@@ -44,7 +44,7 @@ xxxx/xx/xx xx:xx:xx : build [one two] starting
 xxxx/xx/xx xx:xx:xx : build [one two] completed
 xxxx/xx/xx xx:xx:xx : install [one two] starting
 xxxx/xx/xx xx:xx:xx : install [one two] completed
-xxxx/xx/xx xx:xx:xx : End building var-one.two
+xxxx/xx/xx xx:xx:xx : End Building var [one two] (master)
 
 ========== build/install var/two.one
 xxxx/xx/xx xx:xx:xx : Building var [two one] (master)
@@ -56,7 +56,7 @@ xxxx/xx/xx xx:xx:xx : build [two one] starting
 xxxx/xx/xx xx:xx:xx : build [two one] completed
 xxxx/xx/xx xx:xx:xx : install [two one] starting
 xxxx/xx/xx xx:xx:xx : install [two one] completed
-xxxx/xx/xx xx:xx:xx : End building var-two.one
+xxxx/xx/xx xx:xx:xx : End Building var [two one] (master)
 
 ========== build/install var/one.two.three.four
 xxxx/xx/xx xx:xx:xx : Building var [one two three four] (master)
@@ -68,7 +68,7 @@ xxxx/xx/xx xx:xx:xx : build [one two three four] starting
 xxxx/xx/xx xx:xx:xx : build [one two three four] completed
 xxxx/xx/xx xx:xx:xx : install [one two three four] starting
 xxxx/xx/xx xx:xx:xx : install [one two three four] completed
-xxxx/xx/xx xx:xx:xx : End building var-one.two.three.four
+xxxx/xx/xx xx:xx:xx : End Building var [one two three four] (master)
 
 @@@ install var: one.two.three.four
 @@@ install      one

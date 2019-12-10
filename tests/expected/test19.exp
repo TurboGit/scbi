@@ -22,7 +22,7 @@ xxxx/xx/xx xx:xx:xx : pre-wrapup starting
 xxxx/xx/xx xx:xx:xx : pre-wrapup completed
 xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
-xxxx/xx/xx xx:xx:xx : End building testxx-default
+xxxx/xx/xx xx:xx:xx : End Building testxx [default] (master)
 
 ====================== testxx/alt
 xxxx/xx/xx xx:xx:xx : Building testxx [alt] (master)
@@ -52,7 +52,7 @@ xxxx/xx/xx xx:xx:xx : alt-wrapup starting
 xxxx/xx/xx xx:xx:xx : alt-wrapup completed
 xxxx/xx/xx xx:xx:xx : alt-post-wrapup starting
 xxxx/xx/xx xx:xx:xx : alt-post-wrapup completed
-xxxx/xx/xx xx:xx:xx : End building testxx-alt
+xxxx/xx/xx xx:xx:xx : End Building testxx [alt] (master)
 
 @@@ ALT/CONFIG  testxx/xxx_xx-linux-gnu-alt/src
 @@@ ALT/POST-CONFIG  testxx/xxx_xx-linux-gnu-alt/src

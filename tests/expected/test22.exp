@@ -4,7 +4,7 @@ xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : End building testxx-default
+xxxx/xx/xx xx:xx:xx : End Building testxx [default] (master)
 
 === activated
 xxxx/xx/xx xx:xx:xx : Building testxx [default] (master)
@@ -12,7 +12,7 @@ xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : End building testxx-default
+xxxx/xx/xx xx:xx:xx : End Building testxx [default] (master)
 
 @@@ LIGHT is not enabled
 @@@ LIGHT is enabled
