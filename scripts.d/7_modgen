@@ -11,7 +11,7 @@ function module-apply-patch()
     elif [ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]; then
         patch="$SCBI_DEFS/patches/$PATCH_FILE"
     else
-        elog $MODULE patch filename $(basename $patch) not found
+        elog $MODULE patch filename $(basename $PATCH_FILE) not found
         return 1
     fi
 
