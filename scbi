@@ -77,6 +77,7 @@ SCBI_PLAN_CL=
 TAR_CACHE=yes
 DRY_RUN=no
 SAFE_MODE=false
+DO_STANDALONE=no
 
 ############################## check-handled
 #
@@ -294,6 +295,7 @@ function usage()
     echo "      | --tests-only    run the testsuite"
     echo "   -d | --deps          check/build dependencies"
     echo "   -a | --archive       build binary archive"
+    echo "      | --standalone    create a standalone source archive"
     echo "   -v | --verbose       display full log"
     echo "   -l | --no-log        never display log"
     echo "   -f | --force         force rebuild, do not check build id"
@@ -1129,7 +1131,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs:,no-wrapup,wrapup,safe -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs:,no-wrapup,wrapup,safe,standalone -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1235,6 +1237,9 @@ while [ $# -gt 0 ]; do
         --safe)
             SAFE_MODE=yes;
             ;;
+        --standalone)
+            DO_STANDALONE=yes;
+            ;;
         (--)
             ;;
         (*)
@@ -1322,3 +1327,7 @@ fi
 for module in $MODULES; do
     handle-module $module
 done
+
+if [ $DO_STANDALONE == yes ]; then
+    create-standalone-package
+fi

@@ -613,3 +613,104 @@ function all-variants()
     local VARIANTS=$1
     echo "${VARIANTS//./ }"
 }
+
+
+############################## create-standalone-package
+
+function copy-module-src-callback()
+{
+    local MODULE=$1
+    local MODREF=$2
+    local IS_ROOT=$3
+    local IS_EXT=$4
+    local DEST=$5
+
+    if [ $IS_EXT == true ]; then
+        echo -n " $MODULE" >> $DEST/build-deps
+
+    else
+        # copy tarball or vcs sources
+
+        if [ -d $SCBI_BDIR/$MODULE ]; then
+            ilog standalone "-   $MODULE"
+
+            # two modules may share the same VCS or tarball
+            if [ -h $SCBI_BDIR/$MODULE/tar ]; then
+                FILE=$(readlink -f $SCBI_BDIR/$MODULE/tar)
+                [ ! -f $DEST/.tar/$(basename $FILE) ] && cp -p $FILE $DEST/.tar
+            elif [ -h $SCBI_BDIR/$MODULE/vcs ]; then
+                DIR=$(readlink -f $SCBI_BDIR/$MODULE/vcs)
+                [ ! -d $DEST/.vcs/$(basename $DIR) ] && cp -rp $DIR $DEST/.vcs/
+            fi
+        else
+            elog standalone \
+                 "-   $MODULE sources not found, cannot create archive"
+            exit 1
+        fi
+
+        # copy SCBI module if present
+
+        if [ -f $SCBI_DEFS/$MODULE ]; then
+            cp -p $SCBI_DEFS/$MODULE $DEST/scripts.d
+        fi
+    fi
+}
+
+function create-standalone-package()
+{
+    local STANDALONE_TMP=${SCBI_TMP:-/tmp}
+    local STANDALONE=$STANDALONE_TMP/sa-$(basename $SCBI_BDIR)
+
+    rm -fr $STANDALONE
+
+    ilog standalone Create source archive in $STANDALONE
+
+    (
+        mkdir $STANDALONE
+        cd $STANDALONE
+
+        # record the external dependencies
+
+        echo -n "apt install" > build-deps
+
+        # copy scbi scripts
+
+        mkdir bin .vcs .tar scripts.d
+
+        # The main SCBI script, the runtime scripts and the current plan
+
+        cp $HOME/bin/scbi bin/
+        cp -p $SCBI_DEFS/[0-9]_* scripts.d
+        [ ! -z $SCBI_PLAN ] && cp -p $SCBI_DEFS/.plan-$SCBI_PLAN scripts.d
+
+        # copy repositories and tars for all modules with dependencies
+
+        for module in $MODULES; do
+            for-all-modules-with-meta-ext \
+                copy-module-src-callback $module $STANDALONE
+        done
+
+        # create default local environment
+
+        echo 'SCBI_ROOT=$PWD/..'               > .scbi-env-std
+        echo 'SCBI_BDIR=$PWD'                 >> .scbi-env-std
+        echo "SCBI_PLAN=$SCBI_PLAN"           >> .scbi-env-std
+
+        # then create the build script
+
+        echo '#!/bin/bash'                     > build
+        echo 'PYTHON_VERSION=$(python3 --version | cut '"-d' '"' -f2 | cut -c1-3)' >> build
+        echo 'export PATH=$PWD/bin:$PATH'     >> build
+        echo "MODULES=\"$MODULES\""           >> build
+        echo '[ ! -z $1 ] && MODULES="$*"'    >> build
+        echo 'scbi --env=std --deps $MODULES' >> build
+
+        chmod u+x build
+    )
+
+    cd $STANDALONE_TMP
+    tar cfz $STANDALONE.tgz $(basename $STANDALONE) 2> /dev/null
+    rm -fr $STANDALONE
+
+    ilog standalone End create source archive
+}

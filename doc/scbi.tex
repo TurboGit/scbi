@@ -284,6 +284,23 @@ A build-plan can be set in the following files searched in this exact order:
 	\item[\code{\$SCBI\_DEFS/.plan-<name>}] A global build-plan.
 \end{description}
 
+\subsection{Standalone source archive}
+\label{standalone}
+
+Using the \code{\ddash{}standalone} option it is possible to build a fully self contained source archive. This archive embedded all necessary sources and scripts to rebuild the software without the need to get access to repositories or source tar files.
+
+On the root of the archive a build script is provided, so starting a build from such standalone source archive boil done to:
+
+\begin{description}
+	\item[Uncompress] \cmd{tar xf sa-archive.tgz}
+	\item[Enter the directory] \cmd{cd sa-archive}
+	\item[Start the build] \cmd{./build}
+\end{description}
+
+By default the archive is created into \code{/tmp}, but it is possible to change the location setting the \code{SCBI\_TMP} environment variable. This may be needed as such archive can be very large.
+
+The file \code{build-deps} is generated into the root directory and contains the \code{apt} command with all external (OS) dependencies needed to build the software.
+
 \subsection{Command line}
 
 \subsubsection{Description}
@@ -341,6 +358,8 @@ The following options are supported:
 	\item[-d | \ddash{}deps] Check all dependencies and build them if necessary.
 
 	\item[-a | \ddash{}archive] Build binary archive when build is successful.
+
+    \item[\ddash{}standalone] Create a standalone source archive
 
 	\item[-v | \ddash{}verbose] Display full log when running.
 
@@ -871,7 +890,9 @@ Two helper routines are provided for this:
 	\end{lstlisting}
 \end{description}
 
-\subsection{Completion support}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
+
+\section{Completion support}
 \label{completion}
 
 A script is provided to support bash completion for scbi. The script is \file{bash_completion.d/scbi} and must be copied into \file{/etc/bash_completion.d/} OS directory.
