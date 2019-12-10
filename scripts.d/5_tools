@@ -175,7 +175,9 @@ function _internal_for-all-modules()
     local CALLBACK=$1
     local WITH_META=$2
     local IS_ROOT=$3
-    local MODREF=$4
+    local WITHEXT=$4
+    local MODREF=$5
+    shift
     shift
     shift
     shift
@@ -224,9 +226,9 @@ function _internal_for-all-modules()
                 if [ $? = 0 ]; then
                     for dmodule in $($module-$variant-modules); do
                         _internal_for-all-modules $CALLBACK $WITH_META false \
-                                                  $dmodule $@
+                                                  $WITHEXT $dmodule $@
                     done
-                    $CALLBACK $module $MODREF $IS_ROOT $@
+                    $CALLBACK $module $MODREF $IS_ROOT false $@
                     pop-dependency-tree
                     return
                 else
@@ -235,9 +237,9 @@ function _internal_for-all-modules()
                     if [ $? = 0 ]; then
                         for dmodule in $($module-modules $variant); do
                             _internal_for-all-modules $CALLBACK $WITH_META false \
-                                                      $dmodule $@
+                                                      $WITHEXT $dmodule $@
                         done
-                        $CALLBACK $module $MODREF $IS_ROOT $@
+                        $CALLBACK $module $MODREF $IS_ROOT false $@
                         pop-dependency-tree
                         return
                     fi
@@ -251,7 +253,7 @@ function _internal_for-all-modules()
             if [ $? = 0 ]; then
                 for dmodule in $($module-$variant-depends); do
                     _internal_for-all-modules $CALLBACK $WITH_META false \
-                                              $dmodule $@
+                                              $WITHEXT $dmodule $@
                 done
             else
                 fn-exists $module-depends
@@ -259,21 +261,26 @@ function _internal_for-all-modules()
                 if [ $? = 0 ]; then
                     for dmodule in $($module-depends $variant); do
                         _internal_for-all-modules $CALLBACK $WITH_META false \
-                                                  $dmodule $@
+                                                  $WITHEXT $dmodule $@
                     done
                 fi
             fi
 
-            $CALLBACK $module $MODREF $IS_ROOT $@
+            $CALLBACK $module $MODREF $IS_ROOT false $@
             pop-dependency-tree
         fi
 
     else
         # module does not exists, this is an external dependency
         check-pkg $module:$ref
+
+        if [ $WITHEXT == true ]; then
+            $CALLBACK $module $MODREF $IS_ROOT true $@
+        fi
     fi
 }
 
+# Iterate over all modules
 function for-all-modules()
 {
     local CALLBACK=$1
@@ -283,9 +290,10 @@ function for-all-modules()
 
     declare -A SCBI_CHECKED=[]
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK false true $MODREF $@
+    _internal_for-all-modules $CALLBACK false true false $MODREF $@
 }
 
+# Iterate over all modules and meta-modules
 function for-all-modules-with-meta()
 {
     local CALLBACK=$1
@@ -295,7 +303,20 @@ function for-all-modules-with-meta()
 
     declare -A SCBI_CHECKED=[]
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK true true $MODREF $@
+    _internal_for-all-modules $CALLBACK true true false $MODREF $@
+}
+
+# Iterate over all modules, meta-modules and external dependencies
+function for-all-modules-with-meta-ext()
+{
+    local CALLBACK=$1
+    local MODREF=$2
+    shift
+    shift
+
+    declare -A SCBI_CHECKED=[]
+    SCBI_RECTREE=()
+    _internal_for-all-modules $CALLBACK true true true $MODREF $@
 }
 
 ############################## get-depends-build-id
@@ -305,6 +326,7 @@ function get-build-id-callback()
     local MODULE=$1
     local MODREF=$2
     local IS_ROOT=$3
+    local IS_EXT=$4
 
     # Only compute for dependencies, not for the root module
 

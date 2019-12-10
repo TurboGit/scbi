@@ -366,6 +366,7 @@ function display-env-callback()
     local MODULE=$1
     local MODREF=$2
     local IS_ROOT=$3
+    local IS_EXT=$4
 
     echo $MODREF
 }
@@ -379,6 +380,7 @@ function handle-env-callback()
     local MODULE=$1
     local MODREF=$2
     local IS_ROOT=$3
+    local IS_EXT=$4
 
     handle-module-env $MODREF env
 }
