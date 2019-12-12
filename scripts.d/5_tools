@@ -746,12 +746,13 @@ function create-standalone-package()
 
         # then create the build script
 
-        echo '#!/bin/bash'                     > build
-        echo 'PYTHON_VERSION=$(python3 --version | cut '"-d' '"' -f2 | cut -c1-3)' >> build
-        echo 'export PATH=$PWD/bin:$PATH'     >> build
-        echo "MODULES=\"$MODULES\""           >> build
-        echo '[ ! -z $1 ] && MODULES="$*"'    >> build
-        echo 'scbi --env=std --deps $MODULES' >> build
+        echo '#!/bin/bash'                                      > build
+        echo -n 'export PYTHON_VERSION=$(python3 --version |'  >> build
+        echo " cut -d' '"' -f2 | cut -c1-3)'                   >> build
+        echo 'export PATH=$PWD/bin:$PATH'                      >> build
+        echo "MODULES=\"$MODULES\""                            >> build
+        echo '[ ! -z $1 ] && MODULES="$*"'                     >> build
+        echo 'scbi --env=std --deps $MODULES'                  >> build
 
         chmod u+x build
     )
