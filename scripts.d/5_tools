@@ -112,7 +112,7 @@ function get-md5()
 
 ############################## load-module
 #
-#
+# load an SCBI build script
 
 function load-module()
 {
@@ -361,7 +361,7 @@ function get-build-id()
     local MODREF=$3
     local vid="$4"
 
-    #  Get module information
+    # Get module information
 
     local module_info=( $(get-module-ref $MODREF) )
 
