@@ -352,6 +352,27 @@ function get-depends-build-id()
     )
 }
 
+############################## get-patch-md5
+
+function get-patch-md5()
+{
+    local PATCH_FILE="$1"
+
+    local patch=""
+
+    if [ -f "$SCBI_PATCH/$PATCH_FILE" ]; then
+        patch="$SCBI_PATCH/$PATCH_FILE"
+    elif [ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]; then
+        patch="$SCBI_DEFS/patches/$PATCH_FILE"
+    fi
+
+    if [ -f "$patch" ]; then
+        cat $patch | get-md5
+    else
+        echo not-found
+    fi
+}
+
 ############################## get-build-id
 
 function get-build-id()
@@ -370,13 +391,32 @@ function get-build-id()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    # If patch activated and patches dir exists
+    # Include the SCBI module, if changed we need to rebuild
 
-    local pid=no-patch-found
+    local mid=no-module-script
 
-    if [ $PATCH = yes -a -d $SCBI_PATCH ]; then
-        if [ ! -z $(ls $SCBI_PATCH/$module-*.patch 2> /dev/null) ]; then
-            local pid=$(cat $SCBI_PATCH/$module-*.patch 2>&1 | get-md5)
+    [ -f $SCBI_DEFS/$module ] && mid=$(cat $SCBI_DEFS/$module | get-md5)
+
+    # If patch activated
+
+    local pid="no-patch-found"
+
+    if [ $PATCH = yes ]; then
+        fn-exists $module-$variant-patches
+
+        if [ $? = 0 ]; then
+            for patch in $($module-$variant-patches $PREFIX $TARGET); do
+                pid="$pid,$(get-patch-md5 $patch)"
+            done
+
+        else
+            fn-exists $module-patches
+
+            if [ $? = 0 ]; then
+                for patch in $($module-patches $PREFIX $TARGET $variant); do
+                    pid="$pid,$(get-patch-md5 $patch)"
+                done
+            fi
         fi
     fi
 
@@ -388,10 +428,10 @@ function get-build-id()
     # Now compute final id add compile version
 
     if [ "$SCBI_HOST" = "$TARGET" -o "$(which $TARGET-gcc)" = "" ]; then
-        echo -n $(gcc --version | head -1) ",$vid,$pid,$did" | get-md5
+        echo -n $(gcc --version | head -1) ",$vid,$mid,$pid,$did" | get-md5
 
     else
-        echo -n $($TARGET-gcc --version | head -1) ",$vid,$pid,$did" | get-md5
+        echo -n $($TARGET-gcc --version | head -1) ",$vid,$mid,$pid,$did" | get-md5
     fi
 }
 

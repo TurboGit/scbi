@@ -1,0 +1,7 @@
+cp scripts.d/test2 scripts.d/test99
+sed -i 's/test2-/test99-/g' scripts.d/test99
+./scbi test99
+./scbi test99
+
+sed -i 's/make/make -j2/g' scripts.d/test99
+./scbi test99
