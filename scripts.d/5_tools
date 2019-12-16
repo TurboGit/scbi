@@ -711,7 +711,7 @@ function copy-module-src-callback()
                         return 1
                     fi
 
-                    cp $patch $DEST/patches
+                    cp $patch $DEST/.patches
                 }
 
                 local module_info=( $(get-module-ref $MODREF) )
@@ -763,7 +763,7 @@ function create-standalone-package()
 
         # copy scbi scripts
 
-        mkdir bin .vcs .tar patches scripts.d
+        mkdir bin .vcs .tar .patches scripts.d
 
         # The main SCBI script, the runtime scripts and the current plan
 
