@@ -5,3 +5,5 @@ sed -i 's/test2-/test99-/g' scripts.d/test99
 
 sed -i 's/make/make -j2/g' scripts.d/test99
 ./scbi test99
+
+rm scripts.d/test99
