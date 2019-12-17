@@ -3,7 +3,7 @@
 #  SCBI - (C) Pascal Obry - 2007-2019
 #
 
-SCBI_VERSION=2.1
+SCBI_VERSION=2.2
 
 ############################## check-tool
 
@@ -67,6 +67,7 @@ DOARCHIVE=no
 DOFORCE=no
 DOSTAT=no
 DODEPS=no
+DOEXT=no
 DEPS=no
 ISOOT=yes
 PATCH=yes
@@ -279,36 +280,35 @@ function usage()
     echo "   modulen  <name>:#<ver>    build from tarbal version <ver>"
     echo "   modulen  <name>:dev       build from user's repository current branch"
     echo ""
-    echo "   -h | --help          this help message"
-    echo "   -e | --env=<name>    environment file ~/.scbi-<name>"
-    echo "      | --enable-<name> enable feature name"
-    echo "   -t | --target=<name> specify the target to build for ($SCBI_TARGET)"
-    echo "   -S | --no-setup      skip setup"
-    echo "   -I | --no-install    skip install"
-    echo "   -u | --update        do update"
-    echo "   -s | --setup         do setup"
-    echo "   -c | --config        do config"
-    echo "   -b | --build         do build"
-    echo "   -i | --install       do install"
-    echo "      | --tar           check for tar only if explicitly specified"
-    echo "      | --tests         run the testsuite, build if necessary"
-    echo "      | --tests-only    run the testsuite"
-    echo "   -d | --deps          check/build dependencies"
-    echo "   -a | --archive       build binary archive"
-    echo "      | --standalone    create a standalone source archive"
-    echo "   -v | --verbose       display full log"
-    echo "   -l | --no-log        never display log"
-    echo "   -f | --force         force rebuild, do not check build id"
-    echo "   -p | --purge         remove builds directories before building"
-    echo "   -P | --purge-only    only remove builds directories"
-    echo "      | --list-depends  recursivelly list module's dependencies"
-    echo "      | --list-depends-with-meta"
-    echo "                        as above, taking into account meta modules"
-    echo "      | --dry-run       only list modules handled"
-    echo "      | --plan          add a build plan for modules"
-    echo "      | --stat          display some status of current setup"
-    echo "   -n | --no-patch      do not apply patches"
-    echo "   -j | --jobs=<n>      max compilation jobs \$SCBI_JOBS"
+    echo "   -h | --help           this help message"
+    echo "   -e | --env=<name>     environment file ~/.scbi-<name>"
+    echo "      | --enable-<name>  enable feature name"
+    echo "   -t | --target=<name>  specify the target to build for ($SCBI_TARGET)"
+    echo "   -S | --no-setup       skip setup"
+    echo "   -I | --no-install     skip install"
+    echo "   -u | --update         do update"
+    echo "   -s | --setup          do setup"
+    echo "   -c | --config         do config"
+    echo "   -b | --build          do build"
+    echo "   -i | --install        do install"
+    echo "      | --tar            check for tar only if explicitly specified"
+    echo "      | --tests          run the testsuite, build if necessary"
+    echo "      | --tests-only     run the testsuite"
+    echo "   -d | --deps           check/build dependencies"
+    echo "   -a | --archive        build binary archive"
+    echo "      | --standalone     create a standalone source archive"
+    echo "   -v | --verbose        display full log"
+    echo "   -l | --no-log         never display log"
+    echo "   -f | --force          force rebuild, do not check build id"
+    echo "   -p | --purge          remove builds directories before building"
+    echo "   -P | --purge-only     only remove builds directories"
+    echo "      | --list-depends   list module's dependencies"
+    echo "      | --list-externals list module's external dependencies"
+    echo "      | --dry-run        only list modules handled"
+    echo "      | --plan           add a build plan for modules"
+    echo "      | --stat           display some status of current setup"
+    echo "   -n | --no-patch       do not apply patches"
+    echo "   -j | --jobs=<n>       max compilation jobs \$SCBI_JOBS"
 }
 
 ############################## handle-modue-env
@@ -361,7 +361,7 @@ function handle-module-env()
 }
 
 ############################## display-env-callback
-# used for --list-depends and --list-depends-with-meta
+# used for --list-depends and --list-external
 
 function display-env-callback()
 {
@@ -369,8 +369,15 @@ function display-env-callback()
     local MODREF=$2
     local IS_ROOT=$3
     local IS_EXT=$4
+    local SELEXT=false
 
-    echo $MODREF
+    if [ $DOEXT == yes ]; then
+        SELEXT=true
+    fi
+
+    if [ $IS_EXT == $SELEXT ]; then
+        echo $MODREF
+    fi
 }
 
 ############################## handle-env
@@ -1131,7 +1138,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-depends-with-meta,dry-run,jobs:,no-wrapup,wrapup,safe,standalone -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-externals,dry-run,jobs:,no-wrapup,wrapup,safe,standalone -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1227,9 +1234,11 @@ while [ $# -gt 0 ]; do
             ;;
         --list-depends)
             DODEPS=yes;
+            DOEXT=no;
             ;;
-        --list-depends-with-meta)
-            DODEPS=yes-meta;
+        --list-externals)
+            DODEPS=yes;
+            DOEXT=yes;
             ;;
         --dry-run)
             DRY_RUN=yes;
@@ -1298,12 +1307,7 @@ done
 
 if [ $DODEPS == yes ]; then
     for module in $MODULES; do
-        for-all-modules display-env-callback $module
-    done
-    exit 0
-elif [ $DODEPS == yes-meta ]; then
-    for module in $MODULES; do
-        for-all-modules-with-meta display-env-callback $module
+        for-all-modules-with-meta-ext display-env-callback $module
     done
     exit 0
 fi

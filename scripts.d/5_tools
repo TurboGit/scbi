@@ -211,12 +211,13 @@ function _internal_for-all-modules()
 
     #  Then load module
 
-    load-module $module
+    if [ -z "${SCBI_CHECKED[$module]}" ]; then
+        SCBI_CHECKED[$module]=yes
 
-    if [ $? = 0 ]; then
-        if [ -z "${SCBI_CHECKED[$module]}" ]; then
+        load-module $module
+
+        if [ $? = 0 ]; then
             push-dependency-tree $module
-            SCBI_CHECKED[$module]=yes
 
             if [ $WITH_META == true ]; then
                 # check for meta-modules if present
@@ -268,14 +269,15 @@ function _internal_for-all-modules()
 
             $CALLBACK $module $MODREF $IS_ROOT false $@
             pop-dependency-tree
-        fi
 
-    else
-        # module does not exists, this is an external dependency
-        check-pkg $module:$ref
+        else
+            # module does not exists, this is an external dependency
 
-        if [ $WITHEXT == true ]; then
-            $CALLBACK $module $MODREF $IS_ROOT true $@
+            if [ $WITHEXT == true ]; then
+                $CALLBACK $module $MODREF $IS_ROOT true $@
+            else
+                check-pkg $module:$ref
+            fi
         fi
     fi
 }
