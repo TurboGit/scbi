@@ -651,7 +651,9 @@ function last-modified-directory()
 function all-variants()
 {
     local VARIANTS=$1
-    echo "${VARIANTS//./ }"
+    if [ "$VARIANTS" != "default" ]; then
+        echo "${VARIANTS//./ }"
+    fi
 }
 
 
