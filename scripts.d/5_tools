@@ -293,6 +293,19 @@ function for-all-modules()
     _internal_for-all-modules $CALLBACK false true false $MODREF $@
 }
 
+# Iterate over all modules and external dependencies
+function for-all-modules-ext()
+{
+    local CALLBACK=$1
+    local MODREF=$2
+    shift
+    shift
+
+    declare -A SCBI_CHECKED=[]
+    SCBI_RECTREE=()
+    _internal_for-all-modules $CALLBACK false true true $MODREF $@
+}
+
 # Iterate over all modules and meta-modules
 function for-all-modules-with-meta()
 {
