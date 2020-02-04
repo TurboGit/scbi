@@ -223,7 +223,7 @@ An environment is a set of shell variables used to control the build environment
 
 	\item[SCBI\_JOBS] The number of simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores.
 	\label{njobs}
-	
+
 	\item[SCBI\_MAKE\_JOBS] The number of simultaneous jobs to use for \code{make}. \\Default set to \code{\$SCBI\_JOBS / 2}.
 \label{make-njobs}
 \end{description}
@@ -990,7 +990,7 @@ Mercurial and Subversion VCS are also supported, the variables for each are:
 
 When a build fails it may be needed to look at the full logs and the actual commands executed for the failing step (configure, build, install...).
 
-The SCBI driver does record all needed information in the sandbox directory \file{<module>/build/.log/}. 
+The SCBI driver does record all needed information in the sandbox directory \file{<module>/build/.log/}.
 
 The files created in this directory are:
 
