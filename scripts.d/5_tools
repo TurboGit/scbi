@@ -643,7 +643,7 @@ function get-build-type()
     [ ! -z ${!VAR_GENERIC} ] && DEFAULT=${!VAR_GENERIC}
     [ ! -z ${!VAR_MODULE} ] && DEFAULT=${!VAR_MODULE}
 
-    echo $DEFAULT
+    echo -n $DEFAULT
 }
 
 ############################## last-modified-directory
