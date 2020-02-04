@@ -168,6 +168,7 @@ function show-command()
 
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
     echo "# $CMD"
     echo '('
@@ -186,12 +187,16 @@ function show-command()
     echo "   {"
     echo -n "    "
 
-    # We want to keep $1, $2 (the parameters) and the $PREFIX
-    # and $TARGET references.
-    eval echo -e \"$(type $CMD | sed '1,3d;$d;s/$PREFIX/\\$PREFIX/g;s/$TARGET/\\$TARGET/g;s/$1/\\$1/g;s/$2/\\$2/g;')\"
+    # We want to keep $1, $2, $3 (the parameters)
+    # and the $PREFIX, $TARGET references.
+    #
+    # We also keep the OPTIONS variable as support for handling
+    # complex projects using OPTIONS as intermediate variable to
+    # store the final options for the configuration step.
+    eval echo -e \"$(type $CMD | sed '1,3d;$d;s/$PREFIX/\\$PREFIX/g;s/$TARGET/\\$TARGET/g;s/$OPTIONS/\\$OPTIONS/g;s/$1/\\$1/g;s/$2/\\$2/g;s/$3/\\$3/g;s/=\([^;]*\)/=\\"\1\\"/g')\"
     echo "   }"
     echo ""
-    echo "   $CMD $PREFIX $TARGET"
+    echo "   $CMD $PREFIX $TARGET $VARIANT"
     echo ')'
 }
 

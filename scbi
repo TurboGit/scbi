@@ -190,7 +190,7 @@ function module-wrapper()
         #  Record run command
 
         (
-            show-command $module-$mstep $PREFIX $SCBI_TARGET 2&> $clog
+            show-command $module-$mstep $PREFIX $SCBI_TARGET $variant 2&> $clog
         )
 
         #  Call module step
