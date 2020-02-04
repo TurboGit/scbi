@@ -1,0 +1,22 @@
+=================== plan var (skip libx)
+xxxx/xx/xx xx:xx:xx : skip depA, marked to be skipped
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default setup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default setup
+
+xxxx/xx/xx xx:xx:xx : skip depA, marked to be skipped
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : tests starting
+OOT OK
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default wrapup

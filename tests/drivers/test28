@@ -1,0 +1,7 @@
+# test build plan
+
+./scbi --purge-only depA &> /dev/null
+./scbi --purge-only oot &> /dev/null
+
+echo '=================== plan var (skip lib1)'
+./scbi --tests --plan=var --deps depA:skip dmod

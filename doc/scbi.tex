@@ -161,7 +161,7 @@ Each module is described in an SCBI plug-in script. It can be referenced in diff
 
 	\item[variant] \label{variant}This is a name to identify a build variant for the module. For example an application can be built with different configuration and or dependencies.
 
-	\item[version] The version to build. This version string can be either a reference to a VCS version (branch or a Git sha1 for example), a tar version or a reference to the user's checkout when set to \code{DEV}.
+	\item[version] The version to build. This version string can be either a reference to a VCS version (branch or a Git sha1 for example), a tar version or a reference to the user's checkout when set to \code{dev}. The version can also be set to \code{skip} to specify that the module must be ignored.
 \end{description}
 
 The following are examples of module references:
@@ -180,6 +180,8 @@ The following are examples of module references:
 	\item[lcms2:\#v1.0] Build \code{lcms2} using sources from tar version \emph{1.0}.
 
 	\item[lcms2:dev] Build \code{lcms2} using sources from user's repository checkout found in \code{\$SCBI\_GIT\_REPO} (assuming \code{lcms2} is using Git). For a discussion about user's check-out \seeref{userco}.
+
+	\item[lcms2:skip] Skip \code{lcms2} from the build. This is especially useful when set on a build plan or the command line to specify that the module is to be ignored.
 \end{description}
 
 \subsection{Environment}

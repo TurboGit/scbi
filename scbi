@@ -734,6 +734,13 @@ function handle-module()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
+    #  If this module is marked as to be skipped
+
+    if [ "$ref" == "skip" ]; then
+        ilog $module skip $module, marked to be skipped
+        return
+    fi
+
     log=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-$variant-report.log
 
     #  Check if we have already handled this module
