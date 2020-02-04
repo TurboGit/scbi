@@ -30,6 +30,27 @@ function load-module-plan()
     fi
 }
 
+############################## set-module-ref
+#
+# Set a module reference into the build plan only if this reference a
+# specific version.
+
+function set-module-ref()
+{
+    # full module reference is name[/variant][:version]
+    local modref="$1"
+
+    local module_info=( $(parse-module-ref $modref) )
+
+    if [ "${module_info[1]}" != "default" \
+         -o ${module_info[2]} != "NONE"   \
+         -o "${module_info[3]}" != "NONE" ];
+    then
+        local module=${module_info[0]}
+        MODVER[$module]=$modref
+    fi
+}
+
 ############################## parse-module-ref
 #
 # Returns an array with the following information:

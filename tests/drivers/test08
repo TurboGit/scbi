@@ -14,3 +14,8 @@ echo '=================== second run plan var (no build)'
 
 echo '=================== second run plan var (test-only)'
 ./scbi --tests-only --plan=var --deps mainmult
+
+echo '=================== only lib2 with version from command line'
+# note that this version does not exists, it is only to make sure scbi tries
+# to compile it.
+./scbi --tests-only --plan=var --deps lib2/wrong:bad

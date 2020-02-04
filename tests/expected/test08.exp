@@ -180,3 +180,10 @@ libb.B vx (variantx)
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
+
+=================== only libx with version from command line
+xxxx/xx/xx xx:xx:xx : Building libx [wrong] (bad)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : error: cannot switch to branch bad

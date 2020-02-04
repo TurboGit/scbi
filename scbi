@@ -1326,6 +1326,13 @@ if [ $DRY_RUN == yes ]; then
     STEPS=""
 fi
 
+#  Setup module reference specified on the command line. The module
+#  reference on the command line must overwrite the actual build plan.
+
+for module in $MODULES; do
+    set-module-ref $module
+done
+
 #  Run script for all modules
 
 for module in $MODULES; do
