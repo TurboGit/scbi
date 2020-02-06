@@ -19,10 +19,9 @@ function do-config()
 {
     local PREFIX=$1
     local TARGET=$2
-    GPROPTS="$3"
+    GPROPTS="$3 GENERATE_LANGKIT_SUPPORT=no"
 
     (
-        gpython-env
         add-to-var PYTHONPATH \
                    $SCBI_BDIR/langkit_support/$TARGET-default/build/langkit
 
