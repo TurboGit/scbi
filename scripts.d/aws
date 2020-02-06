@@ -10,7 +10,6 @@ function aws-vcs()
 function aws-depends()
 {
     echo xmlada
-    echo asis
 }
 
 function aws-tar()
