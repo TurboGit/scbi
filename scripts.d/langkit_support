@@ -19,7 +19,6 @@ function langkit_support-env()
 {
     add-to-var QUEX_PATH /opt/quex/quex-0.65.4
     add-to-var LIBLANG_SUPPORT_EXTERNALLY_BUILT false
-    gpython-env
 }
 
 function langkit_support-out-of-tree()
@@ -44,13 +43,13 @@ function langkit_support-build()
     local PREFIX=$1
     local TARGET=$2
 
-    GOPTS=-"p -m -j$SCBI_JOBS"
+    GOPTS="-p -m -j$SCBI_JOBS"
 
     PRJ=./build/lib/gnat/langkit_support.gpr
 
-    gprbuild $GOPTS -XLIBRARY_TYPE=static $PRJ
-    gprbuild $GOPTS -XLIBRARY_TYPE=static-pic -XXMLADA_BUILD=static-pic $PRJ
-    gprbuild $GOPTS -XLIBRARY_TYPE=relocatable -XXMLADA_BUILD=relocatable $PRJ
+    for KIND in static relocatable static-pic; do
+        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
+    done
 }
 
 function langkit_support-install()
@@ -64,9 +63,8 @@ function langkit_support-install()
 
     PRJ=./build/lib/gnat/langkit_support.gpr
 
-    gprinstall $GOPTS -XLIBRARY_TYPE=static --build-name=static $PRJ
-    gprinstall $GOPTS -XLIBRARY_TYPE=relocatable -XXMLADA_BUILD=relocatable \
-               --build-name=relocatable $PRJ
-    gprinstall $GOPTS -XLIBRARY_TYPE=static-pic -XXMLADA_BUILD=static-pic \
-               --build-name=static-pic $PRJ
+    for KIND in static relocatable static-pic; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
+                   -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
+    done
 }
