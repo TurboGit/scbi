@@ -157,13 +157,54 @@ function display-log-stat()
     done
 }
 
+############################## dump-function
+# dump function definition NAME, do it recursively for all used
+# functions in the $NAME.
+
+declare -A SCBI_FCT_DUMPED=[]
+
+function dump-function()
+{
+    local MODULE=$1
+    local NAME=$2
+    local FCT=$(type $NAME | sed '1,3d;$d')
+
+    #  Tokenize all words in FCT and if a routine, dump it
+
+    IFS=' ();=\$!/[]{}'
+
+    SCBI_FCT_DUMPED["$NAME"]=yes
+
+    for word in $FCT; do
+        if [ ! -z "$word"               \
+	     -a "${word}" != 'if'       \
+	     -a "${word:0:1}" != '-' ];
+	then
+            if [ -z "${SCBI_FCT_DUMPED[$word]}" ]; then
+                fn-exists "$word"
+                [ $? == 0 ] && dump-function $MODULE $word;
+            fi
+        fi
+    done
+
+    if [ ${NAME#${MODULE}-} == $NAME ]; then
+	echo
+	echo "   function $NAME()"
+	echo "   {"
+	echo "$FCT"
+	echo "   }"
+    fi
+}
+
 ############################## show-command
 # display bash command with original command and with substitued
 # variables
 
 function show-command()
 {
-    local CMD=$1
+    local MODULE=$1
+    local CMD=$2
+    shift
     shift
 
     local PREFIX=$1
@@ -183,18 +224,15 @@ function show-command()
     echo "   [ -f ../.log/env.cmd ] && source ../.log/env.cmd"
     echo ""
 
-    echo "   function $CMD()"
-    echo "   {"
-    echo -n "    "
+    if [ -f $SCBI_DEFS/$MODULE ]; then
+	cp $SCBI_DEFS/$MODULE ../.log
+	echo "   source ../.log/$MODULE"
+    fi
 
-    # We want to keep $1, $2, $3 (the parameters)
-    # and the $PREFIX, $TARGET references.
-    #
-    # We also keep the OPTIONS variable as support for handling
-    # complex projects using OPTIONS as intermediate variable to
-    # store the final options for the configuration step.
-    eval echo -e \"$(type $CMD | sed '1,3d;$d;s/$PREFIX/\\$PREFIX/g;s/$TARGET/\\$TARGET/g;s/$OPTIONS/\\$OPTIONS/g;s/$1/\\$1/g;s/$2/\\$2/g;s/$3/\\$3/g;s/ \([A-Za-z]*\)=\([^;]*\)/ \1=\\"\2\\"/g')\"
-    echo "   }"
+    (
+	dump-function $MODULE $CMD
+    )
+
     echo ""
     echo "   $CMD $PREFIX $TARGET $VARIANT"
     echo ')'

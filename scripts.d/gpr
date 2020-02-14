@@ -58,6 +58,18 @@ function gpr-build()
     make
 }
 
+function gpr-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    gpython-env
+
+    export PYTHONWARNINGS=ignore::yaml.YAMLLoadWarning
+
+    cd testsuite && ./testsuite.py --temp-dir=$HOME/tmp -j$SCBI_JOBS
+}
+
 function gpr-install()
 {
     local PREFIX=$1
