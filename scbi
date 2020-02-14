@@ -191,7 +191,7 @@ function module-wrapper()
 
         (
             show-command $module $module-$mstep \
-			 $PREFIX $SCBI_TARGET $variant 2&> $clog
+                         $PREFIX $SCBI_TARGET $variant 2&> $clog
         )
 
         #  Call module step
@@ -310,6 +310,7 @@ function usage()
     echo "      | --stat           display some status of current setup"
     echo "   -n | --no-patch       do not apply patches"
     echo "   -j | --jobs=<n>       max compilation jobs \$SCBI_JOBS"
+    echo "      | --plugins=<dir>  specify the modules/plugins directory"
 }
 
 ############################## handle-modue-env
