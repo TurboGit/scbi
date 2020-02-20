@@ -281,36 +281,36 @@ function usage()
     echo "   modulen  <name>:#<ver>    build from tarbal version <ver>"
     echo "   modulen  <name>:dev       build from user's repository current branch"
     echo ""
-    echo "   -h | --help           this help message"
-    echo "   -e | --env=<name>     environment file ~/.scbi-<name>"
-    echo "      | --enable-<name>  enable feature name"
-    echo "   -t | --target=<name>  specify the target to build for ($SCBI_TARGET)"
-    echo "   -S | --no-setup       skip setup"
-    echo "   -I | --no-install     skip install"
-    echo "   -u | --update         do update"
-    echo "   -s | --setup          do setup"
-    echo "   -c | --config         do config"
-    echo "   -b | --build          do build"
-    echo "   -i | --install        do install"
-    echo "      | --tar            check for tar only if explicitly specified"
-    echo "      | --tests          run the testsuite, build if necessary"
-    echo "      | --tests-only     run the testsuite"
-    echo "   -d | --deps           check/build dependencies"
-    echo "   -a | --archive        build binary archive"
-    echo "      | --standalone     create a standalone source archive"
-    echo "   -v | --verbose        display full log"
-    echo "   -l | --no-log         never display log"
-    echo "   -f | --force          force rebuild, do not check build id"
-    echo "   -p | --purge          remove builds directories before building"
-    echo "   -P | --purge-only     only remove builds directories"
-    echo "      | --list-depends   list module's dependencies"
-    echo "      | --list-externals list module's external dependencies"
-    echo "      | --dry-run        only list modules handled"
-    echo "      | --plan           add a build plan for modules"
-    echo "      | --stat           display some status of current setup"
-    echo "   -n | --no-patch       do not apply patches"
-    echo "   -j | --jobs=<n>       max compilation jobs \$SCBI_JOBS"
-    echo "      | --plugins=<dir>  specify the modules/plugins directory"
+    echo "   -h | --help             this help message"
+    echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
+    echo "      | --enable-<name>    enable feature name"
+    echo "   -t | --target=<name>    the target to build for ($SCBI_TARGET)"
+    echo "   -S | --no-setup         skip setup"
+    echo "   -I | --no-install       skip install"
+    echo "   -u | --update           do update"
+    echo "   -s | --setup            do setup"
+    echo "   -c | --config           do config"
+    echo "   -b | --build            do build"
+    echo "   -i | --install          do install"
+    echo "      | --tar              check for tar only if explicitly specified"
+    echo "      | --tests            run the testsuite, build if necessary"
+    echo "      | --tests-only       run the testsuite"
+    echo "   -d | --deps             check/build dependencies"
+    echo "   -a | --archive          build binary archive"
+    echo "      | --standalone       create a standalone source archive"
+    echo "   -v | --verbose          display full log"
+    echo "   -l | --no-log           never display log"
+    echo "   -f | --force            force rebuild, do not check build id"
+    echo "   -p | --purge            remove builds directories before building"
+    echo "   -P | --purge-only       only remove builds directories"
+    echo "      | --list-depends     list module's dependencies"
+    echo "      | --list-externals=n list module's external dependencies"
+    echo "      | --dry-run          only list modules handled"
+    echo "      | --plan             add a build plan for modules"
+    echo "      | --stat             display some status of current setup"
+    echo "   -n | --no-patch         do not apply patches"
+    echo "   -j | --jobs=<n>         max compilation jobs \$SCBI_JOBS"
+    echo "      | --plugins=<dir>    specify the modules/plugins directory"
 }
 
 ############################## handle-modue-env
@@ -378,7 +378,11 @@ function display-env-callback()
     fi
 
     if [ $IS_EXT == $SELEXT ]; then
-        echo $MODREF
+        if [ "$SCBI_EXTERNALS" == "run" -a "${MODREF: -4}" == "-dev" ]; then
+            get-lib-for-dev $MODREF
+        else
+            echo $MODREF
+        fi
     fi
 }
 
@@ -1146,8 +1150,8 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-set -- $(getopt -q -u -o t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch:,plan:,stat,tar,list-depends,list-externals,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins: -- $(echo $SCBIOPTS))
+set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends,list-externals:,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins: -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1246,6 +1250,7 @@ while [ $# -gt 0 ]; do
             DOEXT=no;
             ;;
         --list-externals)
+            SCBI_EXTERNALS=$2; shift
             DODEPS=yes;
             DOEXT=yes;
             ;;
@@ -1323,9 +1328,11 @@ done
 [ $DOSTAT == yes ] && display-log-stat
 
 if [ $DODEPS == yes ]; then
-    for module in $MODULES; do
-        for-all-modules-with-meta-ext display-env-callback $module
-    done
+    LIST="$(for module in $MODULES; do
+               for-all-modules-with-meta-ext display-env-callback $module
+            done)"
+
+    echo $LIST | sort | uniq | tr ' ' '\n'
     exit 0
 fi
 

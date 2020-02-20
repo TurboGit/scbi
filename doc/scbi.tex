@@ -375,7 +375,7 @@ The following options are supported:
 
 	\item[\ddash{}list-depends] Recursively list module's dependencies.
 
-	\item[\ddash{}list-externals] Recursively list all external dependencies.
+	\item[\ddash{}list-externals={[}all|run|dev{]} ] Recursively list external dependencies. Either \code{all} or \code{dev} dependencies are listed or only the ones needed at runtime. Those last dependencies are computed automatically from the \code{dev} dependencies listed in plugin modules.
 
 	\item[\ddash{}dry-run] Only list modules to be handled.
 
