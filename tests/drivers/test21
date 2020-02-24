@@ -2,4 +2,4 @@ echo "========== dmain"
 ./scbi --list-depends dmain
 
 echo "========== dmain externals"
-./scbi --list-externals dmain
+./scbi --list-externals --list-filter=all dmain

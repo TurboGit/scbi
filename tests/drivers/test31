@@ -1,0 +1,23 @@
+echo "====== default build"
+(
+    ./scbi --tests checkenv
+)
+
+echo "====== force DebugA"
+(
+    export SCBI_checkenv_BUILD_TYPE=DebugA
+    ./scbi --force --tests checkenv
+)
+
+echo "====== force DebugB"
+(
+    export SCBI_CMAKE_BUILD_TYPE=DebugB
+    ./scbi --force --tests checkenv
+)
+
+echo "====== force DebugC (check precedence)"
+(
+    export SCBI_checkenv_BUILD_TYPE=DebugC
+    export SCBI_CMAKE_BUILD_TYPE=DebugB
+    ./scbi --force --tests checkenv
+)

@@ -1,8 +1,8 @@
 ========== dmain
 depA
 depB
-oot
-dmod
 dmain
+dmod
+oot
 ========== dmain externals
 libaws-dev

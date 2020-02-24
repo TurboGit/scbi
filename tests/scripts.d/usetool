@@ -1,0 +1,49 @@
+
+function usetool-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/usetool.bundle
+}
+
+function usetool-build-depends()
+{
+    echo gentool
+}
+
+function usetool-out-of-tree()
+{
+    echo false
+}
+
+function usetool-config()
+{
+    gentool vA > version.h
+}
+
+function usetool-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f *.o
+    make
+}
+
+function usetool-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make PREFIX=$PREFIX install
+}
+
+function usetool-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./toolbin
+    return 0
+}

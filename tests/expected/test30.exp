@@ -1,0 +1,19 @@
+====== list all deps listDA
+buildA
+listDA
+listDB
+listDC
+listDD
+====== list all deps (explicit) listDA
+buildA
+listDA
+listDB
+listDC
+listDD
+====== list dev deps listDA
+buildA
+====== list run deps listDA
+listDA
+listDB
+listDC
+listDD

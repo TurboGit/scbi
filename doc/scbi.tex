@@ -375,7 +375,9 @@ The following options are supported:
 
 	\item[\ddash{}list-depends] Recursively list module's dependencies.
 
-	\item[\ddash{}list-externals={[}all|run|dev{]} ] Recursively list external dependencies. Either \code{all} or \code{dev} dependencies are listed or only the ones needed at runtime. Those last dependencies are computed automatically from the \code{dev} dependencies listed in plugin modules.
+	\item[\ddash{}list-externals] Recursively list external dependencies.
+
+	\item[\ddash{}list-filter={[}all|run|dev{]} ] Restrict the listing of dependencies or externals to either \code{all} (default) dependencies, the \code{dev} dependencies needed to build the software or the \code{run} dependencies needed to execute the software. Those last dependencies may be computed automatically from the \code{dev} dependencies listed in plugin modules.
 
 	\item[\ddash{}dry-run] Only list modules to be handled.
 
@@ -483,7 +485,27 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 		\end{enumerate}
 	\end{description}
 
-	\item[<module>-depends] Lists all modules required to build the actual module. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
+	\item[<module>-build-depends] Lists all modules required to build the actual module. These are generally some tools like \code{cmake}, \code{swig} or \code{gcc} which are only needed to build but not needed at runtime. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} [\$VARIANT]
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+			\item echo <module1>
+			\item echo <module2>
+			\item ...
+		\end{enumerate}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+	function aws-build-depends()
+	{
+		echo gnat
+	}
+	\end{lstlisting}
+
+	\item[<module>-depends] Lists all modules required to build the actual module and to use/execute it. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
 
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} [\$VARIANT]
@@ -820,8 +842,8 @@ This function will return the build-kind for the given module and system type (\
 To check the actual build kind for the given module, this function will look at some environment variables in the following specific order:
 
 \begin{description}[style=nextline]
-	\item [<module>\_BUILD\_TYPE] Build kind for this specific module.
-	\item [<CONFIG>\_BUILD\_TYPE] Build kind for the builder kind.
+	\item [SCBI\_<module>\_BUILD\_TYPE] Build kind for this specific module.
+	\item [SCBI\_<CONFIG>\_BUILD\_TYPE] Build kind for the builder kind.
 \end{description}
 
 And then this can be used in the \code{config} hook simply with:
@@ -843,13 +865,13 @@ And then this can be used in the \code{config} hook simply with:
 With the above example, if no variables are set in the environment to set the build type the default \code{Release} will be used. To force a \code{Debug} build one can set in the environment file or in the current shell:
 
 \begin{lstlisting}
- export CMAKE_BUILD_TYPE=Debug
+ export SCBI_CMAKE_BUILD_TYPE=Debug
 \end{lstlisting}
 
 Which will force a \code{Debug} build for all modules using \code{cmake}, or:
 
 \begin{lstlisting}
- export lcms2_BUILD_TYPE=Debug
+ export SCBI_lcms2_BUILD_TYPE=Debug
 \end{lstlisting}
 
 With will force a \code{Debug} build for the \code{lcms2} module only. In both cases, the corresponding module must have been coded to use the \code{get-build-type} routine as seen above. Note that the \code{export} must use \emph{underscores} instead of dashes in module name as dashes are forbidden in variable name.

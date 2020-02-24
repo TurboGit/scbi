@@ -1,0 +1,45 @@
+
+function checkenv-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/usetool.bundle
+}
+
+function checkenv-out-of-tree()
+{
+    echo false
+}
+
+function checkenv-config()
+{
+    BT="$(get-build-type CMAKE checkenv Release)"
+    echo "#define TOOLVER \"$BT\"" > version.h
+}
+
+function checkenv-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f *.o
+    make
+}
+
+function checkenv-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make PREFIX=$PREFIX install
+}
+
+function checkenv-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./toolbin
+    return 0
+}

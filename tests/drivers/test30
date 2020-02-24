@@ -1,0 +1,11 @@
+echo "====== list all deps listDA"
+./scbi --list-depends listDA
+
+echo "====== list all deps (explicit) listDA"
+./scbi --list-depends --list-filter=all listDA
+
+echo "====== list dev deps listDA"
+./scbi --list-depends --list-filter=dev listDA
+
+echo "====== list run deps listDA"
+./scbi --list-depends --list-filter=run listDA
