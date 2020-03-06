@@ -1,0 +1,27 @@
+From 8ea05a3d3dbaa3c12dd761ef6c40882e5bbf7c80 Mon Sep 17 00:00:00 2001
+From: Pascal Obry <pascal@obry.net>
+Date: Fri, 1 Nov 2019 17:26:15 +0100
+Subject: [PATCH] Fix mpris support in Linux (tested with GNOME on
+ GNU/Debian-sid).
+
+Fixes #3618.
+---
+ package.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/package.json b/package.json
+index 068440c..7e97e9b 100644
+--- a/package.json
++++ b/package.json
+@@ -166,7 +166,7 @@
+     "electron-media-service": "^0.2.2",
+     "ll-keyboard-hook-win": "^3.0.0",
+     "mouse-forward-back": "^1.0.1",
+-    "mpris-service": "^2.1.0"
++    "mpris-service": "GPMDP/mpris-service"
+   },
+   "babel": {
+     "presets": [
+-- 
+2.25.1
+
