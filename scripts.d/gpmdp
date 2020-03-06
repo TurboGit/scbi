@@ -9,7 +9,7 @@ function gpmdp-vcs()
 
 function gpmdp-depends()
 {
-    echo npm
+    echo yarn
     echo libavahi-compat-libdnssd-dev
     echo node-babel-register
 }
@@ -29,7 +29,7 @@ function gpmdp-config()
     local PREFIX=$1
     local TARGET=$2
 
-    npm install
+    yarn
 }
 
 function gpmdp-build()
@@ -37,7 +37,7 @@ function gpmdp-build()
     local PREFIX=$1
     local TARGET=$2
 
-    npm run build
+    yarn run build
 }
 
 function gpmdp-install()
@@ -46,7 +46,7 @@ function gpmdp-install()
     local TARGET=$2
 
     # create the installer
-    npm run make:deb:64
+    yarn run make:deb:64
 }
 
 function gpmdp-post-install()
