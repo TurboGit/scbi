@@ -686,7 +686,12 @@ function handle-sources()
             ln -s vcs src
 
         else
-            #  No VCS, not TAR, just rebuild the sources
+            #  No VCS, no TAR, just rebuild the sources if present
+            if [ ! -d src ]; then
+                ilog $module "cannot find sources (vcs or tar)"
+                exit 1
+            fi
+
             get-build-id $SCBI_PREFIX $SCBI_TARGET $modref "$(date)" \
                          > build-id-$variant
         fi
