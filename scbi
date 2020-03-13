@@ -80,6 +80,7 @@ DRY_RUN=no
 SAFE_MODE=false
 DO_STANDALONE=no
 SCBI_FILTER=all
+CMDLINE_BUILD_DIR=
 
 ############################## check-handled
 #
@@ -282,37 +283,38 @@ function usage()
     echo "   modulen  <name>:#<ver>    build from tarbal version <ver>"
     echo "   modulen  <name>:dev       build from user's repository current branch"
     echo ""
-    echo "   -h | --help           this help message"
-    echo "   -e | --env=<name>     environment file ~/.scbi-<name>"
-    echo "      | --enable-<name>  enable feature name"
-    echo "   -t | --target=<name>  the target to build for ($SCBI_TARGET)"
-    echo "   -S | --no-setup       skip setup"
-    echo "   -I | --no-install     skip install"
-    echo "   -u | --update         do update"
-    echo "   -s | --setup          do setup"
-    echo "   -c | --config         do config"
-    echo "   -b | --build          do build"
-    echo "   -i | --install        do install"
-    echo "      | --tar            check for tar only if explicitly specified"
-    echo "      | --tests          run the testsuite, build if necessary"
-    echo "      | --tests-only     run the testsuite"
-    echo "   -d | --deps           check/build dependencies"
-    echo "   -a | --archive        build binary archive"
-    echo "      | --standalone     create a standalone source archive"
-    echo "   -v | --verbose        display full log"
-    echo "   -l | --no-log         never display log"
-    echo "   -f | --force          force rebuild, do not check build id"
-    echo "   -p | --purge          remove builds directories before building"
-    echo "   -P | --purge-only     only remove builds directories"
-    echo "      | --list-depends   list module's dependencies"
-    echo "      | --list-externals list module's external dependencies"
-    echo "      | --list-filter=n  filter depends/external for dev or runtime"
-    echo "      | --dry-run        only list modules handled"
-    echo "      | --plan           add a build plan for modules"
-    echo "      | --stat           display some status of current setup"
-    echo "   -n | --no-patch       do not apply patches"
-    echo "   -j | --jobs=<n>       max compilation jobs \$SCBI_JOBS"
-    echo "      | --plugins=<dir>  specify the modules/plugins directory"
+    echo "   -h | --help            this help message"
+    echo "   -e | --env=<name>      environment file ~/.scbi-<name>"
+    echo "      | --enable-<name>   enable feature name"
+    echo "   -t | --target=<name>   the target to build for ($SCBI_TARGET)"
+    echo "      | --build-dir=<dir> the root build directory."
+    echo "   -S | --no-setup        skip setup"
+    echo "   -I | --no-install      skip install"
+    echo "   -u | --update          do update"
+    echo "   -s | --setup           do setup"
+    echo "   -c | --config          do config"
+    echo "   -b | --build           do build"
+    echo "   -i | --install         do install"
+    echo "      | --tar             check for tar only if explicitly specified"
+    echo "      | --tests           run the testsuite, build if necessary"
+    echo "      | --tests-only      run the testsuite"
+    echo "   -d | --deps            check/build dependencies"
+    echo "   -a | --archive         build binary archive"
+    echo "      | --standalone      create a standalone source archive"
+    echo "   -v | --verbose         display full log"
+    echo "   -l | --no-log          never display log"
+    echo "   -f | --force           force rebuild, do not check build id"
+    echo "   -p | --purge           remove builds directories before building"
+    echo "   -P | --purge-only      only remove builds directories"
+    echo "      | --list-depends    list module's dependencies"
+    echo "      | --list-externals  list module's external dependencies"
+    echo "      | --list-filter=n   filter depends/external for dev or runtime"
+    echo "      | --dry-run         only list modules handled"
+    echo "      | --plan            add a build plan for modules"
+    echo "      | --stat            display some status of current setup"
+    echo "   -n | --no-patch        do not apply patches"
+    echo "   -j | --jobs=<n>        max compilation jobs \$SCBI_JOBS"
+    echo "      | --plugins=<dir>   specify the modules/plugins directory"
 }
 
 ############################## handle-modue-env
@@ -1212,7 +1214,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends,list-externals,list-filter:,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins: -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends,list-externals,list-filter:,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir: -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1334,6 +1336,9 @@ while [ $# -gt 0 ]; do
                 exit 1
             fi
             ;;
+        --build-dir)
+            CMDLINE_BUILD_DIR=$2; shift
+            ;;
         (--)
             ;;
         (*)
@@ -1363,6 +1368,13 @@ load-module-env $ENV_NAME
 
 if [ "$NSTEPS" != "" ]; then
     STEPS=$NSTEPS
+fi
+
+# If we have specified a build directory on command line, set it now
+# that the env is loaded (takes precedence).
+
+if [ ! -z $CMDLINE_BUILD_DIR ]; then
+    export SCBI_BDIR=$CMDLINE_BUILD_DIR
 fi
 
 #  Then load any global settings, not overriding user's ones
