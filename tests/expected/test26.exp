@@ -2,6 +2,7 @@
 xxxx/xx/xx xx:xx:xx : Building var [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : build starting
@@ -14,6 +15,7 @@ xxxx/xx/xx xx:xx:xx : End Building var [default] (master)
 xxxx/xx/xx xx:xx:xx : Building var [one] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [one] starting
 xxxx/xx/xx xx:xx:xx : config [one] completed
 xxxx/xx/xx xx:xx:xx : build [one] starting
@@ -26,6 +28,7 @@ xxxx/xx/xx xx:xx:xx : End Building var [one] (master)
 xxxx/xx/xx xx:xx:xx : Building var [two] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [two] starting
 xxxx/xx/xx xx:xx:xx : config [two] completed
 xxxx/xx/xx xx:xx:xx : build [two] starting
@@ -38,6 +41,7 @@ xxxx/xx/xx xx:xx:xx : End Building var [two] (master)
 xxxx/xx/xx xx:xx:xx : Building var [one two] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [one two] starting
 xxxx/xx/xx xx:xx:xx : config [one two] completed
 xxxx/xx/xx xx:xx:xx : build [one two] starting
@@ -50,6 +54,7 @@ xxxx/xx/xx xx:xx:xx : End Building var [one two] (master)
 xxxx/xx/xx xx:xx:xx : Building var [two one] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [two one] starting
 xxxx/xx/xx xx:xx:xx : config [two one] completed
 xxxx/xx/xx xx:xx:xx : build [two one] starting
@@ -62,6 +67,7 @@ xxxx/xx/xx xx:xx:xx : End Building var [two one] (master)
 xxxx/xx/xx xx:xx:xx : Building var [one two three four] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [one two three four] starting
 xxxx/xx/xx xx:xx:xx : config [one two three four] completed
 xxxx/xx/xx xx:xx:xx : build [one two three four] starting
