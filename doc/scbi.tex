@@ -326,7 +326,7 @@ The following options are supported:
 	\item[\ddash{}prefix=<dir>] The installation directory to use instead of the default \file{$SCBI_PREFIX}.
 
 	\item[\ddash{}build-dir=<dir>] The root build directory to use instead of the default \file{$SCBI_BDIR}.
-	
+
 	\item[-e | \ddash{}env=<name>] Use environment file \code{.env-<name>} instead of the default \code{.env}. (\seeref{build-env})
 
 	\item[\ddash{}plan=<name>] Use build plan file \code{.plan-<name>}. (\seeref{build-plan}).
@@ -641,6 +641,15 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
+
+        It is possible specify a specific VCS hook in an environment file by two means:
+
+        \begin{description}[style=standard]
+                \item[\code{SCBI\_<module>\_VCS\_VARIANT}] \hfill \\
+                 If environment variable \code{SCBI\_<module>\_VCS\_VARIANT} is set then the hook \\ \code{<module>-\$\{SCBI\_<module>\_VCS\_VARIANT\}-vcs} is looked for before the generic \code{<module>-vcs}. This is specific to module name \code{<module>}.
+
+                \item[\code{SCBI\_VCS\_VARIANT}] Same as above for the all modules.
+        \end{description}
 
 \end{description}
 

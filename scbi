@@ -609,10 +609,9 @@ function handle-sources()
     else
         # Get sources from repository
 
-        fn-exists $module-vcs
+        vcs=( $(get-vcs-data $module) )
 
         if [[ $? = 0 ]]; then
-            vcs=( $($module-vcs) )
             VCS_NAME=${vcs[2]}
             VCS_URL=${vcs[3]}
 

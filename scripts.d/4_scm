@@ -237,6 +237,43 @@ function svn-branch()
     return 1
 }
 
+############################## get-vcs-data
+
+function get-vcs-data()
+{
+    local module=$1
+
+    VCS_FUNCTION=${module//-/_}-vcs
+
+    #  check first for module specifc VCS variant
+
+    VAR=SCBI_${module//-/_}_VCS_VARIANT
+
+    if [ "${!VAR}" != "" ]; then
+        fn-exists $module-${!VAR}-vcs
+        if [[ $? = 0 ]]; then
+            VCS_FUNCTION=$module-${!VAR}-vcs
+        else
+            elog build "error: vcs specific function for $module not found."
+            exit 1
+        fi
+
+    elif [ "${SCBI_VCS_VARIANT}" != "" ]; then
+        fn-exists $module-${SCBI_VCS_VARIANT}-vcs
+        if [[ $? = 0 ]]; then
+            VCS_FUNCTION=$module-${SCBI_VCS_VARIANT}-vcs
+        fi
+    fi
+
+    fn-exists $VCS_FUNCTION
+
+    if [[ $? = 0 ]]; then
+        $VCS_FUNCTION
+    else
+        return 1
+    fi
+}
+
 ############################## get-vcs
 
 function get-vcs()
@@ -247,7 +284,7 @@ function get-vcs()
 
     local res=0
 
-    vcs=( $($module-vcs) )
+    vcs=( $(get-vcs-data $module) )
     local VCS_PROXY=${vcs[0]}
     local VCS_OPTIONS=${vcs[1]}
     local VCS_NAME=${vcs[2]}
