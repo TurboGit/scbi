@@ -194,6 +194,8 @@ function _internal_for-all-modules()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
+    [ $ref = "skip" ] && return 0
+
     #  Check dependency graph to ensure there is no circularities
 
     check-dependency-tree $module

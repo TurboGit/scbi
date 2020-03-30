@@ -335,6 +335,9 @@ function handle-module-env()
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
+    local ref=${module_info[3]}
+
+    [ $ref = "skip" ] && return 0
 
     # Then setup the current module
 
