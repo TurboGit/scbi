@@ -70,16 +70,16 @@ function get-deb-lib-for-dev()
     fi
 
     # package name without trailing -dev
-    local base=${pkg:1:-4}
+    local base=${pkg:0:-4}
 
-    local res=$(LANG=c apt-cache depends $1 | grep 'Depends:' \
+    local res=$(LC_ALL=C LANG=C apt-cache depends $1 | grep 'Depends:' \
                     | grep "$base" | cut -d':' -f2)
 
     for D in $res; do
         if [ "${D: -4}" = "-dev" ]; then
             get-deb-lib-for-dev "$D"
         else
-            echo $D;
+            echo $D
         fi
     done
 }
