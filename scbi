@@ -68,6 +68,7 @@ DOFORCE=no
 DOSTAT=no
 DODEPS=no
 DOEXT=no
+DOPLAN=no
 DEPS=no
 ISOOT=yes
 PATCH=yes
@@ -313,6 +314,7 @@ function usage()
     echo "      | --list-depends    list module's dependencies"
     echo "      | --list-externals  list module's external dependencies"
     echo "      | --list-filter=n   filter depends/external for dev or runtime"
+    echo "      | --list-plan       list current current plan"
     echo "      | --dry-run         only list modules handled"
     echo "      | --stat            display some status of current setup"
     echo "   -n | --no-patch        do not apply patches"
@@ -1216,7 +1218,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends,list-externals,list-filter:,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir: -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends,list-externals,list-filter:,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan: -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1320,6 +1322,9 @@ while [ $# -gt 0 ]; do
             ;;
         --list-filter)
             SCBI_FILTER=$2; shift
+            ;;
+        --list-plan)
+            DOPLAN=yes;
             ;;
         --dry-run)
             DRY_RUN=yes;
@@ -1442,6 +1447,11 @@ fi
 for module in $MODULES; do
     set-module-ref $module
 done
+
+if [ $DOPLAN == yes ]; then
+    display-build-plan
+    exit 0
+fi
 
 #  Run script for all modules
 

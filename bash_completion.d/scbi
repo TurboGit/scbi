@@ -5,7 +5,7 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 -l --no-log -p --purge -P --purge-only -d --deps -a --archive -h --help
 -j --jobs= --target= --env= -e --tests-only --plan= -n --no-patch --tar
 --list-depends --list-externals --list-filter= --dry-run -w --wrapup
---force --enable- --safe --plugins --build-dir"
+--force --enable- --safe --plugins --build-dir --list-plan"
 
 _gnat_targets()
 {
