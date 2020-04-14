@@ -2,7 +2,7 @@
 #
 #
 
-declare -A MODVER=[]
+declare -A MODVER
 
 function load-module-plan()
 {
