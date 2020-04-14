@@ -30,6 +30,18 @@ function load-module-plan()
     fi
 }
 
+############################## display-build-plan
+#
+#
+
+function display-build-plan()
+{
+    echo "There is ${#MODVER[*]} module(s) in the plan"
+    for module in ${!MODVER[*]}; do
+        echo ${MODVER[$module]}
+    done
+}
+
 ############################## set-module-ref
 #
 # Set a module reference into the build plan only if this reference a
