@@ -1,5 +1,6 @@
 
-declare -A SCBI_LOADED=[]
+declare -A SCBI_LOADED
+
 declare SCBI_RECTREE=()
 
 ############################## fn-exists
@@ -315,7 +316,7 @@ function for-all-modules()
     shift
     shift
 
-    declare -A SCBI_CHECKED=[]
+    declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK false true false false $MODREF $@
 }
@@ -328,7 +329,7 @@ function for-all-modules-ext()
     shift
     shift
 
-    declare -A SCBI_CHECKED=[]
+    declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK false true true false $MODREF $@
 }
@@ -341,7 +342,7 @@ function for-all-modules-with-meta()
     shift
     shift
 
-    declare -A SCBI_CHECKED=[]
+    declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK true true false false $MODREF $@
 }
@@ -354,7 +355,7 @@ function for-all-modules-with-meta-ext()
     shift
     shift
 
-    declare -A SCBI_CHECKED=[]
+    declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK true true true false $MODREF $@
 }
