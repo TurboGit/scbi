@@ -9,12 +9,23 @@ function libadalang-tools-vcs()
 
 function libadalang-tools-depends()
 {
-    echo libadalang
+    # libadalang-tool must be built using the stable
+    # branch of langkit & libadalang
+
+    echo libadalang/stable:stable
 }
 
 function libadalang-tools-out-of-tree()
 {
     echo false
+}
+
+function libadalang-tools-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    export LIBRARY_TYPE=relocatable
 }
 
 function libadalang-tools-build()
