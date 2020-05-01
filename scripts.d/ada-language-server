@@ -1,0 +1,40 @@
+
+function ada-language-server-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/ada_language_server
+}
+
+function ada-language-server-out-of-tree()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo false
+}
+
+function ada-language-server-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    PROCESSORS=$SCBI_JOBS make -j1
+}
+
+function ada-language-server-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make DESTDIR=$PREFIX install
+}
+
+function ada-language-server-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo NONE
+}
