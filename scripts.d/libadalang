@@ -7,12 +7,34 @@ function libadalang-vcs()
     echo https://github.com/AdaCore/libadalang
 }
 
-function libadalang-depends()
+function libadalang-common-depends()
 {
     echo gnatcoll-bindings-gmp
     echo libyaml-dev
+}
+
+function libadalang-stable-depends()
+{
+    libadalang-common-depends
+    echo langkit/stable:stable
+}
+
+function libadalang-depends()
+{
+    libadalang-common-depends
     echo langkit
-    echo langkit_support
+}
+
+function libadalang-stable-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    libadalang-env
+
+    LAL=$SCBI_BDIR/libadalang
+    add-to-var GPR_PROJECT_PATH $LAL/$TARGET-stable/install/share/gpr
+    add-to-var PATH             $LAL/$TARGET-stable/install/bin
 }
 
 function libadalang-env()
@@ -29,40 +51,30 @@ function libadalang-config()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    [ ! -d langkit ] && mkdir langkit
-    rsync -a --exclude=".git" $SCBI_BDIR/langkit/src/* langkit
-
-    export PYTHONPATH=$PWD/langkit
-    python ada/manage.py generate
+    python ada/manage.py --no-langkit-support generate
 }
 
 function libadalang-build()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    GOPTS="-p -m -j$SCBI_JOBS"
-    PRJ=./build/lib/gnat/libadalang.gpr
-
-    for KIND in static relocatable static-pic; do
-        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
-    done
+    python ada/manage.py --no-langkit-support build
 }
 
 function libadalang-install()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    gprinstall --prefix=$PREFIX --uninstall libadalang
+    python ada/manage.py --no-langkit-support install $PREFIX
+}
 
-    BV="--build-var=LIBADALANG_BUILD --build-var=LIBRARY_TYPE"
-    GOPTS="-p --prefix=$PREFIX $BV"
-    PRJ=./build/lib/gnat/libadalang.gpr
-
-    for KIND in static relocatable static-pic; do
-        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
-                   -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
-    done
+function libadalang-stable-prefix()
+{
+    echo NONE
 }
