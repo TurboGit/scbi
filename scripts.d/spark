@@ -12,6 +12,9 @@ function spark-depends()
     echo cvc4
     echo alt-ergo
     echo menhir
+    echo libnum-ocaml-dev
+    echo libmenhir-ocaml-dev
+    echo libyojson-ocaml-dev
 }
 
 function spark-out-of-tree()
