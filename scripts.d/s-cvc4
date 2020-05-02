@@ -1,0 +1,50 @@
+
+function s-cvc4-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/cvc4
+}
+
+function s-cvc4-depends()
+{
+    echo antlr3
+    echo libantlr3c-dev
+    echo libboost-dev
+    echo python-toml
+}
+
+function s-cvc4-out-of-tree()
+{
+    echo false
+}
+
+function s-cvc4-build-env()
+{
+    system-compiler
+}
+
+function s-cvc4-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./configure.sh --prefix=$PREFIX
+}
+
+function s-cvc4-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd build && make -j$SCBI_MAKE_JOBS
+}
+
+function s-cvc4-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd build && make install
+}
