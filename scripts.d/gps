@@ -25,6 +25,11 @@ function gps-out-of-tree()
     echo false
 }
 
+function gps-patches()
+{
+    echo gps-css-gtk3.36.patch
+}
+
 function gps-config()
 {
     local PREFIX=$1

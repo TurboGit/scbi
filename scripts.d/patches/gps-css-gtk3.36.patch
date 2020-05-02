@@ -1,0 +1,204 @@
+diff --git a/share/gps.css b/share/gps.css
+index a332e70add..7746a782bd 100644
+--- a/share/gps.css
++++ b/share/gps.css
+@@ -34,16 +34,13 @@
+  *********************/
+ 
+ * {
+-   /* Reduce the size of the scroll arrows in notebooks */
+-   -GtkWidget-scroll-arrow-hlength: 8;
+-   -GtkWidget-scroll-arrow-vlength: 8;
+-   -GtkNotebook-arrow-spacing: 0;
+-   icon-shadow: none;
+-   text-shadow: none;
+-   box-shadow: none;
++   font-family: "Liberation Mono",
++                "DejaVu Sans Mono",
++                "Noto Sans Mono Condensed";
++   font-size: 12px;
+ }
+ 
+-.view, .menu, column-header .button, GtkListBox, GtkFlowBox {
++.view, menu, column-header .button, GtkListBox, GtkFlowBox {
+    background-color: @theme_base_color;
+ }
+ 
+@@ -63,6 +60,11 @@ GtkToolbar * {
+  * Entries
+  *********************/
+ 
++entry
++{
++    min-width: 10em;
++}
++
+ .entry, .entry.multiline GtkTextView.view {
+    background-image: -gtk-gradient (linear,
+                                    0 0, 0 0.5,
+@@ -90,7 +92,7 @@ GtkToolbar * {
+ }
+ 
+ .button.flat
+- {
++{
+    background: transparent;
+    background-image: none;
+    border-radius: 2px;
+@@ -98,7 +100,7 @@ GtkToolbar * {
+    border-color: transparent;
+ }
+ 
+-*:insensitive {
++*:disabled {
+   color: @inactive_items_color;
+ }
+ 
+@@ -144,6 +146,12 @@ GtkToolbar * {
+    background-image: none;
+ }
+ 
++notebook * progressbar, notebook * progressbar * {
++    background-color: @theme_base_color;
++    border: 0;
++    padding: 0;
++}
++
+ /*************
+  * Dialogs   *
+  *************/
+@@ -253,13 +261,6 @@ GtkDialog {
+    color: @inactive_items_selected_color;
+ }
+ 
+-.dialog-views-button-boxes {
+-   -GtkButtonBox-child-min-width: 0;
+-   -GtkButtonBox-child-min-height: 0;
+-   -GtkButtonBox-child-internal-pad-y: 0;
+-   -GtkButtonBox-child-internal-pad-x: 0;
+-}
+-
+ .dialog-views-groups.with-message {
+    padding-top: 12px;
+    padding-bottom: 12px;
+@@ -390,16 +391,16 @@ GtkDialog {
+    box-shadow: none;
+ }
+ 
+-.menu .menuitem:hover {
++menu .menuitem:hover {
+    background: @theme_selected_bg_color;
+    color: @theme_selected_fg_color;
+ }
+ 
+-.menubar {
++menubar {
+    background: @notebook_background;
+ }
+ 
+-.menu {
++menu {
+   border: 2px solid mix(@theme_base_color, @mdi_border_color, 0.5);
+ }
+ 
+@@ -420,12 +421,9 @@ GtkDialog {
+  * MDI Notebooks
+  *********************/
+ 
+-.notebook.mdi {
+-   -GtkNotebook-initial-gap: 0;
+-
+-   /* No space between tabs */
+-   -GtkNotebook-tab-overlap: 0;
+-
++notebook.mdi {
++   padding: 0;
++   margin: 0;
+    background-color: @notebook_background;
+ }
+ 
+@@ -433,60 +431,43 @@ GtkDialog {
+  * MDI Notebook headers
+  ***********************/
+ 
+-.notebook.mdi.header {
++notebook header * {
+   border: none;
+   box-shadow: none;
++  background-color: @notebook_background;
+ }
+ 
+ /*********************
+  * MDI Notebook tabs
+  *********************/
+ 
+-.notebook.mdi tab {
++notebook.mdi tab {
++   border: none;
+    border-width: 0px;
+    border-color: @mdi_border_color;
+-   padding: 8px;
++   padding: 1px;
+ }
+ 
+-.notebook.mdi tab * {
+-   padding: 4px;
++notebook.mdi tab * {
++   border: none;
++   padding: 2px;
+ }
+ 
+-.notebook.mdi tab GtkLabel {
++notebook.mdi tab GtkLabel {
+    font-weight: normal;
+    color: @inactive_items_color;
+ }
+ 
+-.notebook.mdifocused tab:active {
++notebook.mdi tab:checked * {
+    background-color: @theme_base_color;
+ }
+ 
+-.notebook.mdi .active-page GtkLabel {
+-   color: @editor_fg_color;;
+-}
+-
+-.notebook.mdi .mdi-highlighted-tab {
+-   color: @theme_selected_bg_color;
+-}
+-
+-.notebook.mdifocused tab:active.top {
+-   border-top-width: 2px;
+-   border-top-color: @theme_selected_bg_color;
+-}
+-
+-.notebook.mdifocused tab:active.left {
+-   border-left-width: 2px;
+-   border-left-color: @theme_selected_bg_color;
+-}
+-
+-.notebook.mdifocused tab:active.right {
+-   border-right-width: 2px;
+-   border-right-color: @theme_selected_bg_color;
+-}
+-
+-.notebook.mdifocused tab:active.bottom {
+-   border-bottom-width: 2px;
+-   border-bottom-color: @theme_selected_bg_color;
++notebook.mdi tab:checked {
++    background-color: @mdi_border_color;
++    padding-top: 1px;
++    padding-left: 1px;
++    padding-right: 1px;
++    padding-bottom: 0px;
+ }
+ 
+ /**********************
+@@ -495,7 +476,6 @@ GtkDialog {
+ 
+ .scrollbar {
+    border-width: 0px;
+-   -GtkRange-slider-width: 8px;
+    background-color: @theme_base_color;
+ }
+ 
