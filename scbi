@@ -341,10 +341,19 @@ function handle-module-env()
 
     [ $ref = "skip" ] && return 0
 
+    # For a build environment we call the hook from the build directory
+    # otherwise we call for the install directory.
+
+    if [ $ENV = "build-env" ]; then
+        ENV_DIR=build
+    else
+        ENV_DIR=install
+    fi
+
     # Then setup the current module
 
-    if [ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]; then
-        cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
+    if [ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/$ENV_DIR ]; then
+        cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant/$ENV_DIR
     elif [ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]; then
         cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant
     else
