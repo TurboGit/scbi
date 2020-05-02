@@ -1,5 +1,5 @@
 diff --git a/share/gps.css b/share/gps.css
-index a332e70add..7746a782bd 100644
+index a332e70add..3143466ae3 100644
 --- a/share/gps.css
 +++ b/share/gps.css
 @@ -34,16 +34,13 @@
@@ -24,28 +24,48 @@ index a332e70add..7746a782bd 100644
     background-color: @theme_base_color;
  }
  
-@@ -63,6 +60,11 @@ GtkToolbar * {
+@@ -63,6 +60,13 @@ GtkToolbar * {
   * Entries
   *********************/
  
 +entry
 +{
 +    min-width: 10em;
++    min-height: 1.7em;
++    padding: 0px;
 +}
 +
  .entry, .entry.multiline GtkTextView.view {
     background-image: -gtk-gradient (linear,
                                     0 0, 0 0.5,
-@@ -90,7 +92,7 @@ GtkToolbar * {
+@@ -75,7 +79,7 @@ GtkToolbar * {
+  * Buttons and Combos
+  *********************/
+ 
+-.button
++button
+ {
+    background-image: -gtk-gradient (linear,
+                                    0 0, 0 0.5,
+@@ -83,14 +87,15 @@ GtkToolbar * {
+                                    to(@button_bg_color_one));
+    border-width: 1px;
+    border-color: @popup_border_color;
++   padding: 2px;
  }
  
- .button.flat
+ .gps-welcome-dialog .list-row.button, GtkTreeView > .button {
+   background: transparent;
+ }
+ 
+-.button.flat
 - {
++button.flat
 +{
     background: transparent;
     background-image: none;
     border-radius: 2px;
-@@ -98,7 +100,7 @@ GtkToolbar * {
+@@ -98,7 +103,7 @@ GtkToolbar * {
     border-color: transparent;
  }
  
@@ -54,7 +74,40 @@ index a332e70add..7746a782bd 100644
    color: @inactive_items_color;
  }
  
-@@ -144,6 +146,12 @@ GtkToolbar * {
+@@ -111,11 +116,11 @@ GtkToolbar * {
+   padding: 4px;
+ }
+ 
+-.button:link:hover {
++button:link:hover {
+    color: @theme_selected_bg_color;
+ }
+ 
+-.button:active, .button:checked {
++button:active, .button:checked {
+    background-image: -gtk-gradient (linear,
+                                    0 0, 0 0.5,
+                                    from(@active_button_bg_color_one),
+@@ -123,18 +128,11 @@ GtkToolbar * {
+    border-color: @popup_border_color;
+ }
+ 
+-
+ /*********************
+  * Progress Bars
+  *********************/
+ 
+-.gps-task-manager GtkProgressBar {
+-   -GtkProgressBar-min-horizontal-bar-height: 1;
+-}
+-
+ .mdichild GtkProgressBar {
+-   -GtkProgressBar-min-horizontal-bar-height: 1;
+-   -GtkProgressBar-yspacing: 3;
+    border: none;
+    background-color: @theme_base_color;
+ }
+@@ -144,6 +142,12 @@ GtkToolbar * {
     background-image: none;
  }
  
@@ -67,7 +120,7 @@ index a332e70add..7746a782bd 100644
  /*************
   * Dialogs   *
   *************/
-@@ -253,13 +261,6 @@ GtkDialog {
+@@ -253,13 +257,6 @@ GtkDialog {
     color: @inactive_items_selected_color;
  }
  
@@ -81,7 +134,7 @@ index a332e70add..7746a782bd 100644
  .dialog-views-groups.with-message {
     padding-top: 12px;
     padding-bottom: 12px;
-@@ -390,16 +391,16 @@ GtkDialog {
+@@ -390,16 +387,16 @@ GtkDialog {
     box-shadow: none;
  }
  
@@ -101,7 +154,7 @@ index a332e70add..7746a782bd 100644
    border: 2px solid mix(@theme_base_color, @mdi_border_color, 0.5);
  }
  
-@@ -420,12 +421,9 @@ GtkDialog {
+@@ -420,12 +417,9 @@ GtkDialog {
   * MDI Notebooks
   *********************/
  
@@ -117,7 +170,7 @@ index a332e70add..7746a782bd 100644
     background-color: @notebook_background;
  }
  
-@@ -433,60 +431,43 @@ GtkDialog {
+@@ -433,60 +427,43 @@ GtkDialog {
   * MDI Notebook headers
   ***********************/
  
@@ -194,7 +247,7 @@ index a332e70add..7746a782bd 100644
  }
  
  /**********************
-@@ -495,7 +476,6 @@ GtkDialog {
+@@ -495,7 +472,6 @@ GtkDialog {
  
  .scrollbar {
     border-width: 0px;
