@@ -1,5 +1,5 @@
 
-function cvc4-vcs()
+function s-cvc4-vcs()
 {
     echo default
     echo none
@@ -7,7 +7,7 @@ function cvc4-vcs()
     echo https://github.com/AdaCore/cvc4
 }
 
-function cvc4-depends()
+function s-cvc4-depends()
 {
     echo antlr3
     echo libantlr3c-dev
@@ -15,17 +15,17 @@ function cvc4-depends()
     echo python-toml
 }
 
-function cvc4-out-of-tree()
+function s-cvc4-out-of-tree()
 {
     echo false
 }
 
-function cvc4-build-env()
+function s-cvc4-build-env()
 {
     system-compiler
 }
 
-function cvc4-config()
+function s-cvc4-config()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -33,7 +33,7 @@ function cvc4-config()
     ./configure.sh --prefix=$PREFIX
 }
 
-function cvc4-build()
+function s-cvc4-build()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -41,7 +41,7 @@ function cvc4-build()
     cd build && make -j$SCBI_MAKE_JOBS
 }
 
-function cvc4-install()
+function s-cvc4-install()
 {
     local PREFIX=$1
     local TARGET=$2
