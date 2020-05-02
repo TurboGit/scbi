@@ -10,6 +10,8 @@ function gps-vcs()
 function gps-depends()
 {
     echo libclang-dev
+    echo python-pep8
+    echo python-jedi
     echo xmlada
     echo gtkada
     echo libadalang/stable:stable
@@ -31,7 +33,7 @@ function gps-config()
     (
         # Setup GNAT link
         rm -fr gnat
-        ln -s $SCBI_BDIR/gnat/src gnat
+        ln -s $SCBI_BDIR/gnat/$TARGET-default/src/gcc/ada/doc/gnat_ugn gnat
 
         # Setup LaL link
         rm -f laltools
@@ -40,7 +42,8 @@ function gps-config()
         # Setup ALS link
         # GPS require using the build directory of ada-language-server
         rm -f ada_language_server
-        ln -s $SCBI_BDIR/ada-language-server/$TARGET-default/build ada_language_server
+        ln -s $SCBI_BDIR/ada-language-server/$TARGET-default/build \
+           ada_language_server
 
         ./configure --prefix=$PREFIX --with-gtk=$GTKV \
                     --with-sqlite=embedded --with-gnatcoll=$SCBI_BDIR/install \
@@ -62,7 +65,8 @@ function gps-pre-build()
     local PREFIX=$1
     local TARGET=$2
 
-    sed -i "s,unknown date,$(date +%Y/%m/%d),g" common/core/src/config.ads
+    DATE=$(date "+%Y/%m/%d")
+    sed -i "s,unknown date,$DATE,g" common/core/src/config.ads
 }
 
 function gps-build()
