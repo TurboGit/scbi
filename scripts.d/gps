@@ -28,6 +28,7 @@ function gps-out-of-tree()
 function gps-patches()
 {
     echo gps-css-gtk3.36.patch
+    echo gps-gutter-gtk3.patch
 }
 
 function gps-config()
