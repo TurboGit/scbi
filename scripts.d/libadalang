@@ -56,7 +56,7 @@ function libadalang-config()
     python ada/manage.py --no-langkit-support generate
 }
 
-function libadalang-build()
+function libadalang-stable-build()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -65,13 +65,45 @@ function libadalang-build()
     python ada/manage.py --no-langkit-support build
 }
 
-function libadalang-install()
+function libadalang-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    GOPTS="-p -m -j$SCBI_JOBS"
+    PRJ=./build/lib/gnat/libadalang.gpr
+
+    for KIND in static relocatable static-pic; do
+        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
+    done
+}
+
+function libadalang-stable-install()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
 
     python ada/manage.py --no-langkit-support install $PREFIX
+}
+
+function libadalang-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    gprinstall --prefix=$PREFIX --uninstall libadalang
+
+    BV="--build-var=LIBADALANG_BUILD --build-var=LIBRARY_TYPE"
+    GOPTS="-p --prefix=$PREFIX $BV"
+    PRJ=./build/lib/gnat/libadalang.gpr
+
+    for KIND in static relocatable static-pic; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
+                   -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
+    done
 }
 
 function libadalang-stable-prefix()
