@@ -12,7 +12,7 @@ function gpr-depends()
     echo gnatcoll-core
     echo gnatcoll-bindings-iconv
     echo gnatcoll-bindings-gmp
-    echo langkit_support
+    echo langkit
 }
 
 function do-config()
@@ -22,8 +22,7 @@ function do-config()
     GPROPTS="$3 GENERATE_LANGKIT_SUPPORT=no"
 
     (
-        add-to-var PYTHONPATH \
-                   $SCBI_BDIR/langkit_support/$TARGET-default/build/langkit
+        add-to-var PYTHONPATH $SCBI_BDIR/langkit/$TARGET-default/build
 
         make $GPROPTS setup
     )
