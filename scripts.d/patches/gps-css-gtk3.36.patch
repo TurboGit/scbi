@@ -1,5 +1,5 @@
 diff --git a/share/gps.css b/share/gps.css
-index a332e70add..3143466ae3 100644
+index a332e70add..eb834df39d 100644
 --- a/share/gps.css
 +++ b/share/gps.css
 @@ -34,16 +34,13 @@
@@ -255,3 +255,17 @@ index a332e70add..3143466ae3 100644
     background-color: @theme_base_color;
  }
  
+@@ -620,10 +596,9 @@ GtkTextView.view.editor.readonly {
+  * Selection
+  **********************************/
+ 
+-*:selected, GtkTextView.view:selected, GtkTextView.view.editor:selected,
+-.list-row.button:selected {
+-  background-color: @theme_selected_bg_color;
+-  color: @theme_selected_fg_color;
++selection {
++    background-color: @theme_selected_bg_color;
++    color: @theme_selected_fg_color;
+ }
+ 
+ /**********************************
