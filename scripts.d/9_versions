@@ -42,6 +42,24 @@ function display-build-plan()
     done
 }
 
+############################## display-build-plan
+#
+#
+
+function record-build-plan()
+{
+    local module=$1
+    local variant=$2
+
+    local PLAN=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/build-plan
+
+    echo "# build plan" > $PLAN
+
+    for module in ${!MODVER[*]}; do
+        echo ${MODVER[$module]} >> $PLAN
+    done
+}
+
 ############################## set-module-ref
 #
 # Set a module reference into the build plan only if this reference a

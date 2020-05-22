@@ -816,7 +816,7 @@ function handle-module()
     #  Create module build directory
 
     mkdir -p $SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log > $log 2>&1
-    fct=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/fct.cmd
+    local fct=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/fct.cmd
 
     echo "function add-to-var()"                      > $fct
     echo "{"                                         >> $fct
@@ -824,6 +824,8 @@ function handle-module()
     echo '    local DIR=$2'                          >> $fct
     echo '    export $VAR="${DIR}${!VAR:+:}${!VAR}"' >> $fct
     echo "}"                                         >> $fct
+
+    record-build-plan $module $variant
 
     #  Check if meta-module, if so call handle-module for each one
 
