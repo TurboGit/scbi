@@ -1,5 +1,5 @@
 diff --git a/share/gps.css b/share/gps.css
-index a332e70add..04e3292e54 100644
+index a332e70add..960d59a7f1 100644
 --- a/share/gps.css
 +++ b/share/gps.css
 @@ -34,20 +34,17 @@
@@ -527,16 +527,20 @@ index a332e70add..04e3292e54 100644
    background-color: @readonly_color;
  }
  
-@@ -620,7 +601,7 @@ GtkTextView.view.editor.readonly {
+@@ -620,21 +601,20 @@ GtkTextView.view.editor.readonly {
   * Selection
   **********************************/
  
 -*:selected, GtkTextView.view:selected, GtkTextView.view.editor:selected,
-+*:selected, textview.view:selected, textview.view.editor:selected,
- .list-row.button:selected {
-   background-color: @theme_selected_bg_color;
-   color: @theme_selected_fg_color;
-@@ -630,11 +611,11 @@ GtkTextView.view.editor.readonly {
+-.list-row.button:selected {
+-  background-color: @theme_selected_bg_color;
+-  color: @theme_selected_fg_color;
++selection {
++    background-color: @theme_selected_bg_color;
++    color: @theme_selected_fg_color;
+ }
+ 
+ /**********************************
   * Entity Proposals Menu
   **********************************/
  
@@ -550,7 +554,7 @@ index a332e70add..04e3292e54 100644
     padding: 10px;
  }
  
-@@ -660,5 +641,5 @@ GtkTextView.view.editor.readonly {
+@@ -660,5 +640,5 @@ GtkTextView.view.editor.readonly {
     bind "Right" { "move-cursor" (display-lines, 1) };
     bind "Left" { "move-cursor" (display-lines, -1) };
  }
