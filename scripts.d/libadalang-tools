@@ -28,6 +28,16 @@ function libadalang-tools-build-env()
     export LIBRARY_TYPE=relocatable
 }
 
+function libadalang-tools-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    LALT=$SCBI_BDIR/libadalang-tools
+    add-to-var GPR_PROJECT_PATH $LALT/$TARGET-$VARIANT/build/src
+}
+
 function libadalang-tools-build()
 {
     local PREFIX=$1
