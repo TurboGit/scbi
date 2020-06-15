@@ -53,7 +53,7 @@ function libadalang-config()
     local TARGET=$2
     local VARIANT=$3
 
-    python2 ada/manage.py --no-langkit-support generate
+    python ada/manage.py --no-langkit-support generate
 }
 
 function libadalang-stable-build()
@@ -62,7 +62,7 @@ function libadalang-stable-build()
     local TARGET=$2
     local VARIANT=$3
 
-    python2 ada/manage.py --no-langkit-support build
+    python ada/manage.py --no-langkit-support build
 }
 
 function libadalang-build()
@@ -85,7 +85,7 @@ function libadalang-stable-install()
     local TARGET=$2
     local VARIANT=$3
 
-    python2 ada/manage.py --no-langkit-support install $PREFIX
+    python ada/manage.py --no-langkit-support install $PREFIX
 }
 
 function libadalang-install()
