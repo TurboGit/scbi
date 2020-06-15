@@ -53,7 +53,7 @@ function langkit-config()
     local TARGET=$2
     local VARIANT=$3
 
-    python2 scripts/build-langkit_support.py generate
+    python scripts/build-langkit_support.py generate
 }
 
 function langkit-stable-build()
@@ -62,7 +62,7 @@ function langkit-stable-build()
     local TARGET=$2
     local VARIANT=$3
 
-    python2 scripts/build-langkit_support.py build
+    python scripts/build-langkit_support.py build
 }
 
 function langkit-build()
@@ -85,7 +85,7 @@ function langkit-stable-install()
     local TARGET=$2
     local VARIANT=$3
 
-    python2 scripts/build-langkit_support.py install $PREFIX
+    python scripts/build-langkit_support.py install $PREFIX
 }
 
 function langkit-install()
