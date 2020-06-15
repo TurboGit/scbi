@@ -13,6 +13,7 @@ function gpr-depends()
     echo gnatcoll-bindings-iconv
     echo gnatcoll-bindings-gmp
     echo langkit
+    echo libadalang
 }
 
 function do-config()
