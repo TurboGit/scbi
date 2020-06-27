@@ -14,15 +14,18 @@ function darktable-out-of-tree()
 
 function darktable-depends()
 {
+    echo cmake
     echo libsqlite3-dev
     echo libpng-dev
     echo libjpeg-dev
+    echo libopenjp2-7-dev
     echo libpugixml-dev
     echo libxml2-dev
     echo liblcms2-dev
     echo libtiff-dev
     echo libexiv2-dev
     echo libcurl4
+    echo libcurl4-gnutls-dev
     echo libgphoto2-dev
     echo libopenexr-dev
     echo libsoup2.4-dev
@@ -30,9 +33,21 @@ function darktable-depends()
     echo libosmgpsmap-1.0-dev
     echo libgraphicsmagick1-dev
     echo libcolord-dev
+    echo libcolord-gtk-dev
     echo libgomp1
     echo libgmic-dev
     echo libcups2-dev
+    echo libsecret-1-dev
+    echo llvm-10
+    echo clang-10
+    echo xsltproc
+    echo libimage-exiftool-perl
+    echo libxml2-utils
+    echo python3-jsonschema
+    echo intltool
+    echo liblensfun-dev
+    echo librsvg2-dev
+    echo libjson-glib-dev
 }
 
 function darktable-env()
