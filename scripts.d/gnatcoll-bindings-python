@@ -10,6 +10,7 @@ function gnatcoll-bindings-python-vcs()
 function gnatcoll-bindings-python-depends()
 {
     echo gnatcoll-core
+    echo libpython-dev
 }
 
 function gnatcoll-bindings-python-tar()
