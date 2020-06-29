@@ -1,7 +1,7 @@
 
 # default GNAT path
 
-export PATH=$PREFIX/bin:$PATH
+export PATH=$SCBI_PREFIX/bin:$PATH
 
 DEFAULT_C_INCLUDE_PATH=$C_INCLUDE_PATH
 DEFAULT_CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH
@@ -75,7 +75,10 @@ function no-target-env()
         # <prefix>/<target>/bin
 
         if [ -x $PREFIX/../bin/gcc ]; then
-            PREFIX=$(dirname $PREFIX)
+            local DN=$(dirname $PREFIX)
+            if [ $DN != "/" ]; then
+                PREFIX=$DN
+            fi
         fi
     fi
 
@@ -118,7 +121,7 @@ function built-compiler()
     set-compiler-paths $PREFIX
 }
 
-export PATH=$PREFIX/bin:$PATH
+export PATH=$SCBI_PREFIX/bin:$PATH
 set-compiler-paths /usr
 
 # make an alias for x86_64-linux if necessary
