@@ -25,6 +25,15 @@ function ada-language-server-depends()
     echo libadalang-tools
 }
 
+function ada-language-server-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/gnat
+    add-to-var GPR_PROJECT_PATH $PREFIX/../build/gnat
+}
+
 function ada-language-server-build-env()
 {
     local PREFIX=$1
