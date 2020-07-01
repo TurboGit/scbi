@@ -63,9 +63,9 @@ function gpr-tests()
     local PREFIX=$1
     local TARGET=$2
 
-    # Needed to pass the tests
-    # sudo pip3 install git+https://github.com/AdaCore/e3-core
-    # sudo pip3 install git+https://github.com/AdaCore/e3-testsuite
+    # Needed to pass the tests:
+    # pip3 install git+https://github.com/AdaCore/e3-core
+    # pip3 install git+https://github.com/AdaCore/e3-testsuite
 
     cd testsuite && ./testsuite.py --temp-dir=$HOME/tmp -j$SCBI_JOBS
 }
