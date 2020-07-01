@@ -17,6 +17,11 @@ function ada-language-server-out-of-tree()
 
 function ada-language-server-depends()
 {
+    echo gprbuild
+    echo libgpr
+    echo xmlada
+    echo gnatcoll
+    echo vss
     echo libadalang-tools
 }
 
