@@ -12,6 +12,7 @@ function gps-depends()
     echo libclang-dev
     echo python3-pep8
     echo python3-jedi
+    echo python-gi-dev
     echo xmlada
     echo gtkada
     echo libadalang/stable:stable
