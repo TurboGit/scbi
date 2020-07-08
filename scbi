@@ -236,35 +236,12 @@ function module-variant-wrapper()
     local variant=$3
     local step=$4
 
-    if [ "$SCBI_HOST" != "$SCBI_TARGET" ]; then
-        fn-exists $module-$variant-cross-$step
+    local FCT=$(get-hook $module $variant $step)
 
-        if [[ $? = 0 ]]; then
-            module-wrapper $PREFIX $module \
-                           $variant $variant-cross-$step || exit 1
-            return $?
-        else
-            fn-exists $module-cross-$step
-
-            if [[ $? = 0 ]]; then
-                module-wrapper $PREFIX $module \
-                               $variant cross-$step || exit 1
-                return $?
-            fi
-        fi
-    fi
-
-    fn-exists $module-$variant-$step
-
-    if [[ $? = 0 ]]; then
-        module-wrapper $PREFIX $module $variant $variant-$step || exit 1
-
-    else
-        fn-exists $module-$step
-
-        if [[ $? = 0 ]]; then
-            module-wrapper $PREFIX $module $variant $step || exit 1
-        fi
+    if [ ! -z $FCT ]; then
+        module-wrapper $PREFIX $module \
+                       $variant ${FCT#"${module}-"} || exit 1
+        return $?
     fi
 }
 
@@ -747,13 +724,7 @@ function handle-meta-module()
     ilog $metamodule End metamodule $metamodule-$variant setup | tee -a $log
     line-sep
 
-    fn-exists $metamodule-$variant-modules
-
-    if [[ $? = 0 ]]; then
-        FCT=$metamodule-$variant-modules
-    else
-        FCT=$metamodule-modules
-    fi
+    local FCT=$(get-hook $metamodule $variant modules)
 
     for module in $($FCT); do
         handle-module $module
@@ -851,11 +822,11 @@ function handle-module()
     if [ $DEPS = yes ]; then
         # First we check for build dependencies
 
-        fn-exists $module-$variant-build-depends
+        FCT=$(get-hook $module $variant build-depends)
 
-        if [[ $? = 0 ]]; then
+        if [[ ! -z $FCT ]]; then
             (
-                for module in $($module-$variant-build-depends); do
+                for module in $($FCT); do
                     handle-depends $module
                 done
             )
@@ -863,50 +834,22 @@ function handle-module()
                 exit 1
             fi
             [ $DRY_RUN == no ] && line-sep
-        else
-            fn-exists $module-build-depends
-
-            if [[ $? = 0 ]]; then
-                (
-                    for module in $($module-build-depends $variant); do
-                        handle-depends $module
-                    done
-                )
-                if [[ ! $? = 0 ]]; then
-                    exit 1
-                fi
-                [ $DRY_RUN == no ] && line-sep
-            fi
         fi
 
         # And then we check for standard dependencies
 
-        fn-exists $module-$variant-depends
+        FCT=$(get-hook $module $variant depends)
 
-        if [[ $? = 0 ]]; then
+        if [[ ! -z $FCT ]]; then
             (
-                for module in $($module-$variant-depends); do
-                    handle-depends $module
+                for module in $($FCT); do
+                    handle-depends $module $variant
                 done
             )
             if [[ ! $? = 0 ]]; then
                 exit 1
             fi
             [ $DRY_RUN == no ] && line-sep
-        else
-            fn-exists $module-depends
-
-            if [[ $? = 0 ]]; then
-                (
-                    for module in $($module-depends $variant); do
-                        handle-depends $module
-                    done
-                )
-                if [[ ! $? = 0 ]]; then
-                    exit 1
-                fi
-                [ $DRY_RUN == no ] && line-sep
-            fi
         fi
     fi
 
@@ -1165,19 +1108,12 @@ function handle-module()
 
     local _IDIR=""
 
-    fn-exists $module-$variant-prefix
+    FCT=$(get-hook $module $variant prefix)
 
-    if [ $? = 0 -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
-        _IDIR=$($module-$variant-prefix $SCBI_BDIR/$module/build/install \
-                                        $SCBI_TARGET)
+    if [ "$FCT" != "" -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
+        _IDIR=$($FCT $SCBI_BDIR/$module/build/install $SCBI_TARGET)
     else
-        fn-exists $module-prefix
-        if [ $? = 0 -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
-            _IDIR=$($module-prefix $SCBI_BDIR/$module/build/install \
-                                   $SCBI_TARGET $variant)
-        else
-            _IDIR=$SCBI_PREFIX
-        fi
+        _IDIR=$SCBI_PREFIX
     fi
 
     if [ $_IDIR == NONE ]; then

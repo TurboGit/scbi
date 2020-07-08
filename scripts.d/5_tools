@@ -262,69 +262,39 @@ function _internal_for-all-modules()
             if [ $WITH_META == true ]; then
                 # check for meta-modules if present
 
-                fn-exists $module-$variant-modules
+                FCT=$(get-hook $module $variant modules)
 
-                if [ $? = 0 ]; then
-                    for dmodule in $($module-$variant-modules); do
+                if [[ ! -z $FCT ]]; then
+                    for dmodule in $($FCT); do
                         _internal_for-all-modules $CALLBACK $WITH_META false \
                                                   $WITHEXT false $dmodule $@
                     done
                     $CALLBACK $module $MODREF $IS_ROOT $IS_BUILD_DEPENDS false $@
                     pop-dependency-tree
                     return
-                else
-                    fn-exists $module-modules
-
-                    if [ $? = 0 ]; then
-                        for dmodule in $($module-modules $variant); do
-                            _internal_for-all-modules $CALLBACK $WITH_META false \
-                                                      $WITHEXT false $dmodule $@
-                        done
-                        $CALLBACK $module $MODREF $IS_ROOT $IS_BUILD_DEPENDS false $@
-                        pop-dependency-tree
-                        return
-                    fi
                 fi
             fi
 
             # Setup depends recursively if any
 
-            fn-exists $module-$variant-depends
+            FCT=$(get-hook $module $variant depends)
 
-            if [ $? = 0 ]; then
-                for dmodule in $($module-$variant-depends); do
+            if [[ ! -z $FCT ]]; then
+                for dmodule in $($FCT); do
                     _internal_for-all-modules $CALLBACK $WITH_META false \
                                               $WITHEXT false $dmodule $@
                 done
-            else
-                fn-exists $module-depends
-
-                if [ $? = 0 ]; then
-                    for dmodule in $($module-depends $variant); do
-                        _internal_for-all-modules $CALLBACK $WITH_META false \
-                                                  $WITHEXT false $dmodule $@
-                    done
-                fi
             fi
 
             # Setup build-depends recursively if any
 
-            fn-exists $module-$variant-build-depends
+            FCT=$(get-hook $module $variant build-depends)
 
-            if [ $? = 0 ]; then
-                for dmodule in $($module-$variant-build-depends); do
+            if [[ ! -z $FCT ]]; then
+                for dmodule in $($FCT); do
                     _internal_for-all-modules $CALLBACK $WITH_META false \
                                               $WITHEXT true $dmodule $@
                 done
-            else
-                fn-exists $module-build-depends
-
-                if [ $? = 0 ]; then
-                    for dmodule in $($module-build-depends $variant); do
-                        _internal_for-all-modules $CALLBACK $WITH_META false \
-                                                  $WITHEXT true $dmodule $@
-                    done
-                fi
             fi
 
             $CALLBACK $module $MODREF $IS_ROOT $IS_BUILD_DEPENDS false $@
