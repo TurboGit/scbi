@@ -698,7 +698,6 @@ function all-variants()
     fi
 }
 
-
 ############################## create-standalone-package
 
 function copy-module-src-callback()
