@@ -11,6 +11,41 @@ function fn-exists()
     declare -f $1 > /dev/null
 }
 
+############################## get-hooks
+# return the hook name for the given step. This can be the
+# hook for a variant and/or cross build.
+
+function get-hook()
+{
+    local module=$1
+    local variant=$2
+    local step=$3
+
+    local HOOK=""
+
+    if [ $SCBI_HOST != $SCBI_TARGET ]; then
+        fn-exists $module-$variant-cross-$step
+        if [[ $? = 0 ]]; then
+            HOOK=$module-$variant-cross-$step
+        else
+            fn-exists $module-cross-$step
+            [[ $? = 0 ]] && HOOK=$module-cross-$step
+        fi
+    fi
+
+    if [ -z $HOOK ]; then
+        fn-exists $module-$variant-$step
+        if [[ $? = 0 ]]; then
+            HOOK=$module-$variant-$step
+        else
+            fn-exists $module-$step
+            [[ $? = 0 ]] && HOOK=$module-$step
+        fi
+    fi
+
+    echo $HOOK
+}
+
 ############################## is-enabled
 # check wether a feature is enabled (see option --enable-<feature>)
 
