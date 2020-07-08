@@ -23,12 +23,17 @@ function gprbuild-depends()
 {
     echo libgpr
     echo xmlada
+    echo gprconfig-kb
 }
 
 function gprbuild-config()
 {
     local PREFIX=$1
     local TARGET=$2
+
+    if [ ! -e ../src/share/gprconfig ]; then
+        ln -s $SCBI_BDIR/gprconfig-kb/build/src/db ../src/share/gprconfig
+    fi
 
     make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$SCBI_JOBS setup
 }
