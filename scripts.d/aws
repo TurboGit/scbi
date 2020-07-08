@@ -7,6 +7,11 @@ function aws-vcs()
     echo https://github.com/AdaCore/aws
 }
 
+function aws-cross-depends()
+{
+    echo xmlada
+}
+
 function aws-depends()
 {
     echo xmlada
@@ -33,7 +38,7 @@ function aws-cross-config()
     local TARGET=$2
 
     rm -f makefile.setup &&
-        make prefix=$PREFIX ASIS=false ZLIB=false \
+        make prefix=$PREFIX LAL=false ZLIB=false \
              DEBUG=$(get-build-type GPR aws true) TARGET=$TARGET setup
 }
 
