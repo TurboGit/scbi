@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-#  SCBI - (C) Pascal Obry - 2007-2019
+#  SCBI - (C) Pascal Obry - 2007-2020
 #
 
-SCBI_VERSION=2.2
+SCBI_VERSION=2.3
 
 ############################## check-tool
 
@@ -67,6 +67,7 @@ DOARCHIVE=no
 DOFORCE=no
 DOSTAT=no
 DODEPS=no
+SCBI_DEPSRECURS=yes
 DOEXT=no
 DOPLAN=no
 DEPS=no
@@ -288,9 +289,9 @@ function usage()
     echo "   -f | --force           force rebuild, do not check build id"
     echo "   -p | --purge           remove builds directories before building"
     echo "   -P | --purge-only      only remove builds directories"
-    echo "      | --list-depends    list module's dependencies"
+    echo "      | --list-depends:n  list module's dependencies (direct or full)"
     echo "      | --list-externals  list module's external dependencies"
-    echo "      | --list-filter=n   filter depends/external for dev or runtime"
+    echo "      | --list-filter:n   filter depends/external for dev or runtime"
     echo "      | --list-plan       list current current plan"
     echo "      | --dry-run         only list modules handled"
     echo "      | --stat            display some status of current setup"
@@ -367,7 +368,7 @@ function register-depends-callback()
 {
     local MODULE=$1
     local MODREF=$2
-    local IS_ROOT=$3
+    local LEVEL=$3
     local IS_BUILD_DEPENDS=$4
     local IS_EXT=$5
     local SELEXT=false
@@ -384,6 +385,10 @@ function register-depends-callback()
 
     if [ $SELBUILD == $IS_BUILD_DEPENDS -o $SCBI_FILTER == all ]; then
         SELECTED=true
+    fi
+
+    if [ $SCBI_DEPSRECURS == no -a $LEVEL -ne 1 ]; then
+        SELECTED=false
     fi
 
     if [ $IS_EXT == $SELEXT -a $SELECTED == true ]; then
@@ -405,7 +410,7 @@ function handle-env-callback()
 {
     local MODULE=$1
     local MODREF=$2
-    local IS_ROOT=$3
+    local LEVEL=$3
     local IS_BUILD_DEPENDS=$4
     local IS_EXT=$5
 
@@ -1165,7 +1170,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends,list-externals,list-filter:,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan: -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan: -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1259,16 +1264,33 @@ while [ $# -gt 0 ]; do
         --stat)
             DOSTAT=yes;
             ;;
+        --list-depends:direct)
+            DODEPS=yes;
+            DOEXT=no;
+            SCBI_DEPSRECURS=no
+            ;;
+        --list-depends:full)
+            DODEPS=yes;
+            DOEXT=no;
+            SCBI_DEPSRECURS=yes
+            ;;
         --list-depends)
             DODEPS=yes;
             DOEXT=no;
+            SCBI_DEPSRECURS=yes
             ;;
         --list-externals)
             DODEPS=yes;
             DOEXT=yes;
             ;;
-        --list-filter)
-            SCBI_FILTER=$2; shift
+        --list-filter:all)
+            SCBI_FILTER=all;
+            ;;
+        --list-filter:dev)
+            SCBI_FILTER=dev;
+            ;;
+        --list-filter:runtime)
+            SCBI_FILTER=runtime;
             ;;
         --list-plan)
             DOPLAN=yes;

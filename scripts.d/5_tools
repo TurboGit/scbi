@@ -210,7 +210,7 @@ function _internal_for-all-modules()
 {
     local CALLBACK=$1
     local WITH_META=$2
-    local IS_ROOT=$3
+    local LEVEL=$3
     local WITHEXT=$4
     local IS_BUILD_DEPENDS=$5
     local MODREF=$6
@@ -220,6 +220,10 @@ function _internal_for-all-modules()
     shift
     shift
     shift
+
+    #  Check if recursive dependencies is needed
+
+    [ $SCBI_DEPSRECURS == no -a $LEVEL -ge 2 ] && return 0
 
     #  Get module information
 
@@ -231,6 +235,9 @@ function _internal_for-all-modules()
     local ref=${module_info[3]}
 
     [ $ref = "skip" ] && return 0
+
+    #  Next level
+    local NEXTL=$((LEVEL + 1))
 
     #  Check dependency graph to ensure there is no circularities
 
@@ -266,10 +273,10 @@ function _internal_for-all-modules()
 
                 if [[ ! -z $FCT ]]; then
                     for dmodule in $($FCT); do
-                        _internal_for-all-modules $CALLBACK $WITH_META false \
+                        _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
                                                   $WITHEXT false $dmodule $@
                     done
-                    $CALLBACK $module $MODREF $IS_ROOT $IS_BUILD_DEPENDS false $@
+                    $CALLBACK $module $MODREF $LEVEL $IS_BUILD_DEPENDS false $@
                     pop-dependency-tree
                     return
                 fi
@@ -281,7 +288,7 @@ function _internal_for-all-modules()
 
             if [[ ! -z $FCT ]]; then
                 for dmodule in $($FCT); do
-                    _internal_for-all-modules $CALLBACK $WITH_META false \
+                    _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
                                               $WITHEXT false $dmodule $@
                 done
             fi
@@ -292,12 +299,12 @@ function _internal_for-all-modules()
 
             if [[ ! -z $FCT ]]; then
                 for dmodule in $($FCT); do
-                    _internal_for-all-modules $CALLBACK $WITH_META false \
+                    _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
                                               $WITHEXT true $dmodule $@
                 done
             fi
 
-            $CALLBACK $module $MODREF $IS_ROOT $IS_BUILD_DEPENDS false $@
+            $CALLBACK $module $MODREF $LEVEL $IS_BUILD_DEPENDS false $@
 
             pop-dependency-tree
 
@@ -305,7 +312,7 @@ function _internal_for-all-modules()
             # module does not exists, this is an external dependency
 
             if [ $WITHEXT == true ]; then
-                $CALLBACK $module $MODREF $IS_ROOT $IS_BUILD_DEPENDS true $@
+                $CALLBACK $module $MODREF $LEVEL $IS_BUILD_DEPENDS true $@
             else
                 check-pkg $module:$ref
             fi
@@ -323,7 +330,7 @@ function for-all-modules()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK false true false false $MODREF $@
+    _internal_for-all-modules $CALLBACK false 0 false false $MODREF $@
 }
 
 # Iterate over all modules and external dependencies
@@ -336,7 +343,7 @@ function for-all-modules-ext()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK false true true false $MODREF $@
+    _internal_for-all-modules $CALLBACK false 0 true false $MODREF $@
 }
 
 # Iterate over all modules and meta-modules
@@ -349,7 +356,7 @@ function for-all-modules-with-meta()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK true true false false $MODREF $@
+    _internal_for-all-modules $CALLBACK true 0 false false $MODREF $@
 }
 
 # Iterate over all modules, meta-modules and external dependencies
@@ -362,7 +369,7 @@ function for-all-modules-with-meta-ext()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK true true true false $MODREF $@
+    _internal_for-all-modules $CALLBACK true 0 true false $MODREF $@
 }
 
 ############################## get-depends-build-id
@@ -371,13 +378,13 @@ function get-build-id-callback()
 {
     local MODULE=$1
     local MODREF=$2
-    local IS_ROOT=$3
+    local LEVEL=$3
     local IS_BUILD_DEPENDS=$4
     local IS_EXT=$5
 
     # Only compute for dependencies, not for the root module
 
-    if [ $IS_ROOT == false ]; then
+    if [ $LEVEL -gt 0 ]; then
         if [ -f $SCBI_BDIR/$MODULE/install-id ]; then
             var=$(cat $SCBI_BDIR/$MODULE/install-id)
 
@@ -709,7 +716,7 @@ function copy-module-src-callback()
 {
     local MODULE=$1
     local MODREF=$2
-    local IS_ROOT=$3
+    local LEVEL=$3
     local IS_BUILD_DEPENDS=$4
     local IS_EXT=$5
     local DEST=$6

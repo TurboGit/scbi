@@ -2,10 +2,19 @@ echo "====== list all deps listDA"
 ./scbi --list-depends listDA
 
 echo "====== list all deps (explicit) listDA"
-./scbi --list-depends --list-filter=all listDA
+./scbi --list-depends --list-filter:all listDA
 
 echo "====== list dev deps listDA"
-./scbi --list-depends --list-filter=dev listDA
+./scbi --list-depends --list-filter:dev listDA
 
 echo "====== list run deps listDA"
-./scbi --list-depends --list-filter=run listDA
+./scbi --list-depends --list-filter:run listDA
+
+echo "====== list run direct deps listDA"
+./scbi --list-depends:direct --list-filter:run listDA
+
+echo "====== list dev direct deps listDA"
+./scbi --list-depends:direct --list-filter:dev listDA
+
+echo "====== list all direct deps listDA"
+./scbi --list-depends:direct --list-filter:all listDA
