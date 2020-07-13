@@ -3,7 +3,7 @@
 #  SCBI - (C) Pascal Obry - 2007-2020
 #
 
-SCBI_VERSION=2.3
+SCBI_VERSION=2.4
 
 ############################## check-tool
 
@@ -731,7 +731,7 @@ function handle-meta-module()
 
     local FCT=$(get-hook $metamodule $variant modules)
 
-    for module in $($FCT); do
+    for module in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
         handle-module $module
     done
 
@@ -831,7 +831,7 @@ function handle-module()
 
         if [[ ! -z $FCT ]]; then
             (
-                for module in $($FCT); do
+                for module in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
                     handle-depends $module
                 done
             )
@@ -847,8 +847,8 @@ function handle-module()
 
         if [[ ! -z $FCT ]]; then
             (
-                for module in $($FCT); do
-                    handle-depends $module $variant
+                for module in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
+                    handle-depends $module
                 done
             )
             if [[ ! $? = 0 ]]; then
@@ -1116,7 +1116,7 @@ function handle-module()
     FCT=$(get-hook $module $variant prefix)
 
     if [ "$FCT" != "" -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
-        _IDIR=$($FCT $SCBI_BDIR/$module/build/install $SCBI_TARGET)
+        _IDIR=$($FCT $SCBI_BDIR/$module/build/install $SCBI_TARGET $variant)
     else
         _IDIR=$SCBI_PREFIX
     fi
