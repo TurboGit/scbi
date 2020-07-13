@@ -272,7 +272,8 @@ function _internal_for-all-modules()
                 FCT=$(get-hook $module $variant modules)
 
                 if [[ ! -z $FCT ]]; then
-                    for dmodule in $($FCT); do
+                    for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant);
+                    do
                         _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
                                                   $WITHEXT false $dmodule $@
                     done
@@ -287,7 +288,7 @@ function _internal_for-all-modules()
             FCT=$(get-hook $module $variant depends)
 
             if [[ ! -z $FCT ]]; then
-                for dmodule in $($FCT); do
+                for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
                     _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
                                               $WITHEXT false $dmodule $@
                 done
@@ -298,7 +299,7 @@ function _internal_for-all-modules()
             FCT=$(get-hook $module $variant build-depends)
 
             if [[ ! -z $FCT ]]; then
-                for dmodule in $($FCT); do
+                for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
                     _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
                                               $WITHEXT true $dmodule $@
                 done

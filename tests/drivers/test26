@@ -1,3 +1,9 @@
+# fake build dependencies (variants) not present
+
+for v in one two three four; do
+    mkdir -p .root/builds/$v
+done
+
 # check that we properly pass variants
 echo '========== build/install var'
 ./scbi var
