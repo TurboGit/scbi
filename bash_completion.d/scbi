@@ -4,7 +4,7 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 -s --setup -c --config -b --build -i --install -r --tests -v --verbose
 -l --no-log -p --purge -P --purge-only -d --deps -a --archive -h --help
 -j --jobs= --target= --env= -e --tests-only --plan= -n --no-patch --tar
---list-depends --list-externals --list-filter= --dry-run -w --wrapup
+--list-depends: --list-externals --list-filter: --dry-run -w --wrapup
 --force --enable- --safe --plugins --build-dir --list-plan"
 
 _gnat_targets()
@@ -28,6 +28,15 @@ _scbi_list_filter()
     echo all
     echo run
     echo dev
+}
+
+_scbi_list_depends()
+{
+    local ROOT r b
+    local IFS=$'\n'
+
+    echo direct
+    echo full
 }
 
 _scbi_env()
@@ -77,6 +86,7 @@ _scbicomp_1 ()
     for c in $1; do
 	case "$c$2" in
 	    -*=*)  printf %s$'\n' "$c$2" ;;
+	    -*:*)  printf %s$'\n' "$c$2" ;;
 	    *.)    printf %s$'\n' "$c$2" ;;
 	    *)     printf %s$'\n' "$c$2 " ;;
 	esac
@@ -107,7 +117,7 @@ _scbicomp ()
 _scbi()
 {
     COMPREPLY=()
-    cur=$(_get_cword =)
+    cur=$(_get_cword =:)
     prev=${COMP_WORDS[COMP_CWORD-1]}
 
     case "$cur" in
@@ -127,8 +137,12 @@ _scbi()
             _scbicomp "$(_scbi_feature)" "" "${cur}"
             return 0
             ;;
-        --list-filter=*)
-            _scbicomp "$(_scbi_list_filter)" "" "${cur##--list-filter=}"
+        --list-depends:*)
+            _scbicomp "$(_scbi_list_depends)" "" "${cur##--list-depends:}"
+            return 0
+            ;;
+        --list-filter:*)
+            _scbicomp "$(_scbi_list_filter)" "" "${cur##--list-filter:}"
             return 0
             ;;
         -*)
