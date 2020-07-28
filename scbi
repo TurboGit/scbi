@@ -3,7 +3,7 @@
 #  SCBI - (C) Pascal Obry - 2007-2020
 #
 
-SCBI_VERSION=2.4
+SCBI_VERSION=@VERSION@
 
 ############################## check-tool
 
@@ -251,7 +251,7 @@ function module-variant-wrapper()
 function usage()
 {
     echo
-    echo SCBI $VERSION
+    echo SCBI $SCBI_VERSION
     echo
     echo $0 [options] module1 [module2 ... modulen]
 
@@ -1170,11 +1170,15 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan: -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
         -h|--help)
+            break
+            ;;
+        --version)
+            DOVERSION=yes
             break
             ;;
         -f|--force)
@@ -1369,6 +1373,14 @@ done
 [ ! -z $SCBI_PLAN ] && load-module-plan $SCBI_PLAN
 
 #  Nothing to build, display usage
+
+if [ $DOVERSION = yes ]; then
+    echo "SCBI : $SCBI_VERSION"
+    for file in $(ls $SCBI_DEFS/.scbi*version.txt 2> /dev/null); do
+        cat $file
+    done
+    exit 0
+fi
 
 [ "$MODULES" = "" -a $DOSTAT == no ] && usage
 
