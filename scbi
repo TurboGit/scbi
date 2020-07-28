@@ -83,6 +83,7 @@ SAFE_MODE=false
 DO_STANDALONE=no
 SCBI_FILTER=all
 CMDLINE_BUILD_DIR=
+DO_VERSION=false
 
 ############################## check-handled
 #
@@ -1178,7 +1179,7 @@ while [ $# -gt 0 ]; do
             break
             ;;
         --version)
-            DOVERSION=yes
+            DO_VERSION=yes
             break
             ;;
         -f|--force)
@@ -1374,7 +1375,7 @@ done
 
 #  Nothing to build, display usage
 
-if [ $DOVERSION = yes ]; then
+if [ $DO_VERSION = yes ]; then
     echo "SCBI : $SCBI_VERSION"
     for file in $(ls $SCBI_DEFS/.scbi*version.txt 2> /dev/null); do
         cat $file
