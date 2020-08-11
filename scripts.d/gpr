@@ -14,6 +14,7 @@ function gpr-depends()
     echo gnatcoll-bindings-gmp
     echo langkit
     echo libadalang
+    echo gprconfig-kb
 }
 
 function do-config()
@@ -27,6 +28,9 @@ function do-config()
 
         make $GPROPTS setup
     )
+
+    rm -f src/kb/gprconfig_kb
+    ln -s $SCBI_BDIR/gprconfig-kb/src/db src/kb/gprconfig_kb
 }
 
 function gpr-out-of-tree()
