@@ -9,10 +9,7 @@ function libadalang-tools-vcs()
 
 function libadalang-tools-depends()
 {
-    # libadalang-tool must be built using the stable
-    # branch of langkit & libadalang
-
-    echo libadalang/stable:stable
+    echo libadalang
 }
 
 function libadalang-tools-out-of-tree()

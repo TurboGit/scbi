@@ -15,7 +15,7 @@ function gps-depends()
     echo python-gi-dev
     echo xmlada
     echo gtkada
-    echo libadalang/stable:stable
+    echo libadalang
     echo libadalang-tools
     echo gnatcoll-db
     echo ada-language-server
