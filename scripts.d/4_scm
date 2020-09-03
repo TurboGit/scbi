@@ -230,11 +230,28 @@ function svn-branch()
     local OPTIONS=$2
     local MODULE=$3
     local BRANCH=$4
+    local BUILDB=scbi
 
-    #  ??? call $module-vcs and get the URL for branches ${vcs[2]}
+    #  This hook works only for standard Subversion layout, that is
+    #  with trunk/branches/tags at the root.
 
-    ilog build "error: switching branch not supported for subversion"
-    return 1
+    (
+        cd $SCBI_BDIR/$MODULE
+
+        if [ $BRANCH == NONE ]; then
+            ln -s vcs/trunk src
+
+        elif [ -d vcs/branches/$BRANCH ]; then
+            ln -s vcs/branches/$BRANCH src
+
+        elif [ -d vcs/tags/$BRANCH ]; then
+            ln -s vcs/tags/$BRANCH src
+
+        else
+            ilog build "error: switching subversion branch $BRANCH"
+            return 1
+        fi
+    )
 }
 
 ############################## get-vcs-data
@@ -335,7 +352,7 @@ function get-vcs()
                 exit 1
             fi
 
-            if [ $kind != DEV -a $version != NONE ]; then
+            if [ $kind != DEV ]; then
                 svn-branch $VCS_PROXY $VCS_OPTIONS $module $version > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then

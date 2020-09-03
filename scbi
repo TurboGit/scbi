@@ -682,7 +682,21 @@ function handle-sources()
                              > build-id-$variant
             fi
 
-            ln -s vcs src
+            if [ ! -h src ]; then
+                #  Setting source reference, note that for Subversion this
+                #  need to properly set the link to the directory in the vcs.
+                #  This action is done by svn-branch that we call here.
+
+                case $VCS_NAME in
+                    svn|subversion)
+                        svn-branch "" "" $module $ref ""
+                        ;;
+                    *)
+                        ln -s vcs src
+                esac
+            fi
+
+            return 0
 
         else
             #  No VCS, no TAR, just rebuild the sources if present
