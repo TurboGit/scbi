@@ -1,0 +1,8 @@
+# check for tar rebuild if module script has changed
+#
+
+./scbi --tests lib1:#v1.2
+./scbi --tests lib1:#v1.2
+sed -i 's/return 0/return 00/g' scripts.d/lib1
+./scbi --tests lib1:#v1.2
+sed -i 's/return 00/return 0/g' scripts.d/lib1
