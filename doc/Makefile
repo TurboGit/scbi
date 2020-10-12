@@ -3,11 +3,14 @@ NAM = scbi
 TEX = $(NAM).tex
 PDF = $(NAM).pdf
 
+VER=$(shell git describe)
+
 all: $(PDF)
 
-version:
-	sed -n 's/SCBI_VERSION=\(.*\)/\\providecommand{\\version}{\1}/p' \
-	../scbi > version.tex
+force:
+
+version: force
+	echo '\\providecommand{\\version}{'$(VER)'}' > version.tex
 
 # %.pdf: %.tex $(DIF) $(BIB)
 
