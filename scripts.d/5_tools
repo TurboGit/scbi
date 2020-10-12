@@ -644,6 +644,22 @@ function display-modules()
     echo
 }
 
+############################## display-modules
+
+function display-module-version()
+{
+    local MODREF=$1
+
+    local module_info=( $(get-module-ref $MODREF) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    echo -n $ref
+}
+
 ############################## display-plans
 
 function display-plans()
