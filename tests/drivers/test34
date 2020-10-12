@@ -1,0 +1,13 @@
+# test build plan with a :dev version
+
+echo '=================== module version (v1)'
+./scbi --plan=dev --module-version lib1 | sed 's/1/A/g;s/2/B/g'
+echo
+
+echo '=================== module version (v2)'
+./scbi --plan=dev --module-version lib1:v2 | sed 's/1/A/g;s/2/B/g'
+echo
+
+echo '=================== module version (NONE)'
+./scbi --module-version lib1 | sed 's/1/A/g;s/2/B/g'
+echo

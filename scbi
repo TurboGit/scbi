@@ -67,6 +67,7 @@ DOARCHIVE=no
 DOFORCE=no
 DOSTAT=no
 DODEPS=no
+DOMODVER=no
 SCBI_DEPSRECURS=yes
 DOEXT=no
 DOPLAN=no
@@ -294,6 +295,7 @@ function usage()
     echo "      | --list-externals  list module's external dependencies"
     echo "      | --list-filter:n   filter depends/external for dev or runtime"
     echo "      | --list-plan       list current current plan"
+    echo "      | --module-version  display version of specific module"
     echo "      | --dry-run         only list modules handled"
     echo "      | --stat            display some status of current setup"
     echo "   -n | --no-patch        do not apply patches"
@@ -1185,7 +1187,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1270,6 +1272,10 @@ while [ $# -gt 0 ]; do
         --prefix)
             SCBI_DEFAULT_PREFIX=no
             SCBI_PREFIX=$2; shift
+            ;;
+        --module-version)
+            DOMODVER=yes
+            shift
             ;;
         -P|--purge-only)
             PURGE=only
@@ -1397,7 +1403,7 @@ if [ $DO_VERSION = yes ]; then
     exit 0
 fi
 
-[ "$MODULES" = "" -a $DOSTAT == no ] && usage
+[ "$MODULES" = "" -a $DOSTAT == no -a $DOMODVER == no ] && usage
 
 [ $DOSTAT == yes ] && display-stat
 
@@ -1443,6 +1449,15 @@ fi
 for module in $MODULES; do
     set-module-ref $module
 done
+
+#  If we want to display a module version from a module plan, do it now
+
+if [ $DOMODVER == yes ]; then
+    for module in $MODULES; do
+        display-module-version $module
+    done
+    exit 0
+fi
 
 if [ $DOPLAN == yes ]; then
     display-build-plan
