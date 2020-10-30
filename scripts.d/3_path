@@ -22,7 +22,7 @@ function set-compiler-paths()
         I=$PREFIX/include
         IT=$PREFIX/include/$SCBI_HOST
         IL=$PREFIX/lib/gcc/$SCBI_HOST
-        P=$PREFIX/share/gpr
+        P=$PREFIX/$SCBI_HOST/share/gpr:$PREFIX/share/gpr
         L=$PREFIX/lib/$SCBI_HOST:$PREFIX/lib
     else
         I=$PREFIX/include
@@ -122,7 +122,7 @@ function built-compiler()
 }
 
 export PATH=$SCBI_PREFIX/bin:$PATH
-set-compiler-paths /usr
+set-compiler-paths $SCBI_PREFIX
 
 # make an alias for x86_64-linux if necessary
 
