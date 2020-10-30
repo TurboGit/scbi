@@ -239,7 +239,11 @@ function svn-branch()
         cd $SCBI_BDIR/$MODULE
 
         if [ $BRANCH == NONE ]; then
-            ln -s vcs/trunk src
+            if [ -d vcs/trunk ]; then
+                ln -s vcs/trunk src
+            else
+                ln -s vcs src
+            fi
 
         elif [ -d vcs/branches/$BRANCH ]; then
             ln -s vcs/branches/$BRANCH src
