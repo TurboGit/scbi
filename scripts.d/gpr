@@ -12,8 +12,8 @@ function gpr-depends()
     echo gnatcoll-core
     echo gnatcoll-bindings-iconv
     echo gnatcoll-bindings-gmp
-    echo langkit
-    echo libadalang
+    echo langkit/stable:stable
+    echo libadalang/stable:stable
     echo gprconfig-kb
 }
 
@@ -24,7 +24,7 @@ function do-config()
     GPROPTS="$3 GENERATE_LANGKIT_SUPPORT=no"
 
     (
-        add-to-var PYTHONPATH $SCBI_BDIR/langkit/$TARGET-default/build
+        add-to-var PYTHONPATH $SCBI_BDIR/langkit/$TARGET-stable/build
 
         make $GPROPTS setup
     )
