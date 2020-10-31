@@ -47,13 +47,38 @@ function langkit-env()
     add-to-var PYTHONPATH $SCBI_BDIR/langkit/$TARGET-$VARIANT/build
 }
 
+function langkit-stable-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    python3 scripts/build-langkit_support.py \
+            --library-types static,relocatable \
+            generate
+}
+
 function langkit-config()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
 
-    python3 scripts/build-langkit_support.py generate
+    # nothing to do, the sources are pre-generated
+}
+
+function langkit-do-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local PRJ=$3
+
+    GOPTS="-p -m -j$SCBI_JOBS"
+
+    for KIND in static relocatable static-pic; do
+        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
+    done
 }
 
 function langkit-stable-build()
@@ -62,7 +87,8 @@ function langkit-stable-build()
     local TARGET=$2
     local VARIANT=$3
 
-    python3 scripts/build-langkit_support.py build
+    langkit-do-build $PREFIX $TARGET \
+                     ./build/lib/gnat/langkit_support.gpr
 }
 
 function langkit-build()
@@ -71,11 +97,25 @@ function langkit-build()
     local TARGET=$2
     local VARIANT=$3
 
-    GOPTS="-p -m -j$SCBI_JOBS"
-    PRJ=./build/lib/gnat/langkit_support.gpr
+    langkit-do-build $PREFIX $TARGET \
+                     ./support/langkit_support.gpr
+}
+
+function langkit-do-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local PRJ=$3
+
+    gprinstall --prefix=$PREFIX --uninstall langkit
+
+    BV="--build-var=LANGKIT_BUILD --build-var=LIBRARY_TYPE"
+    GOPTS="-p --prefix=$PREFIX $BV"
 
     for KIND in static relocatable static-pic; do
-        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
+        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
+                   -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
     done
 }
 
@@ -85,7 +125,8 @@ function langkit-stable-install()
     local TARGET=$2
     local VARIANT=$3
 
-    python3 scripts/build-langkit_support.py install $PREFIX
+    langkit-do-install $PREFIX $TARGET \
+                       ./build/lib/gnat/langkit_support.gpr
 }
 
 function langkit-install()
@@ -94,16 +135,8 @@ function langkit-install()
     local TARGET=$2
     local VARIANT=$3
 
-    gprinstall --prefix=$PREFIX --uninstall libadalang
-
-    BV="--build-var=LANGKIT_BUILD --build-var=LIBRARY_TYPE"
-    GOPTS="-p --prefix=$PREFIX $BV"
-    PRJ=./build/lib/gnat/langkit_support.gpr
-
-    for KIND in static relocatable static-pic; do
-        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
-                   -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
-    done
+    langkit-do-install $PREFIX $TARGET \
+                       ./support/langkit_support.gpr
 }
 
 function langkit-stable-prefix()
