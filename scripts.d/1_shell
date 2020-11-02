@@ -4,12 +4,29 @@ function run-shell()
 {
     local target=$1
     local modref=$2
+    local docd=$3
 
-    (
-        handle-env $modref
+    if [ -z $SHELL ]; then
+        echo \$SHELL is not defined, cannot spawn a shell
+        exit 1
+    fi
+
+    curcd=$(pwd)
+
+    handle-env $modref
+
+    #  If docd set (no cwd sub-option specified), we are moving into
+    #  the module's build directory. In this mode we not only want the
+    #  environment of all dependencies to be set but we also want the
+    #  build environment of the root module to be set.
+
+    if [ $docd == yes ]; then
+        handle-module-env $modref build-env
 
         cd $(get-build-dir $target $modref)
+    else
+        cd $curcd
+    fi
 
-        $SHELL
-    )
+    $SHELL
 }
