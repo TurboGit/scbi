@@ -876,3 +876,52 @@ function create-standalone-package()
 
     ilog standalone End create source archive
 }
+
+#  Returns the source directory for the given module full reference
+
+function get-source-dir()
+{
+    local target=$1
+    local modref=$2
+
+    local module_info=( $(get-module-ref $modref) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+
+    local SCBI_VCS_REPO=
+
+    if [ $kind == DEV ]; then
+        vcs=( $(get-vcs-data $module) )
+
+        if [[ $? = 0 ]]; then
+            VCS_NAME=${vcs[2]}
+
+            case $VCS_NAME in
+                git)
+                    SCBI_VCS_REPO=$SCBI_GIT_REPO
+                    ;;
+                svn|subversion)
+                    SCBI_VCS_REPO=$SCBI_SVN_REPO
+                    ;;
+                hg)
+                    SCBI_VCS_REPO=$SCBI_HG_REPO
+                    ;;
+                *)
+                    elog $module unsupported VCS $VCS_NAME
+                    exit 1
+            esac
+
+            DIR=$SCBI_VCS_REPO/$module
+
+        else
+            DIR=$SCBI_BDIR/$module
+        fi
+
+    else
+        DIR=$SCBI_BDIR/$module/$target-$variant/src
+    fi
+
+    echo $DIR
+}
