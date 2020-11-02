@@ -1,0 +1,15 @@
+# setup for SCBI shell
+
+function run-shell()
+{
+    local target=$1
+    local modref=$2
+
+    (
+        handle-env $modref
+
+        cd $(get-build-dir $target $modref)
+
+        $SHELL
+    )
+}

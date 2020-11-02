@@ -54,6 +54,7 @@ SCBI_MAKE_JOBS=$(expr $SCBI_JOBS / 2)
 #  Modules to be handled and already handled
 MODULES=
 HANDLED=$(mktemp)
+LAST_MODULE=
 
 #  Actions setup
 PURGE=no
@@ -85,6 +86,7 @@ DO_STANDALONE=no
 SCBI_FILTER=all
 CMDLINE_BUILD_DIR=
 DO_VERSION=false
+DO_SHELL=false
 
 ############################## check-handled
 #
@@ -1187,7 +1189,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1232,6 +1234,9 @@ while [ $# -gt 0 ]; do
             ;;
         -s|--setup)
             NSTEPS="$NSTEPS setup"
+            ;;
+        --shell)
+            DO_SHELL=yes
             ;;
         -c|--config)
             NSTEPS="$NSTEPS config"
@@ -1344,6 +1349,7 @@ while [ $# -gt 0 ]; do
             ;;
         (*)
             MODULES="$MODULES $1"
+            LAST_MODULE=$1
             ;;
         (-*)
             echo "$0: error - unrecognized option $1" 1>&2; exit 1
@@ -1449,6 +1455,13 @@ fi
 for module in $MODULES; do
     set-module-ref $module
 done
+
+#  If a shell is requested
+
+if [ $DO_SHELL == yes ]; then
+    run-shell $SCBI_TARGET $LAST_MODULE
+    exit 0
+fi
 
 #  If we want to display a module version from a module plan, do it now
 

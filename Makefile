@@ -12,6 +12,9 @@ all:
 	mkdir -p $(SCRDIR)
 	rm -f $(SCRDIR)/*~ scripts.d/*~
 	cp -r scripts.d/* $(SCRDIR)
+	# removes old support modules
+	rm -fr $(SCRDIR)/0_prefix
+	rm -fr $(SCRDIR)/1_repositories
 
 test:
 	make -C tests test
