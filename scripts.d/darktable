@@ -137,6 +137,18 @@ function darktable-install()
     rm -f ../src/.git
 }
 
+function darktable-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    (
+        cd ../src/src/tests/integration
+
+        PATH=/opt/darktable/bin:$PATH ./run.sh
+    )
+}
+
 function darktable-prefix()
 {
     echo /opt/darktable
