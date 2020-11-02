@@ -925,3 +925,20 @@ function get-source-dir()
 
     echo $DIR
 }
+
+#  Returns the build directory for the given module full reference
+
+function get-build-dir()
+{
+    local target=$1
+    local modref=$2
+
+    local module_info=( $(get-module-ref $modref) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+
+    DIR=$SCBI_BDIR/$module/$target-$variant/build
+
+    echo $DIR
+}
