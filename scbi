@@ -1190,7 +1190,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:cwd -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1236,11 +1236,11 @@ while [ $# -gt 0 ]; do
         -s|--setup)
             NSTEPS="$NSTEPS setup"
             ;;
-        --shell:cwd)
-            DO_SHELL=yes-nocd
+        --shell:sb|--shell:sandbox)
+            DO_SHELL=yes
             ;;
         --shell)
-            DO_SHELL=yes
+            DO_SHELL=yes-nocd
             ;;
         -c|--config)
             NSTEPS="$NSTEPS config"
@@ -1415,7 +1415,7 @@ fi
 
 [ "$MODULES" = "" -a $DOSTAT == no -a $DOMODVER == no ] && usage
 
-[ "$MODULES" = "" -a $DO_SHELL == yes ] && exit 0
+[ "$MODULES" = "" -a $DO_SHELL != no ] && exit 0
 
 [ $DOSTAT == yes ] && display-stat
 
