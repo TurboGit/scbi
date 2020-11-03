@@ -4,9 +4,9 @@
 
 REP=$PWD/.root/builds/lib1
 
-./scbi --tests lib1
-./scbi --tests --tar lib1:v1
-./scbi --tests --tar lib1:v2
+./scbi --no-patch --tests lib1
+./scbi --no-patch --tests --tar lib1:v1
+./scbi --no-patch --tests --tar lib1:v2
 
 if [ -h $REP/tar ]; then
     echo NOK tar present
@@ -14,7 +14,7 @@ else
     echo OK tar not present
 fi
 
-./scbi --tests --tar lib1:#v1.2
+./scbi --no-patch --tests --tar lib1:#v1.2
 
 if [ -h $REP/tar ]; then
     echo OK tar present
@@ -22,4 +22,4 @@ else
     echo NOK tar not present
 fi
 
-./scbi --tests lib1
+./scbi --no-patch --tests lib1

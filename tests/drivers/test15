@@ -14,10 +14,10 @@
 )
 
 echo "========== build supermod"
-./scbi --tests supermod
+./scbi --no-patch --tests supermod
 
 echo "========== build supermod with local plan myplan"
 echo lib1:v1 > .scbi-plan-myplan
 echo lib2:dev >> .scbi-plan-myplan
-./scbi --tests --plan=myplan supermod
+./scbi --no-patch --tests --plan=myplan supermod
 rm .scbi-plan-myplan

@@ -1,10 +1,10 @@
 # check purge and purge-only
 echo '==== no build expected'
-./scbi lib1
+./scbi --no-patch lib1
 echo '==== purge and re-build'
-./scbi --purge lib1
+./scbi --no-patch --purge lib1
 echo '==== no build expected'
-./scbi lib1
+./scbi --no-patch lib1
 
 echo '==== purge-only, no build expected'
 
@@ -28,4 +28,4 @@ fi
 unset REP
 
 echo '==== re-build after purge'
-./scbi lib1
+./scbi --no-patch lib1

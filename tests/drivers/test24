@@ -4,4 +4,4 @@
 ./scbi --purge-only --plan=inherit lib2 &> /dev/null
 
 echo '=================== plan inherit (lib1:v2 lib2/variant1:v2)'
-./scbi --tests --plan=inherit --deps mainmult
+./scbi --no-patch --tests --plan=inherit --deps mainmult

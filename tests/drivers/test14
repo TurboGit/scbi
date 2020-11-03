@@ -5,13 +5,13 @@
 ./scbi --purge-only lib2 &> /dev/null
 
 echo "========== build supermod"
-./scbi --tests supermod
+./scbi --no-patch --tests supermod
 
 echo "========== build supermod plan sm1"
-./scbi --tests --plan=sm1 supermod
+./scbi --no-patch --tests --plan=sm1 supermod
 
 echo "========== build supermod variant best (plan var)"
-./scbi --tests supermod/best
+./scbi --no-patch --tests supermod/best
 
 if [ -f .root/builds/install/supermod ]; then
     cat .root/builds/install/supermod

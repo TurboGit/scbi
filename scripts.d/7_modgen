@@ -6,7 +6,9 @@ function module-apply-patch()
 
     local patch=""
 
-    if [ -f "$SCBI_PATCH/$PATCH_FILE" ]; then
+    if [ -z "$PATCH_FILE" ]; then
+        return 0
+    elif [ -f "$SCBI_PATCH/$PATCH_FILE" ]; then
         patch="$SCBI_PATCH/$PATCH_FILE"
     elif [ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]; then
         patch="$SCBI_DEFS/patches/$PATCH_FILE"
@@ -15,9 +17,10 @@ function module-apply-patch()
         return 1
     fi
 
-    dlog $MODULE apply-patch filename $(basename $patch)
+    ilog $MODULE apply-patch filename $(basename $patch)
+
     patch -p1 < $patch > /dev/null
-    [[ ! $? = 0 ]] && return 1
+    return $?
 }
 
 ############################## module-patch
@@ -30,12 +33,14 @@ function module-patch()
     local TARGET=$4
     local OOT=$5
 
+    local res=0
+
     fn-exists $MODULE-$VARIANT-patches
 
     if [ $? = 0 ]; then
         for patch in $($MODULE-$VARIANT-patches $PREFIX $TARGET); do
             module-apply-patch "$patch"
-            [[ ! $? = 0 ]] && return 1
+            [[ ! $? = 0 ]] && res=1
         done
 
     else
@@ -44,11 +49,12 @@ function module-patch()
         if [ $? = 0 ]; then
             for patch in $($MODULE-patches $PREFIX $TARGET $VARIANT); do
                 module-apply-patch "$patch"
-                [[ ! $? = 0 ]] && return 1
+                [[ ! $? = 0 ]] && res=1
             done
         fi
     fi
-    return 0
+
+    return $res
 }
 
 ############################## module-setup
@@ -77,21 +83,22 @@ function module-setup()
         OPT=--delete
     fi
 
+    local res=0
+
     if [ -h src -o -d src ]; then
         rsync -a $OPT --exclude=".git" --exclude=".gitignore" --exclude=".svn" \
             --exclude "gcc-interface" \
             --link-dest=../src src/. $SRCDIR/
-    fi
 
-    #  If some patches are present, apply them now
-    if [ $PATCH == yes ]; then
-        (
-            cd $SRCDIR
+        #  If some patches are present, apply them now
+        if [ $PATCH == yes ]; then
+            (
+                cd $SRCDIR
 
-            module-patch $PREFIX $MODULE $VARIANT $TARGET $OOT
-
-            [[ ! $? = 0 ]] && return 1
-        )
+                module-patch $PREFIX $MODULE $VARIANT $TARGET $OOT
+            )
+            res=$?
+        fi
     fi
 
     rm -f build
@@ -99,7 +106,7 @@ function module-setup()
 
     if [ "$OOT" = "yes" ]; then
         # build must be a dir, delete link if it exists
-        rm -f $TARGET-$VARIANT/build
+        [ -h $TARGET-$VARIANT/build ] && rm -f $TARGET-$VARIANT/build
         mkdir -p build/build
     else
         # build must be a link, delete dir if it exists
@@ -107,7 +114,7 @@ function module-setup()
         ln -s src build/build
     fi
 
-    return 0
+    return $res
 }
 
 ############################## module-purge

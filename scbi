@@ -202,19 +202,23 @@ function module-wrapper()
 
         #  Call module step
 
+        local res=0
+
         if [[ $DLOG = yes || "$step" = "tests" ]]; then
             $module-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
                 | tee -a $log | tee $mlog
+            #  We want the status of the first command and not the tee ones
+            res=${PIPESTATUS[0]}
         else
             $module-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
                 | tee $mlog >> $log
+            #  We want the status of the first command and not the tee ones
+            res=${PIPESTATUS[0]}
         fi
-        #  We want the status of the first command and not the tee ones
-        res=${PIPESTATUS[0]}
 
         #  Check for errors
 
-        if [ $res != 0 ]; then
+        if [ $res -ne 0 ]; then
             if [ $DLOG = on-failure ]; then
                 tail -100 $log
             fi
@@ -225,6 +229,7 @@ function module-wrapper()
             return 0
         fi
     )
+    return $?
 }
 
 ############################## module-variant-wrapper
@@ -1028,6 +1033,8 @@ function handle-module()
 
             #  Apply any generic step (module-setup, module-purge)
 
+            local res=0
+
             fn-exists module-pre-$step
 
             if [[ $? = 0 ]]; then
@@ -1035,19 +1042,18 @@ function handle-module()
 
                 if [ $DLOG = yes ]; then
                     module-pre-$step $SCBI_BDIR/$module/build/install $module \
-                                     $variant $SCBI_TARGET $ISOOT \
-                        | tee $log 2>&1
+                                     $variant $SCBI_TARGET $ISOOT 2>&1 \
+                        | tee $log
+                    res=${PIPESTATUS[0]}
                 else
                     module-pre-$step $SCBI_BDIR/$module/build/install $module \
-                                     $variant $SCBI_TARGET $ISOOT >> $log 2>&1
+                                     $variant $SCBI_TARGET $ISOOT 2>&1 \
+                        | tee -a $log
+                    res=${PIPESTATUS[0]}
                 fi
             fi
-            res=$?
 
             if [ $res != 0 ]; then
-                if [ $DLOG = on-failure ]; then
-                    tail -100 $log
-                fi
                 elog $module generic module pre-$step failed with error $res
                 return $res
             fi
@@ -1064,6 +1070,8 @@ function handle-module()
 
             #  Apply any generic step (module-setup, module-purge)
 
+            res=0
+
             fn-exists module-$step
 
             if [[ $? = 0 ]]; then
@@ -1071,18 +1079,16 @@ function handle-module()
 
                 if [ $DLOG = yes ]; then
                     module-$step $SCBI_BDIR/$module/build/install $module \
-                                 $variant $SCBI_TARGET $ISOOT | tee $log 2>&1
+                                 $variant $SCBI_TARGET $ISOOT 2>&1 | tee $log
+                    res=${PIPESTATUS[0]}
                 else
                     module-$step $SCBI_BDIR/$module/build/install $module \
-                                 $variant $SCBI_TARGET $ISOOT >> $log 2>&1
+                                 $variant $SCBI_TARGET $ISOOT 2>&1 | tee -a $log
+                    res=${PIPESTATUS[0]}
                 fi
             fi
-            res=$?
 
-            if [ $res != 0 ]; then
-                if [ $DLOG = on-failure ]; then
-                    tail -100 $log
-                fi
+            if [ $res -ne 0 ]; then
                 elog $module generic module $step failed with error $res
                 return $res
             fi
@@ -1092,6 +1098,8 @@ function handle-module()
             module-variant-wrapper $SCBI_BDIR/$module/build/install $module \
                                    $variant post-$step || exit 1
 
+            res=0
+
             fn-exists module-post-$step
 
             if [[ $? = 0 ]]; then
@@ -1100,18 +1108,17 @@ function handle-module()
                 if [ $DLOG = yes ]; then
                     module-post-$step $SCBI_BDIR/$module/build/install $module \
                                       $variant $SCBI_TARGET $ISOOT \
-                        | tee $log 2>&1
+                         2>&1 | tee $log
+                    res=${PIPESTATUS[0]}
                 else
                     module-post-$step $SCBI_BDIR/$module/build/install $module \
-                                      $variant $SCBI_TARGET $ISOOT >> $log 2>&1
+                                      $variant $SCBI_TARGET $ISOOT \
+                         2>&1 | tee -a $log
+                    res=${PIPESTATUS[0]}
                 fi
             fi
-            res=$?
 
             if [ $res != 0 ]; then
-                if [ $DLOG = on-failure ]; then
-                    tail -100 $log
-                fi
                 elog $module generic module post-$step failed with error $res
                 return $res
             fi

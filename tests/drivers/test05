@@ -1,10 +1,10 @@
 # check that dependents versions are properly built
 #
 echo '============ build test5 + deps (no compilation of lib1 expected)'
-./scbi --tests --deps mainlib
+./scbi --no-patch --tests --deps mainlib
 
 echo '============ re-build test4 on v1'
-./scbi --tar lib1:v1
+./scbi --no-patch --tar lib1:v1
 
 echo '============ build test5 + deps (compilation of lib1 expected)'
-./scbi --tests --deps mainlib
+./scbi --no-patch --tests --deps mainlib

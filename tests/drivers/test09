@@ -13,7 +13,7 @@
 )
 
 echo '=================== plan v2 (lib1:v2 lib2 & mainmult:dev)'
-./scbi --tests --plan=v2 --deps mainmult:dev
+./scbi --no-patch --tests --plan=v2 --deps mainmult:dev
 
 echo '=================== plan v2 (lib1:v2 lib2:dev & mainmult:dev)'
-./scbi --tests --plan=dev --deps mainmult:dev
+./scbi --no-patch --tests --plan=dev --deps mainmult:dev

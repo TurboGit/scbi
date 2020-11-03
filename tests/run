@@ -24,6 +24,9 @@ cp ../scripts.d/[2-9]* scripts.d/
 sed -i 's/rsync -a/rsync -a -c/g' scripts.d/7_modgen
 sed -i 's/dlog/ilog/g' scripts.d/7_modgen
 
+mkdir -p .root/.patches
+cp .root/repos/*.patch .root/.patches/
+
 # the repository directory
 export TESTREPOS=$PWD/.root/repos
 
