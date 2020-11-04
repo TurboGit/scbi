@@ -27,24 +27,14 @@ function langkit-build-env()
     export PYTHONPATH=$PWD
 }
 
-function langkit-stable-env()
-{
-    local PREFIX=$1
-    local TARGET=$2
-
-    langkit-env $PREFIX $TARGET stable
-
-    LK=$SCBI_BDIR/langkit
-    add-to-var GPR_PROJECT_PATH $LK/$TARGET-stable/install/share/gpr
-}
-
 function langkit-env()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
 
-    add-to-var PYTHONPATH $SCBI_BDIR/langkit/$TARGET-$VARIANT/build
+    add-to-var PYTHONPATH       $SCBI_BDIR/langkit/$TARGET-$VARIANT/build
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
 }
 
 function langkit-stable-config()
@@ -139,7 +129,7 @@ function langkit-install()
                        ./support/langkit_support.gpr
 }
 
-function langkit-stable-prefix()
+function langkit-prefix()
 {
     echo NONE
 }
