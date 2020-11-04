@@ -25,7 +25,6 @@ sed -i 's/rsync -a/rsync -a -c/g' scripts.d/7_modgen
 sed -i 's/dlog/ilog/g' scripts.d/7_modgen
 
 mkdir -p .root/.patches
-cp .root/repos/*.patch .root/.patches/
 
 # the repository directory
 export TESTREPOS=$PWD/.root/repos
@@ -42,10 +41,17 @@ mkdir -p $PWD/logs
 if [ -z $1 ]; then
     TESTS='drivers/test*'
 else
-    TESTS=drivers/$1
+    TESTS="drivers/$*"
 fi
 
 for file in $TESTS; do
+    # copy/reset patches each time as some drivers
+    # are changing them for testing purpose.
+    cp .root/repos/*.patch .root/.patches/
+
+    # clean build directory to ensure each run are independent
+    rm -fr .root/builds
+
     bfile=$(basename $file)
     echo -n "========== $bfile "
     run-test $bfile 2>&1 > logs/$bfile.log

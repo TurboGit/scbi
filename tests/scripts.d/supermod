@@ -4,6 +4,7 @@ function supermod-setup()
     local PREFIX=$1
     local TARGET=$2
 
+    mkdir -p $PREFIX
     echo do setup >> $PREFIX/supermod
 }
 

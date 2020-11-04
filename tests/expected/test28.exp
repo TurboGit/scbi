@@ -9,6 +9,7 @@ xxxx/xx/xx xx:xx:xx : skip depA, marked to be skipped
 xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : tests starting

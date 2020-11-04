@@ -23,7 +23,7 @@ function mainmult-build()
     local PREFIX=$1
     local TARGET=$2
 
-    rm *.o
+    rm -f *.o
     make
 }
 

@@ -1,3 +1,6 @@
+
+./scbi --no-patch lib1 > /dev/null 2>&1
+
 # check purge and purge-only
 echo '==== no build expected'
 ./scbi --no-patch lib1
