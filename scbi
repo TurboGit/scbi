@@ -382,6 +382,7 @@ function register-depends-callback()
     local LEVEL=$3
     local IS_BUILD_DEPENDS=$4
     local IS_EXT=$5
+    local IS_META=$6
     local SELEXT=false
     local SELBUILD=false
     local SELECTED=false
@@ -424,6 +425,7 @@ function handle-env-callback()
     local LEVEL=$3
     local IS_BUILD_DEPENDS=$4
     local IS_EXT=$5
+    local IS_META=$6
 
     handle-module-env $MODREF env
 }
@@ -519,16 +521,37 @@ function handle-depends()
 
     cd $SCBI_ROOT
 
+    case "$kind" in
+        NONE)
+            SID="vcs-$ref"
+            ;;
+        TAR)
+            SID="tar-$ref"
+            ;;
+    esac
+
+    if [ -f source-id ]; then
+        if [ "$(cat source-id)" == $SID ]; then
+            rsid=0;
+        else
+            rsid=1;
+        fi
+    else
+        rsid=1;
+    fi
+
     [ "$ref" = "NONE" ] && ref=0
 
     [ $DOFORCE = yes ] && rm -f $SCBI_BDIR/$module/build/build-id
 
     #  Check build id, only rebuild if mismatch
 
-    diff -q $SCBI_BDIR/$module/build-id \
+    diff -q $SCBI_BDIR/$module/build-id-$variant \
             $SCBI_BDIR/$module/build/build-id > /dev/null 2>&1
+    rbid=$?
 
-    if [[ $? != 0 \
+    if [[ $rbid -gt 0 \
+              || $rsid -gt 0 \
               || "$mver" = "" \
               || "$mver" = $VERSION_ERROR \
               || $ref > $mver ]];
