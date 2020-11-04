@@ -1,2 +1,0 @@
-[ -z $SCBI_GIT_REPO ] && SCBI_GIT_REPO=$SCBI_ROOT/repositories/git
-[ -z $SCBI_SVN_REPO ] && SCBI_SVN_REPO=$SCBI_ROOT/repositories/svn

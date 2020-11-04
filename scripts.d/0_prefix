@@ -1,9 +1,0 @@
-
-TODAY=$(date +"%Y_%m_%d")
-
-[ -z $SCBI_ROOT ] && SCBI_ROOT=$HOME/dev
-[ -z $SCBI_BDIR ] && SCBI_BDIR=$SCBI_ROOT/builds
-[ -z $SCBI_PREFIX ] && SCBI_PREFIX=$SCBI_BDIR/install
-[ -z $SCBI_TAR ] && SCBI_TAR=$SCBI_BDIR/.tar
-[ -z $SCBI_PATCH ] && SCBI_PATCH=$SCBI_BDIR/.patches
-[ -z $SCBI_LOGS ] && SCBI_LOGS=$SCBI_BDIR/.logs
