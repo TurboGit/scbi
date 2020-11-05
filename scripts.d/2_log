@@ -177,9 +177,9 @@ function dump-function()
 
     for word in $FCT; do
         if [ ! -z "$word"               \
-	     -a "${word}" != 'if'       \
-	     -a "${word:0:1}" != '-' ];
-	then
+             -a "${word}" != 'if'       \
+             -a "${word:0:1}" != '-' ];
+        then
             if [ -z "${SCBI_FCT_DUMPED[$word]}" ]; then
                 fn-exists "$word"
                 [ $? == 0 ] && dump-function $MODULE $word;
@@ -188,11 +188,11 @@ function dump-function()
     done
 
     if [ ${NAME#${MODULE}-} == $NAME ]; then
-	echo
-	echo "   function $NAME()"
-	echo "   {"
-	echo "$FCT"
-	echo "   }"
+        echo
+        echo "   function $NAME()"
+        echo "   {"
+        echo "$FCT"
+        echo "   }"
     fi
 }
 
@@ -225,12 +225,12 @@ function show-command()
     echo ""
 
     if [ -f $SCBI_DEFS/$MODULE ]; then
-	cp $SCBI_DEFS/$MODULE ../.log
-	echo "   source ../.log/$MODULE"
+        cp $SCBI_DEFS/$MODULE ../.log
+        echo "   source ../.log/$MODULE"
     fi
 
     (
-	dump-function $MODULE $CMD
+        dump-function $MODULE $CMD
     )
 
     echo ""
