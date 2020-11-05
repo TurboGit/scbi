@@ -61,17 +61,17 @@ PURGE=no
 NSTEPS=
 SCBI_PREFIX=
 SCBI_DEFAULT_PREFIX=yes
-DOINSTALL=yes
-DOUPDATE=no
-DOTEST=no
-DOARCHIVE=no
-DOFORCE=no
-DOSTAT=no
-DODEPS=no
+DO_INSTALL=yes
+DO_UPDATE=no
+DO_TEST=no
+DO_ARCHIVE=no
+DO_FORCE=no
+DO_STAT=no
+DO_DEPS=no
 DOMODVER=no
 SCBI_DEPSRECURS=yes
-DOEXT=no
-DOPLAN=no
+DO_EXT=no
+DO_PLAN=no
 DEPS=no
 ISOOT=yes
 PATCH=yes
@@ -387,7 +387,7 @@ function register-depends-callback()
     local SELBUILD=false
     local SELECTED=false
 
-    if [ $DOEXT == yes ]; then
+    if [ $DO_EXT == yes ]; then
         SELEXT=true
     fi
 
@@ -542,7 +542,7 @@ function handle-depends()
 
     [ "$ref" = "NONE" ] && ref=0
 
-    [ $DOFORCE = yes ] && rm -f $SCBI_BDIR/$module/build/build-id
+    [ $DO_FORCE = yes ] && rm -f $SCBI_BDIR/$module/build/build-id
 
     #  Check build id, only rebuild if mismatch
 
@@ -612,7 +612,7 @@ function handle-sources()
             fi
         fi
 
-        if [ $DOUPDATE = yes -o ! -d tarsrc -o ! -f tar ]; then
+        if [ $DO_UPDATE = yes -o ! -d tarsrc -o ! -f tar ]; then
             ilog $module get sources from tar
 
             get-tar $module $ref >> $log 2>&1
@@ -687,13 +687,13 @@ function handle-sources()
                 if [ -f source-id ]; then
                     if [ "$(cat source-id)" != "vcs-$ref" ]; then
                         # a different version is needed
-                        DOUPDATE=yes
+                        DO_UPDATE=yes
                     fi
                 else
-                    DOUPDATE=yes
+                    DO_UPDATE=yes
                 fi
 
-                if [ $DOUPDATE = yes -o ! -d ../.vcs/$REPO ]; then
+                if [ $DO_UPDATE = yes -o ! -d ../.vcs/$REPO ]; then
                     ilog $module get sources from $VCS_NAME
 
                     get-vcs $module $kind $ref
@@ -1004,7 +1004,7 @@ function handle-module()
 
         #  If force build, remove the current build id
 
-        [ $DOFORCE = yes ] && rm -f build/build-id
+        [ $DO_FORCE = yes ] && rm -f build/build-id
 
         #  Check build id, only rebuild if mismatch
 
@@ -1025,7 +1025,7 @@ function handle-module()
 
             # if testing is expected, at least do that
 
-            if [ $DOTEST = true ]; then
+            if [ $DO_TEST = true ]; then
                 STEPS="$STEPS tests"
             fi
 
@@ -1034,7 +1034,7 @@ function handle-module()
             # directory, clean it to ensure no old versions are installed
             # into the same location.
 
-            if [ $DOINSTALL = yes -a -d $SCBI_BDIR/$module/build/install ]; then
+            if [ $DO_INSTALL = yes -a -d $SCBI_BDIR/$module/build/install ]; then
                 rm -fr $SCBI_BDIR/$module/build/install
                 rm -fr $SCBI_BDIR/$module/install-id
             fi
@@ -1155,7 +1155,7 @@ function handle-module()
 
     #  Create binary archive if needed
 
-    if [ $DOARCHIVE = yes ]; then
+    if [ $DO_ARCHIVE = yes ]; then
         cd $SCBI_BDIR/$module/build >> $log 2>&1
         tar cf $module-bin.tar --directory=install .
         bzip2 -9 $module-bin.tar
@@ -1174,7 +1174,7 @@ function handle-module()
     if [ $_IDIR == NONE ]; then
         ilog $module skip global install
 
-    elif [ "$DOINSTALL" = "yes" -a -d $SCBI_BDIR/$module/build/install ]; then
+    elif [ "$DO_INSTALL" = "yes" -a -d $SCBI_BDIR/$module/build/install ]; then
         ilog $module copy install into ..${_IDIR/$SCBI_BDIR/}
 
         #  Finaly copy to given prefix
@@ -1232,10 +1232,10 @@ while [ $# -gt 0 ]; do
             break
             ;;
         -f|--force)
-            DOFORCE=yes
+            DO_FORCE=yes
             ;;
         -a|--archive)
-            DOARCHIVE=yes
+            DO_ARCHIVE=yes
             ;;
         -e|--env)
             ENV_NAME="-$2"
@@ -1258,10 +1258,10 @@ while [ $# -gt 0 ]; do
             NSTEPS="$NSTEPS wrapup"
             ;;
         -I|--no-install)
-            DOINSTALL=no
+            DO_INSTALL=no
             ;;
         -u|--update)
-            DOUPDATE=yes
+            DO_UPDATE=yes
             ;;
         -s|--setup)
             NSTEPS="$NSTEPS setup"
@@ -1286,18 +1286,18 @@ while [ $# -gt 0 ]; do
             ;;
         -i|--install)
             NSTEPS="$NSTEPS install"
-            DOINSTALL=yes
+            DO_INSTALL=yes
             ;;
         -l|--no-log)
             DLOG=no
             ;;
         --tests)
             NSTEPS="$NSTEPS setup config build install tests wrapup"
-            DOTEST=true
+            DO_TEST=true
             ;;
         --tests-only)
             NSTEPS="$NSTEPS tests"
-            DOTEST=true
+            DO_TEST=true
             ;;
         -v|--verbose)
             DLOG=yes
@@ -1326,26 +1326,26 @@ while [ $# -gt 0 ]; do
             SCBI_PLAN_CL=$2; shift
             ;;
         --stat)
-            DOSTAT=yes;
+            DO_STAT=yes;
             ;;
         --list-depends:direct)
-            DODEPS=yes;
-            DOEXT=no;
+            DO_DEPS=yes;
+            DO_EXT=no;
             SCBI_DEPSRECURS=no
             ;;
         --list-depends:full)
-            DODEPS=yes;
-            DOEXT=no;
+            DO_DEPS=yes;
+            DO_EXT=no;
             SCBI_DEPSRECURS=yes
             ;;
         --list-depends)
-            DODEPS=yes;
-            DOEXT=no;
+            DO_DEPS=yes;
+            DO_EXT=no;
             SCBI_DEPSRECURS=yes
             ;;
         --list-externals)
-            DODEPS=yes;
-            DOEXT=yes;
+            DO_DEPS=yes;
+            DO_EXT=yes;
             ;;
         --list-filter:all)
             SCBI_FILTER=all;
@@ -1357,7 +1357,7 @@ while [ $# -gt 0 ]; do
             SCBI_FILTER=runtime;
             ;;
         --list-plan)
-            DOPLAN=yes;
+            DO_PLAN=yes;
             ;;
         --dry-run)
             DRY_RUN=yes;
@@ -1443,17 +1443,17 @@ if [ $DO_VERSION = yes ]; then
     exit 0
 fi
 
-[ "$MODULES" = "" -a $DOSTAT == no -a $DOMODVER == no ] && usage
+[ "$MODULES" = "" -a $DO_STAT == no -a $DOMODVER == no ] && usage
 
-[ "$MODULES" = "" -a $DO_SHELL != no -a $DOSTAT != yes ] && exit 0
+[ "$MODULES" = "" -a $DO_SHELL != no -a $DO_STAT != yes ] && exit 0
 
-[ $DOSTAT == yes ] && display-stat
+[ $DO_STAT == yes ] && display-stat
 
-[ "$MODULES" = "" -o $DOSTAT == yes ] && display-modules && display-plans
+[ "$MODULES" = "" -o $DO_STAT == yes ] && display-modules && display-plans
 
-[ $DOSTAT == yes ] && display-log-stat
+[ $DO_STAT == yes ] && display-log-stat
 
-if [ $DODEPS == yes ]; then
+if [ $DO_DEPS == yes ]; then
     for module in $MODULES; do
         for-all-modules-with-meta-ext register-depends-callback $module
     done
@@ -1478,10 +1478,10 @@ mkdir -p $SCBI_TAR
 
 if [ $DRY_RUN == yes ]; then
     PURGE=no
-    DOINSTALL=no
-    DOARCHIVE=no
-    DOUPDATE=no
-    DOFORCE=no
+    DO_INSTALL=no
+    DO_ARCHIVE=no
+    DO_UPDATE=no
+    DO_FORCE=no
     STEPS=""
 fi
 
@@ -1513,7 +1513,7 @@ if [ $DOMODVER == yes ]; then
     exit 0
 fi
 
-if [ $DOPLAN == yes ]; then
+if [ $DO_PLAN == yes ]; then
     display-build-plan
     exit 0
 fi
