@@ -1445,7 +1445,7 @@ fi
 
 [ "$MODULES" = "" -a $DOSTAT == no -a $DOMODVER == no ] && usage
 
-[ "$MODULES" = "" -a $DO_SHELL != no ] && exit 0
+[ "$MODULES" = "" -a $DO_SHELL != no -a $DOSTAT != yes ] && exit 0
 
 [ $DOSTAT == yes ] && display-stat
 
