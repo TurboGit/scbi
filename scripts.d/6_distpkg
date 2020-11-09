@@ -98,6 +98,15 @@ function get-pkg-name()
     fi
 }
 
+# returns the package name for the current distribution
+function get-pkg-version()
+{
+    local pkg=$1
+
+    local pname=$(get-pkg-name $pkg)
+    echo ${SCBI_PKGS[$pname]}
+}
+
 # returns the library for the given dev package
 function get-lib-for-dev()
 {
