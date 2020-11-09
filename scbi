@@ -71,6 +71,7 @@ DO_DEPS=no
 DOMODVER=no
 SCBI_DEPSRECURS=yes
 DO_EXT=no
+DO_EXT_VERSION=no
 DO_PLAN=no
 DEPS=no
 ISOOT=yes
@@ -271,42 +272,42 @@ function usage()
     echo "   modulen  <name>:#<ver>    build from tarbal version <ver>"
     echo "   modulen  <name>:dev       build from user's repository current branch"
     echo ""
-    echo "   -h | --help            this help message"
-    echo "   -t | --prefix=<dir>    the global install directory"
-    echo "      | --build-dir=<dir> the root build directory."
-    echo "   -e | --env=<name>      environment file ~/.scbi-<name>"
-    echo "      | --plan=<name>     a build plan for modules"
-    echo "      | --enable-<name>   enable feature name"
-    echo "   -t | --target=<name>   the target to build for ($SCBI_TARGET)"
-    echo "      | --plugins=<dir>   specify the modules/plugins directory"
-    echo "   -j | --jobs=<n>        max compilation jobs \$SCBI_JOBS"
-    echo "   -v | --verbose         display full log"
-    echo "   -S | --no-setup        skip setup"
-    echo "   -I | --no-install      skip install"
-    echo "   -u | --update          do update"
-    echo "   -s | --setup           do setup"
-    echo "   -c | --config          do config"
-    echo "   -b | --build           do build"
-    echo "   -i | --install         do install"
-    echo "      | --tar             check for tar only if explicitly specified"
-    echo "      | --tests           run the testsuite, build if necessary"
-    echo "      | --tests-only      run the testsuite"
-    echo "   -d | --deps            check/build dependencies"
-    echo "   -a | --archive         build binary archive"
-    echo "      | --standalone      create a standalone source archive"
-    echo "   -l | --no-log          never display log"
-    echo "   -f | --force           force rebuild, do not check build id"
-    echo "   -p | --purge           remove builds directories before building"
-    echo "   -P | --purge-only      only remove builds directories"
-    echo "      | --shell:n         start a shell with module's environment"
-    echo "      | --list-depends:n  list module's dependencies (direct or full)"
-    echo "      | --list-externals  list module's external dependencies"
-    echo "      | --list-filter:n   filter depends/external for dev or runtime"
-    echo "      | --list-plan       list current current plan"
-    echo "      | --module-version  display version of specific module"
-    echo "      | --dry-run         only list modules handled"
-    echo "      | --stat            display some status of current setup"
-    echo "   -n | --no-patch        do not apply patches"
+    echo "   -h | --help             this help message"
+    echo "   -t | --prefix=<dir>     the global install directory"
+    echo "      | --build-dir=<dir>  the root build directory."
+    echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
+    echo "      | --plan=<name>      a build plan for modules"
+    echo "      | --enable-<name>    enable feature name"
+    echo "   -t | --target=<name>    the target to build for ($SCBI_TARGET)"
+    echo "      | --plugins=<dir>    specify the modules/plugins directory"
+    echo "   -j | --jobs=<n>         max compilation jobs \$SCBI_JOBS"
+    echo "   -v | --verbose          display full log"
+    echo "   -S | --no-setup         skip setup"
+    echo "   -I | --no-install       skip install"
+    echo "   -u | --update           do update"
+    echo "   -s | --setup            do setup"
+    echo "   -c | --config           do config"
+    echo "   -b | --build            do build"
+    echo "   -i | --install          do install"
+    echo "      | --tar              check for tar only if explicitly specified"
+    echo "      | --tests            run the testsuite, build if necessary"
+    echo "      | --tests-only       run the testsuite"
+    echo "   -d | --deps             check/build dependencies"
+    echo "   -a | --archive          build binary archive"
+    echo "      | --standalone       create a standalone source archive"
+    echo "   -l | --no-log           never display log"
+    echo "   -f | --force            force rebuild, do not check build id"
+    echo "   -p | --purge            remove builds directories before building"
+    echo "   -P | --purge-only       only remove builds directories"
+    echo "      | --shell:n          start a shell with module's environment"
+    echo "      | --list-depends:n   list module's dependencies (direct, full)"
+    echo "      | --list-externals:n list module's external dependencies"
+    echo "      | --list-filter:n    filter depends/external for dev or runtime"
+    echo "      | --list-plan        list current current plan"
+    echo "      | --module-version   display version of specific module"
+    echo "      | --dry-run          only list modules handled"
+    echo "      | --stat             display some status of current setup"
+    echo "   -n | --no-patch         do not apply patches"
 }
 
 ############################## handle-modue-env
@@ -410,7 +411,22 @@ function register-depends-callback()
             MOD=$MODREF
         fi
 
-       MODULE_LIST+=($MOD)
+        # we have an external, get version if needed
+
+        if [ $IS_EXT == true -a $DO_EXT_VERSION == yes ]; then
+            local module_info=( $(get-module-ref $MODREF) )
+
+            local module=${module_info[0]}
+            local ref=${module_info[3]}
+
+            if [ $ref == NONE ]; then
+                MOD="$module:$(get-pkg-version $module)"
+            else
+                MOD="$module:$ref"
+            fi
+        fi
+
+        MODULE_LIST+=($MOD)
     fi
 }
 
@@ -1220,7 +1236,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:versions,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1343,6 +1359,11 @@ while [ $# -gt 0 ]; do
             DO_EXT=no;
             SCBI_DEPSRECURS=yes
             ;;
+        --list-externals:versions)
+            DO_DEPS=yes;
+            DO_EXT=yes;
+            DO_EXT_VERSION=yes;
+            ;;
         --list-externals)
             DO_DEPS=yes;
             DO_EXT=yes;
@@ -1453,6 +1474,13 @@ fi
 
 [ $DO_STAT == yes ] && display-log-stat
 
+#  Setup module reference specified on the command line. The module
+#  reference on the command line must overwrite the actual build plan.
+
+for module in $MODULES; do
+    set-module-ref $module
+done
+
 if [ $DO_DEPS == yes ]; then
     for module in $MODULES; do
         for-all-modules-with-meta-ext register-depends-callback $module
@@ -1484,13 +1512,6 @@ if [ $DRY_RUN == yes ]; then
     DO_FORCE=no
     STEPS=""
 fi
-
-#  Setup module reference specified on the command line. The module
-#  reference on the command line must overwrite the actual build plan.
-
-for module in $MODULES; do
-    set-module-ref $module
-done
 
 #  If a shell is requested
 

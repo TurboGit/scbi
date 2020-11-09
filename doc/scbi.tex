@@ -391,7 +391,7 @@ The following options are supported:
 
 	\item[\ddash{}list-depends:{[}direct|full{]}] Recursively list module's dependencies. Either list all dependencies recursively (the default) or only the direct dependencies of the given module.
 
-	\item[\ddash{}list-externals] Recursively list external dependencies.
+	\item[\ddash{}list-externals:{[}version{]}] Recursively list external dependencies. If sub-option versions is specified it also displays the external version.
 
 	\item[\ddash{}list-filter:{[}all|run|dev{]} ] Restrict the listing of dependencies or externals to either \code{all} (default) dependencies, the \code{dev} dependencies needed to build the software or the \code{run} dependencies needed to execute the software. Those last dependencies may be computed automatically from the \code{dev} dependencies listed in plugin modules.
 
