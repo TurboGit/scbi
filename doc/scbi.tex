@@ -383,7 +383,7 @@ The following options are supported:
 
 	 If the sub-option \code{cwd} is specified the shell stays in the current working directory, otherwise the shell will move to the module's build directory.
 
-	\begin{description}
+	\begin{description}[font=\texttt]
 		\item[sandbox] Specifying \code{sandbox} move the shell working directory into the module's build directory sandbox. This mode is meant to debug (or test some other options) the build of the given module. Not only the environment is setup from all dependencies but also the build environment of the specified module is setup. That is, in this mode the environment is exactly the one SCBI sees when starting the configuration, build or install steps.
 
 		\item[no sub-option] The shell stays in the current working directory and setup the environment for the module to be used by another one. That is the given module is a dependency (and all dependents modules recursively) for the work to be done.
@@ -391,7 +391,9 @@ The following options are supported:
 
 	\item[\ddash{}list-depends:{[}direct|full{]}] Recursively list module's dependencies. Either list all dependencies recursively (the default) or only the direct dependencies of the given module.
 
-	\item[\ddash{}list-externals:{[}version{]}] Recursively list external dependencies. If sub-option versions is specified it also displays the external version.
+	\item[\ddash{}list-externals:{[}only{]}] Recursively list externals and modules dependencies. If sub-option \code{only} is specified it only displays the externals.
+
+	\item[\ddash{}list-no-version] Do not display modules or externals versions.
 
 	\item[\ddash{}list-filter:{[}all|run|dev{]} ] Restrict the listing of dependencies or externals to either \code{all} (default) dependencies, the \code{dev} dependencies needed to build the software or the \code{run} dependencies needed to execute the software. Those last dependencies may be computed automatically from the \code{dev} dependencies listed in plugin modules.
 

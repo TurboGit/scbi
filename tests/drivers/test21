@@ -2,4 +2,10 @@ echo "========== dmain"
 ./scbi --list-depends dmain
 
 echo "========== dmain externals"
-./scbi --list-externals --list-filter=all dmain
+./scbi --list-externals:only dmain
+
+echo "========== dmain modules & externals"
+./scbi --list-externals dmain
+
+echo "========== dmain direct modules & externals"
+./scbi --list-depends:direct --list-externals dmain

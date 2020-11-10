@@ -223,7 +223,7 @@ function _internal_for-all-modules()
 
     #  Check if recursive dependencies is needed
 
-    [ $SCBI_DEPSRECURS == no -a $LEVEL -ge 2 ] && return 0
+    [ $DO_DEPS == yes-direct -a $LEVEL -ge 2 ] && return 0
 
     #  Get module information
 

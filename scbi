@@ -66,12 +66,11 @@ DO_UPDATE=no
 DO_TEST=no
 DO_ARCHIVE=no
 DO_FORCE=no
+DO_MOD_VER=no
 DO_STAT=no
 DO_DEPS=no
-DOMODVER=no
-SCBI_DEPSRECURS=yes
 DO_EXT=no
-DO_EXT_VERSION=no
+DO_LIST_VER=yes
 DO_PLAN=no
 DEPS=no
 ISOOT=yes
@@ -302,6 +301,7 @@ function usage()
     echo "      | --shell:n          start a shell with module's environment"
     echo "      | --list-depends:n   list module's dependencies (direct, full)"
     echo "      | --list-externals:n list module's external dependencies"
+    echo "      | --list-no-version  do not display modules/externals version"
     echo "      | --list-filter:n    filter depends/external for dev or runtime"
     echo "      | --list-plan        list current current plan"
     echo "      | --module-version   display version of specific module"
@@ -346,8 +346,10 @@ function handle-module-env()
         cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant/$ENV_DIR
     elif [ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]; then
         cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant
-    else
+    elif [ -d $SCBI_BDIR/$module ]; then
         cd $SCBI_BDIR/$module
+    else
+        cd $SCBI_BDIR
     fi
 
     fn-exists $module-$variant-$ENV
@@ -384,11 +386,12 @@ function register-depends-callback()
     local IS_BUILD_DEPENDS=$4
     local IS_EXT=$5
     local IS_META=$6
+
     local SELEXT=false
     local SELBUILD=false
     local SELECTED=false
 
-    if [ $DO_EXT == yes ]; then
+    if [ $DO_EXT != no -o $IS_EXT == false ]; then
         SELEXT=true
     fi
 
@@ -400,27 +403,40 @@ function register-depends-callback()
         SELECTED=true
     fi
 
-    if [ $SCBI_DEPSRECURS == no -a $LEVEL -ne 1 ]; then
+    if [ $DO_DEPS == yes-direct -a $LEVEL -ne 1 ]; then
         SELECTED=false
     fi
 
-    if [ $IS_EXT == $SELEXT -a $SELECTED == true ]; then
+    if [ $DO_EXT == yes-only -a $IS_EXT == false ]; then
+        SELECTED=false
+    fi
+
+    if [ $SELEXT == true -a $SELECTED == true ]; then
         if [ "$SCBI_FILTER" == "run" -a "${MODREF: -4}" == "-dev" ]; then
             MOD=$(get-lib-for-dev $MODREF)
         else
             MOD=$MODREF
         fi
 
-        # we have an external, get version if needed
+        #  Do we need the version of the module
 
-        if [ $IS_EXT == true -a $DO_EXT_VERSION == yes ]; then
+        if [ $DO_LIST_VER == yes ]; then
             local module_info=( $(get-module-ref $MODREF) )
 
             local module=${module_info[0]}
             local ref=${module_info[3]}
 
             if [ $ref == NONE ]; then
-                MOD="$module:$(get-pkg-version $module)"
+                if [ $IS_EXT == true ]; then
+                    local V=$(get-pkg-version $module)
+                    if [ -z $V ]; then
+                        MOD="$module"
+                    else
+                        MOD="$module:$V"
+                    fi
+                else
+                    MOD="$module"
+                fi
             else
                 MOD="$module:$ref"
             fi
@@ -1236,7 +1252,7 @@ while [ $# -gt 0 ]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:versions,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox -- $(echo $SCBIOPTS))
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -1329,7 +1345,7 @@ while [ $# -gt 0 ]; do
             SCBI_PREFIX=$2; shift
             ;;
         --module-version)
-            DOMODVER=yes
+            DO_MOD_VER=yes
             shift
             ;;
         -P|--purge-only)
@@ -1345,28 +1361,22 @@ while [ $# -gt 0 ]; do
             DO_STAT=yes;
             ;;
         --list-depends:direct)
-            DO_DEPS=yes;
-            DO_EXT=no;
-            SCBI_DEPSRECURS=no
+            DO_DEPS=yes-direct;
             ;;
         --list-depends:full)
             DO_DEPS=yes;
-            DO_EXT=no;
-            SCBI_DEPSRECURS=yes
             ;;
         --list-depends)
             DO_DEPS=yes;
-            DO_EXT=no;
-            SCBI_DEPSRECURS=yes
             ;;
-        --list-externals:versions)
-            DO_DEPS=yes;
-            DO_EXT=yes;
-            DO_EXT_VERSION=yes;
+        --list-externals:only)
+            DO_EXT=yes-only;
             ;;
         --list-externals)
-            DO_DEPS=yes;
             DO_EXT=yes;
+            ;;
+        --list-no-version)
+            DO_LIST_VER=no
             ;;
         --list-filter:all)
             SCBI_FILTER=all;
@@ -1412,6 +1422,10 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
+
+if [ $DO_EXT != no -a $DO_DEPS == no ]; then
+    DO_DEPS=yes
+fi
 
 trap clean-up EXIT
 
@@ -1464,7 +1478,7 @@ if [ $DO_VERSION = yes ]; then
     exit 0
 fi
 
-[ "$MODULES" = "" -a $DO_STAT == no -a $DOMODVER == no ] && usage
+[ "$MODULES" = "" -a $DO_STAT == no -a $DO_MOD_VER == no ] && usage
 
 [ "$MODULES" = "" -a $DO_SHELL != no -a $DO_STAT != yes ] && exit 0
 
@@ -1481,7 +1495,7 @@ for module in $MODULES; do
     set-module-ref $module
 done
 
-if [ $DO_DEPS == yes ]; then
+if [ $DO_DEPS != no ]; then
     for module in $MODULES; do
         for-all-modules-with-meta-ext register-depends-callback $module
     done
@@ -1527,7 +1541,7 @@ fi
 
 #  If we want to display a module version from a module plan, do it now
 
-if [ $DOMODVER == yes ]; then
+if [ $DO_MOD_VER == yes ]; then
     for module in $MODULES; do
         display-module-version $module
     done
