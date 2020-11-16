@@ -114,6 +114,7 @@ function git-branch()
     local OPTIONS=$2
     local MODULE=$3
     local BRANCH=$4
+
     local BUILDB=scbi
 
     (

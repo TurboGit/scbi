@@ -758,6 +758,7 @@ function handle-sources()
                         ;;
                     *)
                         ln -s vcs src
+                        ;;
                 esac
             fi
 
@@ -1089,7 +1090,7 @@ function handle-module()
         for step in $STEPS; do
             ########## PRE module
 
-            #  Apply any generic step (module-setup, module-purge)
+            #  Apply any generic pre-step (module-pre-setup, module-pre-purge)
 
             local res=0
 
