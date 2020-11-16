@@ -728,7 +728,7 @@ function handle-sources()
                 if [ $DO_UPDATE = yes -o ! -d ../.vcs/$REPO ]; then
                     ilog $module get sources from $VCS_NAME
 
-                    get-vcs $module $kind $ref
+                    get-vcs $SCBI_PREFIX $SCBI_TARGET $modref
 
                     if [[ ! $? = 0 ]]; then
                         exit 1

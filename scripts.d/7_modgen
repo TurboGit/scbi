@@ -2,7 +2,8 @@
 
 function module-apply-patch()
 {
-    local PATCH_FILE="$1"
+    local MODULE=$1
+    local PATCH_FILE="$2"
 
     local patch=""
 
@@ -28,27 +29,36 @@ function module-apply-patch()
 function module-patch()
 {
     local PREFIX=$1
-    local MODULE=$2
-    local VARIANT=$3
-    local TARGET=$4
-    local OOT=$5
+    local TARGET=$2
+    local MODREF=$3
+
+    local module_info=( $(get-module-ref $MODREF) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
 
     local res=0
 
-    fn-exists $MODULE-$VARIANT-patches
+    fn-exists $module-$variant-patches
 
     if [ $? = 0 ]; then
-        for patch in $($MODULE-$VARIANT-patches $PREFIX $TARGET); do
-            module-apply-patch "$patch"
+        for patch in $($module-$variant-patches $PREFIX $TARGET \
+                                                $kind $ref);
+        do
+            module-apply-patch $module "$patch"
             [[ ! $? = 0 ]] && res=1
         done
 
     else
-        fn-exists $MODULE-patches
+        fn-exists $module-patches
 
         if [ $? = 0 ]; then
-            for patch in $($MODULE-patches $PREFIX $TARGET $VARIANT); do
-                module-apply-patch "$patch"
+            for patch in $($module-patches $PREFIX $TARGET $variant \
+                                           $kind $ref);
+            do
+                module-apply-patch $module "$patch"
                 [[ ! $? = 0 ]] && res=1
             done
         fi
@@ -95,7 +105,7 @@ function module-setup()
             (
                 cd $SRCDIR
 
-                module-patch $PREFIX $MODULE $VARIANT $TARGET $OOT
+                module-patch $PREFIX $TARGET $MODULE
             )
             res=$?
         fi
