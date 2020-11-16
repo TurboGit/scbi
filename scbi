@@ -74,7 +74,7 @@ DO_LIST_VER=yes
 DO_PLAN=no
 DEPS=no
 ISOOT=yes
-PATCH=yes
+DO_PATCH=yes
 STEPS="setup config build install wrapup"
 BUILD_SCBI_TARGET=
 SCBI_PLAN=
@@ -1338,7 +1338,7 @@ while [ $# -gt 0 ]; do
             PURGE=yes
             ;;
         -n|--no-patch)
-            PATCH=no
+            DO_PATCH=no
             ;;
         --prefix)
             SCBI_DEFAULT_PREFIX=no

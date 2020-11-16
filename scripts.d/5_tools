@@ -467,7 +467,7 @@ function get-build-id()
 
     local pid="no-patch-found"
 
-    if [ $PATCH = yes ]; then
+    if [ $DO_PATCH = yes ]; then
         fn-exists $module-$variant-patches
 
         if [ $? = 0 ]; then

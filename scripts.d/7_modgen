@@ -91,7 +91,7 @@ function module-setup()
             --link-dest=../src src/. $SRCDIR/
 
         #  If some patches are present, apply them now
-        if [ $PATCH == yes ]; then
+        if [ $DO_PATCH == yes ]; then
             (
                 cd $SRCDIR
 
