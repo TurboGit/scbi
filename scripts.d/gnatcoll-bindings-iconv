@@ -60,7 +60,7 @@ function gnatcoll-bindings-iconv-install()
 
     PM=$PREFIX/$TARGET/install/$TARGET/share/gpr/manifests
 
-    if [ -f $PM/gnatcoll_iconv ]; then
+    if [[ -f $PM/gnatcoll_iconv ]]; then
         gprinstall $GOPTS --uninstall gnatcoll_iconv
     fi
 

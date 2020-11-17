@@ -24,11 +24,11 @@ function binutils-version()
 
     TOOL=ld
 
-    if [ $SCBI_HOST != $TARGET ]; then
+    if [[ $SCBI_HOST != $TARGET ]]; then
         TOOL=${TARGET}-ld
     fi
 
-    if [ "$(which $TOOL)" = "" ]; then
+    if [[ "$(which $TOOL)" = "" ]]; then
         echo $VERSION_ERROR
     else
         echo $($TOOL --version | head -1 | cut -d' ' -f5)
@@ -62,7 +62,7 @@ function binutils-build()
 
     DEBUG=$(get-build-type MAKE binutils false)
 
-    if [ $DEBUG == true ]; then
+    if [[ $DEBUG == true ]]; then
        CFLAGS="-O0 -g -Wno-error"
     else
        CFLAGS="-O2 -g -Wno-error"

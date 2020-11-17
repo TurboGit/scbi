@@ -18,7 +18,7 @@ function blaslapack-config()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ $SCBI_HOST != $TARGET ]; then
+    if [[ $SCBI_HOST != $TARGET ]]; then
         COPTS=-DCMAKE_Fortran_COMPILER=$SCBI_BDIR/install/bin/$TARGET-gfortran
     fi
 
@@ -38,7 +38,7 @@ function blaslapack-install()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ $SCBI_HOST == $TARGET ]; then
+    if [[ $SCBI_HOST == $TARGET ]]; then
         TPREFIX=$PREFIX
         ranlib lib/*.a
     else

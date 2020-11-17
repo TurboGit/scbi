@@ -24,7 +24,7 @@ function svn-co()
 
         mkdir -p $SCBI_BDIR/.vcs
         cd $SCBI_BDIR/.vcs &&
-        if [ ! -d $REPO ]; then
+        if [[ ! -d $REPO ]]; then
             svn co $URL $REPO
         else
             cd $REPO
@@ -50,7 +50,7 @@ function git-co()
     local GOPTS1=""
     local GOPTS2=""
 
-    if [ ! -z ${OPTIONS##*no-recursive*} ]; then
+    if [[ ! -z ${OPTIONS##*no-recursive*} ]]; then
         GOPTS1="--recursive"
         GOPTS2="--recurse-submodules"
     fi
@@ -60,7 +60,7 @@ function git-co()
 
         mkdir -p $SCBI_BDIR/.vcs
         cd $SCBI_BDIR/.vcs &&
-        if [ ! -d $REPO ]; then
+        if [[ ! -d $REPO ]]; then
             git clone $GOPTS1 $URL $REPO
         else
             cd $REPO
@@ -91,7 +91,7 @@ function hg-co()
 
         mkdir -p $SCBI_BDIR/.vcs
         cd $SCBI_BDIR/.vcs &&
-        if [ ! -d $REPO ]; then
+        if [[ ! -d $REPO ]]; then
             hg clone $URL $REPO
         else
             cd $REPO
@@ -129,7 +129,7 @@ function git-branch()
 
         # if no branch specified use master
 
-        if [ $BRANCH == NONE ]; then
+        if [[ $BRANCH == NONE ]]; then
             BRANCH=master
         fi
 
@@ -137,17 +137,17 @@ function git-branch()
 
         git show-ref --verify --quiet refs/remotes/origin/$BRANCH
 
-        if [ $? == 1 ]; then
+        if [[ $? == 1 ]]; then
             git show-ref --verify --quiet refs/heads/$BRANCH
-            if [ $? == 1 ]; then
+            if [[ $? == 1 ]]; then
                 # maybe a tag then
                 git show-ref --verify --quiet refs/tags/$BRANCH
 
-                if [ $? == 1 ]; then
+                if [[ $? == 1 ]]; then
                     # check for a sha1
                     git rev-parse -q --verify $BRANCH^{commit} &> /dev/null
 
-                    if [ $? == 1 ]; then
+                    if [[ $? == 1 ]]; then
                         # version not found
                         ilog build "error: switching git branch"
                         return 1
@@ -165,7 +165,7 @@ function git-branch()
 
         git show-ref --verify --quiet refs/heads/$BUILDB
 
-        if [ $? == 1 ]; then
+        if [[ $? == 1 ]]; then
             git branch $BUILDB
         fi
 
@@ -179,7 +179,7 @@ function git-branch()
 
         NEW=$(git rev-parse --short HEAD)
 
-        if [ "$CUR" != "$NEW" ]; then
+        if [[ "$CUR" != "$NEW" ]]; then
             send-mail "scbi: $MODULE updated $CUR..$NEW"
             ilog $MODULE "scbi: $MODULE updated $CUR..$NEW"
         fi
@@ -210,13 +210,13 @@ function hg-branch()
 
         # if no branch specified use default
 
-        if [ $BRANCH == NONE ]; then
+        if [[ $BRANCH == NONE ]]; then
             BRANCH=default
         fi
 
         hg branch -f $BRANCH
 
-        if [ $? != 0 ]; then
+        if [[ $? != 0 ]]; then
             ilog build "error: switching mercurial branch"
             return 1
         fi
@@ -239,17 +239,17 @@ function svn-branch()
     (
         cd $SCBI_BDIR/$MODULE
 
-        if [ $BRANCH == NONE ]; then
-            if [ -d vcs/trunk ]; then
+        if [[ $BRANCH == NONE ]]; then
+            if [[ -d vcs/trunk ]]; then
                 ln -s vcs/trunk src
             else
                 ln -s vcs src
             fi
 
-        elif [ -d vcs/branches/$BRANCH ]; then
+        elif [[ -d vcs/branches/$BRANCH ]]; then
             ln -s vcs/branches/$BRANCH src
 
-        elif [ -d vcs/tags/$BRANCH ]; then
+        elif [[ -d vcs/tags/$BRANCH ]]; then
             ln -s vcs/tags/$BRANCH src
 
         else
@@ -271,7 +271,7 @@ function get-vcs-data()
 
     VAR=SCBI_${module//-/_}_VCS_VARIANT
 
-    if [ "${!VAR}" != "" ]; then
+    if [[ "${!VAR}" != "" ]]; then
         fn-exists $module-${!VAR}-vcs
         if [[ $? = 0 ]]; then
             VCS_FUNCTION=$module-${!VAR}-vcs
@@ -280,7 +280,7 @@ function get-vcs-data()
             exit 1
         fi
 
-    elif [ "${SCBI_VCS_VARIANT}" != "" ]; then
+    elif [[ "${SCBI_VCS_VARIANT}" != "" ]]; then
         fn-exists $module-${SCBI_VCS_VARIANT}-vcs
         if [[ $? = 0 ]]; then
             VCS_FUNCTION=$module-${SCBI_VCS_VARIANT}-vcs
@@ -333,7 +333,7 @@ function get-vcs()
                 exit 1
             fi
 
-            if [ $kind != DEV ]; then
+            if [[ $kind != DEV ]]; then
                 git-branch $VCS_PROXY $VCS_OPTIONS $module $ref > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
@@ -351,7 +351,7 @@ function get-vcs()
                 exit 1
             fi
 
-            if [ $kind != DEV ]; then
+            if [[ $kind != DEV ]]; then
                 hg-branch $VCS_PROXY $VCS_OPTIONS $module $ref > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
@@ -369,7 +369,7 @@ function get-vcs()
                 exit 1
             fi
 
-            if [ $kind != DEV ]; then
+            if [[ $kind != DEV ]]; then
                 svn-branch $VCS_PROXY $VCS_OPTIONS $module $ref > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
@@ -402,7 +402,7 @@ function vcs-build-id()
     local vid=$(
         cd $vcs
 
-        if [ -d .git ]; then
+        if [[ -d .git ]]; then
             local gver=$(git rev-list -1 HEAD)
             local gdif=$( ( git diff HEAD ;
                              git submodule --quiet foreach --recursive \
@@ -410,11 +410,11 @@ function vcs-build-id()
 
             echo $gver$gdif
 
-        elif [ -d .svn ]; then
+        elif [[ -d .svn ]]; then
             echo "r$(LANG=C svn info | \
                   sed -n -e '/^Revision: \([0-9]*\).*$/s//\1/p')"
 
-        elif [ -d .hg ]; then
+        elif [[ -d .hg ]]; then
             local hver=$(hg identify --num)
             local hdif=$(hg diff | tail -n+4 | md5sum | cut -d' ' -f1)
 

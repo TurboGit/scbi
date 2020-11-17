@@ -6,7 +6,7 @@ function run-shell()
     local modref=$2
     local docd=$3
 
-    if [ -z $SHELL ]; then
+    if [[ -z $SHELL ]]; then
         echo \$SHELL is not defined, cannot spawn a shell
         exit 1
     fi
@@ -20,7 +20,7 @@ function run-shell()
     #  environment of all dependencies to be set but we also want the
     #  build environment of the root module to be set.
 
-    if [ $docd == yes ]; then
+    if [[ $docd == yes ]]; then
         handle-module-env $modref build-env
 
         cd $(get-build-dir $target $modref)

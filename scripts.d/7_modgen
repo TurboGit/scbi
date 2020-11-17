@@ -7,11 +7,11 @@ function module-apply-patch()
 
     local patch=""
 
-    if [ -z "$PATCH_FILE" ]; then
+    if [[ -z "$PATCH_FILE" ]]; then
         return 0
-    elif [ -f "$SCBI_PATCH/$PATCH_FILE" ]; then
+    elif [[ -f "$SCBI_PATCH/$PATCH_FILE" ]]; then
         patch="$SCBI_PATCH/$PATCH_FILE"
-    elif [ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]; then
+    elif [[ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]]; then
         patch="$SCBI_DEFS/patches/$PATCH_FILE"
     else
         elog $MODULE patch filename $(basename $PATCH_FILE) not found
@@ -43,7 +43,7 @@ function module-patch()
 
     fn-exists $module-$variant-patches
 
-    if [ $? = 0 ]; then
+    if [[ $? = 0 ]]; then
         for patch in $($module-$variant-patches $PREFIX $TARGET \
                                                 $kind $ref);
         do
@@ -54,7 +54,7 @@ function module-patch()
     else
         fn-exists $module-patches
 
-        if [ $? = 0 ]; then
+        if [[ $? = 0 ]]; then
             for patch in $($module-patches $PREFIX $TARGET $variant \
                                            $kind $ref);
             do
@@ -85,7 +85,7 @@ function module-setup()
     # Note: we do exclude gcc-interface directory here to avoid overwriting
     #       the gcc-interface sources from GNAT.
 
-    if [ -h module-src ]; then
+    if [[ -h module-src ]]; then
         SRCDIR=module-src
         OPT=
     else
@@ -95,13 +95,13 @@ function module-setup()
 
     local res=0
 
-    if [ -h src -o -d src ]; then
+    if [[ -h src ]] || [[ -d src ]]; then
         rsync -a $OPT --exclude=".git" --exclude=".gitignore" --exclude=".svn" \
             --exclude "gcc-interface" \
             --link-dest=../src src/. $SRCDIR/
 
         #  If some patches are present, apply them now
-        if [ $DO_PATCH == yes ]; then
+        if [[ $DO_PATCH == yes ]]; then
             (
                 cd $SRCDIR
 
@@ -114,7 +114,7 @@ function module-setup()
     rm -f build
     ln -s $TARGET-$VARIANT build
 
-    if [ "$OOT" = "yes" ]; then
+    if [[ "$OOT" = "yes" ]]; then
         # build must be a dir, delete link if it exists
         [ -h $TARGET-$VARIANT/build ] && rm -f $TARGET-$VARIANT/build
         mkdir -p build/build
@@ -140,7 +140,7 @@ function module-purge()
     # note that we keep the manifest to be sure that we can clean-up
     # the final install destination.
 
-    if [ -d $PREFIX/$TARGET-$VARIANT ]; then
+    if [[ -d $PREFIX/$TARGET-$VARIANT ]]; then
         rm -fr $PREFIX/$TARGET-$VARIANT/build
         rm -fr $PREFIX/$TARGET-$VARIANT/build-id
         rm -fr $PREFIX/$TARGET-$VARIANT/install
@@ -166,19 +166,19 @@ function module-pre-install()
 
     fn-exists $MODULE-$VARIANT-prefix
 
-    if [ $? = 0 -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
+    if [[ $? = 0 ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
         _IDIR=$($MODULE-$VARIANT-prefix $MPREFIX $TARGET)
     else
         fn-exists $MODULE-prefix
-        if [ $? = 0 -a "$SCBI_DEFAULT_PREFIX" = "yes" ]; then
+        if [[ $? = 0 ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
             _IDIR=$($MODULE-prefix $MPREFIX $TARGET $VARIANT)
         else
             _IDIR=$SCBI_PREFIX
         fi
     fi
 
-    if [ $_IDIR != NONE ]; then
-        if [ ! -w ${_IDIR} ]; then
+    if [[ $_IDIR != NONE ]]; then
+        if [[ ! -w ${_IDIR} ]]; then
             SUDO=sudo
         fi
 
@@ -187,12 +187,13 @@ function module-pre-install()
         # then delete the module install location (double check that the
         # directory is the right one).
 
-        if [ -f $MPREFIX/../manifest ]; then
+        if [[ -f $MPREFIX/../manifest ]]; then
             cat $MPREFIX/../manifest | while read file; do
                 $SUDO rm -f ${_IDIR}/$file
             done &&
-                if [ $(basename $MPREFIX) = "install" \
-                    -a $(basename $(dirname $MPREFIX)) = "$MODULE" ]; then
+                if [[ $(basename $MPREFIX) = "install" ]] \
+                       && [[ $(basename $(dirname $MPREFIX)) = "$MODULE" ]];
+                then
                     cd $MPREFIX && rm -fr .
                 fi
         fi
@@ -209,7 +210,7 @@ function module-install()
     local TARGET=$4
     local OOT=$5
 
-    if [ ! -f build-id-$VARIANT ]; then
+    if [[ ! -f build-id-$VARIANT ]]; then
         #  No build-id, this means that the sources have been installed by
         #  the <module>-setup most probably. In this case just compute the
         #  build-id to be the md5sum of all sources available in src directory.
@@ -217,7 +218,7 @@ function module-install()
         #  current date/time as a build-id. In this case the build will always
         #  been triggered.
 
-        if [ -d src ]; then
+        if [[ -d src ]]; then
             vid=$(cat src/* | md5sum | cut -d' ' -f1)
             get-build-id $PREFIX $TARGET $MODULE $vid > build-id-$VARIANT
         else
@@ -229,7 +230,7 @@ function module-install()
     # been done. module just bringing sources for another module won't
     # install anything.
 
-    if [ -d ./build/install ]; then
+    if [[ -d ./build/install ]]; then
         (
             cd ./build/install
             find . -type f > ../manifest

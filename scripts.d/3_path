@@ -18,7 +18,7 @@ function set-compiler-paths()
 
     VER=$(gcc -dumpversion)
 
-    if [ -z $TARGET ]; then
+    if [[ -z $TARGET ]]; then
         I=$PREFIX/include
         IT=$PREFIX/include/$SCBI_HOST
         IL=$PREFIX/lib/gcc/$SCBI_HOST
@@ -46,11 +46,11 @@ function target-env()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ -z $PREFIX ]; then
+    if [[ -z $PREFIX ]]; then
         PREFIX=$(dirname $(dirname $(which gcc)))
     fi
 
-    if [ -z $TARGET ]; then
+    if [[ -z $TARGET ]]; then
         B=$PREFIX/bin
     else
         B=$PREFIX/$TARGET/bin
@@ -68,21 +68,21 @@ function no-target-env()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ -z $PREFIX ]; then
+    if [[ -z $PREFIX ]]; then
         PREFIX=$(dirname $(dirname $(which gcc)))
 
         # check if gcc is inside a target specific dir
         # <prefix>/<target>/bin
 
-        if [ -x $PREFIX/../bin/gcc ]; then
+        if [[ -x $PREFIX/../bin/gcc ]]; then
             local DN=$(dirname $PREFIX)
-            if [ $DN != "/" ]; then
+            if [[ $DN != "/" ]]; then
                 PREFIX=$DN
             fi
         fi
     fi
 
-    if [ -z $TARGET ]; then
+    if [[ -z $TARGET ]]; then
         B=$PREFIX/bin
     else
         B=$PREFIX/$TARGET/bin
@@ -126,7 +126,7 @@ set-compiler-paths $SCBI_PREFIX
 
 # make an alias for x86_64-linux if necessary
 
-if [ -e $PREFIX/x86_64-linux-gnu -a ! -e $PREFIX/x86_64-linux ]; then
+if [[ -e $PREFIX/x86_64-linux-gnu ]] && [[ ! -e $PREFIX/x86_64-linux ]]; then
     (
         cd $PREFIX
         ln -s x86_64-linux-gnu x86_64-linux

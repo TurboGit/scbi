@@ -31,7 +31,7 @@ function gprbuild-config()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ ! -e ../src/share/gprconfig ]; then
+    if [[ ! -e ../src/share/gprconfig ]]; then
         ln -s $SCBI_BDIR/gprconfig-kb/build/src/db ../src/share/gprconfig
     fi
 

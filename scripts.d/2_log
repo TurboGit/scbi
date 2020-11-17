@@ -85,10 +85,10 @@ function compute-log-stat-file()
     local duration=0
 
     while read date time x action word; do
-        if [ "$action" == "Building" ]; then
+        if [[ "$action" == "Building" ]]; then
             module=$word
             start_time=$(date +"%s" --date="$date $time")
-        elif [ "$action" == "End" -a "$module" != "" ]; then
+        elif [[ "$action" == "End" ]] && [[ "$module" != "" ]]; then
             end_time=$(date +"%s" --date="$date $time")
             duration=$(($end_time - $start_time))
             SCBI_STATS[$module]="${SCBI_STATS[$module]} $duration"
@@ -176,18 +176,18 @@ function dump-function()
     SCBI_FCT_DUMPED["$NAME"]=yes
 
     for word in $FCT; do
-        if [ ! -z "$word"               \
-             -a "${word}" != 'if'       \
-             -a "${word:0:1}" != '-' ];
+        if [[ ! -z "$word" ]]             \
+               && [[ "${word}" != 'if' ]]     \
+               && [[ "${word:0:1}" != '-' ]];
         then
-            if [ -z "${SCBI_FCT_DUMPED[$word]}" ]; then
+            if [[ -z "${SCBI_FCT_DUMPED[$word]}" ]]; then
                 fn-exists "$word"
                 [ $? == 0 ] && dump-function $MODULE $word;
             fi
         fi
     done
 
-    if [ ${NAME#${MODULE}-} == $NAME ]; then
+    if [[ ${NAME#${MODULE}-} == $NAME ]]; then
         echo
         echo "   function $NAME()"
         echo "   {"
@@ -224,7 +224,7 @@ function show-command()
     echo "   [ -f ../.log/env.cmd ] && source ../.log/env.cmd"
     echo ""
 
-    if [ -f $SCBI_DEFS/$MODULE ]; then
+    if [[ -f $SCBI_DEFS/$MODULE ]]; then
         cp $SCBI_DEFS/$MODULE ../.log
         echo "   source ../.log/$MODULE"
     fi

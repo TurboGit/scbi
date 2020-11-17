@@ -12,7 +12,7 @@ function gwiad-setup()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ ! -d src_cp ]; then
+    if [[ ! -d src_cp ]]; then
         ln -s $SCBI_GIT_REPO/gwiad src_cp
     fi
 }

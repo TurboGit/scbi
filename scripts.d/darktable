@@ -65,7 +65,7 @@ function darktable-clang-config()
 
     # fake build script which want the src dir to be a git repository
 
-    if [ ! -h ../src/.git ]; then
+    if [[ ! -h ../src/.git ]]; then
         ln -s ../../src/.git ../src/.git
     fi
 
@@ -82,7 +82,7 @@ function darktable-release-config()
 
     # fake build script which want the src dir to be a git repository
 
-    if [ ! -h ../src/.git ]; then
+    if [[ ! -h ../src/.git ]]; then
         ln -s ../../src/.git ../src/.git
     fi
 
@@ -98,18 +98,18 @@ function darktable-config()
 
     # fake build script which want the src dir to be a git repository
 
-    if [ ! -h ../src/.git ]; then
+    if [[ ! -h ../src/.git ]]; then
         ln -s ../../src/.git ../src/.git
     fi
 
-    if [ -d "$GINST" ]; then
+    if [[ -d "$GINST" ]]; then
         GPOPTS="-DGPHOTO2CONFIG_EXECUTABLE=$GINST/bin/gphoto2-config \
         -DGPHOTO2_INCLUDE_DIR=$GINST/include \
         -DGPHOTO2_LIBRARY=$GINST/lib/libgphoto2.so \
         -DGPHOTO2_PORT_LIBRARY=$GINST/lib/libgphoto2_port.so"
     fi
 
-    if [ -d "$LINST" ]; then
+    if [[ -d "$LINST" ]]; then
        GPOPTS="$GOPT -DLENSFUN_INCLUDE_DIR=$LINST/include/lensfun \
         -DLENSFUN_LIBRARY=$LINST/lib/liblensfun.so.1"
     fi

@@ -12,7 +12,7 @@ function v2p-setup()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ ! -d src_cp ]; then
+    if [[ ! -d src_cp ]]; then
         ln -s $SCBI_GIT_REPO/v2p src_cp
     fi
 }

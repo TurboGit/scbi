@@ -10,15 +10,15 @@ function load-module-plan()
 
     # if not found in definitions install dir, look in current directory
 
-    if [ ! -f $PLAN ]; then
+    if [[ ! -f $PLAN ]]; then
         PLAN=$SCBI_DEFS/.plan-$1
     fi
 
-    if [ -f $PLAN ]; then
+    if [[ -f $PLAN ]]; then
         while read modref file; do
-            if [ "$modref" = "@load" ]; then
+            if [[ "$modref" = "@load" ]]; then
                 load-module-plan $file
-            elif [ "$modref" != "#" ]; then
+            elif [[ "$modref" != "#" ]]; then
                 local module_info=( $(parse-module-ref $modref) )
                 local module=${module_info[0]}
                 MODVER[$module]=$modref
@@ -72,9 +72,9 @@ function set-module-ref()
 
     local module_info=( $(parse-module-ref $modref) )
 
-    if [ "${module_info[1]}" != "default" \
-         -o ${module_info[2]} != "NONE"   \
-         -o "${module_info[3]}" != "NONE" ];
+    if [[ "${module_info[1]}" != "default" ]]   \
+         || [[ ${module_info[2]} != "NONE" ]]   \
+         || [[ "${module_info[3]}" != "NONE" ]];
     then
         local module=${module_info[0]}
         MODVER[$module]=$modref
@@ -94,16 +94,16 @@ function parse-module-ref()
     # check for version
     local mver=($(echo $modref | tr ":" " "))
 
-    if [ -z ${mver[1]} ]; then
+    if [[ -z ${mver[1]} ]]; then
         local KIND=NONE
         local version=NONE
     else
         local vb=${mver[1]:0:1}
 
-        if [ ${mver[1]} = dev ]; then
+        if [[ ${mver[1]} = dev ]]; then
             KIND=DEV
             local version=${mver[1]}
-        elif [ $vb = '#' ]; then
+        elif [[ $vb = '#' ]]; then
             KIND=VERSION
             local version=${mver[1]:1}
         else
@@ -115,7 +115,7 @@ function parse-module-ref()
     # check for variant
     local mvar=($(echo ${mver[0]} | tr "/" " "))
 
-    if [ -z ${mvar[1]} ]; then
+    if [[ -z ${mvar[1]} ]]; then
         local variant=default
     else
         local variant=${mvar[1]}
@@ -138,7 +138,7 @@ function get-module-ref()
 
     local modplan=${MODVER[$module]}
 
-    if [ ! -z $modplan ]; then
+    if [[ ! -z $modplan ]]; then
         module_info=( $(parse-module-ref $modplan) )
     fi
 

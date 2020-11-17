@@ -38,12 +38,12 @@ function check-deb-pkg()
 
     local inst_ver=${SCBI_PKGS[$pck]}
 
-    if [ -z $inst_ver ]; then
+    if [[ -z $inst_ver ]]; then
         #  Package is not installed, check if it exists
 
         dpkg-query -l $pck &> /dev/null
 
-        if [ $? = 0 ]; then
+        if [[ $? = 0 ]]; then
             return 2
         else
             return 3
@@ -64,7 +64,7 @@ function get-deb-lib-for-dev()
 {
     local pkg=$1
 
-    if [ ${pkg: -4} != "-dev" ]; then
+    if [[ ${pkg: -4} != "-dev" ]]; then
         echo "error: $pkg is not a dev package (should end with -dev)"
         return 1
     fi
@@ -76,7 +76,7 @@ function get-deb-lib-for-dev()
                     | grep "$base" | cut -d':' -f2)
 
     for D in $res; do
-        if [ "${D: -4}" = "-dev" ]; then
+        if [[ "${D: -4}" = "-dev" ]]; then
             get-deb-lib-for-dev "$D"
         else
             echo $D
@@ -127,17 +127,17 @@ function check-pkg()
 
     local res=$?
 
-    if [ $res = 3 ]; then
+    if [[ $res = 3 ]]; then
         echo "error: $pkg not found"
         return 1
-    elif [ $res = 2 ]; then
-        if [ $version == NONE ]; then
+    elif [[ $res = 2 ]]; then
+        if [[ $version == NONE ]]; then
             echo "error: $pkg should be installed."
         else
             echo "error: $pkg:$version should be installed."
         fi
         return 1
-    elif [ $res = 1 ]; then
+    elif [[ $res = 1 ]]; then
         echo "error: $pkg:$version should be installed."
         return 1
     else

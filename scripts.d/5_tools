@@ -23,7 +23,7 @@ function get-hook()
 
     local HOOK=""
 
-    if [ $SCBI_HOST != $SCBI_TARGET ]; then
+    if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
         fn-exists $module-$variant-cross-$step
         if [[ $? = 0 ]]; then
             HOOK=$module-$variant-cross-$step
@@ -33,7 +33,7 @@ function get-hook()
         fi
     fi
 
-    if [ -z $HOOK ]; then
+    if [[ -z $HOOK ]]; then
         fn-exists $module-$variant-$step
         if [[ $? = 0 ]]; then
             HOOK=$module-$variant-$step
@@ -53,7 +53,7 @@ function is-enabled()
 {
     local VAR=SCBI_${1/-/_}_SET
 
-    if [ "${!VAR}" = "true" ]; then
+    if [[ "${!VAR}" = "true" ]]; then
         echo "yes"
         return 0
     else
@@ -71,7 +71,7 @@ function add-to-var()
 
     # If adding to PATH, do so only if DIR exists
 
-    if [ -d "$DIR" -o "${VAR}" != "PATH" ] &&
+    if [[ -d "$DIR" ]] || [[ "${VAR}" != "PATH" ]] &&
            [[ ":${!VAR}:" != *":$DIR:"* ]];
     then
         # If SCBI_ENV_MODULE file exists, record the change into
@@ -79,7 +79,7 @@ function add-to-var()
         # for each module. This env file can then be sourced to replay
         # the commands manually.
 
-        if [ ! -z $SCBI_ENV_MODULE ]; then
+        if [[ ! -z $SCBI_ENV_MODULE ]]; then
             echo add-to-var $VAR $DIR >> $SCBI_ENV_MODULE
         fi
 
@@ -104,9 +104,9 @@ function display-version()
 {
     local version=$1
 
-    if [ "$version" = "$VERSION_OK" ]; then
+    if [[ "$version" = "$VERSION_OK" ]]; then
         echo latest
-    elif [ "$version" = "$VERSION_ERROR" ]; then
+    elif [[ "$version" = "$VERSION_ERROR" ]]; then
         echo not found
     else
         echo $version
@@ -121,7 +121,7 @@ function gprbuild-project()
     local PRJ=$1
 
     (
-        if [ $SCBI_HOST == $TARGET ]; then
+        if [[ $SCBI_HOST == $TARGET ]]; then
             gprbuild -p -q $PRJ -cargs -gnatwA
         else
             gprbuild -p -q --target=$TARGET $PRJ -cargs -gnatwA
@@ -154,8 +154,8 @@ function load-module()
 {
     local module=$1
 
-    if [ -z "${SCBI_LOADED[$module]}" ]; then
-        if [ -f $SCBI_DEFS/$module ]; then
+    if [[ -z "${SCBI_LOADED[$module]}" ]]; then
+        if [[ -f $SCBI_DEFS/$module ]]; then
             source $SCBI_DEFS/$module
             SCBI_LOADED[$module]=yes
             return 0
@@ -177,7 +177,7 @@ function check-dependency-tree()
     local res=1
 
     for m in ${SCBI_RECTREE[*]}; do
-        if [ $m = $module ]; then
+        if [[ $m = $module ]]; then
             res=0
         fi
     done
@@ -223,7 +223,7 @@ function _internal_for-all-modules()
 
     #  Check if recursive dependencies is needed
 
-    [ $DO_DEPS == yes-direct -a $LEVEL -ge 2 ] && return 0
+    [[ $DO_DEPS == yes-direct ]] && [[ $LEVEL -ge 2 ]] && return 0
 
     #  Get module information
 
@@ -243,7 +243,7 @@ function _internal_for-all-modules()
 
     check-dependency-tree $module
 
-    if [ $? = 0 ]; then
+    if [[ $? = 0 ]]; then
         elog $module recursive dependencies detected
 
         local N=${#SCBI_RECTREE[*]}
@@ -262,12 +262,12 @@ function _internal_for-all-modules()
 
     local IS_META=false
 
-    if [ -z "${SCBI_CHECKED[$module]}" ]; then
+    if [[ -z "${SCBI_CHECKED[$module]}" ]]; then
         SCBI_CHECKED[$module]=yes
 
         load-module $module
 
-        if [ $? = 0 ]; then
+        if [[ $? = 0 ]]; then
             push-dependency-tree $module
 
             FCT=$(get-hook $module $variant modules)
@@ -276,7 +276,7 @@ function _internal_for-all-modules()
                 IS_META=true
             fi
 
-            if [ $WITH_META == true -a $IS_META == true ]; then
+            if [[ $WITH_META == true ]] && [[ $IS_META == true ]]; then
                 # check for meta-modules if present
 
                 for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
@@ -321,7 +321,7 @@ function _internal_for-all-modules()
         else
             # module does not exists, this is an external dependency
 
-            if [ $WITHEXT == true ]; then
+            if [[ $WITHEXT == true ]]; then
                 $CALLBACK $module $MODREF $LEVEL \
                           $IS_BUILD_DEPENDS true $IS_META $@
             else
@@ -396,11 +396,11 @@ function get-build-id-callback()
 
     # Only compute for dependencies, not for the root module
 
-    if [ $LEVEL -gt 0 -a $IS_META == false ]; then
-        if [ -f $SCBI_BDIR/$MODULE/install-id ]; then
+    if [[ $LEVEL -gt 0 ]] && [[ $IS_META == false ]]; then
+        if [[ -f $SCBI_BDIR/$MODULE/install-id ]]; then
             var=$(cat $SCBI_BDIR/$MODULE/install-id)
 
-            if [ -f $SCBI_BDIR/$MODULE/build-id-$var ]; then
+            if [[ -f $SCBI_BDIR/$MODULE/build-id-$var ]]; then
                 cat $SCBI_BDIR/$MODULE/build-id-$var
             else
                 echo $(date)
@@ -426,13 +426,13 @@ function get-patch-md5()
 
     local patch=""
 
-    if [ -f "$SCBI_PATCH/$PATCH_FILE" ]; then
+    if [[ -f "$SCBI_PATCH/$PATCH_FILE" ]]; then
         patch="$SCBI_PATCH/$PATCH_FILE"
-    elif [ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]; then
+    elif [[ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]]; then
         patch="$SCBI_DEFS/patches/$PATCH_FILE"
     fi
 
-    if [ -f "$patch" ]; then
+    if [[ -f "$patch" ]]; then
         cat $patch | get-md5
     else
         echo not-found
@@ -467,10 +467,10 @@ function get-build-id()
 
     local pid="no-patch-found"
 
-    if [ $DO_PATCH = yes ]; then
+    if [[ $DO_PATCH = yes ]]; then
         fn-exists $module-$variant-patches
 
-        if [ $? = 0 ]; then
+        if [[ $? = 0 ]]; then
             for patch in $($module-$variant-patches $PREFIX $TARGET \
                                                     $kind $ref);
             do
@@ -480,7 +480,7 @@ function get-build-id()
         else
             fn-exists $module-patches
 
-            if [ $? = 0 ]; then
+            if [[ $? = 0 ]]; then
                 for patch in $($module-patches $PREFIX $TARGET $variant \
                                                $kind $ref);
                 do
@@ -497,7 +497,9 @@ function get-build-id()
 
     # Now compute final id add compile version
 
-    if [ "$SCBI_HOST" = "$TARGET" -o "$(which $TARGET-gcc)" = "" ]; then
+    if [[ "$SCBI_HOST" = "$TARGET" ]] \
+           || [[ "$(which $TARGET-gcc)" = "" ]];
+    then
         echo -n $(gcc --version | head -1) ",$vid,$mid,$pid,$did" | get-md5
 
     else
@@ -527,7 +529,7 @@ function check-tar-exists()
     #local tarurl=${tar[2]}
     local tarsrc=${tar[3]}
 
-    if [ -f $SCBI_TAR/$tarsrc ]; then
+    if [[ -f $SCBI_TAR/$tarsrc ]]; then
         return 0
     else
         return 1
@@ -562,19 +564,20 @@ function get-tar()
 
     #  The tarball is not present, try downloading it
 
-    if [ ! -f $SCBI_TAR/$tarsrc \
-           -a "$tarcp" != "none" -a "$tarurl" != "none" ];
+    if [[ ! -f $SCBI_TAR/$tarsrc ]]     \
+           && [[ "$tarcp" != "none" ]]  \
+           && [[ "$tarurl" != "none" ]];
     then
         (
             check-tool $tarcp
-            if [ $? != 0 ]; then
+            if [[ $? != 0 ]]; then
                 elog $module Required tool $tarcp missing
                 exit 1
             fi
 
             set-proxy $proxy
 
-            if [ $tarcp == wget ]; then
+            if [[ $tarcp == wget ]]; then
                 $tarcp $tarurl/$tarsrc -O $SCBI_TAR/$tarsrc > $log 2>&1
             elif  [ $tarcp == curl ]; then
                 $tarcp $tarurl/$tarsrc --output $SCBI_TAR/$tarsrc > $log 2>&1
@@ -602,7 +605,7 @@ function get-tar()
     tar xf $SCBI_TAR/$tarsrc
     topdir=$(ls -d *)
 
-    if [ -d "$topdir" ]; then
+    if [[ -d "$topdir" ]]; then
         mv "$topdir" ../tarsrc
         cd ..
         rmdir tartmp
@@ -630,7 +633,7 @@ function display-stat()
     echo "user's SVN repository : $SCBI_SVN_REPO"
     echo -n "e-mail notification   :"
 
-    if [ $EMAIL_NOTIFICATION == no ]; then
+    if [[ $EMAIL_NOTIFICATION == no ]]; then
         echo " no"
     else
         echo " $EMAIL"
@@ -649,7 +652,7 @@ function display-modules()
     for module in $SCBI_DEFS/[^0-9]*; do
         bn=$(basename $module)
         linelen=$(expr $linelen + ${#bn} + 1)
-        if [ $linelen -gt 70 ]; then
+        if [[ $linelen -gt 70 ]]; then
             echo
             echo -n "        "
             linelen=${#bn}
@@ -683,13 +686,13 @@ function display-plans()
     echo -n "plans  :"
     local linelen=0
 
-    if [ -z "$(ls $SCBI_DEFS/.plan-* 2> /dev/null)" ]; then
+    if [[ -z "$(ls $SCBI_DEFS/.plan-* 2> /dev/null)" ]]; then
         echo " none"
     else
         for module in $SCBI_DEFS/.plan-*; do
             bn=$(basename $module)
             linelen=$(expr $linelen + ${#bn} + 1)
-            if [ $linelen -gt 70 ]; then
+            if [[ $linelen -gt 70 ]]; then
                 echo
                 echo -n "        "
                 linelen=${#bn}
@@ -737,7 +740,7 @@ function last-modified-directory()
 function all-variants()
 {
     local VARIANTS=$1
-    if [ "$VARIANTS" != "default" ]; then
+    if [[ "$VARIANTS" != "default" ]]; then
         echo "${VARIANTS//./ }"
     fi
 }
@@ -754,20 +757,20 @@ function copy-module-src-callback()
     local IS_META=$6
     local DEST=$7
 
-    if [ $IS_EXT == true ]; then
+    if [[ $IS_EXT == true ]]; then
         echo -n " $MODULE" >> $DEST/build-deps
 
     else
         # copy tarball or vcs sources
 
-        if [ -d $SCBI_BDIR/$MODULE ]; then
+        if [[ -d $SCBI_BDIR/$MODULE ]]; then
             ilog standalone "-   $MODULE"
 
             # two modules may share the same VCS or tarball
-            if [ -h $SCBI_BDIR/$MODULE/tar ]; then
+            if [[ -h $SCBI_BDIR/$MODULE/tar ]]; then
                 FILE=$(readlink -f $SCBI_BDIR/$MODULE/tar)
                 [ ! -f $DEST/.tar/$(basename $FILE) ] && cp -p $FILE $DEST/.tar
-            elif [ -h $SCBI_BDIR/$MODULE/vcs ]; then
+            elif [[ -h $SCBI_BDIR/$MODULE/vcs ]]; then
                 DIR=$(readlink -f $SCBI_BDIR/$MODULE/vcs)
                 [ ! -d $DEST/.vcs/$(basename $DIR) ] && cp -rp $DIR $DEST/.vcs/
             fi
@@ -779,7 +782,7 @@ function copy-module-src-callback()
 
         # copy SCBI module if present
 
-        if [ -f $SCBI_DEFS/$MODULE ]; then
+        if [[ -f $SCBI_DEFS/$MODULE ]]; then
             cp -p $SCBI_DEFS/$MODULE $DEST/scripts.d
 
             # and then copy patches if any
@@ -790,9 +793,9 @@ function copy-module-src-callback()
 
                     local patch=""
 
-                    if [ -f "$SCBI_PATCH/$PATCH_FILE" ]; then
+                    if [[ -f "$SCBI_PATCH/$PATCH_FILE" ]]; then
                         patch="$SCBI_PATCH/$PATCH_FILE"
-                    elif [ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]; then
+                    elif [[ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]]; then
                         patch="$SCBI_DEFS/patches/$PATCH_FILE"
                     else
                         elog standalone patch filename \
@@ -814,7 +817,7 @@ function copy-module-src-callback()
 
                 fn-exists $module-$variant-patches
 
-                if [ $? = 0 ]; then
+                if [[ $? = 0 ]]; then
                     for patch in $($module-$variant-patches $PREFIX $TARGET); do
                         cp-patch $patch
                     done
@@ -822,7 +825,7 @@ function copy-module-src-callback()
                 else
                     fn-exists $module-patches
 
-                    if [ $? = 0 ]; then
+                    if [[ $? = 0 ]]; then
                         for patch in $($module-patches $PREFIX $TARGET $variant); do
                             cp-patch $patch
                         done
@@ -908,7 +911,7 @@ function get-source-dir()
 
     local SCBI_VCS_REPO=
 
-    if [ $kind == DEV ]; then
+    if [[ $kind == DEV ]]; then
         vcs=( $(get-vcs-data $module) )
 
         if [[ $? = 0 ]]; then

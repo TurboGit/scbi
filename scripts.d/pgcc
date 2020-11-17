@@ -9,7 +9,7 @@ function pgcc-version()
 
     INST=$SCBI_BDIR/pgcc/install/$TARGET/bin
 
-    if [ -f $INST/$TARGET-gcc ]; then
+    if [[ -f $INST/$TARGET-gcc ]]; then
         return $VERSION_OK
     else
         return $VERSION_ERROR

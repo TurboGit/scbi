@@ -68,7 +68,7 @@ function gnatcoll-bindings-python-install()
 
     PM=$PREFIX/$TARGET/install/$TARGET/share/gpr/manifests
 
-    if [ -f $PM/gnatcoll_python ]; then
+    if [[ -f $PM/gnatcoll_python ]]; then
         gprinstall $GOPTS --uninstall gnatcoll_python
     fi
 

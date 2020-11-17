@@ -46,7 +46,7 @@ function win32ada-build()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ "$SCBI_HOST" = "$TARGET" ]; then
+    if [[ "$SCBI_HOST" = "$TARGET" ]]; then
         make PROCESSORS=$SCBI_JOBS
     else
         make PROCESSORS=$SCBI_JOBS prefix=$PREFIX \
@@ -59,7 +59,7 @@ function win32ada-install()
     local PREFIX=$1
     local TARGET=$2
 
-    if [ "$SCBI_HOST" = "$TARGET" ]; then
+    if [[ "$SCBI_HOST" = "$TARGET" ]]; then
         make install
     else
         make prefix=$PREFIX TARGET=$TARGET DEBUG=false install
