@@ -74,7 +74,7 @@ DO_LIST_VER=yes
 DO_PLAN=no
 DEPS=no
 ISOOT=yes
-PATCH=yes
+DO_PATCH=yes
 STEPS="setup config build install wrapup"
 BUILD_SCBI_TARGET=
 SCBI_PLAN=
@@ -728,7 +728,7 @@ function handle-sources()
                 if [ $DO_UPDATE = yes -o ! -d ../.vcs/$REPO ]; then
                     ilog $module get sources from $VCS_NAME
 
-                    get-vcs $module $kind $ref
+                    get-vcs $SCBI_PREFIX $SCBI_TARGET $modref
 
                     if [[ ! $? = 0 ]]; then
                         exit 1
@@ -758,6 +758,7 @@ function handle-sources()
                         ;;
                     *)
                         ln -s vcs src
+                        ;;
                 esac
             fi
 
@@ -1089,7 +1090,7 @@ function handle-module()
         for step in $STEPS; do
             ########## PRE module
 
-            #  Apply any generic step (module-setup, module-purge)
+            #  Apply any generic pre-step (module-pre-setup, module-pre-purge)
 
             local res=0
 
@@ -1338,7 +1339,7 @@ while [ $# -gt 0 ]; do
             PURGE=yes
             ;;
         -n|--no-patch)
-            PATCH=no
+            DO_PATCH=no
             ;;
         --prefix)
             SCBI_DEFAULT_PREFIX=no

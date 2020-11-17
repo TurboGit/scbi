@@ -467,11 +467,13 @@ function get-build-id()
 
     local pid="no-patch-found"
 
-    if [ $PATCH = yes ]; then
+    if [ $DO_PATCH = yes ]; then
         fn-exists $module-$variant-patches
 
         if [ $? = 0 ]; then
-            for patch in $($module-$variant-patches $PREFIX $TARGET); do
+            for patch in $($module-$variant-patches $PREFIX $TARGET \
+                                                    $kind $ref);
+            do
                 pid="$pid,$(get-patch-md5 $patch)"
             done
 
@@ -479,7 +481,9 @@ function get-build-id()
             fn-exists $module-patches
 
             if [ $? = 0 ]; then
-                for patch in $($module-patches $PREFIX $TARGET $variant); do
+                for patch in $($module-patches $PREFIX $TARGET $variant \
+                                               $kind $ref);
+                do
                     pid="$pid,$(get-patch-md5 $patch)"
                 done
             fi

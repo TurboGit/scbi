@@ -114,6 +114,7 @@ function git-branch()
     local OPTIONS=$2
     local MODULE=$3
     local BRANCH=$4
+
     local BUILDB=scbi
 
     (
@@ -299,17 +300,29 @@ function get-vcs-data()
 
 function get-vcs()
 {
-    local module=$1
-    local kind=$2
-    local version=$3
+    local PREFIX=$1
+    local TARGET=$2
+    local MODREF=$3
 
-    local res=0
+    #  get module information
+
+    local module_info=( $(get-module-ref $MODREF) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    #  get vcs information
 
     vcs=( $(get-vcs-data $module) )
+
     local VCS_PROXY=${vcs[0]}
     local VCS_OPTIONS=${vcs[1]}
     local VCS_NAME=${vcs[2]}
     local VCS_URL=${vcs[3]}
+
+    local res=0
 
     case $VCS_NAME in
         git)
@@ -321,10 +334,10 @@ function get-vcs()
             fi
 
             if [ $kind != DEV ]; then
-                git-branch $VCS_PROXY $VCS_OPTIONS $module $version > $log 2>&1
+                git-branch $VCS_PROXY $VCS_OPTIONS $module $ref > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
-                    ilog build "error: cannot switch to branch $version"
+                    ilog build "error: cannot switch to branch $ref"
                     exit 1
                 fi
             fi
@@ -339,10 +352,10 @@ function get-vcs()
             fi
 
             if [ $kind != DEV ]; then
-                hg-branch $VCS_PROXY $VCS_OPTIONS $module $version > $log 2>&1
+                hg-branch $VCS_PROXY $VCS_OPTIONS $module $ref > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
-                    ilog build "error: cannot switch to branch $version"
+                    ilog build "error: cannot switch to branch $ref"
                     exit 1
                 fi
             fi
@@ -357,15 +370,15 @@ function get-vcs()
             fi
 
             if [ $kind != DEV ]; then
-                svn-branch $VCS_PROXY $VCS_OPTIONS $module $version > $log 2>&1
+                svn-branch $VCS_PROXY $VCS_OPTIONS $module $ref > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
-                    ilog build "error: cannot switch to branch $version"
+                    ilog build "error: cannot switch to branch $ref"
                     exit 1
                 fi
             fi
-
             ;;
+
         *)
             ilog build "error: unknown vcs $VCS_NAME"
             res=1
