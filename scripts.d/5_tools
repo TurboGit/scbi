@@ -201,7 +201,7 @@ function push-dependency-tree()
 
 function pop-dependency-tree()
 {
-    unset SCBI_RECTREE[-1]
+    unset SCBI_RECTREE[${#SCBI_RECTREE[@]}-1]
 }
 
 ############################## for-all-modules
