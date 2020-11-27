@@ -1,8 +1,6 @@
 
 # default GNAT path
 
-export PATH=$SCBI_PREFIX/bin:$PATH
-
 DEFAULT_C_INCLUDE_PATH=$C_INCLUDE_PATH
 DEFAULT_CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH
 DEFAULT_LIBRARY_PATH=$LIBRARY_PATH
@@ -19,21 +17,31 @@ function set-compiler-paths()
     VER=$(gcc -dumpversion)
 
     if [[ -z $TARGET ]]; then
-        I=$PREFIX/include
-        IT=$PREFIX/include/$SCBI_HOST
-        IL=$PREFIX/lib/gcc/$SCBI_HOST
+        I1=$PREFIX/include/$SCBI_HOST
+        I2=$PREFIX/include
+        I3=$PREFIX/lib/gcc/$SCBI_HOST/$VER/include
+        I4=$PREFIX/local/include
+
+        IP1=$PREFIX/include/c++/$VER
+
         P=$PREFIX/$SCBI_HOST/share/gpr:$PREFIX/share/gpr
         L=$PREFIX/lib/$SCBI_HOST:$PREFIX/lib
     else
-        I=$PREFIX/include
-        IT=$PREFIX/include/$TARGET
+        I1=$PREFIX/lib/gcc/$TARGET/$VER/include
+        I2=$PREFIX/include/$TARGET
+        I3=$PREFIX/include
+        I4=$PREFIX/local/include
+
+        IP1=$PREFIX/include/$TARGET/c++/$VER
+        IP2=$PREFIX/include/c++/$VER
+
         P=$PREFIX/$TARGET/share/gpr
         L=$PREFIX/lib/$TARGET
     fi
 
-    export C_INCLUDE_PATH=$IT:$I
-    export CPLUS_INCLUDE_PATH=$IT/c++/$VER:$I/c++/$VER:$IT:$I
-    export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$IL/include:$IL/include-fixed
+    export C_INCLUDE_PATH=$I1:$I2:$I3:$I4
+    export CPLUS_INCLUDE_PATH=$IP1:$IP2:$I1:$I2:$I3:$I4
+
     export LIBRARY_PATH=$L:/usr/lib
     export LD_LIBRARY_PATH=$L:/usr/lib
     export ADA_PROJECT_PATH=$P
@@ -105,9 +113,13 @@ function gpython-env()
 
 function system-compiler()
 {
-    export PATH=/usr/bin:/bin:/usr/local/bin
+    export PATH=/usr/local/bin:/usr/bin:/bin
 
-    set-compiler-paths /usr
+    unset C_INCLUDE_PATH
+    unset CPLUS_INCLUDE_PATH
+    unset LIBRARY_PATH
+    unset LD_LIBRARY_PATH
+    unset ADA_PROJECT_PATH
 }
 
 ############################## built-compiler
