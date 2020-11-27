@@ -1,4 +1,7 @@
 
+# External requirements:
+# pip3 install -r REQUIREMENTS.dev
+
 function langkit-vcs()
 {
     echo default
@@ -37,17 +40,6 @@ function langkit-env()
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
 }
 
-function langkit-stable-config()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
-
-    python3 scripts/build-langkit_support.py \
-            --library-types static,relocatable \
-            generate
-}
-
 function langkit-config()
 {
     local PREFIX=$1
@@ -69,16 +61,6 @@ function langkit-do-build()
     for KIND in static relocatable static-pic; do
         gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
     done
-}
-
-function langkit-stable-build()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
-
-    langkit-do-build $PREFIX $TARGET \
-                     ./build/lib/gnat/langkit_support.gpr
 }
 
 function langkit-build()
@@ -107,16 +89,6 @@ function langkit-do-install()
         gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
                    -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
     done
-}
-
-function langkit-stable-install()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
-
-    langkit-do-install $PREFIX $TARGET \
-                       ./build/lib/gnat/langkit_support.gpr
 }
 
 function langkit-install()

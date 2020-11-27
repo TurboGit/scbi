@@ -1,3 +1,5 @@
+# External requirements:
+# pip3 install -r REQUIREMENTS.dev
 
 function libadalang-vcs()
 {
@@ -16,7 +18,7 @@ function libadalang-common-depends()
 function libadalang-stable-depends()
 {
     libadalang-common-depends
-    echo langkit/stable:stable
+    echo langkit:stable
 }
 
 function libadalang-depends()
@@ -42,22 +44,13 @@ function libadalang-out-of-tree()
     echo false
 }
 
-function libadalang-stable-config()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
-
-    python3 ada/manage.py --no-langkit-support generate
-}
-
 function libadalang-config()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
 
-    python3 ada/manage.py generate
+    python3 manage.py generate
 }
 
 function libadalang-do-build()
@@ -72,16 +65,6 @@ function libadalang-do-build()
     for KIND in static relocatable static-pic; do
         gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
     done
-}
-
-function libadalang-stable-build()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
-
-    libadalang-do-build $PREFIX $TARGET \
-                        ./build/lib/gnat/libadalang.gpr
 }
 
 function libadalang-build()
@@ -110,16 +93,6 @@ function libadalang-do-install()
         gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
                    -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
     done
-}
-
-function libadalang-stable-install()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
-
-    libadalang-do-install $PREFIX $TARGET \
-                          ./build/lib/gnat/libadalang.gpr
 }
 
 function libadalang-install()

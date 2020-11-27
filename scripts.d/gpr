@@ -12,7 +12,7 @@ function gpr-depends()
     echo gnatcoll-core
     echo gnatcoll-bindings-iconv
     echo gnatcoll-bindings-gmp
-    echo langkit/stable:stable
+    echo langkit:stable
     echo libadalang/stable:stable
     echo gprconfig-kb
 }
