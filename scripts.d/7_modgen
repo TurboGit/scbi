@@ -87,9 +87,11 @@ function module-setup()
 
     if [[ -h module-src ]]; then
         SRCDIR=module-src
+        LINKDEST=../../../src
         OPT=
     else
         SRCDIR=$TARGET-$VARIANT/src
+        LINKDEST=../../src
         OPT=--delete
     fi
 
@@ -98,7 +100,7 @@ function module-setup()
     if [[ -h src ]] || [[ -d src ]]; then
         rsync -a $OPT --exclude=".git" --exclude=".gitignore" --exclude=".svn" \
             --exclude "gcc-interface" \
-            --link-dest=../src src/. $SRCDIR/
+            --link-dest=$LINKDEST src/. $SRCDIR/
 
         #  If some patches are present, apply them now
         if [[ $DO_PATCH == yes ]]; then
