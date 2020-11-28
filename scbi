@@ -352,24 +352,14 @@ function handle-module-env()
         cd $SCBI_BDIR
     fi
 
-    fn-exists $module-$variant-$ENV
+    local FCT=$(get-hook $module $variant $ENV)
 
-    if [ $? = 0 ]; then
+    if [[ ! -z $FCT ]]; then
         if [ ! -z $SCBI_ENV_MODULE ]; then
             echo >> $SCBI_ENV_MODULE
             echo "# $module" >> $SCBI_ENV_MODULE
         fi
-        $module-$variant-$ENV $SCBI_BDIR/$module/build/install $SCBI_TARGET
-    else
-        fn-exists $module-$ENV
-
-        if [ $? = 0 ]; then
-            if [ ! -z $SCBI_ENV_MODULE ]; then
-                echo >> $SCBI_ENV_MODULE
-                echo "# $module" >> $SCBI_ENV_MODULE
-            fi
-            $module-$ENV $SCBI_BDIR/$module/build/install $SCBI_TARGET $variant
-        fi
+        $FCT $SCBI_BDIR/$module/build/install $SCBI_TARGET $variant
     fi
 }
 

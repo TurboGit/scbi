@@ -1,0 +1,49 @@
+
+function gcc-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo git+ssh://git.adacore.com/gcc
+}
+
+function gcc-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    system-compiler
+}
+
+function gcc-options()
+{
+    echo --disable-multilib
+    echo --disable-libada
+    echo --disable-nls
+    echo --enable-languages=c,c++
+}
+
+function gcc-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ../src/configure --prefix=$PREFIX --build=$TARGET --target=$TARGET \
+                     $(gcc-options)
+}
+
+function gcc-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j$SCBI_JOBS
+}
+
+function gcc-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}
