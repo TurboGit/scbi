@@ -77,8 +77,9 @@ By default the scbi build directories can be displayed with --stat option (outpu
       ```
       function lcms-config()
       {
-          PREFIX=$1
-          TARGET=$2
+          local PREFIX=$1
+          local TARGET=$2
+
           ../src/configure --prefix=$PREFIX
       }
       ```
@@ -99,8 +100,9 @@ By default the scbi build directories can be displayed with --stat option (outpu
       ```
       function lcms-build()
       {
-          PREFIX=$1
-          TARGET=$2
+          local PREFIX=$1
+          local TARGET=$2
+
           make -j4
       }
       ```
@@ -112,8 +114,9 @@ By default the scbi build directories can be displayed with --stat option (outpu
       ```
       function lcms-install()
       {
-          PREFIX=$1
-          TARGET=$2
+          local PREFIX=$1
+          local TARGET=$2
+
           make install
       }
       ```
@@ -177,8 +180,9 @@ to build with just "-O3" at configuration step:
 
       function lcms-release-config()
       {
-          PREFIX=$1
-          TARGET=$2
+          local PREFIX=$1
+          local TARGET=$2
+
           CFLAGS="-O3" ../src/configure --prefix=$PREFIX
       }
 
