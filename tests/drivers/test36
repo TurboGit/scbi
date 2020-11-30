@@ -1,0 +1,12 @@
+# check that patches are properly handled
+
+echo '========== lib1 patched version'
+./scbi --tests lib1
+
+echo '========== lib1 wrong patch'
+sed -i 's/master/azerty/g' .root/.patches/lib1-0-fix.patch
+./scbi --tests lib1
+
+echo '========== lib1 missing patch'
+rm .root/.patches/lib1-0-fix.patch
+./scbi --tests lib1
