@@ -1,5 +1,5 @@
 
-function gcc-vcs()
+function s-gcc-vcs()
 {
     echo default
     echo none
@@ -7,7 +7,7 @@ function gcc-vcs()
     echo git+ssh://git.adacore.com/gcc
 }
 
-function gcc-build-env()
+function s-gcc-build-env()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -15,7 +15,7 @@ function gcc-build-env()
     system-compiler
 }
 
-function gcc-options()
+function s-gcc-options()
 {
     echo --disable-multilib
     echo --disable-libada
@@ -23,7 +23,7 @@ function gcc-options()
     echo --enable-languages=c,c++
 }
 
-function gcc-config()
+function s-gcc-config()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -32,7 +32,7 @@ function gcc-config()
                      $(gcc-options)
 }
 
-function gcc-build()
+function s-gcc-build()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -40,7 +40,7 @@ function gcc-build()
     make -j$SCBI_JOBS
 }
 
-function gcc-install()
+function s-gcc-install()
 {
     local PREFIX=$1
     local TARGET=$2
