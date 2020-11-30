@@ -11,6 +11,6 @@ doc/*.toc
 tests/.root/local-install
 tests/.root/git
 tests/.root/builds
-tests/scripts.d/[2-9]_*
+tests/scripts.d/[1-9]_*
 tests/logs
 tests/scbi
