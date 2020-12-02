@@ -75,8 +75,8 @@ function aws-tests()
 
     (
         gpython-env
-        cd regtests && ./testsuite.py --jobs=4
+        cd regtests && ./testsuite.py --jobs=$SCBI_JOBS
     )
 
-    display-file build/regtests/out/report
+    display-file regtests/out/report
 }
