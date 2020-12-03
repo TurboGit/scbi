@@ -947,6 +947,23 @@ Two helper routines are provided for this:
 	\end{lstlisting}
 \end{description}
 
+\subsection{Inheritance}
+\label{inheritance}
+
+It is possible to create a plug-in module by inheriting from the definition
+of another module. To do this the first line on the module should be:
+
+\begin{lstlisting}
+	inherit-plugin <name>
+\end{lstlisting}
+
+The \code{<name>} above is the name of an existing module from which we want
+to inherit all the current hooks.
+
+After this line it is possible to redefine any hook as it would be done
+without inheritance. This may be handy if a module need to redefine only
+the \code{vcs} or \code{proxy} hook for a specific context.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
 \section{Completion support}

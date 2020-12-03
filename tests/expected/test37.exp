@@ -1,0 +1,31 @@
+xxxx/xx/xx xx:xx:xx : Building testxx [default] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End Building testxx [default] (master)
+
+in config (overriding)
+# ROOT_DIR /this/is/it
+# ABC_ROOT /perfect/here
+# PATH     /var:/tmp:/bin:/usr/bin
+# CONFxx   two:one
+in build
+ROOT_DIR /this/is/it
+ABC_ROOT /perfect/here
+PATH     /var:/tmp:/bin:/usr/bin
+CONFxx   two:one
+in install (overriding)
+In driver:
+ROOT_DIR /this/is/it
+ABC_ROOT /perfect/here
+PATH     /var:/tmp:/bin:/usr/bin
+CONFxx   two:one
+setup is out-of-tree build

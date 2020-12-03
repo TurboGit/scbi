@@ -1,0 +1,27 @@
+./scbi test37
+
+cat .root/builds/.logs/*test37*config.log
+cat .root/builds/.logs/*test37*build.log
+cat .root/builds/.logs/*test37*install.log
+
+function add-to-var()
+{
+    local VAR=$1
+    local DIR=$2
+
+    export $VAR="${DIR}${!VAR:+:}${!VAR}"
+}
+
+echo In driver:
+PATH=/bin:/usr/bin
+source .root/builds/test37/build/.log/env.cmd
+echo "ROOT_DIR $ROOT_DIR"
+echo "ABC_ROOT $ABC_ROOT"
+echo "PATH     $PATH"
+echo "CONF17   $CONF17"
+
+if [ -h .root/builds/test37/build/build ]; then
+    echo setup is not out-of-tree build
+else
+    echo setup is out-of-tree build
+fi
