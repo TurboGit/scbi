@@ -514,8 +514,8 @@ function handle-depends()
         if [ $? = 0 ]; then
             return 0
         else
-            echo No description for module $module &&
-            echo And not found in the distrib  &&
+            echo No description for module $module
+            echo And not found in the distrib
             exit 1
         fi
     fi
