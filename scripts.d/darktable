@@ -48,6 +48,7 @@ function darktable-depends()
     echo liblensfun-dev
     echo librsvg2-dev
     echo libjson-glib-dev
+    echo libpod-parser-perl
 }
 
 function darktable-env()
