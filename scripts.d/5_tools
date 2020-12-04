@@ -428,6 +428,48 @@ function for-all-modules-with-meta-ext()
     _internal_for-all-modules $CALLBACK true 0 true false $MODREF $@
 }
 
+############################## for-final-modules
+# list all direct final modules resolving the meta-modules references
+
+function _internal_for-final-modules()
+{
+    local MODREF=$1
+
+    #  Get module information
+
+    local module_info=( $(get-module-ref $MODREF) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    [ $ref = "skip" ] && return 0
+
+    if [[ $(is-meta-module $MODREF) == yes ]]; then
+        load-module $MODREF
+
+        FCT=$(get-hook $module $variant modules)
+
+        for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
+            _internal_for-final-modules $dmodule
+        done
+    else
+        echo $module
+    fi
+}
+
+#  Parameters is a list of modules
+function for-final-modules()
+{
+    declare -A SCBI_CHECKED
+    SCBI_RECTREE=()
+
+    for module in $@; do
+        _internal_for-final-modules $module
+    done | sort | uniq
+}
+
 ############################## get-depends-build-id
 
 function get-build-id-callback()
