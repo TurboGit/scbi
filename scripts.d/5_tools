@@ -185,6 +185,33 @@ function load-module()
     return 0
 }
 
+############################## is-meta-module
+#
+# return yes/0 if modref is a meta-module
+
+function is-meta-module()
+{
+    local modref=$1
+
+    local module_info=( $(get-module-ref $modref) )
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+
+    local key="${module}.${variant}"
+
+    if [[ -z "${SCBI_LOADED[$module]}" ]]; then
+        load-module $modref
+    fi
+
+    if [[ "${SCBI_LOADED[$key]}" == "meta" ]]; then
+        echo "yes"
+        return 0
+    else
+        echo "no"
+        return 1
+    fi
+}
+
 ############################## check-dependency-tree
 #
 # check whether a module is in the dependency tree
