@@ -522,7 +522,7 @@ function handle-depends()
 
     #  Check if the proper version is installed
 
-    load-module $module
+    load-module $modref
 
     fn-exists $module-version
     if [[ $? = 0 ]]; then
@@ -858,7 +858,7 @@ function handle-module()
 
     #  Then load module setup
 
-    load-module $module
+    load-module $modref
 
     #  Create module build directory
 

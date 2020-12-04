@@ -1,4 +1,7 @@
 
+#  associative array given the status of a module, $SCBI_LOADED[$module] is
+#  set to yes when module is loaded and $SCBI_LOADED[$module.$variant] is
+#  set to meta (for a meta-module) / final (for a standard module).
 declare -A SCBI_LOADED
 
 declare SCBI_RECTREE=()
@@ -152,19 +155,34 @@ function get-md5()
 
 function load-module()
 {
-    local module=$1
+    local modref=$1
+
+    local module_info=( $(get-module-ref $modref) )
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+
+    local key="${module}.${variant}"
 
     if [[ -z "${SCBI_LOADED[$module]}" ]]; then
         if [[ -f $SCBI_DEFS/$module ]]; then
             source $SCBI_DEFS/$module
             SCBI_LOADED[$module]=yes
-            return 0
         else
             return 1
         fi
-    else
-        return 0
     fi
+
+    if [[ -z "${SCBI_LOADED[$key]}" ]]; then
+        local FCT=$(get-hook $module $variant modules)
+
+        if [[ -z $FCT ]]; then
+            SCBI_LOADED[$key]=final
+        else
+            SCBI_LOADED[$key]=meta
+        fi
+    fi
+
+    return 0
 }
 
 ############################## check-dependency-tree
@@ -265,7 +283,7 @@ function _internal_for-all-modules()
     if [[ -z "${SCBI_CHECKED[$module]}" ]]; then
         SCBI_CHECKED[$module]=yes
 
-        load-module $module
+        load-module $MODREF
 
         if [[ $? = 0 ]]; then
             push-dependency-tree $module
@@ -813,7 +831,7 @@ function copy-module-src-callback()
                 local kind=${module_info[2]}
                 local ref=${module_info[3]}
 
-                load-module $MODULE
+                load-module $MODREF
 
                 fn-exists $module-$variant-patches
 
