@@ -88,40 +88,45 @@ function set-module-ref()
 
 function parse-module-ref()
 {
-    # full module reference is name[/variant][:version]
-    local modref="$1"
+    local modref=$1
 
-    # check for version
-    local mver=($(echo $modref | tr ":" " "))
+    local module=""
 
-    if [[ -z ${mver[1]} ]]; then
+    # check version
+
+    local ver=${modref##*:}
+
+    if [[ $ver == $modref ]]; then
+        # no version specified
         local KIND=NONE
         local version=NONE
+        module=$modref
     else
-        local vb=${mver[1]:0:1}
+        # version specified, check for tar version
+        local vb=${ver:0:1}
 
-        if [[ ${mver[1]} = dev ]]; then
+        if [[ $ver = dev ]]; then
             KIND=DEV
-            local version=${mver[1]}
+            local version=dev
         elif [[ $vb = '#' ]]; then
             KIND=VERSION
-            local version=${mver[1]:1}
+            local version=${ver:1}
         else
             KIND=BRANCH
-            local version=${mver[1]}
+            local version=$ver
         fi
+
+        module=${modref%:*}
     fi
 
-    # check for variant
-    local mvar=($(echo ${mver[0]} | tr "/" " "))
+    local variant=${module##*/}
 
-    if [[ -z ${mvar[1]} ]]; then
-        local variant=default
+    if [[ $variant == $module ]]; then
+        #  no variant
+        variant=default
     else
-        local variant=${mvar[1]}
+        module=${module%/*}
     fi
-
-    local module=${mvar[0]}
 
     echo $module
     echo $variant
