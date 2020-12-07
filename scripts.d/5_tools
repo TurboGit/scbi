@@ -676,12 +676,12 @@ function get-tar()
         )
     fi
 
-    [ ! -f $SCBI_TAR/$tarsrc ] &&
+    [[ ! -f $SCBI_TAR/$tarsrc ]] &&
         elog $module error: tarball $tarsrc not found
 
     ilog build extract tarball $tarsrc
 
-    [ ! -d $SCBI_BDIR/$module ] && mkdir -p $SCBI_BDIR/$module > $log 2>&1
+    [[ ! -d $SCBI_BDIR/$module ]] && mkdir -p $SCBI_BDIR/$module > $log 2>&1
 
     cd $SCBI_BDIR/$module
 
@@ -801,8 +801,8 @@ function get-build-type()
     VAR_GENERIC=SCBI_${KIND}_BUILD_TYPE
     VAR_MODULE=SCBI_${MODULE/-/_}_BUILD_TYPE
 
-    [ ! -z ${!VAR_GENERIC} ] && DEFAULT=${!VAR_GENERIC}
-    [ ! -z ${!VAR_MODULE} ] && DEFAULT=${!VAR_MODULE}
+    [[ ! -z ${!VAR_GENERIC} ]] && DEFAULT=${!VAR_GENERIC}
+    [[ ! -z ${!VAR_MODULE} ]] && DEFAULT=${!VAR_MODULE}
 
     echo -n $DEFAULT
 }
@@ -856,10 +856,12 @@ function copy-module-src-callback()
             # two modules may share the same VCS or tarball
             if [[ -h $SCBI_BDIR/$MODULE/tar ]]; then
                 FILE=$(readlink -f $SCBI_BDIR/$MODULE/tar)
-                [ ! -f $DEST/.tar/$(basename $FILE) ] && cp -p $FILE $DEST/.tar
+                [[ ! -f $DEST/.tar/$(basename $FILE) ]] &&
+                    cp -p $FILE $DEST/.tar
             elif [[ -h $SCBI_BDIR/$MODULE/vcs ]]; then
                 DIR=$(readlink -f $SCBI_BDIR/$MODULE/vcs)
-                [ ! -d $DEST/.vcs/$(basename $DIR) ] && cp -rp $DIR $DEST/.vcs/
+                [[ ! -d $DEST/.vcs/$(basename $DIR) ]] &&
+                    cp -rp $DIR $DEST/.vcs/
             fi
         else
             elog standalone \
@@ -948,7 +950,7 @@ function create-standalone-package()
 
         cp $HOME/bin/scbi bin/
         cp -p $SCBI_DEFS/[0-9]_* scripts.d
-        [ ! -z $SCBI_PLAN ] && cp -p $SCBI_DEFS/.plan-$SCBI_PLAN scripts.d
+        [[ ! -z $SCBI_PLAN ]] && cp -p $SCBI_DEFS/.plan-$SCBI_PLAN scripts.d
 
         # copy repositories and tars for all modules with dependencies
 
