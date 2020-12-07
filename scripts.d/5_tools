@@ -279,7 +279,7 @@ function _internal_for-all-modules()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    [ $ref = "skip" ] && return 0
+    [[ $ref = "skip" ]] && return 0
 
     #  Next level
     local NEXTL=$((LEVEL + 1))
@@ -444,7 +444,7 @@ function _internal_for-final-modules()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    [ $ref = "skip" ] && return 0
+    [[ $ref = "skip" ]] && return 0
 
     if [[ $(is-meta-module $MODREF) == yes ]]; then
         load-module $MODREF
@@ -548,7 +548,7 @@ function get-build-id()
 
     local mid=no-module-script
 
-    [ -f $SCBI_DEFS/$module ] && mid=$(cat $SCBI_DEFS/$module | get-md5)
+    [[ -f $SCBI_DEFS/$module ]] && mid=$(cat $SCBI_DEFS/$module | get-md5)
 
     # If patch activated
 
@@ -666,7 +666,7 @@ function get-tar()
 
             if [[ $tarcp == wget ]]; then
                 $tarcp $tarurl/$tarsrc -O $SCBI_TAR/$tarsrc > $log 2>&1
-            elif  [ $tarcp == curl ]; then
+            elif  [[ $tarcp == curl ]]; then
                 $tarcp $tarurl/$tarsrc --output $SCBI_TAR/$tarsrc > $log 2>&1
             else
                 elog $module error: unknown tar protocol $tarcp

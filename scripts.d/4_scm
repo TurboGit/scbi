@@ -28,7 +28,7 @@ function svn-co()
             svn co $URL $REPO
         else
             cd $REPO
-            [ ! -d .svn ] &&
+            [[ ! -d .svn ]] &&
                 ilog build error: $(pwd) not a subversion repository &&
                 exit 1
             svn update
@@ -64,7 +64,7 @@ function git-co()
             git clone $GOPTS1 $URL $REPO
         else
             cd $REPO
-            [ ! -d .git ] &&
+            [[ ! -d .git ]] &&
                 ilog build error: $(pwd) not a git repository &&
                 exit 1
             # we set the URL in case the repo has been relocated
@@ -95,7 +95,7 @@ function hg-co()
             hg clone $URL $REPO
         else
             cd $REPO
-            [ ! -d .git ] &&
+            [[ ! -d .git ]] &&
                 ilog build error: $(pwd) not a git repository &&
                 exit 1
             # we set the URL in case the repo has been relocated
@@ -184,7 +184,7 @@ function git-branch()
             ilog $MODULE "scbi: $MODULE updated $CUR..$NEW"
         fi
 
-        [ ! -z ${OPTIONS##*no-recursive*} -a -f .gitmodules ] &&
+        [[ ! -z ${OPTIONS##*no-recursive*} ]] && [[ -f .gitmodules ]] &&
             git submodule update --init --recursive || true
     )
 }
@@ -397,7 +397,7 @@ function vcs-build-id()
     local MODREF=$3
     local vcs=$4
 
-    [ ! -d $vcs ] && return 0
+    [[ ! -d $vcs ]] && return 0
 
     local vid=$(
         cd $vcs
