@@ -1,0 +1,57 @@
+
+function boggus-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function boggus-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo boggus-$VERSION-src.tar.bz2
+}
+
+function boggus-depends()
+{
+    echo doesnotexists
+}
+
+function boggus-out-of-tree()
+{
+    echo false
+}
+
+function boggus-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f *.o
+    make
+}
+
+function boggus-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $PREFIX/include
+    mkdir -p $PREFIX/lib
+    cp liblib1.so $PREFIX/lib
+    cp lib1.h $PREFIX/include
+}
+
+function boggus-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./main
+    return 0
+}

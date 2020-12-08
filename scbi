@@ -882,14 +882,14 @@ function handle-module()
         (
             handle-meta-module $module $variant
         )
-        return
+        return $?
     else
         fn-exists $module-modules
         if [[ $? = 0 ]]; then
             (
                 handle-meta-module $module $variant
             )
-            return
+            return $?
         fi
     fi
 
@@ -1548,6 +1548,7 @@ fi
 
 for module in $MODULES; do
     handle-module $module
+    [[ $? -ne 0 ]] && exit 1
 done
 
 if [ $DO_STANDALONE == yes ]; then
