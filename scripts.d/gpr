@@ -22,10 +22,10 @@ function do-config()
     local PREFIX=$1
     local TARGET=$2
 
-    make setup
-
-    rm -f src/kb/gprconfig_kb
-    ln -s $SCBI_BDIR/gprconfig-kb/src/db src/kb/gprconfig_kb
+    make PYTHONEXE=python3 -C langkit &&
+        make PYTHONEXE=python3 setup &&
+        rm -f src/kb/gprconfig_kb &&
+        ln -s $SCBI_BDIR/gprconfig-kb/src/db src/kb/gprconfig_kb
 }
 
 function gpr-out-of-tree()
