@@ -10,8 +10,8 @@ all: clean.install
 	mkdir -p $(HOME)/bin
 	cat scbi | sed "s/@VERSION@/$(VER)/" > $(HOME)/bin/scbi
 	mkdir -p $(SCRDIR)
-	rm -f $(SCRDIR)/*~ scripts.d/*~
-	cp -r scripts.d/* $(SCRDIR)
+	rm -f $(SCRDIR)/*~ $(SCRDIR)/.*~ scripts.d/*~ scripts.d/.*~
+	cp -r scripts.d/* scripts.d/.[a-z]* $(SCRDIR)
 	echo "CORE plugins : ${VER}" > $(SCRDIR)/.scbi_core_version.txt
 
 	cd scripts.d; find . -type f > $(SCRDIR)/.core.plugins
