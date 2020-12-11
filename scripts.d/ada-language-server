@@ -23,6 +23,7 @@ function ada-language-server-depends()
     echo gnatcoll
     echo vss
     echo libadalang-tools
+    echo ada-libfswatch
 }
 
 function ada-language-server-env()
