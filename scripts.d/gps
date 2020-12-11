@@ -53,7 +53,7 @@ function gps-config()
 
         ./configure --prefix=$PREFIX --with-gtk=$GTKV \
                     --with-sqlite=embedded --with-gnatcoll=$SCBI_BDIR/install \
-                    --with-clang=/usr/lib/llvm-9/lib
+                    --with-clang=/usr/lib/llvm-11/lib
     )
 }
 
