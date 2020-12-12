@@ -162,44 +162,8 @@ function module-pre-install()
     local TARGET=$4
     local OOT=$5
 
-    #  Finaly copy to given prefix
-    local SUDO=""
-    local _IDIR=""
-
-    fn-exists $MODULE-$VARIANT-prefix
-
-    if [[ $? = 0 ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
-        _IDIR=$($MODULE-$VARIANT-prefix $MPREFIX $TARGET)
-    else
-        fn-exists $MODULE-prefix
-        if [[ $? = 0 ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
-            _IDIR=$($MODULE-prefix $MPREFIX $TARGET $VARIANT)
-        else
-            _IDIR=$SCBI_PREFIX
-        fi
-    fi
-
-    if [[ $_IDIR != NONE ]]; then
-        if [[ ! -w ${_IDIR} ]]; then
-            SUDO=sudo
-        fi
-
-        # note that we do not want to fail here
-        # delete files in the final destination installation prefix.
-        # then delete the module install location (double check that the
-        # directory is the right one).
-
-        if [[ -f $MPREFIX/../manifest ]]; then
-            cat $MPREFIX/../manifest | while read file; do
-                $SUDO rm -f ${_IDIR}/$file
-            done &&
-                if [[ $(basename $MPREFIX) = "install" ]] \
-                       && [[ $(basename $(dirname $MPREFIX)) = "$MODULE" ]];
-                then
-                    cd $MPREFIX && rm -fr .
-                fi
-        fi
-    fi
+    #  Clean previous installation
+    module-clean-install $MPREFIX $MODULE $VARIANT $TARGET $OOT
 }
 
 ############################## module-install

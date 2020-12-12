@@ -69,6 +69,7 @@ DO_MOD_VER=no
 DO_STAT=no
 DO_DEPS=no
 DO_EXT=no
+DO_CLEAN_INSTALL=no
 DO_LIST_VER=yes
 DO_PLAN=no
 DEPS=no
@@ -287,6 +288,7 @@ function usage()
     echo "   -c | --config           do config"
     echo "   -b | --build            do build"
     echo "   -i | --install          do install"
+    echo "      | --clean-install    clean installation directory"
     echo "      | --tar              check for tar only if explicitly specified"
     echo "      | --tests            run the testsuite, build if necessary"
     echo "      | --tests-only       run the testsuite"
@@ -945,6 +947,14 @@ function handle-module()
             module-purge $SCBI_BDIR/$module $module $variant $SCBI_TARGET
     fi
 
+    if [[ $DO_CLEAN_INSTALL = yes ]]; then
+        ilog $module Clean $module install for $SCBI_TARGET/$variant
+        [[ -d $SCBI_BDIR/$module ]] &&
+            module-clean-install $SCBI_BDIR/$module/build/install \
+                                 $module $variant $SCBI_TARGET
+        return 0
+    fi
+
     #  If purge-only, stop there
 
     [[ $PURGE = only ]] && return 0
@@ -1248,7 +1258,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -1407,6 +1417,9 @@ while [[ $# -gt 0 ]]; do
         --build-dir)
             CMDLINE_BUILD_DIR=$2; shift
             ;;
+        --clean-install)
+            DO_CLEAN_INSTALL=yes
+            ;;
         (--)
             ;;
         (*)
@@ -1527,6 +1540,7 @@ if [[ $DRY_RUN == yes ]]; then
     DO_ARCHIVE=no
     DO_UPDATE=no
     DO_FORCE=no
+    DO_CLEAN_INSTALL=no
     STEPS=""
 fi
 
