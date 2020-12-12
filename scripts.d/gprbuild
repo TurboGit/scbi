@@ -1,11 +1,4 @@
 
-# we want to disable the pre-install for GPRbuild as the cleanup
-# would remove the current used tool for installation.
-function module-pre-install()
-{
-    echo ""
-}
-
 function gprbuild-vcs()
 {
     echo default
