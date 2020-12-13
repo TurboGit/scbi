@@ -56,7 +56,7 @@ HANDLED=$(mktemp)
 LAST_MODULE=
 
 #  Actions setup
-PURGE=no
+DO_PURGE=no
 NSTEPS=
 SCBI_PREFIX=
 SCBI_DEFAULT_PREFIX=yes
@@ -941,7 +941,7 @@ function handle-module()
 
     #  If purge is asked, first remove current build structure
 
-    if [[ $PURGE = yes || $PURGE = only ]]; then
+    if [[ $DO_PURGE = yes || $DO_PURGE = only ]]; then
         ilog $module Purging $module for $SCBI_TARGET/$variant
         [[ -d $SCBI_BDIR/$module ]] &&
             module-purge $SCBI_BDIR/$module $module $variant $SCBI_TARGET
@@ -957,7 +957,7 @@ function handle-module()
 
     #  If purge-only, stop there
 
-    [[ $PURGE = only ]] && return 0
+    [[ $DO_PURGE = only ]] && return 0
 
     if [[ $ref == NONE ]]; then
         DISPREF=master
@@ -1341,7 +1341,7 @@ while [[ $# -gt 0 ]]; do
             DLOG=yes
             ;;
         -p|--purge)
-            PURGE=yes
+            DO_PURGE=yes
             ;;
         -n|--no-patch)
             DO_PATCH=no
@@ -1355,7 +1355,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -P|--purge-only)
-            PURGE=only
+            DO_PURGE=only
             ;;
         -j|--jobs)
             SCBI_JOBS=$2; shift
@@ -1535,7 +1535,7 @@ mkdir -p $SCBI_LOGS/$TODAY
 mkdir -p $SCBI_TAR
 
 if [[ $DRY_RUN == yes ]]; then
-    PURGE=no
+    DO_PURGE=no
     DO_INSTALL=no
     DO_ARCHIVE=no
     DO_UPDATE=no
