@@ -4,16 +4,16 @@
 ./scbi --no-patch --purge-only lib2 &> /dev/null
 
 echo '=================== plan v2 (lib1:v2 lib2)'
-./scbi --no-patch --tests --plan=v2 --deps mainmult
+./scbi -v --no-patch --tests --plan=v2 --deps mainmult
 
 echo '=================== plan var (lib1:v1 lib2/variant1:v2)'
-./scbi --no-patch --tests --plan=var --deps mainmult
+./scbi -v --no-patch --tests --plan=var --deps mainmult
 
 echo '=================== second run plan var (no build)'
-./scbi --no-patch --tests --plan=var --deps mainmult
+./scbi -v --no-patch --tests --plan=var --deps mainmult
 
 echo '=================== second run plan var (test-only)'
-./scbi --no-patch --tests-only --plan=var --deps mainmult
+./scbi -v --no-patch --tests-only --plan=var --deps mainmult
 
 echo '=================== only lib2 with version from command line'
 # note that this version does not exists, it is only to make sure scbi tries

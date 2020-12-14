@@ -5,7 +5,7 @@ mkdir -p .root/builds/recb
 mkdir -p .root/builds/recc
 
 echo ========== deps A
-./scbi --deps reca
+./scbi -v --deps reca
 
 echo ========== list-depends A
 ./scbi --list-depends reca

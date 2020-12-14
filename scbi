@@ -44,7 +44,7 @@ SCBI_TARGET_SPECIFIED=no
 ENV_NAME=
 
 #  General script setup
-DLOG=on-failure
+SCBI_DLOG=on-failure
 SCBI_DEFS="$PWD"/scripts.d
 SCBI_JOBS=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 SCBI_MAKE_JOBS=$(expr $SCBI_JOBS / 2)
@@ -72,6 +72,7 @@ DO_EXT=no
 DO_CLEAN_INSTALL=no
 DO_LIST_VER=yes
 DO_PLAN=no
+DO_VERBOSE=no
 DEPS=no
 ISOOT=yes
 DO_PATCH=yes
@@ -206,7 +207,7 @@ function module-wrapper()
 
         local res=0
 
-        if [[ $DLOG = yes || "$step" = "tests" ]]; then
+        if [[ $SCBI_DLOG = yes || "$step" = "tests" ]]; then
             $module-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
                 | tee -a $log | tee $mlog
             #  We want the status of the first command and not the tee ones
@@ -221,7 +222,7 @@ function module-wrapper()
         #  Check for errors
 
         if [[ $res -ne 0 ]]; then
-            if [[ $DLOG = on-failure ]]; then
+            if [[ $SCBI_DLOG = on-failure ]]; then
                 tail -100 $log
             fi
             elog $module $mstep failed with error $res
@@ -295,7 +296,7 @@ function usage()
     echo "   -d | --deps             check/build dependencies"
     echo "   -a | --archive          build binary archive"
     echo "      | --standalone       create a standalone source archive"
-    echo "   -l | --no-log           never display log"
+    echo "   -l | --log:n            log display control yes|no|on-failure"
     echo "   -f | --force            force rebuild, do not check build id"
     echo "   -p | --purge            remove builds directories before building"
     echo "   -P | --purge-only       only remove builds directories"
@@ -581,7 +582,7 @@ function handle-depends()
               || "$mver" = $VERSION_ERROR \
               || $ref > $mver ]];
     then
-        if [[ $DRY_RUN == no ]]; then
+        if [[ $DRY_RUN == no ]] && [[ $DO_VERBOSE = yes ]]; then
             ilog $module need building $module, \
                  current version $(display-version $mver) | tee -a $log
         fi
@@ -847,7 +848,7 @@ function handle-module()
 
     check-handled $module+$variant
     if [[ $? = 1 ]]; then
-        if [[ $DRY_RUN == no ]]; then
+        if [[ $DRY_RUN == no ]] && [[ $DO_VERBOSE = yes ]]; then
             ilog $module skip $module, already handled
         fi
         return
@@ -1102,7 +1103,7 @@ function handle-module()
             if [[ $? = 0 ]]; then
                 cd $SCBI_BDIR/$module
 
-                if [[ $DLOG = yes ]]; then
+                if [[ $SCBI_DLOG = yes ]]; then
                     module-pre-$step $SCBI_BDIR/$module/build/install $module \
                                      $variant $SCBI_TARGET $ISOOT 2>&1 \
                         | tee $log
@@ -1139,7 +1140,7 @@ function handle-module()
             if [[ $? = 0 ]]; then
                 cd $SCBI_BDIR/$module
 
-                if [[ $DLOG = yes ]]; then
+                if [[ $SCBI_DLOG = yes ]]; then
                     module-$step $SCBI_BDIR/$module/build/install $module \
                                  $variant $SCBI_TARGET $ISOOT 2>&1 | tee $log
                     res=${PIPESTATUS[0]}
@@ -1167,7 +1168,7 @@ function handle-module()
             if [[ $? = 0 ]]; then
                 cd $SCBI_BDIR/$module
 
-                if [[ $DLOG = yes ]]; then
+                if [[ $SCBI_DLOG = yes ]]; then
                     module-post-$step $SCBI_BDIR/$module/build/install $module \
                                       $variant $SCBI_TARGET $ISOOT \
                          2>&1 | tee $log
@@ -1258,7 +1259,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,no-log,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
+    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,log,log:yes,log:no,log:on-failure,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -1326,8 +1327,14 @@ while [[ $# -gt 0 ]]; do
             NSTEPS="$NSTEPS install"
             DO_INSTALL=yes
             ;;
-        -l|--no-log)
-            DLOG=no
+        -l|--log|--log:yes)
+            SCBI_DLOG=yes
+            ;;
+        --log:no)
+            SCBI_DLOG=no
+            ;;
+        --log:on-failure)
+            SCBI_DLOG=on-failure
             ;;
         --tests)
             NSTEPS="$NSTEPS setup config build install tests wrapup"
@@ -1338,7 +1345,7 @@ while [[ $# -gt 0 ]]; do
             DO_TEST=true
             ;;
         -v|--verbose)
-            DLOG=yes
+            DO_VERBOSE=yes
             ;;
         -p|--purge)
             DO_PURGE=yes

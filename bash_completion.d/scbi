@@ -6,7 +6,7 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 -j --jobs= --target= --env= -e --tests-only --plan= -n --no-patch --tar
 --list-depends: --list-externals --list-externals:only --list-no-version --list-filter:
 --dry-run -w --wrapup --force --enable- --safe --plugins --build-dir
---list-plan --version --clean-install"
+--list-plan --version --clean-install --log:yes --log:no --log:on-failure"
 
 _gnat_targets()
 {
@@ -38,6 +38,16 @@ _scbi_list_depends()
 
     echo direct
     echo full
+}
+
+_scbi_log()
+{
+    local ROOT r b
+    local IFS=$'\n'
+
+    echo yes
+    echo no
+    echo on-failure
 }
 
 _scbi_env()
@@ -144,6 +154,10 @@ _scbi()
             ;;
         --list-filter:*)
             _scbicomp "$(_scbi_list_filter)" "" "${cur##--list-filter:}"
+            return 0
+            ;;
+        --log:*)
+            _scbicomp "$(_scbi_log)" "" "${cur##--log:}"
             return 0
             ;;
         -*)

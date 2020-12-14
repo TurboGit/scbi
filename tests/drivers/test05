@@ -4,10 +4,10 @@
 ./scbi --no-patch lib1 2>&1 > /dev/null
 
 echo '============ build mainlib + deps (no compilation of lib1 expected)'
-./scbi --no-patch --tests --deps mainlib
+./scbi --verbose --no-patch --tests --deps mainlib
 
 echo '============ re-build lib1 on v1'
-./scbi --no-patch --tar lib1:v1
+./scbi --verbose --no-patch --tar lib1:v1
 
 echo '============ build mainlib + deps (compilation of lib1 expected)'
-./scbi --no-patch --tests --deps mainlib
+./scbi --verbose --no-patch --tests --deps mainlib

@@ -1,7 +1,6 @@
 # test build plan with a :dev version
 
-./scbi --purge-only lib1 &> /dev/null
-./scbi --purge-only lib2 &> /dev/null
+./scbi --purge-only lib1 lib2 &> /dev/null
 
 (
     mkdir -p .root/git
@@ -13,7 +12,7 @@
 )
 
 echo '=================== plan v2 (lib1:v2 lib2 & mainmult:dev)'
-./scbi --no-patch --tests --plan=v2 --deps mainmult:dev
+./scbi -v --no-patch --tests --plan=v2 --deps mainmult:dev
 
 echo '=================== plan v2 (lib1:v2 lib2:dev & mainmult:dev)'
-./scbi --no-patch --tests --plan=dev --deps mainmult:dev
+./scbi -v --no-patch --tests --plan=dev --deps mainmult:dev
