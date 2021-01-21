@@ -19,6 +19,7 @@ function gps-depends()
     echo libadalang-tools
     echo gnatcoll-db
     echo ada-language-server
+    echo spawn
 }
 
 function gps-out-of-tree()
@@ -29,6 +30,11 @@ function gps-out-of-tree()
 function gps-patches()
 {
     echo gps-css-gtk3.36.patch
+}
+
+function gps-gtk324-patches()
+{
+    echo
 }
 
 function gps-config()
