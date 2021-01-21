@@ -40,7 +40,7 @@ function libadalang-tools-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make
+    make bin
 }
 
 function libadalang-tools-install()
@@ -48,5 +48,5 @@ function libadalang-tools-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make install-strip DESTDIR=$PREFIX
+    make install-bin-strip DESTDIR=$PREFIX
 }
