@@ -1,0 +1,17 @@
+modA
+modB
+modC
+modD:vA
+modE/new:vB
+
+[
+        modF
+        modG
+        modH:vB
+]/grp:vZ
+
+modI/hybrid
+
+[
+        modJ
+] /speed

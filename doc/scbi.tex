@@ -253,7 +253,7 @@ A build-plan is a file listing for each module a specific version to build. It i
 
 \cmd{scbi lcms2:v2 aws:v1}
 
-But this solution is not safe as not reproducible and not recorded in a version control. It is therefore easy to make mistakes and not actually build the proper version of the softwares.
+But this solution is not safe as not reproducible and not recorded in a version control. It is therefore easy to make mistakes and not actually build the proper version of the software.
 
 To avoid those issues, the solution is to use a build-plan which is a file named \file{.plan-<name>} and listing the versions (\seeref{modref} about module references) for each software:
 
@@ -272,6 +272,16 @@ File \file{.plan-next}:
  @load standard
  lcms2:v2
  aws:v1
+\end{lstlisting}
+
+A group can be used in a build plan to group together all modules with the same version. A group starts with \code{[} and ends with \code{] /variant:version} where version specify the variant and/or version.
+
+\begin{lstlisting}
+	lcms2:v2
+	[
+		moduleA
+		moduleB
+	] /speed:v3
 \end{lstlisting}
 
 And finally, to build one just need to pass the build plan as option:

@@ -8,6 +8,9 @@ function load-module-plan()
 {
     local PLAN=$PWD/.scbi-plan-$1
 
+    local GROUP=no
+    local GMOD=""
+
     # if not found in definitions install dir, look in current directory
 
     if [[ ! -f $PLAN ]]; then
@@ -15,9 +18,35 @@ function load-module-plan()
     fi
 
     if [[ -f $PLAN ]]; then
-        while read modref file; do
+        while read modref arg; do
             if [[ "$modref" = "@load" ]]; then
-                load-module-plan $file
+                load-module-plan $arg
+            elif [[ "$modref" = "" ]]; then
+                true
+            elif [[ "${modref:0:1}" = "]" ]]; then
+                REF=""
+                if [[ ! -z $arg ]]; then
+                    REF=$arg
+                else
+                    REF=${modref:1}
+                fi
+                # set REF to all all module's group in GMOD
+                for mod in $GMOD; do
+                    local module_info=( $(parse-module-ref $mod) )
+                    local module=${module_info[0]}
+                    MODVER[$module]=${module}${REF}
+                done
+                GROUP=no
+                GMOD=""
+            elif [[ $GROUP = yes ]]; then
+                # stote all module's group in GMOD
+                GMOD="$GMOD $modref"
+            elif [[ "$modref" = "[" ]]; then
+                if [[ ! -z $arg ]]; then
+                    elog build "build plan unexpected $arg on group start"
+                    exit 1
+                fi
+                GROUP=yes
             elif [[ "$modref" != "#" ]]; then
                 local module_info=( $(parse-module-ref $modref) )
                 local module=${module_info[0]}
@@ -26,6 +55,11 @@ function load-module-plan()
         done < $PLAN
     else
         elog build build plan .plan-$1 does not exists
+        exit 1
+    fi
+
+    if [[ $GROUP = yes ]]; then
+        elog build build plan group is not closed .plan-$1
         exit 1
     fi
 }

@@ -1484,7 +1484,10 @@ done
 
 #  Load build plan if any
 
-[[ ! -z $SCBI_PLAN ]] && load-module-plan $SCBI_PLAN
+if [[ ! -z $SCBI_PLAN ]]; then
+    load-module-plan $SCBI_PLAN
+    [[ $? -ne 0 ]] && exit 1
+fi
 
 #  Nothing to build, display usage
 

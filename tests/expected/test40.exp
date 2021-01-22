@@ -1,0 +1,14 @@
+========================= A
+There is AB module(s) in the plan
+modI/hybrid
+modH/grp:vZ
+modJ/speed
+modE/new:vB
+modD:vA
+modG/grp:vZ
+modF/grp:vZ
+modA
+modC
+modB
+========================= B
+xxxx/xx/xx xx:xx:xx : build (FAILED) build plan unexpected modB on group start
