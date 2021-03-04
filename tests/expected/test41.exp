@@ -1,0 +1,46 @@
+natv-native-build is a function
+natv-native-build ()
+{
+    true
+}
+natv-native-build-env is a function
+natv-native-build-env ()
+{
+    true
+}
+natv-native-config is a function
+natv-native-config ()
+{
+    true
+}
+natv-native-depends is a function
+natv-native-depends ()
+{
+    echo libA;
+    echo libB
+}
+natv-native-env is a function
+natv-native-env ()
+{
+    add-to-var ROOT_DIR /usr
+}
+natv-native-install is a function
+natv-native-install ()
+{
+    true
+}
+natv-native-prefix is a function
+natv-native-prefix ()
+{
+    echo NONE
+}
+xxxx/xx/xx xx:xx:xx : Building natv [default] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+env
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End Building natv [default] (master)

@@ -1,0 +1,23 @@
+
+with-variant native libA libB \
+                    --env 'add-to-var ROOT_DIR /usr'
+
+function natv-env()
+{
+    echo env
+}
+
+function natv-build()
+{
+    echo build
+}
+
+function natv-install()
+{
+    echo install
+}
+
+# dump created routines
+declare -F | grep native | grep natv | while read d1 d1 n; do
+    type $n | sed 's/ $//g'
+done

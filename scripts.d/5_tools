@@ -1079,6 +1079,48 @@ function inherit-plugin()
     done
 }
 
+############################## with-variant
+# parameters are the OS library for the native support
+
+function with-variant()
+{
+    local VNAME=$1
+    shift
+
+    #  Get the caller plug-in name
+    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+
+    #  Hooks with nop body
+    local SCBI_HOOKS="config build install env build-env"
+
+    for hook in $SCBI_HOOKS; do
+        H="function $PLUGIN-$VNAME-$hook()"
+        H="$H { true; }"
+        eval $H
+    done
+
+    #  Hook prefix
+    H="function $PLUGIN-$VNAME-prefix() { echo NONE; }"
+    eval $H
+
+    #  Hook depends
+    H="function $PLUGIN-$VNAME-depends() { "
+    P="echo "
+    while [[ ! -z $1 ]]; do
+        if [[ $1 == "--env" ]]; then
+            H="$H }"
+            eval $H
+            H="function $PLUGIN-$VNAME-env() { "
+            P=""
+        else
+            H="$H $P$1;"
+        fi
+        shift
+    done
+    H="$H }"
+    eval $H
+}
+
 ############################## module-clean-install
 
 function module-clean-install()

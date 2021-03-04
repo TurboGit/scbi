@@ -976,6 +976,60 @@ After this line it is possible to redefine any hook as it would be done
 without inheritance. This may be handy if a module need to redefine only
 the \code{vcs} or \code{proxy} hook for a specific context.
 
+\subsection{Native variants}
+\label{native variant}
+
+For a plug-in it is sometimes needed to have a native variant to use the OS libraries instead of building from sources. It is possible to do so by creating the variant hooks manually. All hooks must be nop action except the \code{depends} hooks which must list the OS libraries and possible the \code{env} hook which may need to define some environment variables.
+
+The support routine \code{with-variant} can be used to automate this action. For example:
+
+\begin{lstlisting}
+with-variant native libA libB \
+	--env 'add-to-var ROOT_DIR /usr'
+\end{lstlisting}
+
+The first parameter is the variant name. The followings are the libraries and an optional environment section can be opened with \code{\ddash{}env}.
+
+The command above will automatically create the following hooks when called from \file{natv} module script:
+
+\begin{lstlisting}
+function natv-native-build-env ()
+{
+	true
+}
+
+function natv-native-env ()
+{
+	add-to-var ROOT_DIR /usr
+}
+
+function natv-native-depends ()
+{
+	echo libA
+	echo libB
+}
+
+function natv-native-config ()
+{
+	true
+}
+
+function natv-native-build ()
+{
+	true
+}
+
+function natv-native-install ()
+{
+	true
+}
+
+function natv-native-prefix ()
+{
+	echo NONE
+}
+\end{lstlisting}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
 \section{Completion support}
