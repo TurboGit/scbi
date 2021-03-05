@@ -397,7 +397,7 @@ function vcs-build-id()
     local MODREF=$3
     local vcs=$4
 
-    [[ ! -d $vcs ]] && return 0
+    [[ ! -d $vcs ]] && echo $MODREF | get-md5 && return 0
 
     local vid=$(
         cd $vcs

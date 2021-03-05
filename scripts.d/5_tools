@@ -545,10 +545,14 @@ function get-build-id()
     local ref=${module_info[3]}
 
     # Include the SCBI module, if changed we need to rebuild
+    # We also include the module refrence to ensure virtual modules
+    # withou build, nor install hook for native libraries (see with-variant)
+    # will get differentiated.
 
-    local mid=no-module-script
+    local mid=$variant:$ref
 
-    [[ -f $SCBI_DEFS/$module ]] && mid=$(cat $SCBI_DEFS/$module | get-md5)
+    [[ -f $SCBI_DEFS/$module ]] &&
+        mid="$mid,$(cat $SCBI_DEFS/$module | get-md5)"
 
     # If patch activated
 
