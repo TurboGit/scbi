@@ -1125,20 +1125,21 @@ function with-variant()
     eval $H
 }
 
-############################## apply-variant-options
+############################## call-variant-hooks
 
-function apply-variant-options()
+function call-variant-hooks()
 {
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
+    local NAME=$1
+    local PREFIX=$2
+    local TARGET=$3
+    local VARIANT=$4
 
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
     for v in $(all-variants $VARIANT); do
-        fn-exists $PLUGIN-$v-options
+        fn-exists $PLUGIN-$v-$NAME
         if [ $? = 0 ]; then
-            $PLUGIN-$v-options $PREFIX $TARGET
+            $PLUGIN-$v-$NAME $PREFIX $TARGET
         fi
     done
 }

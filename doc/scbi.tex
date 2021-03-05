@@ -1030,6 +1030,60 @@ function natv-native-prefix ()
 }
 \end{lstlisting}
 
+\subsection{Call variant hooks}
+\label{call variant hooks}
+
+The support routine \code{call-variant-hook} can be used to call a set of hook in a module based on the variants.
+
+\begin{lstlisting}
+call-variant-hooks hname $PREFIX $TARGET $VARIANT
+\end{lstlisting}
+
+Will call all hooks in the current plug-in (<plugin>) named:
+
+\begin{lstlisting}
+   <plugin>-<variant>-hname
+\end{lstlisting}
+
+This may be handy to set options for the \code{config} hook depending on the current activated variants.
+
+For example:
+
+\begin{lstlisting}
+function mod-mpi-options()
+{
+	echo -DMPI=ON
+}
+
+function mod-openmp-options()
+{
+	echo -DOpenMP=ON
+}
+
+function mod-config()
+{
+	local PREFIX=$1
+	local TARGET=$2
+	local VARIANT=$3
+
+	local OPTIONS="$(call-variant-hooks options /usr lin $VARIANT)"
+
+	cmake $OPTIONS ../src
+}
+\end{lstlisting}
+
+If the current module reference is \code{mod/mp}i the \code{cmake} command will be:
+
+\begin{lstlisting}
+	cmake -DMPI=ON ../src
+\end{lstlisting}
+
+And if the module reference is \code{mod/mpi.openmp} the \code{cmake} command will be:
+
+\begin{lstlisting}
+	cmake -DMPI=ON -DOpenMP=ON ../src
+\end{lstlisting}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
 \section{Completion support}
