@@ -6,8 +6,7 @@ function o()
     cat > out
     # sort lines exept first and last
     head -1 out
-    sed '1d;$d' out | sort
-    tail -1 out
+    sed '1d' out | sort
     rm out
 }
 
