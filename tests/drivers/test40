@@ -1,8 +1,18 @@
 # Note that we transform all 1 to A and 2 to B to have a better check
 # of the final output.
 
+function o()
+{
+    cat > out
+    # sort lines exept first and last
+    head -1 out
+    sed '1d;$d' out | sort
+    tail -1 out
+    rm out
+}
+
 echo "========================= A"
-./scbi --plan=group --list-plan lib1 | sed 's/1/A/g;s/0/B/g'
+./scbi --plan=group --list-plan lib1 | o | sed 's/1/A/g;s/0/B/g'
 
 echo "========================= B"
 ./scbi --plan=group2 --list-plan lib1 | tr '[0-9]' 'x'
