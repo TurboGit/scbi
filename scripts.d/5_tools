@@ -1121,6 +1121,24 @@ function with-variant()
     eval $H
 }
 
+############################## apply-variant-options
+
+function apply-variant-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+
+    for v in $(all-variants $VARIANT); do
+        fn-exists $PLUGIN-$v-options
+        if [ $? = 0 ]; then
+            $PLUGIN-$v-options $PREFIX $TARGET
+        fi
+    done
+}
+
 ############################## module-clean-install
 
 function module-clean-install()
