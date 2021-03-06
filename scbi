@@ -1583,8 +1583,7 @@ fi
 #  Run script for all modules
 
 for module in $MODULES; do
-    handle-module $module
-    [[ $? -ne 0 ]] && exit 1
+    handle-module $module || exit 1
 done
 
 if [[ $DO_STANDALONE == yes ]]; then
