@@ -807,7 +807,7 @@ function handle-meta-module()
     local FCT=$(get-hook $metamodule $variant modules)
 
     for module in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-        handle-module $module
+        handle-module $module || exit 1
     done
 
     # check for wrapup
