@@ -370,7 +370,7 @@ function _internal_for-all-modules()
                 $CALLBACK $module $MODREF $LEVEL \
                           $IS_BUILD_DEPENDS true $IS_META $@
             else
-                check-pkg $module:$ref
+                check-pkg $module:$ref || exit 1
             fi
         fi
     fi
