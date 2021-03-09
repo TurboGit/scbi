@@ -1,7 +1,7 @@
-SCBI_ROOT=$PWD/.root
-SCBI_BDIR=$SCBI_ROOT/builds
-SCBI_PREFIX=$SCBI_BDIR/install
-SCBI_TAR=$SCBI_ROOT/.tar
-SCBI_PATCH=$SCBI_ROOT/.patches
-SCBI_LOGS=$SCBI_BDIR/.logs
-SCBI_GIT_REPO=$SCBI_ROOT/git
+[[ -z $SCBI_ROOT ]]     && SCBI_ROOT=$PWD/.root
+[[ -z $SCBI_BDIR ]]     && SCBI_BDIR=$SCBI_ROOT/builds
+[[ -z $SCBI_PREFIX ]]   && SCBI_PREFIX=$SCBI_BDIR/install
+[[ -z $SCBI_TAR ]]      && SCBI_TAR=$SCBI_ROOT/.tar
+[[ -z $SCBI_PATCH ]]    && SCBI_PATCH=$SCBI_ROOT/.patches
+[[ -z $SCBI_LOGS ]]     && SCBI_LOGS=$SCBI_BDIR/.logs
+[[ -z $SCBI_GIT_REPO ]] && SCBI_GIT_REPO=$SCBI_ROOT/git
