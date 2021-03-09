@@ -7,11 +7,17 @@
 #     - implement get-<distrib>-lib-for-dev (optional)
 #     - add <pkg>-<distrib>-name routine for specific package name
 
+SCBI_LINUX_DES=$(lsb_release -d)
+
 declare -A SCBI_PKGS
 
 function get-distrib()
 {
-    echo deb
+    if [[ $SCBI_LINUX_DES =~ "Debian" ]]; then
+        echo deb
+    elif [[ $SCBI_LINUX_DES =~ "Red Hat" ]]; then
+        echo rhl
+    fi
 }
 
 ######################################
