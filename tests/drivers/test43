@@ -1,0 +1,13 @@
+# check standalone package
+
+./scbi --deps --standalone mainmult 2>&1 > /dev/null
+
+(
+        cd /tmp
+        tar xf sa-builds.tgz
+        cd sa-builds
+        export TESTREPOS=$PWD/.vcs
+        export SCBI_PATCH=$PWD/.patches
+        ./build
+        LD_LIBRARY_PATH=install/lib/ install/bin/mainmult
+)
