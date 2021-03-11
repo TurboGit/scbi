@@ -676,7 +676,9 @@ function get-tar()
                 elog $module error: unknown tar protocol $tarcp
             fi
 
-            [[ ! $? = 0 ]] && elog $module error: cannot get tar: $tarcp
+            [[ ! $? = 0 ]] &&
+                rm -f $SCBI_TAR/$tarsrc &&
+                elog $module error: cannot get tar: $tarcp
         )
     fi
 
