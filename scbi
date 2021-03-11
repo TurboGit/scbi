@@ -9,7 +9,7 @@ SCBI_VERSION=@VERSION@
 
 function check-tool()
 {
-    if [[ -z "$(which $1)" ]]; then
+    if [[ -z "$(which $1 2> /dev/null)" ]]; then
         return 1
     fi
     return 0
@@ -1008,13 +1008,13 @@ function handle-module()
         echo "==================== env " > $ENVLOG
         env >> $ENVLOG
 
-        [[ ! -z $(which gprls) ]] &&
+        [[ ! -z $(which gprls 2> /dev/null) ]] &&
             (
                 echo "==================== gprls " >> $ENVLOG
                 gprls -v 2>&1 >> $ENVLOG
             )
 
-        [[ ! -z $(which gcc) ]] &&
+        [[ ! -z $(which gcc 2> /dev/null) ]] &&
             (
                 echo "==================== gcc " >> $ENVLOG
                 gcc -v &>> $ENVLOG
