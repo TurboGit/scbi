@@ -10,8 +10,7 @@
 declare -A SCBI_PKGS
 
 #  OS dependent alias map
-declare -g -A SCBI_deb_PKGS
-declare -g -A SCBI_rhl_PKGS
+declare -g -A SCBI_ALIAS
 
 ############################## get-distrib
 # returns the name of the current distrib
@@ -28,6 +27,18 @@ function get-distrib()
 
 SCBI_LINUX_DISTRIB=$(get-distrib)
 
+############################## init-alias
+# read package alias file
+
+function init-alias()
+{
+    local FILE="$1"
+
+    while read pkg a; do
+        SCBI_ALIAS["$pkg"]=$a
+    done < <( cat "$FILE" )
+}
+
 ############################## init-deb-pkg
 # cache all installed packages
 
@@ -36,6 +47,10 @@ function init-deb-pkg()
     while read ii pkg version dummy; do
         SCBI_PKGS["$pkg"]=$version
     done < <( dpkg-query -l | tail -n+6 | sed 's/:amd64//g' )
+
+    if [[ -f $SCBI_DEFS/.deb-pkgs ]]; then
+        init-alias $SCBI_DEFS/.deb-pkgs
+    fi
 }
 
 function init-rhl-pkg()
@@ -49,6 +64,10 @@ function init-rhl-pkg()
         version=${version%-*};
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null | grep -v "^Not root" )
+
+    if [[ -f $SCBI_DEFS/.rhl-pkgs ]]; then
+        init-alias $SCBI_DEFS/.rhl-pkgs
+    fi
 }
 
 ############################## check-deb-pkg
@@ -153,10 +172,10 @@ function get-pkg-name()
     # if package start with os@- it is an alias, lookup
     # in the corresponding table:
     #
-    #    <distrib_name>_PKGS[pkg]
+    #    SCBI_ALIAS[pkg]
 
     if [[ "${pkg:0:4}" == "os@-" ]]; then
-        REF="SCBI_${SCBI_LINUX_DISTRIB}_PKGS["$pkg"]"
+        REF="SCBI_ALIAS["$pkg"]"
         echo ${!REF}
     else
         echo $pkg

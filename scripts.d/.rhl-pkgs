@@ -1,0 +1,93 @@
+# OS name                           Red Hat packaages
+# ---------------------------------------------------
+os@-autoconf                        autoconf
+os@-autotools-dev
+os@-blas-dev                        blas-devel
+os@-boost-chrono-dev                boost-chrono
+os@-boost-date-time-dev             boost-date-time
+os@-boost-dev                       boost
+os@-boost-filesystem-dev            boost-filesystem
+os@-boost-graph-dev                 boost-graph
+os@-boost-locale-dev                boost-locale
+os@-boost-regexp-dev                boost-regexp
+os@-boost-signals-dev               boost-signals
+os@-boost-thread-dev                boost-thread
+os@-bz2-dev                         bzip2-devel
+os@-c6-dev
+os@-cfitsio-dev                     cfitsio
+os@-cgal-dev
+os@-cmake                           cmake
+os@-cminpack-dev
+os@-cos4-dev
+os@-cppunit-dev                     cppunit-devel
+os@-curl4-openssl-dev               libcurl-devel
+os@-doxygen                         doxygen
+os@-egl1-mesa-dev
+os@-eigen3-dev                      eigen3-devel
+os@-fftw3-dev                       fftw-devel
+os@-freeimage-dev                   freeimage-devel
+os@-freetype6-dev                   freetype-devel
+os@-ftgl-dev                        ftgl-devel
+os@-g++                             gcc-c++
+os@-gdal-dev                        gdal-devel
+os@-gl2ps-dev                       gl2ps-devel
+os@-glew-dev
+os@-glfw3-dev
+os@-glu1-mesa-dev                   mesa-libGLU-devel
+os@-graphviz                        graphviz
+os@-graphviz-dev                    graphviz-devel
+os@-hdf5-dev                        hdf5-devel
+os@-jpeg-dev                        libjpeg-turbo-devel
+os@-lapack-dev                      lapack-devel
+os@-make                            make
+os@-metis-dev                       metis-devel
+os@-ncurses-dev                     ncurses-devel
+os@-nlopt0
+os@-omniidl
+os@-omniorb
+os@-omniorb-idl
+os@-omniorb4-dev
+os@-opencv-dev                      opencv-devel
+os@-openmpi-dev                     openmpi-bull-gnu
+os@-osmesa6-dev
+os@-pcre3-dev                       pcre-devel
+os@-png-dev                         libpng-devel
+os@-proj-dev                        proj
+os@-pyqt5-dev                       python3-qt5-devel
+os@-pyqt5-dev-tools                 python3-qt5-base
+os@-python3
+os@-python3-dev
+os@-python3-docutils                python3-docutils
+os@-python3-matplotlib              python3-matplotlib
+os@-python3-scipy                   python3-scipy
+os@-python3-sphinx                  python3-sphinx
+os@-python3-sphinx-rtd-theme        python3-sphinx_rtd_theme
+os@-python3-stemmer
+os@-qt5-default                     qt5-devel
+os@-qt5help5                        qt5-qttools-libs-help
+os@-qt5opengl5-dev
+os@-qt5printsupport5
+os@-qt5svg5-dev                     qt5-qtsvg-devel
+os@-qt5x11extras5-dev               qt5-qtx11extras-devel
+os@-qtbase5-dev                     qt5-qtbase-devel
+os@-qttools5-dev                    qt5-qttools-devel
+os@-qtxmlpatterns5-dev-tools        qt5-qtxmlpatterns qt5-qtxmlpatterns-devel
+os@-qwt-qt5-dev                     qwt-qt5-devel
+os@-scotch-dev                      scotch-devel
+os@-sphinx-common                   python3-sphinx
+os@-sphinx-intl                     python-sphinx-locale
+os@-ssl-dev                         openssl-devel
+os@-swig                            swig
+os@-tbb-dev                         tbb-devel
+os@-tcl-dev                         tcl-devel
+os@-tk-dev                          tk-devel
+os@-x11-dev                         libX11-devel
+os@-xext-dev                        libXext-devel
+os@-xft-dev                         libXft-devel
+os@-xi-dev                          libXi-devel
+os@-xml2-dev                        libxml2-devel
+os@-xml2-utils
+os@-xmu-dev                         libXmu-devel
+os@-xpm-dev                         libXpm-devel
+os@-xt-dev                          libXt-devel
+os@-zlib1g-dev                      zlib-devel
