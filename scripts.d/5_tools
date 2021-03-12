@@ -1099,6 +1099,8 @@ function with-variant()
     #  Hooks with nop body
     local SCBI_HOOKS="config build install env build-env"
 
+    local H=""
+
     for hook in $SCBI_HOOKS; do
         H="function $PLUGIN-$VNAME-$hook()"
         H="$H { true; }"
@@ -1120,7 +1122,7 @@ function with-variant()
 
     #  Hook depends/env
     H="function $PLUGIN-$VNAME-depends() { "
-    P="echo "
+    local P="echo "
     while [[ ! -z "$1" ]]; do
         if [[ "$1" == "--env" ]]; then
             H="$H }"
