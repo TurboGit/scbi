@@ -1112,14 +1112,18 @@ function with-variant()
     #  Hook depends
     H="function $PLUGIN-$VNAME-depends() { "
     P="echo "
-    while [[ ! -z $1 ]]; do
-        if [[ $1 == "--env" ]]; then
+    while [[ ! -z "$1" ]]; do
+        if [[ "$1" == "--env" ]]; then
             H="$H }"
             eval $H
             H="function $PLUGIN-$VNAME-env() { "
             P=""
         else
-            H="$H $P$1;"
+            if [[ "$1" == "NONE" ]]; then
+               H="$H $P;"
+            else
+               H="$H $P$1;"
+            fi
         fi
         shift
     done
