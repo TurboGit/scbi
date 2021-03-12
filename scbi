@@ -665,12 +665,13 @@ function handle-sources()
     else
         # Get sources from repository
 
-        vcs=( $(get-vcs-data $module) )
+        vcs=( $(get-vcs-data $module $variant) )
+        res=$?
 
-        if [[ $? = 0 ]]; then
-            VCS_NAME=${vcs[2]}
-            VCS_URL=${vcs[3]}
+        local VCS_NAME=${vcs[2]}
+        local VCS_URL=${vcs[3]}
 
+        if [[ $res = 0 ]] && [[ "$VCS_NAME" != "NONE" ]]; then
             REPO=$(basename $VCS_URL .git)
 
             if [[ $kind = DEV ]]; then

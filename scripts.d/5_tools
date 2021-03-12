@@ -1007,7 +1007,7 @@ function get-source-dir()
     local SCBI_VCS_REPO=
 
     if [[ $kind == DEV ]]; then
-        vcs=( $(get-vcs-data $module) )
+        vcs=( $(get-vcs-data $module $variant) )
 
         if [[ $? = 0 ]]; then
             VCS_NAME=${vcs[2]}
@@ -1105,11 +1105,20 @@ function with-variant()
         eval $H
     done
 
+    #  Hooks with NONE body
+    local SCBI_HOOKS="vcs tar"
+
+    for hook in $SCBI_HOOKS; do
+        H="function $PLUGIN-$VNAME-$hook()"
+        H="$H { echo NONE; echo NONE; echo NONE; echo NONE; }"
+        eval $H
+    done
+
     #  Hook prefix
     H="function $PLUGIN-$VNAME-prefix() { echo NONE; }"
     eval $H
 
-    #  Hook depends
+    #  Hook depends/env
     H="function $PLUGIN-$VNAME-depends() { "
     P="echo "
     while [[ ! -z "$1" ]]; do

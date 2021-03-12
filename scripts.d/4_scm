@@ -264,8 +264,10 @@ function svn-branch()
 function get-vcs-data()
 {
     local module=$1
+    local variant=$2
 
-    VCS_FUNCTION=${module}-vcs
+    VCS_FUNCTION=$(get-hook $module $variant vcs)
+    VCS_FUNCTION=${VCS_FUNCTION:=${module}-vcs}
 
     #  check first for module specifc VCS variant
 
@@ -279,7 +281,6 @@ function get-vcs-data()
             elog build "error: vcs specific function for $module not found."
             exit 1
         fi
-
     elif [[ "${SCBI_VCS_VARIANT}" != "" ]]; then
         fn-exists $module-${SCBI_VCS_VARIANT}-vcs
         if [[ $? = 0 ]]; then
@@ -315,7 +316,7 @@ function get-vcs()
 
     #  get vcs information
 
-    vcs=( $(get-vcs-data $module) )
+    vcs=( $(get-vcs-data $module $variant) )
 
     local VCS_PROXY=${vcs[0]}
     local VCS_OPTIONS=${vcs[1]}
