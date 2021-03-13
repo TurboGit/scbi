@@ -38,8 +38,6 @@ function darktable-depends()
     echo libgmic-dev
     echo libcups2-dev
     echo libsecret-1-dev
-    echo llvm-10
-    echo clang-10
     echo xsltproc
     echo libimage-exiftool-perl
     echo libxml2-utils
@@ -49,6 +47,14 @@ function darktable-depends()
     echo librsvg2-dev
     echo libjson-glib-dev
     echo libpod-parser-perl
+}
+
+function darktable-clang-depends()
+{
+    darktable-depends
+
+    echo llvm-10
+    echo clang-10
 }
 
 function darktable-env()
