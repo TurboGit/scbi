@@ -19,6 +19,7 @@ export CDPATH=
 # copy scripts
 cp ../scbi .
 cp ../scripts.d/[1-9]* scripts.d/
+cp ../scripts.d/.*pkgs scripts.d/
 
 # patch rsync to use safe mode (checksum) as the tests repositories are small,
 # and has some files with same time-stamp.

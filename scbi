@@ -763,10 +763,13 @@ function handle-sources()
             #  No VCS, no TAR, just rebuild the sources if present
             if [[ ! -d src ]]; then
                 ilog $module "no sources (vcs or tar)"
-            fi
 
-            get-build-id $SCBI_PREFIX $SCBI_TARGET $modref "$(date)" \
-                         > build-id-$variant
+                get-build-id $SCBI_PREFIX $SCBI_TARGET $modref "$variant" \
+                             > build-id-$variant
+            else
+                get-build-id $SCBI_PREFIX $SCBI_TARGET $modref "$(date)" \
+                             > build-id-$variant
+            fi
         fi
 
         #  If get-vcs is not defined then the $module-setup routine is in

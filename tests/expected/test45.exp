@@ -1,0 +1,40 @@
+============ run one : build
+xxxx/xx/xx xx:xx:xx : Building inhnat [native] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : native-config starting
+xxxx/xx/xx xx:xx:xx : native-config completed
+xxxx/xx/xx xx:xx:xx : native-build starting
+xxxx/xx/xx xx:xx:xx : native-build completed
+xxxx/xx/xx xx:xx:xx : native-install starting
+xxxx/xx/xx xx:xx:xx : native-install completed
+xxxx/xx/xx xx:xx:xx : skip global install
+xxxx/xx/xx xx:xx:xx : End Building inhnat [native] (master)
+
+xxxx/xx/xx xx:xx:xx : Building libx [default] (vx.x)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from tar
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx.x)
+
+============ run two : nothing to do
+xxxx/xx/xx xx:xx:xx : Building inhnat [native] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : skip global install
+xxxx/xx/xx xx:xx:xx : End Building inhnat [native] (master)
+
+xxxx/xx/xx xx:xx:xx : Building libx [default] (vx.x)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx.x)

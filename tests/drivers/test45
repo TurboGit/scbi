@@ -1,0 +1,7 @@
+# check that a native deps does not force a recompilation
+
+echo "============ run one : build"
+./scbi --deps lib3:#v1.2
+
+echo "============ run two : nothing to do"
+./scbi --deps lib3:#v1.2
