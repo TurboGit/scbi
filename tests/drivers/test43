@@ -6,8 +6,7 @@
         cd /tmp
         tar xf sa-builds.tgz
         cd sa-builds
-        export TESTREPOS=$PWD/.vcs
-        export SCBI_PATCH=$PWD/.patches
+        export TESTREPOS=$PWD/builds/.vcs
         ./build
-        LD_LIBRARY_PATH=install/lib/ install/bin/mainmult
+        LD_LIBRARY_PATH=builds/install/lib/ builds/install/bin/mainmult
 )

@@ -861,11 +861,11 @@ function copy-module-src-callback()
             if [[ -h $SCBI_BDIR/$MODULE/tar ]]; then
                 FILE=$(readlink -f $SCBI_BDIR/$MODULE/tar)
                 [[ ! -f $DEST/.tar/$(basename $FILE) ]] &&
-                    cp -p $FILE $DEST/.tar
+                    cp -p $FILE $DEST/builds/.tar
             elif [[ -h $SCBI_BDIR/$MODULE/vcs ]]; then
                 DIR=$(readlink -f $SCBI_BDIR/$MODULE/vcs)
                 [[ ! -d $DEST/.vcs/$(basename $DIR) ]] &&
-                    cp -rp $DIR $DEST/.vcs/
+                    cp -rp $DIR $DEST/builds/.vcs/
             fi
         else
             elog standalone \
@@ -896,7 +896,7 @@ function copy-module-src-callback()
                         return 1
                     fi
 
-                    cp $patch $DEST/.patches
+                    cp $patch $DEST/builds/.patches
                 }
 
                 local module_info=( $(get-module-ref $MODREF) )
@@ -948,7 +948,8 @@ function create-standalone-package()
 
         # copy scbi scripts
 
-        mkdir bin .vcs .tar .patches scripts.d
+        mkdir -p bin scripts.d
+        mkdir -p builds/.vcs builds/.tar builds/.patches
 
         # The main SCBI script, the runtime scripts and the current plan
 
@@ -965,8 +966,12 @@ function create-standalone-package()
 
         # create default local environment
 
-        echo 'SCBI_ROOT=$PWD/..'               > .scbi-env-std
-        echo 'SCBI_BDIR=$PWD'                 >> .scbi-env-std
+        echo 'SCBI_ROOT=$PWD'                  > .scbi-env-std
+        echo 'SCBI_BDIR=$SCBI_ROOT/builds'    >> .scbi-env-std
+        echo 'SCBI_PREFIX=$SCBI_BDIR/install' >> .scbi-env-std
+        echo 'SCBI_TAR=$SCBI_BDIR/.tar'       >> .scbi-env-std
+        echo 'SCBI_PATCH=$SCBI_BDIR/.patches' >> .scbi-env-std
+        echo 'SCBI_LOGS=$SCBI_BDIR/.logs'     >> .scbi-env-std
         echo "SCBI_PLAN=$SCBI_PLAN"           >> .scbi-env-std
 
         # then create the build script
