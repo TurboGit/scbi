@@ -6,6 +6,18 @@ declare -A SCBI_LOADED
 
 declare SCBI_RECTREE=()
 
+############################## display-stacktrace
+#
+function display-stacktrace()
+{
+    local frame=0 LINE SUB FILE
+
+    while read LINE SUB FILE < <(caller "$frame"); do
+        printf '  %s @ %s:%s\n' "${SUB}" "${FILE}" "${LINE}" > $(tty)
+        ((frame++))
+    done
+}
+
 ############################## fn-exists
 # check wether a function is defined
 
