@@ -12,6 +12,8 @@ declare -A SCBI_PKGS
 #  OS dependent alias map
 declare -g -A SCBI_ALIAS
 
+SCBI_LINUX_DISTRIBS=( deb rhl )
+
 ############################## get-distrib
 # returns the name of the current distrib
 
@@ -34,9 +36,25 @@ function init-alias()
 {
     local FILE="$1"
 
-    while read pkg a; do
-        SCBI_ALIAS["$pkg"]=$a
-    done < <( cat "$FILE" )
+    if [[ -f $FILE ]]; then
+        while read pkg a; do
+            SCBI_ALIAS["$pkg"]=$a
+        done < <( cat "$FILE" )
+    fi
+}
+
+############################## init-distrib-alias
+# check all possible distrib alias files
+
+function init-distrib-alias()
+{
+    local DIST=$1
+
+    init-alias $SCBI_DEFS/.$DIST-pkgs
+
+    init-alias $SCBI_BDIR/.scbi-$DIST-pkgs
+
+    init-alias $PWD/.scbi-$DIST-pkgs
 }
 
 ############################## init-deb-pkg
@@ -48,9 +66,7 @@ function init-deb-pkg()
         SCBI_PKGS["$pkg"]=$version
     done < <( dpkg-query -l | tail -n+6 | sed 's/:amd64//g' )
 
-    if [[ -f $SCBI_DEFS/.deb-pkgs ]]; then
-        init-alias $SCBI_DEFS/.deb-pkgs
-    fi
+    init-distrib-alias deb
 }
 
 function init-rhl-pkg()
@@ -65,9 +81,7 @@ function init-rhl-pkg()
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null | grep -v "^Not root" )
 
-    if [[ -f $SCBI_DEFS/.rhl-pkgs ]]; then
-        init-alias $SCBI_DEFS/.rhl-pkgs
-    fi
+    init-distrib-alias rhl
 }
 
 ############################## check-deb-pkg

@@ -1091,6 +1091,27 @@ And if the module reference is \code{mod/mpi.openmp} the \code{cmake} command wi
 	cmake -DMPI=ON -DOpenMP=ON ../src
 \end{lstlisting}
 
+\subsection{OS dependencies}
+\label{OS dependencies}
+
+The hook \code{depends} list dependencies to other plug-ins or external libraries/tools. As the name of the external dependency package may be different depending on the Linux distribution it is possible to use an OS independent naming.
+
+\begin{lstlisting}
+	os@-<name>
+\end{lstlisting}
+
+The \code{os@-<name>} is then search against a table to find the corresponding OS package name.
+
+A distribution acronym is represented by a 3 letters name (deb, rhl for example). See output of the \code{--stat} option for the currently supported distribution.
+
+An alias table is searched into the following places and in this specific order:
+
+\begin{enumerate}
+	\item \code{.<distrib>-pkgs} into \$SCBI\_DEFS (default \file{~/.config/scbi})
+	\item \code{.scbi-<distrib>-pkgs} into \$SCBI\_BDIR (build directory)
+	\item \code{.scbi-<distrib>-pkgs} into \$PWD (current directory)
+\end{enumerate}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
 \section{Completion support}

@@ -743,6 +743,12 @@ function display-stat()
     else
         echo " $EMAIL"
     fi
+
+    echo -n "Supported Linux       :"
+    for L in ${SCBI_LINUX_DISTRIBS[@]}; do
+        echo -n " $L"
+    done
+    echo
 }
 
 ############################## display-modules
