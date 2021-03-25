@@ -133,7 +133,12 @@ function load-module-env()
         ENV=$PWD/../.scbi-env$1
 
         if [[ ! -f $ENV ]]; then
-            ENV=$SCBI_DEFS/.env$1
+            # look for it in $HOME directory too
+            ENV=$HOME/.scbi-env$1
+
+            if [[ ! -f $ENV ]]; then
+                ENV=$SCBI_DEFS/.env$1
+            fi
         fi
     fi
 

@@ -235,7 +235,9 @@ The environment can be set in the following files searched in this exact order:
 \begin{description}
 	\item[\code{\$PWD/.scbi-env}] The local environment found in the current working directory.
 
-	\item[\code{\$PWD/../.scbi-env}] The local environment found in the parent if the working directory. This environment can then be shared for a set of repositories.
+	\item[\code{\$PWD/../.scbi-env}] The local environment found in the parent of the working directory. This environment can then be shared for a set of repositories.
+
+	\item[\code{\$HOME/.scbi-env}] The local environment found in the HOME. This environment can then be shared by all builds.
 
 	\item[\code{\$SCBI\_DEFS/.env}] The default global environment used for all builds.
 \end{description}
