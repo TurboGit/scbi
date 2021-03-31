@@ -97,7 +97,7 @@ function record-build-plan()
 ############################## set-module-ref
 #
 # Set a module reference into the build plan only if this reference a
-# specific version.
+# specific version or is forced.
 
 function set-module-ref()
 {
@@ -106,12 +106,20 @@ function set-module-ref()
 
     local module_info=( $(parse-module-ref $modref) )
 
-    if [[ "${module_info[1]}" != "default" ]]   \
-         || [[ ${module_info[2]} != "NONE" ]]   \
-         || [[ "${module_info[3]}" != "NONE" ]];
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    if [[ "$variant" != "default" ]]   \
+         || [[ "$kind" != "NONE" ]]   \
+         || [[ "$ref" != "NONE" ]];
     then
-        local module=${module_info[0]}
-        MODVER[$module]=$modref
+        if [[ "$ref" == "force" ]]; then
+            MODVER[$module]=$module/$variant
+        else
+            MODVER[$module]=$modref
+        fi
     fi
 }
 

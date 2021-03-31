@@ -162,6 +162,15 @@ Each module is described in an SCBI plug-in script. It can be referenced in diff
 	\item[variant] \label{variant}This is a name to identify a build variant for the module. For example an application can be built with different configuration and or dependencies.
 
 	\item[version] The version to build. This version string can be either a reference to a VCS version (branch or a Git sha1 for example), a tar version or a reference to the user's checkout when set to \code{dev}. The version can also be set to \code{skip} to specify that the module must be ignored.
+
+	Furthermore the version can be set to \code{force} on the command line to tell that the module should not be skipped. On the command line it is always possible to force a build of a module to a specific variant or version. But if one need to build the default variant or version it is required to pass the \code{force} as version.
+
+	That is, this will never overwrite a build plan as it is a default reference to a module:
+	\cmd{scbi --plan=xyz mod}
+
+	But this will do:
+
+	\cmd{scbi --plan=xyz mod:force}
 \end{description}
 
 The following are examples of module references:
@@ -289,6 +298,10 @@ A group can be used in a build plan to group together all modules with the same 
 And finally, to build one just need to pass the build plan as option:
 
 \cmd{scbi \ddash{}plan=next lcms2 aws}
+
+Note that if a module is set as \code{skip} on the build plan, to build the default version one need to force it on the command line:
+
+\cmd{scbi \ddash{}plan=next lcms2:force aws}
 
 It is possible to list the final build plan using \code{\ddash{}list-plan} option. See \ref{cmdline}.
 

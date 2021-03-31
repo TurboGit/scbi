@@ -1,0 +1,13 @@
+# check skip and command line
+
+echo "========== lib1 skip"
+./scbi --plan=skip --deps mainmult \
+    | sed '/#include/d;/^make:/d;/~~~~~/d;/<builtin>/d;/\^$/d'
+
+echo "========== lib1 forced"
+./scbi --plan=skip --deps lib1:force
+
+rm -fr .root/builds/install .root/builds/.logs
+
+echo "========== lib1 forced on mainmult"
+./scbi --plan=skip --deps lib1:force mainmult
