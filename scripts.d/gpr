@@ -21,11 +21,12 @@ function do-config()
 {
     local PREFIX=$1
     local TARGET=$2
+    local BUILD=$3
 
     make PYTHONEXE=python3 -C langkit &&
-        make PYTHONEXE=python3 GPR2_TOOLS_PREFIX=gpr2 setup &&
         rm -f src/kb/gprconfig_kb &&
-        ln -s $SCBI_BDIR/gprconfig-kb/src/db src/kb/gprconfig_kb
+        ln -s $SCBI_BDIR/gprconfig-kb/src/db src/kb/gprconfig_kb &&
+        make $BUILD PYTHONEXE=python3 GPR2_TOOLS_PREFIX=gpr2 setup
 }
 
 function gpr-out-of-tree()
