@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  SCBI - (C) Pascal Obry - 2007-2020
+#  SCBI - (C) Pascal Obry - 2007-2021
 #
 
 SCBI_VERSION=@VERSION@
@@ -715,13 +715,15 @@ function handle-sources()
                 fi
 
             else
-                if [[ -f source-id ]]; then
-                    if [[ "$(cat source-id)" != "vcs-$ref" ]]; then
-                        # a different version is needed
+                if [[ ! $DO_TEST =~ "yes-only" ]]; then
+                    if [[ -f source-id ]]; then
+                        if [[ "$(cat source-id)" != "vcs-$ref" ]]; then
+                            # a different version is needed
+                            DO_UPDATE=yes
+                        fi
+                    else
                         DO_UPDATE=yes
                     fi
-                else
-                    DO_UPDATE=yes
                 fi
 
                 if [[ $DO_UPDATE = yes ]] || [[ ! -d ../.vcs/$REPO ]]; then
@@ -1065,7 +1067,7 @@ function handle-module()
 
             # if testing is expected, at least do that
 
-            if [[ $DO_TEST = true ]]; then
+            if [[ $DO_TEST =~ "yes" ]]; then
                 STEPS="$STEPS tests"
             fi
 
@@ -1343,11 +1345,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         --tests)
             NSTEPS="$NSTEPS setup config build install tests wrapup"
-            DO_TEST=true
+            DO_TEST=yes
             ;;
         --tests-only)
             NSTEPS="$NSTEPS tests"
-            DO_TEST=true
+            DO_TEST=yes-only
             ;;
         -v|--verbose)
             DO_VERBOSE=yes
