@@ -1,0 +1,3 @@
+inherit-plugin s-cmake
+
+with-variant native os@-cmake

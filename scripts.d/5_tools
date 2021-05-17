@@ -6,6 +6,18 @@ declare -A SCBI_LOADED
 
 declare SCBI_RECTREE=()
 
+############################## display-stacktrace
+#
+function display-stacktrace()
+{
+    local frame=0 LINE SUB FILE
+
+    while read LINE SUB FILE < <(caller "$frame"); do
+        printf '  %s @ %s:%s\n' "${SUB}" "${FILE}" "${LINE}" > $(tty)
+        ((frame++))
+    done
+}
+
 ############################## fn-exists
 # check wether a function is defined
 
@@ -676,7 +688,9 @@ function get-tar()
                 elog $module error: unknown tar protocol $tarcp
             fi
 
-            [[ ! $? = 0 ]] && elog $module error: cannot get tar: $tarcp
+            [[ ! $? = 0 ]] &&
+                rm -f $SCBI_TAR/$tarsrc &&
+                elog $module error: cannot get tar: $tarcp
         )
     fi
 
@@ -729,6 +743,12 @@ function display-stat()
     else
         echo " $EMAIL"
     fi
+
+    echo -n "Supported Linux       :"
+    for L in ${SCBI_LINUX_DISTRIBS[@]}; do
+        echo -n " $L"
+    done
+    echo
 }
 
 ############################## display-modules
@@ -1010,7 +1030,7 @@ function get-source-dir()
     local SCBI_VCS_REPO=
 
     if [[ $kind == DEV ]]; then
-        vcs=( $(get-vcs-data $module) )
+        vcs=( $(get-vcs-data $module $variant) )
 
         if [[ $? = 0 ]]; then
             VCS_NAME=${vcs[2]}
@@ -1102,9 +1122,20 @@ function with-variant()
     #  Hooks with nop body
     local SCBI_HOOKS="config build install env build-env"
 
+    local H=""
+
     for hook in $SCBI_HOOKS; do
         H="function $PLUGIN-$VNAME-$hook()"
         H="$H { true; }"
+        eval $H
+    done
+
+    #  Hooks with NONE body
+    local SCBI_HOOKS="vcs tar"
+
+    for hook in $SCBI_HOOKS; do
+        H="function $PLUGIN-$VNAME-$hook()"
+        H="$H { echo NONE; echo NONE; echo NONE; echo NONE; }"
         eval $H
     done
 
@@ -1112,17 +1143,21 @@ function with-variant()
     H="function $PLUGIN-$VNAME-prefix() { echo NONE; }"
     eval $H
 
-    #  Hook depends
+    #  Hook depends/env
     H="function $PLUGIN-$VNAME-depends() { "
-    P="echo "
-    while [[ ! -z $1 ]]; do
-        if [[ $1 == "--env" ]]; then
+    local P="echo "
+    while [[ ! -z "$1" ]]; do
+        if [[ "$1" == "--env" ]]; then
             H="$H }"
             eval $H
             H="function $PLUGIN-$VNAME-env() { "
             P=""
         else
-            H="$H $P$1;"
+            if [[ "$1" == "NONE" ]]; then
+               H="$H $P;"
+            else
+               H="$H $P$1;"
+            fi
         fi
         shift
     done

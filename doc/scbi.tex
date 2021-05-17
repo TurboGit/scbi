@@ -991,19 +991,26 @@ After this line it is possible to redefine any hook as it would be done
 without inheritance. This may be handy if a module need to redefine only
 the \code{vcs} or \code{proxy} hook for a specific context.
 
-\subsection{Native variants}
+\subsection{Native variant}
 \label{native variant}
 
-For a plug-in it is sometimes needed to have a native variant to use the OS libraries instead of building from sources. It is possible to do so by creating the variant hooks manually. All hooks must be nop action except the \code{depends} hooks which must list the OS libraries and possible the \code{env} hook which may need to define some environment variables.
+For a plug-in it is sometimes needed to have a native variant to use the OS libraries instead of building from sources. It is possible to do so by creating the variant hooks manually. All hooks must be nop action except the \code{depends} hooks which may list the OS libraries and possible the \code{env} hook which may need to define some environment variables.
 
-The support routine \code{with-variant} can be used to automate this action. For example:
+The support routine \code{with-variant} can be used to automate this action:
 
 \begin{lstlisting}
-with-variant native libA libB \
-	--env 'add-to-var ROOT_DIR /usr'
+with-variant native [<packages>|NONE] \
+	--env 'cmd1 'cmd2'
 \end{lstlisting}
 
-The first parameter is the variant name. The followings are the libraries and an optional environment section can be opened with \code{\ddash{}env}.
+The first parameter is the variant name. The followings are the OS package names or \code{NONE}. An optional environment section can be opened with \code{\ddash{}env}. The value \code{NONE} will create an empty \code{depends} hook and can be used if the actual OS dependency has been installed manually on the machine. A possible reason is that the library has not been packaged by the OS maintainers.
+
+For example:
+
+\begin{lstlisting}
+with-variant native pckA pckB \
+	--env 'add-to-var ROOT_DIR /usr'
+\end{lstlisting}
 
 The command above will automatically create the following hooks when called from \file{natv} module script:
 
@@ -1020,8 +1027,8 @@ function natv-native-env ()
 
 function natv-native-depends ()
 {
-	echo libA
-	echo libB
+	echo pckA
+	echo pckB
 }
 
 function natv-native-config ()
@@ -1098,6 +1105,27 @@ And if the module reference is \code{mod/mpi.openmp} the \code{cmake} command wi
 \begin{lstlisting}
 	cmake -DMPI=ON -DOpenMP=ON ../src
 \end{lstlisting}
+
+\subsection{OS dependencies}
+\label{OS dependencies}
+
+The hook \code{depends} list dependencies to other plug-ins or external libraries/tools. As the name of the external dependency package may be different depending on the Linux distribution it is possible to use an OS independent naming.
+
+\begin{lstlisting}
+	os@-<name>
+\end{lstlisting}
+
+The \code{os@-<name>} is then search against a table to find the corresponding OS package name.
+
+A distribution acronym is represented by a 3 letters name (deb, rhl for example). See output of the \code{--stat} option for the currently supported distribution.
+
+An alias table is searched into the following places and in this specific order:
+
+\begin{enumerate}
+	\item \code{.<distrib>-pkgs} into \$SCBI\_DEFS (default \file{~/.config/scbi})
+	\item \code{.scbi-<distrib>-pkgs} into \$SCBI\_BDIR (build directory)
+	\item \code{.scbi-<distrib>-pkgs} into \$PWD (current directory)
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 

@@ -9,7 +9,7 @@ SCBI_VERSION=@VERSION@
 
 function check-tool()
 {
-    if [[ -z "$(which $1)" ]]; then
+    if [[ -z "$(which $1 2> /dev/null)" ]]; then
         return 1
     fi
     return 0
@@ -673,12 +673,13 @@ function handle-sources()
     else
         # Get sources from repository
 
-        vcs=( $(get-vcs-data $module) )
+        vcs=( $(get-vcs-data $module $variant) )
+        res=$?
 
-        if [[ $? = 0 ]]; then
-            VCS_NAME=${vcs[2]}
-            VCS_URL=${vcs[3]}
+        local VCS_NAME=${vcs[2]}
+        local VCS_URL=${vcs[3]}
 
+        if [[ $res = 0 ]] && [[ "$VCS_NAME" != "NONE" ]]; then
             REPO=$(basename $VCS_URL .git)
 
             if [[ $kind = DEV ]]; then
@@ -772,10 +773,13 @@ function handle-sources()
             #  No VCS, no TAR, just rebuild the sources if present
             if [[ ! -d src ]]; then
                 ilog $module "no sources (vcs or tar)"
-            fi
 
-            get-build-id $SCBI_PREFIX $SCBI_TARGET $modref "$(date)" \
-                         > build-id-$variant
+                get-build-id $SCBI_PREFIX $SCBI_TARGET $modref "$variant" \
+                             > build-id-$variant
+            else
+                get-build-id $SCBI_PREFIX $SCBI_TARGET $modref "$(date)" \
+                             > build-id-$variant
+            fi
         fi
 
         #  If get-vcs is not defined then the $module-setup routine is in
@@ -1018,13 +1022,13 @@ function handle-module()
         echo "==================== env " > $ENVLOG
         env >> $ENVLOG
 
-        [[ ! -z $(which gprls) ]] &&
+        [[ ! -z $(which gprls 2> /dev/null) ]] &&
             (
                 echo "==================== gprls " >> $ENVLOG
                 gprls -v 2>&1 >> $ENVLOG
             )
 
-        [[ ! -z $(which gcc) ]] &&
+        [[ ! -z $(which gcc 2> /dev/null) ]] &&
             (
                 echo "==================== gcc " >> $ENVLOG
                 gcc -v &>> $ENVLOG

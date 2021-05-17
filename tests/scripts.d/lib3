@@ -1,0 +1,67 @@
+
+function lib3-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function lib3-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo lib1-$VERSION-src.tar.bz2
+}
+
+function lib3-depends()
+{
+    echo inhnat/native
+}
+
+function lib3-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    export C_INCLUDE_PATH=$PWD/include:$C_INCLUDE_PATH
+    export LIBRARY_PATH=.:$PWD/lib:$LIBRARY_PATH
+    export LD_LIBRARY_PATH=.:$PWD/lib:$LD_LIBRARY_PATH
+}
+
+function lib3-out-of-tree()
+{
+    echo false
+}
+
+function lib3-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f *.o
+    make
+}
+
+function lib3-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $PREFIX/include
+    mkdir -p $PREFIX/lib
+    cp liblib1.so $PREFIX/lib
+    cp lib1.h $PREFIX/include
+}
+
+function lib3-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./main
+    return 0
+}

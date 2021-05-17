@@ -34,6 +34,22 @@ natv-native-prefix ()
 {
     echo NONE
 }
+natv-native-tar is a function
+natv-native-tar ()
+{
+    echo NONE;
+    echo NONE;
+    echo NONE;
+    echo NONE
+}
+natv-native-vcs is a function
+natv-native-vcs ()
+{
+    echo NONE;
+    echo NONE;
+    echo NONE;
+    echo NONE
+}
 xxxx/xx/xx xx:xx:xx : Building natv [default] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup

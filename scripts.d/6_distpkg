@@ -1,26 +1,63 @@
 #  Support for distrib packages.
 #
 #  For adding a new distrib:
-#     - add distrib in get-distrib
+#     - add support for new distrib in get-distrib
 #     - implement init-<distrib>-pkg
 #     - implement check-<distrib>-pkg
 #     - implement get-<distrib>-lib-for-dev (optional)
-#     - add <pkg>-<distrib>-name routine for specific package name
 
-SCBI_LINUX_DES=$(lsb_release -d)
-
+#  All currently installed packages
 declare -A SCBI_PKGS
+
+#  OS dependent alias map
+declare -g -A SCBI_ALIAS
+
+SCBI_LINUX_DISTRIBS=( deb rhl )
+
+############################## get-distrib
+# returns the name of the current distrib
 
 function get-distrib()
 {
-    if [[ $SCBI_LINUX_DES =~ "Debian" ]]; then
+    local DES=$(lsb_release -d)
+    if [[ $DES =~ "Debian" ]]; then
         echo deb
-    elif [[ $SCBI_LINUX_DES =~ "Red Hat" ]]; then
+    elif [[ $DES =~ "Red Hat" ]]; then
         echo rhl
     fi
 }
 
-######################################
+SCBI_LINUX_DISTRIB=$(get-distrib)
+
+############################## init-alias
+# read package alias file
+
+function init-alias()
+{
+    local FILE="$1"
+
+    if [[ -f $FILE ]]; then
+        while read pkg a; do
+            SCBI_ALIAS["$pkg"]=$a
+        done < <( cat "$FILE" )
+    fi
+}
+
+############################## init-distrib-alias
+# check all possible distrib alias files
+
+function init-distrib-alias()
+{
+    local DIST=$1
+
+    init-alias $SCBI_DEFS/.$DIST-pkgs
+
+    init-alias $SCBI_BDIR/.scbi-$DIST-pkgs
+
+    init-alias $PWD/.scbi-$DIST-pkgs
+}
+
+############################## init-deb-pkg
 # cache all installed packages
 
 function init-deb-pkg()
@@ -28,9 +65,26 @@ function init-deb-pkg()
     while read ii pkg version dummy; do
         SCBI_PKGS["$pkg"]=$version
     done < <( dpkg-query -l | tail -n+6 | sed 's/:amd64//g' )
+
+    init-distrib-alias deb
 }
 
-######################################
+function init-rhl-pkg()
+{
+    # format : cmake-0:3.11.4-7.el8.x86_64
+    #          <name>-<indice>:<version>-<level>.<rel>.<arch>
+    while read N; do
+        pkg=${N%%:*};
+        pkg=${pkg%-*};
+        version=${N#*:};
+        version=${version%-*};
+        SCBI_PKGS["$pkg"]="$version"
+    done < <( dnf repoquery --installed 2> /dev/null | grep -v "^Not root" )
+
+    init-distrib-alias rhl
+}
+
+############################## check-deb-pkg
 # check-deb-pkg should return:
 #   3 - package not found
 #   2 - package found but not installed
@@ -66,6 +120,37 @@ function check-deb-pkg()
     fi
 }
 
+function check-rhl-pkg()
+{
+    local pck=$1
+    local version=$(get-version-number $2)
+
+    local inst_ver=${SCBI_PKGS[$pck]}
+
+    if [[ -z $inst_ver ]]; then
+        #  Package is not installed, check if it exists
+
+        rpm -qi $pck &> /dev/null
+
+        if [[ $? = 0 ]]; then
+            return 2
+        else
+            return 3
+        fi
+
+    else
+        #  Is the installed version ok?
+
+        if [[ $inst_ver > $version ]]; then
+            return 0
+        else
+            return 1
+        fi
+    fi
+}
+
+############################## get-deb-lib-for-dev
+
 function get-deb-lib-for-dev()
 {
     local pkg=$1
@@ -90,36 +175,49 @@ function get-deb-lib-for-dev()
     done
 }
 
-# returns the package name for the current distribution
+############################## get-pkg-name
+# returns the package name or possibly a list of packages if
+# the parameter is an alias for a distribution.
+
 function get-pkg-name()
 {
     local pkg=$1
 
-    fn-exists $pkg-$(get-distrib)-name
+    # if package start with os@- it is an alias, lookup
+    # in the corresponding table:
+    #
+    #    SCBI_ALIAS[pkg]
 
-    if [[ $? = 0 ]]; then
-        echo $pkg-$(get-distrib)-name
+    if [[ "${pkg:0:4}" == "os@-" ]]; then
+        REF="SCBI_ALIAS["$pkg"]"
+        echo ${!REF}
     else
         echo $pkg
     fi
 }
 
-# returns the package name for the current distribution
+############################## get-pkg-version
+# returns the package version for the current distribution
+
 function get-pkg-version()
 {
     local pkg=$1
 
-    local pname=$(get-pkg-name $pkg)
+    local pname=$(get-pkg-name "$pkg")
     echo ${SCBI_PKGS[$pname]}
 }
 
+############################## get-lib-for-dev
 # returns the library for the given dev package
+
 function get-lib-for-dev()
 {
-    local pkg=$(get-pkg-name $1)
+    local pkg=$(get-pkg-name "$1")
 
-    get-$(get-distrib)-lib-for-dev $pkg
+    get-${SCBI_LINUX_DISTRIB}-lib-for-dev $pkg
 }
+
+############################## check-pkg
 
 function check-pkg()
 {
@@ -127,28 +225,28 @@ function check-pkg()
     local pkg=${name_ver[0]}
     local version=${name_ver[1]}
 
-    local distname=$(get-pkg-name $pkg)
+    for distname in $(get-pkg-name "$pkg"); do
+        check-${SCBI_LINUX_DISTRIB}-pkg $distname $version
 
-    check-$(get-distrib)-pkg $pkg $version
+        local res=$?
 
-    local res=$?
-
-    if [[ $res = 3 ]]; then
-        echo "error: $pkg not found"
-        return 1
-    elif [[ $res = 2 ]]; then
-        if [[ $version == NONE ]]; then
-            echo "error: $pkg should be installed."
+        if [[ $res = 3 ]]; then
+            echo "error: $distname not found"
+            return 1
+        elif [[ $res = 2 ]]; then
+            if [[ $version == NONE ]]; then
+                echo "error: $distname should be installed."
+            else
+                echo "error: $distname:$version should be installed."
+            fi
+            return 1
+        elif [[ $res = 1 ]]; then
+            echo "error: $distname:$version should be installed."
+            return 1
         else
-            echo "error: $pkg:$version should be installed."
+            return 0
         fi
-        return 1
-    elif [[ $res = 1 ]]; then
-        echo "error: $pkg:$version should be installed."
-        return 1
-    else
-        return 0
-    fi
+    done
 }
 
-init-$(get-distrib)-pkg
+init-${SCBI_LINUX_DISTRIB}-pkg
