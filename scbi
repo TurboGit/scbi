@@ -197,8 +197,11 @@ function module-wrapper()
 
         if [[ "$step" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
             cd $SCBI_BDIR/$module
-        else
+        elif [[ -d $SCBI_BDIR/$module/build/build ]]; then
             cd $SCBI_BDIR/$module/build/build
+        else
+            elog $module $mstep, build directory not setup
+            return 1
         fi
 
         #  Record run command
