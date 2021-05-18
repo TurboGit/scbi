@@ -200,8 +200,8 @@ function module-wrapper()
         elif [[ -d $SCBI_BDIR/$module/build/build ]]; then
             cd $SCBI_BDIR/$module/build/build
         else
-            elog $module $mstep, build directory not setup
-            return 1
+            # a native module has no sources for example
+            cd $SCBI_BDIR/$module
         fi
 
         #  Record run command
