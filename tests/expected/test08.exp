@@ -186,4 +186,5 @@ xxxx/xx/xx xx:xx:xx : Building libx [wrong] (bad)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : tests
 xxxx/xx/xx xx:xx:xx : tests [wrong] starting
-xxxx/xx/xx xx:xx:xx : libx (FAILED) tests, build directory not setup
+<pwd>/scripts.d/libx: line xx: ./mainx: No such file or directory
+xxxx/xx/xx xx:xx:xx : libx (FAILED) tests failed with error x

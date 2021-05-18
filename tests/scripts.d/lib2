@@ -63,5 +63,10 @@ function lib2-tests()
     local TARGET=$2
 
     ./main2
-    return 0
+    # for testing purpose, fails if main is not present
+    if [[ -f ./main2 ]]; then
+        return 0
+    else
+        return 1;
+    fi
 }

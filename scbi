@@ -215,7 +215,7 @@ function module-wrapper()
 
         local res=0
 
-        if [[ $SCBI_DLOG = yes || "$step" = "tests" ]]; then
+        if [[ $SCBI_DLOG = yes ]] || [[ "$step" = "tests" ]]; then
             $module-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
                 | tee -a $log | tee $mlog
             #  We want the status of the first command and not the tee ones
@@ -230,7 +230,7 @@ function module-wrapper()
         #  Check for errors
 
         if [[ $res -ne 0 ]]; then
-            if [[ $SCBI_DLOG = on-failure ]]; then
+            if [[ $SCBI_DLOG = on-failure ]] && [[ "$step" != "tests" ]]; then
                 tail -100 $log
             fi
             elog $module $mstep failed with error $res
