@@ -153,11 +153,13 @@ We'll see how to achieve that in this document.
 
 Each module is described in an SCBI plug-in script. It can be referenced in different places with the following format which is called a \emph{module reference}:
 
-\code{name[/variant][:version]}
+\code{[for\_module=]name[/variant][:version]}
 \label{dev}
 
 \begin{description}[style=nextline]
-	\item[name] The name of the module. This is the main reference for the module. The module script must named identically and located in \code{\$SCBI\_DEFS}.
+	\item[for\_module] The name of the module depending on this module reference. This is optional and can be used to select a specific variant or version when the module \code{name} is used a a dependency on \code{for\_module}.
+
+	\item[name] The name of the module. This is the main reference for the module. The module script must be named identically and located in \code{\$SCBI\_DEFS}.
 
 	\item[variant] \label{variant}This is a name to identify a build variant for the module. For example an application can be built with different configuration and or dependencies.
 
@@ -179,6 +181,8 @@ The following are examples of module references:
 	\item[lcms2] Build \code{lcms2} from repository main (master/trunk) branch.
 
 	\item[lcms2/fast] Build \code{lcms2} \emph{fast} variant from repository main (master/trunk) branch.
+
+	\item[gimp=lcms2/slow] When a direct dependency of project \code{gimp}, build \code{lcms2} \emph{slow} variant from repository main (master/trunk) branch.
 
 	\item[lcms2:v2.0] Build \code{lcms2} from repository using branch (or tag) \emph{2.0}.
 

@@ -50,7 +50,7 @@ function load-module-plan()
             elif [[ "$modref" != "#" ]]; then
                 local module_info=( $(parse-module-ref $modref) )
                 local module=${module_info[0]}
-                MODVER[$module]=$modref
+                MODVER[$module]=${modref/*=/}
             fi
         done < $PLAN
     else
@@ -118,7 +118,7 @@ function set-module-ref()
         if [[ "$ref" == "force" ]]; then
             MODVER[$module]=$module/$variant
         else
-            MODVER[$module]=$modref
+            MODVER[$module]=${modref/*=/}
         fi
     fi
 }
@@ -183,9 +183,15 @@ function get-module-ref()
     local module_info=( $(parse-module-ref $MODREF) )
     local module=${module_info[0]}
 
-    local modplan=${MODVER[$module]}
+    local modplan=${MODVER[$SCBI_CURRENT_MODULE"="$module]}
 
-    if [[ ! -z $modplan ]]; then
+    if [[ -z $modplan ]]; then
+        local modplan=${MODVER[$module]}
+
+        if [[ ! -z $modplan ]]; then
+            module_info=( $(parse-module-ref $modplan) )
+        fi
+    else
         module_info=( $(parse-module-ref $modplan) )
     fi
 

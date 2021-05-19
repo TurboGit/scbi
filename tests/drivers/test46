@@ -1,0 +1,7 @@
+# check for dry-run
+
+echo mainlib:
+./scbi -f --deps --plan=moddep mainlib
+
+echo mainlib and specific variant lib1:
+./scbi -f --deps --plan=moddep mainlib=lib1/newtiti mainlib

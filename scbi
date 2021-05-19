@@ -54,6 +54,7 @@ SCBI_MAKE_JOBS=$(expr $SCBI_JOBS / 2)
 MODULES=
 HANDLED=$(mktemp)
 LAST_MODULE=
+SCBI_CURRENT_MODULE=
 
 #  Actions setup
 DO_PURGE=no
@@ -848,6 +849,8 @@ function handle-module()
     local variant=${module_info[1]}
     local kind=${module_info[2]}
     local ref=${module_info[3]}
+
+    SCBI_CURRENT_MODULE=$module
 
     #  If this module is marked as to be skipped
 
