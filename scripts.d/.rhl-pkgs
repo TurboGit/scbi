@@ -37,6 +37,8 @@ os@-glu1-mesa-dev                   mesa-libGLU-devel
 os@-graphviz                        graphviz
 os@-graphviz-dev                    graphviz-devel
 os@-hdf5-dev                        hdf5-devel
+os@-hdf5-openmpi-dev
+os@-hdf5-tools
 os@-jpeg-dev                        libjpeg-turbo-devel
 os@-lapack-dev                      lapack-devel
 os@-make                            make
@@ -53,12 +55,14 @@ os@-osmesa6-dev
 os@-pcre3-dev                       pcre-devel
 os@-png-dev                         libpng-devel
 os@-proj-dev                        proj
+os@-ptscotch-dev
 os@-pyqt5-dev                       python3-qt5-devel
 os@-pyqt5-dev-tools                 python3-qt5-base
 os@-python3
 os@-python3-dev
 os@-python3-docutils                python3-docutils
 os@-python3-matplotlib              python3-matplotlib
+os@-python3-mpi4py
 os@-python3-scipy                   python3-scipy
 os@-python3-sphinx                  python3-sphinx
 os@-python3-sphinx-rtd-theme        python3-sphinx_rtd_theme
@@ -81,6 +85,7 @@ os@-swig                            swig
 os@-tbb-dev                         tbb-devel
 os@-tcl-dev                         tcl-devel
 os@-tk-dev                          tk-devel
+os@-uuid-dev
 os@-x11-dev                         libX11-devel
 os@-xext-dev                        libXext-devel
 os@-xft-dev                         libXft-devel
