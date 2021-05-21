@@ -8,9 +8,13 @@ doc/*.log
 doc/*.out
 doc/*.pdf
 doc/*.toc
+doc/version.tex
+doc/*.dvi
 tests/.root/local-install
 tests/.root/git
 tests/.root/builds
-tests/scripts.d/[1-9]_*
+tests/.root/.patches
+tests/scripts.d/[0-9]_*
+tests/scripts.d/.*-pkgs
 tests/logs
 tests/scbi
