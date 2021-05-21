@@ -21,6 +21,7 @@ os@-cminpack-dev                    libcminpack-dev
 os@-cos4-dev                        libcos4-dev
 os@-cppunit-dev                     libcppunit-dev
 os@-curl4-openssl-dev               libcurl4-openssl-dev
+os@-curl4-gnutls-dev                libcurl4-gnutls-dev
 os@-doxygen                         doxygen
 os@-egl1-mesa-dev                   libegl1-mesa-dev
 os@-eigen3-dev                      libeigen3-dev
