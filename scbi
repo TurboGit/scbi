@@ -918,36 +918,26 @@ function handle-module()
 
     if [[ $DEPS = yes ]]; then
         # First we check for build dependencies
-
-        FCT=$(get-hook $module $variant build-depends)
-
-        if [[ ! -z $FCT ]]; then
-            (
-                for module in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-                    handle-depends $module
-                done
-            )
-            if [[ ! $? = 0 ]]; then
-                exit 1
-            fi
-            [[ $DRY_RUN == no ]] && line-sep
+        (
+            for module in $(get-all-depends $module $variant build-depends); do
+                handle-depends $module
+            done
+        )
+        if [[ ! $? = 0 ]]; then
+            exit 1
         fi
+        [[ $DRY_RUN == no ]] && line-sep
 
         # And then we check for standard dependencies
-
-        FCT=$(get-hook $module $variant depends)
-
-        if [[ ! -z $FCT ]]; then
-            (
-                for module in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-                    handle-depends $module
-                done
-            )
-            if [[ ! $? = 0 ]]; then
-                exit 1
-            fi
-            [[ $DRY_RUN == no ]] && line-sep
+        (
+            for module in $(get-all-depends $module $variant depends); do
+                handle-depends $module
+            done
+        )
+        if [[ ! $? = 0 ]]; then
+            exit 1
         fi
+        [[ $DRY_RUN == no ]] && line-sep
     fi
 
     if [[ $DRY_RUN == yes ]]; then

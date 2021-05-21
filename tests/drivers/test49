@@ -1,0 +1,13 @@
+# check for depends & call-variant-hooks
+
+echo no variant
+./scbi --log:yes --deps dephook2
+
+echo variant vara
+./scbi --log:yes --deps dephook2/vara
+
+echo variant varb
+./scbi --log:yes --deps dephook2/varb
+
+echo variant vara and varb
+./scbi --log:yes --deps dephook2/vara.varb

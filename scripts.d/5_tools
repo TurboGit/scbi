@@ -261,6 +261,38 @@ function pop-dependency-tree()
     unset SCBI_RECTREE[${#SCBI_RECTREE[@]}-1]
 }
 
+############################## get-all-depends
+#
+# return each module in $module-$hook and also in each active variants
+# $module-<variant>-$hook.
+
+function get-all-depends()
+{
+    local module="$1"
+    local variant="$2"
+    local hook="$3"
+
+    local FCT="$module-$hook"
+
+    fn-exists $FCT
+
+    if [[ $? = 0 ]]; then
+        for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
+            echo $mod
+        done
+    fi
+
+    for v in $(all-variants $variant); do
+        FCT="$module-$v-$hook"
+        fn-exists $FCT
+        if [[ $? = 0 ]]; then
+            for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
+                echo $mod
+            done
+        fi
+    done
+}
+
 ############################## for-all-modules
 
 function _internal_for-all-modules()
@@ -350,25 +382,17 @@ function _internal_for-all-modules()
 
             # Setup depends recursively if any
 
-            FCT=$(get-hook $module $variant depends)
-
-            if [[ ! -z $FCT ]]; then
-                for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-                    _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
-                                              $WITHEXT false $dmodule $@
-                done
-            fi
+            for dmodule in $(get-all-depends $module $variant depends); do
+                _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
+                                          $WITHEXT false $dmodule $@
+            done
 
             # Setup build-depends recursively if any
 
-            FCT=$(get-hook $module $variant build-depends)
-
-            if [[ ! -z $FCT ]]; then
-                for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-                    _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
-                                              $WITHEXT true $dmodule $@
-                done
-            fi
+            for dmodule in $(get-all-depends $module $variant build-depends); do
+                _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
+                                          $WITHEXT true $dmodule $@
+            done
 
             $CALLBACK $module $MODREF $LEVEL \
                       $IS_BUILD_DEPENDS false $IS_META $@

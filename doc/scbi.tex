@@ -706,7 +706,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 
 \subsubsection{Calling order}
 
-Some of the hooks are called by the main scbi driver when needed as they are returning information of some artifacts. Those hooks do not have specific calling order:
+Some of the hooks are called by the main SCBI driver when needed as they are returning information of some artifacts. Those hooks do not have specific calling order:
 
 \begin{itemize}
 	\item vcs
@@ -717,6 +717,7 @@ Some of the hooks are called by the main scbi driver when needed as they are ret
 	\item env
 	\item build-env
 	\item depends
+	\item build-depends
 \end{itemize}
 
 For all other hooks there is a specific calling order which is:
@@ -758,7 +759,6 @@ When \emph{variant} (\seeref{variant}) and/or \emph{cross} hooks are present, th
 \end{enumerate}
 
 If a \emph{variant} hook is not present then the main hook is called and the variant string is passed to it as third parameter. That's why the variant parameter in the hook description is optional.
-
 For example, if we have the module reference:
 
 \code{lcms2/fast}
@@ -781,6 +781,10 @@ function lcms2-config()
 	done
 }
 \end{lstlisting}
+
+This is discouraged and one should use variant \code{config} hook or use the \code{get-config-options} helper routine, see \ref{get config options}.
+
+Finally the \code{depends} and \code{build-depends} are cumulative. That is, the final dependencies of a given module is given by the default \code{depends} (and \code{build-depends}) hook and all the active variants \code{depends} hooks.
 
 \subsection{Meta-module}
 \label{meta-module}
@@ -1072,6 +1076,7 @@ Will call all hooks in the current plug-in (<plugin>) named:
 \end{lstlisting}
 
 \subsection{Get configuration options}
+\label{get config options}
 
 It is often needed to set configuration options based on the variant we want to build. This is for example to activate an external module.
 

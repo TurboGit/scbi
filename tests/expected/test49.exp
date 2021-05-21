@@ -1,0 +1,85 @@
+no variant
+xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+depA
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building dephookx [default] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+call -DOnlyCommon
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building dephookx [default] (master)
+
+variant vara
+xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building dephookx [vara] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config [vara] starting
+call -DOnlyCommon -DA=yes
+xxxx/xx/xx xx:xx:xx : config [vara] completed
+xxxx/xx/xx xx:xx:xx : End Building dephookx [vara] (master)
+
+variant varb
+xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building depB [default] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+depB
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building depB [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building dephookx [varb] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config [varb] starting
+call -DOnlyCommon
+xxxx/xx/xx xx:xx:xx : config [varb] completed
+xxxx/xx/xx xx:xx:xx : End Building dephookx [varb] (master)
+
+variant vara and varb
+xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building depB [default] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building depB [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building dephookx [vara varb] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config [vara varb] starting
+call -DOnlyCommon -DA=yes
+xxxx/xx/xx xx:xx:xx : config [vara varb] completed
+xxxx/xx/xx xx:xx:xx : End Building dephookx [vara varb] (master)
