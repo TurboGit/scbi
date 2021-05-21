@@ -1184,6 +1184,24 @@ function call-variant-hooks()
     done
 }
 
+############################## get-config-options
+
+function get-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+
+    for v in common $(all-variants $VARIANT); do
+        fn-exists $PLUGIN-$v-config-options
+        if [ $? = 0 ]; then
+            $PLUGIN-$v-config-options $PREFIX $TARGET
+        fi
+    done
+}
+
 ############################## module-clean-install
 
 function module-clean-install()

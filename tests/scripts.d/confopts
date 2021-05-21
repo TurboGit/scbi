@@ -1,0 +1,26 @@
+
+function confopts-vara-config-options()
+{
+    echo -DvaraA
+}
+
+function confopts-varb-config-options()
+{
+    echo -DvarbA
+    echo -DvarbB
+}
+
+function confopts-common-config-options()
+{
+    echo -DcommonX
+    echo -DcommonY
+}
+
+function confopts-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo call $(get-config-options $PREFIX $TARGET $VARIANT)
+}

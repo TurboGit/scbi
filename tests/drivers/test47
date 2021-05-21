@@ -1,0 +1,13 @@
+# check for config-options special hooks
+
+echo no variant
+./scbi --log:yes confopts
+
+echo variant vara
+./scbi --log:yes confopts/vara
+
+echo variant varb
+./scbi --log:yes confopts/varb
+
+echo variant vara and varb
+./scbi --log:yes confopts/vara.varb

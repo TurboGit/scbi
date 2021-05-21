@@ -1071,19 +1071,39 @@ Will call all hooks in the current plug-in (<plugin>) named:
    <plugin>-<variant>-hname
 \end{lstlisting}
 
-This may be handy to set options for the \code{config} hook depending on the current activated variants.
+\subsection{Get configuration options}
+
+It is often needed to set configuration options based on the variant we want to build. This is for example to activate an external module.
+
+\begin{lstlisting}
+	get-config-options $PREFIX $TARGET $VARIANT
+\end{lstlisting}
+
+Will call all hooks in the current plug-in (<plugin>) named:
+
+\begin{lstlisting}
+	<plugin>-common-config-options
+	<plugin>-<variant>-config-options
+\end{lstlisting}
+
+The \code{common} hook is designed to contain all the common options to be used regardless of the selected variant.
 
 For example:
 
 \begin{lstlisting}
-function mod-mpi-options()
+function mod-mpi-config-options()
 {
 	echo -DMPI=ON
 }
 
-function mod-openmp-options()
+function mod-openmp-config-options()
 {
 	echo -DOpenMP=ON
+}
+
+function mod-common-config-options()
+{
+	echo -DPREFIX=/my/path
 }
 
 function mod-config()
@@ -1092,7 +1112,7 @@ function mod-config()
 	local TARGET=$2
 	local VARIANT=$3
 
-	local OPTIONS="$(call-variant-hooks options /usr lin $VARIANT)"
+	local OPTIONS="$(get-config-options /usr lin $VARIANT)"
 
 	cmake $OPTIONS ../src
 }
@@ -1101,13 +1121,13 @@ function mod-config()
 If the current module reference is \code{mod/mpi} the \code{cmake} command will be:
 
 \begin{lstlisting}
-	cmake -DMPI=ON ../src
+	cmake -DPREFIX=/my/path -DMPI=ON ../src
 \end{lstlisting}
 
 And if the module reference is \code{mod/mpi.openmp} the \code{cmake} command will be:
 
 \begin{lstlisting}
-	cmake -DMPI=ON -DOpenMP=ON ../src
+	cmake -DPREFIX=/my/path -DMPI=ON -DOpenMP=ON ../src
 \end{lstlisting}
 
 \subsection{OS dependencies}
