@@ -12,6 +12,12 @@ function darktable-out-of-tree()
     echo true
 }
 
+function darktable-clang-depends()
+{
+    echo llvm-10
+    echo clang-10
+}
+
 function darktable-depends()
 {
     echo cmake
@@ -49,12 +55,10 @@ function darktable-depends()
     echo libpod-parser-perl
 }
 
-function darktable-clang-depends()
+function darktable-clang-build-env()
 {
-    darktable-depends
-
-    echo llvm-10
-    echo clang-10
+    add-to-var CC  clang-$CLANG_VER
+    add-to-var CXX clang++-$CLANG_VER
 }
 
 function darktable-env()
@@ -63,45 +67,38 @@ function darktable-env()
     add-to-var PERL5LIB .
 }
 
-function darktable-clang-config()
+function darktable-release-config-options()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    CLANG_VER=10
-
-    # fake build script which want the src dir to be a git repository
-
-    if [[ ! -h ../src/.git ]]; then
-        ln -s ../../src/.git ../src/.git
-    fi
-
-    CC=clang-$CLANG_VER CXX=clang++-$CLANG_VER cmake \
-      -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_OPENMP=OFF $GPOPTS \
-      -DCMAKE_INSTALL_PREFIX=$PREFIX \
-      ../src
+    echo -DCMAKE_BUILD_TYPE=Release
 }
 
-function darktable-release-config()
+function darktable-default-config-options()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    # fake build script which want the src dir to be a git repository
+    echo -DCMAKE_BUILD_TYPE=RelWithDebInfo
+}
 
-    if [[ ! -h ../src/.git ]]; then
-        ln -s ../../src/.git ../src/.git
-    fi
+function darktable-common-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
 
-    cmake -DCMAKE_BUILD_TYPE=Release $GPOPTS \
-          -DCMAKE_INSTALL_PREFIX=$PREFIX \
-          ../src
+    echo -DCMAKE_INSTALL_PREFIX=$PREFIX
 }
 
 function darktable-config()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
     # fake build script which want the src dir to be a git repository
 
@@ -109,21 +106,9 @@ function darktable-config()
         ln -s ../../src/.git ../src/.git
     fi
 
-    if [[ -d "$GINST" ]]; then
-        GPOPTS="-DGPHOTO2CONFIG_EXECUTABLE=$GINST/bin/gphoto2-config \
-        -DGPHOTO2_INCLUDE_DIR=$GINST/include \
-        -DGPHOTO2_LIBRARY=$GINST/lib/libgphoto2.so \
-        -DGPHOTO2_PORT_LIBRARY=$GINST/lib/libgphoto2_port.so"
-    fi
+    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
 
-    if [[ -d "$LINST" ]]; then
-       GPOPTS="$GOPT -DLENSFUN_INCLUDE_DIR=$LINST/include/lensfun \
-        -DLENSFUN_LIBRARY=$LINST/lib/liblensfun.so.1"
-    fi
-
-    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo $GPOPTS \
-          -DCMAKE_INSTALL_PREFIX=$PREFIX \
-          ../src
+    cmake $OPTIONS ../src
 }
 
 function darktable-build()
