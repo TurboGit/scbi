@@ -282,7 +282,7 @@ function get-all-depends()
         done
     fi
 
-    for v in $(all-variants $variant); do
+    for v in default $(all-variants $variant); do
         FCT="$module-$v-$hook"
         fn-exists $FCT
         if [[ $? = 0 ]]; then
@@ -1200,7 +1200,7 @@ function call-variant-hooks()
 
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
-    for v in $(all-variants $VARIANT); do
+    for v in default $(all-variants $VARIANT); do
         fn-exists $PLUGIN-$v-$NAME
         if [ $? = 0 ]; then
             $PLUGIN-$v-$NAME $PREFIX $TARGET
@@ -1218,7 +1218,7 @@ function get-config-options()
 
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
-    for v in common $(all-variants $VARIANT); do
+    for v in common default $(all-variants $VARIANT); do
         fn-exists $PLUGIN-$v-config-options
         if [ $? = 0 ]; then
             $PLUGIN-$v-config-options $PREFIX $TARGET
