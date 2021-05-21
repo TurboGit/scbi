@@ -1,0 +1,35 @@
+
+function dephook-varb-depends-list()
+{
+    echo depB
+}
+
+function dephook-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo depA
+
+    call-variant-hooks depends-list $PREFIX $TARGET $VARIANT
+}
+
+function dephook-vara-config-options()
+{
+    echo -DA=yes
+}
+
+function dephook-common-config-options()
+{
+    echo -DOnlyCommon
+}
+
+function dephook-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo call $(get-config-options $PREFIX $TARGET $VARIANT)
+}
