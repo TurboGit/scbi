@@ -41,7 +41,7 @@ CDPATH=
 SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
 SCBI_TARGET=$SCBI_HOST
 SCBI_TARGET_SPECIFIED=no
-ENV_NAME=
+ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
 
 #  General script setup
 SCBI_DLOG=on-failure
