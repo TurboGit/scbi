@@ -1,12 +1,12 @@
 # check call-variant-hooks
 
 echo ============= 0
-scbi varhook
+./scbi varhook
 
 echo ============= 1
-scbi varhook/mpi
+./scbi varhook/mpi
 
 echo ============= 2
-scbi varhook/mpi.openmp:dev
+./scbi varhook/mpi.openmp:dev
 
 grep @@@ .root/builds/.logs/*varhook*config.log
