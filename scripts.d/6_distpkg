@@ -78,6 +78,8 @@ function init-none-pkg()
 
 function init-deb-pkg()
 {
+    check-tools-abort dpkg-query
+
     while read ii pkg version dummy; do
         SCBI_PKGS["$pkg"]=$version
     done < <( dpkg-query -l | tail -n+6 | sed 's/:amd64//g' )
@@ -87,6 +89,8 @@ function init-deb-pkg()
 
 function init-ubt-pkg()
 {
+    check-tools-abort dpkg-query
+
     while read ii pkg version dummy; do
         SCBI_PKGS["$pkg"]=$version
     done < <( dpkg-query -l | tail -n+6 | sed 's/:amd64//g' )
@@ -96,6 +100,8 @@ function init-ubt-pkg()
 
 function init-rhl-pkg()
 {
+    check-tools-abort dnf rpm
+
     # format : cmake-0:3.11.4-7.el8.x86_64
     #          <name>-<indice>:<version>-<level>.<rel>.<arch>
     while read N; do

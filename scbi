@@ -30,11 +30,21 @@ function check-tools()
     return $res
 }
 
+############################## check-tools-abort
+
+function check-tools-abort()
+{
+    local TOOLS="$1"
+
+    check-tools $TOOLS
+
+    [[ $? != 0 ]] &&
+        echo Required tools ${TOOLS} missing, please install &&
+        exit 1
+}
+
 # check for tools used by scbi itself
-check-tools gcc python3 rsync sed
-[[ $? != 0 ]] &&
-    echo Required tools gcc python3 rsync sed missing, please install &&
-    exit 1
+check-tools-abort gcc rsync sed
 
 CDPATH=
 
