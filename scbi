@@ -4,6 +4,7 @@
 #
 
 SCBI_VERSION=@VERSION@
+SCBI_BINARY=$(realpath $0)
 
 ############################## check-tool
 

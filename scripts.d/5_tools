@@ -997,7 +997,7 @@ function create-standalone-package()
 
         # The main SCBI script, the runtime scripts and the current plan
 
-        cp $HOME/bin/scbi bin/
+        cp $SCBI_BINARY bin/
         cp -p $SCBI_DEFS/[0-9]_* scripts.d
         [[ ! -z $SCBI_PLAN ]] && cp -p $SCBI_DEFS/.plan-$SCBI_PLAN scripts.d
 
@@ -1026,7 +1026,7 @@ function create-standalone-package()
         echo 'export PATH=$PWD/bin:$PATH'                      >> build
         echo "MODULES=\"$MODULES\""                            >> build
         echo '[ ! -z $1 ] && MODULES="$*"'                     >> build
-        echo 'scbi --env=std --deps $MODULES'                  >> build
+        echo './bin/scbi --env=std --deps $MODULES'            >> build
 
         chmod u+x build
     )
