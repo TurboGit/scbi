@@ -12,7 +12,7 @@ declare -A SCBI_PKGS
 #  OS dependent alias map
 declare -g -A SCBI_ALIAS
 
-SCBI_LINUX_DISTRIBS=( deb rhl )
+SCBI_LINUX_DISTRIBS=( deb ubt rhl )
 
 ############################## get-distrib
 # returns the name of the current distrib
@@ -22,8 +22,12 @@ function get-distrib()
     local DES=$(lsb_release -d)
     if [[ $DES =~ "Debian" ]]; then
         echo deb
+    elif [[ $DES =~ "Ubuntu" ]]; then
+        echo ubt
     elif [[ $DES =~ "Red Hat" ]]; then
         echo rhl
+    else
+        echo none
     fi
 }
 
@@ -49,16 +53,28 @@ function init-alias()
 function init-distrib-alias()
 {
     local DIST=$1
+    local VER=$(lsb_release -r -s)
 
-    init-alias $SCBI_DEFS/.$DIST-pkgs
+    if [[ $VER =~ ([0-9]+)(\.([0-9]+))? ]]; then
+        local MAJOR=${BASH_REMATCH[1]}
+        local MINOR=${BASH_REMATCH[3]}
+    fi
 
-    init-alias $SCBI_BDIR/.scbi-$DIST-pkgs
-
-    init-alias $PWD/.scbi-$DIST-pkgs
+    for NAME in $DIST $DIST-$MAJOR ${MINOR:+$DIST-$MAJOR-$MINOR}; do
+        init-alias $SCBI_DEFS/.$NAME-pkgs
+        init-alias $SCBI_BDIR/.scbi-$NAME-pkgs
+        init-alias $PWD/.scbi-$NAME-pkgs
+    done
 }
 
 ############################## init-deb-pkg
 # cache all installed packages
+
+function init-none-pkg()
+{
+    echo "Unsupported Linux distribution, external lib support disabled"
+    echo ""
+}
 
 function init-deb-pkg()
 {
@@ -67,6 +83,15 @@ function init-deb-pkg()
     done < <( dpkg-query -l | tail -n+6 | sed 's/:amd64//g' )
 
     init-distrib-alias deb
+}
+
+function init-ubt-pkg()
+{
+    while read ii pkg version dummy; do
+        SCBI_PKGS["$pkg"]=$version
+    done < <( dpkg-query -l | tail -n+6 | sed 's/:amd64//g' )
+
+    init-distrib-alias ubt
 }
 
 function init-rhl-pkg()
@@ -90,6 +115,11 @@ function init-rhl-pkg()
 #   2 - package found but not installed
 #   1 - package installed but wrong version
 #   0 - package installed with proper version
+
+function check-none-pkg()
+{
+    return 0
+}
 
 function check-deb-pkg()
 {
@@ -118,6 +148,11 @@ function check-deb-pkg()
             return 1
         fi
     fi
+}
+
+function check-ubt-pkg()
+{
+    check-deb-pkg "$1" "$2"
 }
 
 function check-rhl-pkg()

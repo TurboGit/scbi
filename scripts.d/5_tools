@@ -751,9 +751,11 @@ function get-tar()
 
 function display-stat()
 {
+    echo "SCBI : $SCBI_VERSION"
     echo
     echo stats
     echo -----
+    echo "host                  : $(lsb_release -s -d)"
     echo "build dir             : $SCBI_BDIR"
     echo "install prefix        : $SCBI_PREFIX"
     echo "tar dir               : $SCBI_TAR"
@@ -768,7 +770,7 @@ function display-stat()
         echo " $EMAIL"
     fi
 
-    echo -n "Supported Linux       :"
+    echo -n "supported linux       :"
     for L in ${SCBI_LINUX_DISTRIBS[@]}; do
         echo -n " $L"
     done

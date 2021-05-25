@@ -1148,7 +1148,7 @@ And if the module reference is \code{mod/mpi.openmp} the \code{cmake} command wi
 \subsection{OS dependencies}
 \label{OS dependencies}
 
-The hook \code{depends} list dependencies to other plug-ins or external libraries/tools. As the name of the external dependency package may be different depending on the Linux distribution it is possible to use an OS independent naming.
+The hook \code{depends} list dependencies to other plug-ins or external libraries/tools. As the name of the external dependency packages may be different depending on the Linux distribution and version it is possible to use an OS independent naming.
 
 \begin{lstlisting}
 	os@-<name>
@@ -1156,7 +1156,7 @@ The hook \code{depends} list dependencies to other plug-ins or external librarie
 
 The \code{os@-<name>} is then search against a table to find the corresponding OS package name.
 
-A distribution acronym is represented by a 3 letters name (deb, rhl for example). See output of the \code{--stat} option for the currently supported distribution.
+A distribution acronym is represented by a 3 letters name (deb, ubt, rhl for example). See output of the \code{--stat} option for the currently supported distributions.
 
 An alias table is searched into the following places and in this specific order:
 
@@ -1165,6 +1165,18 @@ An alias table is searched into the following places and in this specific order:
 	\item \code{.scbi-<distrib>-pkgs} into \$SCBI\_BDIR (build directory)
 	\item \code{.scbi-<distrib>-pkgs} into \$PWD (current directory)
 \end{enumerate}
+
+In complement to the files searched based on distribution acronym, the major and minor version of the OS is also used.
+
+For example on Debian 10.6 the searched files will be, and in that order:
+
+\begin{enumerate}
+	\item \code{.deb-pkgs}
+	\item \code{.deb-10-pkgs}
+	\item \code{.deb-10-6-pkgs}
+\end{enumerate}
+
+So \code{.deb-10-pkgs} can add new dependencies or override some dependencies that are set in \code{.deb-pkgs}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
