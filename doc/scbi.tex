@@ -151,7 +151,7 @@ We'll see how to achieve that in this document.
 \subsection{Module reference}
 \label{modref}
 
-Each module is described in an SCBI plug-in script. It can be referenced in different places with the following format which is called a \emph{module reference}:
+A module is described in an SCBI plug-in script (one plug-in in one file). It can be referenced in different places (in other plug-ins, build plan, etc...) with the following format which is called a \emph{module reference}:
 
 \code{[for\_module=]name[/variant][:version]}
 \label{dev}
@@ -159,13 +159,20 @@ Each module is described in an SCBI plug-in script. It can be referenced in diff
 \begin{description}[style=nextline]
 	\item[for\_module] The name of the module depending on this module reference. This is optional and can be used to select a specific variant or version when the module \code{name} is used a a dependency on \code{for\_module}.
 
-	\item[name] The name of the module. This is the main reference for the module. The module script must be named identically and located in \code{\$SCBI\_DEFS}.
+	\item[name] The name of the module. This is the main reference for the module. The corresponding module script must be named identically and located in \code{\$SCBI\_DEFS}.
 
 	\item[variant] \label{variant}This is a name to identify a build variant for the module. For example an application can be built with different configuration and or dependencies.
 
-	\item[version] The version to build. This version string can be either a reference to a VCS version (branch or a Git sha1 for example), a tar version or a reference to the user's checkout when set to \code{dev}. The version can also be set to \code{skip} to specify that the module must be ignored.
+	\item[version] The version to build. This version string can be either:
 
-	Furthermore the version can be set to \code{force} on the command line to tell that the module should not be skipped. On the command line it is always possible to force a build of a module to a specific variant or version. But if one need to build the default variant or version it is required to pass the \code{force} as version.
+	\begin{description}[font=\texttt]
+		\item[<VCS>] a reference to a VCS version (branch or a Git sha1 for example), a tar version.
+		\item[dev] to take the source from a user's checkout.
+		\item[kip] to specify that the module must be ignored.
+		\item[force] to enable an otherwise skip module (possibly set to skip in a build plan).
+	\end{description}
+
+	The version can be set to \code{force} on the command line to tell that the module should not be skipped. On the command line it is always possible to force a build of a module to a specific variant or version. But if one need to build the default variant or version it is required to pass the \code{force} as version.
 
 	That is, this will never overwrite a build plan as it is a default reference to a module:
 	\cmd{scbi --plan=xyz mod}
@@ -244,6 +251,7 @@ An environment is a set of shell variables used to control the build environment
 \end{description}
 
 \subsubsection{Environment files}
+\label{envfile}
 
 The environment can be set in the following files searched in this exact order:
 
@@ -1193,10 +1201,10 @@ Note that for this to work, the bash completion package must be installed, on De
 
 \section{Use Cases}
 
-\subsubsection{User's checkout}
+\subsection{User's checkout}
 \label{userco}
 
-This is certainly the most important use case. A complex software is built with SCBI, but a bug is found in one module. We need to debug this module and fix it, so the complete cycle would be:
+This is certainly the most important use case. A complex software is built with SCBI, but a bug (due to configuration, build or dependencies) is found in one module. We need to debug this module and fix it, so the complete cycle would be:
 
 \begin{itemize}
 	\item Check-out the module
@@ -1207,7 +1215,7 @@ This is certainly the most important use case. A complex software is built with 
 	\item Push, integrate the new changes (possibly in a new branch)
 \end{itemize}
 
-SCBI does support this scenario directly by allowing a user's checkout to be used instead of the sources in the sandbox for the module. It is highly discouraged to modify the sources in the sandbox which should stay untouched by users.
+SCBI does support this scenario directly by allowing a user's checkout to be used instead of the sources in the sandbox. It is highly discouraged to modify the sources in the sandbox which should stay untouched by users. Beware, depending on the SCBI options, the modifications in the source may be overwritten, so lost.
 
 The recommended steps are (we assume the current VCS for the module is Git):
 
@@ -1219,7 +1227,7 @@ The recommended steps are (we assume the current VCS for the module is Git):
 	\item git clone http://github.com/mm2/Little-CMS
 	\end{shellcommand}
 
-	\item[Setup SCBI enviroment] The variable SCBI\_GIT\_REPO must be modified to point to the directory containing the user's Git checkouts. This is done by creating a new environment file, for example \file{.env-debug}:
+	\item[Setup SCBI enviroment] The variable SCBI\_GIT\_REPO must be modified to point to the directory containing the user's Git checkouts. This is done by creating a new environment file, for example \file{.env-debug} (\seeref{envfile}):
 
 	\begin{shellcommand}
 	\item export SCBI\_GIT\_REPO=\$HOME/dev
@@ -1271,10 +1279,29 @@ Mercurial and Subversion VCS are also supported, the variables for each are:
 	\item[Subversion] \tabto{3cm} SCBI\_SVN\_REPO
 \end{description}
 
-\subsubsection{Analyzing build failures}
+\subsection{Analyzing build failures}
 \label{debugging}
 
 When a build fails it may be needed to look at the full logs and the actual commands executed for the failing step (configure, build, install...).
+
+\subsubsection{Replay one specific step}
+
+It is possible to replay a single command and display the full log to analyze what went wrong:
+
+\begin{description}
+	\item[configuration] \tabto{3cm}  \cmd{scbi \ddash{}config \ddash{}log:yes lcms2}
+	\item[build] \tabto{3cm} \cmd{scbi \ddash{}build \ddash{}log:yes lcms2}
+\end{description}
+
+The files to be edited are in the sandbox module's directory:
+
+\file{$SCBI_BDIR/lcms2/build/src}
+
+Then one of the configuration commands above can be restarted. \emph{When the fix is found it must be applied in the module's repository outside of the sandbox or it will be lost.}
+
+Again, note that restarting an SCBI command without specifying a specific step (like \ddash{config} or \ddash{build}) will reset all sources from the reference repository in the sandbox.
+
+\subsubsection{Look at the sandbox status}
 
 The SCBI driver does record all needed information in the sandbox directory \file{<module>/build/.log/}.
 
