@@ -810,6 +810,14 @@ function handle-meta-module()
         fi
     fi
 
+    # check for dependencies
+
+    if [[ $DEPS = yes ]]; then
+        for dmodule in $(get-all-depends $metamodule $variant build-depends); do
+            handle-depends $dmodule || exit 1
+        done
+    fi
+
     # check for setup
 
     line-sep
