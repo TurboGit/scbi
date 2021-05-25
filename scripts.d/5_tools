@@ -403,7 +403,7 @@ function _internal_for-all-modules()
             # module does not exists, this is an external dependency
 
             if [[ $WITHEXT == true ]]; then
-                $CALLBACK $module $MODREF $LEVEL \
+                $CALLBACK $module $(get-pkg-name $MODREF) $LEVEL \
                           $IS_BUILD_DEPENDS true $IS_META $@
             else
                 check-pkg $module:$ref || exit 1
