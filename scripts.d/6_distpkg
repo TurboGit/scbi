@@ -264,7 +264,7 @@ function get-lib-for-dev()
 
 function check-pkg()
 {
-    local name_ver=($(echo $1 | tr ":" " "))
+    local name_ver=( ${1/:/ } )
     local pkg=${name_ver[0]}
     local version=${name_ver[1]}
 
