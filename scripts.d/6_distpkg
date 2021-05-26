@@ -196,6 +196,8 @@ function get-deb-lib-for-dev()
 {
     local pkg=$1
 
+    check-tools-abort apt-cache
+
     if [[ ${pkg: -4} != "-dev" ]]; then
         echo "error: $pkg is not a dev package (should end with -dev)"
         return 1
