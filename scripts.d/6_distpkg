@@ -2,6 +2,7 @@
 #
 #  For adding a new distrib:
 #     - add support for new distrib in get-distrib
+#     - add 3 letters acronym for new distrib in SCBI_LINUX_DISTRIBS
 #     - implement init-<distrib>-pkg
 #     - implement check-<distrib>-pkg
 #     - implement get-<distrib>-lib-for-dev (optional)
