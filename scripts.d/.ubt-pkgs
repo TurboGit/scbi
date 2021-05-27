@@ -1,4 +1,4 @@
-# OS name                           Debian packaages
+# OS name (Ubuntu 20.04)            Ubuntu packages
 # --------------------------------------------------
 os@-autoconf                        autoconf
 os@-autotools-dev                   autotools-dev
