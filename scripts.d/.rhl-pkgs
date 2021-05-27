@@ -64,6 +64,7 @@ os@-python3-dev
 os@-python3-docutils                python3-docutils
 os@-python3-matplotlib              python3-matplotlib
 os@-python3-mpi4py
+os@-python3-psutil                  python3-psutil
 os@-python3-scipy                   python3-scipy
 os@-python3-sphinx                  python3-sphinx
 os@-python3-sphinx-rtd-theme        python3-sphinx_rtd_theme

@@ -16,12 +16,13 @@ os@-bz2-dev                         libbz2-dev
 os@-c6-dev                          libc6-dev
 os@-cfitsio-dev                     libcfitsio-dev
 os@-cgal-dev                        libcgal-dev
+os@-cgns-dev                        libcgns-dev
 os@-cmake                           cmake
 os@-cminpack-dev                    libcminpack-dev
 os@-cos4-dev                        libcos4-dev
 os@-cppunit-dev                     libcppunit-dev
-os@-curl4-openssl-dev               libcurl4-openssl-dev
 os@-curl4-gnutls-dev                libcurl4-gnutls-dev
+os@-curl4-openssl-dev               libcurl4-openssl-dev
 os@-doxygen                         doxygen
 os@-egl1-mesa-dev                   libegl1-mesa-dev
 os@-eigen3-dev                      libeigen3-dev
@@ -64,7 +65,9 @@ os@-python3-dev                     libpython3-dev
 os@-python3-docutils                python3-docutils
 os@-python3-matplotlib              python3-matplotlib
 os@-python3-mpi4py                  python3-mpi4py
+os@-python3-psutil                  python3-psutil
 os@-python3-scipy                   python3-scipy
+os@-python3-setuptools              python3-setuptools
 os@-python3-sphinx                  python3-sphinx
 os@-python3-sphinx-rtd-theme        python3-sphinx-rtd-theme
 os@-python3-stemmer                 python3-stemmer
