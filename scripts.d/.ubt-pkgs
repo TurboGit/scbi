@@ -21,6 +21,7 @@ os@-cmake                           cmake
 os@-cminpack-dev                    libcminpack-dev
 os@-cos4-dev                        libcos4-dev
 os@-cppunit-dev                     libcppunit-dev
+os@-curl4-gnutls-dev                libcurl4-gnutls-dev
 os@-curl4-openssl-dev               libcurl4-openssl-dev
 os@-doxygen                         doxygen
 os@-egl1-mesa-dev                   libegl1-mesa-dev
@@ -88,6 +89,7 @@ os@-swig                            swig
 os@-tbb-dev                         libtbb-dev
 os@-tcl-dev                         tcl-dev
 os@-tk-dev                          tk-dev
+os@-uuid-dev                        uuid-dev
 os@-x11-dev                         libx11-dev
 os@-xext-dev                        libxext-dev
 os@-xft-dev                         libxft-dev
