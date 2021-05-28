@@ -13,7 +13,7 @@ declare -A SCBI_PKGS
 #  OS dependent alias map
 declare -g -A SCBI_ALIAS
 
-SCBI_LINUX_DISTRIBS=( deb ubt rhl )
+SCBI_LINUX_DISTRIBS=( deb ubt cos rhl )
 
 check-tools-abort lsb_release
 
@@ -29,6 +29,8 @@ function get-distrib()
         echo ubt
     elif [[ $DES =~ "Red Hat" ]]; then
         echo rhl
+    elif [[ $DES =~ "CentOS" ]]; then
+        echo cos
     else
         echo none
     fi
@@ -101,6 +103,23 @@ function init-ubt-pkg()
     init-distrib-alias ubt
 }
 
+function init-cos-pkg()
+{
+    check-tools-abort dnf rpm
+
+    # format : cmake-0:3.11.4-7.el8.x86_64
+    #          <name>-<indice>:<version>-<level>.<rel>.<arch>
+    while read N; do
+        pkg=${N%%:*};
+        pkg=${pkg%-*};
+        version=${N#*:};
+        version=${version%-*};
+        SCBI_PKGS["$pkg"]="$version"
+    done < <( dnf repoquery --installed 2> /dev/null | grep -v "^Not root" )
+
+    init-distrib-alias cos
+}
+
 function init-rhl-pkg()
 {
     check-tools-abort dnf rpm
@@ -164,7 +183,7 @@ function check-ubt-pkg()
     check-deb-pkg "$1" "$2"
 }
 
-function check-rhl-pkg()
+function check-cos-pkg()
 {
     local pck=$1
     local version=$(get-version-number $2)
@@ -174,7 +193,7 @@ function check-rhl-pkg()
     if [[ -z $inst_ver ]]; then
         #  Package is not installed, check if it exists
 
-        rpm -qi $pck &> /dev/null
+        dnf -C list $pck &> /dev/null
 
         if [[ $? = 0 ]]; then
             return 2
@@ -191,6 +210,11 @@ function check-rhl-pkg()
             return 1
         fi
     fi
+}
+
+function check-rhl-pkg()
+{
+    check-cos-pkg "$1" "$2"
 }
 
 ############################## get-deb-lib-for-dev
