@@ -64,9 +64,9 @@ function init-distrib-alias()
     fi
 
     for NAME in $DIST $DIST-$MAJOR ${MINOR:+$DIST-$MAJOR-$MINOR}; do
-        init-alias $SCBI_DEFS/.$NAME-pkgs
-        init-alias $SCBI_BDIR/.scbi-$NAME-pkgs
-        init-alias $PWD/.scbi-$NAME-pkgs
+        init-alias $SCBI_DEFS/.pkgs-$NAME
+        init-alias $SCBI_BDIR/.scbi-pkgs-$NAME
+        init-alias $PWD/.scbi-pkgs-$NAME
     done
 }
 

@@ -1169,9 +1169,9 @@ A distribution acronym is represented by a 3 letters name (deb, ubt, rhl for exa
 An alias table is searched into the following places and in this specific order:
 
 \begin{enumerate}
-	\item \code{.<distrib>-pkgs} into \$SCBI\_DEFS (default \file{~/.config/scbi})
-	\item \code{.scbi-<distrib>-pkgs} into \$SCBI\_BDIR (build directory)
-	\item \code{.scbi-<distrib>-pkgs} into \$PWD (current directory)
+	\item \code{.pkgs-<distrib>} into \$SCBI\_DEFS (default \file{~/.config/scbi})
+	\item \code{.scbi-pkgs-<distrib>} into \$SCBI\_BDIR (build directory)
+	\item \code{.scbi-pkgs-<distrib>} into \$PWD (current directory)
 \end{enumerate}
 
 In complement to the files searched based on distribution acronym, the major and minor version of the OS is also used.
@@ -1179,12 +1179,12 @@ In complement to the files searched based on distribution acronym, the major and
 For example on Debian 10.6 the searched files will be, and in that order:
 
 \begin{enumerate}
-	\item \code{.deb-pkgs}
-	\item \code{.deb-10-pkgs}
-	\item \code{.deb-10-6-pkgs}
+	\item \code{.pkgs-deb}
+	\item \code{.pkgs-deb-10}
+	\item \code{.pkgs-deb-10-6}
 \end{enumerate}
 
-So \code{.deb-10-pkgs} can add new dependencies or override some dependencies that are set in \code{.deb-pkgs}.
+So \code{.pkgs-deb-10} can add new dependencies or override some dependencies that are set in \code{.pkgs-deb}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
