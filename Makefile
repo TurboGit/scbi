@@ -9,6 +9,7 @@ install: all
 all: clean.install
 	mkdir -p $(HOME)/bin
 	cat scbi | sed "s/@VERSION@/$(VER)/" > $(HOME)/bin/scbi
+	chmod u+x $(HOME)/bin/scbi
 	mkdir -p $(SCRDIR)
 	rm -f $(SCRDIR)/*~ $(SCRDIR)/.*~ scripts.d/*~ scripts.d/.*~
 	cp -r scripts.d/* scripts.d/.[a-z]* $(SCRDIR)
