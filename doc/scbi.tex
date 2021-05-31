@@ -493,6 +493,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 			\item options : comma separated list of options, possible values are \emph{none}, \emph{no-recursive}
 			\item protocol : \emph{git}, \emph{svn}, \emph{hg}
 			\item URL : repository location with protocol
+			\item DIR (optional): name of the directory if the repository is hosting multiple projects. This is mostly needed for Subversion non standard repository layout. If \code{URL} is pointing to the tree when \code{trunk}, \code{branches} and \code{tags} directories are found, then SCBI will check for the actual sources in \code{<root>/trunk/\$DIR} or \code{<root>/branches/<VER>/\$DIR} for example.
 		\end{enumerate}
 	\end{description}
 

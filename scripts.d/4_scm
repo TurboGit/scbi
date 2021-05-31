@@ -17,7 +17,9 @@ function svn-co()
     local URL=$2
     local OPTIONS=$3
     local NAME=$4
-    local REPO=$(basename $URL)
+    local DIR=$5
+
+    local REPO=${DIR:-$(basename $URL)}
 
     (
         set-proxy $PROXY
@@ -46,7 +48,9 @@ function git-co()
     local URL=$2
     local OPTIONS=$3
     local NAME=$4
-    local REPO=$(basename $URL .git)
+    local DIR=$5
+    local REPO=${DIR:-$(basename $URL .git)}
+
     local GOPTS1=""
     local GOPTS2=""
 
@@ -84,7 +88,9 @@ function hg-co()
     local URL=$2
     local OPTIONS=$3
     local NAME=$4
-    local REPO=$(basename $URL .git)
+    local DIR=$5
+
+    local REPO=${DIR:-$(basename $URL)}
 
     (
         set-proxy $PROXY
@@ -114,6 +120,7 @@ function git-branch()
     local OPTIONS=$2
     local MODULE=$3
     local BRANCH=$4
+    local DIR=$5
 
     local BUILDB=scbi
 
@@ -197,6 +204,8 @@ function hg-branch()
     local OPTIONS=$2
     local MODULE=$3
     local BRANCH=$4
+    local DIR=$5
+
     local BUILDB=scbi
 
     (
@@ -231,6 +240,8 @@ function svn-branch()
     local OPTIONS=$2
     local MODULE=$3
     local BRANCH=$4
+    local DIR=$5
+
     local BUILDB=scbi
 
     #  This hook works only for standard Subversion layout, that is
@@ -240,14 +251,22 @@ function svn-branch()
         cd $SCBI_BDIR/$MODULE
 
         if [[ $BRANCH == NONE ]]; then
-            if [[ -d vcs/trunk ]]; then
+            if [[ ! -z $DIR ]] && [[ -d vcs/trunk/$DIR ]]; then
+                ln -s vcs/trunk/$DIR src
+	    elif [[ -d vcs/trunk ]]; then
                 ln -s vcs/trunk src
             else
                 ln -s vcs src
             fi
 
+        elif [[ ! -z $DIR ]] && [[ -d vcs/branches/$BRANCH/$DIR ]]; then
+            ln -s vcs/branches/$BRANCH/$DIR src
+
         elif [[ -d vcs/branches/$BRANCH ]]; then
             ln -s vcs/branches/$BRANCH src
+
+        elif [[ ! -z $DIR ]] && [[ -d vcs/tags/$BRANCH/$DIR ]]; then
+            ln -s vcs/tags/$BRANCH/$DIR src
 
         elif [[ -d vcs/tags/$BRANCH ]]; then
             ln -s vcs/tags/$BRANCH src
@@ -322,12 +341,14 @@ function get-vcs()
     local VCS_OPTIONS=${vcs[1]}
     local VCS_NAME=${vcs[2]}
     local VCS_URL=${vcs[3]}
+    local VCS_DIR=${vcs[4]}
 
     local res=0
 
     case $VCS_NAME in
         git)
-            git-co $VCS_PROXY $VCS_URL $VCS_OPTIONS $module > $log 2>&1
+            git-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
+		$module "$VCS_DIR" > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
 		check-tool svn
@@ -341,7 +362,8 @@ function get-vcs()
             fi
 
             if [[ $kind != DEV ]]; then
-                git-branch $VCS_PROXY $VCS_OPTIONS $module $ref > $log 2>&1
+                git-branch $VCS_PROXY $VCS_OPTIONS \
+		    $module $ref "$VCS_DIR" > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
                     ilog build "error: cannot switch to branch $ref"
@@ -351,7 +373,8 @@ function get-vcs()
             ;;
 
         hg|mercurial)
-            hg-co $VCS_PROXY $VCS_URL $VCS_OPTIONS $module > $log 2>&1
+            hg-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
+		$module "$VCS_DIR" > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
 		check-tool hg
@@ -365,7 +388,8 @@ function get-vcs()
             fi
 
             if [[ $kind != DEV ]]; then
-                hg-branch $VCS_PROXY $VCS_OPTIONS $module $ref > $log 2>&1
+                hg-branch $VCS_PROXY $VCS_OPTIONS \
+		    $module $ref "$VCS_DIR" > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
                     ilog build "error: cannot switch to branch $ref"
@@ -375,7 +399,8 @@ function get-vcs()
             ;;
 
         svn|subversion)
-            svn-co $VCS_PROXY $VCS_URL $VCS_OPTIONS $module > $log 2>&1
+            svn-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
+		$module "$VCS_DIR" > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
 		check-tool svn
@@ -389,7 +414,8 @@ function get-vcs()
             fi
 
             if [[ $kind != DEV ]]; then
-                svn-branch $VCS_PROXY $VCS_OPTIONS $module $ref > $log 2>&1
+                svn-branch $VCS_PROXY $VCS_OPTIONS \
+		    $module $ref "$VCS_DIR" > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
                     ilog build "error: cannot switch to branch $ref"
