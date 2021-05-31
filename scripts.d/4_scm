@@ -330,7 +330,13 @@ function get-vcs()
             git-co $VCS_PROXY $VCS_URL $VCS_OPTIONS $module > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
-                ilog build "error: cannot get sources from $VCS_URL"
+		check-tool svn
+		if [[ $? == 0 ]]; then
+                    ilog build "error: cannot get sources from $VCS_URL"
+		else
+                    ilog build "error: tool git not installed"
+		fi
+
                 exit 1
             fi
 
@@ -348,7 +354,13 @@ function get-vcs()
             hg-co $VCS_PROXY $VCS_URL $VCS_OPTIONS $module > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
-                ilog build "error: cannot get sources from $VCS_URL"
+		check-tool hg
+		if [[ $? == 0 ]]; then
+                    ilog build "error: cannot get sources from $VCS_URL"
+		else
+                    ilog build "error: tool hg not installed"
+		fi
+
                 exit 1
             fi
 
@@ -366,7 +378,13 @@ function get-vcs()
             svn-co $VCS_PROXY $VCS_URL $VCS_OPTIONS $module > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
-                ilog build "error: cannot get sources from $VCS_URL"
+		check-tool svn
+		if [[ $? == 0 ]]; then
+                    ilog build "error: cannot get sources from $VCS_URL"
+		else
+                    ilog build "error: tool svn not installed"
+		fi
+
                 exit 1
             fi
 
