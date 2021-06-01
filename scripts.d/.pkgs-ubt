@@ -43,6 +43,9 @@ os@-hdf5-openmpi-dev                libhdf5-openmpi-dev
 os@-hdf5-tools                      hdf5-tools
 os@-jpeg-dev                        libjpeg-dev
 os@-lapack-dev                      liblapack-dev
+os@-libxrandr-dev                   libxrandr-dev
+os@-libxinerama-dev                 libxinerama-dev
+os@-libxcursor-dev                  libxcursor-dev
 os@-make                            make
 os@-metis-dev                       libmetis-dev
 os@-ncurses-dev                     libncurses-dev
@@ -53,7 +56,8 @@ os@-omniorb-idl                     omniorb-idl
 os@-omniorb4-dev                    libomniorb4-dev
 os@-opencv-dev                      libopencv-dev
 os@-openmpi-dev                     libopenmpi-dev
-os@-osmesa6-dev                     libosmesa6-dev
+os@-osmesa-dev                      libosmesa6-dev
+os@-ssl-dev                         libssl-dev
 os@-pcre3-dev                       libpcre3-dev
 os@-png-dev                         libpng-dev
 os@-proj-dev                        libproj-dev
