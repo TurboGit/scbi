@@ -1,0 +1,33 @@
+
+echo "========= should fail"
+
+./scbi --setup --test-only checkvcs
+
+function scbi-rewrite-vcs()
+{
+    local PROXY="$1"
+    local OPTIONS="$2"
+    local VCS="$3"
+    local URL="$4"
+    local DIR="$5"
+
+    # rewrite URL
+    FROM="/this.is.path"
+    URL=${URL/$FROM/$TESTREPOS}
+
+    # rewrite dir/path
+    FROM_DIR="some/dir"
+    TO_DIR="lib1.bundle"
+    URL=${URL/$FROM_DIR/$TO_DIR}
+
+    echo "$PROXY"
+    echo "$OPTIONS"
+    echo "$VCS"
+    echo "$URL"
+    echo "$DIR"
+}
+export -f scbi-rewrite-vcs
+
+echo ""
+echo "========= should be ok"
+./scbi --setup --test-only checkvcs

@@ -310,7 +310,12 @@ function get-vcs-data()
     fn-exists $VCS_FUNCTION
 
     if [[ $? = 0 ]]; then
-        $VCS_FUNCTION
+        fn-exists scbi-rewrite-vcs
+        if [[ $? = 0 ]]; then
+            scbi-rewrite-vcs $($VCS_FUNCTION)
+        else
+            $VCS_FUNCTION
+        fi
     else
         return 1
     fi

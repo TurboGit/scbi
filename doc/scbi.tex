@@ -508,6 +508,17 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 	}
 	\end{lstlisting}
 
+	It is possible specify a specific VCS hook in an environment file by two means:
+
+	\begin{description}[style=standard]
+		\item[\code{SCBI\_<module>\_VCS\_VARIANT}] \hfill \\
+		If environment variable \code{SCBI\_<module>\_VCS\_VARIANT} is set then the hook \\ \code{<module>-\$\{SCBI\_<module>\_VCS\_VARIANT\}-vcs} is looked for before the generic \code{<module>-vcs}. This is specific to module name \code{<module>}.
+
+		\item[\code{SCBI\_VCS\_VARIANT}] Same as above for the all modules.
+	\end{description}
+
+	And finally the function \code{scbi-rewrite-vcs} can be defined. This function takes the five values returned by the VCS hook and must return the five values in the same order but possibly rewritten.
+
 	\item[<module>-tar] Describe the tar filename and location of the tar containing the module sources.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$VERSION}
@@ -709,15 +720,6 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
-
-        It is possible specify a specific VCS hook in an environment file by two means:
-
-        \begin{description}[style=standard]
-                \item[\code{SCBI\_<module>\_VCS\_VARIANT}] \hfill \\
-                 If environment variable \code{SCBI\_<module>\_VCS\_VARIANT} is set then the hook \\ \code{<module>-\$\{SCBI\_<module>\_VCS\_VARIANT\}-vcs} is looked for before the generic \code{<module>-vcs}. This is specific to module name \code{<module>}.
-
-                \item[\code{SCBI\_VCS\_VARIANT}] Same as above for the all modules.
-        \end{description}
 
 \end{description}
 
