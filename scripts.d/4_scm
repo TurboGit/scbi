@@ -253,7 +253,7 @@ function svn-branch()
         if [[ $BRANCH == NONE ]]; then
             if [[ ! -z $DIR ]] && [[ -d vcs/trunk/$DIR ]]; then
                 ln -s vcs/trunk/$DIR src
-	    elif [[ -d vcs/trunk ]]; then
+            elif [[ -d vcs/trunk ]]; then
                 ln -s vcs/trunk src
             else
                 ln -s vcs src
@@ -348,22 +348,22 @@ function get-vcs()
     case $VCS_NAME in
         git)
             git-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
-		$module "$VCS_DIR" > $log 2>&1
+                $module "$VCS_DIR" > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
-		check-tool svn
-		if [[ $? == 0 ]]; then
+                check-tool git
+                if [[ $? == 0 ]]; then
                     ilog build "error: cannot get sources from $VCS_URL"
-		else
+                else
                     ilog build "error: tool git not installed"
-		fi
+                fi
 
                 exit 1
             fi
 
             if [[ $kind != DEV ]]; then
                 git-branch $VCS_PROXY $VCS_OPTIONS \
-		    $module $ref "$VCS_DIR" > $log 2>&1
+                    $module $ref "$VCS_DIR" > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
                     ilog build "error: cannot switch to branch $ref"
@@ -374,22 +374,22 @@ function get-vcs()
 
         hg|mercurial)
             hg-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
-		$module "$VCS_DIR" > $log 2>&1
+                $module "$VCS_DIR" > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
-		check-tool hg
-		if [[ $? == 0 ]]; then
+                check-tool hg
+                if [[ $? == 0 ]]; then
                     ilog build "error: cannot get sources from $VCS_URL"
-		else
+                else
                     ilog build "error: tool hg not installed"
-		fi
+                fi
 
                 exit 1
             fi
 
             if [[ $kind != DEV ]]; then
                 hg-branch $VCS_PROXY $VCS_OPTIONS \
-		    $module $ref "$VCS_DIR" > $log 2>&1
+                    $module $ref "$VCS_DIR" > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
                     ilog build "error: cannot switch to branch $ref"
@@ -400,22 +400,22 @@ function get-vcs()
 
         svn|subversion)
             svn-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
-		$module "$VCS_DIR" > $log 2>&1
+                $module "$VCS_DIR" > $log 2>&1
 
             if [[ ! $? = 0 ]]; then
-		check-tool svn
-		if [[ $? == 0 ]]; then
+                check-tool svn
+                if [[ $? == 0 ]]; then
                     ilog build "error: cannot get sources from $VCS_URL"
-		else
+                else
                     ilog build "error: tool svn not installed"
-		fi
+                fi
 
                 exit 1
             fi
 
             if [[ $kind != DEV ]]; then
                 svn-branch $VCS_PROXY $VCS_OPTIONS \
-		    $module $ref "$VCS_DIR" > $log 2>&1
+                    $module $ref "$VCS_DIR" > $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
                     ilog build "error: cannot switch to branch $ref"
