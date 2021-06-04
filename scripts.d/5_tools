@@ -1281,3 +1281,74 @@ function module-clean-install()
         fi
     fi
 }
+
+############################## scbi-store-[get/set]-value scbi-store
+
+function scbi-store-get-value()
+{
+    local KEY="$1"
+
+    local VALUE=""
+    local res=1
+    local STORE_FILE=$SCBI_DEFS/.store
+
+    if [[ -f $STORE_FILE ]]; then
+        # check KEY in store
+
+        while read K V; do
+            if [[ "$K" = "$KEY" ]]; then
+                VALUE=$V
+                res=0
+                break;
+            fi
+        done < $STORE_FILE
+    fi
+
+    echo -n $VALUE
+    return $res
+}
+
+function scbi-store-set-value()
+{
+    local KEY="$1"
+    local VALUE="$2"
+
+    local STORE_FILE=$SCBI_DEFS/.store
+
+    [[ ! -f $STORE_FILE ]] && touch $STORE_FILE
+
+    declare -A STORE
+
+    # read store content, put it inside STORE
+
+    while read K V; do
+        STORE[$K]=$V
+    done < $STORE_FILE
+
+    STORE[$KEY]="$VALUE"
+
+    # clear content
+
+    echo -n > $STORE_FILE
+
+    # write back content
+
+    for K in "${!STORE[@]}"; do
+        echo $K ${STORE[$K]} >> $STORE_FILE
+    done
+
+    unset STORE
+    return 0
+}
+
+function scbi-store()
+{
+    local KEY="$1"
+    local VALUE="$2"
+
+    if [[ -z "$VALUE" ]]; then
+        scbi-store-get-value "$KEY"
+    else
+        scbi-store-set-value "$KEY" "$VALUE"
+    fi
+}

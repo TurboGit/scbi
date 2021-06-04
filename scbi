@@ -85,6 +85,7 @@ DO_CLEAN_INSTALL=no
 DO_LIST_VER=yes
 DO_PLAN=no
 DO_VERBOSE=no
+DO_STORE=no
 DEPS=no
 ISOOT=yes
 DO_PATCH=yes
@@ -300,6 +301,7 @@ function usage()
     echo "      | --enable-<name>    enable feature name"
     echo "   -t | --target=<name>    the target to build for ($SCBI_TARGET)"
     echo "      | --plugins=<dir>    specify the modules/plugins directory"
+    echo "      | --store KEY [VAL]  set or retrieved private store data"
     echo "   -j | --jobs=<n>         max compilation jobs \$SCBI_JOBS"
     echo "   -v | --verbose          display full log"
     echo "   -S | --no-setup         skip setup"
@@ -1285,7 +1287,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l target:,no-setup,no-install,update,setup,config,build,build-target:,install,log,log:yes,log:no,log:on-failure,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
+    -l store,target:,no-setup,no-install,update,setup,config,build,build-target:,install,log,log:yes,log:no,log:on-failure,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -1453,6 +1455,22 @@ while [[ $# -gt 0 ]]; do
         --clean-install)
             DO_CLEAN_INSTALL=yes
             ;;
+        --store)
+            DO_STORE=yes
+            shift
+            shift
+            STORE_KEY="$1"
+            STORE_VALUE="$2"
+
+            [[ -z $1 ]] &&
+                echo "$0: missing key for store command" &&
+                exit 1
+            [[ ! -z $3 ]] &&
+                echo "$0: unexpected parameters for store command" &&
+                exit 1
+            shift
+            shift
+            ;;
         (--)
             ;;
         (*)
@@ -1502,6 +1520,13 @@ fi
 for setup in $SCBI_DEFS/[0-9]*; do
     source $setup
 done
+
+# Handle store command
+
+if [[ $DO_STORE = yes ]]; then
+    scbi-store "$STORE_KEY" "$STORE_VALUE"
+    exit $?
+fi
 
 # If a plan passed on the command line ensure that it is used instead
 # of any other possibly set in the environment file.

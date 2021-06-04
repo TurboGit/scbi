@@ -459,7 +459,9 @@ The following options are supported:
 
 	\item[\ddash{}safe] Build in safe mode. If a module needs to be built the previous build directory is removed. This ensures that the old configuration and/or build artifacts won't interact in any way with new build.
 
-	\item[\ddash{}plugins=<directory>] Speficy a non default location for the modules and plug-ins directory. This overrides the \code{SCBI\_DEFS} environment.
+	\item[\ddash{}plugins=<directory>] Specify a non default location for the modules and plug-ins directory. This overrides the \code{SCBI\_DEFS} environment.
+
+	\item[\ddash{}store KEY <VALUE>] Set or retrieve private information based on KEY, VALUE pair. (\seeref{private store})
 
 \end{description}
 
@@ -1189,6 +1191,36 @@ For example on Debian 10.6 the searched files will be, and in that order:
 \end{enumerate}
 
 So \code{.pkgs-deb-10} can add new dependencies or override some dependencies that are set in \code{.pkgs-deb}.
+
+\subsection{SCBI Private Store}
+\label{private store}
+\label{store}
+
+It is sometimes needed to use some private information (like software keys) to activate a module. Such information cannot be stored directly into a plug-in which could be made public. To cope with this specific case SCBI comes with support for storing pair of information into an external private store.
+
+The option to set or retrieve a value is \ddash{}store.
+
+\begin{itemize}
+	\item On the command line:\\
+	To set a key:
+
+	\cmd{scbi --store LICKEY 89AXCDPPP6BGG}
+
+	To get value associated with a key:
+
+	\cmd{scbi --store LICKEY}
+
+	\item Inside a plug-in script:\\
+	To set a key:
+
+	\hspace{1.5cm}\texttt{\$(scbi-store-set-key LICKEY 89AXCDPPP6BGG)}
+
+	To get value associated with a key:
+
+	\hspace{1.5cm}\texttt{\$(scbi-store-get-key LICKEY)}
+\end{itemize}
+
+All keys are stored into the file \file{$SCBI_DEFS/.store} (if using the default environment \file{$HOME/.config/scbi/.store}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 

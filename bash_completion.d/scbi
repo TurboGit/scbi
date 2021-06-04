@@ -6,7 +6,8 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 -j --jobs= --target= --env= -e --tests-only --plan= -n --no-patch --tar
 --list-depends: --list-externals --list-externals:only --list-no-version --list-filter:
 --dry-run -w --wrapup --force --enable- --safe --plugins --build-dir
---list-plan --version --clean-install --log:yes --log:no --log:on-failure"
+--list-plan --version --clean-install --log:yes --log:no --log:on-failure
+--store"
 
 _gnat_targets()
 {
@@ -84,6 +85,17 @@ _scbi_feature()
                    sed 's/.*is-enabled \([a-zA-Z\-\_]*\).*/--enable-\1/g'); do
         printf %s$'\n' "$r "
     done
+}
+
+_scbi_store_key()
+{
+    local IFS=$' '
+
+    if [[ -f $HOME/.config/scbi/.store ]]; then
+        while read K V; do
+            echo $K
+        done < $HOME/.config/scbi/.store
+    fi
 }
 
 _scbi_complete()
@@ -167,6 +179,10 @@ _scbi()
             case "$prev" in
                 -t)
                     _scbicomp "$(_gnat_targets)" "" "${cur##--target=}"
+                    return 0
+                    ;;
+                --store)
+                    _scbicomp "$(_scbi_store_key)" "" "${cur##--store}"
                     return 0
                     ;;
                 *)

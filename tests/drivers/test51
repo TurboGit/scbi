@@ -1,0 +1,24 @@
+
+function check-res()
+{
+    if [[ $1 == 0 ]]; then
+        echo FOUND
+    else
+        echo NOTFOUD
+    fi
+}
+
+./scbi --store ONE
+out=$(check-res $?)
+echo ONE : $out
+
+./scbi --store ONE A
+
+./scbi --store ONE
+out=$(check-res $?)
+echo
+echo ONE : $out
+
+./scbi --store SECRET "#this-is-a-long:key:with:some:nonstd%*$chars@"
+./scbi --store SECRET
+echo

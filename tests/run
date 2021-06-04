@@ -16,6 +16,8 @@ function run-test()
 
 export CDPATH=
 
+rm -f scripts.d/.store
+
 # copy scripts
 cp ../scbi .
 cp ../scripts.d/[1-9]* scripts.d/
