@@ -940,8 +940,8 @@ function handle-module()
     if [[ $DEPS = yes ]]; then
         # First we check for build dependencies
         (
-            for module in $(get-all-depends $module $variant build-depends); do
-                handle-depends $module
+            for dmodule in $(get-all-depends $module $variant build-depends); do
+                handle-depends $dmodule
             done
         )
         if [[ ! $? = 0 ]]; then
@@ -951,8 +951,8 @@ function handle-module()
 
         # And then we check for standard dependencies
         (
-            for module in $(get-all-depends $module $variant depends); do
-                handle-depends $module
+            for dmodule in $(get-all-depends $module $variant depends); do
+                handle-depends $dmodule
             done
         )
         if [[ ! $? = 0 ]]; then
