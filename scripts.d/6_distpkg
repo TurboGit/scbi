@@ -264,6 +264,12 @@ function get-lib-for-dev()
 }
 
 ############################## check-pkg
+#
+# check a distrib package, returned code:
+#
+#  0 - found & installed
+#  1 - found & not installed or wrong version
+#  2 - not found
 
 function check-pkg()
 {
@@ -278,7 +284,7 @@ function check-pkg()
 
         if [[ $res = 3 ]]; then
             echo "error: $distname not found"
-            return 1
+            return 2
         elif [[ $res = 2 ]]; then
             if [[ $version == NONE ]]; then
                 echo "error: $distname should be installed."
