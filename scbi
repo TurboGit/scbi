@@ -514,7 +514,8 @@ function handle-env()
 
 function handle-depends()
 {
-    local modref=$1
+    local formodule=$1
+    local modref=$2
 
     local module_info=( $(get-module-ref $modref) )
 
@@ -526,7 +527,7 @@ function handle-depends()
     #  If we want latest version, just handle this module
 
     if [[ "$kind" = "DEV" ]]; then
-        handle-module $1
+        handle-module $modref
         return
     fi
 
@@ -535,13 +536,21 @@ function handle-depends()
     #  If module not found, check for a possible distrib package
 
     if [[ ! -f $SCBI_DEFS/$module ]]; then
-        check-pkg $module:$ref
+        MES=$(check-pkg $module:$ref)
 
         if [[ $? = 0 ]]; then
             return 0
         else
-            echo "No description for module $module"
-            echo "And not found in the distrib"
+            echo "dependencies error building $formodule"
+
+            for dmodule in $(get-all-depends $formodule $variant build-depends); do
+                check-pkg $dmodule
+            done
+
+            for dmodule in $(get-all-depends $formodule $variant depends); do
+                check-pkg $dmodule
+            done
+
             exit 1
         fi
     fi
@@ -827,7 +836,7 @@ function handle-meta-module()
 
     if [[ $DEPS = yes ]]; then
         for dmodule in $(get-all-depends $metamodule $variant build-depends); do
-            handle-depends $dmodule || exit 1
+            handle-depends $metamodule $dmodule || exit 1
         done
     fi
 
@@ -941,7 +950,7 @@ function handle-module()
         # First we check for build dependencies
         (
             for dmodule in $(get-all-depends $module $variant build-depends); do
-                handle-depends $dmodule
+                handle-depends $module $dmodule
             done
         )
         if [[ ! $? = 0 ]]; then
@@ -952,7 +961,7 @@ function handle-module()
         # And then we check for standard dependencies
         (
             for dmodule in $(get-all-depends $module $variant depends); do
-                handle-depends $dmodule
+                handle-depends $module $dmodule
             done
         )
         if [[ ! $? = 0 ]]; then
