@@ -3,6 +3,8 @@
 #  SCBI - (C) Pascal Obry - 2007-2021
 #
 
+shopt -s extglob
+
 SCBI_VERSION=@VERSION@
 SCBI_BINARY=$(realpath $0)
 
@@ -519,6 +521,14 @@ function handle-depends()
 
     local module_info=( $(get-module-ref $modref) )
 
+    if [[ ! -z ${module_info[4]} ]]; then
+        module_info[1]=""
+        module_info[2]=""
+        module_info[3]=""
+        elog ${module_info[@]}
+        exit 1
+    fi
+
     local module=${module_info[0]}
     local variant=${module_info[1]}
     local kind=${module_info[2]}
@@ -874,6 +884,14 @@ function handle-module()
     #  Get module information
 
     local module_info=( $(get-module-ref $modref) )
+
+    if [[ ! -z ${module_info[4]} ]]; then
+        module_info[1]=""
+        module_info[2]=""
+        module_info[3]=""
+        elog ${module_info[@]}
+        exit 1
+    fi
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1580,6 +1598,10 @@ fi
 for module in $MODULES; do
     set-module-ref $module
 done
+
+handle-auto-variant
+
+[[ $? == 1 ]] && exit 1
 
 if [[ $DO_DEPS != no ]]; then
     for module in $MODULES; do

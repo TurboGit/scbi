@@ -1,0 +1,16 @@
+# Check for auto variant
+
+echo "A AUTO on command line - no native"
+./scbi autovarA/auto
+
+echo "A AUTO on plan - no native"
+./scbi --plan=autoa autovarA
+
+echo "B AUTO on command line"
+./scbi autovarB/auto
+
+echo "B AUTO on plan"
+./scbi --plan=autob autovarB
+
+echo "C AUTO on command line"
+./scbi autovarC/auto

@@ -164,6 +164,11 @@ A module is described in an SCBI plug-in script (one plug-in in one file). It ca
 
 	\item[variant] \label{variant}This is a name to identify a build variant for the module. For example an application can be built with different configuration and or dependencies.
 
+	\begin{description}[font=\texttt]
+		\item[native] a variant name that can be defined to use the distribution package. This name is only a convention but a requited name when using the \code{auto} mode. See below.
+		\item[auto] a specific variant name which checks the dependencies of the defined \code{native} variant and use it if all dependencies are available (not necessary installed). The \code{auto} variant should not be defined in a lug-in script but only used in references. The \code{native} and \code{auto} variant can be used together to build a package or use the native one depending on the availability of the dependencies on the running OS.
+	\end{description}
+
 	\item[version] The version to build. This version string can be either:
 
 	\begin{description}[font=\texttt]

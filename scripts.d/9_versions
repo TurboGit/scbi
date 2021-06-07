@@ -64,6 +64,48 @@ function load-module-plan()
     fi
 }
 
+############################## load-module-plan
+#
+# Checks all auto vaariant and use the native one or the default variant
+# depending on the availability of the dependencies.
+
+function handle-auto-variant()
+{
+    local eres=0
+
+    for M in ${!MODVER[@]}; do
+        local value=${MODVER[$M]}
+
+        local module_info=( $(get-module-ref $value) )
+
+        local module=${module_info[0]}
+        local variant=${module_info[1]}
+
+        if [[ $variant == auto ]]; then
+            check-auto-variant $M
+            local res=$?
+
+            if [[ $res == 0 ]]; then
+                #  replaces all variants by a single "native"
+                value=${value/\/auto*([.a-zA-Z])/\/native}
+                MODVER[$M]=$value
+                ilog $M module $M using native variant
+            elif [[ $res == 1 ]]; then
+                #  remove "auto" from the list of variants
+                value=${value/\/auto\./}
+                value=${value/\/auto}
+                MODVER[$M]=$value
+                ilog module $M using standard variant
+            else
+                elog $M "$M auto mode must define a native variant"
+                eres=1
+            fi
+        fi
+    done
+
+    return $eres
+}
+
 ############################## display-build-plan
 #
 #
@@ -199,4 +241,46 @@ function get-module-ref()
     echo ${module_info[1]}
     echo ${module_info[2]}
     echo ${module_info[3]}
+}
+
+############################## check-auto-variant
+
+function check-auto-variant()
+{
+    local module=$1
+
+    if [[ -f $SCBI_DEFS/$module ]]; then
+        #  Check external dependencies for native-depends
+
+        (
+            local res=0
+
+            source $SCBI_DEFS/$module
+
+            fn-exists $module-native-depends
+
+            if [[ ! $? = 0 ]]; then
+                #  Fatal error, stop now
+                exit 2
+            fi
+
+            for dmodule in $(get-all-depends $module native depends); do
+                if [[ ! -f $SCBI_DEFS/$dmodule ]]; then
+                    M=$(check-pkg $dmodule)
+                    if [[ $? == 2 ]]; then
+                        #  Module not found in OS, cannot use native
+                        res=1
+                    fi
+                fi
+            done
+
+            exit $res
+        )
+        return $?
+
+    else
+        #  No module definition, cannot have a native variant, error will
+        #  be reported upward.
+        return 1
+    fi
 }
