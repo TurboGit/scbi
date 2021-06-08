@@ -1351,7 +1351,14 @@ function scbi-store-get-value()
         done < $STORE_FILE
     fi
 
-    echo -n $VALUE
+    # check if stdout (1) is a terminal
+
+    if [[ -t 1 ]]; then
+        echo $VALUE
+    else
+        echo -n $VALUE
+    fi
+
     return $res
 }
 
