@@ -663,7 +663,7 @@ function handle-sources()
     #  If building from tarball, extract it now
 
     if [[ $kind == VERSION ]]; then
-        fn-exists $module-tar
+        M=$(get-tar-data $module $variant $ref)
 
         if [[ ! $? = 0 ]]; then
             echo "error: $module-tar function not defined, cannot get tarball"
@@ -682,7 +682,7 @@ function handle-sources()
         if [[ $DO_UPDATE = yes ]] || [[ ! -d tarsrc ]] || [[ ! -f tar ]]; then
             ilog $module get sources from tar
 
-            get-tar $module $ref >> $log 2>&1
+            get-tar $module $variant $ref >> $log 2>&1
 
             if [[ ! $? = 0 ]]; then
                 ilog $module cannot get/find tar sources
