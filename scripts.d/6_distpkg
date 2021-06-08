@@ -140,7 +140,7 @@ function check-deb-pkg()
     if [[ -z $inst_ver ]]; then
         #  Package is not installed, check if it exists
 
-        dpkg-query -l $pck &> /dev/null
+        apt-cache show $pck &> /dev/null
 
         if [[ $? = 0 ]]; then
             return 2
@@ -287,13 +287,13 @@ function check-pkg()
             return 2
         elif [[ $res = 2 ]]; then
             if [[ $version == NONE ]]; then
-                echo "error: $distname should be installed."
+                echo "error: $distname should be installed"
             else
-                echo "error: $distname:$version should be installed."
+                echo "error: $distname:$version should be installed"
             fi
             return 1
         elif [[ $res = 1 ]]; then
-            echo "error: $distname:$version should be installed."
+            echo "error: $distname:$version should be installed"
             return 1
         else
             return 0

@@ -674,15 +674,62 @@ function set-proxy()
     [[ $? = 0 ]] && proxy-$NAME
 }
 
+############################## get-tar-data
+
+function get-tar-data()
+{
+    local module=$1
+    local variant=$2
+    local version=$3
+
+    TAR_FUNCTION=$(get-hook $module $variant tar)
+    TAR_FUNCTION=${TAR_FUNCTION:=${module}-tar}
+
+    #  check first for module specifc VCS variant
+
+    VAR=SCBI_${module//-/_}_TAR_VARIANT
+
+    if [[ "${!VAR}" != "" ]]; then
+        fn-exists $module-${!VAR}-tar
+        if [[ $? = 0 ]]; then
+            TAR_FUNCTION=$module-${!VAR}-tar
+        else
+            elog build "error: tar specific function for $module not found."
+            exit 1
+        fi
+    elif [[ "${SCBI_TAR_VARIANT}" != "" ]]; then
+        fn-exists $module-${SCBI_TAR_VARIANT}-tar
+        if [[ $? = 0 ]]; then
+            TAR_FUNCTION=$module-${SCBI_TAR_VARIANT}-tar
+        fi
+    fi
+
+    fn-exists $TAR_FUNCTION
+
+    if [[ $? = 0 ]]; then
+        fn-exists scbi-rewrite-tar
+        if [[ $? = 0 ]]; then
+            scbi-rewrite-tar $($TAR_FUNCTION $version)
+        else
+            $TAR_FUNCTION $version
+        fi
+        return 0
+    else
+        return 1
+    fi
+}
+
 ############################## get-tar
 
 function get-tar()
 {
     local module=$1
-    local version=$2
+    local variant=$2
+    local version=$3
+
     local res=0
 
-    local tar=( $($module-tar $version) )
+    local tar=( $(get-tar-data $module $variant $version) )
 
     local proxy=${tar[0]}
     local tarcp=${tar[1]}
