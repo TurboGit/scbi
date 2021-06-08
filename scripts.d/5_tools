@@ -1331,7 +1331,7 @@ function module-clean-install()
 
 ############################## scbi-store-[get/set]-value scbi-store
 
-function scbi-store-get-value()
+function scbi-store-get-key()
 {
     local KEY="$1"
 
@@ -1362,7 +1362,7 @@ function scbi-store-get-value()
     return $res
 }
 
-function scbi-store-set-value()
+function scbi-store-set-key()
 {
     local KEY="$1"
     local VALUE="$2"
@@ -1401,8 +1401,8 @@ function scbi-store()
     local VALUE="$2"
 
     if [[ -z "$VALUE" ]]; then
-        scbi-store-get-value "$KEY"
+        scbi-store-get-key "$KEY"
     else
-        scbi-store-set-value "$KEY" "$VALUE"
+        scbi-store-set-key "$KEY" "$VALUE"
     fi
 }
