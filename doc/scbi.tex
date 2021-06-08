@@ -172,7 +172,7 @@ A module is described in an SCBI plug-in script (one plug-in in one file). It ca
 	\item[version] The version to build. This version string can be either:
 
 	\begin{description}[font=\texttt]
-		\item[<VCS>] a reference to a VCS version (branch or a Git sha1 for example), a tar version.
+		\item[<VCS>] a reference to a VCS version (branch or a Git SHA-1 for example), a tar version.
 		\item[dev] to take the source from a user's checkout.
 		\item[kip] to specify that the module must be ignored.
 		\item[force] to enable an otherwise skip module (possibly set to skip in a build plan).
@@ -516,7 +516,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 	}
 	\end{lstlisting}
 
-	It is possible specify a specific VCS hook in an environment file by two means:
+	It is possible specify a specific \code{vcs} hook in an environment file by two means:
 
 	\begin{description}[style=standard]
 		\item[\code{SCBI\_<module>\_VCS\_VARIANT}] \hfill \\
@@ -525,7 +525,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 		\item[\code{SCBI\_VCS\_VARIANT}] Same as above for the all modules.
 	\end{description}
 
-	And finally the function \code{scbi-rewrite-vcs} can be defined. This function takes the five values returned by the VCS hook and must return the five values in the same order but possibly rewritten.
+	And finally the function \code{scbi-rewrite-vcs} can be defined. This function takes the five values returned by the \code{vcs} hook and must return the five values in the same order but possibly rewritten.
 
 	\item[<module>-tar] Describe the tar filename and location of the tar containing the module sources.
 	\begin{description}[font=\textit,style=standard]
