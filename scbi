@@ -554,11 +554,11 @@ function handle-depends()
             echo "dependencies error building $formodule"
 
             for dmodule in $(get-all-depends $formodule $variant build-depends); do
-                check-pkg $dmodule
+                [[ ! -f $SCBI_DEFS/$dmodule ]] && check-pkg $dmodule
             done
 
             for dmodule in $(get-all-depends $formodule $variant depends); do
-                check-pkg $dmodule
+                [[ ! -f $SCBI_DEFS/$dmodule ]] && check-pkg $dmodule
             done
 
             exit 1
