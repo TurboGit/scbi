@@ -1004,7 +1004,8 @@ function copy-module-src-callback()
                 fn-exists $module-$variant-patches
 
                 if [[ $? = 0 ]]; then
-                    for patch in $($module-$variant-patches $PREFIX $TARGET); do
+                    for patch in $($module-$variant-patches $PREFIX $TARGET \
+                                                            $kind $ref); do
                         cp-patch $patch
                     done
 
@@ -1012,7 +1013,8 @@ function copy-module-src-callback()
                     fn-exists $module-patches
 
                     if [[ $? = 0 ]]; then
-                        for patch in $($module-patches $PREFIX $TARGET $variant); do
+                        for patch in $($module-patches $PREFIX $TARGET \
+                                                       $variant $kind $ref); do
                             cp-patch $patch
                         done
                     fi
