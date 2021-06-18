@@ -914,6 +914,112 @@ function last-modified-directory()
     ls -td $PATTERN 2> /dev/null | head -1
 }
 
+############################## check-os-file
+# check for a specific file in a set of hint directories, return full pathname
+#
+# get-os-file <FILENAME> <PATH1> <PATH2> ...
+
+function get-os-file()
+{
+    local FILENAME=$1
+    shift
+
+    while [[ ! -z "$1" ]]; do
+        F="$1/$FILENAME"
+        RES=$(ls $F 2>&1 > /dev/null)
+        if [[ $? == 0 ]]; then
+            FILENAME=$F
+            break
+        fi
+        shift
+    done
+
+    echo $FILENAME
+}
+
+############################## get-os-lib
+# check for a specific lib, return full pathname
+#
+# get-os-lib <FILENAME>
+
+function get-os-lib()
+{
+    local F=$1
+    local BN=${F##*/}
+
+    local R=$(get-os-file "$F" \
+                          "/usr/lib*/$SCBI_TARGET" \
+                          "/usr/lib*/$SCBI_TARGET/*" \
+                          "/usr/lib*" \
+                          "usr/lib*/*")
+
+    if [[ "$R" == "$F" ]] && [[ "$BN" == "$F" ]]; then
+        echo $R
+    else
+        get-os-file "$BN" \
+                    "/usr/lib*/$SCBI_TARGET" \
+                    "/usr/lib*/$SCBI_TARGET/*" \
+                    "/usr/lib*" \
+                    "usr/lib*/*"
+    fi
+}
+
+function get-os-lib-dir()
+{
+    local R=$(get-os-lib "$1")
+    echo ${R%/*}
+}
+
+############################## get-os-inc
+# check for a specific include, return full pathname
+#
+# get-os-inc <FILENAME>
+
+function get-os-inc()
+{
+    local F=$1
+    local BN=${F##*/}
+
+    local R=$(get-os-file "$F" \
+                          "/usr/include/$SCBI_TARGET" \
+                          "/usr/include" \
+                          "/usr/include/$SCBI_TARGET/*" \
+                          "usr/include/*")
+
+    if [[ "$R" == "$F" ]] && [[ "$BN" == "$F" ]]; then
+        echo $R
+    else
+        get-os-file "$BN" \
+                    "/usr/include/$SCBI_TARGET" \
+                    "/usr/include" \
+                    "/usr/include/$SCBI_TARGET/*" \
+                    "usr/include*/*"
+    fi
+}
+
+function get-os-inc-dir()
+{
+    local R=$(get-os-inc "$1")
+    echo ${R%/*}
+}
+
+############################## get-os-bin
+# check for a specific binary, return full pathname
+#
+# get-os-bin <FILENAME>
+
+function get-os-bin()
+{
+    get-os-file "$1" \
+                "/usr/bin*" "/usr/lib*/*/bin"
+}
+
+function get-os-bin-dir()
+{
+    local R=$(get-os-bin "$1")
+    echo ${R%/*}
+}
+
 ############################## split all variants
 # returns all variants separated with spaces, usage:
 #
