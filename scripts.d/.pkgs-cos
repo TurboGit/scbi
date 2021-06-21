@@ -16,6 +16,7 @@ os@-bz2-dev                         bzip2-devel
 os@-c6-dev
 os@-cfitsio-dev                     cfitsio
 os@-cgal-dev
+os@-cgns-dev                        cgnslib-devel
 os@-cmake                           cmake
 os@-cminpack-dev
 os@-cos4-dev
