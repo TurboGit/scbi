@@ -43,10 +43,10 @@ os@-hdf5-openmpi-dev                libhdf5-openmpi-dev
 os@-hdf5-tools                      hdf5-tools
 os@-jpeg-dev                        libjpeg-dev
 os@-lapack-dev                      liblapack-dev
-os@-libxrandr-dev                   libxrandr-dev
-os@-libxinerama-dev                 libxinerama-dev
+os@-libtirpc-dev
 os@-libxcursor-dev                  libxcursor-dev
-os@-ssl-dev                         libssl-dev
+os@-libxinerama-dev                 libxinerama-dev
+os@-libxrandr-dev                   libxrandr-dev
 os@-make                            make
 os@-metis-dev                       libmetis-dev
 os@-ncurses-dev                     libncurses-dev
@@ -88,6 +88,7 @@ os@-qwt-qt5-dev                     libqwt-qt5-dev
 os@-scotch-dev                      libscotch-dev
 os@-sphinx-common                   sphinx-common
 os@-sphinx-intl                     sphinx-intl
+os@-ssl-dev                         libssl-dev
 os@-ssl-dev                         libssl-dev
 os@-swig                            swig
 os@-tbb-dev                         libtbb-dev

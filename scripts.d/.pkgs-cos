@@ -16,13 +16,12 @@ os@-bz2-dev                         bzip2-devel
 os@-c6-dev
 os@-cfitsio-dev                     cfitsio
 os@-cgal-dev
-os@-ssl-dev                         openssl-devel
 os@-cmake                           cmake
 os@-cminpack-dev
 os@-cos4-dev
 os@-cppunit-dev                     cppunit-devel
-os@-curl4-openssl-dev               libcurl-devel
 os@-curl4-gnutls-dev                libcurl-devel
+os@-curl4-openssl-dev               libcurl-devel
 os@-doxygen                         doxygen
 os@-egl1-mesa-dev                   mesa-libEGL-devel
 os@-eigen3-dev                      eigen3-devel
@@ -30,8 +29,8 @@ os@-fftw3-dev                       fftw-devel
 os@-freeimage-dev                   freeimage-devel
 os@-freetype6-dev                   freetype-devel
 os@-ftgl-dev                        ftgl-devel
-os@-gcc                             gcc
 os@-g++                             gcc-c++
+os@-gcc                             gcc
 os@-gdal-dev                        gdal-devel
 os@-gl2ps-dev                       gl2ps-devel
 os@-glew-dev                        glew-devel
@@ -44,14 +43,15 @@ os@-hdf5-openmpi-dev                hdf5-openmpi-devel
 os@-hdf5-tools
 os@-jpeg-dev                        libjpeg-turbo-devel
 os@-lapack-dev                      lapack-devel
-os@-libxrandr-dev                   libXrandr-devel
-os@-libxinerama-dev                 libXinerama-devel
+os@-libtirpc-dev                    libtirpc-devel
 os@-libxcursor-dev                  libXcursor-devel
+os@-libxinerama-dev                 libXinerama-devel
+os@-libxrandr-dev                   libXrandr-devel
 os@-make                            make
 os@-metis-dev                       metis-devel
 os@-ncurses-dev                     ncurses-devel
 os@-nlopt0
-os@-omniidl                         
+os@-omniidl
 os@-omniorb                         omniORB
 os@-omniorb-idl
 os@-omniorb4-dev                    omniORB-devel
@@ -86,7 +86,8 @@ os@-qtxmlpatterns5-dev-tools        qt5-qtxmlpatterns qt5-qtxmlpatterns-devel
 os@-qwt-qt5-dev                     qwt-qt5-devel
 os@-scotch-dev                      scotch-devel
 os@-sphinx-common                   python3-sphinx
-os@-sphinx-intl                     
+os@-sphinx-intl
+os@-ssl-dev                         openssl-devel
 os@-ssl-dev                         openssl-devel
 os@-swig                            swig
 os@-tbb-dev                         tbb-devel
