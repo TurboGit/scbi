@@ -3,6 +3,11 @@ natv-native-build ()
 {
     true
 }
+natv-native-build-depends is a function
+natv-native-build-depends ()
+{
+    true
+}
 natv-native-build-env is a function
 natv-native-build-env ()
 {

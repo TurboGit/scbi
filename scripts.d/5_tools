@@ -272,25 +272,34 @@ function get-all-depends()
     local variant="$2"
     local hook="$3"
 
-    local FCT="$module-$hook"
+    #  If the "native" variant is found then we do not use the default
+    #  depend / build-depends hook. The native variant is supposed to
+    #  be self contained and we do not want to inherit the dependencies
+    #  from the main plug-in if any.
 
-    fn-exists $FCT
-
-    if [[ $? = 0 ]]; then
-        for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-            echo $mod
-        done
-    fi
+    local NATIVEFOUND=false
 
     for v in default $(all-variants $variant); do
         FCT="$module-$v-$hook"
         fn-exists $FCT
         if [[ $? = 0 ]]; then
+            [[ "$v" == "native" ]] && NATIVEFOUND=true
             for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
                 echo $mod
             done
         fi
     done
+
+    if [[ $NATIVEFOUND == false ]]; then
+        FCT="$module-$hook"
+        fn-exists $FCT
+
+        if [[ $? = 0 ]]; then
+            for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
+                echo $mod
+            done
+        fi
+    fi
 }
 
 ############################## for-all-modules
@@ -1301,7 +1310,7 @@ function with-variant()
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
     #  Hooks with nop body
-    local SCBI_HOOKS="config build install env build-env"
+    local SCBI_HOOKS="config build install env build-env build-depends"
 
     local H=""
 

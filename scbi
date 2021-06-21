@@ -551,13 +551,20 @@ function handle-depends()
         if [[ $? = 0 ]]; then
             return 0
         else
-            echo "dependencies error building $formodule"
+            local formodule_info=( $(get-module-ref $formodule) )
+            fmodule=${formodule_info[0]}
+            fvariant=${formodule_info[1]}
 
-            for dmodule in $(get-all-depends $formodule $variant build-depends); do
+            local MNAME=$fmodule
+            [[ $fvariant != "default" ]] && MNAME="$MNAME/$fvariant"
+
+            echo "dependencies error building $MNAME"
+
+            for dmodule in $(get-all-depends $fmodule $fvariant build-depends); do
                 [[ ! -f $SCBI_DEFS/$dmodule ]] && check-pkg $dmodule
             done
 
-            for dmodule in $(get-all-depends $formodule $variant depends); do
+            for dmodule in $(get-all-depends $fmodule $fvariant depends); do
                 [[ ! -f $SCBI_DEFS/$dmodule ]] && check-pkg $dmodule
             done
 
@@ -968,7 +975,7 @@ function handle-module()
         # First we check for build dependencies
         (
             for dmodule in $(get-all-depends $module $variant build-depends); do
-                handle-depends $module $dmodule
+                handle-depends $modref $dmodule
             done
         )
         if [[ ! $? = 0 ]]; then
@@ -979,7 +986,7 @@ function handle-module()
         # And then we check for standard dependencies
         (
             for dmodule in $(get-all-depends $module $variant depends); do
-                handle-depends $module $dmodule
+                handle-depends $modref $dmodule
             done
         )
         if [[ ! $? = 0 ]]; then
