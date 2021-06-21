@@ -960,7 +960,8 @@ function get-os-lib()
                           "/usr/lib*/$SCBI_TARGET" \
                           "/usr/lib*/$SCBI_TARGET/*" \
                           "/usr/lib*" \
-                          "usr/lib*/*")
+                          "/usr/lib*/*" \
+                          "/usr/lib*/*/lib*")
 
     if [[ "$R" == "$F" ]] && [[ "$BN" == "$F" ]]; then
         echo $R
@@ -969,7 +970,8 @@ function get-os-lib()
                     "/usr/lib*/$SCBI_TARGET" \
                     "/usr/lib*/$SCBI_TARGET/*" \
                     "/usr/lib*" \
-                    "usr/lib*/*"
+                    "/usr/lib*/*" \
+                    "/usr/lib*/*/lib*"
     fi
 }
 
@@ -993,7 +995,7 @@ function get-os-inc()
                           "/usr/include/$SCBI_TARGET" \
                           "/usr/include" \
                           "/usr/include/$SCBI_TARGET/*" \
-                          "usr/include/*")
+                          "/usr/include/*")
 
     if [[ "$R" == "$F" ]] && [[ "$BN" == "$F" ]]; then
         echo $R
@@ -1002,7 +1004,7 @@ function get-os-inc()
                     "/usr/include/$SCBI_TARGET" \
                     "/usr/include" \
                     "/usr/include/$SCBI_TARGET/*" \
-                    "usr/include*/*"
+                    "/usr/include*/*"
     fi
 }
 
