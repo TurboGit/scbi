@@ -28,5 +28,7 @@ function run-shell()
         cd $curcd
     fi
 
+    #  Exports all functions into the bash sub-shell
+    eval "$(declare -F | sed -e 's/-f /-fx /')"
     $SHELL
 }
