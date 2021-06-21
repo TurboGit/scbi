@@ -9,7 +9,7 @@ os@-boost-dev                       libboost-dev
 os@-boost-filesystem-dev            libboost-filesystem-dev
 os@-boost-graph-dev                 libboost-graph-dev
 os@-boost-locale-dev                libboost-locale-dev
-os@-boost-regexp-dev                libboost-regex-dev
+os@-boost-regex-dev                 libboost-regex-dev
 os@-boost-signals-dev
 os@-boost-thread-dev                libboost-thread-dev
 os@-bz2-dev                         libbz2-dev

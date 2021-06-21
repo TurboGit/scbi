@@ -9,7 +9,7 @@ os@-boost-dev                       boost
 os@-boost-filesystem-dev            boost-filesystem
 os@-boost-graph-dev                 boost-graph
 os@-boost-locale-dev                boost-locale
-os@-boost-regexp-dev                boost-regexp
+os@-boost-regex-dev                 boost-regexp
 os@-boost-signals-dev               boost-signals
 os@-boost-thread-dev                boost-thread
 os@-bz2-dev                         bzip2-devel
