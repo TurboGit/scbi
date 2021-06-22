@@ -1,6 +1,7 @@
 # OS name (Ubuntu 20.04)            Ubuntu packages
 # --------------------------------------------------
 os@-autoconf                        autoconf
+os@-automake                        automake
 os@-autotools-dev                   autotools-dev
 os@-blas-dev                        libblas-dev
 os@-boost-chrono-dev                libboost-chrono-dev

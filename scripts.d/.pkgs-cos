@@ -1,6 +1,7 @@
 # OS name (CentOS 8)                Red Hat packaages
 # ---------------------------------------------------
 os@-autoconf                        autoconf
+os@-automake                        automake
 os@-autotools-dev
 os@-blas-dev                        blas-devel
 os@-boost-chrono-dev                boost-chrono
