@@ -20,6 +20,8 @@ function module-apply-patch()
 
     ilog $MODULE apply-patch filename $(basename $patch)
 
+    check-tools-abort patch
+
     patch -p1 < $patch > /dev/null
     return $?
 }
