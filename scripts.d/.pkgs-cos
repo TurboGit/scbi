@@ -2,7 +2,7 @@
 # ---------------------------------------------------
 os@-autoconf                        autoconf
 os@-automake                        automake
-os@-autotools-dev
+os@-autotools-dev                   libtool
 os@-blas-dev                        blas-devel
 os@-boost-chrono-dev                boost-chrono
 os@-boost-date-time-dev             boost-date-time
