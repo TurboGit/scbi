@@ -963,7 +963,7 @@ function get-os-lib()
                           "/usr/lib*/*" \
                           "/usr/lib*/*/lib*")
 
-    if [[ "$R" == "$F" ]] && [[ "$BN" == "$F" ]]; then
+    if [[ "$R" != "$F" ]] || [[ "$BN" == "$F" ]]; then
         echo $R
     else
         get-os-file "$BN" \
@@ -997,7 +997,7 @@ function get-os-inc()
                           "/usr/include/$SCBI_TARGET/*" \
                           "/usr/include/*")
 
-    if [[ "$R" == "$F" ]] && [[ "$BN" == "$F" ]]; then
+    if [[ "$R" != "$F" ]] || [[ "$BN" == "$F" ]]; then
         echo $R
     else
         get-os-file "$BN" \
