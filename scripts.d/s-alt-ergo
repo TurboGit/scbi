@@ -49,7 +49,7 @@ function s-alt-ergo-build()
     local TARGET=$2
 
     cd sources &&
-        make -j$SCBI_MAKE_JOBS
+        make -j$SCBI_JOBS
 }
 
 function s-alt-ergo-install()

@@ -251,8 +251,6 @@ An environment is a set of shell variables used to control the build environment
 
 	\item[SCBI\_JOBS] The number of simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores.
 	\label{njobs}
-
-	\item[SCBI\_MAKE\_JOBS] The number of simultaneous jobs to use for \code{make}. \\Default set to \code{\$SCBI\_JOBS / 2}.
 \label{make-njobs}
 \end{description}
 
@@ -703,7 +701,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 		local PREFIX=$1
 		local TARGET=$2
 
-		make -J$SCBI_MAKE_JOBS
+		make -J$SCBI_JOBS
 	}
 	\end{lstlisting}
 
@@ -1509,7 +1507,7 @@ Note that this was compiling at the time this doc was written, but some dependen
 		local PREFIX=$1
 		local TARGET=$2
 
-		make -j$SCBI_MAKE_JOBS
+		make -j$SCBI_JOBS
 	}
 	\end{lstlisting}
 

@@ -38,7 +38,7 @@ function s-cvc4-build()
     local PREFIX=$1
     local TARGET=$2
 
-    cd build && make -j$SCBI_MAKE_JOBS
+    cd build && make -j$SCBI_JOBS
 }
 
 function s-cvc4-install()
