@@ -34,7 +34,30 @@ function load-module-plan()
                 for mod in $GMOD; do
                     local module_info=( $(parse-module-ref $mod) )
                     local module=${module_info[0]}
-                    MODVER[$module]=${module}${REF}
+                    local variant=${module_info[1]}
+                    local version=${module_info[3]}
+
+                    local ref_info=( $(parse-module-ref "name$REF") )
+                    local rvariant=${ref_info[1]}
+                    local rversion=${ref_info[3]}
+
+                    local FREF=""
+
+                    #  Override the variant & version only if defined in REF
+
+                    if [[ $rvariant != "default" ]]; then
+                        FREF="/$rvariant"
+                    elif [[ $variant != "default" ]]; then
+                        FREF="/$variant"
+                    fi
+
+                    if [[ $rversion != NONE ]]; then
+                        FREF="$FREF:$rversion"
+                    elif [[ $version != NONE ]]; then
+                        FREF="$FREF:$version"
+                    fi
+
+                    MODVER[$module]=${module}${FREF}
                 done
                 GROUP=no
                 GMOD=""
