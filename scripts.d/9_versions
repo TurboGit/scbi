@@ -70,7 +70,7 @@ function load-module-plan()
                     exit 1
                 fi
                 GROUP=yes
-            elif [[ "$modref" != "#" ]]; then
+            elif [[ "${modref:0:1}" != "#" ]]; then
                 local module_info=( $(parse-module-ref $modref) )
                 local module=${module_info[0]}
                 MODVER[$module]=${modref/*=/}
