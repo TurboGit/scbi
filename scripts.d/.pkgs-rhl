@@ -31,7 +31,9 @@ os@-freeimage-dev                   freeimage-devel
 os@-freetype6-dev                   freetype-devel
 os@-ftgl-dev                        ftgl-devel
 os@-g++                             gcc-c++
+os@-gcc                             gcc
 os@-gdal-dev                        gdal-devel
+os@-gfortran                        gcc-gfortran
 os@-gl2ps-dev                       gl2ps-devel
 os@-glew-dev
 os@-glfw3-dev

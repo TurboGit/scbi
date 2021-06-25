@@ -32,7 +32,9 @@ os@-freeimage-dev                   libfreeimage-dev
 os@-freetype6-dev                   libfreetype6-dev
 os@-ftgl-dev                        libftgl-dev
 os@-g++                             g++
+os@-gcc                             gcc
 os@-gdal-dev                        libgdal-dev
+os@-gfortran                        gfortran
 os@-gl2ps-dev                       libgl2ps-dev
 os@-glew-dev                        libglew-dev
 os@-glfw3-dev                       libglfw3-dev

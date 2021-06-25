@@ -34,6 +34,7 @@ os@-ftgl-dev                        ftgl-devel
 os@-g++                             gcc-c++
 os@-gcc                             gcc
 os@-gdal-dev                        gdal-devel
+os@-gfortran                        gcc-gfortran
 os@-gl2ps-dev                       gl2ps-devel
 os@-glew-dev                        glew-devel
 os@-glfw3-dev
