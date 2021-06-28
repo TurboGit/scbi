@@ -78,6 +78,8 @@ os@-python3-scipy                   python3-scipy
 os@-python3-sphinx                  python3-sphinx
 os@-python3-sphinx-rtd-theme        python3-sphinx_rtd_theme
 os@-python3-stemmer
+os@-python3-xlrd                    python3-xlrd
+os@-python3-xlwt
 os@-qt5-default                     qt5-devel
 os@-qt5help5                        qt5-qttools-libs-help
 os@-qt5opengl5-dev

@@ -79,6 +79,8 @@ os@-python3-setuptools              python3-setuptools
 os@-python3-sphinx                  python3-sphinx
 os@-python3-sphinx-rtd-theme        python3-sphinx-rtd-theme
 os@-python3-stemmer                 python3-stemmer
+os@-python3-xlrd                    python3-xlrd
+os@-python3-xlwt                    python3-xlwt
 os@-qt5-default                     qt5-default
 os@-qt5help5                        libqt5help5
 os@-qt5opengl5-dev                  libqt5opengl5-dev
