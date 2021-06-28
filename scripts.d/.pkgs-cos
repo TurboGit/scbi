@@ -2,7 +2,7 @@
 # ---------------------------------------------------
 os@-autoconf                        autoconf
 os@-automake                        automake
-os@-autotools-dev                   libtool
+os@-autotools-dev
 os@-blas-dev                        blas-devel
 os@-boost-chrono-dev                boost-chrono
 os@-boost-date-time-dev             boost-date-time
@@ -47,6 +47,7 @@ os@-hdf5-tools
 os@-jpeg-dev                        libjpeg-turbo-devel
 os@-lapack-dev                      lapack-devel
 os@-libtirpc-dev                    libtirpc-devel
+os@-libtool                         libtool
 os@-libxcursor-dev                  libXcursor-devel
 os@-libxinerama-dev                 libXinerama-devel
 os@-libxrandr-dev                   libXrandr-devel

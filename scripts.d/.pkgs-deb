@@ -47,6 +47,7 @@ os@-hdf5-tools                      hdf5-tools
 os@-jpeg-dev                        libjpeg-dev
 os@-lapack-dev                      liblapack-dev
 os@-libtirpc-dev
+os@-libtool                         libtool
 os@-libxcursor-dev                  libxcursor-dev
 os@-libxinerama-dev                 libxinerama-dev
 os@-libxrandr-dev                   libxrandr-dev

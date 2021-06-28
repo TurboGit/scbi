@@ -46,6 +46,7 @@ os@-hdf5-tools
 os@-jpeg-dev                        libjpeg-turbo-devel
 os@-lapack-dev                      lapack-devel
 os@-libtirpc-dev		    libtirpc-devel
+os@-libtool                         libtool
 os@-make                            make
 os@-metis-dev                       metis-devel
 os@-ncurses-dev                     ncurses-devel
