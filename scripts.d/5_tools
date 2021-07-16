@@ -650,15 +650,14 @@ function get-build-id()
 function check-tar-exists()
 {
     local module=$1
-    local version=$2
+    local variant=$2
+    local version=$3
 
-    fn-exists $module-tar
+    local tar=( $(get-tar-data $module $variant $version) )
 
     if [[ ! $? = 0 ]]; then
         return 1
     fi
-
-    local tar=( $($module-tar $version) )
 
     #local proxy=${tar[0]}
     #local tarcp=${tar[1]}
@@ -694,22 +693,25 @@ function get-tar-data()
     TAR_FUNCTION=$(get-hook $module $variant tar)
     TAR_FUNCTION=${TAR_FUNCTION:=${module}-tar}
 
-    #  check first for module specifc VCS variant
+    #  check first for module specifc VCS variant except for native
+    #  variant.
 
-    VAR=SCBI_${module//-/_}_TAR_VARIANT
+    if [[ $variant != "native" ]]; then
+        VAR=SCBI_${module//-/_}_TAR_VARIANT
 
-    if [[ "${!VAR}" != "" ]]; then
-        fn-exists $module-${!VAR}-tar
-        if [[ $? = 0 ]]; then
-            TAR_FUNCTION=$module-${!VAR}-tar
-        else
-            elog build "error: tar specific function for $module not found."
-            exit 1
-        fi
-    elif [[ "${SCBI_TAR_VARIANT}" != "" ]]; then
-        fn-exists $module-${SCBI_TAR_VARIANT}-tar
-        if [[ $? = 0 ]]; then
-            TAR_FUNCTION=$module-${SCBI_TAR_VARIANT}-tar
+        if [[ "${!VAR}" != "" ]]; then
+            fn-exists $module-${!VAR}-tar
+            if [[ $? = 0 ]]; then
+                TAR_FUNCTION=$module-${!VAR}-tar
+            else
+                elog build "error: tar specific function for $module not found."
+                exit 1
+            fi
+        elif [[ "${SCBI_TAR_VARIANT}" != "" ]]; then
+            fn-exists $module-${SCBI_TAR_VARIANT}-tar
+            if [[ $? = 0 ]]; then
+                TAR_FUNCTION=$module-${SCBI_TAR_VARIANT}-tar
+            fi
         fi
     fi
 
@@ -744,6 +746,12 @@ function get-tar()
     local tarcp=${tar[1]}
     local tarurl=${tar[2]}
     local tarsrc=${tar[3]}
+
+    #  If tarsrc set to NONE, there is nothing to do for this hook
+
+    if [[ "${tarsrc^^}" == "NONE" ]]; then
+        return 0
+    fi
 
     #  The tarball is not present, try downloading it
 
@@ -796,7 +804,7 @@ function get-tar()
         rmdir tartmp
         ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc) tar
     else
-        echo Error, no top directory found.
+        elog $module error: no top directory found
         res=1
     fi
 
@@ -1345,7 +1353,7 @@ function with-variant()
             H="function $PLUGIN-$VNAME-env() { "
             P=""
         else
-            if [[ "$1" == "NONE" ]]; then
+            if [[ "${1^^}" == "NONE" ]]; then
                H="$H $P;"
             else
                H="$H $P$1;"
