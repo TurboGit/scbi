@@ -1325,7 +1325,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l store,target:,no-setup,no-install,update,setup,config,build,build-target:,install,log,log:yes,log:no,log:on-failure,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
+    -l store,target:,no-setup,no-install,update,setup,config,build,build-target:,install,log,log:yes,log:no,log:on-failure,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,stat:full,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -1436,8 +1436,11 @@ while [[ $# -gt 0 ]]; do
         --plan)
             SCBI_PLAN_CL=$2; shift
             ;;
-        --stat)
+        --stat:full)
             DO_STAT=yes;
+            ;;
+        --stat)
+            DO_STAT=info-only;
             ;;
         --list-depends:direct)
             DO_DEPS=yes-direct;
@@ -1591,10 +1594,10 @@ fi
 [[ "$MODULES" = "" ]] && [[ $DO_STAT == no ]] && [[ $DO_MOD_VER == no ]] &&
     usage
 
-[[ "$MODULES" = "" ]] && [[ $DO_SHELL != no ]] && [[ $DO_STAT != yes ]] &&
+[[ "$MODULES" = "" ]] && [[ $DO_SHELL != no ]] && [[ $DO_STAT == no ]] &&
     exit 0
 
-[[ $DO_STAT == yes ]] &&
+[[ $DO_STAT != no ]] &&
     display-stat
 
 [[ "$MODULES" = "" ]] || [[ $DO_STAT == yes ]] &&
