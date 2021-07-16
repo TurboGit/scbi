@@ -21,6 +21,14 @@ function load-module-plan()
         while read modref arg; do
             if [[ "$modref" = "@load" ]]; then
                 load-module-plan $arg
+            elif [[ "$modref" = "@on" ]]; then
+                AON=( $arg )
+                if [[ ${AON[0]} == $SCBI_LINUX_DISTRIB ]]; then
+                    modref=${AON[1]}
+                    local module_info=( $(parse-module-ref $modref) )
+                    local module=${module_info[0]}
+                    MODVER[$module]=${modref/*=/}
+                fi
             elif [[ "$modref" = "" ]]; then
                 true
             elif [[ "${modref:0:1}" = "]" ]]; then

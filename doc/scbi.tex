@@ -288,9 +288,9 @@ A build-plan is a file listing for each module a specific version to build. It i
 
 \cmd{scbi lcms2:v2 aws:v1}
 
-But this solution is not safe as not reproducible and not recorded in a version control. It is therefore easy to make mistakes and not actually build the proper version of the software.
+But it is preferable to use a build plan to ensure a reproducible build and have all information properly recorded into a version control for example.
 
-To avoid those issues, the solution is to use a build-plan which is a file named \file{.plan-<name>} and listing the versions (\seeref{modref} about module references) for each software:
+A build-plan is a file named \file{.plan-<name>} and listing the versions (\seeref{modref} about module references) for each software:
 
 File \file{.plan-next}:
 \begin{lstlisting}
@@ -298,7 +298,16 @@ File \file{.plan-next}:
  aws:v1
 \end{lstlisting}
 
-In a build plan a line starting with \code{\#} is a comment. It is also possible to load another build-plan as base and then modify only some of the versions. This is simple way to derive a build plan from another one.
+Some specific actions are supported with the following syntax:
+
+\begin{description}
+	\item[\code{\#}] To start a comment line.
+	\item[\code{@load <name>}] To load another build-plan as a base for the new plan. Every descriptions after this will overwrite the loaded build plan.
+	\item[\code{@on <OS> <module-reference>}] To set a module reference only for the OS (3 letters OS acronym supported). Use option \ddash{}stat to see all supported OS. This will overwrite previous definition for this module if any.
+	\item[\code{[ ... ] /variant:version}] To create a group.
+\end{description}
+
+This is simple way to derive a build plan from another one.
 
 File \file{.plan-next}:
 
@@ -454,7 +463,7 @@ The following options are supported:
 
 	\item[\ddash{}dry-run] Only list modules to be handled.
 
-	\item[\ddash{}stat] Display some statistics about of current setup.
+	\item[\ddash{}stat:{[}full{]}] Display some statistics about of current setup. With sub-option full also gives stats about module's build time.
 
 	\item[-n | \ddash{}no-patch] Do not apply patches.
 
