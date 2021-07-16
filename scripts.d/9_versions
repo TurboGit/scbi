@@ -177,8 +177,8 @@ function set-module-ref()
     local ref=${module_info[3]}
 
     if [[ "$variant" != "default" ]]   \
-         || [[ "$kind" != "NONE" ]]   \
-         || [[ "$ref" != "NONE" ]];
+         || [[ "${kind^^}" != "NONE" ]]   \
+         || [[ "${ref^^}" != "NONE" ]];
     then
         if [[ "$ref" == "force" ]]; then
             MODVER[$module]=$module/$variant

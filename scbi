@@ -612,7 +612,7 @@ function handle-depends()
         rsid=1;
     fi
 
-    [[ "$ref" = "NONE" ]] && ref=0
+    [[ "${ref^^}" = "NONE" ]] && ref=0
 
     [[ $DO_FORCE = yes ]] && rm -f $SCBI_BDIR/$module/build/build-id
 
@@ -656,12 +656,14 @@ function handle-sources()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
+    [[ "$variant" = "native" ]] && return 0;
+
     #  Check if a given tar exists even if a standard branch ref has
     #  been provided. This is an optimization to used a local tar
     #  instead of a repository branch.
 
     if [[ $kind == BRANCH && "$TAR_CACHE" == "yes" ]]; then
-        check-tar-exists $module $ref
+        check-tar-exists $module $variant $ref
         [[ $? == 0 ]] && kind=VERSION
     fi
 
@@ -675,11 +677,15 @@ function handle-sources()
             exit 1
         fi
 
+        tarsrc=${M[3]}
+
         #  We need to extract the tarball if the version does not match
         #  the one currently extracted.
 
         if [[ -f source-id ]]; then
-            if [[ "$(cat source-id)" != "tar-$ref" ]]; then
+            if [[ "$(cat source-id)" != "tar-$ref" ]] ||
+                   [[ ${tarsrc^^} = "NONE" ]];
+            then
                 rm -fr tarsrc
             fi
         fi
@@ -717,7 +723,7 @@ function handle-sources()
         local VCS_NAME=${vcs[2]}
         local VCS_URL=${vcs[3]}
 
-        if [[ $res = 0 ]] && [[ "$VCS_NAME" != "NONE" ]]; then
+        if [[ $res = 0 ]] && [[ "${VCS_NAME^^}" != "NONE" ]]; then
             REPO=$(basename $VCS_URL .git)
 
             if [[ $kind = DEV ]]; then
