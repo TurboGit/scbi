@@ -13,7 +13,7 @@ declare -A SCBI_PKGS
 #  OS dependent alias map
 declare -g -A SCBI_ALIAS
 
-SCBI_LINUX_DISTRIBS=( deb ubt cos rhl )
+SCBI_LINUX_DISTRIBS=( deb ubt cos rhl fed )
 
 check-tools-abort lsb_release
 
@@ -31,6 +31,8 @@ function get-distrib()
         echo rhl
     elif [[ $DES =~ "CentOS" ]]; then
         echo cos
+    elif [[ $DES =~ "Fedora" ]]; then
+        echo fed
     else
         echo none
     fi
@@ -118,6 +120,23 @@ function init-cos-pkg()
     done < <( dnf repoquery --installed 2> /dev/null | grep -v "^Not root" )
 
     init-distrib-alias cos
+}
+
+function init-fed-pkg()
+{
+    check-tools-abort dnf rpm
+
+    # format : cmake-0:3.11.4-7.el8.x86_64
+    #          <name>-<indice>:<version>-<level>.<rel>.<arch>
+    while read N; do
+        pkg=${N%%:*};
+        pkg=${pkg%-*};
+        version=${N#*:};
+        version=${version%-*};
+        SCBI_PKGS["$pkg"]="$version"
+    done < <( dnf repoquery --installed 2> /dev/null | grep -v "^Not root" )
+
+    init-distrib-alias fed
 }
 
 function init-rhl-pkg()
@@ -210,6 +229,11 @@ function check-cos-pkg()
             return 1
         fi
     fi
+}
+
+function check-fed-pkg()
+{
+    check-cos-pkg "$1" "$2"
 }
 
 function check-rhl-pkg()
