@@ -670,14 +670,14 @@ function handle-sources()
     #  If building from tarball, extract it now
 
     if [[ $kind == VERSION ]]; then
-        M=$(get-tar-data $module $variant $ref)
+        local tar=( $(get-tar-data $module $variant $ref) )
 
         if [[ ! $? = 0 ]]; then
             echo "error: $module-tar function not defined, cannot get tarball"
             exit 1
         fi
 
-        tarsrc=${M[3]}
+        tarsrc=${tar[4]}
 
         #  We need to extract the tarball if the version does not match
         #  the one currently extracted.
@@ -691,7 +691,8 @@ function handle-sources()
         fi
 
         if [[ $DO_UPDATE = yes ]] || [[ ! -d tarsrc ]] || [[ ! -f tar ]]; then
-            ilog $module get sources from tar
+            V=${tar[0]#default}
+            ilog $module get sources from tar ${V:+[$V]}
 
             get-tar $module $variant $ref >> $log 2>&1
 
@@ -720,8 +721,8 @@ function handle-sources()
         vcs=( $(get-vcs-data $module $variant) )
         res=$?
 
-        local VCS_NAME=${vcs[2]}
-        local VCS_URL=${vcs[3]}
+        local VCS_NAME=${vcs[3]}
+        local VCS_URL=${vcs[4]}
 
         if [[ $res = 0 ]] && [[ "${VCS_NAME^^}" != "NONE" ]]; then
             REPO=$(basename $VCS_URL .git)
@@ -775,7 +776,8 @@ function handle-sources()
                 fi
 
                 if [[ $DO_UPDATE = yes ]] || [[ ! -d ../.vcs/$REPO ]]; then
-                    ilog $module get sources from $VCS_NAME
+                    V=${vcs[0]#default}
+                    ilog $module get sources from $VCS_NAME ${V:+[$V]}
 
                     get-vcs $SCBI_PREFIX $SCBI_TARGET $modref
 

@@ -659,10 +659,10 @@ function check-tar-exists()
         return 1
     fi
 
-    #local proxy=${tar[0]}
-    #local tarcp=${tar[1]}
-    #local tarurl=${tar[2]}
-    local tarsrc=${tar[3]}
+    #local proxy=${tar[1]}
+    #local tarcp=${tar[2]}
+    #local tarurl=${tar[3]}
+    local tarsrc=${tar[4]}
 
     if [[ -f $SCBI_TAR/$tarsrc ]]; then
         return 0
@@ -683,6 +683,15 @@ function set-proxy()
 }
 
 ############################## get-tar-data
+# returns in order:
+#
+#  hook-variant-name-used
+#        _
+#  proxy  |
+#  cp     | as defined in the hook
+#  url    |
+#  src   _|
+#
 
 function get-tar-data()
 {
@@ -690,8 +699,10 @@ function get-tar-data()
     local variant=$2
     local version=$3
 
-    TAR_FUNCTION=$(get-hook $module $variant tar)
+    local TAR_FUNCTION=$(get-hook $module $variant tar)
     TAR_FUNCTION=${TAR_FUNCTION:=${module}-tar}
+
+    local TAR_VARIANT=default
 
     #  check first for module specifc VCS variant except for native
     #  variant.
@@ -702,7 +713,8 @@ function get-tar-data()
         if [[ "${!VAR}" != "" ]]; then
             fn-exists $module-${!VAR}-tar
             if [[ $? = 0 ]]; then
-                TAR_FUNCTION=$module-${!VAR}-tar
+                TAR_VARIANT=${!VAR}
+                TAR_FUNCTION=$module-${TAR_VARIANT}-tar
             else
                 elog build "error: tar specific function for $module not found."
                 exit 1
@@ -710,7 +722,8 @@ function get-tar-data()
         elif [[ "${SCBI_TAR_VARIANT}" != "" ]]; then
             fn-exists $module-${SCBI_TAR_VARIANT}-tar
             if [[ $? = 0 ]]; then
-                TAR_FUNCTION=$module-${SCBI_TAR_VARIANT}-tar
+                TAR_VARIANT=${SCBI_TAR_VARIANT}
+                TAR_FUNCTION=$module-${TAR_VARIANT}-tar
             fi
         fi
     fi
@@ -718,6 +731,9 @@ function get-tar-data()
     fn-exists $TAR_FUNCTION
 
     if [[ $? = 0 ]]; then
+        #  First we output the actual variant used
+        echo $TAR_VARIANT
+
         fn-exists scbi-rewrite-tar
         if [[ $? = 0 ]]; then
             scbi-rewrite-tar $($TAR_FUNCTION $version)
@@ -742,10 +758,10 @@ function get-tar()
 
     local tar=( $(get-tar-data $module $variant $version) )
 
-    local proxy=${tar[0]}
-    local tarcp=${tar[1]}
-    local tarurl=${tar[2]}
-    local tarsrc=${tar[3]}
+    local proxy=${tar[1]}
+    local tarcp=${tar[2]}
+    local tarurl=${tar[3]}
+    local tarsrc=${tar[4]}
 
     #  If tarsrc set to NONE, there is nothing to do for this hook
 
@@ -1233,7 +1249,7 @@ function get-source-dir()
         vcs=( $(get-vcs-data $module $variant) )
 
         if [[ $? = 0 ]]; then
-            VCS_NAME=${vcs[2]}
+            VCS_NAME=${vcs[3]}
 
             case $VCS_NAME in
                 git)

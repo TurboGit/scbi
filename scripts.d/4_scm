@@ -285,8 +285,10 @@ function get-vcs-data()
     local module=$1
     local variant=$2
 
-    VCS_FUNCTION=$(get-hook $module $variant vcs)
+    local VCS_FUNCTION=$(get-hook $module $variant vcs)
     VCS_FUNCTION=${VCS_FUNCTION:=${module}-vcs}
+
+    local VCS_VARIANT=default
 
     #  check first for module specifc VCS variant
 
@@ -295,7 +297,8 @@ function get-vcs-data()
     if [[ "${!VAR}" != "" ]]; then
         fn-exists $module-${!VAR}-vcs
         if [[ $? = 0 ]]; then
-            VCS_FUNCTION=$module-${!VAR}-vcs
+            VCS_VARIANT=${!VAR}
+            VCS_FUNCTION=$module-${VCS_VARIANT}-vcs
         else
             elog build "error: vcs specific function for $module not found."
             exit 1
@@ -303,13 +306,17 @@ function get-vcs-data()
     elif [[ "${SCBI_VCS_VARIANT}" != "" ]]; then
         fn-exists $module-${SCBI_VCS_VARIANT}-vcs
         if [[ $? = 0 ]]; then
-            VCS_FUNCTION=$module-${SCBI_VCS_VARIANT}-vcs
+            VCS_VARIANT=${SCBI_VCS_VARIANT}
+            VCS_FUNCTION=$module-${VCS_VARIANT}-vcs
         fi
     fi
 
     fn-exists $VCS_FUNCTION
 
     if [[ $? = 0 ]]; then
+        #  First we output the actual variant used
+        echo $VCS_VARIANT
+
         fn-exists scbi-rewrite-vcs
         if [[ $? = 0 ]]; then
             scbi-rewrite-vcs $($VCS_FUNCTION)
@@ -342,11 +349,11 @@ function get-vcs()
 
     vcs=( $(get-vcs-data $module $variant) )
 
-    local VCS_PROXY=${vcs[0]}
-    local VCS_OPTIONS=${vcs[1]}
-    local VCS_NAME=${vcs[2]}
-    local VCS_URL=${vcs[3]}
-    local VCS_DIR=${vcs[4]}
+    local VCS_PROXY=${vcs[1]}
+    local VCS_OPTIONS=${vcs[2]}
+    local VCS_NAME=${vcs[3]}
+    local VCS_URL=${vcs[4]}
+    local VCS_DIR=${vcs[5]}
 
     local res=0
 
