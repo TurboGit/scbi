@@ -12,47 +12,55 @@ function darktable-out-of-tree()
     echo true
 }
 
-function darktable-clang-depends()
+function darktable-build-depends()
 {
-    echo llvm-10
-    echo clang-10
+    echo os@-cmake
+    echo os@-python3-jsonschema
+    echo os@-intltool
+    echo os@-xsltproc
+    echo os@-findbin
+}
+
+function darktable-clang-build-depends()
+{
+    echo os@-llvm-10
+    echo os@-clang-10
 }
 
 function darktable-depends()
 {
-    echo cmake
-    echo libsqlite3-dev
-    echo libpng-dev
-    echo libjpeg-dev
-    echo libopenjp2-7-dev
-    echo libpugixml-dev
-    echo libxml2-dev
-    echo liblcms2-dev
-    echo libtiff-dev
-    echo libexiv2-dev
-    echo libcurl4
-    echo libcurl4-gnutls-dev
-    echo libgphoto2-dev
-    echo libopenexr-dev
-    echo libsoup2.4-dev
-    echo liblua5.3-dev
-    echo libosmgpsmap-1.0-dev
-    echo libgraphicsmagick1-dev
-    echo libcolord-dev
-    echo libcolord-gtk-dev
-    echo libgomp1
-    echo libgmic-dev
-    echo libcups2-dev
-    echo libsecret-1-dev
-    echo xsltproc
-    echo libimage-exiftool-perl
-    echo libxml2-utils
-    echo python3-jsonschema
-    echo intltool
-    echo liblensfun-dev
-    echo librsvg2-dev
-    echo libjson-glib-dev
-    echo libpod-parser-perl
+    echo os@-sqlite3-dev
+    echo os@-png-dev
+    echo os@-jpeg-dev
+    echo os@-openjp2-dev
+    echo os@-pugixml-dev
+    echo os@-xml2-dev
+    echo os@-lcms2-dev
+    echo os@-tiff-dev
+    echo os@-exiv2-dev
+    echo os@-curl4
+    echo os@-curl4-gnutls-dev
+    echo os@-gphoto2-dev
+    echo os@-openexr-dev
+    echo os@-soup2-dev
+    echo os@-lua5.3-dev
+    echo os@-osmgpsmap-1.0-dev
+    echo os@-graphicsmagick1-dev
+    echo os@-colord-dev
+    echo os@-colord-gtk-dev
+    echo os@-gomp1
+    echo os@-gmic-dev
+    echo os@-cups2-dev
+    echo os@-secret-dev
+    echo os@-xml2-utils
+    echo os@-lensfun-dev
+    echo os@-rsvg2-dev
+    echo os@-json-glib-dev
+    echo os@-pod-parser-perl
+    echo os@-avif-dev
+    echo os@-webp-dev
+    echo os@-cairo-dev
+    echo os@-image-exiftool-perl
 }
 
 function darktable-clang-build-env()
