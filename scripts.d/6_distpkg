@@ -300,6 +300,7 @@ function check-pkg()
     local name_ver=( ${1/:/ } )
     local pkg=${name_ver[0]}
     local version=${name_ver[1]}
+    local cpres=0
 
     for distname in $(get-pkg-name "$pkg"); do
         check-${SCBI_LINUX_DISTRIB}-pkg $distname $version
@@ -308,21 +309,21 @@ function check-pkg()
 
         if [[ $res = 3 ]]; then
             echo "error: $distname not found"
-            return 2
+            cpres=2
         elif [[ $res = 2 ]]; then
             if [[ $version == NONE ]]; then
                 echo "error: $distname should be installed"
             else
                 echo "error: $distname:$version should be installed"
             fi
-            return 1
+            cpres=1
         elif [[ $res = 1 ]]; then
             echo "error: $distname:$version should be installed"
-            return 1
-        else
-            return 0
+            cpres=1
         fi
     done
+
+    return $cpres
 }
 
 init-${SCBI_LINUX_DISTRIB}-pkg
