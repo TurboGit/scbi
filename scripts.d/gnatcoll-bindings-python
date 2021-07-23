@@ -9,8 +9,9 @@ function gnatcoll-bindings-python-vcs()
 
 function gnatcoll-bindings-python-depends()
 {
+    echo os@-python3-dev
+
     echo gnatcoll-core
-    echo libpython-dev
 }
 
 function gnatcoll-bindings-python-tar()
@@ -33,8 +34,11 @@ function gnatcoll-bindings-python-build-env()
     local PREFIX=$1
     local TARGET=$2
 
-    export GNATCOLL_PYTHON_CFLAGS="-I/usr/include/python2.7"
-    export GNATCOLL_PYTHON_LIBS="-lpython2.7"
+    PYINC=$(get-os-inc-dir /usr/include/python3*/Python.h)
+    PYLIB=$(basename $PYINC)
+
+    export GNATCOLL_PYTHON_CFLAGS="-I$PYINC"
+    export GNATCOLL_PYTHON_LIBS="-l$PYLIB"
 }
 
 function gnatcoll-bindings-python-cross-build-env()
@@ -42,8 +46,11 @@ function gnatcoll-bindings-python-cross-build-env()
     local PREFIX=$1
     local TARGET=$2
 
-    export GNATCOLL_PYTHON_CFLAGS="-I$SCBI_BDIR/install/$TARGET/Python27/include"
-    export GNATCOLL_PYTHON_LIBS="-lpython2.7"
+    PYINC=$(get-os-inc-dir $SCBI_BDIR/install/$TARGET/Python3*/include/Python.h)
+    PYLIB=$(basename ${PYINC%%/include})
+
+    export GNATCOLL_PYTHON_CFLAGS="-I$PYINC"
+    export GNATCOLL_PYTHON_LIBS="-l$PYLIB"
 }
 
 function gnatcoll-bindings-python-build()
