@@ -318,7 +318,13 @@ File \file{.plan-next}:
  aws:v1
 \end{lstlisting}
 
-A group can be used in a build plan to group together all modules with the same version. A group starts with \code{[} and ends with \code{] /variant:version} where version specify the variant and/or version.
+A group can be used in a build plan to group together all modules with the same version. To define a group:
+
+\begin{description}
+	\item[ {[} barrier] Start with a square bracket and an option barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a variant. The group will be evaluated only if the barrier evaluate to true otherwise it will be skipped. If the barrier is not specified the group will always be evaluated (i.e. the barrier is by default TRUE).
+
+	\item[ {]} /variant:version ] Ends with \code{/variant:version} with is the variant and version to apply to all module in the group. Both \code{variant} and \code{version} are optional.
+\end{description}
 
 \begin{lstlisting}
 	lcms2:v2
@@ -335,6 +341,10 @@ And finally, to build one just need to pass the build plan as option:
 Note that if a module is set as \code{skip} on the build plan, to build the default version one need to force it on the command line:
 
 \cmd{scbi \ddash{}plan=next lcms2:force aws}
+
+A set of variants separated with a dot can be specified with the build plan. In the following example we set the \code{mpi} variant of the build plan \code{next}. This will activate all groups having the following barrier "\code{= mpi}".
+
+\cmd{scbi \ddash{}plan=next/mpi lcms2:force aws}
 
 It is possible to list the final build plan using \code{\ddash{}list-plan} option. See \ref{cmdline}.
 

@@ -1,0 +1,23 @@
+################### A plan
+
+modA
+
+[
+        modB/new
+] :vZ
+
+[
+        modH:vB
+] /fast
+
+[
+        modC/nochange:vX
+] /fast:vc
+
+[
+        modD/one:vA
+] /fast
+
+[
+        modE/one:vA
+] :vV

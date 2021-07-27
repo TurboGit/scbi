@@ -1070,6 +1070,27 @@ function all-variants()
     fi
 }
 
+############################## has variant
+# returns true if variants exists
+#
+#  if [[ has-variant "v1.v2" v2 ]]; then
+#     ...
+#  fi
+
+function has-variant()
+{
+    local VARIANTS=$1
+    local VAR=$2
+
+    for v in $(all-variants $VARIANTS); do
+        if [[ $v == $VAR ]]; then
+            echo "yes"
+            return 0
+        fi
+    done
+    return 1
+}
+
 ############################## create-standalone-package
 
 function copy-module-src-callback()

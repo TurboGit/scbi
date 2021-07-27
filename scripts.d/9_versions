@@ -6,7 +6,18 @@ declare -A MODVER
 
 function load-module-plan()
 {
-    local PLAN=$PWD/.scbi-plan-$1
+    local NAMEREF=$1
+
+    local VARIANT=${NAMEREF##*/}
+
+    if [[ $VARIANT == $NAMEREF ]]; then
+        VARIANT=""
+        NAME=${NAMEREF}
+    else
+        NAME=${NAMEREF%/*}
+    fi
+
+    local PLAN=$PWD/.scbi-plan-$NAME
 
     local GROUP=no
     local GMOD=""
@@ -14,11 +25,11 @@ function load-module-plan()
     # if not found in definitions install dir, look in current directory
 
     if [[ ! -f $PLAN ]]; then
-        PLAN=$SCBI_DEFS/.plan-$1
+        PLAN=$SCBI_DEFS/.plan-$NAME
     fi
 
     if [[ -f $PLAN ]]; then
-        while read modref arg; do
+        while read modref arg var; do
             if [[ "$modref" = "@load" ]]; then
                 load-module-plan $arg
             elif [[ "$modref" = "@on" ]]; then
@@ -69,15 +80,30 @@ function load-module-plan()
                 done
                 GROUP=no
                 GMOD=""
-            elif [[ $GROUP = yes ]]; then
+            elif [[ $GROUP != no ]]; then
                 # stote all module's group in GMOD
-                GMOD="$GMOD $modref"
+                [[ $GROUP == yes ]] && GMOD="$GMOD $modref"
             elif [[ "$modref" = "[" ]]; then
                 if [[ ! -z $arg ]]; then
-                    elog build "build plan unexpected $arg on group start"
-                    exit 1
+                    if [[ $arg = "=" ]]; then
+                        if [[ $(has-variant "$VARIANT" $var) ]]; then
+                            GROUP=yes
+                        else
+                            GROUP=closed
+                        fi
+                    elif [[ $arg = "/=" ]]; then
+                        if [[ $(has-variant "$VARIANT" $var) ]]; then
+                            GROUP=closed
+                        else
+                            GROUP=yes
+                        fi
+                    else
+                       elog build "build plan unexpected $arg on group start"
+                       exit 1
+                    fi
+                else
+                    GROUP=yes
                 fi
-                GROUP=yes
             elif [[ "${modref:0:1}" != "#" ]]; then
                 local module_info=( $(parse-module-ref $modref) )
                 local module=${module_info[0]}

@@ -1,0 +1,19 @@
+modA
+modB
+modC
+
+[ = mpi
+        modA/mpi.fast
+        modG/mpi
+        modH/mpi:v8
+] :master
+
+[ /= mpi
+        modA
+        modG
+        modH
+] :master
+
+[ = fast
+        modH
+] /fast:rz
