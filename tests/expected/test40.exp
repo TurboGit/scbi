@@ -14,9 +14,9 @@ modJ/speed
 xxxx/xx/xx xx:xx:xx : build (FAILED) build plan unexpected modB on group start
 ========================= C
 There is x module(s) in the plan
-modH/fast:vB
-modE/one:vV
-modD/fast:vA
 modA
-modC/fast:vc
 modB/new:vZ
+modC/fast:vc
+modD/fast:vA
+modE/one:vV
+modH/fast:vB

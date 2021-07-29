@@ -17,4 +17,4 @@ echo "========================= B"
 ./scbi --plan=group2 --list-plan lib1 | tr '[0-9]' 'x'
 
 echo "========================= C"
-./scbi --plan=group3 --list-plan lib1 | tr '[0-9]' 'x'
+./scbi --plan=group3 --list-plan lib1 | o | tr '[0-9]' 'x'
