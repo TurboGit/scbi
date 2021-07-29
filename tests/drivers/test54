@@ -1,0 +1,16 @@
+# Check handling of parameters with spaces & get-config-options
+
+echo "========== OPT-A"
+./scbi mspace/opta
+
+cat .root/builds/mspace/x86_64-linux-gnu-opta/.log/opta-config.log
+
+echo "========== OPT-B"
+./scbi mspace/optb
+
+cat .root/builds/mspace/x86_64-linux-gnu-optb/.log/optb-config.log
+
+echo "========== OPT-A + OPT-B"
+./scbi mspace/opta.optb
+
+cat .root/builds/mspace/x86_64-linux-gnu-opta.optb/.log/config.log

@@ -1,0 +1,72 @@
+
+function mspace-opta-config-options()
+{
+    echo -DLIB="-L/usr/lib -lmpi_cxx -lmpi"
+}
+
+function mspace-optb-config-options()
+{
+    echo -DLIB="-lz1 -lz2 -lz3"
+}
+
+function mspace-common-config-options()
+{
+    echo one
+    echo two
+}
+
+function display-opt()
+{
+    local n=64
+
+    while [[ ! -z $1 ]]; do
+        n=$(( $n + 1 ))
+        printf '%b %s\n' \\$(printf "%o" $n) "$1"
+        shift
+    done
+}
+
+function mspace-opta-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    IFS=$'\n'
+
+    local OPTIONS=( $(get-config-options $PREFIX $TARGET $VARIANT) )
+
+    display-opt ${OPTIONS[*]}
+
+    unset IFS
+}
+
+function mspace-optb-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    IFS=$'\n'
+
+    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
+
+    display-opt $OPTIONS
+
+    unset IFS
+}
+
+function mspace-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    for V in $(all-variants $VARIANT); do
+        mspace-opta-config $PREFIX $TARGET $V
+    done
+
+    for V in $(all-variants $VARIANT); do
+        mspace-optb-config $PREFIX $TARGET $V
+    done
+}
