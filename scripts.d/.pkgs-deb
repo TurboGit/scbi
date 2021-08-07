@@ -70,6 +70,7 @@ os@-libxinerama-dev                 libxinerama-dev
 os@-libxrandr-dev                   libxrandr-dev
 os@-llvm10                          llvm-10
 os@-lua5.3-dev                      liblua5.3-dev
+os@-lua5.4-dev                      liblua5.4-dev
 os@-make                            make
 os@-metis-dev                       libmetis-dev
 os@-ncurses-dev                     libncurses-dev

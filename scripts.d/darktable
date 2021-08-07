@@ -43,7 +43,7 @@ function darktable-depends()
     echo os@-gphoto2-dev
     echo os@-openexr-dev
     echo os@-soup2-dev
-    echo os@-lua5.3-dev
+    echo os@-lua5.4-dev
     echo os@-osmgpsmap-1.0-dev
     echo os@-graphicsmagick1-dev
     echo os@-colord-dev

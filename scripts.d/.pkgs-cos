@@ -71,6 +71,7 @@ os@-libxinerama-dev                 libXinerama-devel
 os@-libxrandr-dev                   libXrandr-devel
 os@-llvm10                          llvm-10
 os@-lua5.3-dev                      lua-devel
+os@-lua5.4-dev                      lua-devel
 os@-make                            make
 os@-metis-dev                       metis-devel
 os@-ncurses-dev                     ncurses-devel
