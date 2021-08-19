@@ -15,6 +15,11 @@ function run-shell()
 
     handle-env $modref
 
+    local module_info=( $(get-module-ref $modref) )
+    local module=${module_info[0]}
+
+    export SCBI_SHELL=$module
+
     #  If docd set (no cwd sub-option specified), we are moving into
     #  the module's build directory. In this mode we not only want the
     #  environment of all dependencies to be set but we also want the
