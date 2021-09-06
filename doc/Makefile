@@ -3,7 +3,7 @@ NAM = scbi
 TEX = $(NAM).tex
 PDF = $(NAM).pdf
 
-VER=$(shell git describe)
+VER=$(shell git describe $(CORE_SHA1))
 
 all: $(PDF)
 
@@ -12,7 +12,7 @@ force:
 version: force
 	echo '\\providecommand{\\version}{'$(VER)'}' > version.tex
 
-# %.pdf: %.tex $(DIF) $(BIB)
+#  %.pdf: %.tex $(DIF) $(BIB)
 
 $(PDF): $(TEX) $(DIF) $(BIB) version
 	-latex $(TEX)

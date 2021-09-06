@@ -2,13 +2,19 @@
 .SILENT: test
 
 SCRDIR=$(HOME)/.config/scbi
+
+#  Get SHA-1 of last commit in core SCBI
+CORE_SHA1=$(shell git log -1 --format="%h" -- Makefile \
+	bash_completion.d scbi scripts.d/[0-9]* \
+	doc tests scripts.d/.pkgs* scripts.d/.plan*)
+CORE_VER=$(shell git describe $(CORE_SHA1))
 VER=$(shell git describe)
 
 install: all
 
 all: clean.install
 	mkdir -p $(HOME)/bin
-	cat scbi | sed "s/@VERSION@/$(VER)/" > $(HOME)/bin/scbi
+	cat scbi | sed "s/@VERSION@/$(CORE_VER)/" > $(HOME)/bin/scbi
 	chmod u+x $(HOME)/bin/scbi
 	mkdir -p $(SCRDIR)
 	rm -f $(SCRDIR)/*~ $(SCRDIR)/.*~ scripts.d/*~ scripts.d/.*~
@@ -34,6 +40,6 @@ test-clean:
 	make -C tests clean
 
 doc: force
-	make -C doc
+	make CORE_SHA1=$(CORE_SHA1) -C doc
 
 force:
