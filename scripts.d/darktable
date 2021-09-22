@@ -124,7 +124,7 @@ function darktable-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j4
+    make -j$SCBI_HALF_JOBS
 }
 
 function darktable-install()
