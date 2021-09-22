@@ -484,3 +484,46 @@ function vcs-build-id()
 
     get-build-id $PREFIX $TARGET $MODREF $vid
 }
+
+############################## get-vcs-dir
+
+function get-vcs-dir()
+{
+    local modref=$1
+
+    local module_info=( $(get-module-ref $modref) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    vcs=( $(get-vcs-data $module $variant) )
+    res=$?
+
+    local VCS_NAME=${vcs[3]}
+    local VCS_URL=${vcs[4]}
+
+    REPO=$(basename $VCS_URL .git)
+
+    if [[ $kind == DEV ]]; then
+        local SCBI_VCS_REPO=
+
+        case $VCS_NAME in
+            git)
+                echo $SCBI_GIT_REPO/$REPO
+                ;;
+            svn|subversion)
+                echo $SCBI_SVN_REPO/$REPO
+                ;;
+            hg)
+                echo $SCBI_HG_REPO/$REPO
+                ;;
+            *)
+                elog $module unsupported VCS $VCS_NAME
+                exit 1
+        esac
+    else
+        echo $SCBI_BDIR/.vcs/$module
+    fi
+}

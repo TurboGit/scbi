@@ -17,20 +17,27 @@ function run-shell()
 
     local module_info=( $(get-module-ref $modref) )
     local module=${module_info[0]}
+    local kind=${module_info[2]}
 
     export SCBI_SHELL=$module
+
+    [[ $kind == DEV ]] && docd=yes-dev
 
     #  If docd set (no cwd sub-option specified), we are moving into
     #  the module's build directory. In this mode we not only want the
     #  environment of all dependencies to be set but we also want the
     #  build environment of the root module to be set.
 
-    if [[ $docd == yes ]]; then
+    if [[ $docd == no ]]; then
+        cd $curcd
+    else
         handle-module-env $modref build-env
 
-        cd $(get-build-dir $target $modref)
-    else
-        cd $curcd
+        if [[ $docd == yes ]]; then
+            cd $(get-build-dir $target $modref)
+        else
+            cd $(get-vcs-dir $module:dev)
+        fi
     fi
 
     #  Exports all functions into the bash sub-shell

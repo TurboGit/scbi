@@ -1327,7 +1327,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l store,target:,no-setup,no-install,update,setup,config,build,build-target:,install,log,log:yes,log:no,log:on-failure,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,stat:full,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
+    -l store,target:,no-setup,no-install,update,setup,config,build,build-target:,install,log,log:yes,log:no,log:on-failure,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,stat:full,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:dev,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -1375,6 +1375,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         --shell:sb|--shell:sandbox)
             DO_SHELL=yes
+            ;;
+        --shell:dev)
+            DO_SHELL=yes-dev
             ;;
         --shell)
             DO_SHELL=yes-nocd
@@ -1654,8 +1657,8 @@ fi
 
 #  If a shell is requested
 
-if [[ $DO_SHELL == yes ]]; then
-    run-shell $SCBI_TARGET $LAST_MODULE yes
+if [[ $DO_SHELL == yes ]] || [[ $DO_SHELL == yes-dev ]]; then
+    run-shell $SCBI_TARGET $LAST_MODULE $DO_SHELL
     exit 0
 fi
 

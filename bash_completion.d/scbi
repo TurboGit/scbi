@@ -2,7 +2,7 @@
 
 _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 -s --setup -c --config -b --build -i --install -r --tests -v --verbose
--l --shell --no-log -p --purge -P --purge-only -d --deps -a --archive -h --help
+-l --shell --shell:sandbox --shell:dev --no-log -p --purge -P --purge-only -d --deps -a --archive -h --help
 -j --jobs= --target= --env= -e --tests-only --plan= -n --no-patch --tar
 --list-depends: --list-externals --list-externals:only --list-no-version --list-filter:
 --dry-run -w --wrapup --force --enable- --safe --plugins --build-dir
@@ -49,6 +49,15 @@ _scbi_log()
     echo yes
     echo no
     echo on-failure
+}
+
+_scbi_shell()
+{
+    local ROOT r b
+    local IFS=$'\n'
+
+    echo dev
+    echo sandbox
 }
 
 _scbi_env()
@@ -170,6 +179,10 @@ _scbi()
             ;;
         --log:*)
             _scbicomp "$(_scbi_log)" "" "${cur##--log:}"
+            return 0
+            ;;
+        --shell:*)
+            _scbicomp "$(_scbi_shell)" "" "${cur##--shell:}"
             return 0
             ;;
         -*)
