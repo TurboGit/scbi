@@ -13,7 +13,7 @@ VER=$(shell git describe)
 install: all
 
 all: clean.install
-	mkdir -p $(HOME)/bin
+	mkdir -p $(HOME)/bin $(HOME)/.bash_completion.d/
 	cat scbi | sed "s/@VERSION@/$(CORE_VER)/" > $(HOME)/bin/scbi
 	chmod u+x $(HOME)/bin/scbi
 	mkdir -p $(SCRDIR)
@@ -22,6 +22,7 @@ all: clean.install
 	echo "CORE plugins : ${VER}" > $(SCRDIR)/.scbi_core_version.txt
 
 	cd scripts.d; find . -type f > $(SCRDIR)/.core.plugins
+	cp bash_completion.d/scbi $(HOME)/.bash_completion.d/
 
 clean.install:
 	if [ -f $(SCRDIR)/.core.plugins ]; then            \
@@ -32,6 +33,7 @@ clean.install:
 		rm -f $(SCRDIR)/.core.plugins;             \
 		rm -f $(SCRDIR)/.scbi_core_version.txt;    \
 	fi
+	rm -f $(HOME)/.bash_completion.d/scbi
 
 test:
 	make -C tests test
