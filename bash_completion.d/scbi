@@ -116,12 +116,12 @@ _scbicomp_1 ()
 {
     local c IFS=' '$'\t'$'\n'
     for c in $1; do
-	case "$c$2" in
-	    -*=*)  printf %s$'\n' "$c$2" ;;
-	    -*:*)  printf %s$'\n' "$c$2" ;;
-	    *.)    printf %s$'\n' "$c$2" ;;
-	    *)     printf %s$'\n' "$c$2 " ;;
-	esac
+        case "$c$2" in
+            -*=*)  printf %s$'\n' "$c$2" ;;
+            -*:*)  printf %s$'\n' "$c$2" ;;
+            *.)    printf %s$'\n' "$c$2" ;;
+            *)     printf %s$'\n' "$c$2 " ;;
+        esac
     done
 }
 
@@ -130,19 +130,19 @@ _scbicomp ()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
     if [ $# -gt 2 ]; then
-	cur="$3"
+        cur="$3"
     fi
 
     case "$cur" in
-	-*=)
+        -*=)
             COMPREPLY=()
-	    ;;
-	*)
-	    local IFS=$'\n'
-	    COMPREPLY=($(compgen -P "${2-}" \
-		                 -W "$(_scbicomp_1 "${1-}" "${4-}")" \
-		                 -- "$cur"))
-	    ;;
+            ;;
+        *)
+            local IFS=$'\n'
+            COMPREPLY=($(compgen -P "${2-}" \
+                                 -W "$(_scbicomp_1 "${1-}" "${4-}")" \
+                                 -- "$cur"))
+            ;;
     esac
 }
 
