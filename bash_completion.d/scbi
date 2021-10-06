@@ -14,7 +14,7 @@ _gnat_targets()
     local ROOT r b
     local IFS=$'\n'
 
-    ROOT=$(dirname $(which gcc))
+    ROOT=$(dirname $(command -v gcc))
 
     for r in $(ls -d $ROOT/../libexec/gcc/* 2>/dev/null); do
         b=$(basename $r)

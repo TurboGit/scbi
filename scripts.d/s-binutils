@@ -28,7 +28,7 @@ function s-binutils-version()
         TOOL=${TARGET}-ld
     fi
 
-    if [[ "$(which $TOOL)" = "" ]]; then
+    if [[ "$(command -v $TOOL)" = "" ]]; then
         echo $VERSION_ERROR
     else
         echo $($TOOL --version | head -1 | cut -d' ' -f5)
