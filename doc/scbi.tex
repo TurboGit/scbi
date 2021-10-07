@@ -256,9 +256,10 @@ An environment is a set of shell variables used to control the build environment
 
 	\item[SCBI\_TARGET] The target triplet for the builds. \\Default is \code{\$SCBI\_HOST}.
 
-	\item[SCBI\_JOBS] The number of simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores.
+	\item[SCBI\_JOBS] The number of simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores. This can be overwritten using \code{--jobs} option.
 	\label{njobs}
 \label{make-njobs}
+	\item[SCBI\_HALF\_JOBS] Half the simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores divided by 2. This can be overwritten using \code{--jobs} option.
 \end{description}
 
 \subsubsection{Environment files}

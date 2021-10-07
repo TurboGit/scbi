@@ -1438,6 +1438,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         -j|--jobs)
             SCBI_JOBS=$2; shift
+            SCBI_HALF_JOBS=$SCBI_JOBS
             ;;
         --plan)
             SCBI_PLAN_CL=$2; shift
