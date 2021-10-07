@@ -172,7 +172,7 @@ A module is described in an SCBI plug-in script (one plug-in in one file). It ca
 
 		\item[native] \index{variant!native}A variant name that can be defined to use the distribution package. This name \code{native} is mandatory in this case and requited when using the \code{auto} mode (see below). When a \code{native} variant is referenced the \code{build-depends} hook is not used (\seeref{native variant}).
 
-		\item[auto] \index{variant!auto}A specific variant name which checks the dependencies of the defined \code{native} variant and use it if all dependencies are available (not necessary installed). The \code{auto} variant should not be defined in a lug-in script but only used in references. The \code{native} and \code{auto} variant can be used together to build a package or use the native one depending on the availability of the dependencies on the running OS.
+		\item[auto] \index{variant!auto}A specific variant name which checks the dependencies of the defined \code{native} variant and use it if all dependencies are available (not necessary installed). The \code{auto} variant should not be defined in a plug-in script but only used in references. The \code{native} and \code{auto} variant can be used together to build a package or use the native one depending on the availability of the dependencies on the running OS.
 	\end{description}
 
 	\item[version] The version to build. This version string can be either:
