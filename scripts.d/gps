@@ -57,7 +57,7 @@ function gps-config()
         ln -s $SCBI_BDIR/ada-language-server/$TARGET-default/build \
            ada_language_server
 
-        ./configure --prefix=$PREFIX --with-gtk=$GTKV \
+        ./configure --prefix=$PREFIX --with-gtk=$SCBI_GTK_VERSION \
                     --with-sqlite=embedded --with-gnatcoll=$SCBI_BDIR/install \
                     --with-clang=/usr/lib/llvm-11/lib
     )

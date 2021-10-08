@@ -65,8 +65,8 @@ function darktable-depends()
 
 function darktable-clang-build-env()
 {
-    add-to-var CC  clang-$CLANG_VER
-    add-to-var CXX clang++-$CLANG_VER
+    add-to-var CC  clang-$SCBI_CLANG_VERSION
+    add-to-var CXX clang++-$SCBI_CLANG_VERSION
 }
 
 function darktable-env()
