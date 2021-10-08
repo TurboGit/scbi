@@ -11,6 +11,7 @@ function gnatcoll-bindings-iconv-depends()
 {
     echo gnatcoll-core
     echo xmlada
+    echo s-libiconv:#1.15
 }
 
 function gnatcoll-bindings-iconv-tar()
@@ -28,25 +29,19 @@ function gnatcoll-bindings-iconv-out-of-tree()
     echo false
 }
 
-function gnatcoll-bindings-iconv-cross-build()
-{
-    local PREFIX=$1
-    local TARGET=$2
-
-    echo Not supported on cross $TARGET
-    return 1
-}
-
 function gnatcoll-bindings-iconv-build()
 {
     local PREFIX=$1
     local TARGET=$2
 
-    GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET -XGNATCOLL_ICONV_OPT="
+    GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
 
     for kind in static relocatable static-pic; do
         gprbuild $GOPTS -XLIBRARY_TYPE=$kind iconv/gnatcoll_iconv.gpr
+        [[ $res != 0 ]] && exit 1
     done
+
+    true
 }
 
 function gnatcoll-bindings-iconv-install()
@@ -56,7 +51,6 @@ function gnatcoll-bindings-iconv-install()
 
     GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
     GOPTS="$GOPTS --build-var=LIBRARY_TYPE"
-    GOPTS="$GOPTS -XGNATCOLL_ICONV_OPT="
 
     PM=$PREFIX/$TARGET/install/$TARGET/share/gpr/manifests
 
@@ -69,5 +63,8 @@ function gnatcoll-bindings-iconv-install()
                    --build-var=GNATCOLL.ICONV_BUILD \
                    --install-name=gnatcoll_iconv \
                    --build-name=$kind iconv/gnatcoll_iconv.gpr
+        [[ $? != 0 ]] && exit 1
     done
+
+    true
 }
