@@ -1,0 +1,16 @@
+========== OPT-A
+dependencies error building mcross/opta
+error: cross-opta not found
+error: cross-general not found
+========== OPT-B
+dependencies error building mcross/optb
+error: cross-optb not found
+error: cross-general not found
+========== OPT-A + OPT-B
+dependencies error building mcross/opta.optb
+error: cross-opta not found
+error: cross-optb not found
+error: cross-general not found
+========== NO-OPT
+dependencies error building mcross
+error: cross-general not found

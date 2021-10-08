@@ -280,9 +280,20 @@ function get-all-depends()
     local NATIVEFOUND=false
 
     for v in default $(all-variants $variant); do
-        FCT="$module-$v-$hook"
-        fn-exists $FCT
-        if [[ $? = 0 ]]; then
+        found=0
+        if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
+            FCT="$module-$v-cross-$hook"
+            fn-exists $FCT
+            [[ $? = 0 ]] && found=1
+        fi
+
+        if [[ $found = 0 ]]; then
+            FCT="$module-$v-$hook"
+            fn-exists $FCT
+            [[ $? = 0 ]] && found=1
+        fi
+
+        if [[ $found = 1 ]]; then
             [[ "$v" == "native" ]] && NATIVEFOUND=true
             for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
                 echo $mod
@@ -291,10 +302,20 @@ function get-all-depends()
     done
 
     if [[ $NATIVEFOUND == false ]]; then
-        FCT="$module-$hook"
-        fn-exists $FCT
+        found=0
+        if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
+            FCT="$module-cross-$hook"
+            fn-exists $FCT
+            [[ $? = 0 ]] && found=1
+        fi
 
-        if [[ $? = 0 ]]; then
+        if [[ $found = 0 ]]; then
+            FCT="$module-$hook"
+            fn-exists $FCT
+            [[ $? = 0 ]] && found=1
+        fi
+
+        if [[ $found = 1 ]]; then
             for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
                 echo $mod
             done
