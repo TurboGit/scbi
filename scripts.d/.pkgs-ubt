@@ -3,6 +3,7 @@
 os@-autoconf                        autoconf
 os@-automake                        automake
 os@-autotools-dev                   autotools-dev
+os@-avif-dev                        libavif-dev
 os@-blas-dev                        libblas-dev
 os@-boost-chrono-dev                libboost-chrono-dev
 os@-boost-date-time-dev             libboost-date-time-dev

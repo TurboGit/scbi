@@ -1,0 +1,77 @@
+
+with-variant native os@-avif-dev
+
+function s-libavif-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AOMediaCodec/libavif.git
+}
+
+function s-libavif-depends()
+{
+    echo libgav1-dev
+}
+
+function s-libavif-out-of-tree()
+{
+    echo true
+}
+
+function s-libavif-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var CMAKE_PREFIX_PATH $PREFIX/lib/cmake/libavif
+    add-to-var LD_LIBRARY_PATH   $PREFIX/lib
+}
+
+function s-libavif-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX \
+          -DAVIF_CODEC_LIBGAV1=ON \
+          ../src
+}
+
+function s-libavif-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make -j$JOBS
+}
+
+function s-libavif-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make install
+}
+
+function s-libavif-darktable-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo /opt/darktable
+}
+
+function s-libavif-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo NONE
+}
