@@ -1,0 +1,76 @@
+
+function s-libiconv-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://git.savannah.gnu.org/git/libiconv.git
+}
+
+function s-libiconv-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo curl
+    echo http://ftp.gnu.org/gnu/libiconv
+    echo libiconv-$VERSION.tar.gz
+}
+
+function s-libiconv-depends()
+{
+    echo groff
+    echo gperf
+}
+
+function s-libiconv-out-of-tree()
+{
+    echo false
+}
+
+function s-libiconv-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var C_INCLUDE_PATH   $PREFIX/include
+    add-to-var CXX_INCLUDE_PATH $PREFIX/include
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
+}
+
+function s-libiconv-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./configure --prefix=$PREFIX/$TARGET --build=$HOST --host=$TARGET
+}
+
+function s-libiconv-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./configure --prefix=$PREFIX
+}
+
+function s-libiconv-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make -j$JOBS
+}
+
+function s-libiconv-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make install
+}
