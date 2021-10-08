@@ -100,6 +100,7 @@ function darktable-common-config-options()
     local VARIANT=$3
 
     echo -DCMAKE_INSTALL_PREFIX=$PREFIX
+    echo -DUSE_GAME=OFF
 }
 
 function darktable-config()
