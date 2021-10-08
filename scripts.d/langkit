@@ -53,10 +53,11 @@ function langkit-do-build()
 {
     local PREFIX=$1
     local TARGET=$2
+    local OPTS=$3
 
-    local PRJ=$3
+    local PRJ=$4
 
-    GOPTS="-p -m -j$SCBI_JOBS"
+    GOPTS="-p -m -j$SCBI_JOBS $OPTS"
 
     for KIND in static relocatable static-pic; do
         gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
@@ -69,7 +70,17 @@ function langkit-build()
     local TARGET=$2
     local VARIANT=$3
 
-    langkit-do-build $PREFIX $TARGET \
+    langkit-do-build $PREFIX $TARGET "" \
+                     ./support/langkit_support.gpr
+}
+
+function langkit-cross-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    langkit-do-build $PREFIX $TARGET "--target=$TARGET" \
                      ./support/langkit_support.gpr
 }
 
@@ -77,13 +88,14 @@ function langkit-do-install()
 {
     local PREFIX=$1
     local TARGET=$2
+    local OPTS=$3
 
-    local PRJ=$3
+    local PRJ=$4
 
-    gprinstall --prefix=$PREFIX --uninstall langkit
+    gprinstall $OPTS --prefix=$PREFIX --uninstall langkit
 
     BV="--build-var=LANGKIT_BUILD --build-var=LIBRARY_TYPE"
-    GOPTS="-p --prefix=$PREFIX $BV"
+    GOPTS="-p --prefix=$PREFIX $OPTS $BV"
 
     for KIND in static relocatable static-pic; do
         gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
@@ -97,7 +109,17 @@ function langkit-install()
     local TARGET=$2
     local VARIANT=$3
 
-    langkit-do-install $PREFIX $TARGET \
+    langkit-do-install $PREFIX $TARGET "" \
+                       ./support/langkit_support.gpr
+}
+
+function langkit-cross-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    langkit-do-install $PREFIX $TARGET "--target=$TARGET" \
                        ./support/langkit_support.gpr
 }
 
