@@ -211,8 +211,8 @@ function module-wrapper()
 
         if [[ "$step" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
             cd $SCBI_BDIR/$module
-        elif [[ -d $SCBI_BDIR/$module/build/build ]]; then
-            cd $SCBI_BDIR/$module/build/build
+        elif [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build ]]; then
+            cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build
         else
             # a native module has no sources for example
             cd $SCBI_BDIR/$module
@@ -384,7 +384,8 @@ function handle-module-env()
             echo >> $SCBI_ENV_MODULE
             echo "# $module" >> $SCBI_ENV_MODULE
         fi
-        $FCT $SCBI_BDIR/$module/build/install $SCBI_TARGET $variant
+        $FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+             $SCBI_TARGET $variant
     fi
 }
 
@@ -615,12 +616,13 @@ function handle-depends()
 
     [[ "${ref^^}" = "NONE" ]] && ref=0
 
-    [[ $DO_FORCE = yes ]] && rm -f $SCBI_BDIR/$module/build/build-id
+    [[ $DO_FORCE = yes ]] &&
+        rm -f $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id
 
     #  Check build id, only rebuild if mismatch
 
     diff -q $SCBI_BDIR/$module/build-id-$variant \
-            $SCBI_BDIR/$module/build/build-id > /dev/null 2>&1
+            $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
     rbid=$?
 
     if [[ $rbid -gt 0 \
@@ -1020,8 +1022,9 @@ function handle-module()
     if [[ $DO_CLEAN_INSTALL = yes ]]; then
         ilog $module Clean $module install for $SCBI_TARGET/$variant
         [[ -d $SCBI_BDIR/$module ]] &&
-            module-clean-install $SCBI_BDIR/$module/build/install \
-                                 $module $variant $SCBI_TARGET
+            module-clean-install \
+                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                $module $variant $SCBI_TARGET
         return 0
     fi
 
@@ -1108,7 +1111,7 @@ function handle-module()
 
         #  If force build, remove the current build id
 
-        [[ $DO_FORCE = yes ]] && rm -f build/build-id
+        [[ $DO_FORCE = yes ]] && rm -f $SCBI_TARGET-$variant/build-id
 
         #  Check build id, only rebuild if mismatch
 
@@ -1120,7 +1123,7 @@ function handle-module()
         ln -s $SCBI_TARGET-$variant build
 
         diff -q build-id-$variant \
-             $SCBI_BDIR/$module/build/build-id > /dev/null 2>&1
+             $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
 
         if [[ $? = 0 ]]; then
             ilog $module no build needed, versions match
@@ -1139,9 +1142,9 @@ function handle-module()
             # into the same location.
 
             if [[ $DO_INSTALL = yes ]] &&
-                   [[ -d $SCBI_BDIR/$module/build/install ]];
+                   [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
             then
-                rm -fr $SCBI_BDIR/$module/build/install
+                rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
                 rm -fr $SCBI_BDIR/$module/install-id
             fi
 
@@ -1155,8 +1158,8 @@ function handle-module()
             # location)
 
             if [[ $SAFE_MODE = yes ]] && [[ $ISOOT = yes ]]; then
-                rm -fr $SCBI_BDIR/$module/build/build
-                rm -fr $SCBI_BDIR/$module/build/build-id
+                rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build
+                rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id
             fi
         fi
 
@@ -1173,13 +1176,17 @@ function handle-module()
                 cd $SCBI_BDIR/$module
 
                 if [[ $SCBI_DLOG = yes ]]; then
-                    module-pre-$step $SCBI_BDIR/$module/build/install $module \
-                                     $variant $SCBI_TARGET $ISOOT 2>&1 \
+                    module-pre-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module \
+                        $variant $SCBI_TARGET $ISOOT 2>&1 \
                         | tee $log
                     res=${PIPESTATUS[0]}
                 else
-                    module-pre-$step $SCBI_BDIR/$module/build/install $module \
-                                     $variant $SCBI_TARGET $ISOOT 2>&1 \
+                    module-pre-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module \
+                        $variant $SCBI_TARGET $ISOOT 2>&1 \
                         | tee -a $log
                     res=${PIPESTATUS[0]}
                 fi
@@ -1192,13 +1199,15 @@ function handle-module()
 
             #  Apply module specific step if any
 
-            module-variant-wrapper $SCBI_BDIR/$module/build/install $module \
-                                   $variant pre-$step || exit 1
+            module-variant-wrapper \
+                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $module \
+                $variant pre-$step || exit 1
 
             ########## module
 
-            module-variant-wrapper $SCBI_BDIR/$module/build/install $module \
-                                   $variant $step || exit 1
+            module-variant-wrapper \
+                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $module \
+                $variant $step || exit 1
 
             #  Apply any generic step (module-setup, module-purge)
 
@@ -1210,12 +1219,14 @@ function handle-module()
                 cd $SCBI_BDIR/$module
 
                 if [[ $SCBI_DLOG = yes ]]; then
-                    module-$step $SCBI_BDIR/$module/build/install $module \
-                                 $variant $SCBI_TARGET $ISOOT 2>&1 | tee $log
+                    module-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee $log
                     res=${PIPESTATUS[0]}
                 else
-                    module-$step $SCBI_BDIR/$module/build/install $module \
-                                 $variant $SCBI_TARGET $ISOOT 2>&1 | tee -a $log
+                    module-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee -a $log
                     res=${PIPESTATUS[0]}
                 fi
             fi
@@ -1227,8 +1238,9 @@ function handle-module()
 
             ########## POST module
 
-            module-variant-wrapper $SCBI_BDIR/$module/build/install $module \
-                                   $variant post-$step || exit 1
+            module-variant-wrapper \
+                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                $module $variant post-$step || exit 1
 
             res=0
 
@@ -1238,14 +1250,16 @@ function handle-module()
                 cd $SCBI_BDIR/$module
 
                 if [[ $SCBI_DLOG = yes ]]; then
-                    module-post-$step $SCBI_BDIR/$module/build/install $module \
-                                      $variant $SCBI_TARGET $ISOOT \
-                         2>&1 | tee $log
+                    module-post-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module $variant $SCBI_TARGET $ISOOT \
+                        2>&1 | tee $log
                     res=${PIPESTATUS[0]}
                 else
-                    module-post-$step $SCBI_BDIR/$module/build/install $module \
-                                      $variant $SCBI_TARGET $ISOOT \
-                         2>&1 | tee -a $log
+                    module-post-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module $variant $SCBI_TARGET $ISOOT \
+                        2>&1 | tee -a $log
                     res=${PIPESTATUS[0]}
                 fi
             fi
@@ -1272,7 +1286,8 @@ function handle-module()
     FCT=$(get-hook $module $variant prefix)
 
     if [[ "$FCT" != "" ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
-        _IDIR=$($FCT $SCBI_BDIR/$module/build/install $SCBI_TARGET $variant)
+        _IDIR=$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                     $SCBI_TARGET $variant)
     else
         _IDIR=$SCBI_PREFIX
     fi
@@ -1281,7 +1296,7 @@ function handle-module()
         ilog $module skip global install
 
     elif [[ "$DO_INSTALL" = "yes" ]] &&
-             [[ -d $SCBI_BDIR/$module/build/install ]];
+             [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
     then
         ilog $module copy install into ..${_IDIR/$SCBI_BDIR/}
 
