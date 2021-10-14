@@ -971,7 +971,17 @@ function handle-module()
     echo "{"                                         >> $fct
     echo '    local VAR=$1'                          >> $fct
     echo '    local DIR=$2'                          >> $fct
-    echo '    export $VAR="${DIR}${!VAR:+:}${!VAR}"' >> $fct
+
+    if [[ $SCBI_IS_WINDOWS == yes ]]; then
+        echo '    if [[ $VAR == "PATH" ]]; then'              >> $fct
+        echo '        export $VAR="${DIR}${!VAR:+:}${!VAR}"'  >> $fct
+        echo '    else'                                       >> $fct
+        echo '        export $VAR="${DIR}${!VAR:+;}${!VAR}"'  >> $fct
+        echo '    fi'                                         >> $fct
+    else
+        echo '    export $VAR="${DIR}${!VAR:+:}${!VAR}"'      >> $fct
+    fi
+
     echo "}"                                         >> $fct
 
     record-build-plan $module $variant
