@@ -45,13 +45,27 @@ function check-tools-abort()
         exit 1
 }
 
-# check for tools used by scbi itself
-check-tools-abort gcc rsync sed
-
 CDPATH=
 
 #  Environment
-SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
+
+#  Setup host & Check for tools used by scbi itself
+
+SCBI_IS_WINDOWS=no
+
+if [[ $(uname -a) =~ Cygwin ]]; then
+    SCBI_IS_WINDOWS=yes
+    SCBI_HOST=x86_64-cygwin
+    check-tools-abort rsync sed
+elif [[ $(uname -a) =~ Msys ]]; then
+    SCBI_IS_WINDOWS=yes
+    SCBI_HOST=x86_64-mingw64
+    check-tools-abort rsync sed
+else
+    SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
+    check-tools-abort gcc rsync sed
+fi
+
 SCBI_TARGET=$SCBI_HOST
 SCBI_TARGET_SPECIFIED=no
 ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
