@@ -13,28 +13,34 @@ declare -A SCBI_PKGS
 #  OS dependent alias map
 declare -g -A SCBI_ALIAS
 
-SCBI_LINUX_DISTRIBS=( deb ubt cos rhl fed )
+SCBI_LINUX_DISTRIBS=( deb ubt cos rhl fed win )
 
-check-tools-abort lsb_release
+if [[ $SCBI_IS_WINDOWS == no ]]; then
+    check-tools-abort lsb_release
+fi
 
 ############################## get-distrib
 # returns the name of the current distrib
 
 function get-distrib()
 {
-    local DES=$(lsb_release -d)
-    if [[ $DES =~ "Debian" ]]; then
-        echo deb
-    elif [[ $DES =~ "Ubuntu" ]]; then
-        echo ubt
-    elif [[ $DES =~ "Red Hat" ]]; then
-        echo rhl
-    elif [[ $DES =~ "CentOS" ]]; then
-        echo cos
-    elif [[ $DES =~ "Fedora" ]]; then
-        echo fed
+    if [[ $SCBI_IS_WINDOWS == yes ]]; then
+        echo win
     else
-        echo none
+        local DES=$(lsb_release -d)
+        if [[ $DES =~ "Debian" ]]; then
+            echo deb
+        elif [[ $DES =~ "Ubuntu" ]]; then
+            echo ubt
+        elif [[ $DES =~ "Red Hat" ]]; then
+            echo rhl
+        elif [[ $DES =~ "CentOS" ]]; then
+            echo cos
+        elif [[ $DES =~ "Fedora" ]]; then
+            echo fed
+        else
+            echo none
+        fi
     fi
 }
 
@@ -156,6 +162,11 @@ function init-rhl-pkg()
     init-distrib-alias rhl
 }
 
+function init-win-pkg()
+{
+    true
+}
+
 ############################## check-deb-pkg
 # check-deb-pkg should return:
 #   3 - package not found
@@ -164,6 +175,11 @@ function init-rhl-pkg()
 #   0 - package installed with proper version
 
 function check-none-pkg()
+{
+    return 0
+}
+
+function check-win-pkg()
 {
     return 0
 }
