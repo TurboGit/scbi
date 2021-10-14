@@ -1133,7 +1133,7 @@ function handle-module()
         # the variant. this is needed as the setup won't be
         # done.
 
-        [[ -h build ]] && rm -f build
+        [[ -d build ]] && rm -fr build
         ln -s $SCBI_TARGET-$variant build
 
         diff -q build-id-$variant \

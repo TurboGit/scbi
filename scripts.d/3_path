@@ -14,7 +14,11 @@ function set-compiler-paths()
     local PREFIX=$1
     local TARGET=$2
 
-    VER=$(gcc -dumpversion)
+    local VER=1
+
+    if [[ $SCBI_IS_WINDOWS == no ]]; then
+        VER=$(gcc -dumpversion)
+    fi
 
     if [[ -z $TARGET ]]; then
         I1=$PREFIX/include/$SCBI_HOST

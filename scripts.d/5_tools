@@ -654,13 +654,19 @@ function get-build-id()
 
     # Now compute final id add compile version
 
-    if [[ "$SCBI_HOST" = "$TARGET" ]] \
-           || [[ "$(command -v $TARGET-gcc)" = "" ]];
-    then
-        echo -n $(gcc --version | head -1) ",$vid,$mid,$pid,$did" | get-md5
-
+    if [[ $SCBI_IS_WINDOWS == yes ]]; then
+        echo -n ",$vid,$mid,$pid,$did" | get-md5
     else
-        echo -n $($TARGET-gcc --version | head -1) ",$vid,$mid,$pid,$did" | get-md5
+        if [[ "$SCBI_HOST" = "$TARGET" ]] \
+               || [[ "$(command -v $TARGET-gcc)" = "" ]];
+        then
+            echo -n $(gcc --version | head -1) \
+                 ",$vid,$mid,$pid,$did" | get-md5
+
+        else
+            echo -n $($TARGET-gcc --version | head -1) \
+                 ",$vid,$mid,$pid,$did" | get-md5
+        fi
     fi
 }
 

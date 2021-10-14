@@ -115,12 +115,18 @@ function module-setup()
         fi
     fi
 
-    rm -f build
+    rm -fr build
     ln -s $TARGET-$VARIANT build
 
     if [[ "$OOT" = "yes" ]]; then
         # build must be a dir, delete link if it exists
-        [[ -h $TARGET-$VARIANT/build ]] && rm -f $TARGET-$VARIANT/build
+        # build must be a dir
+        if [[ $SCBI_HOST == "x86_64-mingw64" ]]; then
+            #  There is no symlinks on MSYS
+            [[ -d $TARGET-$VARIANT/build ]] && rm -fr $TARGET-$VARIANT/build
+        else
+            [[ -h $TARGET-$VARIANT/build ]] && rm -f $TARGET-$VARIANT/build
+        fi
         mkdir -p $TARGET-$VARIANT/build
     else
         # build must be a link, delete dir if it exists
