@@ -1585,8 +1585,8 @@ if [[ "$NSTEPS" != "" ]]; then
     STEPS=$NSTEPS
 fi
 
-# If we have specified a build directory on command line, set it now
-# that the env is loaded (takes precedence).
+#  If we have specified a build directory on command line, set it now
+#  that the env is loaded (takes precedence).
 
 if [[ ! -z $CMDLINE_BUILD_DIR ]]; then
     export SCBI_BDIR=$CMDLINE_BUILD_DIR
@@ -1598,15 +1598,15 @@ for setup in $SCBI_DEFS/[0-9]*; do
     source $setup
 done
 
-# Handle store command
+#  Handle store command
 
 if [[ $DO_STORE = yes ]]; then
     scbi-store "$STORE_KEY" "$STORE_VALUE"
     exit $?
 fi
 
-# If a plan passed on the command line ensure that it is used instead
-# of any other possibly set in the environment file.
+#  If a plan passed on the command line ensure that it is used instead
+#  of any other possibly set in the environment file.
 
 [[ ! -z $SCBI_PLAN_CL ]] && SCBI_PLAN=$SCBI_PLAN_CL
 
