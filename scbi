@@ -52,14 +52,17 @@ CDPATH=
 #  Setup host & Check for tools used by scbi itself
 
 SCBI_IS_WINDOWS=no
+SCBI_OS_MODULE=
 
 if [[ $(uname -a) =~ Cygwin ]]; then
     SCBI_IS_WINDOWS=yes
     SCBI_HOST=x86_64-cygwin
+    SCBI_OS_MODULE=windows
     check-tools-abort rsync sed
 elif [[ $(uname -a) =~ Msys ]]; then
     SCBI_IS_WINDOWS=yes
     SCBI_HOST=x86_64-mingw64
+    SCBI_OS_MODULE=windows
     check-tools-abort rsync sed
 else
     SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
@@ -1597,6 +1600,11 @@ fi
 for setup in $SCBI_DEFS/[0-9]*; do
     source $setup
 done
+
+#  Then load any OS dependent runtime module
+
+[[ -f $SCBI_DEFS/_os_$SCBI_OS_MODULE ]] &&
+    source $SCBI_DEFS/_os_$SCBI_OS_MODULE
 
 #  Handle store command
 
