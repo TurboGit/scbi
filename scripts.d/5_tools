@@ -1412,7 +1412,7 @@ function with-variant()
     local P="echo "
     while [[ ! -z "$1" ]]; do
         if [[ "$1" == "--env" ]]; then
-            H="$H }"
+            H="$H true; }"
             eval $H
             H="function $PLUGIN-$VNAME-env() { "
             P=""
