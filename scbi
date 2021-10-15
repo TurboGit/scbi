@@ -1370,7 +1370,18 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l store,target:,no-setup,no-install,update,setup,config,build,build-target:,install,log,log:yes,log:no,log:on-failure,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,stat:full,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:dev,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
+                -l store,target:,no-setup,no-install,update,setup,config \
+                -l build,build-target:,install,clean-install,tar \
+                -l log,log:yes,log:no,log:on-failure,purge,purge-only \
+                -l verbose,prefix:,tests,tests-only,help,deps \
+                -l archive,force,env:,no-patch,plan:,stat,stat:full \
+                -l list-depends:direct,list-depends:full,list-depends \
+                -l list-externals,list-externals:only,list-no-version \
+                -l list-filter:all,list-filter:dev,list-filter:runtime \
+                -l dry-run,jobs:,no-wrapup,wrapup,safe,standalone \
+                -l plugins:,build-dir,list-plan:,version,module-version \
+                -l shell,shell:dev,shell:sb,shell:sandbox \
+                -- $(echo $SCBIOPTS))
 
 while [[ $# -gt 0 ]]; do
     case $1 in
