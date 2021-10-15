@@ -1,4 +1,4 @@
-# setup for SCBI shell
+#  setup for SCBI shell
 
 function run-shell()
 {

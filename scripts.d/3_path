@@ -83,8 +83,8 @@ function no-target-env()
     if [[ -z $PREFIX ]]; then
         PREFIX=$(dirname $(dirname $(command -v gcc)))
 
-        # check if gcc is inside a target specific dir
-        # <prefix>/<target>/bin
+        #  check if gcc is inside a target specific dir
+        #  <prefix>/<target>/bin
 
         if [[ -x $PREFIX/../bin/gcc ]]; then
             local DN=$(dirname $PREFIX)
@@ -140,7 +140,7 @@ function built-compiler()
 export PATH=$SCBI_PREFIX/bin:$PATH
 set-compiler-paths $SCBI_PREFIX
 
-# make an alias for x86_64-linux if necessary
+#  make an alias for x86_64-linux if necessary
 
 if [[ -e $PREFIX/x86_64-linux-gnu ]] && [[ ! -e $PREFIX/x86_64-linux ]]; then
     (

@@ -194,13 +194,13 @@ function module-wrapper()
     local pvariant=""
     local dvariant=""
 
-    # set variant parameter if different than default
+    #  set variant parameter if different than default
 
     if [[ "$variant" != "default" ]]; then
         pvariant=$variant
     fi
 
-    # set variant display if not part of step and not default
+    #  set variant display if not part of step and not default
 
     if [[ ${step/$variant/} == $step && "$variant" != "default" ]]; then
         dvariant=" [${variant//./ }]"
@@ -212,10 +212,10 @@ function module-wrapper()
         mstep=$step
     fi
 
-    # global logs
+    #  global logs
     log=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-$variant-$mstep.log
 
-    # local log for last module command
+    #  local log for last module command
     mlog=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/$mstep.log
     clog=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/$mstep.cmd
 
@@ -231,7 +231,7 @@ function module-wrapper()
         elif [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build ]]; then
             cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build
         else
-            # a native module has no sources for example
+            #  a native module has no sources for example
             cd $SCBI_BDIR/$module
         fi
 
@@ -373,8 +373,8 @@ function handle-module-env()
 
     [[ $ref = "skip" ]] && return 0
 
-    # For a build environment we call the hook from the build directory
-    # otherwise we call for the install directory.
+    #  For a build environment we call the hook from the build directory
+    #  otherwise we call for the install directory.
 
     if [[ $ENV = "build-env" ]]; then
         ENV_DIR=build
@@ -382,7 +382,7 @@ function handle-module-env()
         ENV_DIR=install
     fi
 
-    # Then setup the current module
+    #  Then setup the current module
 
     if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/$ENV_DIR ]]; then
         cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant/$ENV_DIR
@@ -736,7 +736,7 @@ function handle-sources()
         ln -s tarsrc src
 
     else
-        # Get sources from repository
+        #  Get sources from repository
 
         vcs=( $(get-vcs-data $module $variant) )
         res=$?
@@ -860,7 +860,7 @@ function handle-meta-module()
     local metamodule=$1
     local variant=$2
 
-    # check for plan
+    #  check for plan
 
     fn-exists $metamodule-$variant-plan
 
@@ -875,7 +875,7 @@ function handle-meta-module()
         fi
     fi
 
-    # check for dependencies
+    #  check for dependencies
 
     if [[ $DEPS = yes ]]; then
         for dmodule in $(get-all-depends $metamodule $variant build-depends); do
@@ -883,7 +883,7 @@ function handle-meta-module()
         done
     fi
 
-    # check for setup
+    #  check for setup
 
     line-sep
     ilog $metamodule Metamodule $metamodule-$variant setup | tee -a $log
@@ -898,7 +898,7 @@ function handle-meta-module()
         handle-module $module || exit 1
     done
 
-    # check for wrapup
+    #  check for wrapup
 
     line-sep
     ilog $metamodule Metamodule $metamodule-$variant wrapup | tee -a $log
@@ -1005,10 +1005,10 @@ function handle-module()
         fi
     fi
 
-    # Check for depends if any, and handle them if any
+    #  Check for depends if any, and handle them if any
 
     if [[ $DEPS = yes ]]; then
-        # First we check for build dependencies
+        #  First we check for build dependencies
         (
             for dmodule in $(get-all-depends $module $variant build-depends); do
                 handle-depends $modref $dmodule
@@ -1019,7 +1019,7 @@ function handle-module()
         fi
         [[ $DRY_RUN == no ]] && line-sep
 
-        # And then we check for standard dependencies
+        #  And then we check for standard dependencies
         (
             for dmodule in $(get-all-depends $module $variant depends); do
                 handle-depends $modref $dmodule
@@ -1142,9 +1142,9 @@ function handle-module()
 
         #  Check build id, only rebuild if mismatch
 
-        # make sure the current build softlink is pointing to
-        # the variant. this is needed as the setup won't be
-        # done.
+        #  make sure the current build softlink is pointing to
+        #  the variant. this is needed as the setup won't be
+        #  done.
 
         [[ -d build ]] && rm -fr build
         ln -s $SCBI_TARGET-$variant build
@@ -1164,9 +1164,9 @@ function handle-module()
             fi
 
         else
-            # If install is requested and we already have a local install
-            # directory, clean it to ensure no old versions are installed
-            # into the same location.
+            #  If install is requested and we already have a local install
+            #  directory, clean it to ensure no old versions are installed
+            #  into the same location.
 
             if [[ $DO_INSTALL = yes ]] &&
                    [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
@@ -1175,14 +1175,14 @@ function handle-module()
                 rm -fr $SCBI_BDIR/$module/install-id
             fi
 
-            # Build is needed, on safe mode we remove the current
-            # build directory to ensure that old configuration and/or
-            # build artifacts are not going to break new build.
+            #  Build is needed, on safe mode we remove the current
+            #  build directory to ensure that old configuration and/or
+            #  build artifacts are not going to break new build.
             #
-            # Note that we do that only for out-of-tree build as in
-            # the build in-tree the sources are fully syncronized from
-            # src directory (deleting all non existing files in source
-            # location)
+            #  Note that we do that only for out-of-tree build as in
+            #  the build in-tree the sources are fully syncronized from
+            #  src directory (deleting all non existing files in source
+            #  location)
 
             if [[ $SAFE_MODE = yes ]] && [[ $ISOOT = yes ]]; then
                 rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build

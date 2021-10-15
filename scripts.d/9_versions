@@ -1,4 +1,4 @@
-############################## load-module-plan
+# ############################## load-module-plan
 #
 #
 
@@ -22,7 +22,7 @@ function load-module-plan()
     local GROUP=no
     local GMOD=""
 
-    # if not found in definitions install dir, look in current directory
+    #  if not found in definitions install dir, look in current directory
 
     if [[ ! -f $PLAN ]]; then
         PLAN=$SCBI_DEFS/.plan-$NAME
@@ -49,7 +49,7 @@ function load-module-plan()
                 else
                     REF=${modref:1}
                 fi
-                # set REF to all all module's group in GMOD
+                #  set REF to all all module's group in GMOD
                 for mod in $GMOD; do
                     local module_info=( $(parse-module-ref $mod) )
                     local module=${module_info[0]}
@@ -81,7 +81,7 @@ function load-module-plan()
                 GROUP=no
                 GMOD=""
             elif [[ $GROUP != no ]]; then
-                # stote all module's group in GMOD
+                #  stote all module's group in GMOD
                 [[ $GROUP == yes ]] && GMOD="$GMOD $modref"
             elif [[ "$modref" = "[" ]]; then
                 if [[ ! -z $arg ]]; then
@@ -200,7 +200,7 @@ function record-build-plan()
 
 function set-module-ref()
 {
-    # full module reference is name[/variant][:version]
+    #  full module reference is name[/variant][:version]
     local modref="$1"
 
     local module_info=( $(parse-module-ref $modref) )
@@ -233,17 +233,17 @@ function parse-module-ref()
 
     local module=""
 
-    # check version
+    #  check version
 
     local ver=${modref##*:}
 
     if [[ $ver == $modref ]]; then
-        # no version specified
+        #  no version specified
         local KIND=NONE
         local version=NONE
         module=$modref
     else
-        # version specified, check for tar version
+        #  version specified, check for tar version
         local vb=${ver:0:1}
 
         if [[ $ver = dev ]]; then

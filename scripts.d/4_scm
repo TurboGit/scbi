@@ -71,7 +71,7 @@ function git-co()
             [[ ! -d .git ]] &&
                 ilog build error: $(pwd) not a git repository &&
                 exit 1
-            # we set the URL in case the repo has been relocated
+            #  we set the URL in case the repo has been relocated
             git remote set-url origin $URL
             git fetch $GOPTS2
         fi &&
@@ -104,7 +104,7 @@ function hg-co()
             [[ ! -d .git ]] &&
                 ilog build error: $(pwd) not a git repository &&
                 exit 1
-            # we set the URL in case the repo has been relocated
+            #  we set the URL in case the repo has been relocated
             hg pull
         fi &&
         cd $SCBI_BDIR/$NAME &&
@@ -129,33 +129,33 @@ function git-branch()
 
         cd $SCBI_BDIR/$MODULE/vcs
 
-        # first, let's update the repository
+        #  first, let's update the repository
 
         git checkout master
         git fetch
 
-        # if no branch specified use master
+        #  if no branch specified use master
 
         if [[ $BRANCH == NONE ]]; then
             BRANCH=master
         fi
 
-        # check that $BRANCH is a known branch
+        #  check that $BRANCH is a known branch
 
         git show-ref --verify --quiet refs/remotes/origin/$BRANCH
 
         if [[ $? == 1 ]]; then
             git show-ref --verify --quiet refs/heads/$BRANCH
             if [[ $? == 1 ]]; then
-                # maybe a tag then
+                #  maybe a tag then
                 git show-ref --verify --quiet refs/tags/$BRANCH
 
                 if [[ $? == 1 ]]; then
-                    # check for a sha1
+                    #  check for a sha1
                     git rev-parse -q --verify $BRANCH^{commit} &> /dev/null
 
                     if [[ $? == 1 ]]; then
-                        # version not found
+                        #  version not found
                         ilog build "error: switching git branch"
                         return 1
                     fi
@@ -168,7 +168,7 @@ function git-branch()
             BR=refs/remotes/origin/$BRANCH
         fi
 
-        # create the build branch if needed
+        #  create the build branch if needed
 
         git show-ref --verify --quiet refs/heads/$BUILDB
 
@@ -176,7 +176,7 @@ function git-branch()
             git branch $BUILDB
         fi
 
-        # move to build branch, and initialize it
+        #  move to build branch, and initialize it
 
         git checkout $BUILDB
 
@@ -213,11 +213,11 @@ function hg-branch()
 
         cd $SCBI_BDIR/$MODULE/vcs
 
-        # first, let's update the repository
+        #  first, let's update the repository
 
         hg pull
 
-        # if no branch specified use default
+        #  if no branch specified use default
 
         if [[ $BRANCH == NONE ]]; then
             BRANCH=default

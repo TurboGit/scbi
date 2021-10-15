@@ -115,8 +115,8 @@ function init-cos-pkg()
 {
     check-tools-abort dnf rpm
 
-    # format : cmake-0:3.11.4-7.el8.x86_64
-    #          <name>-<indice>:<version>-<level>.<rel>.<arch>
+    #  format : cmake-0:3.11.4-7.el8.x86_64
+    #           <name>-<indice>:<version>-<level>.<rel>.<arch>
     while read N; do
         pkg=${N%%:*};
         pkg=${pkg%-*};
@@ -132,8 +132,8 @@ function init-fed-pkg()
 {
     check-tools-abort dnf rpm
 
-    # format : cmake-0:3.11.4-7.el8.x86_64
-    #          <name>-<indice>:<version>-<level>.<rel>.<arch>
+    #  format : cmake-0:3.11.4-7.el8.x86_64
+    #           <name>-<indice>:<version>-<level>.<rel>.<arch>
     while read N; do
         pkg=${N%%:*};
         pkg=${pkg%-*};
@@ -149,8 +149,8 @@ function init-rhl-pkg()
 {
     check-tools-abort dnf rpm
 
-    # format : cmake-0:3.11.4-7.el8.x86_64
-    #          <name>-<indice>:<version>-<level>.<rel>.<arch>
+    #  format : cmake-0:3.11.4-7.el8.x86_64
+    #           <name>-<indice>:<version>-<level>.<rel>.<arch>
     while read N; do
         pkg=${N%%:*};
         pkg=${pkg%-*};
@@ -270,7 +270,7 @@ function get-deb-lib-for-dev()
         return 1
     fi
 
-    # package name without trailing -dev
+    #  package name without trailing -dev
     local base=${pkg:0:-4}
 
     local res=$(LC_ALL=C LANG=C apt-cache depends $1 | grep 'Depends:' \
@@ -293,10 +293,10 @@ function get-pkg-name()
 {
     local pkg=$1
 
-    # if package start with os@- it is an alias, lookup
-    # in the corresponding table:
+    #  if package start with os@- it is an alias, lookup
+    #  in the corresponding table:
     #
-    #    SCBI_ALIAS[pkg]
+    #     SCBI_ALIAS[pkg]
 
     if [[ "${pkg:0:4}" == "os@-" ]]; then
         REF="SCBI_ALIAS["$pkg"]"
