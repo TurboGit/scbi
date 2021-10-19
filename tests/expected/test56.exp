@@ -1,0 +1,40 @@
+runA
+=== default
+common
+default
+=== varA
+common
+varA
+=== varB
+common
+varB
+=== varA.varB
+common
+varA
+varB
+=== common
+common
+common
+
+runB
+=== default
+common
+default
+main
+=== varA
+common
+varA
+main
+=== varB
+common
+varB
+main
+=== varA.varB
+common
+varA
+varB
+main
+=== common
+common
+common
+main

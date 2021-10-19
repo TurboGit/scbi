@@ -278,8 +278,12 @@ function get-all-depends()
     #  from the main plug-in if any.
 
     local NATIVEFOUND=false
+    local ALLVARS=$(all-variants $variant)
 
-    for v in default $(all-variants $variant); do
+    #  Always check the common depends, then the variants if defined
+    #  or otherwise the default variant.
+
+    for v in common ${ALLVARS:-default}; do
         found=0
         if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
             FCT="$module-$v-cross-$hook"
