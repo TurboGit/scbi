@@ -54,19 +54,19 @@ CDPATH=
 SCBI_IS_WINDOWS=no
 SCBI_OS_MODULE=
 
+check-tools-abort rsync sed diff
+
 if [[ $(uname -a) =~ Cygwin ]]; then
     SCBI_IS_WINDOWS=yes
     SCBI_HOST=x86_64-cygwin
     SCBI_OS_MODULE=windows
-    check-tools-abort rsync sed
 elif [[ $(uname -a) =~ Msys ]]; then
     SCBI_IS_WINDOWS=yes
     SCBI_HOST=x86_64-mingw64
     SCBI_OS_MODULE=windows
-    check-tools-abort rsync sed
 else
     SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
-    check-tools-abort gcc rsync sed
+    check-tools-abort gcc
 fi
 
 SCBI_TARGET=$SCBI_HOST
