@@ -1,4 +1,4 @@
-# keep logs for 4 months (120 days)
+#  keep logs for 4 months (120 days)
 [[ -z $KEEP_LOG_DAYS ]] && KEEP_LOG_DAYS=120
 
 SCBI_LINE_SEP=$(mktemp)
@@ -32,7 +32,7 @@ function dlog()
 
     shift
 
-    # output to console only if present
+    #  output to console only if present
     tty --silent
     [[ $? == 0 ]] && echo $ts : "  $*" > $(tty)
     echo $ts : "  $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-report.log
@@ -67,8 +67,8 @@ function elog()
 
 function clean-scbi-logs()
 {
-    # no output as the parent directory is created before the files inside,
-    # so it could be deleted before all files inside are deleted.
+    #  no output as the parent directory is created before the files inside,
+    #  so it could be deleted before all files inside are deleted.
     find $SCBI_LOGS -ctime +$KEEP_LOG_DAYS -delete &> /dev/null
 }
 
@@ -214,11 +214,11 @@ function show-command()
     echo "# $CMD"
     echo '('
 
-    # first output current working directory
+    #  first output current working directory
 
     echo "   cd $PWD"
 
-    # then source env.cmd if present
+    #  then source env.cmd if present
 
     echo "   source ../.log/fct.cmd"
     echo "   [[ -f ../.log/env.cmd ]] && source ../.log/env.cmd"

@@ -32,6 +32,7 @@ function darktable-depends()
     echo os@-sqlite3-dev
     echo os@-png-dev
     echo os@-jpeg-dev
+    echo os@-heif-dev
     echo os@-openjp2-dev
     echo os@-pugixml-dev
     echo os@-xml2-dev

@@ -57,6 +57,7 @@ os@-graphviz-dev                    libgraphviz-dev
 os@-hdf5-dev                        libhdf5-dev
 os@-hdf5-openmpi-dev                libhdf5-openmpi-dev
 os@-hdf5-tools                      hdf5-tools
+os@-heif-dev                        libheif-dev
 os@-image-exiftool-perl             libimage-exiftool-perl
 os@-intltool                        intltool
 os@-jpeg-dev                        libjpeg-dev

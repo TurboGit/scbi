@@ -45,13 +45,30 @@ function check-tools-abort()
         exit 1
 }
 
-# check for tools used by scbi itself
-check-tools-abort gcc rsync sed
-
 CDPATH=
 
 #  Environment
-SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
+
+#  Setup host & Check for tools used by scbi itself
+
+SCBI_IS_WINDOWS=no
+SCBI_OS_MODULE=
+
+if [[ $(uname -a) =~ Cygwin ]]; then
+    SCBI_IS_WINDOWS=yes
+    SCBI_HOST=x86_64-cygwin
+    SCBI_OS_MODULE=windows
+    check-tools-abort rsync sed
+elif [[ $(uname -a) =~ Msys ]]; then
+    SCBI_IS_WINDOWS=yes
+    SCBI_HOST=x86_64-mingw64
+    SCBI_OS_MODULE=windows
+    check-tools-abort rsync sed
+else
+    SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
+    check-tools-abort gcc rsync sed
+fi
+
 SCBI_TARGET=$SCBI_HOST
 SCBI_TARGET_SPECIFIED=no
 ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
@@ -177,13 +194,13 @@ function module-wrapper()
     local pvariant=""
     local dvariant=""
 
-    # set variant parameter if different than default
+    #  set variant parameter if different than default
 
     if [[ "$variant" != "default" ]]; then
         pvariant=$variant
     fi
 
-    # set variant display if not part of step and not default
+    #  set variant display if not part of step and not default
 
     if [[ ${step/$variant/} == $step && "$variant" != "default" ]]; then
         dvariant=" [${variant//./ }]"
@@ -195,10 +212,10 @@ function module-wrapper()
         mstep=$step
     fi
 
-    # global logs
+    #  global logs
     log=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-$variant-$mstep.log
 
-    # local log for last module command
+    #  local log for last module command
     mlog=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/$mstep.log
     clog=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/$mstep.cmd
 
@@ -211,10 +228,10 @@ function module-wrapper()
 
         if [[ "$step" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
             cd $SCBI_BDIR/$module
-        elif [[ -d $SCBI_BDIR/$module/build/build ]]; then
-            cd $SCBI_BDIR/$module/build/build
+        elif [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build ]]; then
+            cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build
         else
-            # a native module has no sources for example
+            #  a native module has no sources for example
             cd $SCBI_BDIR/$module
         fi
 
@@ -356,8 +373,8 @@ function handle-module-env()
 
     [[ $ref = "skip" ]] && return 0
 
-    # For a build environment we call the hook from the build directory
-    # otherwise we call for the install directory.
+    #  For a build environment we call the hook from the build directory
+    #  otherwise we call for the install directory.
 
     if [[ $ENV = "build-env" ]]; then
         ENV_DIR=build
@@ -365,7 +382,7 @@ function handle-module-env()
         ENV_DIR=install
     fi
 
-    # Then setup the current module
+    #  Then setup the current module
 
     if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/$ENV_DIR ]]; then
         cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant/$ENV_DIR
@@ -384,7 +401,8 @@ function handle-module-env()
             echo >> $SCBI_ENV_MODULE
             echo "# $module" >> $SCBI_ENV_MODULE
         fi
-        $FCT $SCBI_BDIR/$module/build/install $SCBI_TARGET $variant
+        $FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+             $SCBI_TARGET $variant
     fi
 }
 
@@ -615,12 +633,13 @@ function handle-depends()
 
     [[ "${ref^^}" = "NONE" ]] && ref=0
 
-    [[ $DO_FORCE = yes ]] && rm -f $SCBI_BDIR/$module/build/build-id
+    [[ $DO_FORCE = yes ]] &&
+        rm -f $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id
 
     #  Check build id, only rebuild if mismatch
 
     diff -q $SCBI_BDIR/$module/build-id-$variant \
-            $SCBI_BDIR/$module/build/build-id > /dev/null 2>&1
+            $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
     rbid=$?
 
     if [[ $rbid -gt 0 \
@@ -717,7 +736,7 @@ function handle-sources()
         ln -s tarsrc src
 
     else
-        # Get sources from repository
+        #  Get sources from repository
 
         vcs=( $(get-vcs-data $module $variant) )
         res=$?
@@ -841,7 +860,7 @@ function handle-meta-module()
     local metamodule=$1
     local variant=$2
 
-    # check for plan
+    #  check for plan
 
     fn-exists $metamodule-$variant-plan
 
@@ -856,7 +875,7 @@ function handle-meta-module()
         fi
     fi
 
-    # check for dependencies
+    #  check for dependencies
 
     if [[ $DEPS = yes ]]; then
         for dmodule in $(get-all-depends $metamodule $variant build-depends); do
@@ -864,7 +883,7 @@ function handle-meta-module()
         done
     fi
 
-    # check for setup
+    #  check for setup
 
     line-sep
     ilog $metamodule Metamodule $metamodule-$variant setup | tee -a $log
@@ -879,7 +898,7 @@ function handle-meta-module()
         handle-module $module || exit 1
     done
 
-    # check for wrapup
+    #  check for wrapup
 
     line-sep
     ilog $metamodule Metamodule $metamodule-$variant wrapup | tee -a $log
@@ -952,7 +971,17 @@ function handle-module()
     echo "{"                                         >> $fct
     echo '    local VAR=$1'                          >> $fct
     echo '    local DIR=$2'                          >> $fct
-    echo '    export $VAR="${DIR}${!VAR:+:}${!VAR}"' >> $fct
+
+    if [[ $SCBI_IS_WINDOWS == yes ]]; then
+        echo '    if [[ $VAR == "PATH" ]]; then'              >> $fct
+        echo '        export $VAR="${DIR}${!VAR:+:}${!VAR}"'  >> $fct
+        echo '    else'                                       >> $fct
+        echo '        export $VAR="${DIR}${!VAR:+;}${!VAR}"'  >> $fct
+        echo '    fi'                                         >> $fct
+    else
+        echo '    export $VAR="${DIR}${!VAR:+:}${!VAR}"'      >> $fct
+    fi
+
     echo "}"                                         >> $fct
 
     record-build-plan $module $variant
@@ -976,10 +1005,10 @@ function handle-module()
         fi
     fi
 
-    # Check for depends if any, and handle them if any
+    #  Check for depends if any, and handle them if any
 
     if [[ $DEPS = yes ]]; then
-        # First we check for build dependencies
+        #  First we check for build dependencies
         (
             for dmodule in $(get-all-depends $module $variant build-depends); do
                 handle-depends $modref $dmodule
@@ -990,7 +1019,7 @@ function handle-module()
         fi
         [[ $DRY_RUN == no ]] && line-sep
 
-        # And then we check for standard dependencies
+        #  And then we check for standard dependencies
         (
             for dmodule in $(get-all-depends $module $variant depends); do
                 handle-depends $modref $dmodule
@@ -1020,8 +1049,9 @@ function handle-module()
     if [[ $DO_CLEAN_INSTALL = yes ]]; then
         ilog $module Clean $module install for $SCBI_TARGET/$variant
         [[ -d $SCBI_BDIR/$module ]] &&
-            module-clean-install $SCBI_BDIR/$module/build/install \
-                                 $module $variant $SCBI_TARGET
+            module-clean-install \
+                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                $module $variant $SCBI_TARGET
         return 0
     fi
 
@@ -1108,19 +1138,19 @@ function handle-module()
 
         #  If force build, remove the current build id
 
-        [[ $DO_FORCE = yes ]] && rm -f build/build-id
+        [[ $DO_FORCE = yes ]] && rm -f $SCBI_TARGET-$variant/build-id
 
         #  Check build id, only rebuild if mismatch
 
-        # make sure the current build softlink is pointing to
-        # the variant. this is needed as the setup won't be
-        # done.
+        #  make sure the current build softlink is pointing to
+        #  the variant. this is needed as the setup won't be
+        #  done.
 
-        [[ -h build ]] && rm -f build
+        [[ -d build ]] && rm -fr build
         ln -s $SCBI_TARGET-$variant build
 
         diff -q build-id-$variant \
-             $SCBI_BDIR/$module/build/build-id > /dev/null 2>&1
+             $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
 
         if [[ $? = 0 ]]; then
             ilog $module no build needed, versions match
@@ -1134,29 +1164,29 @@ function handle-module()
             fi
 
         else
-            # If install is requested and we already have a local install
-            # directory, clean it to ensure no old versions are installed
-            # into the same location.
+            #  If install is requested and we already have a local install
+            #  directory, clean it to ensure no old versions are installed
+            #  into the same location.
 
             if [[ $DO_INSTALL = yes ]] &&
-                   [[ -d $SCBI_BDIR/$module/build/install ]];
+                   [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
             then
-                rm -fr $SCBI_BDIR/$module/build/install
+                rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
                 rm -fr $SCBI_BDIR/$module/install-id
             fi
 
-            # Build is needed, on safe mode we remove the current
-            # build directory to ensure that old configuration and/or
-            # build artifacts are not going to break new build.
+            #  Build is needed, on safe mode we remove the current
+            #  build directory to ensure that old configuration and/or
+            #  build artifacts are not going to break new build.
             #
-            # Note that we do that only for out-of-tree build as in
-            # the build in-tree the sources are fully syncronized from
-            # src directory (deleting all non existing files in source
-            # location)
+            #  Note that we do that only for out-of-tree build as in
+            #  the build in-tree the sources are fully syncronized from
+            #  src directory (deleting all non existing files in source
+            #  location)
 
             if [[ $SAFE_MODE = yes ]] && [[ $ISOOT = yes ]]; then
-                rm -fr $SCBI_BDIR/$module/build/build
-                rm -fr $SCBI_BDIR/$module/build/build-id
+                rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build
+                rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id
             fi
         fi
 
@@ -1173,13 +1203,17 @@ function handle-module()
                 cd $SCBI_BDIR/$module
 
                 if [[ $SCBI_DLOG = yes ]]; then
-                    module-pre-$step $SCBI_BDIR/$module/build/install $module \
-                                     $variant $SCBI_TARGET $ISOOT 2>&1 \
+                    module-pre-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module \
+                        $variant $SCBI_TARGET $ISOOT 2>&1 \
                         | tee $log
                     res=${PIPESTATUS[0]}
                 else
-                    module-pre-$step $SCBI_BDIR/$module/build/install $module \
-                                     $variant $SCBI_TARGET $ISOOT 2>&1 \
+                    module-pre-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module \
+                        $variant $SCBI_TARGET $ISOOT 2>&1 \
                         | tee -a $log
                     res=${PIPESTATUS[0]}
                 fi
@@ -1192,13 +1226,15 @@ function handle-module()
 
             #  Apply module specific step if any
 
-            module-variant-wrapper $SCBI_BDIR/$module/build/install $module \
-                                   $variant pre-$step || exit 1
+            module-variant-wrapper \
+                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $module \
+                $variant pre-$step || exit 1
 
             ########## module
 
-            module-variant-wrapper $SCBI_BDIR/$module/build/install $module \
-                                   $variant $step || exit 1
+            module-variant-wrapper \
+                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $module \
+                $variant $step || exit 1
 
             #  Apply any generic step (module-setup, module-purge)
 
@@ -1210,12 +1246,14 @@ function handle-module()
                 cd $SCBI_BDIR/$module
 
                 if [[ $SCBI_DLOG = yes ]]; then
-                    module-$step $SCBI_BDIR/$module/build/install $module \
-                                 $variant $SCBI_TARGET $ISOOT 2>&1 | tee $log
+                    module-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee $log
                     res=${PIPESTATUS[0]}
                 else
-                    module-$step $SCBI_BDIR/$module/build/install $module \
-                                 $variant $SCBI_TARGET $ISOOT 2>&1 | tee -a $log
+                    module-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee -a $log
                     res=${PIPESTATUS[0]}
                 fi
             fi
@@ -1227,8 +1265,9 @@ function handle-module()
 
             ########## POST module
 
-            module-variant-wrapper $SCBI_BDIR/$module/build/install $module \
-                                   $variant post-$step || exit 1
+            module-variant-wrapper \
+                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                $module $variant post-$step || exit 1
 
             res=0
 
@@ -1238,14 +1277,16 @@ function handle-module()
                 cd $SCBI_BDIR/$module
 
                 if [[ $SCBI_DLOG = yes ]]; then
-                    module-post-$step $SCBI_BDIR/$module/build/install $module \
-                                      $variant $SCBI_TARGET $ISOOT \
-                         2>&1 | tee $log
+                    module-post-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module $variant $SCBI_TARGET $ISOOT \
+                        2>&1 | tee $log
                     res=${PIPESTATUS[0]}
                 else
-                    module-post-$step $SCBI_BDIR/$module/build/install $module \
-                                      $variant $SCBI_TARGET $ISOOT \
-                         2>&1 | tee -a $log
+                    module-post-$step \
+                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $module $variant $SCBI_TARGET $ISOOT \
+                        2>&1 | tee -a $log
                     res=${PIPESTATUS[0]}
                 fi
             fi
@@ -1272,7 +1313,8 @@ function handle-module()
     FCT=$(get-hook $module $variant prefix)
 
     if [[ "$FCT" != "" ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
-        _IDIR=$($FCT $SCBI_BDIR/$module/build/install $SCBI_TARGET $variant)
+        _IDIR=$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                     $SCBI_TARGET $variant)
     else
         _IDIR=$SCBI_PREFIX
     fi
@@ -1281,7 +1323,7 @@ function handle-module()
         ilog $module skip global install
 
     elif [[ "$DO_INSTALL" = "yes" ]] &&
-             [[ -d $SCBI_BDIR/$module/build/install ]];
+             [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
     then
         ilog $module copy install into ..${_IDIR/$SCBI_BDIR/}
 
@@ -1328,7 +1370,18 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
-    -l store,target:,no-setup,no-install,update,setup,config,build,build-target:,install,log,log:yes,log:no,log:on-failure,purge,purge-only,verbose,prefix:,tests,tests-only,help,deps,archive,force,env:,no-patch,plan:,stat,stat:full,tar,list-depends:direct,list-depends:full,list-depends,list-externals,list-externals:only,list-no-version,list-filter:all,list-filter:dev,list-filter:runtime,dry-run,jobs:,no-wrapup,wrapup,safe,standalone,plugins:,build-dir,list-plan:,version,module-version,shell,shell:dev,shell:sb,shell:sandbox,clean-install -- $(echo $SCBIOPTS))
+                -l store,target:,no-setup,no-install,update,setup,config \
+                -l build,build-target:,install,clean-install,tar \
+                -l log,log:yes,log:no,log:on-failure,purge,purge-only \
+                -l verbose,prefix:,tests,tests-only,help,deps \
+                -l archive,force,env:,no-patch,plan:,stat,stat:full \
+                -l list-depends:direct,list-depends:full,list-depends \
+                -l list-externals,list-externals:only,list-no-version \
+                -l list-filter:all,list-filter:dev,list-filter:runtime \
+                -l dry-run,jobs:,no-wrapup,wrapup,safe,standalone \
+                -l plugins:,build-dir,list-plan:,version,module-version \
+                -l shell,shell:dev,shell:sb,shell:sandbox \
+                -- $(echo $SCBIOPTS))
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -1556,8 +1609,8 @@ if [[ "$NSTEPS" != "" ]]; then
     STEPS=$NSTEPS
 fi
 
-# If we have specified a build directory on command line, set it now
-# that the env is loaded (takes precedence).
+#  If we have specified a build directory on command line, set it now
+#  that the env is loaded (takes precedence).
 
 if [[ ! -z $CMDLINE_BUILD_DIR ]]; then
     export SCBI_BDIR=$CMDLINE_BUILD_DIR
@@ -1569,15 +1622,20 @@ for setup in $SCBI_DEFS/[0-9]*; do
     source $setup
 done
 
-# Handle store command
+#  Then load any OS dependent runtime module
+
+[[ -f $SCBI_DEFS/_os_$SCBI_OS_MODULE ]] &&
+    source $SCBI_DEFS/_os_$SCBI_OS_MODULE
+
+#  Handle store command
 
 if [[ $DO_STORE = yes ]]; then
     scbi-store "$STORE_KEY" "$STORE_VALUE"
     exit $?
 fi
 
-# If a plan passed on the command line ensure that it is used instead
-# of any other possibly set in the environment file.
+#  If a plan passed on the command line ensure that it is used instead
+#  of any other possibly set in the environment file.
 
 [[ ! -z $SCBI_PLAN_CL ]] && SCBI_PLAN=$SCBI_PLAN_CL
 

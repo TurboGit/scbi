@@ -84,18 +84,18 @@ function add-to-var()
     local VAR=$1
     local DIR=$2
 
-    # If adding to PATH, do so only if DIR exists
+    #  If adding to PATH, do so only if DIR exists
 
     if [[ -d "$DIR" ]] || [[ "${VAR}" != "PATH" ]] &&
            [[ ":${!VAR}:" != *":$DIR:"* ]];
     then
-        # If SCBI_ENV_MODULE file exists, record the change into
-        # it. This is used internally by scbi to record .log/env.cmd
-        # for each module. This env file can then be sourced to replay
-        # the commands manually.
+        #  If SCBI_ENV_MODULE file exists, record the change into
+        #  it. This is used internally by scbi to record .log/env.cmd
+        #  for each module. This env file can then be sourced to replay
+        #  the commands manually.
 
         if [[ ! -z $SCBI_ENV_MODULE ]]; then
-            echo add-to-var $VAR $DIR >> $SCBI_ENV_MODULE
+            echo add-to-var $VAR \"$DIR\" >> $SCBI_ENV_MODULE
         fi
 
         export $VAR="${DIR}${!VAR:+:}${!VAR}"
@@ -396,7 +396,7 @@ function _internal_for-all-modules()
             fi
 
             if [[ $WITH_META == true ]] && [[ $IS_META == true ]]; then
-                # check for meta-modules if present
+                #  check for meta-modules if present
 
                 for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
                     _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
@@ -410,14 +410,14 @@ function _internal_for-all-modules()
                 return
             fi
 
-            # Setup depends recursively if any
+            #  Setup depends recursively if any
 
             for dmodule in $(get-all-depends $module $variant depends); do
                 _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
                                           $WITHEXT false $dmodule $@
             done
 
-            # Setup build-depends recursively if any
+            #  Setup build-depends recursively if any
 
             for dmodule in $(get-all-depends $module $variant build-depends); do
                 _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
@@ -430,7 +430,7 @@ function _internal_for-all-modules()
             pop-dependency-tree
 
         else
-            # module does not exists, this is an external dependency
+            #  module does not exists, this is an external dependency
 
             if [[ $WITHEXT == true ]]; then
                 $CALLBACK $module $(get-pkg-name $MODREF) $LEVEL \
@@ -442,7 +442,7 @@ function _internal_for-all-modules()
     fi
 }
 
-# Iterate over all modules
+#  Iterate over all modules
 function for-all-modules()
 {
     local CALLBACK=$1
@@ -455,7 +455,7 @@ function for-all-modules()
     _internal_for-all-modules $CALLBACK false 0 false false $MODREF $@
 }
 
-# Iterate over all modules and external dependencies
+#  Iterate over all modules and external dependencies
 function for-all-modules-ext()
 {
     local CALLBACK=$1
@@ -468,7 +468,7 @@ function for-all-modules-ext()
     _internal_for-all-modules $CALLBACK false 0 true false $MODREF $@
 }
 
-# Iterate over all modules and meta-modules
+#  Iterate over all modules and meta-modules
 function for-all-modules-with-meta()
 {
     local CALLBACK=$1
@@ -481,7 +481,7 @@ function for-all-modules-with-meta()
     _internal_for-all-modules $CALLBACK true 0 false false $MODREF $@
 }
 
-# Iterate over all modules, meta-modules and external dependencies
+#  Iterate over all modules, meta-modules and external dependencies
 function for-all-modules-with-meta-ext()
 {
     local CALLBACK=$1
@@ -547,7 +547,7 @@ function get-build-id-callback()
     local IS_EXT=$5
     local IS_META=$6
 
-    # Only compute for dependencies, not for the root module
+    #  Only compute for dependencies, not for the root module
 
     if [[ $LEVEL -gt 0 ]] && [[ $IS_META == false ]]; then
         if [[ -f $SCBI_BDIR/$MODULE/install-id ]]; then
@@ -601,7 +601,7 @@ function get-build-id()
     local MODREF=$3
     local vid="$4"
 
-    # Get module information
+    #  Get module information
 
     local module_info=( $(get-module-ref $MODREF) )
 
@@ -610,17 +610,17 @@ function get-build-id()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    # Include the SCBI module, if changed we need to rebuild
-    # We also include the module refrence to ensure virtual modules
-    # withou build, nor install hook for native libraries (see with-variant)
-    # will get differentiated.
+    #  Include the SCBI module, if changed we need to rebuild
+    #  We also include the module refrence to ensure virtual modules
+    #  withou build, nor install hook for native libraries (see with-variant)
+    #  will get differentiated.
 
     local mid=$variant:$ref
 
     [[ -f $SCBI_DEFS/$module ]] &&
         mid="$mid,$(cat $SCBI_DEFS/$module | get-md5)"
 
-    # If patch activated
+    #  If patch activated
 
     local pid="no-patch-found"
 
@@ -647,20 +647,26 @@ function get-build-id()
         fi
     fi
 
-    # Also compute id from dependencies to ensure we rebuild if one
-    # dependency has changed.
+    #  Also compute id from dependencies to ensure we rebuild if one
+    #  dependency has changed.
 
     local did=$(get-depends-build-id $MODREF)
 
-    # Now compute final id add compile version
+    #  Now compute final id add compile version
 
-    if [[ "$SCBI_HOST" = "$TARGET" ]] \
-           || [[ "$(command -v $TARGET-gcc)" = "" ]];
-    then
-        echo -n $(gcc --version | head -1) ",$vid,$mid,$pid,$did" | get-md5
-
+    if [[ $SCBI_IS_WINDOWS == yes ]]; then
+        echo -n ",$vid,$mid,$pid,$did" | get-md5
     else
-        echo -n $($TARGET-gcc --version | head -1) ",$vid,$mid,$pid,$did" | get-md5
+        if [[ "$SCBI_HOST" = "$TARGET" ]] \
+               || [[ "$(command -v $TARGET-gcc)" = "" ]];
+        then
+            echo -n $(gcc --version | head -1) \
+                 ",$vid,$mid,$pid,$did" | get-md5
+
+        else
+            echo -n $($TARGET-gcc --version | head -1) \
+                 ",$vid,$mid,$pid,$did" | get-md5
+        fi
     fi
 }
 
@@ -1128,12 +1134,12 @@ function copy-module-src-callback()
         echo -n " $MODULE" >> $DEST/build-deps
 
     else
-        # copy tarball or vcs sources
+        #  copy tarball or vcs sources
 
         if [[ -d $SCBI_BDIR/$MODULE ]]; then
             ilog standalone "-   $MODULE"
 
-            # two modules may share the same VCS or tarball
+            #  two modules may share the same VCS or tarball
             if [[ -h $SCBI_BDIR/$MODULE/tar ]]; then
                 FILE=$(readlink -f $SCBI_BDIR/$MODULE/tar)
                 [[ ! -f $DEST/.tar/$(basename $FILE) ]] &&
@@ -1149,12 +1155,12 @@ function copy-module-src-callback()
             exit 1
         fi
 
-        # copy SCBI module if present
+        #  copy SCBI module if present
 
         if [[ -f $SCBI_DEFS/$MODULE ]]; then
             cp -p $SCBI_DEFS/$MODULE $DEST/scripts.d
 
-            # and then copy patches if any
+            #  and then copy patches if any
             (
                 function cp-patch()
                 {
@@ -1220,29 +1226,29 @@ function create-standalone-package()
         mkdir $STANDALONE
         cd $STANDALONE
 
-        # record the external dependencies
+        #  record the external dependencies
 
         echo -n "apt install" > build-deps
 
-        # copy scbi scripts
+        #  copy scbi scripts
 
         mkdir -p bin scripts.d
         mkdir -p builds/.vcs builds/.tar builds/.patches
 
-        # The main SCBI script, the runtime scripts and the current plan
+        #  The main SCBI script, the runtime scripts and the current plan
 
         cp $SCBI_BINARY bin/
         cp -p $SCBI_DEFS/[0-9]_* scripts.d
         [[ ! -z $SCBI_PLAN ]] && cp -p $SCBI_DEFS/.plan-$SCBI_PLAN scripts.d
 
-        # copy repositories and tars for all modules with dependencies
+        #  copy repositories and tars for all modules with dependencies
 
         for module in $MODULES; do
             for-all-modules-with-meta-ext \
                 copy-module-src-callback $module $STANDALONE
         done
 
-        # create default local environment
+        #  create default local environment
 
         echo 'SCBI_ROOT=$PWD'                  > .scbi-env-std
         echo 'SCBI_BDIR=$SCBI_ROOT/builds'    >> .scbi-env-std
@@ -1252,7 +1258,7 @@ function create-standalone-package()
         echo 'SCBI_LOGS=$SCBI_BDIR/.logs'     >> .scbi-env-std
         echo "SCBI_PLAN=$SCBI_PLAN"           >> .scbi-env-std
 
-        # then create the build script
+        #  then create the build script
 
         echo '#!/bin/bash'                                      > build
         echo -n 'export PYTHON_VERSION=$(python3 --version |'  >> build
@@ -1406,7 +1412,7 @@ function with-variant()
     local P="echo "
     while [[ ! -z "$1" ]]; do
         if [[ "$1" == "--env" ]]; then
-            H="$H }"
+            H="$H true; }"
             eval $H
             H="function $PLUGIN-$VNAME-env() { "
             P=""
@@ -1492,10 +1498,10 @@ function module-clean-install()
             SUDO=sudo
         fi
 
-        # note that we do not want to fail here
-        # delete files in the final destination installation prefix.
-        # then delete the module install location (double check that the
-        # directory is the right one).
+        #  note that we do not want to fail here
+        #  delete files in the final destination installation prefix.
+        #  then delete the module install location (double check that the
+        #  directory is the right one).
 
         if [[ -f $MPREFIX/../manifest ]]; then
             cat $MPREFIX/../manifest | while read file; do
@@ -1525,7 +1531,7 @@ function scbi-store-get-key()
     local STORE_FILE=$SCBI_DEFS/.store
 
     if [[ -f $STORE_FILE ]]; then
-        # check KEY in store
+        #  check KEY in store
 
         while read K V; do
             if [[ "$K" = "$KEY" ]]; then
@@ -1536,7 +1542,7 @@ function scbi-store-get-key()
         done < $STORE_FILE
     fi
 
-    # check if stdout (1) is a terminal
+    #  check if stdout (1) is a terminal
 
     if [[ -t 1 ]]; then
         echo $VALUE
@@ -1558,7 +1564,7 @@ function scbi-store-set-key()
 
     declare -A STORE
 
-    # read store content, put it inside STORE
+    #  read store content, put it inside STORE
 
     while read K V; do
         STORE[$K]=$V
@@ -1566,11 +1572,11 @@ function scbi-store-set-key()
 
     STORE[$KEY]="$VALUE"
 
-    # clear content
+    #  clear content
 
     echo -n > $STORE_FILE
 
-    # write back content
+    #  write back content
 
     for K in "${!STORE[@]}"; do
         echo $K ${STORE[$K]} >> $STORE_FILE

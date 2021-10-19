@@ -22,7 +22,8 @@ natv-native-depends is a function
 natv-native-depends ()
 {
     echo libA;
-    echo libB
+    echo libB;
+    true
 }
 natv-native-env is a function
 natv-native-env ()

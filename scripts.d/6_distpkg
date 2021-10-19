@@ -13,28 +13,34 @@ declare -A SCBI_PKGS
 #  OS dependent alias map
 declare -g -A SCBI_ALIAS
 
-SCBI_LINUX_DISTRIBS=( deb ubt cos rhl fed )
+SCBI_LINUX_DISTRIBS=( deb ubt cos rhl fed win )
 
-check-tools-abort lsb_release
+if [[ $SCBI_IS_WINDOWS == no ]]; then
+    check-tools-abort lsb_release
+fi
 
 ############################## get-distrib
 # returns the name of the current distrib
 
 function get-distrib()
 {
-    local DES=$(lsb_release -d)
-    if [[ $DES =~ "Debian" ]]; then
-        echo deb
-    elif [[ $DES =~ "Ubuntu" ]]; then
-        echo ubt
-    elif [[ $DES =~ "Red Hat" ]]; then
-        echo rhl
-    elif [[ $DES =~ "CentOS" ]]; then
-        echo cos
-    elif [[ $DES =~ "Fedora" ]]; then
-        echo fed
+    if [[ $SCBI_IS_WINDOWS == yes ]]; then
+        echo win
     else
-        echo none
+        local DES=$(lsb_release -d)
+        if [[ $DES =~ "Debian" ]]; then
+            echo deb
+        elif [[ $DES =~ "Ubuntu" ]]; then
+            echo ubt
+        elif [[ $DES =~ "Red Hat" ]]; then
+            echo rhl
+        elif [[ $DES =~ "CentOS" ]]; then
+            echo cos
+        elif [[ $DES =~ "Fedora" ]]; then
+            echo fed
+        else
+            echo none
+        fi
     fi
 }
 
@@ -109,8 +115,8 @@ function init-cos-pkg()
 {
     check-tools-abort dnf rpm
 
-    # format : cmake-0:3.11.4-7.el8.x86_64
-    #          <name>-<indice>:<version>-<level>.<rel>.<arch>
+    #  format : cmake-0:3.11.4-7.el8.x86_64
+    #           <name>-<indice>:<version>-<level>.<rel>.<arch>
     while read N; do
         pkg=${N%%:*};
         pkg=${pkg%-*};
@@ -126,8 +132,8 @@ function init-fed-pkg()
 {
     check-tools-abort dnf rpm
 
-    # format : cmake-0:3.11.4-7.el8.x86_64
-    #          <name>-<indice>:<version>-<level>.<rel>.<arch>
+    #  format : cmake-0:3.11.4-7.el8.x86_64
+    #           <name>-<indice>:<version>-<level>.<rel>.<arch>
     while read N; do
         pkg=${N%%:*};
         pkg=${pkg%-*};
@@ -143,8 +149,8 @@ function init-rhl-pkg()
 {
     check-tools-abort dnf rpm
 
-    # format : cmake-0:3.11.4-7.el8.x86_64
-    #          <name>-<indice>:<version>-<level>.<rel>.<arch>
+    #  format : cmake-0:3.11.4-7.el8.x86_64
+    #           <name>-<indice>:<version>-<level>.<rel>.<arch>
     while read N; do
         pkg=${N%%:*};
         pkg=${pkg%-*};
@@ -156,6 +162,11 @@ function init-rhl-pkg()
     init-distrib-alias rhl
 }
 
+function init-win-pkg()
+{
+    true
+}
+
 ############################## check-deb-pkg
 # check-deb-pkg should return:
 #   3 - package not found
@@ -164,6 +175,11 @@ function init-rhl-pkg()
 #   0 - package installed with proper version
 
 function check-none-pkg()
+{
+    return 0
+}
+
+function check-win-pkg()
 {
     return 0
 }
@@ -254,7 +270,7 @@ function get-deb-lib-for-dev()
         return 1
     fi
 
-    # package name without trailing -dev
+    #  package name without trailing -dev
     local base=${pkg:0:-4}
 
     local res=$(LC_ALL=C LANG=C apt-cache depends $1 | grep 'Depends:' \
@@ -277,10 +293,10 @@ function get-pkg-name()
 {
     local pkg=$1
 
-    # if package start with os@- it is an alias, lookup
-    # in the corresponding table:
+    #  if package start with os@- it is an alias, lookup
+    #  in the corresponding table:
     #
-    #    SCBI_ALIAS[pkg]
+    #     SCBI_ALIAS[pkg]
 
     if [[ "${pkg:0:4}" == "os@-" ]]; then
         REF="SCBI_ALIAS["$pkg"]"

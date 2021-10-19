@@ -79,13 +79,13 @@ function module-setup()
     local TARGET=$4
     local OOT=$5
 
-    # if module-src soft link exists use it to copy the module sources into
-    # the pointed location. This is used when multiple modules are used
-    # together to create the set of source for the build. In this case we do
-    # not want to delete sources in rsync.
+    #  if module-src soft link exists use it to copy the module sources into
+    #  the pointed location. This is used when multiple modules are used
+    #  together to create the set of source for the build. In this case we do
+    #  not want to delete sources in rsync.
     #
-    # Note: we do exclude gcc-interface directory here to avoid overwriting
-    #       the gcc-interface sources from GNAT.
+    #  Note: we do exclude gcc-interface directory here to avoid overwriting
+    #        the gcc-interface sources from GNAT.
 
     if [[ -h module-src ]]; then
         SRCDIR=module-src
@@ -115,17 +115,23 @@ function module-setup()
         fi
     fi
 
-    rm -f build
+    rm -fr build
     ln -s $TARGET-$VARIANT build
 
     if [[ "$OOT" = "yes" ]]; then
-        # build must be a dir, delete link if it exists
-        [[ -h $TARGET-$VARIANT/build ]] && rm -f $TARGET-$VARIANT/build
-        mkdir -p build/build
+        #  build must be a dir, delete link if it exists
+        #  build must be a dir
+        if [[ $SCBI_HOST == "x86_64-mingw64" ]]; then
+            #  There is no symlinks on MSYS
+            [[ -d $TARGET-$VARIANT/build ]] && rm -fr $TARGET-$VARIANT/build
+        else
+            [[ -h $TARGET-$VARIANT/build ]] && rm -f $TARGET-$VARIANT/build
+        fi
+        mkdir -p $TARGET-$VARIANT/build
     else
-        # build must be a link, delete dir if it exists
+        #  build must be a link, delete dir if it exists
         rm -fr $TARGET-$VARIANT/build
-        ln -s src build/build
+        ln -s src $TARGET-$VARIANT/build
     fi
 
     return $res
@@ -141,8 +147,8 @@ function module-purge()
     local TARGET=$4
     local OOT=$5
 
-    # note that we keep the manifest to be sure that we can clean-up
-    # the final install destination.
+    #  note that we keep the manifest to be sure that we can clean-up
+    #  the final install destination.
 
     if [[ -d $PREFIX/$TARGET-$VARIANT ]]; then
         rm -fr $PREFIX/$TARGET-$VARIANT/build
@@ -194,9 +200,9 @@ function module-install()
         fi
     fi
 
-    # get all installed files, do that only if the installation has
-    # been done. module just bringing sources for another module won't
-    # install anything.
+    #  get all installed files, do that only if the installation has
+    #  been done. module just bringing sources for another module won't
+    #  install anything.
 
     if [[ -d ./build/install ]]; then
         (
