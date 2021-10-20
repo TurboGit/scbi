@@ -272,59 +272,8 @@ function get-all-depends()
     local variant="$2"
     local hook="$3"
 
-    #  If the "native" variant is found then we do not use the default
-    #  depend / build-depends hook. The native variant is supposed to
-    #  be self contained and we do not want to inherit the dependencies
-    #  from the main plug-in if any.
-
-    local NATIVEFOUND=false
-    local ALLVARS=$(all-variants $variant)
-
-    #  Always check the common depends, then the variants if defined
-    #  or otherwise the default variant.
-
-    for v in common ${ALLVARS:-default}; do
-        found=0
-        if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
-            FCT="$module-$v-cross-$hook"
-            fn-exists $FCT
-            [[ $? = 0 ]] && found=1
-        fi
-
-        if [[ $found = 0 ]]; then
-            FCT="$module-$v-$hook"
-            fn-exists $FCT
-            [[ $? = 0 ]] && found=1
-        fi
-
-        if [[ $found = 1 ]]; then
-            [[ "$v" == "native" ]] && NATIVEFOUND=true
-            for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-                echo $mod
-            done
-        fi
-    done
-
-    if [[ $NATIVEFOUND == false ]]; then
-        found=0
-        if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
-            FCT="$module-cross-$hook"
-            fn-exists $FCT
-            [[ $? = 0 ]] && found=1
-        fi
-
-        if [[ $found = 0 ]]; then
-            FCT="$module-$hook"
-            fn-exists $FCT
-            [[ $? = 0 ]] && found=1
-        fi
-
-        if [[ $found = 1 ]]; then
-            for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-                echo $mod
-            done
-        fi
-    fi
+    _internal_call-variant-hooks \
+        $module $hook "$SCBI_PREFIX" "$SCBI_TARGET" $variant
 }
 
 ############################## for-all-modules
@@ -1433,23 +1382,75 @@ function with-variant()
     eval $H
 }
 
+############################## _internal_call-variant-hooks
+
+function _internal_call-variant-hooks()
+{
+    local PLUGIN=$1
+    local HOOK=$2
+    local PREFIX=$3
+    local TARGET=$4
+    local VARIANT=$5
+
+    local ALLVARS=$(all-variants $VARIANT)
+    local VARFOUND=no
+    local found=0
+    local FCT=""
+
+    #  Always check the common hook, then the variants if defined
+    #  or otherwise the default variant. Then if nothing found
+    #  we call the main hook (no variant).
+
+    for v in common ${ALLVARS:-default}; do
+        found=0
+        if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
+            FCT="$PLUGIN-$v-cross-$HOOK"
+            fn-exists $FCT
+            [[ $? = 0 ]] && found=1
+        fi
+
+        if [[ $found == 0 ]]; then
+            FCT="$PLUGIN-$v-$HOOK"
+            fn-exists $FCT
+            [[ $? = 0 ]] && found=1
+        fi
+
+        if [[ $found == 1 ]]; then
+            [[ $v != "common" ]] && [[ $v != "default" ]] && VARFOUND=yes
+            $FCT $PREFIX $TARGET $VARIANT
+        fi
+    done
+
+    if [[ $VARFOUND == no ]]; then
+        found=0
+        if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
+            FCT="$PLUGIN-cross-$HOOK"
+            fn-exists $FCT
+            [[ $? = 0 ]] && found=1
+        fi
+
+        if [[ $found == 0 ]]; then
+            FCT="$PLUGIN-$HOOK"
+            fn-exists $FCT
+            [[ $? = 0 ]] && found=1
+        fi
+
+        [[ $found == 1 ]] && $FCT $PREFIX $TARGET $VARIANT
+    fi
+}
+
 ############################## call-variant-hooks
 
 function call-variant-hooks()
 {
-    local NAME=$1
+    local HOOK=$1
     local PREFIX=$2
     local TARGET=$3
     local VARIANT=$4
 
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
-    for v in default $(all-variants $VARIANT); do
-        fn-exists $PLUGIN-$v-$NAME
-        if [ $? = 0 ]; then
-            $PLUGIN-$v-$NAME $PREFIX $TARGET
-        fi
-    done
+    _internal_call-variant-hooks $PLUGIN $HOOK $PREFIX $TARGET $VARIANT
 }
 
 ############################## get-config-options
@@ -1462,12 +1463,7 @@ function get-config-options()
 
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
-    for v in common default $(all-variants $VARIANT); do
-        fn-exists $PLUGIN-$v-config-options
-        if [ $? = 0 ]; then
-            $PLUGIN-$v-config-options $PREFIX $TARGET
-        fi
-    done
+    _internal_call-variant-hooks $PLUGIN config-options $PREFIX $TARGET $VARIANT
 }
 
 ############################## module-clean-install

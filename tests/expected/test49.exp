@@ -44,13 +44,6 @@ depB
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building depB [default] (master)
 
-xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
-xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
-
 xxxx/xx/xx xx:xx:xx : Building dephookx [varb] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
@@ -67,13 +60,6 @@ xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : End Building depB [default] (master)
-
-xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
-xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building dephookx [vara varb] (master)
 xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu

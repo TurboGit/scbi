@@ -11,3 +11,17 @@ echo "========== OPT-A + OPT-B"
 
 echo "========== NO-OPT"
 ./scbi --deps --target=x86_64-pc-mingw32 mcross
+
+echo
+
+echo "========== OPT-A"
+./scbi --deps --target=x86_64-pc-mingw32 mcrossc/opta
+
+echo "========== OPT-B"
+./scbi --deps --target=x86_64-pc-mingw32 mcrossc/optb:v8
+
+echo "========== OPT-A + OPT-B"
+./scbi --deps --target=x86_64-pc-mingw32 mcrossc/opta.optb
+
+echo "========== NO-OPT"
+./scbi --deps --target=x86_64-pc-mingw32 mcrossc
