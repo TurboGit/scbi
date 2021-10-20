@@ -299,9 +299,7 @@ function get-all-depends()
 
         if [[ $found = 1 ]]; then
             [[ "$v" == "native" ]] && NATIVEFOUND=true
-            for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-                echo $mod
-            done
+            $FCT $SCBI_PREFIX $SCBI_TARGET $variant
         fi
     done
 
@@ -320,9 +318,7 @@ function get-all-depends()
         fi
 
         if [[ $found = 1 ]]; then
-            for mod in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-                echo $mod
-            done
+            $FCT $SCBI_PREFIX $SCBI_TARGET $variant
         fi
     fi
 }
