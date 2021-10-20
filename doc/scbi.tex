@@ -620,7 +620,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 		\end{enumerate}
 	\end{description}
 
-	\item[<module>-build-depends] \index{hook!build-depends}Lists all modules required to build the actual module. These are generally some tools like \code{cmake}, \code{swig} or \code{gcc} which are only needed to build but not needed at runtime. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
+	\item[<module>-{[}common|<variant>{]}-build-depends] \index{hook!build-depends}Lists all modules required to build the actual module. These are generally some tools like \code{cmake}, \code{swig} or \code{gcc} which are only needed to build but not needed at runtime. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
 
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
@@ -640,7 +640,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 	}
 	\end{lstlisting}
 
-	\item[<module>-depends] \index{hook!depends}Lists all modules required to build the actual module and to use/execute it. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
+	\item[<module>-{[}common|<variant>{]}-depends] \index{hook!depends}Lists all modules required to build the actual module and to use/execute it. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
 
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
@@ -661,7 +661,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 	}
 	\end{lstlisting}
 
-	\item[<module>-env] \index{hook!env}Set the environment to use this module as a dependency. This is the exported environment. The environment must be set using \code{add-to-var} function.
+	\item[<module>-{[}common|<variant>{]}-env] \index{hook!env}Set the environment to use this module as a dependency. This is the exported environment. The environment must be set using \code{add-to-var} function.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\begin{enumerate}
@@ -683,7 +683,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 	}
 	\end{lstlisting}
 
-	\item[<module>-build-env] \index{hook!build-env}Set the environment needed to build this module. The environment must be set using \code{add-to-var} function. Those settings are not exported and only used for the module.
+	\item[<module>-{[}common|<variant>{]}-build-env] \index{hook!build-env}Set the environment needed to build this module. The environment must be set using \code{add-to-var} function. Those settings are not exported and only used for the module.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\begin{enumerate}
@@ -828,14 +828,21 @@ It must be noted that for those steps we have generic internal version and \code
 
 For example, the generic internal setup step (\code{module-setup}) is used by the scbi driver to setup the sources (creating the build environment and populating the proper sources to compile) using the \code{vcs}, \code{version}, \code{tar} and \code{out-of-tree} hooks.
 
-For the non internal steps there is cross and variant hooks. The hook name is finally:
+The \code{depends}, \code{build-depends}, \code{env}, \code{build-env} and \code{config-options} can have a \code{common} variant which is cumulative with the corresponding variant hooks or with the default hook. If a variant hook is present then the default hook is not called (we stop at the first \code{<variant>} call below:
 
-\code{<module>[-<variant][-cross]-step}
+\begin{enumerate}
+	\item <module>-common-cross-<step>
+	\item <module>-<variant>-cross-<step>
+	\item <module>-cross-<step>
+	\item <module>-common-<step>
+	\item <module>-<variant>-<step>
+	\item <module>-<step>
+\end{enumerate}
 
-The \code{cross} hook is used when the target is different than the host.
+The \code{cross} hooks are used when the target is different than the host.
 \index{hook!cronn}
 
-When \emph{variant} (\seeref{variant}) and/or \emph{cross} hooks are present, they are checked in the following order and the first found is called:
+For all other hooks there is no \code{common} variant. Again if a variant hook is present the default hook is not called (we stop at the first \code{<variant>} call below:
 
 \begin{enumerate}
 	\item <module>-<variant>-cross-<step>
@@ -843,34 +850,6 @@ When \emph{variant} (\seeref{variant}) and/or \emph{cross} hooks are present, th
 	\item <module>-<variant>-<step>
 	\item <module>-<step>
 \end{enumerate}
-
-If a \emph{variant} hook is not present then the main hook is called and the variant string is passed to it as third parameter. That's why the variant parameter in the hook description is optional.
-For example, if we have the module reference:
-
-\code{lcms2/fast}
-
-For configuration step, we first check if the following hook exists and if so we call it:
-
-\code{lcms2-fast-config}
-
-If it does not exist we call the standard \emph{lcms2-config} hook with \emph{fast} as parameter. An helper routine \emph{all-variants} is provided to loop on all variants:
-
-\begin{lstlisting}
-function lcms2-config()
-{
-	local PREFIX=$1
-	local TARGET=$2
-	local VARIANT=$3
-
-	for v in $(all-variants $VARIANT); do
-	   ...
-	done
-}
-\end{lstlisting}
-
-This is discouraged and one should use variant \code{config} hook or use the \code{get-config-options} helper routine, see \ref{get config options}.
-
-Finally the \code{depends} and \code{build-depends} are cumulative. That is, the final dependencies of a given module is given by the default \code{depends} (and \code{build-depends}) hook and all the active variants \code{depends} hooks.
 
 \subsection{Meta-module}
 \label{meta-module}

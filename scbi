@@ -394,16 +394,14 @@ function handle-module-env()
         cd $SCBI_BDIR
     fi
 
-    local FCT=$(get-hook $module $variant $ENV)
-
-    if [[ ! -z $FCT ]]; then
-        if [[ ! -z $SCBI_ENV_MODULE ]]; then
-            echo >> $SCBI_ENV_MODULE
-            echo "# $module" >> $SCBI_ENV_MODULE
-        fi
-        $FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
-             $SCBI_TARGET $variant
+    if [[ ! -z $SCBI_ENV_MODULE ]]; then
+        echo >> $SCBI_ENV_MODULE
+        echo "# $module" >> $SCBI_ENV_MODULE
     fi
+
+    _internal_call-variant-hooks \
+        $module $ENV \
+        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $SCBI_TARGET $variant
 }
 
 ############################## register-depends-callback
