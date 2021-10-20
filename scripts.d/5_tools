@@ -272,55 +272,8 @@ function get-all-depends()
     local variant="$2"
     local hook="$3"
 
-    #  If the "native" variant is found then we do not use the default
-    #  depend / build-depends hook. The native variant is supposed to
-    #  be self contained and we do not want to inherit the dependencies
-    #  from the main plug-in if any.
-
-    local NATIVEFOUND=false
-    local ALLVARS=$(all-variants $variant)
-
-    #  Always check the common depends, then the variants if defined
-    #  or otherwise the default variant.
-
-    for v in common ${ALLVARS:-default}; do
-        found=0
-        if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
-            FCT="$module-$v-cross-$hook"
-            fn-exists $FCT
-            [[ $? = 0 ]] && found=1
-        fi
-
-        if [[ $found = 0 ]]; then
-            FCT="$module-$v-$hook"
-            fn-exists $FCT
-            [[ $? = 0 ]] && found=1
-        fi
-
-        if [[ $found = 1 ]]; then
-            [[ "$v" == "native" ]] && NATIVEFOUND=true
-            $FCT $SCBI_PREFIX $SCBI_TARGET $variant
-        fi
-    done
-
-    if [[ $NATIVEFOUND == false ]]; then
-        found=0
-        if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
-            FCT="$module-cross-$hook"
-            fn-exists $FCT
-            [[ $? = 0 ]] && found=1
-        fi
-
-        if [[ $found = 0 ]]; then
-            FCT="$module-$hook"
-            fn-exists $FCT
-            [[ $? = 0 ]] && found=1
-        fi
-
-        if [[ $found = 1 ]]; then
-            $FCT $SCBI_PREFIX $SCBI_TARGET $variant
-        fi
-    fi
+    _internal_call-variant-hooks \
+        $module $hook "$SCBI_PREFIX" "$SCBI_TARGET" $variant
 }
 
 ############################## for-all-modules

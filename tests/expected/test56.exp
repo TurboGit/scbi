@@ -24,16 +24,13 @@ main
 === varA
 common
 varA
-main
 === varB
 common
 varB
-main
 === varA.varB
 common
 varA
 varB
-main
 === common
 common
 common

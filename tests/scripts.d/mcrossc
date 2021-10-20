@@ -1,0 +1,25 @@
+
+function mcrossc-depends()
+{
+    echo not-cross
+}
+
+function mcrossc-cross-depends()
+{
+    echo crossc-general
+}
+
+function mcrossc-opta-cross-depends()
+{
+    echo crossc-opta
+}
+
+function mcrossc-optb-cross-depends()
+{
+    echo crossc-optb
+}
+
+function mcrossc-common-cross-depends()
+{
+    echo crossc-common
+}
