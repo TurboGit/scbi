@@ -34,4 +34,17 @@ else
     echo "ok: file b-some-file removed (safe mode)"
 fi
 
+echo '========== build 4 oot2'
+
+./scbi -f oot2/no
+
+rm -f $REP/build/src/b-some-file
+echo some text > $REP/build/build/b-some-file
+
+if [ -f $REP/build/src/b-some-file ]; then
+    echo "ok: file b-some-file found"
+else
+    echo "nok: file b-some-file should not be there"
+fi
+
 unset REP

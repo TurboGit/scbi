@@ -12,6 +12,11 @@ function oot2-out-of-tree()
     echo true
 }
 
+function oot2-no-out-of-tree()
+{
+    echo false
+}
+
 function oot2-build()
 {
     local PREFIX=$1

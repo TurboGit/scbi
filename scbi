@@ -1128,9 +1128,9 @@ function handle-module()
 
         #  Check if envrionment is to be done for out-of-tree build
 
-        fn-exists $module-out-of-tree
+        FCT=$(get-hook $module $variant out-of-tree)
 
-        [[ $? = 0 ]] && [[ $($module-out-of-tree) = "false" ]] && ISOOT=false
+        [[ ! -z $FCT ]] && [[ $($FCT) = "false" ]] && ISOOT=no
 
         #  Call module routines
 

@@ -35,3 +35,15 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End Building ootx [default] (master)
 
 ok: file b-some-file removed (safe mode)
+========== build x ootx
+xxxx/xx/xx xx:xx:xx : Building ootx [no] (master)
+xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : build [no] starting
+xxxx/xx/xx xx:xx:xx : build [no] completed
+xxxx/xx/xx xx:xx:xx : install [no] starting
+xxxx/xx/xx xx:xx:xx : install [no] completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building ootx [no] (master)
+
+ok: file b-some-file found
