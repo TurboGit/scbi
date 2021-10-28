@@ -17,13 +17,11 @@ function libadalang-common-depends()
 
 function libadalang-stable-depends()
 {
-    libadalang-common-depends
-    echo langkit:stable
+    echo langkit/stable:stable
 }
 
 function libadalang-depends()
 {
-    libadalang-common-depends
     echo langkit
 }
 
