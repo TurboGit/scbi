@@ -41,6 +41,12 @@ function set-compiler-paths()
 
         P=$PREFIX/$TARGET/share/gpr
         L=$PREFIX/lib/$TARGET
+
+        #  The cross-compiler needs libiconv shared library if it was
+        #  built against it.
+        IC=$SCBI_BDIR/s-libiconv/x86_64-linux-gnu-default/install/lib
+
+        [[ -d $IC ]] && L=$L:$IC
     fi
 
     export C_INCLUDE_PATH=$I1:$I2:$I3:$I4
