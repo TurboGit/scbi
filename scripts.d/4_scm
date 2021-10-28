@@ -360,7 +360,7 @@ function get-vcs()
     case $VCS_NAME in
         git)
             git-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
-                $module "$VCS_DIR" >> $log 2>&1
+                   $module "$VCS_DIR" >> $log 2>&1
 
             if [[ ! $? = 0 ]]; then
                 check-tool git
@@ -386,7 +386,7 @@ function get-vcs()
 
         hg|mercurial)
             hg-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
-                $module "$VCS_DIR" >> $log 2>&1
+                  $module "$VCS_DIR" >> $log 2>&1
 
             if [[ ! $? = 0 ]]; then
                 check-tool hg
@@ -412,7 +412,7 @@ function get-vcs()
 
         svn|subversion)
             svn-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
-                $module "$VCS_DIR" >> $log 2>&1
+                   $module "$VCS_DIR" >> $log 2>&1
 
             if [[ ! $? = 0 ]]; then
                 check-tool svn
