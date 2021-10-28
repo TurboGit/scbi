@@ -500,14 +500,16 @@ function get-build-id-callback()
     local IS_EXT=$5
     local IS_META=$6
 
+    local module_info=( $(get-module-ref $MODREF) )
+    local variant=${module_info[1]}
+
     #  Only compute for dependencies, not for the root module
 
     if [[ $LEVEL -gt 0 ]] && [[ $IS_META == false ]]; then
-        if [[ -f $SCBI_BDIR/$MODULE/install-id ]]; then
-            var=$(cat $SCBI_BDIR/$MODULE/install-id)
+        if [[ -f $SCBI_BDIR/$MODULE/build-id-$variant ]]; then
 
-            if [[ -f $SCBI_BDIR/$MODULE/build-id-$var ]]; then
-                cat $SCBI_BDIR/$MODULE/build-id-$var
+            if [[ -f $SCBI_BDIR/$MODULE/build-id-$variant ]]; then
+                cat $SCBI_BDIR/$MODULE/build-id-$variant
             else
                 echo $(date)
             fi
