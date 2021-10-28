@@ -328,6 +328,92 @@ function get-vcs-data()
     fi
 }
 
+############################## get-branch
+
+function _internal_get-branch()
+{
+    local VCS_NAME=$1
+    local VCS_PROXY=$2
+    local VCS_OPTIONS=$3
+    local module=$4
+    local ref=$5
+    local VCS_DIR=$6
+
+    case $VCS_NAME in
+        git)
+            if [[ $kind != DEV ]]; then
+                git-branch $VCS_PROXY $VCS_OPTIONS \
+                    $module $ref "$VCS_DIR" >> $log 2>&1
+
+                if [[ ! $? = 0 ]]; then
+                    ilog build "error: cannot switch to branch $ref"
+                    exit 1
+                fi
+            fi
+            ;;
+
+        hg|mercurial)
+            if [[ $kind != DEV ]]; then
+                hg-branch $VCS_PROXY $VCS_OPTIONS \
+                    $module $ref "$VCS_DIR" >> $log 2>&1
+
+                if [[ ! $? = 0 ]]; then
+                    ilog build "error: cannot switch to branch $ref"
+                    exit 1
+                fi
+            fi
+            ;;
+
+        svn|subversion)
+            if [[ $kind != DEV ]]; then
+                svn-branch $VCS_PROXY $VCS_OPTIONS \
+                    $module $ref "$VCS_DIR" >> $log 2>&1
+
+                if [[ ! $? = 0 ]]; then
+                    ilog build "error: cannot switch to branch $ref"
+                    exit 1
+                fi
+            fi
+            ;;
+
+        *)
+            ilog build "error: unknown vcs $VCS_NAME"
+            return 1
+            ;;
+    esac
+}
+
+function get-branch()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local MODREF=$3
+
+    #  get module information
+
+    local module_info=( $(get-module-ref $MODREF) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    #  get vcs information
+
+    vcs=( $(get-vcs-data $module $variant) )
+
+    local VCS_PROXY=${vcs[1]}
+    local VCS_OPTIONS=${vcs[2]}
+    local VCS_NAME=${vcs[3]}
+    local VCS_URL=${vcs[4]}
+    local VCS_DIR=${vcs[5]}
+
+    _internal_get-branch $VCS_NAME $VCS_PROXY $VCS_OPTIONS \
+                         $module $ref $VCS_DIR
+
+    return $?
+}
+
 ############################## get-vcs
 
 function get-vcs()
@@ -372,16 +458,6 @@ function get-vcs()
 
                 exit 1
             fi
-
-            if [[ $kind != DEV ]]; then
-                git-branch $VCS_PROXY $VCS_OPTIONS \
-                    $module $ref "$VCS_DIR" >> $log 2>&1
-
-                if [[ ! $? = 0 ]]; then
-                    ilog build "error: cannot switch to branch $ref"
-                    exit 1
-                fi
-            fi
             ;;
 
         hg|mercurial)
@@ -397,16 +473,6 @@ function get-vcs()
                 fi
 
                 exit 1
-            fi
-
-            if [[ $kind != DEV ]]; then
-                hg-branch $VCS_PROXY $VCS_OPTIONS \
-                    $module $ref "$VCS_DIR" >> $log 2>&1
-
-                if [[ ! $? = 0 ]]; then
-                    ilog build "error: cannot switch to branch $ref"
-                    exit 1
-                fi
             fi
             ;;
 
@@ -424,16 +490,6 @@ function get-vcs()
 
                 exit 1
             fi
-
-            if [[ $kind != DEV ]]; then
-                svn-branch $VCS_PROXY $VCS_OPTIONS \
-                    $module $ref "$VCS_DIR" >> $log 2>&1
-
-                if [[ ! $? = 0 ]]; then
-                    ilog build "error: cannot switch to branch $ref"
-                    exit 1
-                fi
-            fi
             ;;
 
         *)
@@ -441,6 +497,11 @@ function get-vcs()
             res=1
             ;;
     esac
+
+    if [[ $res == 0 ]]; then
+        res=$(_internal_get-branch $VCS_NAME $VCS_PROXY $VCS_OPTIONS \
+                                   $module $ref $VCS_DIR)
+    fi
 
     return $res
 }
@@ -458,6 +519,10 @@ function vcs-build-id()
 
     local vid=$(
         cd $vcs
+
+        if [[ $DO_UPDATE = no ]]; then
+            get-branch $PREFIX $TARGET $MODREF
+        fi
 
         if [[ -d .git ]]; then
             local gver=$(git rev-list -1 HEAD)
