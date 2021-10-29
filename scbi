@@ -1166,11 +1166,10 @@ function handle-module()
             #  directory, clean it to ensure no old versions are installed
             #  into the same location.
 
-            if [[ $DO_INSTALL = yes ]] &&
-                   [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
-            then
+            if [[ $DO_INSTALL = yes ]]; then
                 rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
-                rm -fr $SCBI_BDIR/$module/install-id
+                rm -f  $SCBI_BDIR/$module/install-id
+                rm -f  $SCBI_BDIR/$module/install-${SCBI_TARGET}-id
             fi
 
             #  Build is needed, on safe mode we remove the current
@@ -1293,8 +1292,6 @@ function handle-module()
                 elog $module generic module post-$step failed with error $res
                 return $res
             fi
-
-            [[ $step == install ]] && echo -n "$variant" > install-id || true
         done
     ) || exit 1
 
@@ -1324,6 +1321,10 @@ function handle-module()
              [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
     then
         ilog $module copy install into ..${_IDIR/$SCBI_BDIR/}
+
+        #  Record global install
+        echo "$variant" > $SCBI_BDIR/$module/install-${SCBI_TARGET}-id
+        echo ${_IDIR}  >> $SCBI_BDIR/$module/install-${SCBI_TARGET}-id
 
         #  Finaly copy to given prefix
         SUDO=""
