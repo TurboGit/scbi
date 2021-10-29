@@ -123,7 +123,7 @@ function load-module-plan()
 
 ############################## load-module-plan
 #
-# Checks all auto vaariant and use the native one or the default variant
+# Checks all auto variant and use the native one or the default variant
 # depending on the availability of the dependencies.
 
 function handle-auto-variant()
