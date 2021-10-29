@@ -499,8 +499,9 @@ function get-vcs()
     esac
 
     if [[ $res == 0 ]]; then
-        res=$(_internal_get-branch $VCS_NAME $VCS_PROXY $VCS_OPTIONS \
-                                   $module $ref $VCS_DIR)
+        _internal_get-branch $VCS_NAME $VCS_PROXY $VCS_OPTIONS \
+                             $module $ref $VCS_DIR
+        res=$?
     fi
 
     return $res
