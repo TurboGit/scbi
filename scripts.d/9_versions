@@ -138,7 +138,7 @@ function handle-auto-variant()
         local module=${module_info[0]}
         local variant=${module_info[1]}
 
-        if [[ $variant =~ ^auto ]]; then
+        if [[ $variant =~ ^auto(\.|$) ]]; then
             check-auto-variant $M
             local res=$?
 
