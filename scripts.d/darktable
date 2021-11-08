@@ -23,8 +23,8 @@ function darktable-build-depends()
 
 function darktable-clang-build-depends()
 {
-    echo os@-llvm-10
-    echo os@-clang-10
+    echo os@-llvm-11
+    echo os@-clang-11
 }
 
 function darktable-depends()
@@ -66,14 +66,13 @@ function darktable-depends()
 
 function darktable-clang-build-env()
 {
-    add-to-var CC  clang-$SCBI_CLANG_VERSION
-    add-to-var CXX clang++-$SCBI_CLANG_VERSION
+    add-to-var CMAKE_C_COMPILER   clang-$SCBI_CLANG_VERSION
+    add-to-var CMAKE_CXX_COMPILER clang++-$SCBI_CLANG_VERSION
 }
 
 function darktable-env()
 {
     system-compiler
-    add-to-var PERL5LIB .
 }
 
 function darktable-release-config-options()
