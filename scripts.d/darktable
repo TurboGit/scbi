@@ -38,7 +38,6 @@ function darktable-depends()
     echo os@-xml2-dev
     echo os@-lcms2-dev
     echo os@-tiff-dev
-    echo os@-exiv2-dev
     echo os@-curl4
     echo os@-curl4-gnutls-dev
     echo os@-gphoto2-dev
@@ -62,6 +61,8 @@ function darktable-depends()
     echo os@-webp-dev
     echo os@-cairo-dev
     echo os@-image-exiftool-perl
+
+    echo s-exiv2
 }
 
 function darktable-clang-build-env()
