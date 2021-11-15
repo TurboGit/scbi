@@ -7,6 +7,11 @@
 #     - implement check-<distrib>-pkg
 #     - implement get-<distrib>-lib-for-dev (optional)
 
+SCBI_PKG_NOT_FOUND=3
+SCBI_PKG_NOT_INSTALLED=2
+SCBI_PKG_VERSION_NOK=1
+SCBI_PKG_VERSION_OK=0
+
 #  All currently installed packages
 declare -A SCBI_PKGS
 
@@ -201,18 +206,18 @@ function check-deb-pkg()
         apt-cache show $pck &> /dev/null
 
         if [[ $? = 0 ]]; then
-            return 2
+            return $SCBI_PKG_NOT_INSTALLED
         else
-            return 3
+            return $SCBI_PKG_NOT_FOUND
         fi
 
     else
         #  Is the installed version ok?
 
         if [[ $inst_ver > $version ]]; then
-            return 0
+            return $SCBI_PKG_VERSION_OK
         else
-            return 1
+            return $SCBI_PKG_VERSION_NOK
         fi
     fi
 }
@@ -235,18 +240,18 @@ function check-cos-pkg()
         dnf -C list $pck &> /dev/null
 
         if [[ $? = 0 ]]; then
-            return 2
+            return $SCBI_PKG_NOT_INSTALLED
         else
-            return 3
+            return $SCBI_PKG_NOT_FOUND
         fi
 
     else
         #  Is the installed version ok?
 
         if [[ $inst_ver > $version ]]; then
-            return 0
+            return $SCBI_PKG_VERSION_OK
         else
-            return 1
+            return $SCBI_PKG_VERSION_NOK
         fi
     fi
 }
@@ -351,17 +356,17 @@ function check-pkg()
 
         local res=$?
 
-        if [[ $res = 3 ]]; then
+        if [[ $res = $SCBI_PKG_NOT_FOUND ]]; then
             echo "error: $distname not found"
             cpres=2
-        elif [[ $res = 2 ]]; then
+        elif [[ $res = $SCBI_PKG_NOT_INSTALLED ]]; then
             if [[ $version == NONE ]]; then
                 echo "error: $distname should be installed"
             else
                 echo "error: $distname:$version should be installed"
             fi
             cpres=1
-        elif [[ $res = 1 ]]; then
+        elif [[ $res = $SCBI_PKG_VERSION_NOK ]]; then
             echo "error: $distname:$version should be installed"
             cpres=1
         fi
