@@ -1,0 +1,7 @@
+
+function c-gnatcoll-modules()
+{
+    echo c-gnatcoll-core
+    echo c-gnatcoll-bindings
+    echo c-gnatcoll-db
+}

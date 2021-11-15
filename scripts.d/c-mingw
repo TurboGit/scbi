@@ -1,0 +1,75 @@
+
+function c-mingw-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/mirror/mingw-w64.git
+}
+
+function c-mingw-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    target-env $SCBI_BDIR/c-pgcc/install/$TARGET
+}
+
+function c-mingw-depends()
+{
+    echo c-mingw-header
+    echo c-pgcc
+}
+
+function c-mingw-setup()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    case $TARGET in
+        *mingw*)
+            ;;
+        *)
+            echo $TARGET not supported for mingw.
+            return 1
+            ;;
+    esac
+}
+
+function c-mingw-out-of-tree()
+{
+    echo true
+}
+
+function c-mingw-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    env > /tmp/env
+
+    ../src/mingw-w64-crt/configure --enable-wildcard \
+        --prefix=$PREFIX/$TARGET --host=$TARGET --build=$SCBI_HOST
+}
+
+function c-mingw-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    #  First fix makefile, we cannot build winrt/libruntimeobject.a on
+    #  lib32 not lib64.
+
+    sed -i 's/^winrt32_DATA/#winrt32_DATA/' Makefile
+    sed -i 's/^winrt64_DATA/#winrt64_DATA/' Makefile
+
+    make -j4
+}
+
+function c-mingw-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}

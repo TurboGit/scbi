@@ -1,0 +1,34 @@
+
+function c-gnadelite-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo git+ssh://repo.or.cz/srv/git/gnadelite.git
+}
+
+function c-gnadelite-depends()
+{
+    echo libsqlite3-dev
+}
+
+function c-gnadelite-out-of-tree()
+{
+    echo false
+}
+
+function c-gnadelite-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    PROCESSORS=$SCBI_JOBS make prefix=$PREFIX
+}
+
+function c-gnadelite-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make prefix=$PREFIX prepare_install && make prefix=$PREFIX install
+}

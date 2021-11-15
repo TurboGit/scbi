@@ -1,0 +1,13 @@
+
+function c-gprconfig-kb-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gprconfig_kb
+}
+
+function c-gprconfig-kb-config()
+{
+    echo done
+}

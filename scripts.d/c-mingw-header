@@ -1,0 +1,78 @@
+
+function c-mingw-header-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/mirror/mingw-w64.git
+}
+
+function c-mingw-header-version()
+{
+    return $VERSION_ERROR
+}
+
+function c-mingw-header-depends()
+{
+    echo c-binutils
+}
+
+function c-mingw-header-out-of-tree()
+{
+    echo true
+}
+
+function c-mingw-header-setup()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    case $TARGET in
+        *mingw*)
+            ;;
+        *)
+            echo $TARGET not supported for mingw.
+            return 1
+            ;;
+    esac
+}
+
+function c-mingw-header-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var C_INCLUDE_PATH $SCBI_BDIR/c-mingw-header/$TARGET-default/install/$TARGET/include
+}
+
+function c-mingw-header-build-env()
+{
+    no-target-env
+}
+
+function c-mingw-header-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ../src/mingw-w64-headers/configure \
+        --prefix=$PREFIX/$TARGET --build=$TARGET
+}
+
+function c-mingw-header-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j6
+}
+
+function c-mingw-header-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install &&
+        # install into the partial gcc compiler too
+        rsync -a ../install/. $SCBI_BDIR/c-pgcc/install/
+}

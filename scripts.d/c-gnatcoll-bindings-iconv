@@ -1,0 +1,70 @@
+
+function c-gnatcoll-bindings-iconv-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gnatcoll-bindings
+}
+
+function c-gnatcoll-bindings-iconv-depends()
+{
+    echo c-gnatcoll-core
+    echo c-xmlada
+    echo c-libiconv:#1.15
+}
+
+function c-gnatcoll-bindings-iconv-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo c-gnatcoll-bindings-$VERSION-src.tar.gz
+}
+
+function c-gnatcoll-bindings-iconv-out-of-tree()
+{
+    echo false
+}
+
+function c-gnatcoll-bindings-iconv-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
+
+    for kind in static relocatable static-pic; do
+        gprbuild $GOPTS -XLIBRARY_TYPE=$kind iconv/gnatcoll_iconv.gpr
+        [[ $res != 0 ]] && exit 1
+    done
+
+    true
+}
+
+function c-gnatcoll-bindings-iconv-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
+    GOPTS="$GOPTS --build-var=LIBRARY_TYPE"
+
+    PM=$PREFIX/$TARGET/install/$TARGET/share/gpr/manifests
+
+    if [[ -f $PM/gnatcoll_iconv ]]; then
+        gprinstall $GOPTS --uninstall gnatcoll_iconv
+    fi
+
+    for kind in static relocatable static-pic; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
+                   --build-var=GNATCOLL.ICONV_BUILD \
+                   --install-name=gnatcoll_iconv \
+                   --build-name=$kind iconv/gnatcoll_iconv.gpr
+        [[ $? != 0 ]] && exit 1
+    done
+
+    true
+}

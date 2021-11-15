@@ -1,0 +1,79 @@
+
+function c-gpr-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gpr
+}
+
+function c-gpr-depends()
+{
+    echo c-gnatcoll-core
+    echo c-gnatcoll-bindings-iconv
+    echo c-gnatcoll-bindings-gmp
+    echo c-langkit:stable
+    echo c-libadalang/stable:stable
+    echo c-gprconfig-kb
+}
+
+function do-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local BUILD=$3
+
+    make PYTHONEXE=python3 -C langkit &&
+        rm -f src/kb/gprconfig_kb &&
+        ln -s $SCBI_BDIR/c-gprconfig-kb/src/db src/kb/gprconfig_kb &&
+        make $BUILD PYTHONEXE=python3 GPR2_TOOLS_PREFIX=gpr2 setup
+}
+
+function c-gpr-out-of-tree()
+{
+    echo false
+}
+
+function c-gpr-debug-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    do-config $PREFIX $TARGET "BUILD=debug"
+}
+
+function c-gpr-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    do-config $PREFIX $TARGET "BUILD=release"
+}
+
+function c-gpr-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make
+}
+
+function c-gpr-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    # Needed to pass the tests:
+    # pip3 install git+https://github.com/AdaCore/e3-core
+    # pip3 install git+https://github.com/AdaCore/e3-testsuite
+
+    cd testsuite && ./testsuite.py --temp-dir=$HOME/tmp -j$SCBI_JOBS
+}
+
+function c-gpr-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make GPRINSTALL=gprinstall install
+}

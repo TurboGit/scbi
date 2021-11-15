@@ -1,0 +1,48 @@
+
+function c-gwiad-update()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd $SCBI_GIT_REPO/gwiad && git pull
+}
+
+function c-gwiad-setup()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ ! -d src_cp ]]; then
+        ln -s $SCBI_GIT_REPO/gwiad src_cp
+    fi
+}
+
+function c-gwiad-out-of-tree()
+{
+    echo false
+}
+
+function c-gwiad-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd build && rm mk.install
+}
+
+function c-gwiad-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    export AWS_BUILD=relocatable
+    cd build && make setup && PROCESSORS=$SCBI_JOBS make
+}
+
+function c-gwiad-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd build && make install && make install_server
+}

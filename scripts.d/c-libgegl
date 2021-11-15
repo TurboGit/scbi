@@ -1,0 +1,50 @@
+
+function c-libgegl-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo git://git.gnome.org/gegl
+}
+
+function c-libgegl-out-of-tree()
+{
+    echo false
+}
+
+function c-libgegl-env()
+{
+    system-compiler
+
+    add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+    add-to-var PATH            $PREFIX/bin
+}
+
+function c-libgegl-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./autogen.sh && ./configure --prefix=$PREFIX
+}
+
+function c-libgegl-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j$SCBI_JOBS
+}
+
+function c-libgegl-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}
+
+function c-libgegl-prefix()
+{
+    echo /opt/gimp/libgegl
+}

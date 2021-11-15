@@ -1,5 +1,0 @@
-
-function gnatcoll-modules()
-{
-    echo gnatcoll-core gnatcoll-bindings gnatcoll-db
-}

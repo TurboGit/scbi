@@ -1,0 +1,48 @@
+
+function c-morzhol-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/TurboGit/morzhol.git
+}
+
+function c-morzhol-cross-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    PROCESSORS=$SCBI_JOBS make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
+}
+
+function c-morzhol-out-of-tree()
+{
+    echo false
+}
+
+function c-morzhol-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    PROCESSORS=$SCBI_JOBS make
+}
+
+function c-morzhol-cross-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    # mkdir should be part of makefile
+    mkdir -p $PREFIX/$TARGET/bin
+
+    make OS=Windows_NT prefix=$PREFIX/$TARGET install
+}
+
+function c-morzhol-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}

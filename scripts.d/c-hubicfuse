@@ -1,0 +1,62 @@
+
+function c-hubicfuse-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/TurboGit/hubicfuse.git
+}
+
+function c-hubicfuse-env()
+{
+    system-compiler
+}
+
+function c-hubicfuse-depends()
+{
+    echo libfuse-dev
+    echo libjson-c-dev
+    echo libmagic-dev
+}
+
+function c-hubicfuse-out-of-tree()
+{
+    echo false
+}
+
+function c-hubicfuse-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ../src/configure --prefix=$PREFIX
+}
+
+function c-hubicfuse-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j4
+}
+
+function c-hubicfuse-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}
+
+function c-hubicfuse-post-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    sudo cp $PREFIX/bin/hubicfuse /usr/local/bin
+}
+
+function c-hubicfuse-prefix()
+{
+    echo NONE
+}

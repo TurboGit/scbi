@@ -1,0 +1,38 @@
+
+function c-polyorb-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/PolyORB.git
+}
+
+function c-polyorb-out-of-tree()
+{
+    echo false
+}
+
+function c-polyorb-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./support/reconfig
+    ./configure --prefix=$PREFIX --with-appli-perso="corba dsa"
+}
+
+function c-polyorb-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make
+}
+
+function c-polyorb-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}

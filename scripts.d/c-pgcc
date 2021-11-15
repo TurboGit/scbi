@@ -1,0 +1,79 @@
+
+#  A partial GCC C compiler for building a minimum runtime
+#  used to build a mingw32 cross-compiler
+
+function c-pgcc-version()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    INST=$SCBI_BDIR/c-pgcc/install/$TARGET/bin
+
+    if [[ -f $INST/$TARGET-gcc ]]; then
+        return $VERSION_OK
+    else
+        return $VERSION_ERROR
+    fi
+}
+
+function c-pgcc-build-env()
+{
+    system-compiler
+}
+
+function c-pgcc-setup()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $TARGET-default/src
+    rm -f build
+    ln -s $TARGET-default build
+    mkdir -p install
+}
+
+function c-pgcc-out-of-tree()
+{
+    echo false
+}
+
+function c-pgcc-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    CFLAGS="-O1" $SCBI_BDIR/p-gnat/build/src/configure \
+          --target=$TARGET --prefix=$PREFIX/$TARGET --host=$SCBI_HOST \
+          --enable-thread=win32 --disable-nls --disable-multilib \
+          --disable-libada --disable-sjlj-exceptions \
+          --enable-languages=c
+}
+
+function c-pgcc-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    # The make will fail, but we install the partial C compiler
+    # which is sufficient to build the MingW runtime.
+
+    make -j4
+
+    return 0
+}
+
+function c-pgcc-install()
+{
+    # The make will fail, but we install the partial C compiler
+    # which is sufficient to build the MingW runtime.
+
+    make -k install
+
+    return 0
+}
+
+function c-pgcc-prefix()
+{
+    # install into the partial gcc compiler
+    echo $SCBI_BDIR/c-pgcc/install
+}

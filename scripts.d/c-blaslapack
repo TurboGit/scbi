@@ -1,0 +1,51 @@
+function c-blaslapack-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo lapack.tgz
+}
+
+function c-blaslapack-out-of-tree()
+{
+    echo true
+}
+
+function c-blaslapack-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ $SCBI_HOST != $TARGET ]]; then
+        COPTS=-DCMAKE_Fortran_COMPILER=$SCBI_BDIR/install/bin/$TARGET-gfortran
+    fi
+
+    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX $COPTS ../src
+}
+
+function c-blaslapack-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make PROCESSORS=$SCBI_JOBS blas lapack
+}
+
+function c-blaslapack-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ $SCBI_HOST == $TARGET ]]; then
+        TPREFIX=$PREFIX
+        ranlib lib/*.a
+    else
+        TPREFIX=$PREFIX/$TARGET
+        $TARGET-ranlib lib/*.a
+    fi
+
+    mkdir -p $TPREFIX/lib
+    cp lib/*.a $TPREFIX/lib
+}

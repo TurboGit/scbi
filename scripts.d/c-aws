@@ -1,0 +1,82 @@
+
+function c-aws-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/aws
+}
+
+function c-aws-cross-depends()
+{
+    echo c-xmlada
+}
+
+function c-aws-depends()
+{
+    echo c-xmlada
+    echo c-libadalang
+}
+
+function c-aws-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo c-aws-$VERSION-src.tar.gz
+}
+
+function c-aws-out-of-tree()
+{
+    echo false
+}
+
+function c-aws-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f makefile.setup &&
+        make prefix=$PREFIX LAL=false ZLIB=false \
+             DEBUG=$(get-build-type GPR aws true) TARGET=$TARGET setup
+}
+
+function c-aws-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f makefile.setup &&
+        make prefix=$PREFIX DEBUG=$(get-build-type GPR aws true) setup
+}
+
+function c-aws-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make
+}
+
+function c-aws-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}
+
+function c-aws-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    (
+        gpython-env
+        cd regtests && ./testsuite.py --jobs=$SCBI_JOBS
+    )
+
+    display-file regtests/out/report
+}

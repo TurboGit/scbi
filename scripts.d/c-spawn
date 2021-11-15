@@ -1,0 +1,44 @@
+function c-spawn-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/spawn
+}
+
+function c-spawn-out-of-tree()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo false
+}
+
+function c-spawn-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/../build/gnat
+}
+
+function c-spawn-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j1 all
+}
+
+function c-spawn-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j1 PREFIX=$PREFIX install
+}
+
+function c-spawn-prefix()
+{
+    echo NONE
+}

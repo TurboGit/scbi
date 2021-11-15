@@ -1,0 +1,53 @@
+
+function c-gnatcoll-db-libs-sql-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gnatcoll-db
+}
+
+function c-gnatcoll-db-libs-sql-depends()
+{
+    echo c-gnatcoll-core
+}
+
+function c-gnatcoll-db-libs-sql-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo c-gnatcoll-db-libs-sql-sql-$VERSION-src.tar.gz
+}
+
+function c-gnatcoll-db-libs-sql-out-of-tree()
+{
+    echo false
+}
+
+function c-gnatcoll-db-libs-sql-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -C sql prefix=$PREFIX INTEGRATED=yes \
+         TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$SCBI_JOBS setup
+}
+
+function c-gnatcoll-db-libs-sql-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -C sql NORMALIZED_TARGET=$TARGET
+}
+
+function c-gnatcoll-db-libs-sql-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -C sql NORMALIZED_TARGET=$TARGET install
+}

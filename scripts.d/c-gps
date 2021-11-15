@@ -1,0 +1,108 @@
+
+function c-gps-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gps
+}
+
+function c-gps-depends()
+{
+    echo libclang-dev
+    echo python3-pep8
+    echo python3-jedi
+    echo python-gi-dev
+    echo c-xmlada
+    echo c-gtkada
+    echo c-libadalang
+    echo c-libadalang-tools
+    echo c-gnatcoll-db
+    echo c-ada-language-server
+    echo c-spawn
+}
+
+function c-gps-out-of-tree()
+{
+    echo false
+}
+
+function c-gps-patches()
+{
+    echo gps-css-gtk3.36.patch
+}
+
+function c-gps-gtk324-patches()
+{
+    echo
+}
+
+function c-gps-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    (
+        # Setup GNAT link
+        rm -fr gnat
+        ln -s $SCBI_BDIR/p-gnat/$TARGET-default/src/gcc/ada/doc/gnat_ugn gnat
+
+        # Setup LaL link
+        rm -f laltools
+        ln -s $SCBI_BDIR/c-libadalang-tools/$TARGET-default/src laltools
+
+        # Setup ALS link
+        # GPS require using the build directory of ada-language-server
+        rm -f ada_language_server
+        ln -s $SCBI_BDIR/c-ada-language-server/$TARGET-default/build \
+           ada_language_server
+
+        ./configure --prefix=$PREFIX --with-gtk=$SCBI_GTK_VERSION \
+                    --with-sqlite=embedded --with-gnatcoll=$SCBI_BDIR/install \
+                    --with-clang=/usr/lib/llvm-11/lib
+    )
+}
+
+function c-gps-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    export LIBRARY_TYPE=relocatable
+    export LANGKIT_SUPPORT_BUILD=relocatable
+
+    add-to-var C_INCLUDE_PATH /usr/include/python2.7
+}
+
+function c-gps-pre-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    DATE=$(date "+%Y/%m/%d")
+    sed -i "s,unknown date,$DATE,g" common/core/src/config.ads
+}
+
+function c-gps-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    PROCESSORS=$SCBI_JOBS make PYTHON=python2 -j1
+}
+
+function c-gps-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}
+
+function c-gps-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo /opt/gnat/gps
+}

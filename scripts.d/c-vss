@@ -1,0 +1,31 @@
+function c-vss-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/VSS
+}
+
+function c-vss-out-of-tree()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo false
+}
+
+function c-vss-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/../build/gnat
+}
+
+function c-vss-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j1 all
+}
