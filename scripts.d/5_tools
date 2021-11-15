@@ -103,14 +103,14 @@ function add-to-var()
 }
 
 ############################## get-version-number
-# return a 2 digits version number for $1
+# return a 3 digits version number for $1
 
 VERSION_OK=9999
 VERSION_ERROR=-1
 
 function get-version-number()
 {
-    echo -n "$1" | sed -e 's/[^0-9-]*\(\-\?[0-9]*\(\.[0-9]*\)\?\).*/\1/g'
+    echo -n "$1" | sed -e 's/[^0-9-]*\(\-\?[0-9]*\(\.[0-9]*\)\?\(\.[0-9]*\)\?\).*/\1/g'
 }
 
 ############################## display-version
