@@ -10,8 +10,8 @@ function c-gps-vcs()
 function c-gps-depends()
 {
     echo libclang-dev
-    echo python-pep8
-    echo python-jedi
+    echo python3-pep8
+    echo python3-jedi
     echo python-gi-dev
     echo c-xmlada
     echo c-gtkada
