@@ -1,0 +1,17 @@
+
+with-variant native gcc:8.3.1
+
+function mauto-config()
+{
+    echo mauto-config
+}
+
+function mauto-build()
+{
+    echo mauto-config
+}
+
+function mauto-install()
+{
+    echo mauto-config
+}

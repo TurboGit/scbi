@@ -1,0 +1,9 @@
+# check for auto variant depending on os package with specific version
+
+./scbi mauto/auto
+
+sed -i 's/8.3.1/99.99.09/g' scripts.d/mauto
+
+./scbi mauto/auto
+
+sed -i 's/99.99.09/8.3.1/g' scripts.d/mauto

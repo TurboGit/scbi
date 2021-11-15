@@ -356,8 +356,8 @@ function check-pkg-status()
 
     for distname in $(get-pkg-name "$pkg"); do
         echo $distname
-        echo $version
-        M=$(check-${SCBI_LINUX_DISTRIB}-pkg $distname $version)
+        echo ${version:-0}
+        M=$(check-${SCBI_LINUX_DISTRIB}-pkg $distname ${version:-0})
         echo $?
     done
 }

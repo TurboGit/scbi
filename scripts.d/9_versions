@@ -323,11 +323,23 @@ function check-auto-variant()
 
             for dmodule in $(get-all-depends $module native depends); do
                 if [[ ! -f $SCBI_DEFS/$dmodule ]]; then
-                    M=$(check-pkg $dmodule)
-                    if [[ $? == 2 ]]; then
-                        #  Module not found in OS, cannot use native
-                        res=1
-                    fi
+                    local STATUSES=( $(check-pkg-status $dmodule) )
+
+                    while read pkg pver pres; do
+                        if [[ $pres == $SCBI_PKG_NOT_FOUND ]]; then
+                            ilog $module unknown dependency $pkg
+                            res=1
+                        elif [[ $pres == $SCBI_PKG_NOT_INSTALLED ]]; then
+                            ilog $module dependency $pkg not installed
+                            res=1
+                        elif [[ $pres == $SCBI_PKG_VERSION_NOK ]]; then
+                            ilog $module module $pkg version $pver not found
+                            res=1
+                        elif [[ $pres == $SCBI_PKG_VERSION_OK ]]; then
+                            ilog $module module $pkg version $pver matching
+                            res=0
+                        fi
+                    done < <( echo ${STATUSES[*]} )
                 fi
             done
 
