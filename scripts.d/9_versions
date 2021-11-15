@@ -139,7 +139,7 @@ function handle-auto-variant()
         local variant=${module_info[1]}
 
         if [[ $variant =~ ^auto(\.|$) ]]; then
-            check-auto-variant $M
+            check-auto-variant ${M/*=/}
             local res=$?
 
             if [[ $res == 0 ]]; then

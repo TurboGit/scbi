@@ -1,4 +1,4 @@
 p-gdb:gdb-head
-c-exiv2/auto:v0.27.5
 c-libavif/auto
 c-libiconv:#1.15
+c-darktable=c-exiv2/auto:v0.27.5
