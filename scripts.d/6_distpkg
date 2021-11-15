@@ -340,6 +340,28 @@ function get-lib-for-dev()
     get-${SCBI_LINUX_DISTRIB}-lib-for-dev $pkg
 }
 
+############################## check-pkg-status
+#
+# check a distrib package, returned code a list:
+#
+#   os-package
+#   required-version
+#   status (one of SCBI_PKG_*)
+
+function check-pkg-status()
+{
+    local name_ver=( ${1/:/ } )
+    local pkg=${name_ver[0]}
+    local version=${name_ver[1]}
+
+    for distname in $(get-pkg-name "$pkg"); do
+        echo $distname
+        echo $version
+        M=$(check-${SCBI_LINUX_DISTRIB}-pkg $distname $version)
+        echo $?
+    done
+}
+
 ############################## check-pkg
 #
 # check a distrib package, returned code:
