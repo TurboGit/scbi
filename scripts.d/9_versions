@@ -336,7 +336,11 @@ function check-auto-variant()
                             ilog $module module $pkg version $pver not found
                             res=1
                         elif [[ $pres == $SCBI_PKG_VERSION_OK ]]; then
-                            ilog $module module $pkg version $pver matching
+                            if [[ $pver == 0 ]]; then
+                                ilog $module module $pkg found
+                            else
+                                ilog $module module $pkg version $pver matching
+                            fi
                             res=0
                         fi
                     done < <( echo ${STATUSES[*]} )
