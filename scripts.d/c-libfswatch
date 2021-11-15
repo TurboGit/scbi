@@ -18,6 +18,11 @@ function c-libfswatch-depends()
     echo autopoint
 }
 
+function c-libfswatch-patches()
+{
+    echo libfswatch.patch
+}
+
 function c-libfswatch-config()
 {
     local PREFIX=$1
@@ -31,7 +36,7 @@ function c-libfswatch-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j$SCBI_JOBS
+    make -C libfswatch -j$SCBI_JOBS
 }
 
 function c-libfswatch-install()
@@ -39,7 +44,7 @@ function c-libfswatch-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make install
+    make -C libfswatch install
 }
 
 function c-libfswatch-prefix()
