@@ -1,0 +1,19 @@
+*** a/configure.ac-orig	2020-12-11 18:37:48.936823506 +0100
+--- b/configure.ac	2021-11-15 12:06:08.659916017 +0100
+***************
+*** 35,41 ****
+  AC_CONFIG_FILES([po/Makefile.in])
+  AC_CONFIG_FILES([man/fswatch.7])
+  AC_CONFIG_MACRO_DIRS([m4])
+! AC_CONFIG_MACRO_DIR([m4])
+  
+  # Compute the canonical target-system type variables
+  AC_CANONICAL_TARGET
+--- 35,41 ----
+  AC_CONFIG_FILES([po/Makefile.in])
+  AC_CONFIG_FILES([man/fswatch.7])
+  AC_CONFIG_MACRO_DIRS([m4])
+! # AC_CONFIG_MACRO_DIR([m4])
+  
+  # Compute the canonical target-system type variables
+  AC_CANONICAL_TARGET
