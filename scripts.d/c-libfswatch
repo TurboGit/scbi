@@ -1,0 +1,51 @@
+
+function c-libfswatch-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/fswatch
+}
+
+function c-libfswatch-out-of-tree()
+{
+    echo false
+}
+
+function c-libfswatch-depends()
+{
+    echo autoconf
+    echo autopoint
+}
+
+function c-libfswatch-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./autogen.sh && ./configure --prefix=$PREFIX
+}
+
+function c-libfswatch-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j$SCBI_JOBS
+}
+
+function c-libfswatch-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}
+
+function c-libfswatch-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo NONE
+}

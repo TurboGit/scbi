@@ -1,0 +1,67 @@
+
+function c-gpmdp-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/MarshallOfSound/Google-Play-Music-Desktop-Player-UNOFFICIAL-.git
+}
+
+function c-gpmdp-depends()
+{
+    echo yarn
+    echo libavahi-compat-libdnssd-dev
+    echo node-babel-register
+}
+
+function c-gpmdp-out-of-tree()
+{
+    echo false
+}
+
+function c-gpmdp-patches()
+{
+    echo 0001-fix-mpris-support-in-gnome.patch
+}
+
+function c-gpmdp-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    yarn
+}
+
+function c-gpmdp-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    yarn run build
+}
+
+function c-gpmdp-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    # create the installer
+    yarn run make:deb:64
+}
+
+function c-gpmdp-post-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    # create the installer
+    echo sudo dpkg -i ./dist/installers/debian/google-play-music-desktop-player_4.6.1_amd64.deb
+}
+
+function c-gpmdp-test()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    npm start
+}

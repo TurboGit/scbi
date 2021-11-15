@@ -1,0 +1,76 @@
+
+function c-aunit-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/aunit
+}
+
+function c-aunit-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo c-aunit-$VERSION-tar.gz
+}
+
+function c-aunit-version()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cat <<EOF > prj.gpr
+       with "aunit";
+       project prj is
+       end prj;
+EOF
+
+    cat <<EOF > main.adb
+       with aunit;
+       procedure main is
+          s : aunit.status;
+       begin
+          null;
+       end main;
+EOF
+
+    gprbuild-project prj.gpr
+
+    if [[ $? = 0 ]]; then
+        echo $VERSION_OK
+    else
+        echo $VERSION_ERROR
+    fi
+}
+
+function c-aunit-out-of-tree()
+{
+    echo false
+}
+
+function c-aunit-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ "$SCBI_HOST" = "$TARGET" ]]; then
+        PROCESSORS=$SCBI_JOBS make INSTALL=$PREFIX
+    else
+        PROCESSORS=$SCBI_JOBS make TARGET=$TARGET INSTALL=$PREFIX
+    fi
+}
+
+function c-aunit-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ "$SCBI_HOST" = "$TARGET" ]]; then
+        make install INSTALL=$PREFIX
+    else
+        make TARGET=$TARGET INSTALL=$PREFIX/$TARGET install
+    fi
+}

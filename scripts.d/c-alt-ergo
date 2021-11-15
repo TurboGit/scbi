@@ -1,0 +1,62 @@
+
+function c-alt-ergo-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/alt-ergo
+}
+
+function c-alt-ergo-depends()
+{
+    echo ocaml
+    echo dune
+    echo opam
+    echo libzarith-ocaml-dev
+    echo libzarith-ocaml
+    echo libzip-ocaml-dev
+    echo ocplib-simplex-ocaml-dev
+    echo liblablgtksourceview2-ocaml-dev
+    echo libdune-ocaml-dev
+}
+
+function c-alt-ergo-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    system-compiler
+    eval $(opam env)
+}
+
+function c-alt-ergo-out-of-tree()
+{
+    echo false
+}
+
+function c-alt-ergo-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd sources &&
+        ./configure --prefix=$PREFIX
+}
+
+function c-alt-ergo-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd sources &&
+        make -j$SCBI_JOBS
+}
+
+function c-alt-ergo-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd sources &&
+        make install
+}

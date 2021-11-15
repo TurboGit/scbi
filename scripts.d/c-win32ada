@@ -1,0 +1,67 @@
+
+function c-win32ada-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/win32ada
+}
+
+function c-win32ada-version()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cat <<EOF > prj.gpr
+       with "win32ada";
+       project prj is
+       end prj;
+EOF
+
+    cat <<EOF > main.adb
+       with win32;
+       procedure main is
+          n : win32.dword;
+       begin
+          null;
+       end main;
+EOF
+
+    gprbuild-project prj.gpr
+
+    if [[ $? = 0 ]]; then
+        echo $VERSION_OK
+    else
+        echo $VERSION_ERROR
+    fi
+}
+
+function c-win32ada-out-of-tree()
+{
+    echo false
+}
+
+function c-win32ada-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ "$SCBI_HOST" = "$TARGET" ]]; then
+        make PROCESSORS=$SCBI_JOBS
+    else
+        make PROCESSORS=$SCBI_JOBS prefix=$PREFIX \
+             TARGET=$TARGET DEBUG=false build
+    fi
+}
+
+function c-win32ada-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ "$SCBI_HOST" = "$TARGET" ]]; then
+        make install
+    else
+        make prefix=$PREFIX TARGET=$TARGET DEBUG=false install
+    fi
+}

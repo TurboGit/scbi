@@ -1,0 +1,48 @@
+
+function c-gprbuild-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gprbuild
+}
+
+function c-gprbuild-out-of-tree()
+{
+    echo true
+}
+
+function c-gprbuild-depends()
+{
+    echo c-libgpr
+    echo c-xmlada
+    echo c-gprconfig-kb
+}
+
+function c-gprbuild-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ ! -e ../src/share/gprconfig ]]; then
+        ln -s $SCBI_BDIR/c-gprconfig-kb/build/src/db ../src/share/gprconfig
+    fi
+
+    make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$SCBI_JOBS setup
+}
+
+function c-gprbuild-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -f ../src/Makefile
+}
+
+function c-gprbuild-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -f ../src/Makefile install
+}

@@ -1,0 +1,157 @@
+
+function c-darktable-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/darktable-org/darktable.git
+}
+
+function c-darktable-out-of-tree()
+{
+    echo true
+}
+
+function c-darktable-build-depends()
+{
+    echo os@-cmake
+    echo os@-python3-jsonschema
+    echo os@-intltool
+    echo os@-xsltproc
+    echo os@-findbin
+}
+
+function c-darktable-clang-build-depends()
+{
+    echo os@-llvm-11
+    echo os@-clang-11
+}
+
+function c-darktable-depends()
+{
+    echo os@-sqlite3-dev
+    echo os@-png-dev
+    echo os@-jpeg-dev
+    echo os@-heif-dev
+    echo os@-openjp2-dev
+    echo os@-pugixml-dev
+    echo os@-xml2-dev
+    echo os@-lcms2-dev
+    echo os@-tiff-dev
+    echo os@-curl4
+    echo os@-curl4-gnutls-dev
+    echo os@-gphoto2-dev
+    echo os@-openexr-dev
+    echo os@-soup2-dev
+    echo os@-lua5.4-dev
+    echo os@-osmgpsmap-1.0-dev
+    echo os@-graphicsmagick1-dev
+    echo os@-colord-dev
+    echo os@-colord-gtk-dev
+    echo os@-gomp1
+    echo os@-gmic-dev
+    echo os@-cups2-dev
+    echo os@-secret-dev
+    echo os@-xml2-utils
+    echo os@-lensfun-dev
+    echo os@-rsvg2-dev
+    echo os@-json-glib-dev
+    echo os@-pod-parser-perl
+    echo os@-avif-dev
+    echo os@-webp-dev
+    echo os@-cairo-dev
+    echo os@-image-exiftool-perl
+
+    echo c-exiv2
+}
+
+function c-darktable-clang-build-env()
+{
+    add-to-var CMAKE_C_COMPILER   clang-$SCBI_CLANG_VERSION
+    add-to-var CMAKE_CXX_COMPILER clang++-$SCBI_CLANG_VERSION
+}
+
+function c-darktable-env()
+{
+    system-compiler
+}
+
+function c-darktable-release-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo -DCMAKE_BUILD_TYPE=Release
+}
+
+function c-darktable-default-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo -DCMAKE_BUILD_TYPE=RelWithDebInfo
+}
+
+function c-darktable-common-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo -DCMAKE_INSTALL_PREFIX=$PREFIX
+    echo -DUSE_GAME=OFF
+}
+
+function c-darktable-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    # fake build script which want the src dir to be a git repository
+
+    if [[ ! -h ../src/.git ]]; then
+        ln -s ../../src/.git ../src/.git
+    fi
+
+    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
+
+    cmake $OPTIONS ../src
+}
+
+function c-darktable-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j$SCBI_HALF_JOBS
+}
+
+function c-darktable-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+
+    rm -f ../src/.git
+}
+
+function c-darktable-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    (
+        cd ../src/src/tests/integration
+
+        PATH=/opt/darktable/bin:$PATH ./run.sh
+    )
+}
+
+function c-darktable-prefix()
+{
+    echo /opt/darktable
+}

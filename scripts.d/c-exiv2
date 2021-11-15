@@ -1,0 +1,66 @@
+
+with-variant native os@-exiv2 os@-exiv2-dev
+
+function c-exiv2-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/Exiv2/exiv2.git
+}
+
+function c-exiv2-out-of-tree()
+{
+    echo true
+}
+
+function c-exiv2-build-depends()
+{
+    echo os@-cmake
+}
+
+function c-exiv2-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH              $PREFIX/bin
+    add-to-var LD_LIBRARY_PATH   $PREFIX/lib
+    add-to-var C_INCLUDE_PATH    $PREFIX/include
+    add-to-var CXX_INCLUDE_PATH  $PREFIX/include
+    add-to-var PKG_CONFIG_PATH   $PREFIX/lib/pkgconfig
+    add-to-var CMAKE_PREFIX_PATH $PREFIX/lib/cmake/exiv2
+}
+
+function c-exiv2-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DEXIV2_ENABLE_BMFF=ON ../src
+}
+
+function c-exiv2-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make -j$SCBI_JOBS
+}
+
+function c-exiv2-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make install
+}
+
+function c-exiv2-prefix()
+{
+    echo NONE
+}

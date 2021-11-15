@@ -1,0 +1,61 @@
+
+function c-ada-libfswatch-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/ada_libfswatch
+}
+
+function c-ada-libfswatch-depends()
+{
+    echo c-gprbuild
+    echo c-gnatcoll
+    echo c-libfswatch
+}
+
+function c-ada-libfswatch-out-of-tree()
+{
+    echo false
+}
+
+function c-ada-libfswatch-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var C_INCLUDE_PATH .
+}
+
+function c-ada-libfswatch-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    #  Get include / lib from s-libfswatch
+
+    LIB=$SCBI_BDIR/c-libfswatch/$TARGET-default/install
+
+    IDIR=libfswatch/include/libfswatch/c/
+    LDIR=libfswatch/lib
+
+    mkdir -p $IDIR $LDIR &&
+        cp $LIB/include/libfswatch/c/* $IDIR &&
+        cp $LIB/lib/*.a $LDIR
+}
+
+function c-ada-libfswatch-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make DESTDIR=$PREFIX
+}
+
+function c-ada-libfswatch-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make DESTDIR=$PREFIX install
+}

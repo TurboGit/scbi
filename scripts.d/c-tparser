@@ -1,0 +1,47 @@
+
+function c-tparser-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/templates-parser
+}
+
+function c-tparser-out-of-tree()
+{
+    echo false
+}
+
+function c-tparser-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f makefile.setup &&
+        make prefix=$PREFIX TARGET=$TARGET setup
+}
+
+function c-tparser-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f makefile.setup &&
+        make prefix=$PREFIX setup
+}
+
+function c-tparser-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make
+}
+
+function c-tparser-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}

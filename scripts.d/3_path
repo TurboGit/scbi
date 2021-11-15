@@ -44,7 +44,7 @@ function set-compiler-paths()
 
         #  The cross-compiler needs libiconv shared library if it was
         #  built against it.
-        IC=$SCBI_BDIR/s-libiconv/x86_64-linux-gnu-default/install/lib
+        IC=$SCBI_BDIR/c-libiconv/x86_64-linux-gnu-default/install/lib
 
         [[ -d $IC ]] && L=$L:$IC
     fi

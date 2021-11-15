@@ -1,0 +1,65 @@
+
+function c-gimp-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/GNOME/gimp
+}
+
+function c-gimp-out-of-tree()
+{
+    echo false
+}
+
+function c-gimp-depends()
+{
+    echo c-libmypaint:v1.3.0
+    echo c-mypaint-brushes:v1.3.0
+    echo c-libgegl:dev
+    echo gtk-doc-tools
+    echo libbabl-dev
+    echo c-libgegl-dev
+    echo libgexiv2-dev
+    echo libpoppler-glib-dev
+    echo python-gtk2-dev
+    echo python-cairo-dev
+    echo mypaint
+    echo libmng-dev
+    echo libxpm-dev
+}
+
+function c-gimp-env()
+{
+    system-compiler
+    export PERL5LIB=.
+}
+
+function c-gimp-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./autogen.sh --prefix=$PREFIX
+}
+
+function c-gimp-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j$SCBI_JOBS
+}
+
+function c-gimp-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}
+
+function c-gimp-prefix()
+{
+    echo /opt/gimp/gimp
+}

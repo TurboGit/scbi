@@ -1,0 +1,68 @@
+
+function c-ada-language-server-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/ada_language_server
+}
+
+function c-ada-language-server-out-of-tree()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo false
+}
+
+function c-ada-language-server-depends()
+{
+    echo c-gprbuild
+    echo c-libgpr
+    echo c-xmlada
+    echo c-gnatcoll
+    echo c-vss
+    echo c-libadalang-tools
+    echo c-ada-libfswatch
+}
+
+function c-ada-language-server-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/gnat
+    add-to-var GPR_PROJECT_PATH $PREFIX/../build/gnat
+}
+
+function c-ada-language-server-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    export LIBRARY_TYPE=relocatable
+}
+
+function c-ada-language-server-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    PROCESSORS=$SCBI_JOBS make -j1
+}
+
+function c-ada-language-server-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make DESTDIR=$PREFIX install
+}
+
+function c-ada-language-server-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo NONE
+}

@@ -1,0 +1,109 @@
+# External requirements:
+# pip3 install -r REQUIREMENTS.dev
+
+function c-libadalang-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/libadalang
+}
+
+function c-libadalang-common-depends()
+{
+    echo c-gnatcoll-bindings-gmp
+    echo libyaml-dev
+}
+
+function c-libadalang-stable-depends()
+{
+    echo c-langkit/stable:stable
+}
+
+function c-libadalang-depends()
+{
+    echo c-langkit
+}
+
+function c-libadalang-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var LIBLANG_SUPPORT_EXTERNALLY_BUILT false
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var PATH             $PREFIX/bin
+}
+
+function c-libadalang-out-of-tree()
+{
+    echo false
+}
+
+function c-libadalang-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    python3 manage.py generate
+}
+
+function c-libadalang-do-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local PRJ=$3
+
+    GOPTS="-p -m -j$SCBI_JOBS"
+
+    for KIND in static relocatable static-pic; do
+        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
+    done
+}
+
+function c-libadalang-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    c-libadalang-do-build $PREFIX $TARGET \
+                          ./build/libadalang.gpr
+}
+
+function c-libadalang-do-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local PRJ=$3
+
+    gprinstall --prefix=$PREFIX --uninstall libadalang
+
+    BV="--build-var=LIBADALANG_BUILD --build-var=LIBRARY_TYPE"
+    GOPTS="-p --prefix=$PREFIX $BV"
+
+    for KIND in static relocatable static-pic; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
+                   -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
+    done
+}
+
+function c-libadalang-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    c-libadalang-do-install $PREFIX $TARGET \
+                            ./build/libadalang.gpr
+}
+
+function c-libadalang-prefix()
+{
+    echo NONE
+}

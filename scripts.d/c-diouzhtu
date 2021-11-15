@@ -1,0 +1,42 @@
+
+function c-diouzhtu-update()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd $SCBI_GIT_REPO/diouzhtu && git pull
+}
+
+function c-diouzhtu-setup()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ ! -d src_cp ]]; then
+        ln -s $SCBI_GIT_REPO/diouzhtu src_cp
+    fi
+}
+
+function c-diouzhtu-out-of-tree()
+{
+    echo false
+}
+
+function c-diouzhtu-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    export AWS_BUILD=relocatable
+    cd build && PROCESSORS=$SCBI_JOBS make
+}
+
+function c-diouzhtu-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    export ARGWIAD_ROOT=$HOME/opt/gwiad
+
+    cd build &&  make install && make install_gwiad_plugins
+}

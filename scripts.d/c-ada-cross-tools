@@ -1,0 +1,11 @@
+
+function c-ada-cross-tools-modules()
+{
+    echo c-xmlada
+    echo c-libgpr
+    echo c-gnatcoll
+    echo c-win32ada
+    echo c-wposix
+    echo c-aws
+    echo c-tparser
+}

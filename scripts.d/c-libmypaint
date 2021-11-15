@@ -1,0 +1,48 @@
+
+function c-libmypaint-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/mypaint/libmypaint.git
+}
+
+function c-libmypaint-out-of-tree()
+{
+    echo false
+}
+
+function c-libmypaint-env()
+{
+    system-compiler
+    add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+}
+
+function c-libmypaint-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./autogen.sh && ./configure --prefix=$PREFIX
+}
+
+function c-libmypaint-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j$SCBI_JOBS
+}
+
+function c-libmypaint-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}
+
+function c-libmypaint-prefix()
+{
+    echo /opt/gimp/libmypaint
+}

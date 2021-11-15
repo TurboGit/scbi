@@ -1,0 +1,84 @@
+
+function c-xmlada-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/xmlada
+}
+
+function c-xmlada-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo c-xmlada-$VERSION-src.tar.gz
+}
+
+function c-xmlada-version()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cat <<EOF > prj.gpr
+       with "xmlada";
+       project prj is
+       end prj;
+EOF
+
+    cat <<EOF > main.adb
+       with dom.core;
+       procedure main is
+          n : dom.core.node;
+       begin
+          null;
+       end main;
+EOF
+
+    gprbuild-project prj.gpr
+
+    if [[ $? = 0 ]]; then
+        echo $VERSION_OK
+    else
+        echo $VERSION_ERROR
+    fi
+}
+
+function c-xmlada-out-of-tree()
+{
+    echo false
+}
+
+function c-xmlada-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./configure --prefix=$PREFIX --target=$TARGET
+}
+
+function c-xmlada-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./configure --prefix=$PREFIX
+}
+
+function c-xmlada-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make PROCESSORS=$SCBI_JOBS -j2
+}
+
+function c-xmlada-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install
+}

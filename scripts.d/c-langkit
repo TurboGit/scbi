@@ -1,0 +1,129 @@
+
+# External requirements:
+# pip3 install -r REQUIREMENTS.dev
+
+function c-langkit-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/langkit
+}
+
+function c-langkit-depends()
+{
+    echo c-gnatcoll-core
+    echo c-gnatcoll-bindings
+}
+
+function c-langkit-out-of-tree()
+{
+    echo false
+}
+
+function c-langkit-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    export PYTHONPATH=$PWD
+}
+
+function c-langkit-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PYTHONPATH       $SCBI_BDIR/c-langkit/$TARGET-$VARIANT/build
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
+function c-langkit-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    # nothing to do, the sources are pre-generated
+}
+
+function c-langkit-do-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local OPTS=$3
+
+    local PRJ=$4
+
+    GOPTS="-p -m -j$SCBI_JOBS $OPTS"
+
+    for KIND in static relocatable static-pic; do
+        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
+    done
+}
+
+function c-langkit-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    c-langkit-do-build $PREFIX $TARGET "" \
+                       ./support/langkit_support.gpr
+}
+
+function c-langkit-cross-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    c-langkit-do-build $PREFIX $TARGET "--target=$TARGET" \
+                       ./support/langkit_support.gpr
+}
+
+function c-langkit-do-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local OPTS=$3
+
+    local PRJ=$4
+
+    gprinstall $OPTS --prefix=$PREFIX --uninstall langkit
+
+    BV="--build-var=LANGKIT_BUILD --build-var=LIBRARY_TYPE"
+    GOPTS="-p --prefix=$PREFIX $OPTS $BV"
+
+    for KIND in static relocatable static-pic; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
+                   -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
+    done
+}
+
+function c-langkit-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    c-langkit-do-install $PREFIX $TARGET "" \
+                         ./support/langkit_support.gpr
+}
+
+function c-langkit-cross-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    c-langkit-do-install $PREFIX $TARGET "--target=$TARGET" \
+                         ./support/langkit_support.gpr
+}
+
+function c-langkit-prefix()
+{
+    echo NONE
+}

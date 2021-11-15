@@ -1,0 +1,48 @@
+
+function c-git-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo git://git.kernel.org/pub/scm/git/git.git
+}
+
+function c-git-env()
+{
+    system-compiler
+}
+
+function c-git-out-of-tree()
+{
+    echo false
+}
+
+function c-git-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make configure && ./configure --prefix=$PREFIX CFLAGS="-O2"
+}
+
+function c-git-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j6 PREFIX=$PREFIX all doc
+}
+
+function c-git-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make PREFIX=$PREFIX install install-doc &&
+        sudo cp contrib/completion/git-completion.bash $PREFIX/etc/
+}
+
+function c-git-prefix()
+{
+    echo /opt/git
+}

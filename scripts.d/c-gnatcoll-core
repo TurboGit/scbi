@@ -1,0 +1,62 @@
+
+function c-gnatcoll-core-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gnatcoll-core.git
+}
+
+function c-gnatcoll-core-depends()
+{
+    echo c-libgpr
+    echo c-xmlada
+}
+
+function c-gnatcoll-core-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo c-gnatcoll-core-$VERSION-src.tar.gz
+}
+
+function c-gnatcoll-core-out-of-tree()
+{
+    echo false
+}
+
+function c-gnatcoll-core-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ $SCBI_HOST == $TARGET ]]; then
+        MMAP=yes
+        GOS=unix
+    else
+        MMAP=no
+        GOS=windows
+    fi
+
+    make INTEGRATED=yes prefix=$PREFIX GNATCOLL_MMAP=$MMAP GNATCOLL_OS=$GOS \
+         TARGET=$TARGET NORMALIZED_TARGET=$TARGET setup
+}
+
+function c-gnatcoll-core-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    PROCESSORS=$SCBI_JOBS make NORMALIZED_TARGET=$TARGET
+}
+
+function c-gnatcoll-core-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make NORMALIZED_TARGET=$TARGET install
+}

@@ -1,0 +1,78 @@
+
+function c-gnatcoll-db-tools-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gnatcoll-db
+}
+
+function c-gnatcoll-db-tools-depends()
+{
+    echo c-gnatcoll-core
+}
+
+function c-gnatcoll-db-tools-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo c-gnatcoll-db-tools-$VERSION-src.tar.gz
+}
+
+function c-gnatcoll-db-tools-out-of-tree()
+{
+    echo false
+}
+
+function c-gnatcoll-db-tools-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -C gnatcoll_db2ada TARGET=$TARGET setup
+}
+
+function c-gnatcoll-db-tools-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -C gnatcoll_db2ada setup && make -C xref setup
+}
+
+function c-gnatcoll-db-tools-cross-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    PROCESSORS=$SCBI_JOBS make -C gnatcoll_db2ada
+}
+
+function c-gnatcoll-db-tools-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    PROCESSORS=$SCBI_JOBS make -C gnatcoll_db2ada &&
+        PROCESSORS=$SCBI_JOBS make -C xref
+}
+
+function c-gnatcoll-db-tools-cross-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -C gnatcoll_db2ada install
+}
+
+function c-gnatcoll-db-tools-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -C gnatcoll_db2ada install &&
+        make -C xref install
+}

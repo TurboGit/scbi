@@ -1,4 +1,0 @@
-function gnatcoll-db-modules()
-{
-    echo gnatcoll-db-libs gnatcoll-db-tools
-}
