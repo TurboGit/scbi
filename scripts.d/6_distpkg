@@ -214,7 +214,9 @@ function check-deb-pkg()
     else
         #  Is the installed version ok?
 
-        if [[ $inst_ver > $version ]]; then
+        check-versions $inst_ver ">=" $version
+
+        if [[ $? == 0 ]]; then
             return $SCBI_PKG_VERSION_OK
         else
             return $SCBI_PKG_VERSION_NOK
@@ -248,7 +250,9 @@ function check-cos-pkg()
     else
         #  Is the installed version ok?
 
-        if [[ $inst_ver > $version ]]; then
+        check-versions $inst_ver ">=" $version
+
+        if [[ $? == 0 ]]; then
             return $SCBI_PKG_VERSION_OK
         else
             return $SCBI_PKG_VERSION_NOK
