@@ -337,7 +337,7 @@ function check-auto-variant()
 
     else
         #  No module definition, cannot have a native variant, error will
-        #  be reported upward.
+        #  be reported upward.
         return 1
     fi
 }
