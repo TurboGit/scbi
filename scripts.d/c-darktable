@@ -57,12 +57,12 @@ function c-darktable-depends()
     echo os@-rsvg2-dev
     echo os@-json-glib-dev
     echo os@-pod-parser-perl
-    echo os@-avif-dev
     echo os@-webp-dev
     echo os@-cairo-dev
     echo os@-image-exiftool-perl
 
     echo c-exiv2
+    echo c-libavif
 }
 
 function c-darktable-clang-build-env()
