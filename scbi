@@ -640,11 +640,14 @@ function handle-depends()
             $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
     rbid=$?
 
+    check-versions $ref ">" $mver
+    cver=$?
+
     if [[ $rbid -gt 0 \
               || $rsid -gt 0 \
               || "$mver" = "" \
               || "$mver" = $VERSION_ERROR \
-              || $ref > $mver ]];
+              || $cver == 1 ]];
     then
         if [[ $DRY_RUN == no ]] && [[ $DO_VERBOSE = yes ]]; then
             ilog $module need building $module, \
