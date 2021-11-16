@@ -24,6 +24,7 @@ function c-ada-language-server-depends()
     echo c-vss
     echo c-libadalang-tools
     echo c-ada-libfswatch
+    echo c-spawn
 }
 
 function c-ada-language-server-env()
