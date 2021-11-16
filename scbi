@@ -558,6 +558,10 @@ function handle-depends()
 
     cd $SCBI_ROOT
 
+    local formodule_info=( $(get-module-ref $formodule) )
+    fmodule=${formodule_info[0]}
+    fvariant=${formodule_info[1]}
+
     #  If module not found, check for a possible distrib package
 
     if [[ ! -f $SCBI_DEFS/$module ]]; then
@@ -566,10 +570,6 @@ function handle-depends()
         if [[ $? = 0 ]]; then
             return 0
         else
-            local formodule_info=( $(get-module-ref $formodule) )
-            fmodule=${formodule_info[0]}
-            fvariant=${formodule_info[1]}
-
             local MNAME=$fmodule
             [[ $fvariant != "default" ]] && MNAME="$MNAME/$fvariant"
 
@@ -653,6 +653,7 @@ function handle-depends()
             ilog $module need building $module, \
                  current version $(display-version $mver) | tee -a $log
         fi
+        SCBI_CURRENT_MODULE=$fmodule
         handle-module $modref
     else
         ilog $module $modref found
@@ -931,8 +932,6 @@ function handle-module()
     local variant=${module_info[1]}
     local kind=${module_info[2]}
     local ref=${module_info[3]}
-
-    SCBI_CURRENT_MODULE=$module
 
     #  If this module is marked as to be skipped
 
