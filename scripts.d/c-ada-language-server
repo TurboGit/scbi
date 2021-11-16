@@ -15,9 +15,13 @@ function c-ada-language-server-out-of-tree()
     echo false
 }
 
-function c-ada-language-server-depends()
+function c-ada-language-server-build-depends()
 {
     echo c-gprbuild
+}
+
+function c-ada-language-server-depends()
+{
     echo c-libgpr
     echo c-xmlada
     echo c-gnatcoll
