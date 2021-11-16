@@ -2,9 +2,11 @@
 
 _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 -s --setup -c --config -b --build -i --install -r --tests -v --verbose
--l --shell --shell:sandbox --shell:dev --no-log -p --purge -P --purge-only -d --deps -a --archive -h --help
+-l --shell --shell:sandbox --shell:dev --no-log -p --purge -P --purge-only
+--run -d --deps -a --archive -h --help
 -j --jobs= --target= --env= -e --tests-only --plan= -n --no-patch --tar
---list-depends: --list-externals --list-externals:only --list-no-version --list-filter:
+--list-depends: --list-externals --list-externals:only --list-no-version
+ --list-filter:
 --dry-run -w --wrapup --force --enable- --safe --plugins --build-dir
 --list-plan --version --clean-install --log:yes --log:no --log:on-failure
 --store --stat --stat:full"

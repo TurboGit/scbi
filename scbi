@@ -119,6 +119,8 @@ SCBI_FILTER=all
 CMDLINE_BUILD_DIR=
 DO_VERSION=false
 DO_SHELL=false
+DO_RUN=false
+DO_RUN_CMD=
 
 ############################## check-handled
 #
@@ -341,6 +343,7 @@ function usage()
     echo "   -p | --purge            remove builds directories before building"
     echo "   -P | --purge-only       only remove builds directories"
     echo "      | --shell:n          start a shell with module's environment"
+    echo "      | --run:\"cmd arg\"    run command in module's environment"
     echo "      | --list-depends:n   list module's dependencies (direct, full)"
     echo "      | --list-externals:n list module's external dependencies"
     echo "      | --list-no-version  do not display modules/externals version"
@@ -1357,11 +1360,19 @@ function handle-module()
 
 SCBIOPTS=""
 
+#  First handle specific parameters:
+#    --enable-*
+#    --run:"some command"
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         --enable-*)
             VAR=${1/--enable-/}
             export SCBI_${VAR/-/_}_SET=true
+            ;;
+        --run:*)
+            DO_RUN=yes
+            DO_RUN_CMD=${1/*:/}
             ;;
         *)
             SCBIOPTS="$SCBIOPTS $1"
@@ -1660,7 +1671,10 @@ fi
 [[ "$MODULES" = "" ]] && [[ $DO_STAT == no ]] && [[ $DO_MOD_VER == no ]] &&
     usage
 
-[[ "$MODULES" = "" ]] && [[ $DO_SHELL != no ]] && [[ $DO_STAT == no ]] &&
+[[ "$MODULES" = "" ]] &&
+    [[ $DO_SHELL != no ]] &&
+    [[ $DO_RUN != no ]] &&
+    [[ $DO_STAT == no ]] &&
     exit 0
 
 [[ $DO_STAT != no ]] &&
@@ -1714,6 +1728,13 @@ if [[ $DRY_RUN == yes ]]; then
     DO_FORCE=no
     DO_CLEAN_INSTALL=no
     STEPS=""
+fi
+
+#  If a run is requested
+
+if [[ $DO_RUN == yes ]]; then
+    run-command $SCBI_TARGET $LAST_MODULE "$DO_RUN_CMD"
+    exit 0
 fi
 
 #  If a shell is requested

@@ -71,7 +71,7 @@ function c-darktable-clang-build-env()
     add-to-var CMAKE_CXX_COMPILER clang++-$SCBI_CLANG_VERSION
 }
 
-function c-darktable-env()
+function c-darktable-build-env()
 {
     system-compiler
 }
