@@ -1,4 +1,6 @@
-#  setup for SCBI shell
+#  setup for SCBI shell & command spawn
+
+############################## run-shell
 
 function run-shell()
 {
@@ -43,4 +45,30 @@ function run-shell()
     #  Exports all functions into the bash sub-shell
     eval "$(declare -F | sed -e 's/-f /-fx /')"
     $SHELL
+}
+
+############################## run-command
+
+function run-command()
+{
+    local target=$1
+    local modref=$2
+    local CMD="$3"
+
+    if [[ -z $SHELL ]]; then
+        echo \$SHELL is not defined, cannot spawn a shell
+        exit 1
+    fi
+
+    handle-env $modref
+
+    local module_info=( $(get-module-ref $modref) )
+    local module=${module_info[0]}
+
+    export SCBI_SHELL=$module
+
+    #  Exports all functions into the bash sub-shell
+    eval "$(declare -F | sed -e 's/-f /-fx /')"
+
+    $SHELL -c "$CMD"
 }
