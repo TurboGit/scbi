@@ -12,7 +12,7 @@ function c-libfswatch-out-of-tree()
     echo false
 }
 
-function c-libfswatch-depends()
+function c-libfswatch-build-depends()
 {
     echo autoconf
     echo autopoint
@@ -21,6 +21,17 @@ function c-libfswatch-depends()
 function c-libfswatch-patches()
 {
     echo libfswatch.patch
+}
+
+function c-libfswatch-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var LIBRARY_PATH     $PREFIX/lib
+    add-to-var PKG_CONFIG_PATH  $PREFIX/lib/pkgconfig
+    add-to-var C_INCLUDE_PATH   $PREFIX/include/libfswatch/c
+    add-to-var CXX_INCLUDE_PATH $PREFIX/include/libfswatch/c++
 }
 
 function c-libfswatch-config()
@@ -36,7 +47,7 @@ function c-libfswatch-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -C libfswatch -j$SCBI_JOBS
+    make -j$SCBI_JOBS
 }
 
 function c-libfswatch-install()
@@ -44,7 +55,7 @@ function c-libfswatch-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make -C libfswatch install
+    make install
 }
 
 function c-libfswatch-prefix()

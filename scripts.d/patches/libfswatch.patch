@@ -1,19 +1,25 @@
-*** a/configure.ac-orig	2020-12-11 18:37:48.936823506 +0100
---- b/configure.ac	2021-11-15 12:06:08.659916017 +0100
-***************
-*** 35,41 ****
-  AC_CONFIG_FILES([po/Makefile.in])
-  AC_CONFIG_FILES([man/fswatch.7])
-  AC_CONFIG_MACRO_DIRS([m4])
-! AC_CONFIG_MACRO_DIR([m4])
-  
-  # Compute the canonical target-system type variables
-  AC_CANONICAL_TARGET
---- 35,41 ----
-  AC_CONFIG_FILES([po/Makefile.in])
-  AC_CONFIG_FILES([man/fswatch.7])
-  AC_CONFIG_MACRO_DIRS([m4])
-! # AC_CONFIG_MACRO_DIR([m4])
-  
-  # Compute the canonical target-system type variables
-  AC_CANONICAL_TARGET
+diff --git a/Makefile.am b/Makefile.am
+index a9799cd..3c63b93 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -31,7 +31,6 @@ dist_doc_DATA  = README.bsd
+ dist_doc_DATA += README.codestyle
+ dist_doc_DATA += README.freebsd
+ dist_doc_DATA += README.gnu-build-system
+-dist_doc_DATA += README.illumos
+ dist_doc_DATA += README.md
+ dist_doc_DATA += README.libfswatch.md
+ dist_doc_DATA += README.linux
+diff --git a/configure.ac b/configure.ac
+index 1e11260..7c74c99 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -35,7 +35,7 @@ AC_CONFIG_FILES([fswatch/Makefile fswatch/src/Makefile fswatch/doc/Makefile])
+ AC_CONFIG_FILES([po/Makefile.in])
+ AC_CONFIG_FILES([man/fswatch.7])
+ AC_CONFIG_MACRO_DIRS([m4])
+-AC_CONFIG_MACRO_DIR([m4])
++# AC_CONFIG_MACRO_DIR([m4])
+ 
+ # Compute the canonical target-system type variables
+ AC_CANONICAL_TARGET
