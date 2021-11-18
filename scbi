@@ -1646,6 +1646,16 @@ if [[ $DO_STORE = yes ]]; then
     exit $?
 fi
 
+#  Nothing to build, display usage
+
+if [[ $DO_VERSION = yes ]]; then
+    echo "SCBI : $SCBI_VERSION"
+    for file in $(ls $SCBI_DEFS/.scbi*version.txt 2> /dev/null); do
+        cat $file
+    done
+    exit 0
+fi
+
 #  If a plan passed on the command line ensure that it is used instead
 #  of any other possibly set in the environment file.
 
@@ -1656,16 +1666,6 @@ fi
 if [[ ! -z $SCBI_PLAN ]]; then
     load-module-plan $SCBI_PLAN
     [[ $? -ne 0 ]] && exit 1
-fi
-
-#  Nothing to build, display usage
-
-if [[ $DO_VERSION = yes ]]; then
-    echo "SCBI : $SCBI_VERSION"
-    for file in $(ls $SCBI_DEFS/.scbi*version.txt 2> /dev/null); do
-        cat $file
-    done
-    exit 0
 fi
 
 [[ "$MODULES" = "" ]] && [[ $DO_STAT == no ]] && [[ $DO_MOD_VER == no ]] &&
