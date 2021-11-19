@@ -9,7 +9,7 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
  --list-filter:
 --dry-run -w --wrapup --force --enable- --safe --plugins --build-dir
 --list-plan --version --clean-install --log:yes --log:no --log:on-failure
---store --stat --stat:full"
+--store --stat --stat:full --module-version"
 
 _gnat_targets()
 {
