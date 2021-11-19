@@ -286,6 +286,8 @@ function _internal_for-all-modules()
     local WITHEXT=$4
     local IS_BUILD_DEPENDS=$5
     local MODREF=$6
+    local FORMODULE=$7
+    shift
     shift
     shift
     shift
@@ -353,8 +355,11 @@ function _internal_for-all-modules()
 
                 for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
                     _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
-                                              $WITHEXT false $dmodule $@
+                                              $WITHEXT false \
+                                              $dmodule $FORMODULE $@
                 done
+
+                SCBI_CURRENT_MODULE=$FORMODULE
 
                 $CALLBACK $module $MODREF $LEVEL \
                           $IS_BUILD_DEPENDS false $IS_META $@
@@ -367,15 +372,17 @@ function _internal_for-all-modules()
 
             for dmodule in $(get-all-depends $module $variant depends); do
                 _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
-                                          $WITHEXT false $dmodule $@
+                                          $WITHEXT false $dmodule $FORMODULE $@
             done
 
             #  Setup build-depends recursively if any
 
             for dmodule in $(get-all-depends $module $variant build-depends); do
                 _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
-                                          $WITHEXT true $dmodule $@
+                                          $WITHEXT true $dmodule $FORMODULE $@
             done
+
+            SCBI_CURRENT_MODULE=$FORMODULE
 
             $CALLBACK $module $MODREF $LEVEL \
                       $IS_BUILD_DEPENDS false $IS_META $@
@@ -386,7 +393,9 @@ function _internal_for-all-modules()
             #  module does not exists, this is an external dependency
 
             if [[ $WITHEXT == true ]]; then
-                $CALLBACK $module $(get-pkg-name $MODREF) $LEVEL \
+                SCBI_CURRENT_MODULE=$FORMODULE
+
+                $CALLBACK $module "$(get-pkg-name $MODREF)" $LEVEL \
                           $IS_BUILD_DEPENDS true $IS_META $@
             else
                 check-pkg $module:$ref || exit 1
@@ -405,7 +414,7 @@ function for-all-modules()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK false 0 false false $MODREF $@
+    _internal_for-all-modules $CALLBACK false 0 false false $MODREF "@root" $@
 }
 
 #  Iterate over all modules and external dependencies
@@ -418,7 +427,7 @@ function for-all-modules-ext()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK false 0 true false $MODREF $@
+    _internal_for-all-modules $CALLBACK false 0 true false $MODREF "@root" $@
 }
 
 #  Iterate over all modules and meta-modules
@@ -431,7 +440,7 @@ function for-all-modules-with-meta()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK true 0 false false $MODREF $@
+    _internal_for-all-modules $CALLBACK true 0 false false $MODREF "@root" $@
 }
 
 #  Iterate over all modules, meta-modules and external dependencies
@@ -444,7 +453,7 @@ function for-all-modules-with-meta-ext()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK true 0 true false $MODREF $@
+    _internal_for-all-modules $CALLBACK true 0 true false $MODREF "@root" $@
 }
 
 ############################## for-final-modules
