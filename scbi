@@ -113,13 +113,14 @@ SCBI_PLAN=
 SCBI_PLAN_CL=
 TAR_CACHE=yes
 DRY_RUN=no
-SAFE_MODE=false
+SAFE_MODE=no
 DO_STANDALONE=no
 SCBI_FILTER=all
 CMDLINE_BUILD_DIR=
-DO_VERSION=false
-DO_SHELL=false
-DO_RUN=false
+DO_HELP=no
+DO_VERSION=no
+DO_SHELL=no
+DO_RUN=no
 DO_RUN_CMD=
 
 ############################## check-handled
@@ -958,7 +959,7 @@ function handle-module()
     cd $SCBI_ROOT
 
     [[ ! -f $SCBI_DEFS/$module ]] &&
-        echo "No description for module $module" &&
+        echo "error: no description for module $module" &&
         exit 1
 
     #  Then load module setup
@@ -1398,6 +1399,7 @@ set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help)
+            DO_HELP=yes
             break
             ;;
         --version)
@@ -1661,21 +1663,16 @@ fi
 
 [[ ! -z $SCBI_PLAN_CL ]] && SCBI_PLAN=$SCBI_PLAN_CL
 
-#  Load build plan if any
-
-if [[ ! -z $SCBI_PLAN ]]; then
-    load-module-plan $SCBI_PLAN
-    [[ $? -ne 0 ]] && exit 1
-fi
-
-[[ "$MODULES" = "" ]] && [[ $DO_STAT == no ]] && [[ $DO_MOD_VER == no ]] &&
-    usage
-
 [[ "$MODULES" = "" ]] &&
     [[ $DO_SHELL != no ]] &&
     [[ $DO_RUN != no ]] &&
     [[ $DO_STAT == no ]] &&
-    exit 0
+    echo "error: shell/run commands need a plug-in, see scbi --help" && exit 0
+
+[[ "$MODULES" = "" ]] && [[ $DO_STAT == no ]] && [[ $DO_MOD_VER == no ]] &&
+    usage && exit 0
+
+[[ $DO_HELP == yes ]] && usage && exit 0
 
 [[ $DO_STAT != no ]] &&
     display-stat
@@ -1686,6 +1683,15 @@ fi
 [[ $DO_STAT == yes ]] &&
     display-log-stat
 
+#  Load build plan if any
+
+if [[ ! -z $SCBI_PLAN ]]; then
+    load-module-plan $SCBI_PLAN
+    [[ $? -ne 0 ]] &&
+        echo "error: cannot load module plan $SCBI_PLAN" &&
+        exit 1
+fi
+
 #  Setup module reference specified on the command line. The module
 #  reference on the command line must overwrite the actual build plan.
 
@@ -1693,9 +1699,10 @@ for module in $MODULES; do
     set-module-ref $module
 done
 
-handle-auto-variant
-
-[[ $? == 1 ]] && exit 1
+if [[ $DO_STAT == no ]]; then
+    handle-auto-variant
+    [[ $? == 1 ]] && exit 1
+fi
 
 if [[ $DO_DEPS != no ]]; then
     for module in $MODULES; do

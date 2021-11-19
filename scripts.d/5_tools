@@ -832,7 +832,7 @@ function display-stat()
         echo " $EMAIL"
     fi
 
-    echo -n "supported linux       :"
+    echo -n "supported platforms   :"
     for L in ${SCBI_LINUX_DISTRIBS[@]}; do
         echo -n " $L"
     done
