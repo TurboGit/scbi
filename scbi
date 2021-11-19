@@ -1700,7 +1700,11 @@ for module in $MODULES; do
 done
 
 if [[ $DO_STAT == no ]]; then
-    handle-auto-variant
+    if [[ $DO_MOD_VER == no ]]; then
+        handle-auto-variant
+    else
+        handle-auto-variant > /dev/null
+    fi
     [[ $? == 1 ]] && exit 1
 fi
 
