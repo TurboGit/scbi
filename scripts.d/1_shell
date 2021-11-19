@@ -4,9 +4,9 @@
 
 function run-shell()
 {
-    local target=$1
-    local modref=$2
-    local docd=$3
+    local TARGET=$1
+    local MODREF=$2
+    local DOCD=$3
 
     if [[ -z $SHELL ]]; then
         echo \$SHELL is not defined, cannot spawn a shell
@@ -15,28 +15,28 @@ function run-shell()
 
     curcd=$(pwd)
 
-    handle-env $modref
+    handle-env $MODREF
 
-    local module_info=( $(get-module-ref $modref) )
+    local module_info=( $(get-module-ref "@root" $MODREF) )
     local module=${module_info[0]}
     local kind=${module_info[2]}
 
     export SCBI_SHELL=$module
 
-    [[ $kind == DEV ]] && docd=yes-dev
+    [[ $kind == DEV ]] && DOCD=yes-dev
 
     #  If docd set (no cwd sub-option specified), we are moving into
     #  the module's build directory. In this mode we not only want the
     #  environment of all dependencies to be set but we also want the
     #  build environment of the root module to be set.
 
-    if [[ $docd == no ]]; then
+    if [[ $DOCD == no ]]; then
         cd $curcd
     else
-        handle-module-env $modref build-env
+        handle-module-env $MODREF build-env
 
-        if [[ $docd == yes ]]; then
-            cd $(get-build-dir $target $modref)
+        if [[ $DOCD == yes ]]; then
+            cd $(get-build-dir $TARGET $MODREF)
         else
             cd $(get-vcs-dir $module:dev)
         fi
@@ -51,8 +51,8 @@ function run-shell()
 
 function run-command()
 {
-    local target=$1
-    local modref=$2
+    local TARGET=$1
+    local MODREF=$2
     local CMD="$3"
 
     if [[ -z $SHELL ]]; then
@@ -60,9 +60,9 @@ function run-command()
         exit 1
     fi
 
-    handle-env $modref
+    handle-env $MODREF
 
-    local module_info=( $(get-module-ref $modref) )
+    local module_info=( $(get-module-ref "@root" $MODREF) )
     local module=${module_info[0]}
 
     export SCBI_SHELL=$module

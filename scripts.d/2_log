@@ -27,15 +27,15 @@ function line-sep()
 
 function dlog()
 {
-    local module=$1
-    local ts=$(date +"%Y/%m/%d %H:%M:%S")
+    local MODULE=$1
+    local TS=$(date +"%Y/%m/%d %H:%M:%S")
 
     shift
 
     #  output to console only if present
     tty --silent
-    [[ $? == 0 ]] && echo $ts : "  $*" > $(tty)
-    echo $ts : "  $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-report.log
+    [[ $? == 0 ]] && echo $TS : "  $*" > $(tty)
+    echo $ts : "  $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }
 
@@ -43,12 +43,12 @@ function dlog()
 
 function ilog()
 {
-    local module=$1
-    local ts=$(date +"%Y/%m/%d %H:%M:%S")
+    local MODULE=$1
+    local TS=$(date +"%Y/%m/%d %H:%M:%S")
 
     shift
-    echo $ts : $*
-    echo $ts : $* >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-report.log
+    echo $TS : $*
+    echo $TS : $* >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }
 
@@ -56,10 +56,10 @@ function ilog()
 
 function elog()
 {
-    local module=$1
+    local MODULE=$1
     shift
 
-    ilog $module $module \(FAILED\) $*
+    ilog $MODULE $MODULE \(FAILED\) $*
     return 1
 }
 
@@ -78,7 +78,8 @@ declare -A SCBI_STATS
 
 function compute-log-stat-file()
 {
-    local file="$1"
+    local FILE="$1"
+
     local module=""
     local start_time=0
     local end_time=0
@@ -93,12 +94,13 @@ function compute-log-stat-file()
             duration=$(($end_time - $start_time))
             SCBI_STATS[$module]="${SCBI_STATS[$module]} $duration"
         fi
-    done < $file
+    done < $FILE
 }
 
 function get-min-avr-max()
 {
     local LIST="$1"
+
     local min=999999
     local avr=0
     local max=0
@@ -126,9 +128,9 @@ function display-time()
 
 function display-log-stat()
 {
-    local module=$1
+    local MODULE=$1
 
-    FILES=$(find $SCBI_LOGS -name "*$module-report.log")
+    FILES=$(find $SCBI_LOGS -name "*$MODULE-report.log")
 
     for file in $FILES; do
         compute-log-stat-file $file

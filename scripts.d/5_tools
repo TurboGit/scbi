@@ -32,29 +32,29 @@ function fn-exists()
 
 function get-hook()
 {
-    local module=$1
-    local variant=$2
-    local step=$3
+    local MODULE=$1
+    local VARIANT=$2
+    local STEP=$3
 
     local HOOK=""
 
     if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
-        fn-exists $module-$variant-cross-$step
+        fn-exists $MODULE-$VARIANT-cross-$STEP
         if [[ $? = 0 ]]; then
-            HOOK=$module-$variant-cross-$step
+            HOOK=$MODULE-$VARIANT-cross-$STEP
         else
-            fn-exists $module-cross-$step
-            [[ $? = 0 ]] && HOOK=$module-cross-$step
+            fn-exists $MODULE-cross-$STEP
+            [[ $? = 0 ]] && HOOK=$MODULE-cross-$STEP
         fi
     fi
 
     if [[ -z $HOOK ]]; then
-        fn-exists $module-$variant-$step
+        fn-exists $MODULE-$VARIANT-$STEP
         if [[ $? = 0 ]]; then
-            HOOK=$module-$variant-$step
+            HOOK=$MODULE-$VARIANT-$STEP
         else
-            fn-exists $module-$step
-            [[ $? = 0 ]] && HOOK=$module-$step
+            fn-exists $MODULE-$STEP
+            [[ $? = 0 ]] && HOOK=$MODULE-$STEP
         fi
     fi
 
@@ -117,14 +117,14 @@ function get-version-number()
 
 function display-version()
 {
-    local version=$1
+    local VERSION=$1
 
-    if [[ "$version" = "$VERSION_OK" ]]; then
+    if [[ "$VERSION" = "$VERSION_OK" ]]; then
         echo latest
-    elif [[ "$version" = "$VERSION_ERROR" ]]; then
+    elif [[ "$VERSION" = "$VERSION_ERROR" ]]; then
         echo not found
     else
-        echo $version
+        echo $VERSION
     fi
 }
 
@@ -148,10 +148,10 @@ function gprbuild-project()
 
 function display-file()
 {
-    local file=$1
+    local FILE=$1
 
-    echo File : $file
-    cat $file
+    echo File : $FILE
+    cat $FILE
 }
 
 ############################## get-md5
@@ -167,9 +167,9 @@ function get-md5()
 
 function load-module()
 {
-    local modref=$1
+    local MODREF=$1
 
-    local module_info=( $(get-module-ref "@root" $modref) )
+    local module_info=( $(get-module-ref "@root" $MODREF) )
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
@@ -199,20 +199,20 @@ function load-module()
 
 ############################## is-meta-module
 #
-# return yes/0 if modref is a meta-module
+# return yes/0 if MODREF is a meta-module
 
 function is-meta-module()
 {
-    local modref=$1
+    local MODREF=$1
 
-    local module_info=( $(get-module-ref "@root" $modref) )
+    local module_info=( $(get-module-ref "@root" $MODREF) )
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
     local key="${module}.${variant}"
 
     if [[ -z "${SCBI_LOADED[$module]}" ]]; then
-        load-module $modref
+        load-module $MODREF
     fi
 
     if [[ "${SCBI_LOADED[$key]}" == "meta" ]]; then
@@ -230,11 +230,11 @@ function is-meta-module()
 
 function check-dependency-tree()
 {
-    local module=$1
+    local MODULE=$1
     local res=1
 
     for m in ${SCBI_RECTREE[*]}; do
-        if [[ $m = $module ]]; then
+        if [[ $m = $MODULE ]]; then
             res=0
         fi
     done
@@ -248,8 +248,8 @@ function check-dependency-tree()
 
 function push-dependency-tree()
 {
-    local module=$1
-    SCBI_RECTREE=( ${SCBI_RECTREE[*]} $module )
+    local MODULE=$1
+    SCBI_RECTREE=( ${SCBI_RECTREE[*]} $MODULE )
 }
 
 ############################## pop-dependency-tree
@@ -268,12 +268,12 @@ function pop-dependency-tree()
 
 function get-all-depends()
 {
-    local module="$1"
-    local variant="$2"
-    local hook="$3"
+    local MODULE="$1"
+    local VARIANT="$2"
+    local HOOK="$3"
 
     _internal_call-variant-hooks \
-        $module $hook "$SCBI_PREFIX" "$SCBI_TARGET" $variant
+        $MODULE $HOOK "$SCBI_PREFIX" "$SCBI_TARGET" $VARIANT
 }
 
 ############################## for-all-modules
@@ -639,11 +639,11 @@ function get-build-id()
 
 function check-tar-exists()
 {
-    local module=$1
-    local variant=$2
-    local version=$3
+    local MODULE=$1
+    local VARIANT=$2
+    local VERSION=$3
 
-    local tar=( $(get-tar-data $module $variant $version) )
+    local tar=( $(get-tar-data $MODULE $VARIANT $VERSION) )
 
     if [[ ! $? = 0 ]]; then
         return 1
@@ -685,23 +685,23 @@ function set-proxy()
 
 function get-tar-data()
 {
-    local module=$1
-    local variant=$2
-    local version=$3
+    local MODULE=$1
+    local VARIANT=$2
+    local VERSION=$3
 
-    local TAR_FUNCTION=$(get-hook $module $variant tar)
-    TAR_FUNCTION=${TAR_FUNCTION:=${module}-tar}
+    local TAR_FUNCTION=$(get-hook $MODULE $VARIANT tar)
+    TAR_FUNCTION=${TAR_FUNCTION:=${MODULE}-tar}
 
     local TAR_VARIANT=default
 
     #  check first for module specifc VCS variant except for native
     #  variant.
 
-    if [[ $variant != "native" ]]; then
-        VAR=SCBI_${module//-/_}_TAR_VARIANT
+    if [[ $VARIANT != "native" ]]; then
+        VAR=SCBI_${MODULE//-/_}_TAR_VARIANT
 
         if [[ "${!VAR}" != "" ]]; then
-            fn-exists $module-${!VAR}-tar
+            fn-exists $MODULE-${!VAR}-tar
             if [[ $? = 0 ]]; then
                 TAR_VARIANT=${!VAR}
                 TAR_FUNCTION=$module-${TAR_VARIANT}-tar
@@ -713,7 +713,7 @@ function get-tar-data()
             fn-exists $module-${SCBI_TAR_VARIANT}-tar
             if [[ $? = 0 ]]; then
                 TAR_VARIANT=${SCBI_TAR_VARIANT}
-                TAR_FUNCTION=$module-${TAR_VARIANT}-tar
+                TAR_FUNCTION=$MODULE-${TAR_VARIANT}-tar
             fi
         fi
     fi
@@ -726,9 +726,9 @@ function get-tar-data()
 
         fn-exists scbi-rewrite-tar
         if [[ $? = 0 ]]; then
-            scbi-rewrite-tar $($TAR_FUNCTION $version)
+            scbi-rewrite-tar $($TAR_FUNCTION $VERSION)
         else
-            $TAR_FUNCTION $version
+            $TAR_FUNCTION $VERSION
         fi
         return 0
     else
@@ -740,13 +740,13 @@ function get-tar-data()
 
 function get-tar()
 {
-    local module=$1
-    local variant=$2
-    local version=$3
+    local MODULE=$1
+    local VARIANT=$2
+    local VERSION=$3
 
     local res=0
 
-    local tar=( $(get-tar-data $module $variant $version) )
+    local tar=( $(get-tar-data $MODULE $VARIANT $VERSION) )
 
     local proxy=${tar[1]}
     local tarcp=${tar[2]}
@@ -768,7 +768,7 @@ function get-tar()
         (
             check-tool $tarcp
             if [[ $? != 0 ]]; then
-                elog $module Required tool $tarcp missing
+                elog $MODULE Required tool $tarcp missing
                 exit 1
             fi
 
@@ -779,23 +779,23 @@ function get-tar()
             elif  [[ $tarcp == curl ]]; then
                 $tarcp $tarurl/$tarsrc --output $SCBI_TAR/$tarsrc > $log 2>&1
             else
-                elog $module error: unknown tar protocol $tarcp
+                elog $MODULE error: unknown tar protocol $tarcp
             fi
 
             [[ ! $? = 0 ]] &&
                 rm -f $SCBI_TAR/$tarsrc &&
-                elog $module error: cannot get tar: $tarcp
+                elog $MODULE error: cannot get tar: $tarcp
         )
     fi
 
     [[ ! -f $SCBI_TAR/$tarsrc ]] &&
-        elog $module error: tarball $tarsrc not found
+        elog $MODULE error: tarball $tarsrc not found
 
     ilog build extract tarball $tarsrc
 
-    [[ ! -d $SCBI_BDIR/$module ]] && mkdir -p $SCBI_BDIR/$module > $log 2>&1
+    [[ ! -d $SCBI_BDIR/$MODULE ]] && mkdir -p $SCBI_BDIR/$MODULE > $log 2>&1
 
-    cd $SCBI_BDIR/$module
+    cd $SCBI_BDIR/$MODULE
 
     rm -fr tarsrc tar > $log 2>&1
     ( rm -fr tartmp && mkdir -p tartmp ) > $log 2>&1
@@ -810,7 +810,7 @@ function get-tar()
         rmdir tartmp
         ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc) tar
     else
-        elog $module error: no top directory found
+        elog $MODULE error: no top directory found
         res=1
     fi
 
@@ -1245,10 +1245,10 @@ function create-standalone-package()
 
 function get-source-dir()
 {
-    local target=$1
-    local modref=$2
+    local TARGET=$1
+    local MODREF=$2
 
-    local module_info=( $(get-module-ref "@root" $modref) )
+    local module_info=( $(get-module-ref "@root" $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1284,7 +1284,7 @@ function get-source-dir()
         fi
 
     else
-        DIR=$SCBI_BDIR/$module/$target-$variant/src
+        DIR=$SCBI_BDIR/$module/$TARGET-$variant/src
     fi
 
     echo $DIR
@@ -1294,15 +1294,15 @@ function get-source-dir()
 
 function get-build-dir()
 {
-    local target=$1
-    local modref=$2
+    local TARGET=$1
+    local MODREF=$2
 
-    local module_info=( $(get-module-ref "@root" $modref) )
+    local module_info=( $(get-module-ref "@root" $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
-    DIR=$SCBI_BDIR/$module/$target-$variant/build
+    DIR=$SCBI_BDIR/$module/$TARGET-$variant/build
 
     echo $DIR
 }

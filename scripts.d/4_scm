@@ -558,9 +558,9 @@ function vcs-build-id()
 
 function get-vcs-dir()
 {
-    local modref=$1
+    local MODREF=$1
 
-    local module_info=( $(get-module-ref "@root" $modref) )
+    local module_info=( $(get-module-ref "@root" $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}

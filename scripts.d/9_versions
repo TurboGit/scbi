@@ -181,15 +181,15 @@ function display-build-plan()
 
 function record-build-plan()
 {
-    local module=$1
-    local variant=$2
+    local MODULE=$1
+    local VARIANT=$2
 
-    local PLAN=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/build-plan
+    local PLAN=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/.log/build-plan
 
     echo "# build plan" > $PLAN
 
-    for module in ${!MODVER[*]}; do
-        echo ${MODVER[$module]} >> $PLAN
+    for mod in ${!MODVER[*]}; do
+        echo ${MODVER[$mod]} >> $PLAN
     done
 }
 
@@ -201,9 +201,9 @@ function record-build-plan()
 function set-module-ref()
 {
     #  full module reference is name[/variant][:version]
-    local modref="$1"
+    local MODREF="$1"
 
-    local module_info=( $(parse-module-ref $modref) )
+    local module_info=( $(parse-module-ref $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -217,7 +217,7 @@ function set-module-ref()
         if [[ "$ref" == "force" ]]; then
             MODVER[$module]=$module/$variant
         else
-            MODVER[$module]=${modref/*=/}
+            MODVER[$module]=${MODREF/*=/}
         fi
     fi
 }
@@ -229,19 +229,19 @@ function set-module-ref()
 
 function parse-module-ref()
 {
-    local modref=$1
+    local MODREF=$1
 
     local module=""
 
     #  check version
 
-    local ver=${modref##*:}
+    local ver=${MODREF##*:}
 
-    if [[ $ver == $modref ]]; then
+    if [[ $ver == $MODREF ]]; then
         #  no version specified
         local KIND=NONE
         local version=NONE
-        module=$modref
+        module=$MODREF
     else
         #  version specified, check for tar version
         local vb=${ver:0:1}
@@ -257,7 +257,7 @@ function parse-module-ref()
             local version=$ver
         fi
 
-        module=${modref%:*}
+        module=${MODREF%:*}
     fi
 
     local variant=${module##*/}
@@ -305,17 +305,17 @@ function get-module-ref()
 
 function check-auto-variant()
 {
-    local module=$1
+    local MODULE=$1
 
-    if [[ -f $SCBI_DEFS/$module ]]; then
+    if [[ -f $SCBI_DEFS/$MODULE ]]; then
         #  Check external dependencies for native-depends
 
         (
             local res=0
 
-            source $SCBI_DEFS/$module
+            source $SCBI_DEFS/$MODULE
 
-            fn-exists $module-native-depends
+            fn-exists $MODULE-native-depends
 
             if [[ ! $? = 0 ]]; then
                 #  Fatal error, stop now
@@ -328,19 +328,19 @@ function check-auto-variant()
 
                     while read pkg pver pres; do
                         if [[ $pres == $SCBI_PKG_NOT_FOUND ]]; then
-                            ilog $module unknown dependency $pkg
+                            ilog $MODULE unknown dependency $pkg
                             res=1
                         elif [[ $pres == $SCBI_PKG_NOT_INSTALLED ]]; then
-                            ilog $module dependency $pkg not installed
+                            ilog $MODULE dependency $pkg not installed
                             res=1
                         elif [[ $pres == $SCBI_PKG_VERSION_NOK ]]; then
-                            ilog $module module $pkg version $pver not found
+                            ilog $MODULE module $pkg version $pver not found
                             res=1
                         elif [[ $pres == $SCBI_PKG_VERSION_OK ]]; then
                             if [[ $pver == 0 ]]; then
-                                ilog $module module $pkg found
+                                ilog $MODULE module $pkg found
                             else
-                                ilog $module module $pkg version $pver matching
+                                ilog $MODULE module $pkg version $pver matching
                             fi
                             res=0
                         fi
