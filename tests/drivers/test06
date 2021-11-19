@@ -22,7 +22,7 @@ fi
 ./scbi --purge-only lib1
 
 # some checks
-if [ $(ls $REP/x86_64-linux-gnu-default) == "manifest" ]; then
+if [ "$(ls $REP/x86_64-linux-gnu-default)" == "manifest" ]; then
     echo OK build directory removed, only manifest found
 else
     echo NOK build directory still present

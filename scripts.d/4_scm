@@ -336,8 +336,9 @@ function _internal_get-branch()
     local VCS_PROXY=$2
     local VCS_OPTIONS=$3
     local module=$4
-    local ref=$5
-    local VCS_DIR=$6
+    local kind=$5
+    local ref=$6
+    local VCS_DIR=$7
 
     case $VCS_NAME in
         git)
@@ -387,11 +388,12 @@ function get-branch()
 {
     local PREFIX=$1
     local TARGET=$2
-    local MODREF=$3
+    local FORMODULE=$3
+    local MODREF=$4
 
     #  get module information
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -409,7 +411,7 @@ function get-branch()
     local VCS_DIR=${vcs[5]}
 
     _internal_get-branch $VCS_NAME $VCS_PROXY $VCS_OPTIONS \
-                         $module $ref $VCS_DIR
+                         $module $kind $ref $VCS_DIR
 
     return $?
 }
@@ -424,7 +426,7 @@ function get-vcs()
 
     #  get module information
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=( $(get-module-ref "@root" $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -500,7 +502,7 @@ function get-vcs()
 
     if [[ $res == 0 ]]; then
         _internal_get-branch $VCS_NAME $VCS_PROXY $VCS_OPTIONS \
-                             $module $ref $VCS_DIR
+                             $module $kind $ref $VCS_DIR
         res=$?
     fi
 
@@ -513,8 +515,9 @@ function vcs-build-id()
 {
     local PREFIX=$1
     local TARGET=$2
-    local MODREF=$3
-    local vcs=$4
+    local FORMODULE=$3
+    local MODREF=$4
+    local vcs=$5
 
     [[ ! -d $vcs ]] && echo $MODREF | get-md5 && return 0
 
@@ -522,7 +525,7 @@ function vcs-build-id()
         cd $vcs
 
         if [[ $DO_UPDATE = no ]]; then
-            get-branch $PREFIX $TARGET $MODREF
+            get-branch $PREFIX $TARGET $FORMODULE $MODREF
         fi
 
         if [[ -d .git ]]; then
@@ -548,7 +551,7 @@ function vcs-build-id()
         fi
           )
 
-    get-build-id $PREFIX $TARGET $MODREF $vid
+    get-build-id $PREFIX $TARGET $FORMODULE $MODREF $vid
 }
 
 ############################## get-vcs-dir
@@ -557,7 +560,7 @@ function get-vcs-dir()
 {
     local modref=$1
 
-    local module_info=( $(get-module-ref $modref) )
+    local module_info=( $(get-module-ref "@root" $modref) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}

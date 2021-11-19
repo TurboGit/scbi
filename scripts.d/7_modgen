@@ -34,7 +34,7 @@ function module-patch()
     local TARGET=$2
     local MODREF=$3
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=( $(get-module-ref "@root" $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -74,10 +74,11 @@ function module-patch()
 function module-setup()
 {
     local PREFIX=$1
-    local MODULE=$2
-    local VARIANT=$3
-    local TARGET=$4
-    local OOT=$5
+    local FORMODULE=$2
+    local MODULE=$3
+    local VARIANT=$4
+    local TARGET=$5
+    local OOT=$6
 
     #  if module-src soft link exists use it to copy the module sources into
     #  the pointed location. This is used when multiple modules are used
@@ -142,10 +143,11 @@ function module-setup()
 function module-purge()
 {
     local PREFIX=$1
-    local MODULE=$2
-    local VARIANT=$3
-    local TARGET=$4
-    local OOT=$5
+    local FORMODULE=$2
+    local MODULE=$3
+    local VARIANT=$4
+    local TARGET=$5
+    local OOT=$6
 
     #  note that we keep the manifest to be sure that we can clean-up
     #  the final install destination.
@@ -165,13 +167,14 @@ function module-purge()
 function module-pre-install()
 {
     local MPREFIX=$1
-    local MODULE=$2
-    local VARIANT=$3
-    local TARGET=$4
-    local OOT=$5
+    local FORMODULE=$2
+    local MODULE=$3
+    local VARIANT=$4
+    local TARGET=$5
+    local OOT=$6
 
     #  Clean previous installation
-    module-clean-install $MPREFIX $MODULE $VARIANT $TARGET $OOT
+    module-clean-install $MPREFIX $FORMODULE $MODULE $VARIANT $TARGET $OOT
 }
 
 ############################## module-install
@@ -179,10 +182,11 @@ function module-pre-install()
 function module-install()
 {
     local PREFIX=$1
-    local MODULE=$2
-    local VARIANT=$3
-    local TARGET=$4
-    local OOT=$5
+    local FORMODULE=$2
+    local MODULE=$3
+    local VARIANT=$4
+    local TARGET=$5
+    local OOT=$6
 
     if [[ ! -f build-id-$VARIANT ]]; then
         #  No build-id, this means that the sources have been installed by
@@ -194,7 +198,8 @@ function module-install()
 
         if [[ -d src ]]; then
             vid=$(cat src/* | md5sum | cut -d' ' -f1)
-            get-build-id $PREFIX $TARGET $MODULE $vid > build-id-$VARIANT
+            get-build-id $PREFIX $TARGET \
+                         $FORMODULE $MODULE $vid > build-id-$VARIANT
         else
             echo -n $(date) | md5sum | cut -d' ' -f1 > build-id-$VARIANT
         fi

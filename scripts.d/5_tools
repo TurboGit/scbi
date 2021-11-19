@@ -169,7 +169,7 @@ function load-module()
 {
     local modref=$1
 
-    local module_info=( $(get-module-ref $modref) )
+    local module_info=( $(get-module-ref "@root" $modref) )
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
@@ -205,7 +205,7 @@ function is-meta-module()
 {
     local modref=$1
 
-    local module_info=( $(get-module-ref $modref) )
+    local module_info=( $(get-module-ref "@root" $modref) )
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
@@ -301,7 +301,7 @@ function _internal_for-all-modules()
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -356,12 +356,10 @@ function _internal_for-all-modules()
                 for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
                     _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
                                               $WITHEXT false \
-                                              $dmodule $FORMODULE $@
+                                              $dmodule $module $@
                 done
 
-                SCBI_CURRENT_MODULE=$FORMODULE
-
-                $CALLBACK $module $MODREF $LEVEL \
+                $CALLBACK $FORMODULE $MODREF $LEVEL \
                           $IS_BUILD_DEPENDS false $IS_META $@
 
                 pop-dependency-tree
@@ -372,19 +370,17 @@ function _internal_for-all-modules()
 
             for dmodule in $(get-all-depends $module $variant depends); do
                 _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
-                                          $WITHEXT false $dmodule $FORMODULE $@
+                                          $WITHEXT false $dmodule $module $@
             done
 
             #  Setup build-depends recursively if any
 
             for dmodule in $(get-all-depends $module $variant build-depends); do
                 _internal_for-all-modules $CALLBACK $WITH_META $NEXTL \
-                                          $WITHEXT true $dmodule $FORMODULE $@
+                                          $WITHEXT true $dmodule $module $@
             done
 
-            SCBI_CURRENT_MODULE=$FORMODULE
-
-            $CALLBACK $module $MODREF $LEVEL \
+            $CALLBACK $FORMODULE $MODREF $LEVEL \
                       $IS_BUILD_DEPENDS false $IS_META $@
 
             pop-dependency-tree
@@ -393,10 +389,10 @@ function _internal_for-all-modules()
             #  module does not exists, this is an external dependency
 
             if [[ $WITHEXT == true ]]; then
-                SCBI_CURRENT_MODULE=$FORMODULE
-
-                $CALLBACK $module "$(get-pkg-name $MODREF)" $LEVEL \
-                          $IS_BUILD_DEPENDS true $IS_META $@
+                local PKGNAME=$(get-pkg-name $MODREF)
+                [[ ! -z $PKGNAME ]] &&
+                    $CALLBACK $FORMODULE $PKGNAME $LEVEL \
+                              $IS_BUILD_DEPENDS true $IS_META $@
             else
                 check-pkg $module:$ref || exit 1
             fi
@@ -461,11 +457,12 @@ function for-all-modules-with-meta-ext()
 
 function _internal_for-final-modules()
 {
-    local MODREF=$1
+    local FORMODULE=$1
+    local MODREF=$2
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -480,7 +477,7 @@ function _internal_for-final-modules()
         FCT=$(get-hook $module $variant modules)
 
         for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-            _internal_for-final-modules $dmodule
+            _internal_for-final-modules $module $dmodule
         done
     else
         echo $module
@@ -494,7 +491,7 @@ function for-final-modules()
     SCBI_RECTREE=()
 
     for module in $@; do
-        _internal_for-final-modules $module
+        _internal_for-final-modules "@root" $module
     done | sort | uniq
 }
 
@@ -502,23 +499,24 @@ function for-final-modules()
 
 function get-build-id-callback()
 {
-    local MODULE=$1
+    local FORMODULE=$1
     local MODREF=$2
     local LEVEL=$3
     local IS_BUILD_DEPENDS=$4
     local IS_EXT=$5
     local IS_META=$6
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
+    local module=${module_info[0]}
     local variant=${module_info[1]}
 
     #  Only compute for dependencies, not for the root module
 
     if [[ $LEVEL -gt 0 ]] && [[ $IS_META == false ]]; then
-        if [[ -f $SCBI_BDIR/$MODULE/build-id-$variant ]]; then
+        if [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
 
-            if [[ -f $SCBI_BDIR/$MODULE/build-id-$variant ]]; then
-                cat $SCBI_BDIR/$MODULE/build-id-$variant
+            if [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
+                cat $SCBI_BDIR/$module/build-id-$variant
             else
                 echo $(date)
             fi
@@ -562,12 +560,13 @@ function get-build-id()
 {
     local PREFIX=$1
     local TARGET=$2
-    local MODREF=$3
-    local vid="$4"
+    local FORMODULE=$3
+    local MODREF=$4
+    local vid="$5"
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -876,7 +875,7 @@ function display-module-version()
 {
     local MODREF=$1
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=( $(get-module-ref "@root" $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1086,7 +1085,7 @@ function has-variant()
 
 function copy-module-src-callback()
 {
-    local MODULE=$1
+    local FORMODULE=$1
     local MODREF=$2
     local LEVEL=$3
     local IS_BUILD_DEPENDS=$4
@@ -1094,35 +1093,42 @@ function copy-module-src-callback()
     local IS_META=$6
     local DEST=$7
 
+    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
     if [[ $IS_EXT == true ]]; then
-        echo -n " $MODULE" >> $DEST/build-deps
+        echo -n " $module" >> $DEST/build-deps
 
     else
         #  copy tarball or vcs sources
 
-        if [[ -d $SCBI_BDIR/$MODULE ]]; then
-            ilog standalone "-   $MODULE"
+        if [[ -d $SCBI_BDIR/$module ]]; then
+            ilog standalone "-   $module"
 
             #  two modules may share the same VCS or tarball
-            if [[ -h $SCBI_BDIR/$MODULE/tar ]]; then
-                FILE=$(readlink -f $SCBI_BDIR/$MODULE/tar)
+            if [[ -h $SCBI_BDIR/$module/tar ]]; then
+                FILE=$(readlink -f $SCBI_BDIR/$module/tar)
                 [[ ! -f $DEST/.tar/$(basename $FILE) ]] &&
                     cp -p $FILE $DEST/builds/.tar
-            elif [[ -h $SCBI_BDIR/$MODULE/vcs ]]; then
-                DIR=$(readlink -f $SCBI_BDIR/$MODULE/vcs)
+            elif [[ -h $SCBI_BDIR/$module/vcs ]]; then
+                DIR=$(readlink -f $SCBI_BDIR/$module/vcs)
                 [[ ! -d $DEST/.vcs/$(basename $DIR) ]] &&
                     cp -rp $DIR $DEST/builds/.vcs/
             fi
         else
             elog standalone \
-                 "-   $MODULE sources not found, cannot create archive"
+                 "-   $module sources not found, cannot create archive"
             exit 1
         fi
 
         #  copy SCBI module if present
 
-        if [[ -f $SCBI_DEFS/$MODULE ]]; then
-            cp -p $SCBI_DEFS/$MODULE $DEST/scripts.d
+        if [[ -f $SCBI_DEFS/$module ]]; then
+            cp -p $SCBI_DEFS/$module $DEST/scripts.d
 
             #  and then copy patches if any
             (
@@ -1144,13 +1150,6 @@ function copy-module-src-callback()
 
                     cp $patch $DEST/builds/.patches
                 }
-
-                local module_info=( $(get-module-ref $MODREF) )
-
-                local module=${module_info[0]}
-                local variant=${module_info[1]}
-                local kind=${module_info[2]}
-                local ref=${module_info[3]}
 
                 load-module $MODREF
 
@@ -1249,7 +1248,7 @@ function get-source-dir()
     local target=$1
     local modref=$2
 
-    local module_info=( $(get-module-ref $modref) )
+    local module_info=( $(get-module-ref "@root" $modref) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1298,7 +1297,7 @@ function get-build-dir()
     local target=$1
     local modref=$2
 
-    local module_info=( $(get-module-ref $modref) )
+    local module_info=( $(get-module-ref "@root" $modref) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1482,10 +1481,11 @@ function get-config-options()
 function module-clean-install()
 {
     local MPREFIX=$1
-    local MODULE=$2
-    local VARIANT=$3
-    local TARGET=$4
-    local OOT=$5
+    local FORMODULE=$2
+    local MODULE=$3
+    local VARIANT=$4
+    local TARGET=$5
+    local OOT=$6
 
     local SUDO=""
     local _IDIR=""

@@ -133,7 +133,7 @@ function handle-auto-variant()
     for M in ${!MODVER[@]}; do
         local value=${MODVER[$M]}
 
-        local module_info=( $(get-module-ref $value) )
+        local module_info=( $(get-module-ref "@root" $value) )
 
         local module=${module_info[0]}
         local variant=${module_info[1]}
@@ -277,12 +277,13 @@ function parse-module-ref()
 
 function get-module-ref()
 {
-    local MODREF=$1
+    local FORMODULE=$1
+    local MODREF=$2
 
     local module_info=( $(parse-module-ref $MODREF) )
     local module=${module_info[0]}
 
-    local modplan=${MODVER[$SCBI_CURRENT_MODULE"="$module]}
+    local modplan=${MODVER[$FORMODULE"="$module]}
 
     if [[ -z $modplan ]]; then
         local modplan=${MODVER[$module]}
