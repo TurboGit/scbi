@@ -83,7 +83,6 @@ SCBI_HALF_JOBS=$(( $SCBI_JOBS / 2 ))
 MODULES=
 HANDLED=$(mktemp)
 LAST_MODULE=
-SCBI_CURRENT_MODULE=
 
 #  Actions setup
 DO_PURGE=no
