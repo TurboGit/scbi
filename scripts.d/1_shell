@@ -15,7 +15,7 @@ function run-shell()
 
     curcd=$(pwd)
 
-    handle-env $MODREF
+    handle-env "@root" $MODREF
 
     local module_info=( $(get-module-ref "@root" $MODREF) )
     local module=${module_info[0]}
@@ -33,7 +33,7 @@ function run-shell()
     if [[ $DOCD == no ]]; then
         cd $curcd
     else
-        handle-module-env $MODREF build-env
+        handle-module-env "@root" $MODREF build-env
 
         if [[ $DOCD == yes ]]; then
             cd $(get-build-dir $TARGET $MODREF)
@@ -60,7 +60,7 @@ function run-command()
         exit 1
     fi
 
-    handle-env $MODREF
+    handle-env "@root" $MODREF
 
     local module_info=( $(get-module-ref "@root" $MODREF) )
     local module=${module_info[0]}
