@@ -17,7 +17,7 @@ function run-shell()
 
     handle-env "@root" $MODREF
 
-    local module_info=( $(get-module-ref "@root" $MODREF) )
+    local module_info=( $(get-module-ref $MODREF) )
     local module=${module_info[0]}
     local kind=${module_info[2]}
 
@@ -62,7 +62,7 @@ function run-command()
 
     handle-env "@root" $MODREF
 
-    local module_info=( $(get-module-ref "@root" $MODREF) )
+    local module_info=( $(get-module-ref $MODREF) )
     local module=${module_info[0]}
 
     export SCBI_SHELL=$module

@@ -393,7 +393,7 @@ function get-branch()
 
     #  get module information
 
-    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -426,7 +426,7 @@ function get-vcs()
 
     #  get module information
 
-    local module_info=( $(get-module-ref "@root" $MODREF) )
+    local module_info=( $(get-module-ref $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -560,7 +560,7 @@ function get-vcs-dir()
 {
     local MODREF=$1
 
-    local module_info=( $(get-module-ref "@root" $MODREF) )
+    local module_info=( $(get-module-ref $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}

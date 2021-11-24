@@ -169,7 +169,7 @@ function load-module()
 {
     local MODREF=$1
 
-    local module_info=( $(get-module-ref "@root" $MODREF) )
+    local module_info=( $(get-module-ref $MODREF) )
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
@@ -205,7 +205,7 @@ function is-meta-module()
 {
     local MODREF=$1
 
-    local module_info=( $(get-module-ref "@root" $MODREF) )
+    local module_info=( $(get-module-ref $MODREF) )
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
@@ -301,7 +301,7 @@ function _internal_for-all-modules()
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -462,7 +462,7 @@ function _internal_for-final-modules()
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -506,7 +506,7 @@ function get-build-id-callback()
     local IS_EXT=$5
     local IS_META=$6
 
-    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
@@ -566,7 +566,7 @@ function get-build-id()
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -875,7 +875,7 @@ function display-module-version()
 {
     local MODREF=$1
 
-    local module_info=( $(get-module-ref "@root" $MODREF) )
+    local module_info=( $(get-module-ref $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1093,7 +1093,7 @@ function copy-module-src-callback()
     local IS_META=$6
     local DEST=$7
 
-    local module_info=( $(get-module-ref $FORMODULE $MODREF) )
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1248,7 +1248,7 @@ function get-source-dir()
     local TARGET=$1
     local MODREF=$2
 
-    local module_info=( $(get-module-ref "@root" $MODREF) )
+    local module_info=( $(get-module-ref $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1297,7 +1297,7 @@ function get-build-dir()
     local TARGET=$1
     local MODREF=$2
 
-    local module_info=( $(get-module-ref "@root" $MODREF) )
+    local module_info=( $(get-module-ref $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}

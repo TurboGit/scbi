@@ -133,7 +133,7 @@ function handle-auto-variant()
     for M in ${!MODVER[@]}; do
         local value=${MODVER[$M]}
 
-        local module_info=( $(get-module-ref "@root" $value) )
+        local module_info=( $(get-module-ref $value) )
 
         local module=${module_info[0]}
         local variant=${module_info[1]}
@@ -275,10 +275,14 @@ function parse-module-ref()
     echo $version
 }
 
+############################## get-module-ref
+# Returns a module reference given the module name and possibly
+# the parent package (for-module).
+
 function get-module-ref()
 {
-    local FORMODULE=$1
-    local MODREF=$2
+    local MODREF=$1
+    local FORMODULE=${2:-"@root"}
 
     local module_info=( $(parse-module-ref $MODREF) )
     local module=${module_info[0]}

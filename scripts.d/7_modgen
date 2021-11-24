@@ -34,7 +34,7 @@ function module-patch()
     local TARGET=$2
     local MODREF=$3
 
-    local module_info=( $(get-module-ref "@root" $MODREF) )
+    local module_info=( $(get-module-ref $MODREF) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
