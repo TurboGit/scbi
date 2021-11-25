@@ -12,6 +12,13 @@ function run-test()
     )
 }
 
+DO_DIFF=no
+
+if [[ "$1" == "--diff" ]]; then
+    DO_DIFF=yes
+    shift
+fi
+
 ./clean
 
 export CDPATH=
@@ -71,6 +78,7 @@ for file in $TESTS; do
         echo OK
     else
         res=1
+        [[ $DO_DIFF = yes ]] && diff -c logs/$bfile.log expected/$bfile.exp
         echo NOK
     fi
 done
