@@ -49,6 +49,8 @@ else
     TESTS="drivers/$*"
 fi
 
+res=0
+
 for file in $TESTS; do
     # copy/reset patches each time as some drivers
     # are changing them for testing purpose.
@@ -68,6 +70,9 @@ for file in $TESTS; do
     if [ $? == 0 ]; then
         echo OK
     else
+        res=1
         echo NOK
     fi
 done
+
+exit $res
