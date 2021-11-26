@@ -1,5 +1,5 @@
 just mainlib:
 mainlib
 mainlib and deps:
-libx
+lib1
 mainlib

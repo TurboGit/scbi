@@ -1,6 +1,6 @@
-====================== testxx
-xxxx/xx/xx xx:xx:xx : Building testxx [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+====================== test19
+xxxx/xx/xx xx:xx:xx : Building test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : pre-setup starting
@@ -23,11 +23,11 @@ xxxx/xx/xx xx:xx:xx : pre-wrapup starting
 xxxx/xx/xx xx:xx:xx : pre-wrapup completed
 xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
-xxxx/xx/xx xx:xx:xx : End Building testxx [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building test19 [default] (master)
 
-====================== testxx/alt
-xxxx/xx/xx xx:xx:xx : Building testxx [alt] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+====================== test19/alt
+xxxx/xx/xx xx:xx:xx : Building test19 [alt] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : alt-pre-setup starting
@@ -54,27 +54,27 @@ xxxx/xx/xx xx:xx:xx : alt-wrapup starting
 xxxx/xx/xx xx:xx:xx : alt-wrapup completed
 xxxx/xx/xx xx:xx:xx : alt-post-wrapup starting
 xxxx/xx/xx xx:xx:xx : alt-post-wrapup completed
-xxxx/xx/xx xx:xx:xx : End Building testxx [alt] (master)
+xxxx/xx/xx xx:xx:xx : End Building test19 [alt] (master)
 
-@@@ ALT/CONFIG  testxx/xxx_xx-linux-gnu-alt/src
-@@@ ALT/POST-CONFIG  testxx/xxx_xx-linux-gnu-alt/src
-@@@ CONFIG  testxx/xxx_xx-linux-gnu-default/src
-@@@ POST-CONFIG  testxx/xxx_xx-linux-gnu-default/src
-@@@ ALT/PRE-SETUP  testxx
-@@@ PRE-SETUP  testxx
-@@@ BUILD  testxx/xxx_xx-linux-gnu-alt/src
-@@@ POST-BUILD  testxx/xxx_xx-linux-gnu-alt/src
-@@@ PRE-BUILD  testxx/xxx_xx-linux-gnu-alt/src
-@@@ BUILD  testxx/xxx_xx-linux-gnu-default/src
-@@@ POST-BUILD  testxx/xxx_xx-linux-gnu-default/src
-@@@ PRE-BUILD  testxx/xxx_xx-linux-gnu-default/src
-@@@ ALT/INSTALL  testxx/xxx_xx-linux-gnu-alt/src
-@@@ POST-INSTALL  testxx/xxx_xx-linux-gnu-alt/src
-@@@ PRE-INSTALL  testxx/xxx_xx-linux-gnu-alt/src
-@@@ INSTALL  testxx/xxx_xx-linux-gnu-default/src
-@@@ PRE-INSTALL  testxx/xxx_xx-linux-gnu-default/src
-@@@ ALT/POST-WRAPUP  testxx
-@@@ ALT/WRAPUP  testxx
-@@@ PRE-WRAPUP  testxx
-@@@ PRE-WRAPUP  testxx
-@@@ WRAPUP  testxx
+@@@ ALT/CONFIG  test19/x86_64-linux-gnu-alt/src
+@@@ ALT/POST-CONFIG  test19/x86_64-linux-gnu-alt/src
+@@@ CONFIG  test19/x86_64-linux-gnu-default/src
+@@@ POST-CONFIG  test19/x86_64-linux-gnu-default/src
+@@@ ALT/PRE-SETUP  test19
+@@@ PRE-SETUP  test19
+@@@ BUILD  test19/x86_64-linux-gnu-alt/src
+@@@ POST-BUILD  test19/x86_64-linux-gnu-alt/src
+@@@ PRE-BUILD  test19/x86_64-linux-gnu-alt/src
+@@@ BUILD  test19/x86_64-linux-gnu-default/src
+@@@ POST-BUILD  test19/x86_64-linux-gnu-default/src
+@@@ PRE-BUILD  test19/x86_64-linux-gnu-default/src
+@@@ ALT/INSTALL  test19/x86_64-linux-gnu-alt/src
+@@@ POST-INSTALL  test19/x86_64-linux-gnu-alt/src
+@@@ PRE-INSTALL  test19/x86_64-linux-gnu-alt/src
+@@@ INSTALL  test19/x86_64-linux-gnu-default/src
+@@@ PRE-INSTALL  test19/x86_64-linux-gnu-default/src
+@@@ ALT/POST-WRAPUP  test19
+@@@ ALT/WRAPUP  test19
+@@@ PRE-WRAPUP  test19
+@@@ PRE-WRAPUP  test19
+@@@ WRAPUP  test19

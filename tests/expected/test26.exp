@@ -1,6 +1,6 @@
 ========== build/install var
 xxxx/xx/xx xx:xx:xx : Building var [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config starting
@@ -13,7 +13,7 @@ xxxx/xx/xx xx:xx:xx : End Building var [default] (master)
 
 ========== build/install var/one
 xxxx/xx/xx xx:xx:xx : Building var [one] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [one] starting
@@ -26,7 +26,7 @@ xxxx/xx/xx xx:xx:xx : End Building var [one] (master)
 
 ========== build/install var/two
 xxxx/xx/xx xx:xx:xx : Building var [two] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [two] starting
@@ -39,7 +39,7 @@ xxxx/xx/xx xx:xx:xx : End Building var [two] (master)
 
 ========== build/install var/one.two
 xxxx/xx/xx xx:xx:xx : Building var [one two] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [one two] starting
@@ -52,7 +52,7 @@ xxxx/xx/xx xx:xx:xx : End Building var [one two] (master)
 
 ========== build/install var/two.one
 xxxx/xx/xx xx:xx:xx : Building var [two one] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [two one] starting
@@ -65,7 +65,7 @@ xxxx/xx/xx xx:xx:xx : End Building var [two one] (master)
 
 ========== build/install var/one.two.three.four
 xxxx/xx/xx xx:xx:xx : Building var [one two three four] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [one two three four] starting

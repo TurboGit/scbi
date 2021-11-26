@@ -1,8 +1,8 @@
-=================== plan vx (libx:vx libx)
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+=================== plan v2 (lib1:v2 lib2)
+xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
@@ -14,12 +14,12 @@ main
 liba.D br_b
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v2)
 
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : config starting
@@ -33,10 +33,10 @@ main
 libb.B master (default)
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
@@ -51,11 +51,11 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
 
-=================== plan var (libx:vx libx/variantx:vx)
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+=================== plan var (lib1:v1 lib2/variant1:v2)
+xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
@@ -67,29 +67,29 @@ main
 liba.A br_a
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
 
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [variantx] (vx.x)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
-xxxx/xx/xx xx:xx:xx : variantx-config starting
-xxxx/xx/xx xx:xx:xx : variantx-config completed
-xxxx/xx/xx xx:xx:xx : build [variantx] starting
-xxxx/xx/xx xx:xx:xx : build [variantx] completed
-xxxx/xx/xx xx:xx:xx : install [variantx] starting
-xxxx/xx/xx xx:xx:xx : install [variantx] completed
-xxxx/xx/xx xx:xx:xx : tests [variantx] starting
+xxxx/xx/xx xx:xx:xx : variant1-config starting
+xxxx/xx/xx xx:xx:xx : variant1-config completed
+xxxx/xx/xx xx:xx:xx : build [variant1] starting
+xxxx/xx/xx xx:xx:xx : build [variant1] completed
+xxxx/xx/xx xx:xx:xx : install [variant1] starting
+xxxx/xx/xx xx:xx:xx : install [variant1] completed
+xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
-libb.B vx (variantx)
-xxxx/xx/xx xx:xx:xx : tests [variantx] completed
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests [variant1] completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [variantx] (vx.x)
+xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
@@ -98,16 +98,16 @@ xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : tests starting
 main on master
 liba.A br_a
-libb.B vx (variantx)
+libb.B v2 (variant1)
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
 
 =================== second run plan var (no build)
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : tests starting
@@ -115,38 +115,38 @@ main
 liba.A br_a
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
 
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [variantx] (vx.x)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
-xxxx/xx/xx xx:xx:xx : tests [variantx] starting
+xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
-libb.B vx (variantx)
-xxxx/xx/xx xx:xx:xx : tests [variantx] completed
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests [variant1] completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [variantx] (vx.x)
+xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : tests starting
 main on master
 liba.A br_a
-libb.B vx (variantx)
+libb.B v2 (variant1)
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
 
 =================== second run plan var (test-only)
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : tests
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : tests starting
@@ -154,37 +154,37 @@ main
 liba.A br_a
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
 
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [variantx] (vx.x)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : tests
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
-xxxx/xx/xx xx:xx:xx : tests [variantx] starting
+xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
-libb.B vx (variantx)
-xxxx/xx/xx xx:xx:xx : tests [variantx] completed
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests [variant1] completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [variantx] (vx.x)
+xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : tests
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : tests starting
 main on master
 liba.A br_a
-libb.B vx (variantx)
+libb.B v2 (variant1)
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
 
-=================== only libx with version from command line
-xxxx/xx/xx xx:xx:xx : Building libx [wrong] (bad)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+=================== only lib2 with version from command line
+xxxx/xx/xx xx:xx:xx : Building lib2 [wrong] (bad)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : tests
 xxxx/xx/xx xx:xx:xx : tests [wrong] starting
-<pwd>/scripts.d/libx: line xx: ./mainx: No such file or directory
-xxxx/xx/xx xx:xx:xx : libx (FAILED) tests failed with error x
+<pwd>/scripts.d/lib2: line 65: ./main2: No such file or directory
+xxxx/xx/xx xx:xx:xx : lib2 (FAILED) tests failed with error 1

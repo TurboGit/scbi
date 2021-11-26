@@ -1,8 +1,8 @@
-=================== plan vx (libx:vx libx & mainmult:dev)
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+=================== plan v2 (lib1:v2 lib2 & mainmult:dev)
+xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
@@ -14,12 +14,12 @@ main
 liba.D br_b
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v2)
 
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : config starting
@@ -33,10 +33,10 @@ main
 libb.B master (default)
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (dev)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
@@ -50,11 +50,11 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (dev)
 
-=================== plan vx (libx:vx libx:dev & mainmult:dev)
-xxxx/xx/xx xx:xx:xx : need building libx, current version latest
+=================== plan v2 (lib1:v2 lib2:dev & mainmult:dev)
+xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
 
-xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
@@ -66,26 +66,26 @@ main
 liba.A br_a
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
 
-xxxx/xx/xx xx:xx:xx : Building libx [variantx] (dev)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (dev)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : variantx-config starting
-xxxx/xx/xx xx:xx:xx : variantx-config completed
-xxxx/xx/xx xx:xx:xx : build [variantx] starting
-xxxx/xx/xx xx:xx:xx : build [variantx] completed
-xxxx/xx/xx xx:xx:xx : install [variantx] starting
-xxxx/xx/xx xx:xx:xx : install [variantx] completed
-xxxx/xx/xx xx:xx:xx : tests [variantx] starting
+xxxx/xx/xx xx:xx:xx : variant1-config starting
+xxxx/xx/xx xx:xx:xx : variant1-config completed
+xxxx/xx/xx xx:xx:xx : build [variant1] starting
+xxxx/xx/xx xx:xx:xx : build [variant1] completed
+xxxx/xx/xx xx:xx:xx : install [variant1] starting
+xxxx/xx/xx xx:xx:xx : install [variant1] completed
+xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
-libb.B next version (variantx)
-xxxx/xx/xx xx:xx:xx : tests [variantx] completed
+libb.B next version (variant1)
+xxxx/xx/xx xx:xx:xx : tests [variant1] completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [variantx] (dev)
+xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (dev)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (dev)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
@@ -94,7 +94,7 @@ xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : tests starting
 better main in dev
 liba.A br_a
-libb.B next version (variantx)
+libb.B next version (variant1)
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (dev)

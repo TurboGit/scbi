@@ -1,5 +1,5 @@
-xxxx/xx/xx xx:xx:xx : Building testxx [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building test20 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : setup starting
@@ -10,10 +10,10 @@ xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
-xxxx/xx/xx xx:xx:xx : End Building testxx [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building test20 [default] (master)
 
-xxxx/xx/xx xx:xx:xx : Building testxx [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building test20 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : setup starting
@@ -24,7 +24,7 @@ xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
-xxxx/xx/xx xx:xx:xx : End Building testxx [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building test20 [default] (master)
 
 @@@ CONFIG one
 @@@ CONFIG seven

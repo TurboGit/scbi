@@ -1,6 +1,6 @@
 ====== default build
 xxxx/xx/xx xx:xx:xx : Building checkenv [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : config starting
@@ -17,7 +17,7 @@ xxxx/xx/xx xx:xx:xx : End Building checkenv [default] (master)
 
 ====== force DebugA
 xxxx/xx/xx xx:xx:xx : Building checkenv [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
@@ -33,7 +33,7 @@ xxxx/xx/xx xx:xx:xx : End Building checkenv [default] (master)
 
 ====== force DebugB
 xxxx/xx/xx xx:xx:xx : Building checkenv [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
@@ -49,7 +49,7 @@ xxxx/xx/xx xx:xx:xx : End Building checkenv [default] (master)
 
 ====== force DebugC (check precedence)
 xxxx/xx/xx xx:xx:xx : Building checkenv [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed

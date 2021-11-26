@@ -1,8 +1,8 @@
-xxxx/xx/xx xx:xx:xx : module gcc version x.x.x matching
+xxxx/xx/xx xx:xx:xx : module gcc version 4.3.1 matching
 xxxx/xx/xx xx:xx:xx : module mauto using native variant
 
 xxxx/xx/xx xx:xx:xx : Building mauto [native] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : native-config starting
 xxxx/xx/xx xx:xx:xx : native-config completed
@@ -13,11 +13,11 @@ xxxx/xx/xx xx:xx:xx : native-install completed
 xxxx/xx/xx xx:xx:xx : skip global install
 xxxx/xx/xx xx:xx:xx : End Building mauto [native] (master)
 
-xxxx/xx/xx xx:xx:xx : module gcc version xx.xx.xx not found
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99.09 not found
 xxxx/xx/xx xx:xx:xx : mauto using standard variant
 
 xxxx/xx/xx xx:xx:xx : Building mauto [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config starting

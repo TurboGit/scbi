@@ -1,6 +1,6 @@
 no variant
 xxxx/xx/xx xx:xx:xx : Building confopts [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config starting
@@ -10,7 +10,7 @@ xxxx/xx/xx xx:xx:xx : End Building confopts [default] (master)
 
 variant vara
 xxxx/xx/xx xx:xx:xx : Building confopts [vara] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [vara] starting
@@ -20,7 +20,7 @@ xxxx/xx/xx xx:xx:xx : End Building confopts [vara] (master)
 
 variant varb
 xxxx/xx/xx xx:xx:xx : Building confopts [varb] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [varb] starting
@@ -30,7 +30,7 @@ xxxx/xx/xx xx:xx:xx : End Building confopts [varb] (master)
 
 variant vara and varb
 xxxx/xx/xx xx:xx:xx : Building confopts [vara varb] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [vara varb] starting

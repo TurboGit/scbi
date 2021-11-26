@@ -1,5 +1,5 @@
-xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
@@ -11,10 +11,10 @@ main
 liba.C master
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 
-xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
@@ -26,10 +26,10 @@ main
 liba.A br_a
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
 
-xxxx/xx/xx xx:xx:xx : Building libx [default] (vx)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
@@ -41,11 +41,11 @@ main
 liba.D br_b
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v2)
 
 OK tar not present
-xxxx/xx/xx xx:xx:xx : Building libx [default] (vx.x)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1.2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from tar
 xxxx/xx/xx xx:xx:xx : build starting
@@ -57,11 +57,11 @@ main
 lib from tar
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (vx.x)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1.2)
 
 OK tar present
-xxxx/xx/xx xx:xx:xx : Building libx [default] (master)
-xxxx/xx/xx xx:xx:xx : native xxx_xx-linux-gnu
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : build starting
@@ -73,4 +73,4 @@ main
 liba.C master
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into ../install
-xxxx/xx/xx xx:xx:xx : End Building libx [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
