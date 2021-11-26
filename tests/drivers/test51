@@ -8,17 +8,23 @@ function check-res()
     fi
 }
 
-./scbi --store ONE
-out=$(check-res $?)
-echo ONE : $out
+NRUNS ./scbi --store ONE
 
-./scbi --store ONE A
+RUNS ./scbi --store ONE A
 
-./scbi --store ONE
-out=$(check-res $?)
-echo
-echo ONE : $out
+RUNS ./scbi --store ONE
 
-./scbi --store SECRET "#this-is-a-long:key:with:some:nonstd%*$chars@"
-./scbi --store SECRET
-echo
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+A
+EOF
+
+RUNS ./scbi --store SECRET "#this-is-a-long:key:with:some:nonstd%*$chars@"
+RUNS ./scbi --store SECRET
+
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+#this-is-a-long:key:with:some:nonstd%*$chars@
+EOF

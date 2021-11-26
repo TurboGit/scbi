@@ -1,18 +1,71 @@
 # Check for auto variant
 
-./scbi lib1 2>&1 > /dev/null
+RUNS ./scbi lib1
 
-echo "=============== A AUTO on command line - no native"
-./scbi autovarA/auto
+# =============== A AUTO on command line - no native
+NRUNS ./scbi autovarA/auto
 
-echo "=============== A AUTO on plan - no native"
-./scbi --plan=autoa autovarA
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : autovarA (FAILED) autovarA auto mode must define a native variant
+EOF
 
-echo "=============== B AUTO on command line"
-./scbi autovarB/auto
+# =============== A AUTO on plan - no native
+NRUNS ./scbi --plan=autoa autovarA
 
-echo "=============== B AUTO on plan"
-./scbi --plan=autob autovarB
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : autovarA (FAILED) autovarA auto mode must define a native variant
+EOF
 
-echo "=============== C AUTO on command line"
-./scbi autovarC/auto
+# =============== B AUTO on command line
+RUNS ./scbi autovarB/auto
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : dependency amoeba not installed
+xxxx/xx/xx xx:xx:xx : autovarB using standard variant
+
+xxxx/xx/xx xx:xx:xx : Building autovarB [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : skip global install
+xxxx/xx/xx xx:xx:xx : End Building autovarB [default] (master)
+EOF
+
+# =============== B AUTO on plan
+RUNS ./scbi --plan=autob autovarB
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : dependency amoeba not installed
+xxxx/xx/xx xx:xx:xx : autovarB using standard variant
+
+xxxx/xx/xx xx:xx:xx : Building autovarB [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : skip global install
+xxxx/xx/xx xx:xx:xx : End Building autovarB [default] (master)
+EOF
+
+# =============== C AUTO on command line
+RUNS ./scbi autovarC/auto
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : unknown dependency shouldnotexist-dev
+xxxx/xx/xx xx:xx:xx : autovarC using standard variant
+
+xxxx/xx/xx xx:xx:xx : Building autovarC [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : skip global install
+xxxx/xx/xx xx:xx:xx : End Building autovarC [default] (master)
+EOF

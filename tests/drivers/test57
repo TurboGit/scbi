@@ -1,9 +1,43 @@
 # check for auto variant depending on os package with specific version
 
-./scbi mauto/auto
+RUNS ./scbi mauto/auto
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : module gcc version 4.3.1 matching
+xxxx/xx/xx xx:xx:xx : module mauto using native variant
+
+xxxx/xx/xx xx:xx:xx : Building mauto [native] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : native-config starting
+xxxx/xx/xx xx:xx:xx : native-config completed
+xxxx/xx/xx xx:xx:xx : native-build starting
+xxxx/xx/xx xx:xx:xx : native-build completed
+xxxx/xx/xx xx:xx:xx : native-install starting
+xxxx/xx/xx xx:xx:xx : native-install completed
+xxxx/xx/xx xx:xx:xx : skip global install
+xxxx/xx/xx xx:xx:xx : End Building mauto [native] (master)
+EOF
 
 sed -i 's/4.3.1/99.99.09/g' scripts.d/mauto
 
-./scbi mauto/auto
+RUNS ./scbi mauto/auto
 
 sed -i 's/99.99.09/4.3.1/g' scripts.d/mauto
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99.09 not found
+xxxx/xx/xx xx:xx:xx : mauto using standard variant
+
+xxxx/xx/xx xx:xx:xx : Building mauto [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End Building mauto [default] (master)
+EOF

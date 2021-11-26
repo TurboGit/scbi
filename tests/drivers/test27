@@ -1,9 +1,50 @@
 cp scripts.d/test2 scripts.d/test99
 sed -i 's/test2-/test99-/g' scripts.d/test99
-./scbi test99
-./scbi test99
+
+RUNS ./scbi test99
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building test99 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building test99 [default] (master)
+EOF
+
+RUNS ./scbi test99
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building test99 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building test99 [default] (master)
+EOF
 
 sed -i 's/make/make -j2/g' scripts.d/test99
-./scbi test99
+
+RUNS ./scbi test99
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building test99 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building test99 [default] (master)
+EOF
 
 rm scripts.d/test99

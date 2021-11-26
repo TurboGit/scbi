@@ -1,29 +1,71 @@
 # Check cross depends with variants
 
-echo "========== OPT-A"
-./scbi --deps --target=x86_64-pc-mingw32 mcross/opta
+# ========== OPT-A
+NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcross/opta
 
-echo "========== OPT-B"
-./scbi --deps --target=x86_64-pc-mingw32 mcross/optb:v8
+DIFF <<EOF
+dependencies error building mcross/opta
+error: cross-opta not found
+EOF
 
-echo "========== OPT-A + OPT-B"
-./scbi --deps --target=x86_64-pc-mingw32 mcross/opta.optb
+# ========== OPT-B
+NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcross/optb:v8
 
-echo "========== NO-OPT"
-./scbi --deps --target=x86_64-pc-mingw32 mcross
+DIFF <<EOF
+dependencies error building mcross/optb
+error: cross-optb not found
+EOF
 
-echo
+# ========== OPT-A + OPT-B
+NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcross/opta.optb
 
-echo "========== OPT-A"
-./scbi --deps --target=x86_64-pc-mingw32 mcrossc/opta
+DIFF <<EOF
+dependencies error building mcross/opta.optb
+error: cross-opta not found
+error: cross-optb not found
+EOF
 
-echo "========== OPT-B"
-./scbi --deps --target=x86_64-pc-mingw32 mcrossc/optb:v8
+# ========== NO-OPT
+NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcross
 
-echo "========== OPT-A + OPT-B"
-./scbi --deps --target=x86_64-pc-mingw32 mcrossc/opta.optb
+DIFF <<EOF
+dependencies error building mcross
+error: cross-general not found
+EOF
 
-echo "========== NO-OPT"
-./scbi --deps --target=x86_64-pc-mingw32 mcrossc
+# ========== OPT-A
+NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcrossc/opta
 
-true
+DIFF <<EOF
+dependencies error building mcrossc/opta
+error: crossc-common not found
+error: crossc-opta not found
+EOF
+
+# ========== OPT-B
+NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcrossc/optb:v8
+
+DIFF <<EOF
+dependencies error building mcrossc/optb
+error: crossc-common not found
+error: crossc-optb not found
+EOF
+
+# ========== OPT-A + OPT-B
+NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcrossc/opta.optb
+
+DIFF <<EOF
+dependencies error building mcrossc/opta.optb
+error: crossc-common not found
+error: crossc-opta not found
+error: crossc-optb not found
+EOF
+
+# ========== NO-OPT
+NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcrossc
+
+DIFF <<EOF
+dependencies error building mcrossc
+error: crossc-common not found
+error: crossc-general not found
+EOF

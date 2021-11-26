@@ -1,21 +1,69 @@
-./scbi test17
+RUNS ./scbi test17
 
-cat .root/builds/.logs/*test17*config.log
-cat .root/builds/.logs/*test17*build.log
-cat .root/builds/.logs/*test17*install.log
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building test17 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End Building test17 [default] (master)
+EOF
+
+RUNS cat .root/builds/.logs/*test17*config.log
+
+CLEAN-DIFF <<EOF
+in config
+ROOT_DIR /this/is/it
+ABC_ROOT /perfect/here
+PATH     /var:/tmp:/bin:/usr/bin
+CONF17   two:one
+EOF
+
+RUNS cat .root/builds/.logs/*test17*build.log
+
+CLEAN-DIFF <<EOF
+in build
+ROOT_DIR /this/is/it
+ABC_ROOT /perfect/here
+PATH     /var:/tmp:/bin:/usr/bin
+CONF17   two:one
+EOF
+
+RUNS cat .root/builds/.logs/*test17*install.log
+
+CLEAN-DIFF <<EOF
+in install
+ROOT_DIR /this/is/it
+ABC_ROOT /perfect/here
+PATH     /var:/tmp:/bin:/usr/bin
+CONF17   two:one
+EOF
 
 function add-to-var()
 {
     local VAR=$1
     local DIR=$2
 
-    export $VAR="${DIR}${!VAR:+:}${!VAR}"
+    if [[ $VAR != "PATH" ]]; then
+        echo $VAR="${DIR}${!VAR:+:}${!VAR}"
+    fi
 }
+declare -fx add-to-var
 
-echo In driver:
-PATH=/bin:/usr/bin
-source .root/builds/test17/build/.log/env.cmd
-echo "ROOT_DIR $ROOT_DIR"
-echo "ABC_ROOT $ABC_ROOT"
-echo "PATH     $PATH"
-echo "CONF17   $CONF17"
+# In driver:
+export PATH=/bin:/usr/bin
+RUNS source .root/builds/test17/build/.log/env.cmd
+
+CLEAN-DIFF <<EOF
+ROOT_DIR=/this/is/it
+ABC_ROOT=/perfect/here
+CONF17=one
+CONF17=two
+EOF

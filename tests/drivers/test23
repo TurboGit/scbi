@@ -4,13 +4,42 @@ mkdir -p .root/builds/reca
 mkdir -p .root/builds/recb
 mkdir -p .root/builds/recc
 
-echo ========== deps A
-./scbi -v --deps reca
+# ========== deps A
+NRUNS ./scbi -v --deps reca
 
-echo ========== list-depends A
-./scbi --list-depends reca
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : need building recb, current version latest
 
-echo ========== list-depends B
-./scbi --list-depends recb
+xxxx/xx/xx xx:xx:xx : need building recc, current version latest
 
-true
+xxxx/xx/xx xx:xx:xx : need building reca, current version latest
+xxxx/xx/xx xx:xx:xx : skip reca, already handled
+
+xxxx/xx/xx xx:xx:xx : Building recc [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : recc (FAILED) recursive dependencies detected
+xxxx/xx/xx xx:xx:xx : recc (FAILED) . recc -> reca
+xxxx/xx/xx xx:xx:xx : recc (FAILED) . reca -> recb
+xxxx/xx/xx xx:xx:xx : recc (FAILED) . recb -> recc
+EOF
+
+# ========== list-depends A
+NRUNS ./scbi --list-depends reca
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : reca (FAILED) recursive dependencies detected
+xxxx/xx/xx xx:xx:xx : reca (FAILED) . reca -> recb
+xxxx/xx/xx xx:xx:xx : reca (FAILED) . recb -> recc
+xxxx/xx/xx xx:xx:xx : reca (FAILED) . recc -> reca
+EOF
+
+# ========== list-depends B
+NRUNS ./scbi --list-depends recb
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : recb (FAILED) recursive dependencies detected
+xxxx/xx/xx xx:xx:xx : recb (FAILED) . recb -> recc
+xxxx/xx/xx xx:xx:xx : recb (FAILED) . recc -> reca
+xxxx/xx/xx xx:xx:xx : recb (FAILED) . reca -> recb
+EOF

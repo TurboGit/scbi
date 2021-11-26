@@ -1,12 +1,60 @@
 # check call-variant-hooks
 
-echo ============= 0
-./scbi varhook
+# ============= 0
+RUNS ./scbi varhook
 
-echo ============= 1
-./scbi varhook/mpi
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building varhook [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End Building varhook [default] (master)
+EOF
 
-echo ============= 2
-./scbi varhook/mpi.openmp:dev
+# ============= 1
+RUNS ./scbi varhook/mpi
 
-grep @@@ .root/builds/.logs/*varhook*config.log
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building varhook [mpi] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config [mpi] starting
+xxxx/xx/xx xx:xx:xx : config [mpi] completed
+xxxx/xx/xx xx:xx:xx : build [mpi] starting
+xxxx/xx/xx xx:xx:xx : build [mpi] completed
+xxxx/xx/xx xx:xx:xx : install [mpi] starting
+xxxx/xx/xx xx:xx:xx : install [mpi] completed
+xxxx/xx/xx xx:xx:xx : End Building varhook [mpi] (master)
+EOF
+
+# ============= 2
+RUNS ./scbi varhook/mpi.openmp:dev
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building varhook [mpi openmp] (dev)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config [mpi openmp] starting
+xxxx/xx/xx xx:xx:xx : config [mpi openmp] completed
+xxxx/xx/xx xx:xx:xx : build [mpi openmp] starting
+xxxx/xx/xx xx:xx:xx : build [mpi openmp] completed
+xxxx/xx/xx xx:xx:xx : install [mpi openmp] starting
+xxxx/xx/xx xx:xx:xx : install [mpi openmp] completed
+xxxx/xx/xx xx:xx:xx : End Building varhook [mpi openmp] (dev)
+EOF
+
+RUNS grep @@@ .root/builds/.logs/*varhook*config.log
+
+CLEAN-DIFF <<EOF
+.root/builds/.logs/x86_64-linux-gnu-varhook-mpi-config.log:@@@ MPI
+.root/builds/.logs/x86_64-linux-gnu-varhook-mpi.openmp-config.log:@@@ MPI
+.root/builds/.logs/x86_64-linux-gnu-varhook-mpi.openmp-config.log:@@@ OpenMP
+EOF

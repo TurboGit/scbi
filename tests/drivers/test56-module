@@ -1,0 +1,43 @@
+# Check depends with common, default & variants
+
+source scripts.d/5_tools
+
+function internal-common-depends()
+{
+    echo common
+}
+
+function internal-default-depends()
+{
+    echo default
+}
+
+function internal-varA-depends()
+{
+    echo varA
+}
+
+function internal-varB-depends()
+{
+    echo varB
+}
+
+function run()
+{
+    echo "=== default"
+    get-all-depends internal default depends
+
+    echo "=== varA"
+    get-all-depends internal varA depends
+
+    echo "=== varB"
+    get-all-depends internal varB depends
+
+    echo "=== varA.varB"
+    get-all-depends internal varA.varB depends
+
+    echo "=== common"
+    get-all-depends internal common depends
+}
+
+run

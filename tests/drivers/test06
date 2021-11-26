@@ -1,34 +1,73 @@
 
-./scbi --no-patch lib1 > /dev/null 2>&1
+RUNS ./scbi --no-patch lib1
 
 # check purge and purge-only
-echo '==== no build expected'
-./scbi --no-patch lib1
-echo '==== purge and re-build'
-./scbi --no-patch --purge lib1
-echo '==== no build expected'
-./scbi --no-patch lib1
+# ==== no build expected
+RUNS ./scbi --no-patch lib1
 
-echo '==== purge-only, no build expected'
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+EOF
+
+# ==== purge and re-build
+RUNS ./scbi --no-patch --purge lib1
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Purging lib1 for x86_64-linux-gnu/default
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+EOF
+
+# ==== no build expected
+RUNS ./scbi --no-patch lib1
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+EOF
+
+# ==== purge-only, no build expected
 
 REP=$PWD/.root/builds/lib1
 
-if [ -h $REP/x86_64-linux-gnu-default/build ]; then
-    echo OK build directory present before purge
-else
-    echo NOK build directory should have been present $SCBI_BDIR
-fi
+# OK build directory present before purge
+OK -h $REP/x86_64-linux-gnu-default/build
 
-./scbi --purge-only lib1
+RUNS ./scbi --purge-only lib1
 
-# some checks
-if [ "$(ls $REP/x86_64-linux-gnu-default)" == "manifest" ]; then
-    echo OK build directory removed, only manifest found
-else
-    echo NOK build directory still present
-fi
+# OK build directory removed, only manifest found
+IS $(ls $REP/x86_64-linux-gnu-default) == "manifest"
 
 unset REP
 
-echo '==== re-build after purge'
-./scbi --no-patch lib1
+# ==== re-build after purge
+RUNS ./scbi --no-patch lib1
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+EOF

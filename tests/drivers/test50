@@ -1,7 +1,15 @@
 
-echo "========= should fail"
+# ========= should fail
 
-./scbi --setup --test-only checkvcs
+NRUNS ./scbi --setup --test-only checkvcs
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building checkvcs [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : error: cannot get sources from /this.is.path/some/dir
+EOF
 
 function scbi-rewrite-vcs()
 {
@@ -28,6 +36,13 @@ function scbi-rewrite-vcs()
 }
 export -f scbi-rewrite-vcs
 
-echo ""
-echo "========= should be ok"
-./scbi --setup --test-only checkvcs
+# ========= should be ok
+RUNS ./scbi --setup --test-only checkvcs
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building checkvcs [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : End Building checkvcs [default] (master)
+EOF

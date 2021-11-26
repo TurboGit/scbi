@@ -1,13 +1,57 @@
 # check for config-options special hooks
 
-echo no variant
-./scbi --log:yes confopts
+# no variant
+RUNS ./scbi --log:yes confopts
 
-echo variant vara
-./scbi --log:yes confopts/vara
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building confopts [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+call -DcommonX -DcommonY
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building confopts [default] (master)
+EOF
 
-echo variant varb
-./scbi --log:yes confopts/varb
+# variant vara
+RUNS ./scbi --log:yes confopts/vara
 
-echo variant vara and varb
-./scbi --log:yes confopts/vara.varb
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building confopts [vara] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config [vara] starting
+call -DcommonX -DcommonY -DvaraA
+xxxx/xx/xx xx:xx:xx : config [vara] completed
+xxxx/xx/xx xx:xx:xx : End Building confopts [vara] (master)
+EOF
+
+# variant varb
+RUNS ./scbi --log:yes confopts/varb
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building confopts [varb] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config [varb] starting
+call -DcommonX -DcommonY -DvarbA -DvarbB
+xxxx/xx/xx xx:xx:xx : config [varb] completed
+xxxx/xx/xx xx:xx:xx : End Building confopts [varb] (master)
+EOF
+
+# variant vara and varb
+RUNS ./scbi --log:yes confopts/vara.varb
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building confopts [vara varb] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config [vara varb] starting
+call -DcommonX -DcommonY -DvaraA -DvarbA -DvarbB
+xxxx/xx/xx xx:xx:xx : config [vara varb] completed
+xxxx/xx/xx xx:xx:xx : End Building confopts [vara varb] (master)
+EOF

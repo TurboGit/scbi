@@ -1,20 +1,149 @@
 # check for super-module
 #
 
-./scbi --purge-only lib1 &> /dev/null
-./scbi --purge-only lib2 &> /dev/null
+RUNS ./scbi --purge-only lib1
+RUNS ./scbi --purge-only lib2
 
-echo "========== build supermod"
-./scbi --no-patch --tests supermod
+# echo ========== build supermod
+RUNS ./scbi --no-patch --tests supermod
 
-echo "========== build supermod plan sm1"
-./scbi --no-patch --tests --plan=sm1 supermod
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Metamodule supermod-default setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod-default setup
 
-echo "========== build supermod variant best (plan var)"
-./scbi --no-patch --tests supermod/best
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 
-if [ -f .root/builds/install/supermod ]; then
-    cat .root/builds/install/supermod
-else
-    echo no file .root/builds/install/supermod
-fi
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+libb.B master (default)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod-default wrapup
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod-default wrapup
+EOF
+
+# echo ========== build supermod plan sm1
+RUNS ./scbi --no-patch --tests --plan=sm1 supermod
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Metamodule supermod-default setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod-default setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.A br_a
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+libb.B master (default)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod-default wrapup
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod-default wrapup
+EOF
+
+# echo ========== build supermod variant best (plan var)
+RUNS ./scbi --no-patch --tests supermod/best
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Metamodule supermod-best setup
+xxxx/xx/xx xx:xx:xx : setup [best] starting
+xxxx/xx/xx xx:xx:xx : setup [best] completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod-best setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.A br_a
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : variant1-config starting
+xxxx/xx/xx xx:xx:xx : variant1-config completed
+xxxx/xx/xx xx:xx:xx : build [variant1] starting
+xxxx/xx/xx xx:xx:xx : build [variant1] completed
+xxxx/xx/xx xx:xx:xx : install [variant1] starting
+xxxx/xx/xx xx:xx:xx : install [variant1] completed
+xxxx/xx/xx xx:xx:xx : tests [variant1] starting
+main
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests [variant1] completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod-best wrapup
+xxxx/xx/xx xx:xx:xx : wrapup [best] starting
+xxxx/xx/xx xx:xx:xx : wrapup [best] completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod-best wrapup
+EOF
+
+OK -f .root/builds/install/supermod
+
+RUNS cat .root/builds/install/supermod
+
+CLEAN-DIFF <<EOF
+do setup
+do wrapup
+do setup
+do wrapup
+do setup
+do wrapup
+EOF

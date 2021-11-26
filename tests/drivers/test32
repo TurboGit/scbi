@@ -1,3 +1,9 @@
 # Note that we transform all 1 to A and 2 to B to have a better check
 # of the final output.
-./scbi --tests --plan=inherit --list-plan lib1 | sed 's/1/A/g;s/2/B/g'
+RUNS ./scbi --tests --plan=inherit --list-plan lib1
+
+DIFF <<EOF
+There is 2 module(s) in the plan
+lib2/variant1:v2.0
+lib1:v2
+EOF

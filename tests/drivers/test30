@@ -1,20 +1,60 @@
-echo "====== list all deps listDA"
-./scbi --list-depends listDA
+# ====== list all deps listDA
+RUNS ./scbi --list-depends listDA
 
-echo "====== list all deps (explicit) listDA"
-./scbi --list-depends --list-filter:all listDA
+CLEAN-DIFF <<EOF
+buildA
+listDA
+listDB
+listDC
+listDD
+EOF
 
-echo "====== list dev deps listDA"
-./scbi --list-depends --list-filter:dev listDA
+# ====== list all deps (explicit) listDA
+RUNS ./scbi --list-depends --list-filter:all listDA
 
-echo "====== list run deps listDA"
-./scbi --list-depends --list-filter:run listDA
+CLEAN-DIFF <<EOF
+buildA
+listDA
+listDB
+listDC
+listDD
+EOF
 
-echo "====== list run direct deps listDA"
-./scbi --list-depends:direct --list-filter:run listDA
+# ====== list dev deps listDA
+RUNS ./scbi --list-depends --list-filter:dev listDA
 
-echo "====== list dev direct deps listDA"
-./scbi --list-depends:direct --list-filter:dev listDA
+CLEAN-DIFF <<EOF
+buildA
+EOF
 
-echo "====== list all direct deps listDA"
-./scbi --list-depends:direct --list-filter:all listDA
+# ====== list run deps listDA
+RUNS ./scbi --list-depends --list-filter:run listDA
+
+CLEAN-DIFF <<EOF
+listDA
+listDB
+listDC
+listDD
+EOF
+
+# ====== list run direct deps listDA
+RUNS ./scbi --list-depends:direct --list-filter:run listDA
+
+CLEAN-DIFF <<EOF
+listDB
+EOF
+
+# ====== list dev direct deps listDA
+RUNS ./scbi --list-depends:direct --list-filter:dev listDA
+
+CLEAN-DIFF <<EOF
+buildA
+EOF
+
+# ====== list all direct deps listDA
+RUNS ./scbi --list-depends:direct --list-filter:all listDA
+
+CLEAN-DIFF <<EOF
+buildA
+listDB
+EOF

@@ -2,7 +2,38 @@
 
 export LANG=C
 
-function run-test()
+function clean-up-osht-output()
+{
+    sed -i 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;}' ${OSHT_STDIO}
+    sed -i "s,$PWD,<pwd>,g" ${OSHT_STDIO}
+}
+
+function sort-osht-output()
+{
+    cat ${OSHT_STDIO} | sort > ${OSHT_STDIO}
+}
+
+function sort-osht-output-but-first-line()
+{
+    head -1 ${OSHT_STDIO} > xout
+    sed -i '1d' ${OSHT_STDIO}
+    sort ${OSHT_STDIO} >> xout
+    mv xout ${OSHT_STDIO}
+}
+
+function clean-up-osht-input()
+{
+    sed 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;}'
+}
+
+function CLEAN-DIFF()
+{
+    clean-up-osht-output
+    cat - | clean-up-osht-input | \
+DIFF
+}
+
+function run-test-old()
 {
     local TEST=$1
     local EXP=$2
@@ -14,6 +45,16 @@ function run-test()
     cp ${OSHT_STDIO} logs/$TEST.log
     DIFF < $EXP
 
+    rm -f $TEST
+}
+
+function run-test()
+{
+    local TEST=$1
+    local EXP=$2
+
+    cp drivers/$TEST .
+    source ./$TEST
     rm -f $TEST
 }
 
@@ -36,9 +77,6 @@ sed -i 's/dlog/ilog/g' scripts.d/7_modgen
 
 mkdir -p .root/.patches
 
-# the repository directory
-export TESTREPOS=$PWD/.root/repos
-
 # kill mail for testing
 export EMAIL_NOTIFICATION=no
 
@@ -52,18 +90,20 @@ mkdir -p $PWD/logs
 
 cd drivers
 if [ -z $1 ]; then
-    TESTS=( test* )
+    TESTS=( test?? )
 else
     TESTS=( $* )
 fi
 cd ..
 
-PLAN $(( ${#TESTS[*]} * 2 ))
+PLAN 405
 
 ROOTDIR=$PWD
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR
+    export TESTREPOS=$ROOTDIR/.root/repos
+
     # copy/reset patches each time as some drivers
     # are changing them for testing purpose.
     cp .root/repos/*.patch .root/.patches/

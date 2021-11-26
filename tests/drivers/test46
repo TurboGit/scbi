@@ -1,10 +1,74 @@
 # check for dry-run
 
-echo mainlib:
-./scbi -f --deps --plan=moddep mainlib
+# mainlib:
+RUNS ./scbi -f --deps --plan=moddep mainlib
 
-echo mainlib no recompilation:
-./scbi --deps --plan=moddep mainlib
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [titi] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : apply-patch filename lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : build [titi] starting
+xxxx/xx/xx xx:xx:xx : build [titi] completed
+xxxx/xx/xx xx:xx:xx : install [titi] starting
+xxxx/xx/xx xx:xx:xx : install [titi] completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [titi] (master)
 
-echo mainlib and specific variant lib1:
-./scbi -f --deps --plan=moddep mainlib=lib1/newtiti mainlib
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
+EOF
+
+# mainlib no recompilation:
+RUNS ./scbi --deps --plan=moddep mainlib
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [titi] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [titi] (master)
+
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
+EOF
+
+# mainlib and specific variant lib1:
+RUNS ./scbi -f --deps --plan=moddep mainlib=lib1/newtiti mainlib
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [newtiti] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : apply-patch filename lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : build [newtiti] starting
+xxxx/xx/xx xx:xx:xx : build [newtiti] completed
+xxxx/xx/xx xx:xx:xx : install [newtiti] starting
+xxxx/xx/xx xx:xx:xx : install [newtiti] completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [newtiti] (master)
+
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
+EOF

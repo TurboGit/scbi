@@ -1,21 +1,218 @@
 # test build plan
 
-./scbi --no-patch --purge-only lib1 &> /dev/null
-./scbi --no-patch --purge-only lib2 &> /dev/null
+RUNS ./scbi --no-patch --purge-only lib1
 
-echo '=================== plan v2 (lib1:v2 lib2)'
-./scbi -v --no-patch --tests --plan=v2 --deps mainmult
+RUNS ./scbi --no-patch --purge-only lib2
 
-echo '=================== plan var (lib1:v1 lib2/variant1:v2)'
-./scbi -v --no-patch --tests --plan=var --deps mainmult
+# =================== plan v2 (lib1:v2 lib2)
+RUNS ./scbi -v --no-patch --tests --plan=v2 --deps mainmult
 
-echo '=================== second run plan var (no build)'
-./scbi -v --no-patch --tests --plan=var --deps mainmult
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
 
-echo '=================== second run plan var (test-only)'
-./scbi -v --no-patch --tests-only --plan=var --deps mainmult
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.D br_b
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v2)
 
-echo '=================== only lib2 with version from command line'
+xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+libb.B master (default)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main on master
+liba.D br_b
+libb.B master (default)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
+EOF
+
+# =================== plan var (lib1:v1 lib2/variant1:v2)
+RUNS ./scbi -v --no-patch --tests --plan=var --deps mainmult
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.A br_a
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
+
+xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : variant1-config starting
+xxxx/xx/xx xx:xx:xx : variant1-config completed
+xxxx/xx/xx xx:xx:xx : build [variant1] starting
+xxxx/xx/xx xx:xx:xx : build [variant1] completed
+xxxx/xx/xx xx:xx:xx : install [variant1] starting
+xxxx/xx/xx xx:xx:xx : install [variant1] completed
+xxxx/xx/xx xx:xx:xx : tests [variant1] starting
+main
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests [variant1] completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
+
+xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main on master
+liba.A br_a
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
+EOF
+
+# =================== second run plan var (no build)
+RUNS ./scbi -v --no-patch --tests --plan=var --deps mainmult
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.A br_a
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
+
+xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests [variant1] starting
+main
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests [variant1] completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
+
+xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests starting
+main on master
+liba.A br_a
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
+EOF
+
+# =================== second run plan var (test-only)
+RUNS ./scbi -v --no-patch --tests-only --plan=var --deps mainmult
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.A br_a
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
+
+xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests [variant1] starting
+main
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests [variant1] completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
+
+xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests starting
+main on master
+liba.A br_a
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
+EOF
+
+# =================== only lib2 with version from command line
 # note that this version does not exists, it is only to make sure scbi tries
 # to compile it.
-./scbi --tests-only --plan=var --deps lib2/wrong:bad | sed "s,$PWD,<pwd>,g"
+NRUNS ./scbi --tests-only --plan=var --deps lib2/wrong:bad
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib2 [wrong] (bad)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : tests [wrong] starting
+<pwd>/scripts.d/lib2: line 65: ./main2: No such file or directory
+xxxx/xx/xx xx:xx:xx : lib2 (FAILED) tests failed with error 1
+EOF

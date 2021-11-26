@@ -4,47 +4,79 @@ REP=$PWD/.root/builds/oot2
 
 rm -fr $REP
 
-echo '========== build 1 oot2'
-./scbi oot2
+# ========== build 1 oot2
+RUNS ./scbi oot2
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building oot2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building oot2 [default] (master)
+EOF
 
 echo some text > $REP/build/install/i-some-file
 echo some text > $REP/build/build/b-some-file
 
-echo '========== build 2 oot2'
-./scbi -f oot2
+# ========== build 2 oot2
+RUNS ./scbi -f oot2
 
-if [ -f $REP/build/install/i-some-file ]; then
-    echo nok: file i-some-file should have been removed
-else
-    echo ok: file i-some-file properly removed from module install directory
-fi
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building oot2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building oot2 [default] (master)
+EOF
 
-if [ -f $REP/build/build/b-some-file ]; then
-    echo ok: file b-some-file still there
-else
-    echo nok: file b-some-file should have not been removed
-fi
+NOK -f $REP/build/install/i-some-file
+OK -f $REP/build/build/b-some-file
 
-echo '========== build 3 oot2'
-./scbi -f --safe oot2
+# ========== build 3 oot2
+RUNS ./scbi -f --safe oot2
 
-if [ -f $REP/build/build/b-some-file ]; then
-    echo "nok: file b-some-file should have not been removed (safe mode)"
-else
-    echo "ok: file b-some-file removed (safe mode)"
-fi
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building oot2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building oot2 [default] (master)
+EOF
 
-echo '========== build 4 oot2'
+NOK -f $REP/build/build/b-some-file
 
-./scbi -f oot2/no
+# ========== build 4 oot2
+
+RUNS ./scbi -f oot2/no
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building oot2 [no] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : build [no] starting
+xxxx/xx/xx xx:xx:xx : build [no] completed
+xxxx/xx/xx xx:xx:xx : install [no] starting
+xxxx/xx/xx xx:xx:xx : install [no] completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building oot2 [no] (master)
+EOF
 
 rm -f $REP/build/src/b-some-file
 echo some text > $REP/build/build/b-some-file
 
-if [ -f $REP/build/src/b-some-file ]; then
-    echo "ok: file b-some-file found"
-else
-    echo "nok: file b-some-file should not be there"
-fi
+OK -f $REP/build/src/b-some-file
 
 unset REP

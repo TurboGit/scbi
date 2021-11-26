@@ -1,13 +1,26 @@
 # test build plan with a :dev version
 
-echo '=================== module version (v1)'
-./scbi --plan=dev --module-version lib1 | sed 's/1/A/g;s/2/B/g'
-echo
+# =================== module version (v1)
+RUNS ./scbi --plan=dev --module-version lib1
+# add eof to osht output
+echo >> ${OSHT_STDIO}
 
-echo '=================== module version (v2)'
-./scbi --plan=dev --module-version lib1:v2 | sed 's/1/A/g;s/2/B/g'
-echo
+DIFF <<EOF
+v1
+EOF
 
-echo '=================== module version (NONE)'
-./scbi --module-version lib1 | sed 's/1/A/g;s/2/B/g'
-echo
+# =================== module version (v2)
+RUNS ./scbi --plan=dev --module-version lib1:v2
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+v2
+EOF
+
+# =================== module version (NONE)
+RUNS ./scbi --module-version lib1
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+NONE
+EOF

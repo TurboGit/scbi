@@ -1,11 +1,39 @@
-echo "========== dmain"
-./scbi --list-depends dmain
+# echo ========== dmain
+RUNS ./scbi --list-depends dmain
 
-echo "========== dmain externals"
-./scbi --list-externals:only dmain
+CLEAN-DIFF <<EOF
+depA
+depB
+dmain
+dmod
+oot
+EOF
 
-echo "========== dmain modules & externals"
-./scbi --list-externals dmain
+# echo ========== dmain externals
+RUNS ./scbi --list-externals:only dmain
 
-echo "========== dmain direct modules & externals"
-./scbi --list-depends:direct --list-externals dmain
+CLEAN-DIFF <<EOF
+libaws-dev
+EOF
+
+# echo ========== dmain modules & externals
+RUNS ./scbi --list-externals dmain
+
+CLEAN-DIFF <<EOF
+depA
+depB
+dmain
+dmod
+libaws-dev
+oot
+EOF
+
+# echo ========== dmain direct modules & externals
+RUNS ./scbi --list-depends:direct --list-externals dmain
+
+CLEAN-DIFF <<EOF
+depA
+depB
+dmod
+libaws-dev
+EOF

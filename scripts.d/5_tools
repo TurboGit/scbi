@@ -274,6 +274,7 @@ function get-all-depends()
 
     _internal_call-variant-hooks \
         $MODULE $HOOK "$SCBI_PREFIX" "$SCBI_TARGET" $VARIANT
+    true
 }
 
 ############################## for-all-modules

@@ -1,7 +1,16 @@
 # check for dry-run
 
-echo just mainlib:
-./scbi --dry-run mainlib
+# just mainlib:
+RUNS ./scbi --dry-run mainlib
 
-echo mainlib and deps:
-./scbi --dry-run --deps mainlib
+CLEAN-DIFF <<EOF
+mainlib
+EOF
+
+# mainlib and deps:
+RUNS ./scbi --dry-run --deps mainlib
+
+CLEAN-DIFF <<EOF
+lib1
+mainlib
+EOF

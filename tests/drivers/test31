@@ -1,23 +1,96 @@
-echo "====== default build"
-(
-    ./scbi --tests checkenv
-)
+# ====== default build
 
-echo "====== force DebugA"
-(
-    export SCBI_checkenv_BUILD_TYPE=DebugA
-    ./scbi --force --tests checkenv
-)
+RUNS ./scbi --tests checkenv
 
-echo "====== force DebugB"
-(
-    export SCBI_CMAKE_BUILD_TYPE=DebugB
-    ./scbi --force --tests checkenv
-)
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building checkenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+toolbin version = 'Release'
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building checkenv [default] (master)
+EOF
 
-echo "====== force DebugC (check precedence)"
-(
-    export SCBI_checkenv_BUILD_TYPE=DebugC
-    export SCBI_CMAKE_BUILD_TYPE=DebugB
-    ./scbi --force --tests checkenv
-)
+# ====== force DebugA
+
+export SCBI_checkenv_BUILD_TYPE=DebugA
+RUNS ./scbi --force --tests checkenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building checkenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+toolbin version = 'DebugA'
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building checkenv [default] (master)
+EOF
+
+unset SCBI_checkenv_BUILD_TYPE
+
+# ====== force DebugB
+
+export SCBI_CMAKE_BUILD_TYPE=DebugB
+RUNS ./scbi --force --tests checkenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building checkenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+toolbin version = 'DebugB'
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building checkenv [default] (master)
+EOF
+
+unset SCBI_CMAKE_BUILD_TYPE
+
+# ====== force DebugC (check precedence)
+
+export SCBI_checkenv_BUILD_TYPE=DebugC
+export SCBI_CMAKE_BUILD_TYPE=DebugB
+
+RUNS ./scbi --force --tests checkenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building checkenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+toolbin version = 'DebugC'
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : End Building checkenv [default] (master)
+EOF
+
+unset SCBI_checkenv_BUILD_TYPE
+unset SCBI_CMAKE_BUILD_TYPE
