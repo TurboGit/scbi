@@ -10,3 +10,5 @@ sed -i 's/master/azerty/g' .root/.patches/lib1-0-fix.patch
 echo '========== lib1 missing patch'
 rm .root/.patches/lib1-0-fix.patch
 ./scbi --tests lib1
+
+true

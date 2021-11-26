@@ -10,3 +10,5 @@
         ./build
         LD_LIBRARY_PATH=builds/install/lib/ builds/install/bin/mainmult
 )
+
+true

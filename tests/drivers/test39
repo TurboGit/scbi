@@ -1,1 +1,3 @@
 ./scbi --deps mboggus lib1
+
+true

@@ -12,3 +12,5 @@ echo ========== list-depends A
 
 echo ========== list-depends B
 ./scbi --list-depends recb
+
+true

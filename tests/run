@@ -5,19 +5,17 @@ export LANG=C
 function run-test()
 {
     local TEST=$1
+    local EXP=$2
 
-    (
-        cp drivers/$TEST . && source ./$TEST
-        rm -f $TEST
-    )
+    cp drivers/$TEST .
+
+    RUNS source ./$TEST
+    sed -i 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;}' ${OSHT_STDIO}
+    cp ${OSHT_STDIO} logs/$TEST.log
+    DIFF < $EXP
+
+    rm -f $TEST
 }
-
-DO_DIFF=no
-
-if [[ "$1" == "--diff" ]]; then
-    DO_DIFF=yes
-    shift
-fi
 
 ./clean
 
@@ -50,15 +48,22 @@ mkdir -p $PWD/.root/builds/install
 # create the log dirs
 mkdir -p $PWD/logs
 
+. osht
+
+cd drivers
 if [ -z $1 ]; then
-    TESTS='drivers/test*'
+    TESTS=( test* )
 else
-    TESTS="drivers/$*"
+    TESTS=( $* )
 fi
+cd ..
 
-res=0
+PLAN $(( ${#TESTS[*]} * 2 ))
 
-for file in $TESTS; do
+ROOTDIR=$PWD
+
+for file in ${TESTS[*]}; do
+    cd $ROOTDIR
     # copy/reset patches each time as some drivers
     # are changing them for testing purpose.
     cp .root/repos/*.patch .root/.patches/
@@ -67,20 +72,6 @@ for file in $TESTS; do
     rm -fr .root/builds
 
     bfile=$(basename $file)
-    echo -n "========== $bfile "
-    run-test $bfile 2>&1 > logs/$bfile.log
-
-    sed -i 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;}' logs/$bfile.log
-
-    diff -q logs/$bfile.log expected/$bfile.exp 2>&1 > /dev/null
-
-    if [ $? == 0 ]; then
-        echo OK
-    else
-        res=1
-        [[ $DO_DIFF = yes ]] && diff -c logs/$bfile.log expected/$bfile.exp
-        echo NOK
-    fi
+    echo "========== $bfile"
+    run-test $bfile expected/$bfile.exp
 done
-
-exit $res

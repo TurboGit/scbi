@@ -25,3 +25,5 @@ echo "========== OPT-A + OPT-B"
 
 echo "========== NO-OPT"
 ./scbi --deps --target=x86_64-pc-mingw32 mcrossc
+
+true

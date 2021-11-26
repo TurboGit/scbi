@@ -21,3 +21,5 @@ echo '========== build/install var/one.two.three.four'
 for file in $(ls -t .root/builds/.logs/*-var*); do
     grep -h '@@@' $file
 done
+
+true
