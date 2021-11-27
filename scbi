@@ -128,12 +128,12 @@ DO_RUN_CMD=
 
 function check-handled()
 {
-    local module=$1
+    local MODULE=$1
 
-    grep "^$module" $HANDLED &> /dev/null
+    grep "^$MODULE" $HANDLED &> /dev/null
 
     if [[ $? = 1 ]]; then
-        echo $module >> $HANDLED
+        echo $MODULE >> $HANDLED
         return 0
     else
         return 1
@@ -190,71 +190,72 @@ function load-module-env()
 function module-wrapper()
 {
     local PREFIX=$1
-    local module=$2
-    local variant=$3
-    local step=$4
+    local MODULE=$2
+    local VARIANT=$3
+    local STEP=$4
+
     local pvariant=""
     local dvariant=""
 
     #  set variant parameter if different than default
 
-    if [[ "$variant" != "default" ]]; then
-        pvariant=$variant
+    if [[ "$VARIANT" != "default" ]]; then
+        pvariant=$VARIANT
     fi
 
     #  set variant display if not part of step and not default
 
-    if [[ ${step/$variant/} == $step && "$variant" != "default" ]]; then
-        dvariant=" [${variant//./ }]"
+    if [[ ${STEP/$VARIANT/} == $STEP && "$VARIANT" != "default" ]]; then
+        dvariant=" [${VARIANT//./ }]"
     fi
 
-    if [[ $step = "build" && "$BUILD_SCBI_TARGET" != "" ]]; then
+    if [[ $STEP = "build" && "$BUILD_SCBI_TARGET" != "" ]]; then
         mstep=build-$BUILD_SCBI_TARGET
     else
-        mstep=$step
+        mstep=$STEP
     fi
 
     #  global logs
-    log=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-$variant-$mstep.log
+    log=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-$VARIANT-$mstep.log
 
     #  local log for last module command
-    mlog=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/$mstep.log
-    clog=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/$mstep.cmd
+    mlog=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/.log/$mstep.log
+    clog=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/.log/$mstep.cmd
 
-    ilog $module $mstep$dvariant starting
+    ilog $MODULE $mstep$dvariant starting
 
     (
-        cd $SCBI_BDIR/$module >> $log 2>&1
+        cd $SCBI_BDIR/$MODULE >> $log 2>&1
 
         #  Go to build directory
 
-        if [[ "$step" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
-            cd $SCBI_BDIR/$module
-        elif [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build ]]; then
-            cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build
+        if [[ "$STEP" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
+            cd $SCBI_BDIR/$MODULE
+        elif [[ -d $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/build ]]; then
+            cd $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/build
         else
             #  a native module has no sources for example
-            cd $SCBI_BDIR/$module
+            cd $SCBI_BDIR/$MODULE
         fi
 
         #  Record run command
 
         (
-            show-command $module $module-$mstep \
-                         $PREFIX $SCBI_TARGET $variant 2&> $clog
+            show-command $MODULE $MODULE-$mstep \
+                         $PREFIX $SCBI_TARGET $VARIANT 2&> $clog
         )
 
         #  Call module step
 
         local res=0
 
-        if [[ $SCBI_DLOG = yes ]] || [[ "$step" = "tests" ]]; then
-            $module-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
+        if [[ $SCBI_DLOG = yes ]] || [[ "$STEP" = "tests" ]]; then
+            $MODULE-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
                 | tee -a $log | tee $mlog
             #  We want the status of the first command and not the tee ones
             res=${PIPESTATUS[0]}
         else
-            $module-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
+            $MODULE-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
                 | tee $mlog >> $log
             #  We want the status of the first command and not the tee ones
             res=${PIPESTATUS[0]}
@@ -263,13 +264,13 @@ function module-wrapper()
         #  Check for errors
 
         if [[ $res -ne 0 ]]; then
-            if [[ $SCBI_DLOG = on-failure ]] && [[ "$step" != "tests" ]]; then
+            if [[ $SCBI_DLOG = on-failure ]] && [[ "$STEP" != "tests" ]]; then
                 tail -100 $mlog
             fi
-            elog $module $mstep failed with error $res
+            elog $MODULE $mstep failed with error $res
             return $res
         else
-            ilog $module $mstep$dvariant completed
+            ilog $MODULE $mstep$dvariant completed
             return 0
         fi
     )
@@ -284,15 +285,15 @@ function module-wrapper()
 function module-variant-wrapper()
 {
     local PREFIX=$1
-    local module=$2
-    local variant=$3
-    local step=$4
+    local MODULE=$2
+    local VARIANT=$3
+    local STEP=$4
 
-    local FCT=$(get-hook $module $variant $step)
+    local FCT=$(get-hook $MODULE $VARIANT $STEP)
 
     if [[ ! -z $FCT ]]; then
-        module-wrapper $PREFIX $module \
-                       $variant ${FCT#"${module}-"} || exit 1
+        module-wrapper $PREFIX $MODULE \
+                       $VARIANT ${FCT#"${MODULE}-"} || exit 1
         return $?
     fi
 }
@@ -420,31 +421,31 @@ function register-depends-callback()
     local IS_EXT=$5
     local IS_META=$6
 
-    local SELEXT=false
-    local SELBUILD=false
-    local SELECTED=false
+    local selext=false
+    local selbuild=false
+    local selected=false
 
     if [[ $DO_EXT != no ]] || [[ $IS_EXT == false ]]; then
-        SELEXT=true
+        selext=true
     fi
 
     if [[ $SCBI_FILTER == all ]] || [[ $SCBI_FILTER == dev ]]; then
-        SELBUILD=true
+        selbuild=true
     fi
 
-    if [[ $SELBUILD == $IS_BUILD_DEPENDS ]] || [[ $SCBI_FILTER == all ]]; then
-        SELECTED=true
+    if [[ $selbuild == $IS_BUILD_DEPENDS ]] || [[ $SCBI_FILTER == all ]]; then
+        selected=true
     fi
 
     if [[ $DO_DEPS == yes-direct ]] && [[ $LEVEL -ne 1 ]]; then
-        SELECTED=false
+        selected=false
     fi
 
     if [[ $DO_EXT == yes-only ]] && [[ $IS_EXT == false ]]; then
-        SELECTED=false
+        selected=false
     fi
 
-    if [[ $SELEXT == true ]] && [[ $SELECTED == true ]]; then
+    if [[ $selext == true ]] && [[ $selected == true ]]; then
         if [[ "$SCBI_FILTER" == "run" ]] &&
                [[ "${MODREF: -4}" == "-dev" ]];
         then
