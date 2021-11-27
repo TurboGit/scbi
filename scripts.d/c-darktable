@@ -161,8 +161,7 @@ function c-darktable-tests()
 
     (
         cd ../src/src/tests/integration
-
-        PATH=/opt/darktable/bin:$PATH ./run.sh
+        ./run.sh
     )
 }
 
