@@ -134,10 +134,12 @@ function git-branch()
         git checkout master
         git fetch
 
-        #  if no branch specified use master
+        #  if no branch specified use the default branch
+        #  possibly not "master", do check for it
 
         if [[ $BRANCH == NONE ]]; then
-            BRANCH=master
+            local DEFBR=$(git rev-parse --abbrev-ref origin/HEAD)
+            BRANCH=${DEFBR#origin/}
         fi
 
         #  check that $BRANCH is a known branch
