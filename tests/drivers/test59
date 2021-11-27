@@ -1,0 +1,21 @@
+
+NRUNS ./scbi --unknown-options
+
+DIFF <<EOF
+getopt: unrecognized option '--unknown-options'
+try "scbi --help" for more information.
+EOF
+
+NRUNS ./scbi -P
+
+DIFF <<EOF
+getopt: invalid option -- 'P'
+try "scbi --help" for more information.
+EOF
+
+NRUNS ./scbi --ukw lib1
+
+DIFF <<EOF
+getopt: unrecognized option '--ukw'
+try "scbi --help" for more information.
+EOF
