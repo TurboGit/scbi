@@ -806,7 +806,7 @@ function handle-sources()
                     V=${vcs[0]#default}
                     ilog $module get sources from $VCS_NAME ${V:+[$V]}
 
-                    get-vcs $SCBI_PREFIX $SCBI_TARGET $MODREF
+                    get-vcs $SCBI_PREFIX $SCBI_TARGET $FORMODULE $MODREF
 
                     if [[ ! $? = 0 ]]; then
                         exit 1

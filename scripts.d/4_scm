@@ -424,11 +424,12 @@ function get-vcs()
 {
     local PREFIX=$1
     local TARGET=$2
-    local MODREF=$3
+    local FORMODULE=$3
+    local MODREF=$4
 
     #  get module information
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
