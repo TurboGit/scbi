@@ -4,7 +4,8 @@ export LANG=C
 
 function clean-up-osht-output()
 {
-    sed -i 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;}' ${OSHT_STDIO}
+    sed -i 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;}' \
+        ${OSHT_STDIO}
     sed -i "s,$PWD,<pwd>,g" ${OSHT_STDIO}
 }
 
@@ -31,21 +32,6 @@ function CLEAN-DIFF()
     clean-up-osht-output
     cat - | clean-up-osht-input | \
 DIFF
-}
-
-function run-test-old()
-{
-    local TEST=$1
-    local EXP=$2
-
-    cp drivers/$TEST .
-
-    RUNS source ./$TEST
-    sed -i 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;}' ${OSHT_STDIO}
-    cp ${OSHT_STDIO} logs/$TEST.log
-    DIFF < $EXP
-
-    rm -f $TEST
 }
 
 function run-test()
