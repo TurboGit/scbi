@@ -1394,19 +1394,27 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-set -- $(getopt -q -u -o :t:j:adefSIuscbilnpvwWh \
-                -l store,target:,no-setup,no-install,update,setup,config \
-                -l build,build-target:,install,clean-install,tar \
-                -l log,log:yes,log:no,log:on-failure,purge,purge:only \
-                -l verbose,prefix:,tests,tests:only,help,deps \
-                -l archive,force,env:,no-patch,plan:,stat,stat:full \
-                -l list-depends:direct,list-depends:full,list-depends \
-                -l list-externals,list-externals:only,list-no-version \
-                -l list-filter:all,list-filter:dev,list-filter:runtime \
-                -l dry-run,jobs:,no-wrapup,wrapup,safe,standalone \
-                -l plugins:,build-dir,list-plan:,version,module-version \
-                -l shell,shell:dev,shell:sb,shell:sandbox \
-                -- $(echo $SCBIOPTS))
+ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpvwWh \
+                 -l store,target:,no-setup,no-install,update,setup,config \
+                 -l build,build-target:,install,clean-install,tar \
+                 -l log,log:yes,log:no,log:on-failure,purge,purge:only \
+                 -l verbose,prefix:,tests,tests:only,help,deps \
+                 -l archive,force,env:,no-patch,plan:,stat,stat:full \
+                 -l list-depends:direct,list-depends:full,list-depends \
+                 -l list-externals,list-externals:only,list-no-version \
+                 -l list-filter:all,list-filter:dev,list-filter:runtime \
+                 -l dry-run,jobs:,no-wrapup,wrapup,safe,standalone \
+                 -l plugins:,build-dir,list-plan:,version,module-version \
+                 -l shell,shell:dev,shell:sb,shell:sandbox \
+                 -- $SCBIOPTS 2> /tmp/scbierr)
+
+if [[ $? != 0 ]]; then
+    cat /tmp/scbierr
+    echo try \"scbi --help\" for more information.
+    exit 1
+fi
+
+set -- $ALLOPTS
 
 while [[ $# -gt 0 ]]; do
     case $1 in
