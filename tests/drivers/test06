@@ -52,6 +52,10 @@ OK -h $REP/x86_64-linux-gnu-default/build
 
 RUNS ./scbi --purge:only lib1
 
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Purging lib1 for x86_64-linux-gnu/default
+EOF
+
 # OK build directory removed, only manifest found
 IS $(ls $REP/x86_64-linux-gnu-default) == "manifest"
 
