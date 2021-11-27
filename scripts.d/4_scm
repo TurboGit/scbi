@@ -282,32 +282,32 @@ function svn-branch()
 
 function get-vcs-data()
 {
-    local module=$1
-    local variant=$2
+    local MODULE=$1
+    local VARIANT=$2
 
-    local VCS_FUNCTION=$(get-hook $module $variant vcs)
-    VCS_FUNCTION=${VCS_FUNCTION:=${module}-vcs}
+    local VCS_FUNCTION=$(get-hook $MODULE $VARIANT vcs)
+    VCS_FUNCTION=${VCS_FUNCTION:=${MODULE}-vcs}
 
     local VCS_VARIANT=default
 
     #  check first for module specifc VCS variant
 
-    VAR=SCBI_${module//-/_}_VCS_VARIANT
+    VAR=SCBI_${MODULE//-/_}_VCS_VARIANT
 
     if [[ "${!VAR}" != "" ]]; then
-        fn-exists $module-${!VAR}-vcs
+        fn-exists $MODULE-${!VAR}-vcs
         if [[ $? = 0 ]]; then
             VCS_VARIANT=${!VAR}
-            VCS_FUNCTION=$module-${VCS_VARIANT}-vcs
+            VCS_FUNCTION=$MODULE-${VCS_VARIANT}-vcs
         else
-            elog build "error: vcs specific function for $module not found."
+            elog build "error: vcs specific function for $MODULE not found."
             exit 1
         fi
     elif [[ "${SCBI_VCS_VARIANT}" != "" ]]; then
-        fn-exists $module-${SCBI_VCS_VARIANT}-vcs
+        fn-exists $MODULE-${SCBI_VCS_VARIANT}-vcs
         if [[ $? = 0 ]]; then
             VCS_VARIANT=${SCBI_VCS_VARIANT}
-            VCS_FUNCTION=$module-${VCS_VARIANT}-vcs
+            VCS_FUNCTION=$MODULE-${VCS_VARIANT}-vcs
         fi
     fi
 
@@ -335,43 +335,43 @@ function _internal_get-branch()
     local VCS_NAME=$1
     local VCS_PROXY=$2
     local VCS_OPTIONS=$3
-    local module=$4
-    local kind=$5
-    local ref=$6
+    local MODULE=$4
+    local KIND=$5
+    local REF=$6
     local VCS_DIR=$7
 
     case $VCS_NAME in
         git)
-            if [[ $kind != DEV ]]; then
+            if [[ $KIND != DEV ]]; then
                 git-branch $VCS_PROXY $VCS_OPTIONS \
-                    $module $ref "$VCS_DIR" >> $log 2>&1
+                    $MODULE $REF "$VCS_DIR" >> $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
-                    ilog build "error: cannot switch to branch $ref"
+                    ilog build "error: cannot switch to branch $REF"
                     exit 1
                 fi
             fi
             ;;
 
         hg|mercurial)
-            if [[ $kind != DEV ]]; then
+            if [[ $KIND != DEV ]]; then
                 hg-branch $VCS_PROXY $VCS_OPTIONS \
-                    $module $ref "$VCS_DIR" >> $log 2>&1
+                    $MODULE $REF "$VCS_DIR" >> $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
-                    ilog build "error: cannot switch to branch $ref"
+                    ilog build "error: cannot switch to branch $REF"
                     exit 1
                 fi
             fi
             ;;
 
         svn|subversion)
-            if [[ $kind != DEV ]]; then
+            if [[ $KIND != DEV ]]; then
                 svn-branch $VCS_PROXY $VCS_OPTIONS \
-                    $module $ref "$VCS_DIR" >> $log 2>&1
+                    $MODULE $REF "$VCS_DIR" >> $log 2>&1
 
                 if [[ ! $? = 0 ]]; then
-                    ilog build "error: cannot switch to branch $ref"
+                    ilog build "error: cannot switch to branch $REF"
                     exit 1
                 fi
             fi
