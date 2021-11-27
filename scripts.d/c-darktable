@@ -76,6 +76,21 @@ function c-darktable-build-env()
     system-compiler
 }
 
+function c-darktable-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH            $PREFIX/bin
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/views
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/plugins
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/plugins/lighttable
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/plugins/imageio/format
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/plugins/imageio/storage
+}
+
 function c-darktable-release-config-options()
 {
     local PREFIX=$1
