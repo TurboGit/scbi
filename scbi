@@ -1157,6 +1157,7 @@ function handle-module()
         #  done.
 
         [[ -d build ]] && rm -fr build
+        [[ -h build ]] && rm build
         ln -s $SCBI_TARGET-$variant build
 
         diff -q build-id-$variant \
