@@ -1,7 +1,7 @@
 
 RUNS ./scbi --no-patch lib1
 
-# check purge and purge-only
+# check purge and purge:only
 # ==== no build expected
 RUNS ./scbi --no-patch lib1
 
@@ -43,14 +43,14 @@ xxxx/xx/xx xx:xx:xx : copy install into ../install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 EOF
 
-# ==== purge-only, no build expected
+# ==== purge:only, no build expected
 
 REP=$PWD/.root/builds/lib1
 
 # OK build directory present before purge
 OK -h $REP/x86_64-linux-gnu-default/build
 
-RUNS ./scbi --purge-only lib1
+RUNS ./scbi --purge:only lib1
 
 # OK build directory removed, only manifest found
 IS $(ls $REP/x86_64-linux-gnu-default) == "manifest"

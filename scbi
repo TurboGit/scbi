@@ -333,15 +333,13 @@ function usage()
     echo "   -i | --install          do install"
     echo "      | --clean-install    clean installation directory"
     echo "      | --tar              check for tar only if explicitly specified"
-    echo "      | --tests            run the testsuite, build if necessary"
-    echo "      | --tests-only       run the testsuite"
+    echo "      | --tests[:only]     run the testsuite, eventually build"
     echo "   -d | --deps             check/build dependencies"
     echo "   -a | --archive          build binary archive"
     echo "      | --standalone       create a standalone source archive"
     echo "   -l | --log:n            log display control yes|no|on-failure"
     echo "   -f | --force            force rebuild, do not check build id"
-    echo "   -p | --purge            remove builds directories before building"
-    echo "   -P | --purge-only       only remove builds directories"
+    echo "   -p | --purge[:only]     remove build directory, build eventually"
     echo "      | --shell:n          start a shell with module's environment"
     echo "      | --run:\"cmd arg\"    run command in module's environment"
     echo "      | --list-depends:n   list module's dependencies (direct, full)"
@@ -1395,11 +1393,11 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-set -- $(getopt -q -u -o :t:j:adefSIuscbilnpPvwWh \
+set -- $(getopt -q -u -o :t:j:adefSIuscbilnpvwWh \
                 -l store,target:,no-setup,no-install,update,setup,config \
                 -l build,build-target:,install,clean-install,tar \
-                -l log,log:yes,log:no,log:on-failure,purge,purge-only \
-                -l verbose,prefix:,tests,tests-only,help,deps \
+                -l log,log:yes,log:no,log:on-failure,purge,purge:only \
+                -l verbose,prefix:,tests,tests:only,help,deps \
                 -l archive,force,env:,no-patch,plan:,stat,stat:full \
                 -l list-depends:direct,list-depends:full,list-depends \
                 -l list-externals,list-externals:only,list-no-version \
@@ -1492,7 +1490,7 @@ while [[ $# -gt 0 ]]; do
             NSTEPS="$NSTEPS setup config build install tests wrapup"
             DO_TEST=yes
             ;;
-        --tests-only)
+        --tests:only)
             NSTEPS="$NSTEPS tests"
             DO_TEST=yes-only
             ;;
@@ -1501,6 +1499,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         -p|--purge)
             DO_PURGE=yes
+            ;;
+        --purge:only)
+            DO_PURGE=only
             ;;
         -n|--no-patch)
             DO_PATCH=no
@@ -1512,9 +1513,6 @@ while [[ $# -gt 0 ]]; do
         --module-version)
             DO_MOD_VER=yes
             shift
-            ;;
-        -P|--purge-only)
-            DO_PURGE=only
             ;;
         -j|--jobs)
             SCBI_JOBS=$2; shift

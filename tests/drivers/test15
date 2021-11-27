@@ -1,8 +1,8 @@
 # check for local plan
 #
 
-RUNS ./scbi --purge-only lib1
-RUNS ./scbi --purge-only lib2
+RUNS ./scbi --purge:only lib1
+RUNS ./scbi --purge:only lib2
 
 (
     mkdir -p .root/git

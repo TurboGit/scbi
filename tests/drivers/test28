@@ -1,7 +1,7 @@
 # test build plan
 
-RUNS ./scbi --purge-only depA
-RUNS ./scbi --purge-only oot
+RUNS ./scbi --purge:only depA
+RUNS ./scbi --purge:only oot
 
 # =================== plan var (skip lib1)
 RUNS ./scbi --tests --plan=var --deps depA:skip dmod

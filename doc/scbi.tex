@@ -448,9 +448,7 @@ The following options are supported:
 
 	\item[\ddash{}tar] Check for tar only if explicitly specified in the module reference.
 
-	\item[\ddash{}tests] Do a standard build cycle and run the testsuite if any.
-
-	\item[\ddash{}tests-only] Run the testsuite if any.
+	\item[\ddash{}tests{[:only]}] Do a standard build cycle and run the testsuite if any. If suboption \code{only} is specified on run the testsuite.
 
 	\item[-d | \ddash{}deps] Check all dependencies and build them if necessary.
 
@@ -460,13 +458,11 @@ The following options are supported:
 
 	\item[-v | \ddash{}verbose] Display some more information while building.
 
-	\item[-l | \ddash{}log:{[}yes|no|on-failure{]}] Control the log level to display. The default is \code{on-failure} which is displaying the command log only in case of failure.
+	\item[-l | \ddash{}log:{[}yes|no|on-failure{]}] Control the log level to display. The default is \code{on-failure} which displays the command log only in case of failure.
 
 	\item[-f | \ddash{}force] Do not check if build id is matching, force a rebuild.
 
-	\item[-p | \ddash{}purge] Remove module build directory before building.
-
-	\item[-P | \ddash{}purge-only] Only remove module build directory, do not rebuild.
+	\item[-p | \ddash{}purge{[:only]}] Remove module build directory, then if \code{only} is not specified build the module. The simple \code{-p} option corresponds on \code{--purge}.
 
 	\item[\ddash{}shell:{[}dev|sandbox|sb{]}] Start a shell (\code{\$SHELL}) with the environment variables set. This is meant to be used to build or test in the very same environment used by SCBI while building the given module on the command line.
 

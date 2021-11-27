@@ -1,6 +1,6 @@
 # test build plan inheritance
 
-RUNS ./scbi --purge-only --plan=inherit lib1 lib2
+RUNS ./scbi --purge:only --plan=inherit lib1 lib2
 
 # =================== plan inherit (lib1:v2 lib2/variant1:v2)
 RUNS ./scbi --no-patch --tests --plan=inherit --deps mainmult

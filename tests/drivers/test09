@@ -1,6 +1,6 @@
 # test build plan with a :dev version
 
-RUNS ./scbi --purge-only lib1 lib2
+RUNS ./scbi --purge:only lib1 lib2
 
 (
     mkdir -p .root/git

@@ -1,8 +1,8 @@
 # check for super-module
 #
 
-RUNS ./scbi --purge-only lib1
-RUNS ./scbi --purge-only lib2
+RUNS ./scbi --purge:only lib1
+RUNS ./scbi --purge:only lib2
 
 # echo ========== build supermod
 RUNS ./scbi --no-patch --tests supermod
