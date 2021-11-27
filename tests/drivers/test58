@@ -1,0 +1,103 @@
+# check for log on failures only
+
+RUNS ./scbi --force failsteps
+
+CLEAN-DIFF <<EOF
+2021/11/27 09:50:05 : Building failsteps [default] (master)
+2021/11/27 09:50:05 : native x86_64-linux-gnu
+2021/11/27 09:50:05 : steps : setup config build install wrapup
+2021/11/27 09:50:05 : no sources (vcs or tar)
+2021/11/27 09:50:05 : config starting
+2021/11/27 09:50:05 : config completed
+2021/11/27 09:50:05 : build starting
+2021/11/27 09:50:05 : build completed
+2021/11/27 09:50:05 : install starting
+2021/11/27 09:50:05 : install completed
+2021/11/27 09:50:05 : End Building failsteps [default] (master)
+EOF
+
+RUNS ./scbi --force --log failsteps
+
+CLEAN-DIFF <<EOF
+2021/11/27 09:50:19 : Building failsteps [default] (master)
+2021/11/27 09:50:19 : native x86_64-linux-gnu
+2021/11/27 09:50:19 : steps : setup config build install wrapup
+2021/11/27 09:50:19 : no sources (vcs or tar)
+2021/11/27 09:50:19 : config starting
+config
+2021/11/27 09:50:19 : config completed
+2021/11/27 09:50:19 : build starting
+build
+2021/11/27 09:50:19 : build completed
+2021/11/27 09:50:19 : install starting
+install
+2021/11/27 09:50:19 : install completed
+2021/11/27 09:50:19 : End Building failsteps [default] (master)
+EOF
+
+NRUNS ./scbi --force --log:no failsteps/conferr
+
+CLEAN-DIFF <<EOF
+2021/11/27 09:53:01 : Building failsteps [conferr] (master)
+2021/11/27 09:53:01 : native x86_64-linux-gnu
+2021/11/27 09:53:01 : steps : setup config build install wrapup
+2021/11/27 09:53:01 : no sources (vcs or tar)
+2021/11/27 09:53:01 : conferr-config starting
+2021/11/27 09:53:01 : failsteps (FAILED) conferr-config failed with error 1
+EOF
+
+NRUNS ./scbi --force --log:no failsteps/builderr
+
+CLEAN-DIFF <<EOF
+2021/11/27 09:53:52 : Building failsteps [builderr] (master)
+2021/11/27 09:53:52 : native x86_64-linux-gnu
+2021/11/27 09:53:52 : steps : setup config build install wrapup
+2021/11/27 09:53:52 : no sources (vcs or tar)
+2021/11/27 09:53:52 : config [builderr] starting
+2021/11/27 09:53:52 : config [builderr] completed
+2021/11/27 09:53:52 : builderr-build starting
+2021/11/27 09:53:52 : failsteps (FAILED) builderr-build failed with error 1
+EOF
+
+NRUNS ./scbi --force --log:no failsteps/installerr
+
+CLEAN-DIFF <<EOF
+2021/11/27 09:54:19 : Building failsteps [installerr] (master)
+2021/11/27 09:54:19 : native x86_64-linux-gnu
+2021/11/27 09:54:19 : steps : setup config build install wrapup
+2021/11/27 09:54:19 : no sources (vcs or tar)
+2021/11/27 09:54:19 : config [installerr] starting
+2021/11/27 09:54:19 : config [installerr] completed
+2021/11/27 09:54:19 : build [installerr] starting
+2021/11/27 09:54:19 : build [installerr] completed
+2021/11/27 09:54:19 : installerr-install starting
+2021/11/27 09:54:19 : failsteps (FAILED) installerr-install failed with error 1
+EOF
+
+NRUNS ./scbi --force --log:yes failsteps/conferr
+
+CLEAN-DIFF <<EOF
+2021/11/27 09:55:05 : Building failsteps [conferr] (master)
+2021/11/27 09:55:05 : native x86_64-linux-gnu
+2021/11/27 09:55:05 : steps : setup config build install wrapup
+2021/11/27 09:55:05 : no sources (vcs or tar)
+2021/11/27 09:55:05 : conferr-config starting
+config error
+2021/11/27 09:55:05 : failsteps (FAILED) conferr-config failed with error 1
+EOF
+
+NRUNS ./scbi --force --log:on-failure failsteps/installerr
+
+CLEAN-DIFF <<EOF
+2021/11/27 09:55:40 : Building failsteps [installerr] (master)
+2021/11/27 09:55:40 : native x86_64-linux-gnu
+2021/11/27 09:55:40 : steps : setup config build install wrapup
+2021/11/27 09:55:40 : no sources (vcs or tar)
+2021/11/27 09:55:40 : config [installerr] starting
+2021/11/27 09:55:40 : config [installerr] completed
+2021/11/27 09:55:40 : build [installerr] starting
+2021/11/27 09:55:40 : build [installerr] completed
+2021/11/27 09:55:40 : installerr-install starting
+install error
+2021/11/27 09:55:40 : failsteps (FAILED) installerr-install failed with error 1
+EOF

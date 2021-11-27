@@ -264,7 +264,7 @@ function module-wrapper()
 
         if [[ $res -ne 0 ]]; then
             if [[ $SCBI_DLOG = on-failure ]] && [[ "$step" != "tests" ]]; then
-                tail -100 $log
+                tail -100 $mlog
             fi
             elog $module $mstep failed with error $res
             return $res

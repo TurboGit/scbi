@@ -1,0 +1,33 @@
+
+function failsteps-config()
+{
+    echo config
+}
+
+function failsteps-conferr-config()
+{
+    echo config error
+    false
+}
+
+function failsteps-build()
+{
+    echo build
+}
+
+function failsteps-builderr-build()
+{
+    echo build error
+    false
+}
+
+function failsteps-install()
+{
+    echo install
+}
+
+function failsteps-installerr-install()
+{
+    echo install error
+    false
+}
