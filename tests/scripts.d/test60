@@ -1,0 +1,10 @@
+
+function test60-config()
+{
+   local PREFIX=$1
+   local TARGET=$2
+
+   echo @@@OPT1=$(is-enabled safe-arch)
+   echo @@@OPT2=$(is-enabled safe-arch amd)
+   echo @@@OPT3=$(is-enabled safe-arch i686 native)
+}

@@ -720,7 +720,7 @@ The hooks must be prefixed by the name of the module. Each of them are optional.
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
-	\item[<module>-{[}common|<variant>{]}-config-options] \index{hook!config-options}Returns a list of options for the configuration step. The config (see above) hook is then supposed to be using the get-config-options routine to get the options to pass to the configuration tools like \code{cmake} or \code{configure} (\seeref{get config options}).
+	\item[<module>-{[}common|<variant>{]}-config-options] \index{hook!config-options}Returns a list of options for the configuration step. The config (see above) hook is then supposed to be using the \code{get-config-options} routine to get the options to pass to the configuration tools like \code{cmake} or \code{configure} (\seeref{get config options}).
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\item[return] \tabto{2cm} array
@@ -946,22 +946,32 @@ Also, note that this setting will be available only during the download of the a
 \label{enable-feature}
 \index{feature}\index{helpers!is-enabled}\index{is-enabled}
 
-It is possible to enable a feature that can be checked in the scripts using the command line \code{\ddash{}enable-<name>}. This option activate the feature named \code{name}. This is a convenience function and it is up to the user to decide about the semantic of the enabled feature. For SCBI driver this is only a flag set or not.
+It is possible to enable a feature that can be checked in the plug-ins using the command line \code{\ddash{}enable-<name>}. This option activate the feature named \code{name}. This is a convenience function and it is up to the user to decide about the semantic of the enabled feature. For SCBI driver this is only a flag set or not.
 
-In the module scripts the feature can be checked with \code{is-enabled} function. This function set the return code to 0 (true) if activated and returns "yes". If the feature is not activated the function set the return code to 1 (as for errors).
+In the module plug-ins the feature can be checked with \code{is-enabled} function:
+
+\code{is-enabled <name> [then-value] [else-value]}
+
+This function set the return code to 0 (true) if activated and returns \code{yes} by default or \code{then-value} if set. If the feature is not activated the function set the return code to 1 (as for errors) and returns the empty string by default or \code{else-value} if set.
 
 Some example, for a single feature check:
 
 \begin{lstlisting}
- if [ $(is-enabled installer) ]; then
+ if [[ $(is-enabled installer) ]]; then
 \end{lstlisting}
 
 For checking two features:
 
 \begin{lstlisting}
- if [ "$(is-enabled appli)" = "yes"
-         -o "$(is-enabled installer)" = "yes" ];
+ if [[ "$(is-enabled appli)" = "yes" ]] \
+       || [[ "$(is-enabled installer)" = "yes" ]];
  then
+\end{lstlisting}
+
+Or setting a specific compiler option, example of a \code{config-options} hook:
+
+\begin{lstlisting}
+ echo -DCMAKE_CXX_FLAGS="-march=$(is-enabled safe-arch x86_64 native)"
 \end{lstlisting}
 
 \subsection{Build kind}

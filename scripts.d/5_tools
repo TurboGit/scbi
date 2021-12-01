@@ -67,11 +67,20 @@ function get-hook()
 function is-enabled()
 {
     local VAR=SCBI_${1/-/_}_SET
+    local THEN=$2
+    local ELSE=$3
 
     if [[ "${!VAR}" = "true" ]]; then
-        echo "yes"
+        if [[ -z $THEN ]]; then
+            echo "yes"
+        else
+            echo $THEN
+        fi
         return 0
     else
+        if [[ ! -z $ELSE ]]; then
+            echo $ELSE
+        fi
         return 1
     fi
 }

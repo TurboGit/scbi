@@ -1,0 +1,28 @@
+# check for enable with then/else part
+
+# === not activated
+
+RUNS ./scbi -f test60
+
+RUNS grep -h '@@@' .root/builds/.logs/*test60*config*
+
+DIFF <<EOF
+@@@OPT1=
+@@@OPT2=
+@@@OPT3=native
+EOF
+
+# === activated
+
+RUNS ./scbi -f --enable-safe-arch test60
+
+RUNS grep -h '@@@' .root/builds/.logs/*test60*config*
+
+DIFF <<EOF
+@@@OPT1=
+@@@OPT2=
+@@@OPT3=native
+@@@OPT1=yes
+@@@OPT2=amd
+@@@OPT3=i686
+EOF
