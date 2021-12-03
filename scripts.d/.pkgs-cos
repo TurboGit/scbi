@@ -142,5 +142,6 @@ os@-xml2-dev                        libxml2-devel
 os@-xml2-utils
 os@-xmu-dev                         libXmu-devel
 os@-xpm-dev                         libXpm-devel
+os@-xsltproc                        libxslt
 os@-xt-dev                          libXt-devel
 os@-zlib1g-dev                      zlib-devel

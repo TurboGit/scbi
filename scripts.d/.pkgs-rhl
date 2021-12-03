@@ -45,7 +45,7 @@ os@-hdf5-openmpi-dev
 os@-hdf5-tools
 os@-jpeg-dev                        libjpeg-turbo-devel
 os@-lapack-dev                      lapack-devel
-os@-libtirpc-dev		    libtirpc-devel
+os@-libtirpc-dev                    libtirpc-devel
 os@-libtool                         libtool
 os@-make                            make
 os@-metis-dev                       metis-devel
@@ -103,5 +103,6 @@ os@-xml2-dev                        libxml2-devel
 os@-xml2-utils
 os@-xmu-dev                         libXmu-devel
 os@-xpm-dev                         libXpm-devel
+os@-xsltproc                        libxslt
 os@-xt-dev                          libXt-devel
 os@-zlib1g-dev                      zlib-devel
