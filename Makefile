@@ -4,9 +4,8 @@
 SCRDIR=$(HOME)/.config/scbi
 
 #  Get SHA-1 of last commit in core SCBI
-CORE_SHA1=$(shell git log -1 --format="%h" -- Makefile \
-	bash_completion.d scbi scripts.d/[0-9]* scripts.d/_os_* \
-	doc tests scripts.d/.pkgs* scripts.d/.plan*)
+CORE_SHA1=$(shell git log -1 --format="%h" -- scbi scripts.d/[0-9]* \
+	scripts.d/_os_*)
 CORE_VER=$(shell git describe $(CORE_SHA1))
 VER=$(shell git describe)
 
