@@ -221,7 +221,7 @@ repository and rebuild if some modifications are found:
 
 There was no modification, so nothing built. But for our project we
 want a stable version properly identified and tagged. Latest version
-of Little-CMS is 2.9, tagged as lcms.9, to build it it is as simple as:
+of Little-CMS is 2.9, tagged as lcms2.9, to build it it is as simple as:
 
       $ scbi -u lcms/release:lcms2.9
       2019/12/03 13:22:59 : Building lcms [release] (lcms2.9)
