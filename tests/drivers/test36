@@ -17,7 +17,7 @@ xxxx/xx/xx xx:xx:xx : tests starting
 main
 liba.C patched version
 xxxx/xx/xx xx:xx:xx : tests completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 EOF
 

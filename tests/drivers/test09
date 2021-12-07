@@ -29,7 +29,7 @@ xxxx/xx/xx xx:xx:xx : tests starting
 main
 liba.D br_b
 xxxx/xx/xx xx:xx:xx : tests completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v2)
 
 xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
@@ -48,7 +48,7 @@ xxxx/xx/xx xx:xx:xx : tests starting
 main
 libb.B master (default)
 xxxx/xx/xx xx:xx:xx : tests completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (dev)
@@ -63,7 +63,7 @@ better main in dev
 liba.D br_b
 libb.B master (default)
 xxxx/xx/xx xx:xx:xx : tests completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (dev)
 EOF
 
@@ -85,7 +85,7 @@ xxxx/xx/xx xx:xx:xx : tests starting
 main
 liba.A br_a
 xxxx/xx/xx xx:xx:xx : tests completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
 
 xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (dev)
@@ -101,7 +101,7 @@ xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
 libb.B next version (variant1)
 xxxx/xx/xx xx:xx:xx : tests [variant1] completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (dev)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (dev)
@@ -116,6 +116,6 @@ better main in dev
 liba.A br_a
 libb.B next version (variant1)
 xxxx/xx/xx xx:xx:xx : tests completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (dev)
 EOF

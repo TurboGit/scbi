@@ -17,7 +17,7 @@ xxxx/xx/xx xx:xx:xx : tests starting
 main
 libb.B master (default)
 xxxx/xx/xx xx:xx:xx : tests completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 EOF
 
@@ -38,7 +38,7 @@ xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
 libb.B master (variant1)
 xxxx/xx/xx xx:xx:xx : tests [variant1] completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (master)
 EOF
 
@@ -54,7 +54,7 @@ xxxx/xx/xx xx:xx:xx : tests starting
 main
 libb.B master (default)
 xxxx/xx/xx xx:xx:xx : tests completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 EOF
 
@@ -76,7 +76,7 @@ xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
 libb.B v2 (variant1)
 xxxx/xx/xx xx:xx:xx : tests [variant1] completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
 EOF
 
@@ -98,7 +98,7 @@ xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
 libb.A master (variant1)
 xxxx/xx/xx xx:xx:xx : tests [variant1] completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v1.0.0)
 EOF
 
@@ -114,6 +114,6 @@ xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
 libb.A master (variant1)
 xxxx/xx/xx xx:xx:xx : tests [variant1] completed
-xxxx/xx/xx xx:xx:xx : copy install into ../install
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v1.0.0)
 EOF

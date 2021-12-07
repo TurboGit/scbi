@@ -1339,7 +1339,7 @@ function handle-module()
     elif [[ "$DO_INSTALL" = "yes" ]] &&
              [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
     then
-        ilog $module copy install into ..${_IDIR/$SCBI_BDIR/}
+        ilog $module copy install into ${_IDIR/$SCBI_BDIR/<sandbox>}
 
         #  Record global install
         echo "$variant" > $SCBI_BDIR/$module/install-${SCBI_TARGET}-id
