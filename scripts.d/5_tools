@@ -593,14 +593,15 @@ function get-build-id()
     [[ -f $SCBI_DEFS/$module ]] &&
         mid="$mid,$(cat $SCBI_DEFS/$module | get-md5)"
 
-    #  And add possible SCBI_*_BUILD_TYPE that are on the environment
+    #  And add possible SCBI_<module>_BUILD_TYPE that is in the environment
 
     local var_module=SCBI_${module//-/_}_BUILD_TYPE
 
     [[ ! -z ${!var_module} ]] &&
         mid="$mid,${!var_module}"
 
-    #  And possibly the SCBI_*_BUILD_TYPE global settings for some builders
+    #  And possibly the SCBI_*_BUILD_TYPE global settings for
+    #  some known builders.
 
     [[ ! -z ${SCBI_CMAKE_BUILD_TYPE} ]] &&
         mid="$mid,${SCBI_CMAKE_BUILD_TYPE}"
