@@ -14,7 +14,7 @@ function checkenv-out-of-tree()
 
 function checkenv-config()
 {
-    BT="$(get-build-type CMAKE checkenv Release)"
+    BT="$(get-build-type CMAKE Release)"
     echo "#define TOOLVER \"$BT\"" > version.h
 }
 

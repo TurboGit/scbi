@@ -925,11 +925,13 @@ function display-plans()
 function get-build-type()
 {
     local KIND=$1
-    local MODULE=$2
-    local DEFAULT=$3
+    local DEFAULT=$2
+
+    #  Get the caller plug-in name
+    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
     VAR_GENERIC=SCBI_${KIND}_BUILD_TYPE
-    VAR_MODULE=SCBI_${MODULE/-/_}_BUILD_TYPE
+    VAR_MODULE=SCBI_${PLUGIN/-/_}_BUILD_TYPE
 
     [[ ! -z ${!VAR_GENERIC} ]] && DEFAULT=${!VAR_GENERIC}
     [[ ! -z ${!VAR_MODULE} ]] && DEFAULT=${!VAR_MODULE}

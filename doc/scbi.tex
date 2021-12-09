@@ -979,13 +979,13 @@ Or setting a specific compiler option, example of a \code{config-options} hook:
 
 One of the most generic build variant that must be handled is the \code{Release} vs \code{Debug} one. To support this more easily without requiring to create a specific variant hook there is a simple support using the function \code{get-build-type}:
 
-\cmd{get-build-type <config> <module> <default>}
+\cmd{get-build-type <config> <default>}
 
 The \code{<config>} represents the configuration tool (CMAKE or CONFIGURE for example). But it can be whatever string.
 
-This function will return the build-kind for the given module and system type (\code{cmake} or \code{configure}) and if not specified the default value is returned.
+This function will return the build-kind for the calling module and system type (\code{cmake} or \code{configure}) and if not specified the default value is returned.
 
-To check the actual build kind for the given module, this function will look at some environment variables in the following specific order:
+The actual build kind for the given module can be set using some environment variables in the following order:
 
 \begin{description}[style=nextline]
 	\item [SCBI\_<module>\_BUILD\_TYPE] Build kind for this specific module.
@@ -1000,7 +1000,7 @@ And then this can be used in the \code{config} hook simply with:
     local PREFIX=$1
     local TARGET=$1
 
-    local BUILD_TYPE=$(get-build-type CMAKE lcms2 Release)
+    local BUILD_TYPE=$(get-build-type CMAKE Release)
 
     cmake -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
