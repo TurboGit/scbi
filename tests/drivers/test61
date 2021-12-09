@@ -1,0 +1,162 @@
+# Check that a change in the SCBI_*_BUILD_TYPE do force a rebuild of modules.
+
+LOGC61=.root/builds/btype/build/.log/config.log
+
+RUNS ./scbi btype
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : config starting
+2021/12/09 18:48:32 : config completed
+2021/12/09 18:48:32 : build starting
+2021/12/09 18:48:32 : build completed
+2021/12/09 18:48:32 : install starting
+2021/12/09 18:48:32 : install completed
+2021/12/09 18:48:32 : End Building btype [default] (master)
+EOF
+
+GREP Release $LOGC61
+
+RUNS ./scbi btype
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : no build needed, versions match
+2021/12/09 18:48:32 : End Building btype [default] (master)
+EOF
+
+# Let's change global build-type
+
+export SCBI_CMAKE_BUILD_TYPE=Debug
+
+RUNS ./scbi btype
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : config starting
+2021/12/09 18:48:32 : config completed
+2021/12/09 18:48:32 : build starting
+2021/12/09 18:48:32 : build completed
+2021/12/09 18:48:32 : install starting
+2021/12/09 18:48:32 : install completed
+2021/12/09 18:48:32 : End Building btype [default] (master)
+EOF
+
+GREP Debug $LOGC61
+
+RUNS ./scbi btype
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : no build needed, versions match
+2021/12/09 18:48:32 : End Building btype [default] (master)
+EOF
+
+export SCBI_toto_BUILD_TYPE=Debug
+
+RUNS ./scbi btype
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : no build needed, versions match
+2021/12/09 18:48:32 : End Building btype [default] (master)
+EOF
+
+unset SCBI_CMAKE_BUILD_TYPE
+
+RUNS ./scbi btype
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : config starting
+2021/12/09 18:48:32 : config completed
+2021/12/09 18:48:32 : build starting
+2021/12/09 18:48:32 : build completed
+2021/12/09 18:48:32 : install starting
+2021/12/09 18:48:32 : install completed
+2021/12/09 18:48:32 : End Building btype [default] (master)
+EOF
+
+GREP Release $LOGC61
+
+unset SCBI_toto_BUILD_TYPE
+
+RUNS ./scbi btype
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : no build needed, versions match
+2021/12/09 18:48:32 : End Building btype [default] (master)
+EOF
+
+export SCBI_btype_BUILD_TYPE=WhatEver
+
+RUNS ./scbi btype
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : config starting
+2021/12/09 18:48:32 : config completed
+2021/12/09 18:48:32 : build starting
+2021/12/09 18:48:32 : build completed
+2021/12/09 18:48:32 : install starting
+2021/12/09 18:48:32 : install completed
+2021/12/09 18:48:32 : End Building btype [default] (master)
+EOF
+
+GREP WhatEver $LOGC61
+
+RUNS ./scbi btype
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : no build needed, versions match
+2021/12/09 18:48:32 : End Building btype [default] (master)
+EOF
+
+unset SCBI_btype_BUILD_TYPE
+
+RUNS ./scbi btype
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : config starting
+2021/12/09 18:48:32 : config completed
+2021/12/09 18:48:32 : build starting
+2021/12/09 18:48:32 : build completed
+2021/12/09 18:48:32 : install starting
+2021/12/09 18:48:32 : install completed
+2021/12/09 18:48:32 : End Building btype [default] (master)
+EOF
+
+GREP Release $LOGC61

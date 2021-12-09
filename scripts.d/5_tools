@@ -593,6 +593,21 @@ function get-build-id()
     [[ -f $SCBI_DEFS/$module ]] &&
         mid="$mid,$(cat $SCBI_DEFS/$module | get-md5)"
 
+    #  And add possible SCBI_*_BUILD_TYPE that are on the environment
+
+    local var_module=SCBI_${module/-/_}_BUILD_TYPE
+
+    [[ ! -z ${!var_module} ]] &&
+        mid="$mid,${!var_module}"
+
+    #  And possibly the SCBI_*_BUILD_TYPE global settings for some builders
+
+    [[ ! -z ${SCBI_CMAKE_BUILD_TYPE} ]] &&
+        mid="$mid,${SCBI_CMAKE_BUILD_TYPE}"
+
+    [[ ! -z ${SCBI_CONFIGURE_BUILD_TYPE} ]] &&
+        mid="$mid,${SCBI_CONFIGURE_BUILD_TYPE}"
+
     #  If patch activated
 
     local pid="no-patch-found"
