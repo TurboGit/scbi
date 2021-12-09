@@ -603,11 +603,10 @@ function get-build-id()
     #  And possibly the SCBI_*_BUILD_TYPE global settings for
     #  some known builders.
 
-    [[ ! -z ${SCBI_CMAKE_BUILD_TYPE} ]] &&
-        mid="$mid,${SCBI_CMAKE_BUILD_TYPE}"
-
-    [[ ! -z ${SCBI_CONFIGURE_BUILD_TYPE} ]] &&
-        mid="$mid,${SCBI_CONFIGURE_BUILD_TYPE}"
+    for builder in CMAKE CONFIGURE MAKE GPR; do
+        local BVAR=SCBI_${builder}_BUILD_TYPE
+        [[ ! -z ${!BVAR} ]] && mid="$mid,${!BVAR}"
+    done
 
     #  If patch activated
 
