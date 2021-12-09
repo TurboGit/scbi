@@ -29,7 +29,7 @@ function c-llvm-config()
 
     cmake -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON  \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
-          -DCMAKE_BUILD_TYPE=$(get-build-type CMAKE s-llvm Release) \
+          -DCMAKE_BUILD_TYPE=$(get-build-type CMAKE Release) \
           -DLLVM_ENABLE_PROJECTS="llvm" \
           -DLLVM_ENABLE_DUMP=ON  \
           -DLLVM_ENABLE_ASSERTIONS=ON  \

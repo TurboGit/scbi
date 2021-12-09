@@ -60,7 +60,7 @@ function c-binutils-build()
     local PREFIX=$1
     local TARGET=$2
 
-    DEBUG=$(get-build-type MAKE binutils false)
+    local DEBUG=$(get-build-type MAKE false)
 
     if [[ $DEBUG == true ]]; then
        CFLAGS="-O0 -g -Wno-error"

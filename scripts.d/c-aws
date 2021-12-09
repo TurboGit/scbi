@@ -40,7 +40,7 @@ function c-aws-cross-config()
 
     rm -f makefile.setup &&
         make prefix=$PREFIX LAL=false ZLIB=false \
-             DEBUG=$(get-build-type GPR aws true) TARGET=$TARGET setup
+             DEBUG=$(get-build-type GPR true) TARGET=$TARGET setup
 }
 
 function c-aws-config()
