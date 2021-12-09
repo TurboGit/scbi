@@ -595,7 +595,7 @@ function get-build-id()
 
     #  And add possible SCBI_*_BUILD_TYPE that are on the environment
 
-    local var_module=SCBI_${module/-/_}_BUILD_TYPE
+    local var_module=SCBI_${module//-/_}_BUILD_TYPE
 
     [[ ! -z ${!var_module} ]] &&
         mid="$mid,${!var_module}"
@@ -946,7 +946,7 @@ function get-build-type()
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
     VAR_GENERIC=SCBI_${KIND}_BUILD_TYPE
-    VAR_MODULE=SCBI_${PLUGIN/-/_}_BUILD_TYPE
+    VAR_MODULE=SCBI_${PLUGIN//-/_}_BUILD_TYPE
 
     [[ ! -z ${!VAR_GENERIC} ]] && DEFAULT=${!VAR_GENERIC}
     [[ ! -z ${!VAR_MODULE} ]] && DEFAULT=${!VAR_MODULE}
