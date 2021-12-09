@@ -1,0 +1,15 @@
+
+function osdeps-depends()
+{
+    echo rsync
+}
+
+function osdeps-config()
+{
+    echo CONFIG
+}
+
+function osdeps-build()
+{
+    echo BUILD
+}

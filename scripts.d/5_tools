@@ -523,7 +523,9 @@ function get-build-id-callback()
     #  Only compute for dependencies, not for the root module
 
     if [[ $LEVEL -gt 0 ]] && [[ $IS_META == false ]]; then
-        if [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
+        if [[ $IS_EXT == true ]]; then
+            echo ${SCBI_PKGS[$module]}
+        elif [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
 
             if [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
                 cat $SCBI_BDIR/$module/build-id-$variant
@@ -539,7 +541,7 @@ function get-build-id-callback()
 function get-depends-build-id()
 {
     (
-        for-all-modules-with-meta get-build-id-callback $1 | get-md5
+        for-all-modules-with-meta-ext get-build-id-callback $1 | get-md5
     )
 }
 
@@ -640,22 +642,9 @@ function get-build-id()
 
     local did=$(get-depends-build-id $MODREF)
 
-    #  Now compute final id add compile version
+    #  Now compute final id
 
-    if [[ $SCBI_IS_WINDOWS == yes ]]; then
-        echo -n ",$vid,$mid,$pid,$did" | get-md5
-    else
-        if [[ "$SCBI_HOST" = "$TARGET" ]] \
-               || [[ "$(command -v $TARGET-gcc)" = "" ]];
-        then
-            echo -n $(gcc --version | head -1) \
-                 ",$vid,$mid,$pid,$did" | get-md5
-
-        else
-            echo -n $($TARGET-gcc --version | head -1) \
-                 ",$vid,$mid,$pid,$did" | get-md5
-        fi
-    fi
+    echo -n "$vid,$mid,$pid,$did" | get-md5
 }
 
 ############################## check-tar-exists

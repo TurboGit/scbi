@@ -1,0 +1,74 @@
+# Check if OS library update triggers the build
+
+#  Set version for rsync (see osdeps)
+
+export SCBI_TEST_V=1
+
+export SCBI_LINUX_DISTRIB=test
+
+function init-test-pkg()
+{
+    SCBI_PKGS["rsync"]=${SCBI_TEST_V}
+}
+
+function check-test-pkg()
+{
+    check-deb-pkg $1 $2
+}
+
+declare -fx init-test-pkg
+declare -fx check-test-pkg
+
+RUNS ./scbi osdeps
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building osdeps [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : config starting
+2021/12/09 18:48:32 : config completed
+2021/12/09 18:48:32 : build starting
+2021/12/09 18:48:32 : build completed
+2021/12/09 18:48:32 : End Building osdeps [default] (master)
+EOF
+
+RUNS ./scbi osdeps
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building osdeps [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : no build needed, versions match
+2021/12/09 18:48:32 : End Building osdeps [default] (master)
+EOF
+
+#  Force new version for rsync (see osdeps)
+
+export SCBI_TEST_V=2
+
+RUNS ./scbi osdeps
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building osdeps [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : config starting
+2021/12/09 18:48:32 : config completed
+2021/12/09 18:48:32 : build starting
+2021/12/09 18:48:32 : build completed
+2021/12/09 18:48:32 : End Building osdeps [default] (master)
+EOF
+
+RUNS ./scbi osdeps
+
+CLEAN-DIFF <<EOF
+2021/12/09 18:48:32 : Building osdeps [default] (master)
+2021/12/09 18:48:32 : native x86_64-linux-gnu
+2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : no sources (vcs or tar)
+2021/12/09 18:48:32 : no build needed, versions match
+2021/12/09 18:48:32 : End Building osdeps [default] (master)
+EOF

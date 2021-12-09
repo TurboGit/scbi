@@ -49,7 +49,7 @@ function get-distrib()
     fi
 }
 
-SCBI_LINUX_DISTRIB=$(get-distrib)
+SCBI_LINUX_DISTRIB=${SCBI_LINUX_DISTRIB:-$(get-distrib)}
 
 ############################## init-alias
 # read package alias file
