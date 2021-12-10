@@ -137,11 +137,11 @@ The goal is to automate the build procedures from sources. The main features are
 
 The driver and plug-in modules are all written in \code{bash} scripts.
 
-For developer of new plug-in modules in SCBI, all setup, source copy and installation are transparent actions, developers just need to fill functions to configure, build and install (generally just calling configure from \code{autotool} or \code{cmake} and \code{make}).
+For developer of new plug-in modules in SCBI, all setup, source copy and installation are transparent actions, developers just need to fill functions to configure, build and install (generally just calling \code{configure} from \code{autotool} or \code{cmake} and \code{make}).
 
-Those functions are very close to what would have been typed when building manually from the command line. The goal is to reduce as much as possible the gap between a common manual build and the commands used on plug-in modules.
+Those functions are very close to what would have been typed when building manually from the command line. The goal is to reduce as much as possible the gap between a standard manual build and the commands used on plug-in modules.
 
-When properly setup building any software should be as easy as:
+When properly setup, building any software should be as easy as:
 
 \cmd{scbi \ddash{}plan=ver mysoft}
 
@@ -190,7 +190,8 @@ A module is described in an SCBI plug-in script (one plug-in in one file). It ca
 
 	The version can be set to \code{force} on the command line to tell that the module should not be skipped. On the command line it is always possible to force a build of a module to a specific variant or version. But if one need to build the default variant or version it is required to pass the \code{force} as version.
 
-	That is, this will never overwrite a build plan as it is a default reference to a module:
+	That is, the following command will never overwrite a build plan as it is a default reference to a module:
+
 	\cmd{scbi --plan=xyz mod}
 
 	But this will do:
@@ -234,13 +235,13 @@ An environment is a set of shell variables used to control the build environment
 	\item[SCBI\_VERSION] The scbi driver version string.
 	\\This version is \version.
 
-	\item[SCBI\_DEFS] The directories where the SCBI modules and plug-ins are located. \\Default is \file{$HOME/.config/.scbi}.
+	\item[SCBI\_DEFS] The directories where the SCBI plug-ins are located. \\Default is \file{$HOME/.config/.scbi}.
 
 	\item[SCBI\_PLAN] The name of the build-plan to use if any.
 
 	\item[SCBI\_ROOT] The default root directory to use by SCBI. \\Default is \file{$HOME/dev}.
 
-	\item[SCBI\_BDIR] The default directory for build environment.  This is also called the sandboxes directory. \\Default is \file{$SCBI\_ROOT/builds}.
+	\item[SCBI\_BDIR] The default directory for the build directory.  This is also called the sandbox directory. \\Default is \file{$SCBI_ROOT/builds}.
 
 	\item[SCBI\_PREFIX] The default global install directory. Each module after being installed into the sandbox are copied into this global installation directory. \\Default is \file{$SCBI_BDIR/install}. Each module can disable global installation (\seeref{global-install}).
 
@@ -263,7 +264,7 @@ An environment is a set of shell variables used to control the build environment
 	\item[SCBI\_JOBS] The number of simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores. This can be overwritten using \code{--jobs} option.
 	\label{njobs}
 \label{make-njobs}
-	\item[SCBI\_HALF\_JOBS] Half the simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores divided by 2. This can be overwritten using \code{--jobs} option.
+	\item[SCBI\_HALF\_JOBS] Half the simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores divided by 2. This can be overwritten using \code{\ddash{}jobs} option.
 \end{description}
 
 \subsubsection{Environment files}
@@ -316,41 +317,44 @@ Some specific actions are supported with the following syntax:
 
 \begin{description}
 	\item[\code{\#}] To start a comment line.
+
 	\item[\code{@load <name>}] To load another build-plan as a base for the new plan. Every descriptions after this will overwrite the loaded build plan.
+	
+	This is a simple way to derive a build plan from another one.
+
+	File \file{.plan-next}:
+
+	\begin{lstlisting}
+		# the next line will load build plan standard
+		@load standard
+		lcms2:v2
+		aws:v1
+	\end{lstlisting}
+
 	\item[\code{@on <OS> <module-reference>}] To set a module reference only for the OS (3 letters OS acronym supported). Use option \ddash{}stat to see all supported OS. This will overwrite previous definition for this module if any.
+
 	\item[\code{[ <barrier> ... ] /variant:version}] To create a group. The barrier if present must evaluate to true or the group is ignored.
+
+	A group can be used in a build plan to group together all modules with the same version and/or variant. To define a group:
+
+	\begin{description}
+		\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} which will be searched on the specified module's plan variants:
+
+		\code{\ddash{}plan=name/variant1.variant2}
+
+		The group will be evaluated only if the barrier evaluate to true otherwise it will be skipped. If the barrier is not specified the group will always be evaluated (i.e. the barrier is by default TRUE).
+
+		\item[ {]} /variant:version ] Ends with \code{/variant:version} which is the variant and version to apply to all modules in the group. Both \code{variant} and \code{version} are optional.
+	\end{description}
+
+	\begin{lstlisting}
+		lcms2:v2
+		[
+			moduleA
+			moduleB
+		] /speed:v3
+	\end{lstlisting}
 \end{description}
-
-This is simple way to derive a build plan from another one.
-
-File \file{.plan-next}:
-
-\begin{lstlisting}
- # the next line will load build plan standard
- @load standard
- lcms2:v2
- aws:v1
-\end{lstlisting}
-
-A group can be used in a build plan to group together all modules with the same version. To define a group:
-
-\begin{description}
-	\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} which will be searched on the specified module's plan variants:
-
-	\code{\ddash{}plan=name/variant1.variant2}
-
-	The group will be evaluated only if the barrier evaluate to true otherwise it will be skipped. If the barrier is not specified the group will always be evaluated (i.e. the barrier is by default TRUE).
-
-	\item[ {]} /variant:version ] Ends with \code{/variant:version} with is the variant and version to apply to all module in the group. Both \code{variant} and \code{version} are optional.
-\end{description}
-
-\begin{lstlisting}
-	lcms2:v2
-	[
-		moduleA
-		moduleB
-	] /speed:v3
-\end{lstlisting}
 
 And finally, to build one just need to pass the build plan as option:
 
@@ -364,7 +368,7 @@ A set of variants separated with a dot can be specified with the build plan. In 
 
 \cmd{scbi \ddash{}plan=next/mpi lcms2:force aws}
 
-It is possible to list the final build plan using \code{\ddash{}list-plan} option. See \ref{cmdline}.
+It is possible to list the final build plan (that is all modules with their corresponding version) using \code{\ddash{}list-plan} option. See \ref{cmdline}.
 
 A build-plan can be set in the following files searched in this exact order:
 
@@ -378,7 +382,7 @@ A build-plan can be set in the following files searched in this exact order:
 \label{standalone}
 \index{source archive}
 
-Using the \code{\ddash{}standalone} option it is possible to build a fully self contained source archive. This archive embedded all necessary sources and scripts to rebuild the software without the need to get access to repositories or source tar files.
+Using the \code{\ddash{}standalone} option it is possible to build a fully self contained source archive. This archive embed all necessary sources and scripts to rebuild the software without the need to get access to repositories or source tar files.
 
 On the root of the archive a build script is provided, so starting a build from such standalone source archive boil done to:
 
@@ -508,19 +512,19 @@ A completion support for bash is provided. If activated many options will give h
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
-\section{Creating plug-in modules}
+\section{Creating new plug-ins}
 
-To create a new module description for SCBI you need to create a single \code{bash} script (one per module) named as the module and placed into \code{\$SCBI\_DEFS}.
+To create a new plug-in for SCBI you need to create a single \code{bash} script (one per module) into \code{\$SCBI\_DEFS} and named as the plug-in.
 
-The module script will describe the steps for building in different hooks. One for configuring, one for building and one for installing. These are the mains steps generally used to build all software.
+The plug-in script describes, using different hooks, the steps for building. One for configuring, one for building and one for installing. These are the mains steps generally used to build all software.
 
-Separate steps are described by a simple \code{bash} code snippet. Some hooks are just descriptions to retrieve artifacts (like VCS sources or tar file).
+The different steps are described by a simple \code{bash} code snippet. And some hooks are just descriptions to retrieve artifacts (like VCS sources or tar file).
 
-In the following section all the supported hooks are described. Then the calling order conducted by SCBI is described in the section just after.
+In the following section all the supported hooks are described. Then the calling order conducted by SCBI is described.
 
 \subsection{Hooks}
 
-The hooks must be prefixed by the name of the module. Each of them are optional.
+The hooks must be prefixed by the name of the plug-in. Each of them are optional.
 
 \subsubsection{Description}
 
@@ -1022,7 +1026,7 @@ Which will force a \code{Debug} build for all modules using \code{cmake}, or:
 
 With will force a \code{Debug} build for the \code{lcms2} module only. In both cases, the corresponding module must have been coded to use the \code{get-build-type} routine as seen above. Note that the \code{export} must use \emph{underscores} instead of dashes in module name as dashes are forbidden in variable name.
 
-\subsection{Check installed tools}
+\subsection{Checking installed tools}
 \index{helpers!check-tool}\index{check-tool}
 
 It may be needed to check for the existence of a tool installed on the machine. It may not be a direct dependency but a tool needed for a specific need. For example the need to have \code{makeself} installed to create a self installer.
@@ -1149,7 +1153,7 @@ function natv-native-prefix ()
 }
 \end{lstlisting}
 
-\subsection{Call variant hooks}
+\subsection{Calling variant hooks}
 \label{call variant hooks}
 \index{call-variant-hooks}\index{helpers!call-variant-hooks}
 
@@ -1165,7 +1169,9 @@ Will call all hooks in the current plug-in (<plugin>) named:
    <plugin>-<variant>-hname
 \end{lstlisting}
 
-\subsection{Get configuration options}
+Where \code{<variant>} is all possible values found in \code{\$VARIANT}.
+
+\subsection{Getting configuration options}
 \label{get config options}
 \index{get-config-options}\index{helpers!get-config-options}
 
