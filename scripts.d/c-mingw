@@ -46,8 +46,6 @@ function c-mingw-config()
     local PREFIX=$1
     local TARGET=$2
 
-    env > /tmp/env
-
     ../src/mingw-w64-crt/configure --enable-wildcard \
         --prefix=$PREFIX/$TARGET --host=$TARGET --build=$SCBI_HOST
 }
