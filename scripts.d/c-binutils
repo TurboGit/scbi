@@ -35,14 +35,43 @@ function c-binutils-version()
     fi
 }
 
-function c-binutils-cross-config()
+function c-binutils-common-config-options()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    CONF_OPT="--prefix=$PREFIX --disable-multilib --disable-gdb"
+    echo --prefix=$PREFIX
+    echo --disable-nls
+    echo --disable-werror
+    echo --with-zlib
+    echo --disable-compressed-debug-sections
+    echo --disable-separate-code
+    echo --disable-gdb
+    echo --disable-gdbserver
+    echo --disable-sim
+    echo --disable-libquadmath
+    echo --disable-readline
+}
 
-    ../src/configure --target=$TARGET $CONF_OPT
+function c-binutils-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo --build=$SCBI_HOST
+    echo --enable-gold
+    echo --enable-plugins
+}
+
+function c-binutils-cross-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo --target=$TARGET
 }
 
 function c-binutils-config()
@@ -50,9 +79,7 @@ function c-binutils-config()
     local PREFIX=$1
     local TARGET=$2
 
-    CONF_OPT="--prefix=$PREFIX --disable-multilib --disable-gdb"
-
-    ../src/configure --build=$SCBI_HOST $CONF_OPT
+    ../src/configure $(get-config-options $PREFIX $TARGET $VARIANT)
 }
 
 function c-binutils-build()
@@ -68,7 +95,7 @@ function c-binutils-build()
        CFLAGS="-O2 -g -Wno-error"
     fi
 
-    make -j6 CFLAGS="$CFLAGS" CC=gcc
+    make -j$SCBI_JOBS CFLAGS="$CFLAGS" CC=gcc
 }
 
 function c-binutils-cross-install()
