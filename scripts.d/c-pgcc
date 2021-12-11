@@ -1,6 +1,8 @@
 
 #  A partial GCC C compiler for building a minimum runtime
-#  used to build a mingw32 cross-compiler
+#  used to build a mingw32 cross-compiler (i686 or x86_64).
+#
+#  Should only be used as cross : --target=XXX-pc-mingw32
 
 function c-pgcc-version()
 {
@@ -46,7 +48,7 @@ function c-pgcc-config()
           --target=$TARGET --prefix=$PREFIX/$TARGET --host=$SCBI_HOST \
           --enable-thread=win32 --disable-nls --disable-multilib \
           --disable-libada --disable-sjlj-exceptions \
-          --enable-languages=c
+          --enable-large-address-aware --enable-languages=c
 }
 
 function c-pgcc-build()
