@@ -63,7 +63,7 @@ function c-mingw-build()
     sed -i 's/^winrt32_DATA/#winrt32_DATA/' Makefile
     sed -i 's/^winrt64_DATA/#winrt64_DATA/' Makefile
 
-    make -j4
+    make -j$SCBI_JOBS
 }
 
 function c-mingw-install()

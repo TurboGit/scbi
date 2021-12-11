@@ -57,7 +57,7 @@ function c-pgcc-build()
     # The make will fail, but we install the partial C compiler
     # which is sufficient to build the MingW runtime.
 
-    make -j4
+    make -j$SCBI_JOBS
 
     return 0
 }
