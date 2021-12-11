@@ -49,7 +49,7 @@ function c-aws-config()
     local TARGET=$2
 
     rm -f makefile.setup &&
-        make prefix=$PREFIX DEBUG=$(get-build-type GPR aws true) setup
+        make prefix=$PREFIX DEBUG=$(get-build-type GPR true) setup
 }
 
 function c-aws-build()
