@@ -41,8 +41,9 @@ function c-mingw-header-env()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    add-to-var C_INCLUDE_PATH $SCBI_BDIR/c-mingw-header/$TARGET-default/install/$TARGET/include
+    add-to-var C_INCLUDE_PATH $PREFIX/$TARGET/include
 }
 
 function c-mingw-header-build-env()
@@ -54,9 +55,10 @@ function c-mingw-header-config()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
     ../src/mingw-w64-headers/configure \
-        --prefix=$PREFIX/$TARGET --build=$TARGET
+        --prefix=$PREFIX/$TARGET --with-default-win32-winnt=0x0600
 }
 
 function c-mingw-header-build()
@@ -64,7 +66,7 @@ function c-mingw-header-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j6
+    make -j$SCBI_JOBS
 }
 
 function c-mingw-header-install()

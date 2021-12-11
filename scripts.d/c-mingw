@@ -41,13 +41,27 @@ function c-mingw-out-of-tree()
     echo true
 }
 
+function c-mingw-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo --prefix=$PREFIX/$TARGET
+    echo --host=$TARGET
+    echo --build=$SCBI_HOST
+    echo --enable-wildcard
+    echo --with-default-win32-winnt=0x0600
+}
+
 function c-mingw-config()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    ../src/mingw-w64-crt/configure --enable-wildcard \
-        --prefix=$PREFIX/$TARGET --host=$TARGET --build=$SCBI_HOST
+    ../src/mingw-w64-crt/configure \
+        $(get-config-options $PREFIX $TARGET $VARIANT)
 }
 
 function c-mingw-build()
