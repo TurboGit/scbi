@@ -12,9 +12,24 @@ function c-binutils-out-of-tree()
     echo true
 }
 
+function c-binutils-depends()
+{
+    echo os@-makeinfo
+    echo os@-bison
+    echo os@-flex
+}
+
 function c-binutils-build-env()
 {
     system-compiler
+}
+
+function c-binutils-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var PATH $PREFIX/bin
 }
 
 function c-binutils-version()
@@ -96,18 +111,6 @@ function c-binutils-build()
     fi
 
     make -j$SCBI_JOBS CFLAGS="$CFLAGS" CC=gcc
-}
-
-function c-binutils-cross-install()
-{
-    local PREFIX=$1
-    local TARGET=$2
-
-    # install into the partial gcc compiler too
-
-    make install &&
-        mkdir -p $SCBI_BDIR/c-pgcc/install/ &&
-        rsync -a ../install/. $SCBI_BDIR/c-pgcc/install/
 }
 
 function c-binutils-install()

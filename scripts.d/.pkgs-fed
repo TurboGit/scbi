@@ -4,6 +4,7 @@ os@-autoconf                        autoconf
 os@-automake                        automake
 os@-autotools-dev
 os@-avif-dev                        libavif-devel
+os@-bison                           bison
 os@-blas-dev                        blas-devel
 os@-boost-chrono-dev                boost-chrono
 os@-boost-date-time-dev             boost-date-time
@@ -37,6 +38,7 @@ os@-eigen3-dev                      eigen3-devel
 os@-exiv2-dev                       exiv2-devel
 os@-fftw3-dev                       fftw-devel
 os@-findbin                         perl-FindBin
+os@-flex                            flex
 os@-freeimage-dev                   freeimage-devel
 os@-freetype6-dev                   freetype-devel
 os@-ftgl-dev                        ftgl-devel
@@ -73,6 +75,7 @@ os@-llvm10                          llvm-10
 os@-lua5.3-dev                      lua-devel
 os@-lua5.4-dev                      lua-devel
 os@-make                            make
+os@-makeinfo                        makeinfo
 os@-metis-dev                       metis-devel
 os@-ncurses-dev                     ncurses-devel
 os@-nlopt0
@@ -145,3 +148,6 @@ os@-xpm-dev                         libXpm-devel
 os@-xsltproc                        libxslt
 os@-xt-dev                          libXt-devel
 os@-zlib1g-dev                      zlib-devel
+os@-libgmp-dev                      gmp-devel
+os@-libmpc-dev                      mpc-devel
+os@-libmpfr-dev                     mpfr-devel

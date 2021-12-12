@@ -2,6 +2,7 @@
 # ---------------------------------------------------
 os@-autoconf                        autoconf
 os@-autotools-dev
+os@-bison                           bison
 os@-blas-dev                        blas-devel
 os@-boost-chrono-dev                boost-chrono
 os@-boost-date-time-dev             boost-date-time
@@ -27,6 +28,7 @@ os@-doxygen                         doxygen
 os@-egl1-mesa-dev
 os@-eigen3-dev                      eigen3-devel
 os@-fftw3-dev                       fftw-devel
+os@-flex                            flex
 os@-freeimage-dev                   freeimage-devel
 os@-freetype6-dev                   freetype-devel
 os@-ftgl-dev                        ftgl-devel
@@ -48,6 +50,7 @@ os@-lapack-dev                      lapack-devel
 os@-libtirpc-dev                    libtirpc-devel
 os@-libtool                         libtool
 os@-make                            make
+os@-makeinfo                        makeinfo
 os@-metis-dev                       metis-devel
 os@-ncurses-dev                     ncurses-devel
 os@-nlopt0
@@ -106,3 +109,6 @@ os@-xpm-dev                         libXpm-devel
 os@-xsltproc                        libxslt
 os@-xt-dev                          libXt-devel
 os@-zlib1g-dev                      zlib-devel
+os@-libgmp-dev                      gmp-devel
+os@-libmpc-dev                      mpc-devel
+os@-libmpfr-dev                     mpfr-devel

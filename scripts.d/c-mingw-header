@@ -43,7 +43,7 @@ function c-mingw-header-env()
     local TARGET=$2
     local VARIANT=$3
 
-    add-to-var C_INCLUDE_PATH $PREFIX/$TARGET/include
+    add-to-var C_INCLUDE_PATH $PREFIX/include
 }
 
 function c-mingw-header-build-env()
@@ -57,8 +57,7 @@ function c-mingw-header-config()
     local TARGET=$2
     local VARIANT=$3
 
-    ../src/mingw-w64-headers/configure \
-        --prefix=$PREFIX/$TARGET --with-default-win32-winnt=0x0600
+    ../src/mingw-w64-headers/configure --prefix=$PREFIX
 }
 
 function c-mingw-header-build()
@@ -74,7 +73,13 @@ function c-mingw-header-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make install &&
-        # install into the partial gcc compiler too
-        rsync -a ../install/. $SCBI_BDIR/c-pgcc/install/
+    make install
+}
+
+function c-mingw-header-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo $SCBI_PREFIX/$TARGET
 }

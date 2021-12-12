@@ -4,18 +4,33 @@
 #
 #  Should only be used as cross : --target=XXX-pc-mingw32
 
+function c-pgcc-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://gcc.gnu.org/git/gcc.git
+}
+
 function c-pgcc-version()
 {
     local PREFIX=$1
     local TARGET=$2
 
-    INST=$SCBI_BDIR/c-pgcc/install/$TARGET/bin
-
-    if [[ -f $INST/$TARGET-gcc ]]; then
+    if [[ -f $PREFIX/bin/$TARGET-gcc ]]; then
         return $VERSION_OK
     else
         return $VERSION_ERROR
     fi
+}
+
+function c-pgcc-build-depends()
+{
+    echo os@-libgmp-dev
+    echo os@-libmpc-dev
+    echo os@-libmpfr-dev
+
+    echo c-binutils
 }
 
 function c-pgcc-build-env()
@@ -23,32 +38,76 @@ function c-pgcc-build-env()
     system-compiler
 }
 
-function c-pgcc-setup()
+function c-pgcc-env()
 {
     local PREFIX=$1
     local TARGET=$2
 
-    mkdir -p $TARGET-default/src
-    rm -f build
-    ln -s $TARGET-default build
-    mkdir -p install
+    add-to-var PATH $PREFIX/bin
+    add-to-var C_INCLUDE_PATH \
+               $(last-modified-directory $PREFIX/lib/gcc/$TARGET/*/include)
 }
 
 function c-pgcc-out-of-tree()
 {
-    echo false
+    echo true
 }
 
-function c-pgcc-config()
+function c-pgcc-pre-setup()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo c-pgcc is only meant to be used in cross mode
+    false
+}
+
+function c-pgcc-cross-pre-setup()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    true
+}
+
+function c-pgcc-pre-config()
 {
     local PREFIX=$1
     local TARGET=$2
 
-    CFLAGS="-O1" $SCBI_BDIR/p-gnat/build/src/configure \
-          --target=$TARGET --prefix=$PREFIX/$TARGET --host=$SCBI_HOST \
-          --enable-thread=win32 --disable-nls --disable-multilib \
-          --disable-libada --disable-sjlj-exceptions \
-          --enable-large-address-aware --enable-languages=c
+    #  We do not want to configure/build Ada language
+    rm -fr ../src/gcc/ada
+}
+
+function c-pgcc-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo --prefix=$PREFIX
+    echo --target=$TARGET
+    echo --host=$SCBI_HOST
+    echo --enable-thread=win32
+    echo --enable-__cxa_atexit
+    echo --disable-nls
+    echo --disable-multilib
+    echo --disable-libada
+    echo --disable-sjlj-exceptions
+    echo --enable-large-address-aware
+    echo --enable-languages=c
+}
+
+function c-pgcc-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    CFLAGS="-O1" ../src/configure  \
+          $(get-config-options $PREFIX $TARGET $VARIANT)
 }
 
 function c-pgcc-build()
@@ -76,6 +135,5 @@ function c-pgcc-install()
 
 function c-pgcc-prefix()
 {
-    # install into the partial gcc compiler
-    echo $SCBI_BDIR/c-pgcc/install
+    echo NONE
 }

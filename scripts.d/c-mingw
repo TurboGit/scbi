@@ -7,18 +7,36 @@ function c-mingw-vcs()
     echo https://github.com/mirror/mingw-w64.git
 }
 
-function c-mingw-build-env()
+function c-mingw-build-depends()
 {
-    local PREFIX=$1
-    local TARGET=$2
-
-    target-env $SCBI_BDIR/c-pgcc/install/$TARGET
+    echo c-pgcc
 }
 
 function c-mingw-depends()
 {
     echo c-mingw-header
-    echo c-pgcc
+}
+
+function c-mingw-out-of-tree()
+{
+    echo true
+}
+
+function c-mingw-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local CROSSCOMP=$SCBI_BDIR/c-pgcc/$TARGET-$VARIANT/install
+
+    target-env $CROSSCOMP
+
+    #  This must be setup here as target-env will overwrite this value. So
+    #  the setting in c-pgcc env hook is lost here.
+
+    add-to-var C_INCLUDE_PATH \
+               $(last-modified-directory $CROSSCOMP/lib/gcc/$TARGET/*/include)
 }
 
 function c-mingw-setup()
@@ -36,22 +54,16 @@ function c-mingw-setup()
     esac
 }
 
-function c-mingw-out-of-tree()
-{
-    echo true
-}
-
 function c-mingw-config-options()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
 
-    echo --prefix=$PREFIX/$TARGET
+    echo --prefix=$PREFIX
     echo --host=$TARGET
     echo --build=$SCBI_HOST
     echo --enable-wildcard
-    echo --with-default-win32-winnt=0x0600
 }
 
 function c-mingw-config()
@@ -84,4 +96,12 @@ function c-mingw-install()
     local TARGET=$2
 
     make install
+}
+
+function c-mingw-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo $SCBI_PREFIX/$TARGET
 }
