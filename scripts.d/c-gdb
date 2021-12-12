@@ -1,0 +1,39 @@
+
+function c-gdb-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo http://sourceware.org/git/binutils-gdb.git
+}
+
+function c-gdb-build-env()
+{
+    system-compiler
+}
+
+function c-gdb-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ../src/configure --prefix=$PREFIX \
+                     --disable-binutils --disable-gas \
+                     --disable-ld --disable-gold --disable-gprof
+}
+
+function c-gdb-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j$SCBI_JOBS
+}
+
+function c-gdb-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -C gdb install
+}
