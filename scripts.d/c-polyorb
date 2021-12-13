@@ -12,12 +12,23 @@ function c-polyorb-out-of-tree()
     echo false
 }
 
-function c-polyorb-config()
+function c-polyorb-pre-config()
 {
     local PREFIX=$1
     local TARGET=$2
 
     ./support/reconfig
+
+    # Two missing scripts checked by configure but not used
+    echo > support/compile
+    echo > support/missing
+}
+
+function c-polyorb-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
     ./configure --prefix=$PREFIX --with-appli-perso="corba dsa"
 }
 
