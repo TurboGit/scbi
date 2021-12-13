@@ -7,4 +7,8 @@ function test60-config()
    echo @@@OPT1=$(is-enabled safe-arch)
    echo @@@OPT2=$(is-enabled safe-arch amd)
    echo @@@OPT3=$(is-enabled safe-arch i686 native)
+
+   [[   $(is-enabled safe-arch)   ]] && echo "@@@OPT4 : ENABLED"
+   [[ ! $(is-enabled safe-arch)   ]] && echo "@@@OPT4 : NOT ENABLED"
+   [[ ! $(is-enabled unknown-opt) ]] && echo "@@@OPT5 : UNKNOWN"
 }
