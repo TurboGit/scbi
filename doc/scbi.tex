@@ -601,21 +601,22 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	And finally the function \code{scbi-rewrite-tar} can be defined. This function takes the four values returned by the \code{tar} hook and must return the four values in the same order but possibly rewritten.
 
-	\item[<module>-patches] \index{hook!patches}Returns the patch files to apply.
+	\item[<module>-patches] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
 
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT \$KIND \$REF}
 		\item[return] \tabto{2cm} array
 		\begin{enumerate}
 			\item echo <patch-file-1>
 			\item echo <patch-file-2>
+			\item {[}{[} \$REF =\textasciitilde "7.8" {]}{]} \&\& echo <patch-for-7.8>
 			\item ...
 		\end{enumerate}
 	\end{description}
 
 	\item[<module>-version] \index{hook!version}Returns the current version of the installed module.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} version or \code{\$VERSION\_OK} or \code{\$VERSION\_ERROR}
 		\begin{enumerate}
 			\item the version as a string corresponding to the current installed version. Can be \$VERSION\_OK or \$VERSION\_ERROR if the actual version cannot be determined.
@@ -665,7 +666,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	\item[<module>-{[}common|<variant>{]}-env] \index{hook!env}Set the environment to use this module as a dependency. This is the exported environment. The environment must be set using \code{add-to-var} function.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
 			\item \code{add-to-var} <name> <value>
 			\item ...
@@ -687,7 +688,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	\item[<module>-{[}common|<variant>{]}-build-env] \index{hook!build-env}Set the environment needed to build this module. The environment must be set using \code{add-to-var} function. Those settings are not exported and only used for the module.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
 			\item \code{add-to-var} <name> <value>
 			\item ...
@@ -697,13 +698,13 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	\item[<module>-setup] \index{hook!setup}To put in place the sources just before configuration step. This is generally not needed as the sources are setup by \code{scbi} using the information provided by the tar or vcs hook. This may be needed in some complex case or if the sources are generated based on the running environment.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
 	\item[<module>-out-of-tree] \index{hook!out-of-tree}Whether to build out of the source tree or not.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} NONE
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} \code{true | false}
 	\end{description}
 
@@ -717,7 +718,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	\item[<module>-config] \index{hook!config}To configure the sources before starting the build. This is generally a call to GNU \code{configure} or \code{cmake}. The source tree is always accessible as \code{../src}.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
 			\item ./configure \ddash{}prefix=\$PREFIX ../src
 		\end{enumerate}
@@ -737,7 +738,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	\item[<module>-build] \index{hook!build}The command to build the application. This is most of the case a simple call to \code{make}.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
 			\item make
 		\end{enumerate}
@@ -757,7 +758,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	\item[<module>-install] \index{hook!install}The command to install the application. This is most of the case a simple call to \code{make} with target \code{install}.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
 			\item make install
 		\end{enumerate}
@@ -766,14 +767,14 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	\item[<module>-wrapup] \index{hook!wrapup}This is to do whatever is needed after the installation step.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
 	\item[<module>-prefix] \index{hook!prefix}The directory for the installation of the module. The returned value can be set to NONE to skip the installation step. If this hook is not defined the module will be installed into \code{\$SCBI\_PREFIX}.
 	\label{global-install}
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} string
 		\begin{enumerate}
 			\item echo <install\_dir>
@@ -784,7 +785,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	\item[<module>-tests] \index{hook!tests}Set of commands to run the tests.
 	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 

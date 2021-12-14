@@ -1145,7 +1145,9 @@ function handle-module()
 
         FCT=$(get-hook $module $variant out-of-tree)
 
-        [[ ! -z $FCT ]] && [[ $($FCT) = "false" ]] && ISOOT=no
+        [[ ! -z $FCT ]] &&
+            [[ $($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                      $module $variant) = "false" ]] && ISOOT=no
 
         #  Call module routines
 

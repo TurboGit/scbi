@@ -615,25 +615,12 @@ function get-build-id()
     local pid="no-patch-found"
 
     if [[ $DO_PATCH = yes ]]; then
-        fn-exists $module-$variant-patches
+        FCT=$(get-hook $module $variant patches)
 
-        if [[ $? = 0 ]]; then
-            for patch in $($module-$variant-patches $PREFIX $TARGET \
-                                                    $kind $ref);
-            do
+        if [[ ! -z $FCT ]]; then
+            for patch in $($FCT $PREFIX $TARGET $variant $kind $ref); do
                 pid="$pid,$(get-patch-md5 $patch)"
             done
-
-        else
-            fn-exists $module-patches
-
-            if [[ $? = 0 ]]; then
-                for patch in $($module-patches $PREFIX $TARGET $variant \
-                                               $kind $ref);
-                do
-                    pid="$pid,$(get-patch-md5 $patch)"
-                done
-            fi
         fi
     fi
 
@@ -1169,23 +1156,12 @@ function copy-module-src-callback()
 
                 load-module $MODREF
 
-                fn-exists $module-$variant-patches
+                FCT=$(get-hook $module $variant patches)
 
-                if [[ $? = 0 ]]; then
-                    for patch in $($module-$variant-patches $PREFIX $TARGET \
-                                                            $kind $ref); do
+                if [[ ! -z $FCT ]]; then
+                    for patch in $($FCT $PREFIX $TARGET $VARIANT $kind $ref); do
                         cp-patch $patch
                     done
-
-                else
-                    fn-exists $module-patches
-
-                    if [[ $? = 0 ]]; then
-                        for patch in $($module-patches $PREFIX $TARGET \
-                                                       $variant $kind $ref); do
-                            cp-patch $patch
-                        done
-                    fi
                 fi
             )
         fi
