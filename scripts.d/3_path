@@ -1,5 +1,5 @@
 
-# default GNAT path
+# default compiler path
 
 DEFAULT_C_INCLUDE_PATH=$C_INCLUDE_PATH
 DEFAULT_CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH
@@ -111,14 +111,6 @@ function no-target-env()
     set-compiler-paths $PREFIX $SCBI_HOST
 }
 
-############################## gpython-env
-
-function gpython-env()
-{
-    export PATH=/opt/gpython/bin:$PATH
-    export PYTHONPATH=/usr/lib/python2.7/dist-packages:$PYTHONPATH
-}
-
 ############################## system-compiler
 
 function system-compiler()
@@ -142,9 +134,6 @@ function built-compiler()
 
     set-compiler-paths $PREFIX
 }
-
-export PATH=$SCBI_PREFIX/bin:$PATH
-set-compiler-paths $SCBI_PREFIX
 
 #  make an alias for x86_64-linux if necessary
 

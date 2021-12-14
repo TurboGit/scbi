@@ -213,6 +213,6 @@ xxxx/xx/xx xx:xx:xx : Building lib2 [wrong] (bad)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : tests
 xxxx/xx/xx xx:xx:xx : tests [wrong] starting
-<pwd>/scripts.d/lib2: line 65: ./main2: No such file or directory
+<pwd>/scripts.d/lib2: line 75: ./main2: No such file or directory
 xxxx/xx/xx xx:xx:xx : lib2 (FAILED) tests failed with error 1
 EOF

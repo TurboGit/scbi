@@ -74,8 +74,10 @@ function c-aws-tests()
     local TARGET=$2
 
     (
-        gpython-env
-        cd regtests && ./testsuite.py --jobs=$SCBI_JOBS
+        export PATH=/opt/gnatpython/bin:$PATH
+        cd regtests &&
+            python2 ./gen_system_tags.py ../makefile.setup &&
+            python2 ./testsuite.py --jobs=$SCBI_JOBS
     )
 
     display-file regtests/out/report

@@ -17,6 +17,16 @@ function lib2-build-env()
     export LD_LIBRARY_PATH=.:$PWD/lib:$LD_LIBRARY_PATH
 }
 
+function lib2-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var C_INCLUDE_PATH  $PREFIX/include
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib
+    add-to-var LIBRARY_PATH    $PREFIX/lib
+}
+
 function lib2-out-of-tree()
 {
     echo false
