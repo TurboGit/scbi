@@ -20,7 +20,7 @@ EOF
 RUNS ./scbi autovarB/auto
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : dependency amoeba not installed
+xxxx/xx/xx xx:xx:xx : dependency squid-cgi not installed
 xxxx/xx/xx xx:xx:xx : autovarB using standard variant
 
 xxxx/xx/xx xx:xx:xx : Building autovarB [default] (master)
@@ -39,7 +39,7 @@ EOF
 RUNS ./scbi --plan=autob autovarB
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : dependency amoeba not installed
+xxxx/xx/xx xx:xx:xx : dependency squid-cgi not installed
 xxxx/xx/xx xx:xx:xx : autovarB using standard variant
 
 xxxx/xx/xx xx:xx:xx : Building autovarB [default] (master)

@@ -4,7 +4,7 @@ function test17-setup()
     mkdir src
 }
 
-function test17-env()
+function test17-build-env()
 {
     PATH=/bin:/usr/bin
 

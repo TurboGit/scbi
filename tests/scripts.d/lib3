@@ -22,7 +22,7 @@ function lib3-depends()
     echo inhnat/native
 }
 
-function lib3-env()
+function lib3-build-env()
 {
     local PREFIX=$1
     local TARGET=$2

@@ -1,6 +1,6 @@
 
-# expect that amoeba is not installed
-with-variant native amoeba
+# expect that squid-cgi is not installed
+with-variant native squid-cgi
 
 function autovarB-depends()
 {

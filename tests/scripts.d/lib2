@@ -7,7 +7,7 @@ function lib2-vcs()
     echo ${TESTREPOS}/lib2.bundle
 }
 
-function lib2-env()
+function lib2-build-env()
 {
     local PREFIX=$1
     local TARGET=$2

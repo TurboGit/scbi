@@ -35,7 +35,7 @@ function lib1-variant-no-patch-patches()
     echo
 }
 
-function lib1-env()
+function lib1-build-env()
 {
     local PREFIX=$1
     local TARGET=$2

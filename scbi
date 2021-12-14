@@ -495,7 +495,8 @@ function handle-env-callback()
     local IS_EXT=$5
     local IS_META=$6
 
-    handle-module-env $FORMODULE $MODREF env
+    [[ $LEVEL -ge 1 ]] &&
+        handle-module-env $FORMODULE $MODREF env
 }
 
 function handle-env()
@@ -513,9 +514,6 @@ function handle-env()
     local ref=${module_info[3]}
 
     if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]]; then
-        SCBI_ENV_MODULE=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/env.cmd
-        rm -f $SCBI_ENV_MODULE
-
         #  Exports all environment variables starting with SCBI_
 
         env | grep "^SCBI_" | while read DEF; do
@@ -524,8 +522,6 @@ function handle-env()
     fi
 
     for-all-modules handle-env-callback $MODREF
-
-    SCBI_ENV_MODULE=
 }
 
 ############################## handle-depends
@@ -1104,11 +1100,18 @@ function handle-module()
 
         #  Setup the build environment for the current module
 
-        handle-module-env $FORMODULE $MODREF build-env
+        SCBI_ENV_MODULE=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/env.cmd
+        rm -f $SCBI_ENV_MODULE
+
+        handle-module-env $FORMODULE $MODREF build-env \
+                 > $SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/env.cmd
+
 
         #  And then setup recursively the environment to use dependencies
 
         handle-env $FORMODULE $MODREF
+
+        SCBI_ENV_MODULE=
 
         #  Log module enviroment
 

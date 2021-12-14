@@ -2,7 +2,7 @@
 with-variant native libA libB \
                     --env 'add-to-var ROOT_DIR /usr'
 
-function natv-env()
+function natv-build-env()
 {
     echo env
 }

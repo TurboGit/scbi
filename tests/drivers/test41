@@ -64,7 +64,6 @@ natv-native-vcs ()
 xxxx/xx/xx xx:xx:xx : Building natv [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
-env
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
@@ -72,3 +71,5 @@ xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : End Building natv [default] (master)
 EOF
+
+GREP env .root/builds/natv/build/.log/env.cmd
