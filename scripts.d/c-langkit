@@ -27,7 +27,7 @@ function c-langkit-build-env()
     local TARGET=$2
     local VARIANT=$3
 
-    export PYTHONPATH=$PWD
+    add-to-var PYTHONPATH $PWD
 }
 
 function c-langkit-env()
@@ -38,15 +38,6 @@ function c-langkit-env()
 
     add-to-var PYTHONPATH       $SCBI_BDIR/c-langkit/$TARGET-$VARIANT/build
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
-}
-
-function c-langkit-config()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
-
-    # nothing to do, the sources are pre-generated
 }
 
 function c-langkit-do-build()

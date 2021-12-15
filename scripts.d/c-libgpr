@@ -17,6 +17,14 @@ function c-libgpr-depends()
     echo c-xmlada
 }
 
+function c-libgpr-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
 function c-libgpr-cross-config()
 {
     local PREFIX=$1

@@ -21,7 +21,7 @@ function c-gnatcoll-bindings-python-tar()
     echo default
     echo none
     echo none
-    echo c-gnatcoll-bindings-$VERSION-src.tar.gz
+    echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 
 function c-gnatcoll-bindings-python-out-of-tree()
@@ -51,6 +51,14 @@ function c-gnatcoll-bindings-python-cross-build-env()
 
     export GNATCOLL_PYTHON_CFLAGS="-I$PYINC"
     export GNATCOLL_PYTHON_LIBS="-l$PYLIB"
+}
+
+function c-gnatcoll-bindings-python-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
 }
 
 function c-gnatcoll-bindings-python-build()

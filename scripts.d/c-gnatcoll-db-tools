@@ -19,7 +19,7 @@ function c-gnatcoll-db-tools-tar()
     echo default
     echo none
     echo none
-    echo c-gnatcoll-db-tools-$VERSION-src.tar.gz
+    echo gnatcoll-db-tools-$VERSION-src.tar.gz
 }
 
 function c-gnatcoll-db-tools-out-of-tree()
@@ -27,12 +27,20 @@ function c-gnatcoll-db-tools-out-of-tree()
     echo false
 }
 
+function c-gnatcoll-db-tools-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var PATH $PREFIX/bin
+}
+
 function c-gnatcoll-db-tools-cross-config()
 {
     local PREFIX=$1
     local TARGET=$2
 
-    make -C gnatcoll_db2ada TARGET=$TARGET setup
+    make -C gnatcoll_db2ada prefix=$PREFIX TARGET=$TARGET setup
 }
 
 function c-gnatcoll-db-tools-config()
@@ -40,7 +48,7 @@ function c-gnatcoll-db-tools-config()
     local PREFIX=$1
     local TARGET=$2
 
-    make -C gnatcoll_db2ada setup && make -C xref setup
+    make -C gnatcoll_db2ada prefix=$PREFIX setup && make -C xref setup
 }
 
 function c-gnatcoll-db-tools-cross-build()

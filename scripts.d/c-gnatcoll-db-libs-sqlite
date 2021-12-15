@@ -20,12 +20,20 @@ function c-gnatcoll-db-libs-sqlite-tar()
     echo default
     echo none
     echo none
-    echo c-gnatcoll-db-libs-sqlite-sqlite-$VERSION-src.tar.gz
+    echo gnatcoll-db-libs-sqlite-sqlite-$VERSION-src.tar.gz
 }
 
 function c-gnatcoll-db-libs-sqlite-out-of-tree()
 {
     echo false
+}
+
+function c-gnatcoll-db-libs-sqlite-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
 }
 
 function c-gnatcoll-db-libs-sqlite-config()

@@ -20,12 +20,20 @@ function c-gnatcoll-bindings-gmp-tar()
     echo default
     echo none
     echo none
-    echo c-gnatcoll-bindings-$VERSION-src.tar.gz
+    echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 
 function c-gnatcoll-bindings-gmp-out-of-tree()
 {
     echo false
+}
+
+function c-gnatcoll-bindings-gmp-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
 }
 
 function c-gnatcoll-bindings-gmp-build()

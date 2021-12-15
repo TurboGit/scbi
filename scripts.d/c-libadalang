@@ -25,13 +25,20 @@ function c-libadalang-depends()
     echo c-langkit
 }
 
-function c-libadalang-env()
+function c-libadalang-build-env()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
 
-    add-to-var LIBLANG_SUPPORT_EXTERNALLY_BUILT false
+    export LIBLANG_SUPPORT_EXTERNALLY_BUILT=false
+}
+
+function c-libadalang-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
 
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
     add-to-var PATH             $PREFIX/bin

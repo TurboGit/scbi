@@ -51,6 +51,14 @@ function c-xmlada-out-of-tree()
     echo false
 }
 
+function c-xmlada-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
 function c-xmlada-cross-config()
 {
     local PREFIX=$1
