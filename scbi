@@ -1400,6 +1400,8 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+OPTFILE=$(mktemp)
+
 ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpvwWh \
                  -l store,target:,no-setup,no-install,update,setup,config \
                  -l build,build-target:,install,clean-install,tar \
@@ -1412,11 +1414,12 @@ ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpvwWh \
                  -l dry-run,jobs:,no-wrapup,wrapup,safe,standalone \
                  -l plugins:,build-dir,list-plan:,version,module-version \
                  -l shell,shell:dev,shell:sb,shell:sandbox \
-                 -- $SCBIOPTS 2> /tmp/scbierr)
+                 -- $SCBIOPTS 2> $OPTFILE)
 
 if [[ $? != 0 ]]; then
-    cat /tmp/scbierr
+    cat $OPTFILE
     echo try \"scbi --help\" for more information.
+    rm -f $OPTFILE
     exit 1
 fi
 
