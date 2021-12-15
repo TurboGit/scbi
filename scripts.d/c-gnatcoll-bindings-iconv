@@ -42,7 +42,7 @@ function c-gnatcoll-bindings-iconv-build()
     local PREFIX=$1
     local TARGET=$2
 
-    GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
+    local GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
 
     for kind in static relocatable static-pic; do
         gprbuild $GOPTS -XLIBRARY_TYPE=$kind iconv/gnatcoll_iconv.gpr
@@ -57,10 +57,10 @@ function c-gnatcoll-bindings-iconv-install()
     local PREFIX=$1
     local TARGET=$2
 
-    GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
-    GOPTS="$GOPTS --build-var=LIBRARY_TYPE"
+    local GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
+    local GOPTS="$GOPTS --build-var=LIBRARY_TYPE"
 
-    PM=$PREFIX/$TARGET/install/$TARGET/share/gpr/manifests
+    local PM=$PREFIX/$TARGET/install/$TARGET/share/gpr/manifests
 
     if [[ -f $PM/gnatcoll_iconv ]]; then
         gprinstall $GOPTS --uninstall gnatcoll_iconv
