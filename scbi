@@ -513,14 +513,6 @@ function handle-env()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]]; then
-        #  Exports all environment variables starting with SCBI_
-
-        env | grep "^SCBI_" | while read DEF; do
-            echo "export $DEF" >> $SCBI_ENV_MODULE
-        done
-    fi
-
     for-all-modules handle-env-callback $MODREF
 }
 
@@ -1103,9 +1095,17 @@ function handle-module()
         SCBI_ENV_MODULE=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/env.cmd
         rm -f $SCBI_ENV_MODULE
 
-        handle-module-env $FORMODULE $MODREF build-env \
-                 > $SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/env.cmd
+        if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]]; then
+            #  Exports all environment variables starting with SCBI_
+            echo                          >> $SCBI_ENV_MODULE
+            echo "# SCBI global settings" >> $SCBI_ENV_MODULE
 
+            env | grep "^SCBI_" | while read DEF; do
+                echo "export $DEF" >> $SCBI_ENV_MODULE
+            done
+        fi
+
+        handle-module-env $FORMODULE $MODREF build-env >> $SCBI_ENV_MODULE
 
         #  And then setup recursively the environment to use dependencies
 
