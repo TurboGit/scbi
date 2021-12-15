@@ -27,6 +27,14 @@ function c-ada-libfswatch-build-env()
     add-to-var C_INCLUDE_PATH .
 }
 
+function c-ada-libfswatch-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
 function c-ada-libfswatch-config()
 {
     local PREFIX=$1
