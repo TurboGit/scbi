@@ -399,7 +399,7 @@ function handle-module-env()
 
     if [[ ! -z $SCBI_ENV_MODULE ]]; then
         echo >> $SCBI_ENV_MODULE
-        echo "# $module" >> $SCBI_ENV_MODULE
+        echo "# $MODREF" >> $SCBI_ENV_MODULE
     fi
 
     _internal_call-variant-hooks \
