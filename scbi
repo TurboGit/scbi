@@ -122,6 +122,10 @@ DO_SHELL=no
 DO_RUN=no
 DO_RUN_CMD=
 
+export SCBI_ROOT SCBI_BDIR
+export SCBI_HOST SCBI_TARGET SCBI_DEFS SCBI_JOBS SCBI_HALF_JOBS
+export SCBI_IS_WINDOWS SCBI_VERSION SCBI_BINARY
+
 ############################## check-handled
 #
 # check whether a module has already been handled
@@ -387,10 +391,12 @@ function handle-module-env()
 
     #  Then setup the current module
 
-    if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/$ENV_DIR ]]; then
-        cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant/$ENV_DIR
-    elif [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]]; then
-        cd $SCBI_BDIR/$module/$SCBI_TARGET-$variant
+    local TVDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant
+
+    if [[ -d $TVDIR/$ENV_DIR ]]; then
+        cd $TVDIR/$ENV_DIR
+    elif [[ -d $TVDIR ]]; then
+        cd $TVDIR
     elif [[ -d $SCBI_BDIR/$module ]]; then
         cd $SCBI_BDIR/$module
     else
@@ -400,6 +406,7 @@ function handle-module-env()
     if [[ ! -z $SCBI_ENV_MODULE ]]; then
         echo >> $SCBI_ENV_MODULE
         echo "# $MODREF" >> $SCBI_ENV_MODULE
+        SCBI_MODULES_DIR["$module"]+="$TVDIR/install"
     fi
 
     _internal_call-variant-hooks \
@@ -1095,6 +1102,8 @@ function handle-module()
         SCBI_ENV_MODULE=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/env.cmd
         rm -f $SCBI_ENV_MODULE
 
+        declare -A SCBI_MODULES_DIR=()
+
         if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]]; then
             #  Exports all environment variables starting with SCBI_
             echo                          >> $SCBI_ENV_MODULE
@@ -1110,6 +1119,21 @@ function handle-module()
         #  And then setup recursively the environment to use dependencies
 
         handle-env $FORMODULE $MODREF
+
+        # Generate the SCBI_MODULES_DIR associative array
+        {
+            echo
+            echo "# SCBI_MODULES_DIR"
+            echo "declare -A SCBI_MODULES_DIR=("
+
+            for D in ${!SCBI_MODULES_DIR[@]}; do
+                local V="${SCBI_MODULES_DIR[$D]}"
+                local V=${V/$SCBI_TARGET/\$SCBI_TARGET}
+                echo "  [\"$D\"]=\"\$SCBI_BDIR${V#$SCBI_BDIR}\""
+            done
+
+            echo ")"
+        } >> $SCBI_ENV_MODULE
 
         SCBI_ENV_MODULE=
 

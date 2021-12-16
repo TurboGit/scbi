@@ -243,6 +243,8 @@ An environment is a set of shell variables used to control the build environment
 
 	\item[SCBI\_BDIR] The default directory for the build directory.  This is also called the sandbox directory. \\Default is \file{$SCBI_ROOT/builds}.
 
+	\item[SCBI\_MODULES\_DIR{[<module-name>]}] An associative array giving the install directory for a given module name. Directories have \code{\$SCBI\_BDIR} has prefix and point to the install directory for the module's variant. This associative array can be used in hooks \code{config}, \code{build} and \code{install}.
+
 	\item[SCBI\_PREFIX] The default global install directory. Each module after being installed into the sandbox are copied into this global installation directory. \\Default is \file{$SCBI_BDIR/install}. Each module can disable global installation (\seeref{global-install}).
 
 	\item[SCBI\_GIT\_REPO] The directories where the user's Git checkouts are to be found. \\Default is \file{$SCBI_ROOT/repositories/git}.
@@ -263,8 +265,7 @@ An environment is a set of shell variables used to control the build environment
 
 	\item[SCBI\_JOBS] The number of simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores. This can be overwritten using \code{--jobs} option.
 	\label{njobs}
-\label{make-njobs}
-	\item[SCBI\_HALF\_JOBS] Half the simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores divided by 2. This can be overwritten using \code{\ddash{}jobs} option.
+	\item[SCBI\_HALF\_JOBS] Half the simultaneous jobs to use to build. This variable is to be used in module scripts. \\Default set to actual number of cores divided by 2. This can be overwritten using \code{\ddash{}jobs} option.\label{half-njobs}
 \end{description}
 
 \subsubsection{Environment files}
@@ -319,7 +320,7 @@ Some specific actions are supported with the following syntax:
 	\item[\code{\#}] To start a comment line.
 
 	\item[\code{@load <name>}] To load another build-plan as a base for the new plan. Every descriptions after this will overwrite the loaded build plan.
-	
+
 	This is a simple way to derive a build plan from another one.
 
 	File \file{.plan-next}:
@@ -686,11 +687,12 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	\item[<module>-{[}common|<variant>{]}-build-env] \index{hook!build-env}Set the environment needed to build this module. The environment must be set using \code{add-to-var} function. Those settings are not exported and only used for the module.
+	\item[<module>-{[}common|<variant>{]}-build-env] \index{hook!build-env}Set the environment needed to build this module.
+	Those settings are not exported and only visible and used for the module.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
-			\item \code{add-to-var} <name> <value>
+			\item export <name>=<value>
 			\item ...
 		\end{enumerate}
 		\item[return] \tabto{2cm} NONE

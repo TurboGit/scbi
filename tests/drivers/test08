@@ -203,6 +203,27 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
 EOF
 
+# =================== check for SCBI_MODULES_DIR
+
+(
+    function add-to-var()
+    {
+        # skip module's env
+        true
+    }
+
+    source $PWD/.root/builds/mainmult/build/.log/env.cmd
+
+    V1=${SCBI_MODULES_DIR[lib1]}
+    V2=${SCBI_MODULES_DIR[lib2]}
+    VM=${SCBI_MODULES_DIR[mainmult]}
+
+IS   "${SCBI_MODULES_DIR[\"libnother\"]}" == ""
+IS   ${V1/*lib1*/lib1}         == "lib1"
+IS   ${V2/*lib2*/lib2}         == "lib2"
+IS   ${VM/*mainmult*/mainmult} == "mainmult"
+)
+
 # =================== only lib2 with version from command line
 # note that this version does not exists, it is only to make sure scbi tries
 # to compile it.
