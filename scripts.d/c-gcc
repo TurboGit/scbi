@@ -15,8 +15,15 @@ function c-gcc-build-env()
     system-compiler
 }
 
-function c-gcc-options()
+function c-gcc-config-options()
 {
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo --prefix=$PREFIX
+    echo --build=$TARGET
+    echo --target=$TARGET
     echo --disable-multilib
     echo --disable-libada
     echo --disable-nls
@@ -27,9 +34,11 @@ function c-gcc-config()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    ../src/configure --prefix=$PREFIX --build=$TARGET --target=$TARGET \
-                     $(gcc-options)
+    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
+
+    ../src/configure $OPTIONS
 }
 
 function c-gcc-build()
