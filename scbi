@@ -1145,16 +1145,16 @@ function handle-module()
         env >> $ENVLOG
 
         [[ ! -z $(command -v gprls 2> /dev/null) ]] &&
-            (
+            {
                 echo "==================== gprls " >> $ENVLOG
                 gprls -v 2>&1 >> $ENVLOG
-            )
+            }
 
         [[ ! -z $(command -v gcc 2> /dev/null) ]] &&
-            (
+            {
                 echo "==================== gcc " >> $ENVLOG
                 gcc -v &>> $ENVLOG
-            )
+            }
 
         #  We need to remove the link/sources to ensure proper setting by
         #  the module.
