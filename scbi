@@ -81,7 +81,7 @@ SCBI_HALF_JOBS=$(( $SCBI_JOBS / 2 ))
 
 #  Modules to be handled and already handled
 MODULES=
-HANDLED=$(mktemp)
+HANDLED="$(mktemp -p /dev/shm/)"
 LAST_MODULE=
 
 #  Actions setup
