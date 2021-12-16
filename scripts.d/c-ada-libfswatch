@@ -42,7 +42,7 @@ function c-ada-libfswatch-config()
 
     #  Get include / lib from s-libfswatch
 
-    LIB=$SCBI_BDIR/c-libfswatch/$TARGET-default/install
+    LIB=${SCBI_MODULES_DIR["c-libfswatch"]}
 
     IDIR=libfswatch/include/libfswatch/c/
     LDIR=libfswatch/lib
