@@ -198,14 +198,7 @@ function module-wrapper()
     local VARIANT=$3
     local STEP=$4
 
-    local pvariant=""
     local dvariant=""
-
-    #  set variant parameter if different than default
-
-    if [[ "$VARIANT" != "default" ]]; then
-        pvariant=$VARIANT
-    fi
 
     #  set variant display if not part of step and not default
 
@@ -254,12 +247,12 @@ function module-wrapper()
         local res=0
 
         if [[ $SCBI_DLOG = yes ]] || [[ "$STEP" = "tests" ]]; then
-            $MODULE-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
+            $MODULE-$mstep $PREFIX $SCBI_TARGET $VARIANT 2>&1 \
                 | tee -a $log | tee $mlog
             #  We want the status of the first command and not the tee ones
             res=${PIPESTATUS[0]}
         else
-            $MODULE-$mstep $PREFIX $SCBI_TARGET $pvariant 2>&1 \
+            $MODULE-$mstep $PREFIX $SCBI_TARGET $VARIANT 2>&1 \
                 | tee $mlog >> $log
             #  We want the status of the first command and not the tee ones
             res=${PIPESTATUS[0]}
