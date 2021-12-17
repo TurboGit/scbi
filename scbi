@@ -65,8 +65,8 @@ elif [[ $(uname -a) =~ Msys ]]; then
     SCBI_HOST=x86_64-mingw64
     SCBI_OS_MODULE=windows
 else
-    SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
     check-tools-abort gcc
+    SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
 fi
 
 SCBI_TARGET=$SCBI_HOST
