@@ -25,7 +25,7 @@ function load-module-plan()
     #  if not found in definitions install dir, look in current directory
 
     if [[ ! -f $PLAN ]]; then
-        PLAN=$SCBI_DEFS/.plan-$NAME
+        PLAN=$SCBI_PLUGINS/.plan-$NAME
     fi
 
     if [[ -f $PLAN ]]; then
@@ -311,13 +311,13 @@ function check-auto-variant()
 {
     local MODULE=$1
 
-    if [[ -f $SCBI_DEFS/$MODULE ]]; then
+    if [[ -f $SCBI_PLUGINS/$MODULE ]]; then
         #  Check external dependencies for native-depends
 
         (
             local res=0
 
-            source $SCBI_DEFS/$MODULE
+            source $SCBI_PLUGINS/$MODULE
 
             fn-exists $MODULE-native-depends
 
@@ -327,7 +327,7 @@ function check-auto-variant()
             fi
 
             for dmodule in $(get-all-depends $module native depends); do
-                if [[ ! -f $SCBI_DEFS/$dmodule ]]; then
+                if [[ ! -f $SCBI_PLUGINS/$dmodule ]]; then
                     local STATUSES=( $(check-pkg-status $dmodule) )
 
                     while read pkg pver pres; do

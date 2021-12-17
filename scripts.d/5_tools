@@ -185,8 +185,8 @@ function load-module()
     local key="${module}.${variant}"
 
     if [[ -z "${SCBI_LOADED[$module]}" ]]; then
-        if [[ -f $SCBI_DEFS/$module ]]; then
-            source $SCBI_DEFS/$module
+        if [[ -f $SCBI_PLUGINS/$module ]]; then
+            source $SCBI_PLUGINS/$module
             SCBI_LOADED[$module]=yes
         else
             return 1
@@ -555,8 +555,8 @@ function get-patch-md5()
 
     if [[ -f "$SCBI_PATCH/$PATCH_FILE" ]]; then
         patch="$SCBI_PATCH/$PATCH_FILE"
-    elif [[ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]]; then
-        patch="$SCBI_DEFS/patches/$PATCH_FILE"
+    elif [[ -f "$SCBI_PLUGINS/patches/$PATCH_FILE" ]]; then
+        patch="$SCBI_PLUGINS/patches/$PATCH_FILE"
     fi
 
     if [[ -f "$patch" ]]; then
@@ -592,8 +592,8 @@ function get-build-id()
 
     local mid=$variant:$ref
 
-    [[ -f $SCBI_DEFS/$module ]] &&
-        mid="$mid,$(cat $SCBI_DEFS/$module | get-md5)"
+    [[ -f $SCBI_PLUGINS/$module ]] &&
+        mid="$mid,$(cat $SCBI_PLUGINS/$module | get-md5)"
 
     #  And add possible SCBI_<module>_BUILD_TYPE that is in the environment
 
@@ -857,7 +857,7 @@ function display-modules()
 
     local linelen=0
 
-    for module in $SCBI_DEFS/[^0-9]*; do
+    for module in $SCBI_PLUGINS/[^0-9]*; do
         bn=$(basename $module)
         linelen=$(expr $linelen + ${#bn} + 1)
         if [[ $linelen -gt 70 ]]; then
@@ -894,10 +894,10 @@ function display-plans()
     echo -n "plans  :"
     local linelen=0
 
-    if [[ -z "$(ls $SCBI_DEFS/.plan-* 2> /dev/null)" ]]; then
+    if [[ -z "$(ls $SCBI_PLUGINS/.plan-* 2> /dev/null)" ]]; then
         echo " none"
     else
-        for module in $SCBI_DEFS/.plan-*; do
+        for module in $SCBI_PLUGINS/.plan-*; do
             bn=$(basename $module)
             linelen=$(expr $linelen + ${#bn} + 1)
             if [[ $linelen -gt 70 ]]; then
@@ -1130,8 +1130,8 @@ function copy-module-src-callback()
 
         #  copy SCBI module if present
 
-        if [[ -f $SCBI_DEFS/$module ]]; then
-            cp -p $SCBI_DEFS/$module $DEST/scripts.d
+        if [[ -f $SCBI_PLUGINS/$module ]]; then
+            cp -p $SCBI_PLUGINS/$module $DEST/scripts.d
 
             #  and then copy patches if any
             (
@@ -1143,8 +1143,8 @@ function copy-module-src-callback()
 
                     if [[ -f "$SCBI_PATCH/$PATCH_FILE" ]]; then
                         patch="$SCBI_PATCH/$PATCH_FILE"
-                    elif [[ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]]; then
-                        patch="$SCBI_DEFS/patches/$PATCH_FILE"
+                    elif [[ -f "$SCBI_PLUGINS/patches/$PATCH_FILE" ]]; then
+                        patch="$SCBI_PLUGINS/patches/$PATCH_FILE"
                     else
                         elog standalone patch filename \
                              $(basename $PATCH_FILE) not found
@@ -1193,8 +1193,8 @@ function create-standalone-package()
         #  The main SCBI script, the runtime scripts and the current plan
 
         cp $SCBI_BINARY bin/
-        cp -p $SCBI_DEFS/[0-9]_* scripts.d
-        [[ ! -z $SCBI_PLAN ]] && cp -p $SCBI_DEFS/.plan-$SCBI_PLAN scripts.d
+        cp -p $SCBI_PLUGINS/[0-9]_* scripts.d
+        [[ ! -z $SCBI_PLAN ]] && cp -p $SCBI_PLUGINS/.plan-$SCBI_PLAN scripts.d
 
         #  copy repositories and tars for all modules with dependencies
 
@@ -1531,7 +1531,7 @@ function scbi-store-get-key()
 
     local VALUE=""
     local res=1
-    local STORE_FILE=$SCBI_DEFS/.store
+    local STORE_FILE=$SCBI_PLUGINS/.store
 
     if [[ -f $STORE_FILE ]]; then
         #  check KEY in store
@@ -1561,7 +1561,7 @@ function scbi-store-set-key()
     local KEY="$1"
     local VALUE="$2"
 
-    local STORE_FILE=$SCBI_DEFS/.store
+    local STORE_FILE=$SCBI_PLUGINS/.store
 
     [[ ! -f $STORE_FILE ]] && touch $STORE_FILE
 

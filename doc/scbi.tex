@@ -235,7 +235,7 @@ An environment is a set of shell variables used to control the build environment
 	\item[SCBI\_VERSION] The scbi driver version string.
 	\\This version is \version.
 
-	\item[SCBI\_DEFS] The directories where the SCBI plug-ins are located. \\Default is \file{$HOME/.config/.scbi}.
+	\item[SCBI\_PLUGINS] The directories where the SCBI plug-ins are located. \\Default is \file{$HOME/.config/scbi}.
 
 	\item[SCBI\_PLAN] The name of the build-plan to use if any.
 
@@ -1331,7 +1331,7 @@ The option to set or retrieve a value is \ddash{}store.
 	\hspace{1.5cm}\texttt{scbi-store-get-key LICKEY}
 \end{itemize}
 
-All keys are stored into the file \file{$SCBI_DEFS/.store} (if using the default environment \file{$HOME/.config/scbi/.store}).
+All keys are stored into the file \file{$SCBI_PLUGINS/.store} (if using the default environment \file{$HOME/.config/scbi/.store}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
@@ -1533,7 +1533,7 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 
 Many scripts come with \code{scbi}, they are all good examples to learn about different features.
 
-As a complete example here, let's build latest GIMP version. The plug-in module script is called \file{gimp} (placed into \file{$SCBI_DEFS/.config/scbi}) and all hook functions in this script are prefixed by \code{gimp-}.
+As a complete example here, let's build latest GIMP version. The plug-in module script is called \file{gimp} (placed into \file{$SCBI_PLUGINS/.config/scbi}) and all hook functions in this script are prefixed by \code{gimp-}.
 
 Note that this was compiling at the time this doc was written, but some dependencies on the OS may required the script to be updated.
 

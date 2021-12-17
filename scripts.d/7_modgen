@@ -11,8 +11,8 @@ function module-apply-patch()
         return 0
     elif [[ -f "$SCBI_PATCH/$PATCH_FILE" ]]; then
         patch="$SCBI_PATCH/$PATCH_FILE"
-    elif [[ -f "$SCBI_DEFS/patches/$PATCH_FILE" ]]; then
-        patch="$SCBI_DEFS/patches/$PATCH_FILE"
+    elif [[ -f "$SCBI_PLUGINS/patches/$PATCH_FILE" ]]; then
+        patch="$SCBI_PLUGINS/patches/$PATCH_FILE"
     else
         elog $MODULE patch filename $(basename $PATCH_FILE) not found
         return 1

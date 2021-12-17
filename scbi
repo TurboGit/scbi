@@ -75,7 +75,7 @@ ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
 
 #  General script setup
 SCBI_DLOG=on-failure
-SCBI_DEFS="$PWD"/scripts.d
+SCBI_PLUGINS="$PWD/scripts.d"
 SCBI_JOBS=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 SCBI_HALF_JOBS=$(( $SCBI_JOBS / 2 ))
 
@@ -123,7 +123,7 @@ DO_RUN=no
 DO_RUN_CMD=
 
 export SCBI_ROOT SCBI_BDIR
-export SCBI_HOST SCBI_TARGET SCBI_DEFS SCBI_JOBS SCBI_HALF_JOBS
+export SCBI_HOST SCBI_TARGET SCBI_PLUGINS SCBI_JOBS SCBI_HALF_JOBS
 export SCBI_IS_WINDOWS SCBI_VERSION SCBI_BINARY
 
 ############################## check-handled
@@ -174,7 +174,7 @@ function load-module-env()
             ENV=$HOME/.scbi-env$1
 
             if [[ ! -f $ENV ]]; then
-                ENV=$SCBI_DEFS/.env$1
+                ENV=$SCBI_PLUGINS/.env$1
             fi
         fi
     fi
@@ -556,7 +556,7 @@ function handle-depends()
 
     #  If module not found, check for a possible distrib package
 
-    if [[ ! -f $SCBI_DEFS/$module ]]; then
+    if [[ ! -f $SCBI_PLUGINS/$module ]]; then
         MES=$(check-pkg $module:$ref)
 
         if [[ $? = 0 ]]; then
@@ -568,11 +568,11 @@ function handle-depends()
             echo "dependencies error building $MNAME"
 
             for dmodule in $(get-all-depends $fmodule $fvariant build-depends); do
-                [[ ! -f $SCBI_DEFS/$dmodule ]] && check-pkg $dmodule
+                [[ ! -f $SCBI_PLUGINS/$dmodule ]] && check-pkg $dmodule
             done
 
             for dmodule in $(get-all-depends $fmodule $fvariant depends); do
-                [[ ! -f $SCBI_DEFS/$dmodule ]] && check-pkg $dmodule
+                [[ ! -f $SCBI_PLUGINS/$dmodule ]] && check-pkg $dmodule
             done
 
             exit 1
@@ -951,7 +951,7 @@ function handle-module()
 
     cd $SCBI_ROOT
 
-    [[ ! -f $SCBI_DEFS/$module ]] &&
+    [[ ! -f $SCBI_PLUGINS/$module ]] &&
         echo "error: no description for module $module" &&
         exit 1
 
@@ -1602,11 +1602,11 @@ while [[ $# -gt 0 ]]; do
             DO_STANDALONE=yes;
             ;;
         --plugins)
-            SCBI_DEFS=$2; shift
-            if [[ ! -d "$SCBI_DEFS" ]] || \
-                   [[ -z "$(ls $SCBI_DEFS/[0-9]* 2> /dev/null)" ]];
+            SCBI_PLUGINS=$2; shift
+            if [[ ! -d "$SCBI_PLUGINS" ]] || \
+                   [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]];
             then
-                echo "$0: no plugins found in $SCBI_DEFS"
+                echo "$0: no plugins found in $SCBI_PLUGINS"
                 exit 1
             fi
             ;;
@@ -1653,13 +1653,13 @@ trap clean-up EXIT
 
 #  Load module definitions
 
-[[ ! -d "$SCBI_DEFS" ]] || [[ -z "$(ls $SCBI_DEFS/[0-9]* 2> /dev/null)" ]] &&
-    SCBI_DEFS=$HOME/.config/scbi
+[[ ! -d "$SCBI_PLUGINS" ]] || [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]] &&
+    SCBI_PLUGINS=$HOME/.config/scbi
 
-[[ ! -d "$SCBI_DEFS" ]] &&
+[[ ! -d "$SCBI_PLUGINS" ]] &&
     echo "$0: cannot find module definition files" && exit 1
 
-#  Load user's environment if any now that SCBI_DEFS is set
+#  Load user's environment if any now that SCBI_PLUGINS is set
 
 load-module-env $ENV_NAME
 
@@ -1678,14 +1678,14 @@ fi
 
 #  Then load any global settings, not overriding user's ones
 
-for setup in $SCBI_DEFS/[0-9]*; do
+for setup in $SCBI_PLUGINS/[0-9]*; do
     source $setup
 done
 
 #  Then load any OS dependent runtime module
 
-[[ -f $SCBI_DEFS/_os_$SCBI_OS_MODULE ]] &&
-    source $SCBI_DEFS/_os_$SCBI_OS_MODULE
+[[ -f $SCBI_PLUGINS/_os_$SCBI_OS_MODULE ]] &&
+    source $SCBI_PLUGINS/_os_$SCBI_OS_MODULE
 
 #  Handle store command
 
@@ -1698,7 +1698,7 @@ fi
 
 if [[ $DO_VERSION = yes ]]; then
     echo "SCBI : $SCBI_VERSION"
-    for file in $(ls $SCBI_DEFS/.scbi*version.txt 2> /dev/null); do
+    for file in $(ls $SCBI_PLUGINS/.scbi*version.txt 2> /dev/null); do
         cat $file
     done
     exit 0

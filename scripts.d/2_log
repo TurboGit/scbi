@@ -226,8 +226,8 @@ function show-command()
     echo "   [[ -f ../.log/env.cmd ]] && source ../.log/env.cmd"
     echo ""
 
-    if [[ -f $SCBI_DEFS/$MODULE ]]; then
-        cp $SCBI_DEFS/$MODULE ../.log
+    if [[ -f $SCBI_PLUGINS/$MODULE ]]; then
+        cp $SCBI_PLUGINS/$MODULE ../.log
         echo "   source ../.log/$MODULE"
     fi
 
