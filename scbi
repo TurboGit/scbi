@@ -855,20 +855,20 @@ function handle-sources()
 
 function handle-meta-module()
 {
-    local metamodule=$1
-    local variant=$2
+    local METAMODULE=$1
+    local VARIANT=$2
 
     #  check for plan
 
-    fn-exists $metamodule-$variant-plan
+    fn-exists $METAMODULE-$VARIANT-plan
 
     if [[ $? = 0 ]]; then
-        SCBI_PLAN=$($metamodule-$variant-plan)
+        SCBI_PLAN=$($METAMODULE-$VARIANT-plan)
         load-module-plan $SCBI_PLAN
     else
-        fn-exists $metamodule-plan
+        fn-exists $METAMODULE-plan
         if [[ $? = 0 ]]; then
-            SCBI_PLAN=$($metamodule-plan)
+            SCBI_PLAN=$($METAMODULE-plan)
             load-module-plan $SCBI_PLAN
         fi
     fi
@@ -876,33 +876,33 @@ function handle-meta-module()
     #  check for dependencies
 
     if [[ $DEPS = yes ]]; then
-        for dmodule in $(get-all-depends $metamodule $variant build-depends); do
-            handle-depends $metamodule $dmodule || exit 1
+        for dmodule in $(get-all-depends $METAMODULE $VARIANT build-depends); do
+            handle-depends $METAMODULE $dmodule || exit 1
         done
     fi
 
     #  check for setup
 
     line-sep
-    ilog $metamodule Metamodule $metamodule-$variant setup | tee -a $log
+    ilog $METAMODULE Metamodule $METAMODULE-$VARIANT setup | tee -a $log
     module-variant-wrapper $SCBI_BDIR/install \
-                           $metamodule $variant setup || exit 1
-    ilog $metamodule End metamodule $metamodule-$variant setup | tee -a $log
+                           $METAMODULE $VARIANT setup || exit 1
+    ilog $METAMODULE End metamodule $METAMODULE-$VARIANT setup | tee -a $log
     line-sep
 
-    local FCT=$(get-hook $metamodule $variant modules)
+    local FCT=$(get-hook $METAMODULE $VARIANT modules)
 
-    for module in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
-        handle-module $metamodule $module || exit 1
+    for module in $($FCT $SCBI_PREFIX $SCBI_TARGET $VARIANT); do
+        handle-module $METAMODULE $module || exit 1
     done
 
     #  check for wrapup
 
     line-sep
-    ilog $metamodule Metamodule $metamodule-$variant wrapup | tee -a $log
+    ilog $METAMODULE Metamodule $METAMODULE-$VARIANT wrapup | tee -a $log
     module-variant-wrapper $SCBI_BDIR/install \
-                           $metamodule $variant wrapup || exit 1
-    ilog $metamodule End metamodule $metamodule-$variant wrapup | tee -a $log
+                           $METAMODULE $VARIANT wrapup || exit 1
+    ilog $METAMODULE End metamodule $METAMODULE-$VARIANT wrapup | tee -a $log
     line-sep
 }
 
