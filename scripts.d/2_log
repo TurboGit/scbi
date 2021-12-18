@@ -1,7 +1,7 @@
 #  keep logs for 4 months (120 days)
 [[ -z $KEEP_LOG_DAYS ]] && KEEP_LOG_DAYS=120
 
-SCBI_LINE_SEP=$(mktemp)
+SCBI_LINE_SEP=$(mktemp -p /dev/shm/)
 echo -n 1 > $SCBI_LINE_SEP
 
 ############################## clog
