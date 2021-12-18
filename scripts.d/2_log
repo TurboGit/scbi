@@ -168,7 +168,7 @@ declare -A SCBI_FCT_DUMPED=[]
 
 function dump-function()
 {
-    local MODULE=$1
+    local PLUGIN=$1
     local NAME=$2
     local FCT=$(type $NAME | sed '1,3d;$d')
 
@@ -185,12 +185,12 @@ function dump-function()
         then
             if [[ -z "${SCBI_FCT_DUMPED[$word]}" ]]; then
                 fn-exists "$word"
-                [[ $? == 0 ]] && dump-function $MODULE $word;
+                [[ $? == 0 ]] && dump-function $PLUGIN $word;
             fi
         fi
     done
 
-    if [[ ${NAME#${MODULE}-} == $NAME ]]; then
+    if [[ ${NAME#${PLUGIN}-} == $NAME ]]; then
         echo
         echo "   function $NAME()"
         echo "   {"
@@ -205,7 +205,7 @@ function dump-function()
 
 function show-command()
 {
-    local MODULE=$1
+    local PLUGIN=$1
     local CMD=$2
     shift
     shift
@@ -227,13 +227,13 @@ function show-command()
     echo "   [[ -f ../.log/env.cmd ]] && source ../.log/env.cmd"
     echo ""
 
-    if [[ -f $SCBI_PLUGINS/$MODULE ]]; then
-        cp $SCBI_PLUGINS/$MODULE ../.log
-        echo "   source ../.log/$MODULE"
+    if [[ -f $SCBI_PLUGINS/$PLUGIN ]]; then
+        cp $SCBI_PLUGINS/$PLUGIN ../.log
+        echo "   source ../.log/$PLUGIN"
     fi
 
     (
-        dump-function $MODULE $CMD
+        dump-function $PLUGIN $CMD
     )
 
     echo ""
