@@ -1,0 +1,74 @@
+
+function hookskindA-common-config-options()
+{
+    echo opt-common
+}
+
+function hookskindA-default-config-options()
+{
+    echo opt-default
+}
+
+function hookskindA-var-config-options()
+{
+    echo opt-var
+}
+
+function hookskindA-config-options()
+{
+    echo opt-std
+}
+
+function hookskindA-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo CONF-STD $(get-config-options $PREFIX $TARGET $VARIANT)
+}
+
+function hookskindA-default-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo CONF-DEF $(get-config-options $PREFIX $TARGET $VARIANT)
+}
+
+function hookskindA-var-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo CONF-VAR $(get-config-options $PREFIX $TARGET $VARIANT)
+}
+
+function hookskindA-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo BUILD-STD
+}
+
+function hookskindA-default-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo BUILD-DEF
+}
+
+function hookskindA-var-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo BUILD-VAR
+}

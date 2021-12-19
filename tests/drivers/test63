@@ -1,0 +1,21 @@
+# check for common / default / variant (config & build hooks)
+
+LDIR=.root/builds/hookskind/build/.log
+
+RUNS ./scbi hookskind
+
+GREP "CONF-DEF opt-common opt-default opt-std" $LDIR/default-config.log
+
+GREP "BUILD-STD" $LDIR/build.log
+
+RUNS ./scbi hookskind/var
+
+GREP "CONF-VAR opt-common opt-var" $LDIR/var-config.log
+
+GREP "BUILD-VAR" $LDIR/var-build.log
+
+RUNS ./scbi hookskind/wxt
+
+GREP "CONF-STD opt-common opt-std" $LDIR/config.log
+
+GREP "BUILD-STD" $LDIR/build.log
