@@ -52,14 +52,30 @@ function ilog()
     echo -n 0 > $SCBI_LINE_SEP
 }
 
+############################## wlog
+
+function wlog()
+{
+    local MODULE=$1
+    local TS=$(date +"%Y/%m/%d %H:%M:%S")
+
+    shift
+    echo >&2 $TS : $*
+    echo $TS : $* >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
+    echo -n 0 > $SCBI_LINE_SEP
+}
+
 ############################## elog
 
 function elog()
 {
     local MODULE=$1
-    shift
+    local TS=$(date +"%Y/%m/%d %H:%M:%S")
 
-    ilog $MODULE $MODULE \(FAILED\) $*
+    shift
+    echo >&2 $TS : $MODULE \(FAILED\) $*
+    echo $TS : $* >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
+    echo -n 0 > $SCBI_LINE_SEP
     return 1
 }
 
