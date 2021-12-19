@@ -34,6 +34,8 @@ function CLEAN-DIFF()
 DIFF
 }
 
+ROOTDIR=$PWD
+
 function run-test()
 {
     local TEST=$1
@@ -41,6 +43,7 @@ function run-test()
 
     cp drivers/$TEST .
     source ./$TEST
+    cd $ROOTDIR
     rm -f $TEST
 }
 
@@ -83,8 +86,6 @@ fi
 cd ..
 
 PLAN 492
-
-ROOTDIR=$PWD
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR
