@@ -495,6 +495,10 @@ function handle-env-callback()
     local IS_EXT=$5
     local IS_META=$6
 
+    #  Only the environment of the dependencies and not self. The env
+    #  hook of a module is only used for clients and not for the module
+    #  itself.
+
     [[ $LEVEL -ge 1 ]] &&
         handle-module-env $FORMODULE $MODREF env
 }
@@ -1160,7 +1164,7 @@ function handle-module()
 
         #  Check if envrionment is to be done for out-of-tree build
 
-        FCT=$(get-hook $module $variant out-of-tree)
+        local FCT=$(get-hook $module $variant out-of-tree)
 
         [[ ! -z $FCT ]] &&
             [[ $($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
@@ -1346,7 +1350,7 @@ function handle-module()
 
     local _IDIR=""
 
-    FCT=$(get-hook $module $variant prefix)
+    local FCT=$(get-hook $module $variant prefix)
 
     if [[ "$FCT" != "" ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
         _IDIR=$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
