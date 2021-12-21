@@ -587,11 +587,13 @@ function handle-depends()
 
     load-module $MODREF
 
-    fn-exists $module-version
-    if [[ $? = 0 ]]; then
+    local mver=0
+    local FCT=$(get-hook $module $variant version)
+
+    if [[ ! -z $FCT ]]; then
         pushd $(mktemp -d) > /dev/null 2>&1
 
-        mver=$($module-version $SCBI_PREFIX $SCBI_TARGET)
+        mver=$($FCT $SCBI_PREFIX $SCBI_TARGET)
 
         [[ "${PWD:0:4}" = "/tmp" ]] && rm -r $(pwd)
 
