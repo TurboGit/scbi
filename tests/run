@@ -78,14 +78,14 @@ mkdir -p $PWD/logs
 . osht
 
 cd drivers
-if [ -z $1 ]; then
+if [ -z "$1" ]; then
     TESTS=( test?? )
 else
     TESTS=( $* )
 fi
 cd ..
 
-PLAN 492
+PLAN 502
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR

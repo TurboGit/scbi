@@ -284,6 +284,10 @@ function get-module-ref()
     local MODREF=$1
     local FORMODULE=${2:-"@root"}
 
+    #  Remove variants and version
+    FORMODULE=${FORMODULE/:*/}
+    FORMODULE=${FORMODULE/\/*/}
+
     local module_info=( $(parse-module-ref $MODREF) )
     local module=${module_info[0]}
 

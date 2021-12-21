@@ -3,8 +3,6 @@ mkdir -p .root/builds/gentool
 RUNS ./scbi --verbose --deps --tests usetool
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : need building gentool, current version latest
-
 xxxx/xx/xx xx:xx:xx : Building gentool [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup

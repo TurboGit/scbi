@@ -132,12 +132,12 @@ export SCBI_IS_WINDOWS SCBI_VERSION SCBI_BINARY
 
 function check-handled()
 {
-    local MODULE=$1
+    local KEY=$1
 
-    grep "^$MODULE" $HANDLED &> /dev/null
+    grep "^$KEY" $HANDLED &> /dev/null
 
     if [[ $? = 1 ]]; then
-        echo $MODULE >> $HANDLED
+        echo "$KEY" >> $HANDLED
         return 0
     else
         return 1
@@ -520,6 +520,107 @@ function handle-env()
     for-all-modules handle-env-callback $MODREF
 }
 
+############################## is-module-up-to-date
+
+function is-module-up-to-date()
+{
+    local MODREF=$1
+    local FORMODULE=$2
+
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    load-module $MODREF
+
+    local mver=$VERSION_ERROR
+
+    #  Get the version hook, if none present all version are ok
+
+    local FCT=$(get-hook $module $variant version)
+
+    if [[ ! -z $FCT ]]; then
+        pushd $(mktemp -d) > /dev/null 2>&1
+
+        mver=$($FCT $SCBI_PREFIX $SCBI_TARGET)
+
+        [[ "${PWD:0:4}" = "/tmp" ]] && rm -r $(pwd)
+
+        popd > /dev/null 2>&1
+    else
+        mver=$VERSION_OK
+    fi
+
+    local SID=""
+
+    if [[ $variant == "native" ]]; then
+        #  A native variant
+        SID="native"
+    elif [[ -e $SCBI_BDIR/$module/src ]]; then
+        #  A VCS or TAR
+        case "$kind" in
+            NONE|BRANCH)
+                SID="vcs-$ref"
+                ;;
+            VERSION)
+                SID="tar-$ref"
+                ;;
+            DEV)
+                SID="$ref"
+                ;;
+        esac
+    else
+        #  No sources
+        SID="none-$ref"
+    fi
+
+    local rsid=1
+
+    #  If we have a source-id check if the content corresponds to SID
+
+    [[ -f $SCBI_BDIR/$module/source-id ]] &&
+        [[ "$(cat $SCBI_BDIR/$module/source-id)" == $SID ]] &&
+            rsid=0;
+
+    #  Clean-up the version number (only digits and a single dot)
+
+    mver=$(get-version-number $mver)
+
+    if [[ "${ref^^}" = "NONE" ]]; then
+        ref=0
+    else
+        ref=$(get-version-number $ref)
+    fi
+
+    [[ $DO_FORCE = yes ]] &&
+        rm -f $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id
+
+    #  Check build id, only rebuild if mismatch
+
+    diff -q $SCBI_BDIR/$module/build-id-$variant \
+            $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
+    local rbid=$?
+
+    check-versions "$ref" ">" "$mver"
+    local cver=$?
+
+    if [[ $rbid -gt 0 ]]                  ||
+           [[ $rsid -gt 0 ]]              ||
+           [[ "$mver" = "" ]]             ||
+           [[ "$mver" = $VERSION_ERROR ]] ||
+           [[ $cver == 0 ]];
+    then
+        # Rebuild needed, $? = 1
+        false
+    else
+        # Rebuild not needed, $? = 0
+        true
+    fi
+}
+
 ############################## handle-depends
 #
 # check for module dependencies, handle them if build scripts found for
@@ -583,78 +684,7 @@ function handle-depends()
         fi
     fi
 
-    #  Check if the proper version is installed
-
-    load-module $MODREF
-
-    local mver=0
-    local FCT=$(get-hook $module $variant version)
-
-    if [[ ! -z $FCT ]]; then
-        pushd $(mktemp -d) > /dev/null 2>&1
-
-        mver=$($FCT $SCBI_PREFIX $SCBI_TARGET)
-
-        [[ "${PWD:0:4}" = "/tmp" ]] && rm -r $(pwd)
-
-        popd > /dev/null 2>&1
-    else
-        mver=$VERSION_OK
-    fi
-
-    #  Clean-up the version number (only digits and a single dot)
-
-    mver=$(get-version-number $mver)
-
-    cd $SCBI_ROOT
-
-    case "$kind" in
-        NONE)
-            SID="vcs-$ref"
-            ;;
-        TAR)
-            SID="tar-$ref"
-            ;;
-    esac
-
-    if [[ -f source-id ]]; then
-        if [[ "$(cat source-id)" == $SID ]]; then
-            rsid=0;
-        else
-            rsid=1;
-        fi
-    else
-        rsid=1;
-    fi
-
-    [[ "${ref^^}" = "NONE" ]] && ref=0
-
-    [[ $DO_FORCE = yes ]] &&
-        rm -f $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id
-
-    #  Check build id, only rebuild if mismatch
-
-    diff -q $SCBI_BDIR/$module/build-id-$variant \
-            $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
-    rbid=$?
-
-    check-versions $ref ">" $mver
-    cver=$?
-
-    if [[ $rbid -gt 0 \
-              || $rsid -gt 0 \
-              || "$mver" = "" \
-              || "$mver" = $VERSION_ERROR \
-              || $cver == 1 ]];
-    then
-        if [[ $DRY_RUN == no ]] && [[ $DO_VERBOSE = yes ]]; then
-            ilog $module need building $module, \
-                 current version $(display-version $mver) | tee -a $log
-        fi
-        handle-module $fmodule $MODREF
-    else
-        ilog $module $MODREF found
-    fi
+    handle-module $fmodule $MODREF
 }
 
 ############################## handle-sources
@@ -676,7 +706,11 @@ function handle-sources()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    [[ "$variant" = "native" ]] && return 0;
+    [[ "$variant" = "native" ]] &&
+        {
+            echo -n "native" > source-id
+            return 0;
+        }
 
     #  Check if a given tar exists even if a standard branch ref has
     #  been provided. This is an optimization to used a local tar
@@ -838,6 +872,8 @@ function handle-sources()
             return 0
 
         else
+            echo -n "none-$ref" > source-id
+
             #  No VCS, no TAR, just rebuild the sources if present
             if [[ ! -d src ]]; then
                 ilog $module "no sources (vcs or tar)"
@@ -936,24 +972,19 @@ function handle-module()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
+    #  If already handled, nothing more to do
+
+    check-handled "$module+$variant+$ref"
+    [[ $? = 1 ]] && return
+
     #  If this module is marked as to be skipped
 
     if [[ "$ref" == "skip" ]]; then
-        ilog $module skip $module, marked to be skipped
+        ilog $module Module $module marked to be skipped
         return
     fi
 
     log=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-$variant-report.log
-
-    #  Check if we have already handled this module
-
-    check-handled $module+$variant
-    if [[ $? = 1 ]]; then
-        if [[ $DRY_RUN == no ]] && [[ $DO_VERBOSE = yes ]]; then
-            ilog $module skip $module, already handled
-        fi
-        return
-    fi
 
     cd $SCBI_ROOT
 
@@ -1172,14 +1203,6 @@ function handle-module()
             [[ $($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
                       $module $variant) = "false" ]] && ISOOT=no
 
-        #  Call module routines
-
-        #  If force build, remove the current build id
-
-        [[ $DO_FORCE = yes ]] && rm -f $SCBI_TARGET-$variant/build-id
-
-        #  Check build id, only rebuild if mismatch
-
         #  make sure the current build softlink is pointing to
         #  the variant. this is needed as the setup won't be
         #  done.
@@ -1188,8 +1211,9 @@ function handle-module()
         [[ -h build ]] && rm build
         ln -s $SCBI_TARGET-$variant build
 
-        diff -q build-id-$variant \
-             $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
+        #  Only rebuild if mismatch
+
+        is-module-up-to-date $MODREF $FORMODULE
 
         if [[ $? = 0 ]]; then
             ilog $module no build needed, versions match

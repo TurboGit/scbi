@@ -15,8 +15,6 @@ RUNS ./scbi --purge:only lib1 lib2
 RUNS ./scbi -v --no-patch --tests --plan=v2 --deps mainmult:dev
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
-
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v2)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
@@ -31,8 +29,6 @@ liba.D br_b
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v2)
-
-xxxx/xx/xx xx:xx:xx : need building lib2, current version latest
 
 xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -71,8 +67,6 @@ EOF
 RUNS ./scbi -v --no-patch --tests --plan=dev --deps mainmult:dev
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : need building lib1, current version latest
-
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
