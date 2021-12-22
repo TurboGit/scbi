@@ -417,7 +417,7 @@ The following options are supported:
 \begin{description}[font=\texttt]
 	\item[-h | \ddash{}help] List options and usage information.
 
-	\item[\ddash{}version] Display version information of the SCBI driver and versions from plug-ins distributions coming from other sources\footnote{Note that for this to be supported the plug-ins distribution must have generated and installed a file name \file{.scbi*version.txt} next to the plug-ins.}.
+	\item[-v | \ddash{}version] Display version information of the SCBI driver and versions from plug-ins distributions coming from other sources\footnote{Note that for this to be supported the plug-ins distribution must have generated and installed a file name \file{.scbi*version.txt} next to the plug-ins.}.
 
 	\item[\ddash{}prefix=<dir>] The installation directory to use instead of the default \file{$SCBI_PREFIX}.
 
@@ -459,9 +459,7 @@ The following options are supported:
 
 	\item[-a | \ddash{}archive] Build binary archive when build is successful.
 
-    \item[\ddash{}standalone] Create a standalone source archive
-
-	\item[-v | \ddash{}verbose] Display some more information while building.
+        \item[\ddash{}standalone] Create a standalone source archive
 
 	\item[-l | \ddash{}log:{[}yes|no|on-failure{]}] Control the log level to display. The default is \code{on-failure} which displays the command log only in case of failure.
 
