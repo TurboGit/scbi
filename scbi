@@ -101,7 +101,6 @@ DO_EXT=no
 DO_CLEAN_INSTALL=no
 DO_LIST_VER=yes
 DO_PLAN=no
-DO_VERBOSE=no
 DO_STORE=no
 DEPS=no
 ISOOT=yes
@@ -312,6 +311,7 @@ function usage()
     echo "   modulen  <name>:dev       build from user's repository current branch"
     echo ""
     echo "   -h | --help             this help message"
+    echo "   -v | --version          display driver & plug-ins versions"
     echo "   -t | --prefix=<dir>     the global install directory"
     echo "      | --build-dir=<dir>  the root build directory."
     echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
@@ -321,7 +321,6 @@ function usage()
     echo "      | --plugins=<dir>    specify the modules/plugins directory"
     echo "      | --store KEY [VAL]  set or retrieved private store data"
     echo "   -j | --jobs=<n>         max compilation jobs \$SCBI_JOBS"
-    echo "   -v | --verbose          display full log"
     echo "   -S | --no-setup         skip setup"
     echo "   -I | --no-install       skip install"
     echo "   -u | --update           do update"
@@ -1453,7 +1452,7 @@ ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpvwWh \
                  -l store,target:,no-setup,no-install,update,setup,config \
                  -l build,build-target:,install,clean-install,tar \
                  -l log,log:yes,log:no,log:on-failure,purge,purge:only \
-                 -l verbose,prefix:,tests,tests:only,help,deps \
+                 -l prefix:,tests,tests:only,help,deps \
                  -l archive,force,env:,no-patch,plan:,stat,stat:full \
                  -l list-depends:direct,list-depends:full,list-depends \
                  -l list-externals,list-externals:only,list-no-version \
@@ -1478,7 +1477,7 @@ while [[ $# -gt 0 ]]; do
             DO_HELP=yes
             break
             ;;
-        --version)
+        -v|--version)
             DO_VERSION=yes
             break
             ;;
@@ -1558,9 +1557,6 @@ while [[ $# -gt 0 ]]; do
         --tests:only)
             NSTEPS="$NSTEPS tests"
             DO_TEST=yes-only
-            ;;
-        -v|--verbose)
-            DO_VERBOSE=yes
             ;;
         -p|--purge)
             DO_PURGE=yes
