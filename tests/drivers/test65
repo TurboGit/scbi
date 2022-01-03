@@ -1,0 +1,83 @@
+
+# Build v1
+
+RUNS ./scbi modver:v1
+
+CLEAN-DIFF <<EOF
+2021/12/21 14:05:45 : Building modver [default] (v1)
+2021/12/21 14:05:45 : native x86_64-linux-gnu
+2021/12/21 14:05:45 : steps : setup config build install wrapup
+2021/12/21 14:05:45 : get sources from git
+2021/12/21 14:05:45 : config starting
+2021/12/21 14:05:45 : config completed
+2021/12/21 14:05:45 : build starting
+2021/12/21 14:05:45 : build completed
+2021/12/21 14:05:45 : install starting
+2021/12/21 14:05:45 : install completed
+2021/12/21 14:05:45 : End Building modver [default] (v1)
+EOF
+
+# Build v1 again, no build all matches
+
+RUNS ./scbi modver:v1
+
+CLEAN-DIFF <<EOF
+2021/12/21 14:05:45 : Building modver [default] (v1)
+2021/12/21 14:05:45 : native x86_64-linux-gnu
+2021/12/21 14:05:45 : steps : setup config build install wrapup
+2021/12/21 14:05:45 : no build needed, versions match
+2021/12/21 14:05:45 : End Building modver [default] (v1)
+EOF
+
+# Build v2
+
+RUNS ./scbi modver:v2
+
+CLEAN-DIFF <<EOF
+2021/12/21 14:05:45 : Building modver [default] (v2)
+2021/12/21 14:05:45 : native x86_64-linux-gnu
+2021/12/21 14:05:45 : steps : setup config build install wrapup
+2021/12/21 14:05:46 : get sources from git
+2021/12/21 14:05:46 : config starting
+2021/12/21 14:05:46 : config completed
+2021/12/21 14:05:46 : build starting
+2021/12/21 14:05:46 : build completed
+2021/12/21 14:05:46 : install starting
+2021/12/21 14:05:46 : install completed
+2021/12/21 14:05:46 : End Building modver [default] (v2)
+EOF
+
+# Build v2 variant var
+
+RUNS ./scbi modver/var:v2
+
+CLEAN-DIFF <<EOF
+2021/12/21 14:05:46 : Building modver [var] (v2)
+2021/12/21 14:05:46 : native x86_64-linux-gnu
+2021/12/21 14:05:46 : steps : setup config build install wrapup
+2021/12/21 14:05:46 : config [var] starting
+2021/12/21 14:05:46 : config [var] completed
+2021/12/21 14:05:46 : build [var] starting
+2021/12/21 14:05:46 : build [var] completed
+2021/12/21 14:05:46 : install [var] starting
+2021/12/21 14:05:46 : install [var] completed
+2021/12/21 14:05:46 : End Building modver [var] (v2)
+EOF
+
+# Build v2 variant var again, the build is done again as the version
+# of the module is reported as 0.5 whereas the requested version is 2.
+
+RUNS ./scbi modver/var:v2
+
+CLEAN-DIFF <<EOF
+2021/12/21 14:05:46 : Building modver [var] (v2)
+2021/12/21 14:05:46 : native x86_64-linux-gnu
+2021/12/21 14:05:46 : steps : setup config build install wrapup
+2021/12/21 14:05:47 : config [var] starting
+2021/12/21 14:05:47 : config [var] completed
+2021/12/21 14:05:47 : build [var] starting
+2021/12/21 14:05:47 : build [var] completed
+2021/12/21 14:05:47 : install [var] starting
+2021/12/21 14:05:47 : install [var] completed
+2021/12/21 14:05:47 : End Building modver [var] (v2)
+EOF
