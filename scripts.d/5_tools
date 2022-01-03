@@ -404,7 +404,10 @@ function _internal_for-all-modules()
                     $CALLBACK $FORMODULE $PKGNAME $LEVEL \
                               $IS_BUILD_DEPENDS true $IS_META $@
             else
-                check-pkg $module:$ref || exit 1
+                check-pkg $module:$ref
+                if [[ $? == 1 ]] && [[ $DO_WARNING_EXTERNAL == no ]]; then
+                    exit 1
+                fi
             fi
         fi
     fi

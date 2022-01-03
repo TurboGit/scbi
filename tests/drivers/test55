@@ -4,7 +4,7 @@
 NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcross/opta
 
 DIFF <<EOF
-dependencies error building mcross/opta
+error: missing dependencies for building mcross/opta
 error: cross-opta not found
 EOF
 
@@ -12,7 +12,7 @@ EOF
 NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcross/optb:v8
 
 DIFF <<EOF
-dependencies error building mcross/optb
+error: missing dependencies for building mcross/optb
 error: cross-optb not found
 EOF
 
@@ -20,7 +20,7 @@ EOF
 NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcross/opta.optb
 
 DIFF <<EOF
-dependencies error building mcross/opta.optb
+error: missing dependencies for building mcross/opta.optb
 error: cross-opta not found
 error: cross-optb not found
 EOF
@@ -29,7 +29,7 @@ EOF
 NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcross
 
 DIFF <<EOF
-dependencies error building mcross
+error: missing dependencies for building mcross
 error: cross-general not found
 EOF
 
@@ -37,7 +37,7 @@ EOF
 NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcrossc/opta
 
 DIFF <<EOF
-dependencies error building mcrossc/opta
+error: missing dependencies for building mcrossc/opta
 error: crossc-common not found
 error: crossc-opta not found
 EOF
@@ -46,7 +46,7 @@ EOF
 NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcrossc/optb:v8
 
 DIFF <<EOF
-dependencies error building mcrossc/optb
+error: missing dependencies for building mcrossc/optb
 error: crossc-common not found
 error: crossc-optb not found
 EOF
@@ -55,7 +55,7 @@ EOF
 NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcrossc/opta.optb
 
 DIFF <<EOF
-dependencies error building mcrossc/opta.optb
+error: missing dependencies for building mcrossc/opta.optb
 error: crossc-common not found
 error: crossc-opta not found
 error: crossc-optb not found
@@ -65,7 +65,7 @@ EOF
 NRUNS ./scbi --deps --target=x86_64-pc-mingw32 mcrossc
 
 DIFF <<EOF
-dependencies error building mcrossc
+error: missing dependencies for building mcrossc
 error: crossc-common not found
 error: crossc-general not found
 EOF

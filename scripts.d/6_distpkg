@@ -377,23 +377,27 @@ function check-pkg()
     local version=${name_ver[1]}
     local cpres=0
 
+    local MSG="error"
+
+    [[ $DO_WARNING_EXTERNAL == yes ]] && MSG="warning"
+
     for distname in $(get-pkg-name "$pkg"); do
         check-${SCBI_LINUX_DISTRIB}-pkg $distname $version
 
         local res=$?
 
         if [[ $res = $SCBI_PKG_NOT_FOUND ]]; then
-            echo "error: $distname not found"
+            echo "$MSG: $distname not found"
             cpres=2
         elif [[ $res = $SCBI_PKG_NOT_INSTALLED ]]; then
             if [[ $version == NONE ]]; then
-                echo "error: $distname should be installed"
+                echo "$MSG: $distname should be installed"
             else
-                echo "error: $distname:$version should be installed"
+                echo "$MSG: $distname:$version should be installed"
             fi
             cpres=1
         elif [[ $res = $SCBI_PKG_VERSION_NOK ]]; then
-            echo "error: $distname:$version should be installed"
+            echo "$MSG: $distname:$version should be installed"
             cpres=1
         fi
     done
