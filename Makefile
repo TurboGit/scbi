@@ -7,7 +7,9 @@ SCRDIR=$(HOME)/.config/scbi
 CORE_SHA1=$(shell git log -1 --format="%h" -- scbi scripts.d/[0-9]* \
 	scripts.d/_os_*)
 CORE_VER=$(shell git describe $(CORE_SHA1))
-VER=$(shell git describe)
+
+PLG_SHA1=$(shell git log -1 --format="%h" -- scripts.d/c-* scripts.d/patches)
+PLG_VER=$(shell git describe $(PLG_SHA1))
 
 install: all
 
@@ -18,7 +20,7 @@ all: clean.install
 	mkdir -p $(SCRDIR)
 	rm -f $(SCRDIR)/*~ $(SCRDIR)/.*~ scripts.d/*~ scripts.d/.*~
 	cp -r scripts.d/* scripts.d/.[a-z]* $(SCRDIR)
-	echo "CORE plugins : ${VER}" > $(SCRDIR)/.scbi_core_version.txt
+	echo "CORE plugins : ${PLG_VER}" > $(SCRDIR)/.scbi_core_version.txt
 
 	cd scripts.d; find . -type f > $(SCRDIR)/.core.plugins
 	cp bash_completion.d/scbi $(HOME)/.bash_completion.d/
@@ -41,6 +43,6 @@ test-clean:
 	make -C tests clean
 
 doc: force
-	make CORE_SHA1=$(CORE_SHA1) -C doc
+	make CORE_VER=$(CORE_VER) -C doc
 
 force:
