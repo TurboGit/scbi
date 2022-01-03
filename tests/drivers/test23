@@ -5,7 +5,7 @@ mkdir -p .root/builds/recb
 mkdir -p .root/builds/recc
 
 # ========== deps A
-NRUNS ./scbi -v --deps reca
+NRUNS ./scbi --deps reca
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building recc [default] (master)

@@ -12,7 +12,7 @@ RUNS ./scbi --purge:only lib1 lib2
 )
 
 # =================== plan v2 (lib1:v2 lib2 & mainmult:dev)
-RUNS ./scbi -v --no-patch --tests --plan=v2 --deps mainmult:dev
+RUNS ./scbi --no-patch --tests --plan=v2 --deps mainmult:dev
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v2)
@@ -64,7 +64,7 @@ xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (dev)
 EOF
 
 # =================== plan v2 (lib1:v2 lib2:dev & mainmult:dev)
-RUNS ./scbi -v --no-patch --tests --plan=dev --deps mainmult:dev
+RUNS ./scbi --no-patch --tests --plan=dev --deps mainmult:dev
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)

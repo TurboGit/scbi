@@ -4,7 +4,7 @@
 RUNS ./scbi --no-patch lib1
 
 # ============ build mainlib + deps (no compilation of lib1 expected)
-RUNS ./scbi --verbose --no-patch --tests --deps mainlib
+RUNS ./scbi --no-patch --tests --deps mainlib
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
@@ -35,7 +35,7 @@ xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
 EOF
 
 # ============ re-build lib1 on v1
-RUNS ./scbi --verbose --no-patch --tar lib1:v1
+RUNS ./scbi --no-patch --tar lib1:v1
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
@@ -51,7 +51,7 @@ xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
 EOF
 
 # ============ build mainlib + deps (compilation of lib1 expected)
-RUNS ./scbi --verbose --no-patch --tests --deps mainlib
+RUNS ./scbi --no-patch --tests --deps mainlib
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)

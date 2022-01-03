@@ -1,6 +1,6 @@
 mkdir -p .root/builds/gentool
 
-RUNS ./scbi --verbose --deps --tests usetool
+RUNS ./scbi --deps --tests usetool
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building gentool [default] (master)

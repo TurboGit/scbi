@@ -5,7 +5,7 @@ RUNS ./scbi --no-patch --purge:only lib1
 RUNS ./scbi --no-patch --purge:only lib2
 
 # =================== plan v2 (lib1:v2 lib2)
-RUNS ./scbi -v --no-patch --tests --plan=v2 --deps mainmult
+RUNS ./scbi --no-patch --tests --plan=v2 --deps mainmult
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v2)
@@ -58,7 +58,7 @@ xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
 EOF
 
 # =================== plan var (lib1:v1 lib2/variant1:v2)
-RUNS ./scbi -v --no-patch --tests --plan=var --deps mainmult
+RUNS ./scbi --no-patch --tests --plan=var --deps mainmult
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
@@ -110,7 +110,7 @@ xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
 EOF
 
 # =================== second run plan var (no build)
-RUNS ./scbi -v --no-patch --tests --plan=var --deps mainmult
+RUNS ./scbi --no-patch --tests --plan=var --deps mainmult
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
@@ -149,7 +149,7 @@ xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
 EOF
 
 # =================== second run plan var (test:only)
-RUNS ./scbi -v --no-patch --tests:only --plan=var --deps mainmult
+RUNS ./scbi --no-patch --tests:only --plan=var --deps mainmult
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
