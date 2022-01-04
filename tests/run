@@ -34,7 +34,7 @@ function CLEAN-DIFF()
 DIFF
 }
 
-ROOTDIR=$PWD
+export ROOTDIR=$PWD
 
 function run-test()
 {
@@ -85,7 +85,7 @@ else
 fi
 cd ..
 
-PLAN 506
+PLAN 512
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR

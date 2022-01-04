@@ -1,0 +1,33 @@
+
+function dltar-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo cp
+    echo $ROOTDIR/.root/.store
+    echo dltar-src.tar.bz2
+}
+
+function dltar-out-of-tree()
+{
+    echo false
+}
+
+function dltar-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $PREFIX/bin
+    cp script $PREFIX/bin
+}
+
+function dltar-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./script
+    return 0
+}

@@ -725,7 +725,7 @@ function handle-sources()
     #  been provided. This is an optimization to used a local tar
     #  instead of a repository branch.
 
-    if [[ $kind == BRANCH && "$TAR_CACHE" == "yes" ]]; then
+    if [[ $kind == BRANCH ]] && [[ "$TAR_CACHE" == "yes" ]]; then
         check-tar-exists $module $variant $ref
         [[ $? == 0 ]] && kind=VERSION
     fi
@@ -767,11 +767,15 @@ function handle-sources()
 
         echo -n "tar-$ref" > source-id
 
-        #  Compute and store the version id of the sources + compiler.
-        #  That is when the compiler is changed when want to rebuild
-        #  the software.
+        #  Compute and store the version id of the sources. This includes the
+        #  tar sha1 if present to ensure a tar with the same name but different
+        #  content will trigger a build.
+
+        local tar_sha1=""
+        [[ -e tar-sha1 ]] && tar_sha1=$(cat tar-sha1)
+
         get-build-id $SCBI_PREFIX $SCBI_TARGET \
-                     $FORMODULE $MODREF tar-$ref > build-id-$variant
+                     $FORMODULE $MODREF tar-$ref$tar_sha1 > build-id-$variant
 
         #  We set the link for the source so that no module will have to
         #  do it.

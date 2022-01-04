@@ -765,8 +765,7 @@ function get-tar()
 
     #  The tarball is not present, try downloading it
 
-    if [[ ! -f $SCBI_TAR/$tarsrc ]]     \
-           && [[ "$tarcp" != "none" ]]  \
+    if [[ "$tarcp" != "none" ]]  \
            && [[ "$tarurl" != "none" ]];
     then
         (
@@ -778,17 +777,56 @@ function get-tar()
 
             set-proxy $proxy
 
+            local do_download=no
+
+            #  Get SHA-1 if present
+
             if [[ $tarcp == wget ]]; then
-                $tarcp $tarurl/$tarsrc -O $SCBI_TAR/$tarsrc > $log 2>&1
+                $tarcp $tarurl/$tarsrc.sha1 \
+                       -O /tmp/$tarsrc.sha1 > $log 2>&1
             elif  [[ $tarcp == curl ]]; then
-                $tarcp $tarurl/$tarsrc --output $SCBI_TAR/$tarsrc > $log 2>&1
+                $tarcp $tarurl/$tarsrc.sha1 \
+                       --output /tmp/$tarsrc.sha1 > $log 2>&1
+            elif  [[ $tarcp == cp ]] || [[ $tarcp == scp ]]; then
+                $tarcp $tarurl/$tarsrc.sha1 \
+                       /tmp/$tarsrc.sha1 > $log 2>&1
             else
-                elog $MODULE error: unknown tar protocol $tarcp
+                false
             fi
 
-            [[ ! $? = 0 ]] &&
-                rm -f $SCBI_TAR/$tarsrc &&
-                elog $MODULE error: cannot get tar: $tarcp
+            #  Check SHA1 if found, check up-to-date
+
+            if [[ $? == 0 ]]; then
+                diff -q $SCBI_TAR/$tarsrc.sha1 \
+                     /tmp/$tarsrc.sha1 > /dev/null 2>&1
+
+                if [[ $? != 0 ]]; then
+                    cp /tmp/$tarsrc.sha1 $SCBI_TAR/$tarsrc.sha1
+                    do_download=yes
+                fi
+            fi
+
+            rm -f /tmp/$tarsrc.sha1
+
+            if [[ $do_download == yes ]]; then
+                if [[ $tarcp == wget ]]; then
+                    $tarcp $tarurl/$tarsrc \
+                           -O $SCBI_TAR/$tarsrc > $log 2>&1
+                elif  [[ $tarcp == curl ]]; then
+                    $tarcp $tarurl/$tarsrc \
+                           --output $SCBI_TAR/$tarsrc > $log 2>&1
+                elif  [[ $tarcp == cp ]] || [[ $tarcp == scp ]]; then
+                    $tarcp $tarurl/$tarsrc \
+                           $SCBI_TAR/$tarsrc > $log 2>&1
+                else
+                    elog $MODULE error: unknown tar protocol $tarcp
+                fi
+
+                if [[ $? -ne 0 ]]; then
+                    rm -f $SCBI_TAR/$tarsrc $SCBI_TAR/$tarsrc.sha1
+                    elog $MODULE error: cannot get tar: $tarcp
+                fi
+            fi
         )
     fi
 
@@ -801,8 +839,12 @@ function get-tar()
 
     cd $SCBI_BDIR/$MODULE
 
-    rm -fr tarsrc tar > $log 2>&1
-    ( rm -fr tartmp && mkdir -p tartmp ) > $log 2>&1
+    {
+        rm -fr tarsrc tar tar-sha1
+        rm -fr tartmp
+        mkdir -p tartmp
+    } > $log 2>&1
+
     cd tartmp
 
     tar xf $SCBI_TAR/$tarsrc
@@ -813,6 +855,9 @@ function get-tar()
         cd ..
         rmdir tartmp
         ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc) tar
+        [[ -f $SCBI_TAR/$tarsrc.sha1 ]] &&
+            ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc.sha1) \
+               tar-sha1
     else
         elog $MODULE error: no top directory found
         res=1
