@@ -8,7 +8,7 @@ function load-module-plan()
 {
     local NAMEREF=$1
 
-    local VARIANT=${NAMEREF##*/}
+    local VARIANT=${NAMEREF#*/}
 
     if [[ $VARIANT == $NAMEREF ]]; then
         VARIANT=""
@@ -235,7 +235,7 @@ function parse-module-ref()
 
     #  check version
 
-    local ver=${MODREF##*:}
+    local ver=${MODREF#*:}
 
     if [[ $ver == $MODREF ]]; then
         #  no version specified
@@ -257,10 +257,10 @@ function parse-module-ref()
             local version=$ver
         fi
 
-        module=${MODREF%:*}
+        module=${MODREF%%:*}
     fi
 
-    local variant=${module##*/}
+    local variant=${module#*/}
 
     if [[ $variant == $module ]]; then
         #  no variant
