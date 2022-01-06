@@ -54,10 +54,12 @@ function load-module-plan()
                     local module_info=( $(parse-module-ref $mod) )
                     local module=${module_info[0]}
                     local variant=${module_info[1]}
+                    local kind=${module_info[2]}
                     local version=${module_info[3]}
 
                     local ref_info=( $(parse-module-ref "name$REF") )
                     local rvariant=${ref_info[1]}
+                    local rkind=${ref_info[2]}
                     local rversion=${ref_info[3]}
 
                     local FREF=""
@@ -71,9 +73,17 @@ function load-module-plan()
                     fi
 
                     if [[ $rversion != NONE ]]; then
-                        FREF="$FREF:$rversion"
+                        if [[ $rkind == VERSION ]]; then
+                            FREF="$FREF:#$rversion"
+                        else
+                            FREF="$FREF:$rversion"
+                        fi
                     elif [[ $version != NONE ]]; then
-                        FREF="$FREF:$version"
+                        if [[ $kind == VERSION ]]; then
+                            FREF="$FREF:#$version"
+                        else
+                            FREF="$FREF:$version"
+                        fi
                     fi
 
                     MODVER[$module]=${module}${FREF}

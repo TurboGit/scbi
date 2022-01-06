@@ -1,0 +1,32 @@
+
+modA
+modB:vA
+modC/new:vB
+
+[
+        modD:#12
+]
+
+[
+        modE:#13
+] :#56
+
+[
+        modF:#14:xx
+] /speed
+
+[
+        modG:#15
+] :9
+
+[
+        modH:#16
+] /new:#1
+
+[
+        modI:#17
+] /new:1
+
+[
+        modJ/red:#17
+] :#6
