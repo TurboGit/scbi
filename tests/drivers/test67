@@ -41,6 +41,29 @@ Script 1
 2022/01/04 19:22:12 : End Building dltar [default] (0)
 EOF
 
+#  Remove tarball, should be downloaded again
+
+rm -f .root/.tar/dltar-src.tar.bz2
+
+RUNS ./scbi --tests --update dltar:#0
+
+CLEAN-DIFF <<EOF
+2022/01/04 19:22:12 : Building dltar [default] (0)
+2022/01/04 19:22:12 : native x86_64-linux-gnu
+2022/01/04 19:22:12 : steps : setup config build install tests wrapup
+2022/01/04 19:22:12 : get sources from tar
+2022/01/04 19:22:12 : no build needed, versions match
+2022/01/04 19:22:12 : tests starting
+Script 1
+2022/01/04 19:22:12 : tests completed
+2022/01/04 19:22:12 : copy install into <sandbox>/install
+2022/01/04 19:22:12 : End Building dltar [default] (0)
+EOF
+
+#  Check if it was downloaded again (even if identical to previous build and
+#  so it is expected above the see "no build needed".
+IS $(grep extract .root/builds/.logs/x86_64-linux-gnu-build-report.log | wc -l) == 2
+
 #  Update sha-1, same report should now be changed with new tarball
 
 cp .root/.store/dltar-2-src.tar.bz2.sha1 .root/.store/dltar-src.tar.bz2.sha1

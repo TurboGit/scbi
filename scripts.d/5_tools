@@ -765,19 +765,19 @@ function get-tar()
 
     #  The tarball is not present, try downloading it
 
-    if [[ "$tarcp" != "none" ]]  \
-           && [[ "$tarurl" != "none" ]];
+    if [[ "${tarcp^^}" != "NONE" ]]  \
+           && [[ "${tarurl^^}" != "NONE" ]];
     then
-        (
-            check-tool $tarcp
-            if [[ $? != 0 ]]; then
-                elog $MODULE Required tool $tarcp missing
-                exit 1
-            fi
+        check-tool $tarcp
+        if [[ $? != 0 ]]; then
+            elog $MODULE Required tool $tarcp missing
+            return 1
+        fi
 
+        (
             set-proxy $proxy
 
-            local do_download=no
+            local do_download=0
 
             #  Get SHA-1 if present
 
@@ -800,15 +800,17 @@ function get-tar()
                 diff -q $SCBI_TAR/$tarsrc.sha1 \
                      /tmp/$tarsrc.sha1 > /dev/null 2>&1
 
-                if [[ $? != 0 ]]; then
+                if [[ $? -ne 0 ]]; then
                     cp /tmp/$tarsrc.sha1 $SCBI_TAR/$tarsrc.sha1
-                    do_download=yes
+                    do_download=1
                 fi
             fi
 
             rm -f /tmp/$tarsrc.sha1
 
-            if [[ $do_download == yes ]]; then
+            if [[ $do_download == 1 ]] || [[ ! -f $SCBI_TAR/$tarsrc ]]; then
+                do_download=1
+
                 if [[ $tarcp == wget ]]; then
                     $tarcp $tarurl/$tarsrc \
                            -O $SCBI_TAR/$tarsrc > $log 2>&1
@@ -827,11 +829,20 @@ function get-tar()
                     elog $MODULE error: cannot get tar: $tarcp
                 fi
             fi
+
+            return $do_download
         )
+    else
+        false
     fi
 
+    local downloaded=$?
+
     [[ ! -f $SCBI_TAR/$tarsrc ]] &&
-        elog $MODULE error: tarball $tarsrc not found
+        elog $MODULE error: tarball $tarsrc not found &&
+        return 1
+
+    [[ $downloaded == 0 ]] && return 0
 
     ilog build extract tarball $tarsrc
 
