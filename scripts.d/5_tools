@@ -842,7 +842,7 @@ function get-tar()
         elog $MODULE error: tarball $tarsrc not found &&
         return 1
 
-    [[ $downloaded == 0 ]] && return 0
+    [[ $downloaded == 0 ]] && [[ -d $SCBI_BDIR/$MODULE/tarsrc ]] && return 0
 
     ilog build extract tarball $tarsrc
 
