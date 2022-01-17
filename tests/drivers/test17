@@ -46,24 +46,28 @@ PATH     /var:/tmp:/bin:/usr/bin
 CONF17   two:one
 EOF
 
-function add-to-var()
+function define-var()
 {
-    local VAR=$1
-    local DIR=$2
+    local ACTION=$1
+    local VAR=$2
+    local VALUE=$3
 
-    if [[ $VAR != "PATH" ]]; then
-        echo $VAR="${DIR}${!VAR:+:}${!VAR}"
-    fi
+    echo $ACTION $VAR $VALUE
 }
-declare -fx add-to-var
+declare -fx define-var
 
 # In driver:
 export PATH=/bin:/usr/bin
 RUNS source .root/builds/test17/build/.log/env.cmd
 
 DIFF <<EOF
-ROOT_DIR=/this/is/it
-ABC_ROOT=/perfect/here
-CONF17=one
-CONF17=two
+ADD ROOT_DIR /this/is/it
+ADD ROOT_DIR /this/is/it
+ADD ROOT_DIR /this/is/it
+ADD PATH /tmp
+ADD ABC_ROOT /perfect/here
+ADD CONF17 one
+ADD CONF17 two
+ADD PATH /usr/bin
+ADD PATH /var
 EOF

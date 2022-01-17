@@ -663,7 +663,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	\item[<module>-{[}common|<variant>{]}-env] \index{hook!env}Set the environment to use this module as a dependency. This is the exported environment. The environment must be set using \code{add-to-var} function.
+	\item[<module>-{[}common|<variant>{]}-env] \index{hook!env}Set the environment to use this module as a dependency. This is the exported environment. The know how to set the environment using the helper routines \seeref{set-env}.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
@@ -914,6 +914,50 @@ A module listed in a meta-module can itself be a meta-module. A meta-module can 
 	\item {[variant]-wrapup}
 \end{itemize}
 
+\subsection{Setting environment}
+\label{set-env}
+\index{variable!add}
+\index{variable!set}
+\index{variable!prepend}
+\index{variable!append}
+\index{helpers!define-var}
+\index{helpers!add-to-var}
+\index{helpers!prepend-to-var}
+\index{helpers!append-to-var}
+\index{helpers!set-var}
+
+The five helper routines are to be used to set environment variables in \code{env} and \code{build-env} hook. They permit a fine control about the way the variables are set and avoid duplicate values.
+
+\begin{description}[style=nextline]
+	\item[define-var {[PREPEND|APPEND|ADD|SET]} <VARIABLE> <VALUE>] Prepend, append, add or set a variable depending on the first action parameter. Note that a single character action is supported as alias.
+	\begin{description}
+		\item[PREPEND | P] Prepend \code{<VALUE>} in \code{<VARIABLE>}, remove previous value if it exists. This ensures that the value is found after the current ones if needed.
+		\item[APPEND | A] Append \code{<VALUE>} in \code{<VARIABLE>}, remove previous value if it exists. This ensures that the value is found before the current ones.
+		\item[ADD] Add \code{<VALUE>} in \code{<VARIABLE>} if it is not already present. The place of the value in the variable is not important, it may be at the start, middle or end.
+		\item[SET | S] Set \code{<VARIABLE>} to \code{<VALUE>} removing all previous values. After this call we always have a single value set.
+	\end{description}
+
+	\item[prepend-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable PREPEND <VARIABLE> <VALUE>}.
+	\item[append-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable APPEND <VARIABLE> <VALUE>}.
+	\item[add-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable ADD <VARIABLE> <VALUE>}.
+	\item[set-var <VARIABLE> <VALUE>] short hand for \code{define-variable SET <VARIABLE> <VALUE>}.
+\end{description}
+
+Example:
+
+\begin{lstlisting}
+	function mymodule-build-env()
+	{
+		set-var MYMODULE_USE_CLANG no
+	}
+
+	function mymodule-env()
+	{
+		add-to-var      CMAKE_PREFIX_PATH /some/path
+		preprend-to-var PATH              /priority/dir/bin
+	}
+\end{lstlisting}
+
 \subsection{Setting a proxy}
 \label{proxy}
 \index{proxy}
@@ -1106,7 +1150,7 @@ For example:
 
 \begin{lstlisting}
 with-variant native pckA pckB \
-	--env 'add-to-var ROOT_DIR /usr'
+	--env 'set-var ROOT_DIR /usr'
 \end{lstlisting}
 
 The command above will automatically create the following hooks when called from \file{natv} module script:
@@ -1119,7 +1163,7 @@ function natv-native-build-env ()
 
 function natv-native-env ()
 {
-	add-to-var ROOT_DIR /usr
+	set-var ROOT_DIR /usr
 }
 
 function natv-native-build-depends ()

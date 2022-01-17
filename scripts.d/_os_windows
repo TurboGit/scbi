@@ -1,17 +1,17 @@
 
-############################## add-to-var
-# add DIR to environment variable VAR, does nothing if DIR does not exists
+############################## define-var
+#  Append/Prepend/Set VALUE to environment variable VAR,
+#  does nothing if VALUE does not exists and VAR is PATH.
 
-function add-to-var()
+function define-var()
 {
+    local ACTION=$1
     local VAR=$1
-    local DIR=$2
+    local VALUE=$2
 
     # If adding to PATH, do so only if DIR exists
 
-    if [[ -d "$DIR" ]] || [[ "${VAR}" != "PATH" ]] &&
-           [[ ":${!VAR}:" != *":$DIR:"* ]];
-    then
+    if [[ -d "$DIR" ]] || [[ "${VAR}" != "PATH" ]]; then
         # If SCBI_ENV_MODULE file exists, record the change into
         # it. This is used internally by scbi to record .log/env.cmd
         # for each module. This env file can then be sourced to replay
@@ -21,12 +21,51 @@ function add-to-var()
             echo add-to-var $VAR \"$DIR\" >> $SCBI_ENV_MODULE
         fi
 
+        #  Separator of values in variable
+
+        local SEP=";"
+
         # With MSYS & Cygwin the PATH separator is ':'
 
         if [[ $VAR == "PATH" ]]; then
-            export $VAR="${DIR}${!VAR:+:}${!VAR}"
-        else
-            export $VAR="${DIR}${!VAR:+;}${!VAR}"
+            SEP=":"
         fi
+
+        if [[ "$SEP${!VAR}$SEP" == *"$SEP$VALUE$SEP"* ]]; then
+            #  If the value already exists, make sure it is first removed
+            #  in the append/prepend mode to force it to be added at the
+            #  start or end of the variable.
+            VALUE_EXISTS=yes
+        fi
+
+        if [[ ! -z $SCBI_ENV_MODULE ]]; then
+            echo define-var $ACTION $VAR \"$VALUE\" >> $SCBI_ENV_MODULE
+        fi
+
+        case $ACTION in
+            SET|S)
+                export $VAR="${VALUE}"
+            ;;
+            ADD)
+                [[ $VALUE_EXISTS == no ]] &&
+                    export $VAR="${VALUE}${!VAR:+$SEP}${!VAR}"
+            ;;
+            APPEND|A)
+                [[ $VALUE_EXISTS == yes ]] &&
+                    {
+                        export $VAR=${!VAR/$SEP$VALUE}
+                        export $VAR=${!VAR#$VALUE$SEP}
+                    }
+                export $VAR="${!VAR}${!VAR:+$SEP}${VALUE}"
+            ;;
+            PREPEND|P)
+                [[ $VALUE_EXISTS == yes ]] &&
+                    {
+                        export $VAR=${!VAR/$SEP$VALUE}
+                        export $VAR=${!VAR#$VALUE$SEP}
+                    }
+                export $VAR="${VALUE}${!VAR:+$SEP}${!VAR}"
+            ;;
+        esac
     fi
 }

@@ -190,7 +190,7 @@ EOF
 # =================== check for SCBI_MODULES_DIR
 
 (
-    function add-to-var()
+    function define-var()
     {
         # skip module's env
         true
