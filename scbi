@@ -646,8 +646,20 @@ function handle-depends()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
+    #  Check if module exists
+
+    local IS_MODULE=no
+
+    [[ -f $SCBI_PLUGINS/$module ]] && local IS_MODULE=true
+
+    #  Before anything check if we need to skip this dependency
+
     if [[ "$ref" == "skip" ]]; then
-        ilog $module Dependency $module marked to be skipped
+        if [[ $IS_MODULE == true ]]; then
+            ilog $module Module $module marked to be skipped
+        else
+            ilog $module Dependency $module marked to be skipped
+        fi
         return
     fi
 
@@ -666,7 +678,7 @@ function handle-depends()
 
     #  If module not found, check for a possible distrib package
 
-    if [[ ! -f $SCBI_PLUGINS/$module ]]; then
+    if [[ $IS_MODULE == no ]]; then
         MES=$(check-pkg $module:$ref)
 
         if [[ $? = 0 ]]; then
