@@ -2,7 +2,7 @@
 #
 #  For adding a new distrib:
 #     - add support for new distrib in get-distrib
-#     - add 3 letters acronym for new distrib in SCBI_LINUX_DISTRIBS
+#     - add 3 letters acronym for new distrib in SCBI_OS_NAMES
 #     - implement init-<distrib>-pkg
 #     - implement check-<distrib>-pkg
 #     - implement get-<distrib>-lib-for-dev (optional)
@@ -18,7 +18,7 @@ declare -A SCBI_PKGS
 #  OS dependent alias map
 declare -g -A SCBI_ALIAS
 
-SCBI_LINUX_DISTRIBS=( deb ubt cos rhl fed win )
+SCBI_OS_NAMES=( deb ubt cos rhl fed win )
 
 if [[ $SCBI_IS_WINDOWS == no ]]; then
     check-tools-abort lsb_release
@@ -29,10 +29,18 @@ fi
 
 function get-distrib()
 {
+    export SCBI_OS_VERSION=unknown
+    export SCBI_OS_MAJOR_VERSION=unknown
+
     if [[ $SCBI_IS_WINDOWS == yes ]]; then
         echo win
     else
         local DES=$(lsb_release -d)
+        local VER=$(lsb_release -r)
+
+        SCBI_OS_VERSION=${VER#Release:}
+        SCBI_OS_MAJOR_VERSION=${SCBI_OS_VERSION%%.*}
+
         if [[ $DES =~ "Debian" ]]; then
             echo deb
         elif [[ $DES =~ "Ubuntu" ]]; then
@@ -49,7 +57,7 @@ function get-distrib()
     fi
 }
 
-SCBI_LINUX_DISTRIB=${SCBI_LINUX_DISTRIB:-$(get-distrib)}
+export SCBI_OS_NAME=${SCBI_OS_NAME:-$(get-distrib)}
 
 ############################## init-alias
 # read package alias file
@@ -337,7 +345,7 @@ function get-lib-for-dev()
 {
     local PKG=$(get-pkg-name "$1")
 
-    get-${SCBI_LINUX_DISTRIB}-lib-for-dev $PKG
+    get-${SCBI_OS_NAME}-lib-for-dev $PKG
 }
 
 ############################## check-pkg-status
@@ -357,7 +365,7 @@ function check-pkg-status()
     for distname in $(get-pkg-name "$pkg"); do
         echo $distname
         echo ${version:-0}
-        M=$(check-${SCBI_LINUX_DISTRIB}-pkg $distname ${version:-0})
+        M=$(check-${SCBI_OS_NAME}-pkg $distname ${version:-0})
         echo $?
     done
 }
@@ -382,7 +390,7 @@ function check-pkg()
     [[ $DO_WARNING_EXTERNAL == yes ]] && MSG="warning"
 
     for distname in $(get-pkg-name "$pkg"); do
-        check-${SCBI_LINUX_DISTRIB}-pkg $distname $version
+        check-${SCBI_OS_NAME}-pkg $distname $version
 
         local res=$?
 
@@ -405,4 +413,4 @@ function check-pkg()
     return $cpres
 }
 
-init-${SCBI_LINUX_DISTRIB}-pkg
+init-${SCBI_OS_NAME}-pkg

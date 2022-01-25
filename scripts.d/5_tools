@@ -975,7 +975,7 @@ function display-stat()
     fi
 
     echo -n "supported platforms   :"
-    for L in ${SCBI_LINUX_DISTRIBS[@]}; do
+    for L in ${SCBI_OS_NAMES[@]}; do
         echo -n " $L"
     done
     echo

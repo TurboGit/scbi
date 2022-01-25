@@ -4,7 +4,7 @@
 
 export SCBI_TEST_V=1
 
-export SCBI_LINUX_DISTRIB=test
+export SCBI_OS_NAME=test
 
 function init-test-pkg()
 {

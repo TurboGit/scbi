@@ -28,17 +28,31 @@ function load-module-plan()
         PLAN=$SCBI_PLUGINS/.plan-$NAME
     fi
 
+    rm -f /tmp/tmp
+
     if [[ -f $PLAN ]]; then
         while read modref arg var; do
             if [[ "$modref" = "@load" ]]; then
                 load-module-plan $arg
             elif [[ "$modref" = "@on" ]]; then
-                AON=( $arg )
-                if [[ ${AON[0]} == $SCBI_LINUX_DISTRIB ]]; then
-                    modref=${AON[1]}
-                    local module_info=( $(parse-module-ref $modref) )
+                local ACTIVE_BARRIER=true
+
+                echo $arg >> /tmp/tmp
+
+                for tag in ${arg/,/ }; do
+                    echo t: $tag ${SCBI_OS_MAJOR_VERSION} >> /tmp/tmp
+                    if [[ "$tag" != "$SCBI_OS_NAME" ]] \
+                           && $(check-versions "$tag" "!=" "${SCBI_OS_MAJOR_VERSION}") \
+                           && $(check-versions "$tag" "!=" "${SCBI_OS_VERSION}")
+                    then
+                        ACTIVE_BARRIER=false
+                    fi
+                done
+
+                if [[ $ACTIVE_BARRIER == true ]]; then
+                    local module_info=( $(parse-module-ref $var) )
                     local module=${module_info[0]}
-                    MODVER[$module]=${modref/*=/}
+                    MODVER[$module]=${var/*=/}
                 fi
             elif [[ "$modref" = "" ]]; then
                 true

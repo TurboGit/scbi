@@ -646,6 +646,11 @@ function handle-depends()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
+    if [[ "$ref" == "skip" ]]; then
+        ilog $module Dependency $module marked to be skipped
+        return
+    fi
+
     #  If we want latest version, just handle this module
 
     if [[ "$kind" = "DEV" ]]; then

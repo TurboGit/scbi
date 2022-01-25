@@ -332,8 +332,15 @@ Some specific actions are supported with the following syntax:
 		aws:v1
 	\end{lstlisting}
 
-	\item[\code{@on <OS> <module-reference>}] To set a module reference only for the OS (3 letters OS acronym supported). Use option \ddash{}stat to see all supported OS. This will overwrite previous definition for this module if any.
+	\item[\code{@on <discriminants> <module-reference>}] To set a module reference only if the running OS is matching the discriminants. The discriminants are separated with coma and can be the OS name (3 letters OS acronym supported) and the OS version. Use option \ddash{}stat to see all supported OS. This will overwrite previous definition for this module if any. All discriminants must match for the definition to take effect.
 
+	\begin{lstlisting}
+	#  Skip lcms2 on Debian-9
+	@on deb,9 lcms2:skip
+	#  Use v2 of lcms2 on Fedora
+	@on fed   lcms2:v2
+	\end{lstlisting}
+	
 	\item[\code{[ <barrier> ... ] /variant:version}] To create a group. The barrier if present must evaluate to true or the group is ignored.
 
 	A group can be used in a build plan to group together all modules with the same version and/or variant. To define a group:

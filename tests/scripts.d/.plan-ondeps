@@ -1,0 +1,14 @@
+
+@on deb notfound:skip
+
+@on deb,12 large:skip
+
+@on deb,9 forv9:skip
+
+@on deb,10.1 onlyfor10one:skip
+
+@on deb,10.1 liblua5.2-dev:skip
+
+@on deb,10.1 @os-mylualib:skip
+
+me:v2

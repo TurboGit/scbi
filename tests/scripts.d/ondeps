@@ -1,0 +1,33 @@
+
+function ondeps-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function ondeps-build-depends()
+{
+    echo liblua5.2-dev
+}
+
+function ondeps-depends()
+{
+    echo @os-mylualib
+}
+
+function ondeps-config()
+{
+    echo CONFIG
+}
+
+function ondeps-build()
+{
+    echo CONFIG
+}
+
+function ondeps-prefix()
+{
+    echo none
+}
