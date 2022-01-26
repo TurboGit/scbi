@@ -59,8 +59,6 @@ function load-module-plan()
         PLAN=$SCBI_PLUGINS/.plan-$NAME
     fi
 
-    rm -f /tmp/tmp
-
     if [[ -f $PLAN ]]; then
         while read modref arg var; do
             if [[ "$modref" = "@load" ]]; then
