@@ -37,10 +37,7 @@ function load-module-plan()
             elif [[ "$modref" = "@on" ]]; then
                 local ACTIVE_BARRIER=true
 
-                echo $arg >> /tmp/tmp
-
                 for tag in ${arg/,/ }; do
-                    echo t: $tag ${SCBI_OS_MAJOR_VERSION} >> /tmp/tmp
                     if [[ "$tag" != "$SCBI_OS_NAME" ]] \
                            && $(check-versions "$tag" "!=" "${SCBI_OS_MAJOR_VERSION}") \
                            && $(check-versions "$tag" "!=" "${SCBI_OS_VERSION}")
