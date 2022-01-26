@@ -71,6 +71,7 @@ function setup-discriminants()
         SCBI_OS_DISCRIMINANTS+=($SCBI_OS_MAJOR_VERSION)
         SCBI_OS_DISCRIMINANTS+=($SCBI_OS_NAME)
         SCBI_OS_DISCRIMINANTS+=(${SCBI_OS_ID,,})
+        SCBI_OS_DISCRIMINANTS+=($(uname -m))
     fi
 }
 
