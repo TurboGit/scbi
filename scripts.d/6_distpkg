@@ -59,7 +59,10 @@ function setup-discriminants()
     export SCBI_OS_MAJOR_VERSION=unknown
     export SCBI_OS_ID=unknown
 
-    if [[ $SCBI_IS_WINDOWS == no ]]; then
+    if [[ $SCBI_IS_WINDOWS == yes ]]; then
+        SCBI_OS_DISCRIMINANTS+=(windows)
+        ##  ??? how to get architecture & version
+    else
         local VER=$(lsb_release -r)
         local OID=$(lsb_release -i)
 
