@@ -120,7 +120,7 @@ function load-module-plan()
                 GROUP=no
                 GMOD=""
             elif [[ $GROUP != no ]]; then
-                #  stote all module's group in GMOD
+                #  store all module's group in GMOD
                 [[ $GROUP == yes ]] && GMOD="$GMOD $modref"
             elif [[ "$modref" = "[" ]]; then
                 if [[ ! -z $arg ]]; then
