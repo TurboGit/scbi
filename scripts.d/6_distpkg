@@ -29,17 +29,10 @@ fi
 
 function get-distrib()
 {
-    export SCBI_OS_VERSION=unknown
-    export SCBI_OS_MAJOR_VERSION=unknown
-
     if [[ $SCBI_IS_WINDOWS == yes ]]; then
         echo win
     else
         local DES=$(lsb_release -d)
-        local VER=$(lsb_release -r)
-
-        SCBI_OS_VERSION=${VER#Release:}
-        SCBI_OS_MAJOR_VERSION=${SCBI_OS_VERSION%%.*}
 
         if [[ $DES =~ "Debian" ]]; then
             echo deb
@@ -57,9 +50,40 @@ function get-distrib()
     fi
 }
 
-export SCBI_OS_NAME=${SCBI_OS_NAME:-$(get-distrib)}
+############################## setup-discriminants
+# set the discriminants for the running machine
 
-export SCBI_OS_DISCRIMINANTS=( $SCBI_OS_MAJOR_VERSION $SCBI_OS_VERSION $SCBI_OS_NAME )
+function setup-discriminants()
+{
+    export SCBI_OS_VERSION=unknown
+    export SCBI_OS_MAJOR_VERSION=unknown
+    export SCBI_OS_ID=unknown
+
+    if [[ $SCBI_IS_WINDOWS == no ]]; then
+        local VER=$(lsb_release -r)
+        local OID=$(lsb_release -i)
+
+        SCBI_OS_VERSION=${VER#Release:}
+        SCBI_OS_MAJOR_VERSION=${SCBI_OS_VERSION%%.*}
+        SCBI_OS_ID=${OID#*:}
+
+        SCBI_OS_DISCRIMINANTS+=($SCBI_OS_VERSION)
+        SCBI_OS_DISCRIMINANTS+=($SCBI_OS_MAJOR_VERSION)
+        SCBI_OS_DISCRIMINANTS+=($SCBI_OS_NAME)
+        SCBI_OS_DISCRIMINANTS+=(${SCBI_OS_ID,,})
+    fi
+}
+
+#  Can be forced in test driver
+
+if [[ -z $SCBI_OS_NAME ]]; then
+    export SCBI_OS_NAME=$(get-distrib)
+
+    export SCBI_OS_DISCRIMINANTS=()
+    setup-discriminants
+else
+    export SCBI_OS_DISCRIMINANTS=($SCBI_OS_MAJOR_VERSION $SCBI_OS_VERSION $SCBI_OS_NAME)
+fi
 
 ############################## init-alias
 # read package alias file
