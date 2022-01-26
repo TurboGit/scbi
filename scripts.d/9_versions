@@ -1,3 +1,18 @@
+# ############################## has-discriminant
+
+function has-discriminant()
+{
+    local disc=$1
+
+    for d in ${SCBI_OS_DISCRIMINANTS[*]}; do
+        if [[ $disc == $d ]]; then
+            return 1
+        fi
+    done
+
+    return 0
+}
+
 # ############################## load-module-plan
 #
 #
@@ -38,11 +53,10 @@ function load-module-plan()
                 local ACTIVE_BARRIER=true
 
                 for tag in ${arg/,/ }; do
-                    if [[ "$tag" != "$SCBI_OS_NAME" ]] \
-                           && $(check-versions "$tag" "!=" "${SCBI_OS_MAJOR_VERSION}") \
-                           && $(check-versions "$tag" "!=" "${SCBI_OS_VERSION}")
-                    then
+                    has-discriminant $tag
+                    if [[ $? -eq 0 ]]; then
                         ACTIVE_BARRIER=false
+                        break;
                     fi
                 done
 

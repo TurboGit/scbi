@@ -59,6 +59,8 @@ function get-distrib()
 
 export SCBI_OS_NAME=${SCBI_OS_NAME:-$(get-distrib)}
 
+export SCBI_OS_DISCRIMINANTS=( $SCBI_OS_MAJOR_VERSION $SCBI_OS_VERSION $SCBI_OS_NAME )
+
 ############################## init-alias
 # read package alias file
 
