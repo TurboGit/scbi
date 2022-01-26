@@ -149,7 +149,6 @@ function define-var()
     true
 }
 
-
 #  Helper routines to prepend/append or set a variable
 
 function prepend-to-var()
@@ -974,11 +973,8 @@ function display-stat()
         echo " $EMAIL"
     fi
 
-    echo -n "supported platforms   :"
-    for L in ${SCBI_OS_NAMES[@]}; do
-        echo -n " $L"
-    done
-    echo
+    echo "supported platforms   : ${SCBI_OS_NAMES[*]}"
+    echo "discriminants         : ${SCBI_OS_DISCRIMINANTS[*]}"
 }
 
 ############################## display-modules
