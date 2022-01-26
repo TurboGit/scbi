@@ -1195,7 +1195,7 @@ function all-variants()
 ############################## has variant
 # returns true if variants exists
 #
-#  if [[ has-variant "v1.v2" v2 ]]; then
+#  if has-variant "v1.v2" v2; then
 #     ...
 #  fi
 
@@ -1206,7 +1206,6 @@ function has-variant()
 
     for v in $(all-variants $VARIANTS); do
         if [[ $v == $VAR ]]; then
-            echo "yes"
             return 0
         fi
     done

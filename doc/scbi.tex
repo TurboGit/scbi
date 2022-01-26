@@ -340,13 +340,13 @@ Some specific actions are supported with the following syntax:
 	#  Use v2 of lcms2 on Fedora
 	@on fed   lcms2:v2
 	\end{lstlisting}
-	
+
 	\item[\code{[ <barrier> ... ] /variant:version}] To create a group. The barrier if present must evaluate to true or the group is ignored.
 
 	A group can be used in a build plan to group together all modules with the same version and/or variant. To define a group:
 
 	\begin{description}
-		\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} which will be searched on the specified module's plan variants:
+		\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} which will be searched on the specified module's plan variants or a set of OS discriminants.
 
 		\code{\ddash{}plan=name/variant1.variant2}
 
@@ -355,9 +355,31 @@ Some specific actions are supported with the following syntax:
 		\item[ {]} /variant:version ] Ends with \code{/variant:version} which is the variant and version to apply to all modules in the group. Both \code{variant} and \code{version} are optional.
 	\end{description}
 
+	Without a barrier, will always be open:
+
 	\begin{lstlisting}
 		lcms2:v2
 		[
+			moduleA
+			moduleB
+		] /speed:v3
+	\end{lstlisting}
+
+	With a barrier based on a variant (will be open if the build plan is for example \code{\ddash{}plan=name/variant1.variant2}):
+
+	\begin{lstlisting}
+		lcms2:v2
+		[ = variant1
+			moduleA
+			moduleB
+		] /speed:v3
+	\end{lstlisting}
+
+	With a barrier based on discriminants (will be open on Debian 10):
+
+	\begin{lstlisting}
+		lcms2:v2
+		[ = deb,10
 			moduleA
 			moduleB
 		] /speed:v3

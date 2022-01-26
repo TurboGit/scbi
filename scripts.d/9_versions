@@ -7,11 +7,11 @@ function has-discriminant()
 
     for d in ${SCBI_OS_DISCRIMINANTS[*]}; do
         if [[ $disc == $d ]]; then
-            return 1
+            return 0
         fi
     done
 
-    return 0
+    return 1
 }
 
 # ############################## check-discriminants
@@ -19,14 +19,14 @@ function has-discriminant()
 
 function check-discriminants()
 {
-    local discs=$1
+    local discs="$1"
 
     for d in ${discs/,/ }; do
         has-discriminant $d
-        [[ $? == 0 ]] && return 0
+        [[ $? == 1 ]] && return 1
     done
 
-    return 1
+    return 0
 }
 
 # ############################## load-module-plan
@@ -64,12 +64,7 @@ function load-module-plan()
             if [[ "$modref" = "@load" ]]; then
                 load-module-plan $arg
             elif [[ "$modref" = "@on" ]]; then
-                local ACTIVE_BARRIER=true
-
-                check-discriminants "$arg"
-                [[ $? -eq 0 ]] && ACTIVE_BARRIER=false
-
-                if [[ $ACTIVE_BARRIER == true ]]; then
+                if check-discriminants "$arg"; then
                     local module_info=( $(parse-module-ref $var) )
                     local module=${module_info[0]}
                     MODVER[$module]=${var/*=/}
@@ -130,13 +125,17 @@ function load-module-plan()
             elif [[ "$modref" = "[" ]]; then
                 if [[ ! -z $arg ]]; then
                     if [[ $arg = "=" ]]; then
-                        if [[ $(has-variant "$VARIANT" $var) ]]; then
+                        if has-variant "$VARIANT" "$var" \
+                            || check-discriminants "$var";
+                        then
                             GROUP=yes
                         else
                             GROUP=closed
                         fi
                     elif [[ $arg = "/=" ]]; then
-                        if [[ $(has-variant "$VARIANT" $var) ]]; then
+                        if has-variant "$VARIANT" "$var" \
+                                || check-discriminants "$var";
+                        then
                             GROUP=closed
                         else
                             GROUP=yes

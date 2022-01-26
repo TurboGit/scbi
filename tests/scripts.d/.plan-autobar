@@ -1,0 +1,44 @@
+
+modA
+modB
+modC
+modD
+modE
+modF
+modG
+
+[ = deb
+  modA
+] /deb
+
+[ = deb
+  modB
+] /deb
+
+[ = deb,9
+  modB
+] /deb9
+
+[ = deb,10
+  modB
+] /deb10
+
+[ = deb,9.3
+  modC
+] /deb9.3
+
+[ = win
+  modD
+] /win
+
+[ = 9
+  modE
+] /just9
+
+[ /= deb
+  modF/notdeb
+]
+
+[ /= deb,9
+  modG/notdeb9
+]

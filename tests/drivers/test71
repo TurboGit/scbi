@@ -1,0 +1,83 @@
+# Check for [ = barrier ] matching the discriminants
+
+# ========================= A
+
+export SCBI_OS_NAME=deb
+export SCBI_OS_VERSION=9
+export SCBI_OS_MAJOR_VERSION=9.3
+
+RUNS ./scbi --plan=autobar --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 7 module(s) in the plan
+modA/deb
+modB/deb9
+modC/deb9.3
+modD
+modE/just9
+modF
+modG
+EOF
+
+# ========================= B
+
+export SCBI_OS_MAJOR_VERSION=9.1
+
+RUNS ./scbi --plan=autobar --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 7 module(s) in the plan
+modA/deb
+modB/deb9
+modC
+modD
+modE/just9
+modF
+modG
+EOF
+
+# ========================= C
+
+export SCBI_OS_NAME=deb
+export SCBI_OS_VERSION=10
+export SCBI_OS_MAJOR_VERSION=10.4
+
+RUNS ./scbi --plan=autobar --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 7 module(s) in the plan
+modA/deb
+modB/deb10
+modC
+modD
+modE
+modF
+modG/notdeb9
+EOF
+
+# ========================= D
+
+export SCBI_OS_NAME=win
+export SCBI_OS_VERSION=3
+export SCBI_OS_MAJOR_VERSION=3.1
+
+RUNS ./scbi --plan=autobar --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 7 module(s) in the plan
+modA
+modB
+modC
+modD/win
+modE
+modF/notdeb
+modG/notdeb9
+EOF
