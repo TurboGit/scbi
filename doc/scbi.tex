@@ -332,7 +332,7 @@ Some specific actions are supported with the following syntax:
 		aws:v1
 	\end{lstlisting}
 
-	\item[\code{@on <discriminants> <module-reference>}] To set a module reference only if the running OS is matching the discriminants. The discriminants are separated with coma and can be the OS name (3 letters OS acronym supported) and the OS version. Use option \ddash{}stat to see all supported OS. This will overwrite previous definition for this module if any. All discriminants must match for the definition to take effect.
+	\item[\code{@on <discriminants> <module-reference>}] To set a module reference only if the running OS is matching the discriminants. The discriminants are separated with coma and can be the OS name (3 letters OS acronym supported), the OS version, the full OS name (debian, fedora, etc.) and the architecture. Use option \ddash{}stat to see all supported OS and the list of discriminants for the running machine. If all discriminant are matching the module reference will overwrite previous definitions.
 
 	\begin{lstlisting}
 	#  Skip lcms2 on Debian-9
