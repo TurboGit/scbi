@@ -1,4 +1,5 @@
 # ############################## has-discriminant
+# returns 1 if the discriminant has been found
 
 function has-discriminant()
 {
@@ -11,6 +12,21 @@ function has-discriminant()
     done
 
     return 0
+}
+
+# ############################## check-discriminants
+# return 1 if all discriminants match
+
+function check-discriminants()
+{
+    local discs=$1
+
+    for d in ${discs/,/ }; do
+        has-discriminant $d
+        [[ $? == 0 ]] && return 0
+    done
+
+    return 1
 }
 
 # ############################## load-module-plan
@@ -52,13 +68,8 @@ function load-module-plan()
             elif [[ "$modref" = "@on" ]]; then
                 local ACTIVE_BARRIER=true
 
-                for tag in ${arg/,/ }; do
-                    has-discriminant $tag
-                    if [[ $? -eq 0 ]]; then
-                        ACTIVE_BARRIER=false
-                        break;
-                    fi
-                done
+                check-discriminants "$arg"
+                [[ $? -eq 0 ]] && ACTIVE_BARRIER=false
 
                 if [[ $ACTIVE_BARRIER == true ]]; then
                     local module_info=( $(parse-module-ref $var) )
