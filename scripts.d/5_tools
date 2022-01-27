@@ -932,6 +932,11 @@ function get-tar()
     cd tartmp
 
     tar xf $SCBI_TAR/$tarsrc
+
+    [[ $? == 1 ]] &&
+        elog $MODULE error: tarball $tarsrc is corrupted &&
+        return 1
+
     topdir=$(ls -d *)
 
     if [[ -d "$topdir" ]]; then
