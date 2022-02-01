@@ -757,7 +757,7 @@ function handle-sources()
             exit 1
         fi
 
-        tarsrc=${tar[4]}
+        tarsrc=${tar[5]}
 
         #  We need to extract the tarball if the version does not match
         #  the one currently extracted.

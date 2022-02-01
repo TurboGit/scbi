@@ -12,6 +12,7 @@ function c-libiconv-tar()
     local VERSION=$1
 
     echo default
+    echo none
     echo curl
     echo http://ftp.gnu.org/gnu/libiconv
     echo libiconv-$VERSION.tar.gz

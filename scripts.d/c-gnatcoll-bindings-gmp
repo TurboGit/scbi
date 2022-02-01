@@ -20,6 +20,7 @@ function c-gnatcoll-bindings-gmp-tar()
     echo default
     echo none
     echo none
+    echo none
     echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 

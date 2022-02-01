@@ -25,6 +25,7 @@ function c-aws-tar()
     echo default
     echo none
     echo none
+    echo none
     echo aws-$VERSION-src.tar.gz
 }
 

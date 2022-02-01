@@ -4,6 +4,7 @@ function dltar-tar()
     local VERSION=$1
 
     echo default
+    echo none
     echo cp
     echo $ROOTDIR/.root/.store
     echo dltar-src.tar.bz2
