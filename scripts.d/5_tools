@@ -995,7 +995,7 @@ function display-modules()
 
     local linelen=0
 
-    for module in $SCBI_PLUGINS/[^0-9]*; do
+    for module in $SCBI_PLUGINS/[^0-9_]*; do
         bn=$(basename $module)
         linelen=$(expr $linelen + ${#bn} + 1)
         if [[ $linelen -gt 70 ]]; then
