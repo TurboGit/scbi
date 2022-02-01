@@ -948,9 +948,10 @@ function get-tar()
     topdir=$(ls -d *)
 
     if [[ -d "$topdir" ]]; then
-        mv "$topdir" ../tarsrc
+        mkdir ../tarsrc
+        mv $topdir/* $topdir/.* ../tarsrc/.
         cd ..
-        rmdir tartmp
+        rm -fr tartmp
         ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc) tar
         [[ -f $SCBI_TAR/$tarsrc.sha1 ]] &&
             ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc.sha1) \
@@ -972,9 +973,9 @@ function display-stat()
     echo stats
     echo -----
     if [[ $SCBI_IS_WINDOWS == yes ]]; then
-	echo "host                  : windows"
+        echo "host                  : windows"
     else
-	echo "host                  : $(lsb_release -s -d)"
+        echo "host                  : $(lsb_release -s -d)"
     fi
     echo "build dir             : $SCBI_BDIR"
     echo "install prefix        : $SCBI_PREFIX"
