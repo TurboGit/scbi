@@ -19,6 +19,7 @@ function c-gnatcoll-db-libs-sql-tar()
     echo default
     echo none
     echo none
+    echo none
     echo gnatcoll-db-libs-sql-sql-$VERSION-src.tar.gz
 }
 

@@ -20,6 +20,7 @@ function c-gnatcoll-db-libs-sqlite-tar()
     echo default
     echo none
     echo none
+    echo none
     echo gnatcoll-db-libs-sqlite-sqlite-$VERSION-src.tar.gz
 }
 

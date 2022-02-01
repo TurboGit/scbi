@@ -20,6 +20,7 @@ function c-gnatcoll-core-tar()
     echo default
     echo none
     echo none
+    echo none
     echo gnatcoll-core-$VERSION-src.tar.gz
 }
 

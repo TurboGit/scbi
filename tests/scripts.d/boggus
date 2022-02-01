@@ -14,6 +14,7 @@ function boggus-tar()
     echo default
     echo none
     echo none
+    echo none
     echo boggus-$VERSION-src.tar.bz2
 }
 

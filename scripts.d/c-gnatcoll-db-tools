@@ -19,6 +19,7 @@ function c-gnatcoll-db-tools-tar()
     echo default
     echo none
     echo none
+    echo none
     echo gnatcoll-db-tools-$VERSION-src.tar.gz
 }
 

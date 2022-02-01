@@ -19,6 +19,7 @@ function c-gnatcoll-bindings-readline-tar()
     echo default
     echo none
     echo none
+    echo none
     echo gnatcoll-bindings-$VERSION-src.tar.gz
 }
 
