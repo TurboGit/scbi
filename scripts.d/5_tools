@@ -963,7 +963,7 @@ function display-stat()
     echo
     echo stats
     echo -----
-    if [[ $SCBI_IS_WINDOWS == yes ]]; then    
+    if [[ $SCBI_IS_WINDOWS == yes ]]; then
 	echo "host                  : windows"
     else
 	echo "host                  : $(lsb_release -s -d)"
