@@ -963,7 +963,11 @@ function display-stat()
     echo
     echo stats
     echo -----
-    echo "host                  : $(lsb_release -s -d)"
+    if [[ $SCBI_IS_WINDOWS == yes ]]; then    
+	echo "host                  : windows"
+    else
+	echo "host                  : $(lsb_release -s -d)"
+    fi
     echo "build dir             : $SCBI_BDIR"
     echo "install prefix        : $SCBI_PREFIX"
     echo "tar dir               : $SCBI_TAR"
