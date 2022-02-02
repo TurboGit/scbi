@@ -517,7 +517,7 @@ function handle-env()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    for-all-modules handle-env-callback $MODREF
+    for-all-modules-with-meta handle-env-callback $MODREF
 }
 
 ############################## is-module-up-to-date

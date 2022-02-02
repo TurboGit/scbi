@@ -1,0 +1,21 @@
+
+# check meta-module env
+
+RUNS ./scbi metaenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building metaenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building metaenv [default] (master)
+EOF
+
+LDIR=.root/builds/metaenv/build/.log
+
+GREP "NAME1 m1"       $LDIR/config.log
+GREP "NAME2 m2"       $LDIR/config.log
+GREP "NAME3 m3"       $LDIR/config.log
+GREP "LIST  m3:m2:m1" $LDIR/config.log

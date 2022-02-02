@@ -1,0 +1,6 @@
+
+function m3-env()
+{
+    add-to-var LIST  m3
+    set-var    NAME3 m3
+}
