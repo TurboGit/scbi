@@ -42,6 +42,7 @@ function c-libadalang-env()
 
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
     add-to-var PATH             $PREFIX/bin
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
 function c-libadalang-out-of-tree()

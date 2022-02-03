@@ -38,6 +38,7 @@ function c-langkit-env()
 
     add-to-var PYTHONPATH       $SCBI_BDIR/c-langkit/$TARGET-$VARIANT/build
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
 function c-langkit-do-build()

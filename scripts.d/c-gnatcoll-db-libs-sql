@@ -33,7 +33,8 @@ function c-gnatcoll-db-libs-sql-env()
     local PREFIX=$1
     local TARGET=$2
 
-    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var GPR_PROJECT_PATH $PREFIX/$TARGET/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/$TARGET/lib
 }
 
 function c-gnatcoll-db-libs-sql-config()

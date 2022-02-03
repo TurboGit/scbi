@@ -33,6 +33,7 @@ function c-libadalang-tools-env()
 
     LALT=$SCBI_BDIR/c-libadalang-tools
     add-to-var GPR_PROJECT_PATH $LALT/$TARGET-$VARIANT/build/src
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
 function c-libadalang-tools-build()

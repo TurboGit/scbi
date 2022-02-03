@@ -34,6 +34,7 @@ function c-gnatcoll-bindings-readline-env()
     local TARGET=$2
 
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
 function c-gnatcoll-bindings-readline-build()
