@@ -41,7 +41,7 @@ function c-libadalang-tools-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make bin
+    make BUILD_MODE=prod bin
 }
 
 function c-libadalang-tools-install()
