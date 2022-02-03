@@ -55,7 +55,7 @@ function c-gpr-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make
+    make PYTHON=python3
 }
 
 function c-gpr-tests()
