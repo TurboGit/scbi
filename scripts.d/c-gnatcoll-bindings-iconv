@@ -58,10 +58,10 @@ function c-gnatcoll-bindings-iconv-install()
     local PREFIX=$1
     local TARGET=$2
 
-    local GOPTS="-p -f --prefix=$PREFIX/$TARGET -XBUILD=PROD --target=$TARGET"
+    local GOPTS="-p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET"
     local GOPTS="$GOPTS --build-var=LIBRARY_TYPE"
 
-    local PM=$PREFIX/$TARGET/install/$TARGET/share/gpr/manifests
+    local PM=$PREFIX/share/gpr/manifests
 
     if [[ -f $PM/gnatcoll_iconv ]]; then
         gprinstall $GOPTS --uninstall gnatcoll_iconv
