@@ -2,5 +2,5 @@
 function c-ada-tools-modules()
 {
     echo c-xmlada c-libgpr c-gtkada c-gnatcoll c-gprbuild c-langkit
-    echo c-libadalang c-aunit c-gpr c-aws
+    echo c-libadalang c-libadalang-tools c-aunit c-gpr c-aws
 }
