@@ -50,4 +50,5 @@ function c-libadalang-tools-install()
     local TARGET=$2
 
     make install-bin-strip DESTDIR=$PREFIX
+    make install-lib DESTDIR=$PREFIX
 }
