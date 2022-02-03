@@ -10,6 +10,9 @@ function c-gnatcoll-db-tools-vcs()
 function c-gnatcoll-db-tools-depends()
 {
     echo c-gnatcoll-core
+    echo c-gnatcoll-bindings-iconv
+    echo c-gnatcoll-db-libs-sql
+    echo c-gnatcoll-db-libs-sqlite
 }
 
 function c-gnatcoll-db-tools-tar()
