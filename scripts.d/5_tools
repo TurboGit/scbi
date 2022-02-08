@@ -948,10 +948,9 @@ function get-tar()
     topdir=$(ls -d *)
 
     if [[ -d "$topdir" ]]; then
-        mkdir ../tarsrc
-        mv $topdir/* $topdir/.* ../tarsrc/.
+        mv $topdir ../tarsrc
         cd ..
-        rm -fr tartmp
+        rmdir tartmp
         ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc) tar
         [[ -f $SCBI_TAR/$tarsrc.sha1 ]] &&
             ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc.sha1) \
