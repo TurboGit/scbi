@@ -6,8 +6,8 @@
 function define-var()
 {
     local ACTION=$1
-    local VAR=$1
-    local VALUE=$2
+    local VAR=$2
+    local VALUE=$3
 
     # If adding to PATH, do so only if DIR exists
 
