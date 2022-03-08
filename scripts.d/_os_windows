@@ -25,12 +25,17 @@ function define-var()
 
         #  Separator of values in variable
 
+        if [[ ! -z $SCBI_ENV_MODULE ]]; then
+            echo define-var $ACTION $VAR \"$VALUE\" >> $SCBI_ENV_MODULE
+        fi
+
         local SEP=";"
 
         # With MSYS & Cygwin the PATH separator is ':'
 
         if [[ $VAR == "PATH" ]]; then
             SEP=":"
+	    VALUE=$(cygpath -u "$VALUE")
         fi
 
         if [[ "$SEP${!VAR}$SEP" == *"$SEP$VALUE$SEP"* ]]; then
@@ -38,10 +43,6 @@ function define-var()
             #  in the append/prepend mode to force it to be added at the
             #  start or end of the variable.
             VALUE_EXISTS=yes
-        fi
-
-        if [[ ! -z $SCBI_ENV_MODULE ]]; then
-            echo define-var $ACTION $VAR \"$VALUE\" >> $SCBI_ENV_MODULE
         fi
 
         case $ACTION in
