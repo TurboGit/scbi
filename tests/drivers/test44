@@ -30,6 +30,9 @@ cc    -c -o main.o main.c
 main.c:2:10: fatal error: lib1.h: No such file or directory
 compilation terminated.
 xxxx/xx/xx xx:xx:xx : mainmult (FAILED) build failed with error 2
+xxxx/xx/xx xx:xx:xx : mainmult (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : mainmult (FAILED) cd <pwd>/.root/builds/mainmult/x86_64-linux-gnu-default/.log
+xxxx/xx/xx xx:xx:xx : mainmult (FAILED) bash ./build.cmd
 EOF
 
 # echo ========== lib1 forced

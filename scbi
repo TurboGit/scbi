@@ -265,6 +265,17 @@ function module-wrapper()
                 tail -100 $mlog
             fi
             elog $MODULE $mstep failed with error $res
+
+            RDIR="cd $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/.log"
+
+            case $STEP in
+                config|build|install)
+                    elog $MODULE to reproduce:
+                    elog $MODULE $RDIR
+                    elog $MODULE bash ./$mstep.cmd
+                    ;;
+            esac
+
             return $res
         else
             ilog $MODULE $mstep$dvariant completed
