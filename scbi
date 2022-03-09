@@ -266,12 +266,12 @@ function module-wrapper()
             fi
             elog $MODULE $mstep failed with error $res
 
-            RDIR="cd $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/.log"
+            RDIR=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/.log
 
             case $STEP in
                 config|build|install)
                     elog $MODULE to reproduce:
-                    elog $MODULE $RDIR
+                    elog $MODULE cd $RDIR
                     elog $MODULE bash ./$mstep.cmd
                     ;;
             esac
