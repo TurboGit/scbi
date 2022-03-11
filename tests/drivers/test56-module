@@ -1,5 +1,6 @@
 # Check depends with common, default & variants
 
+source scripts.d/0_runtime
 source scripts.d/5_tools
 
 function internal-common-depends()
