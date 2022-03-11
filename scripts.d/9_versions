@@ -78,7 +78,7 @@ function load-module-plan()
                 else
                     REF=${modref:1}
                 fi
-                #  set REF to all all module's group in GMOD
+                #  set REF to all module's group in GMOD
                 for mod in $GMOD; do
                     local module_info=( $(parse-module-ref $mod) )
                     local module=${module_info[0]}
