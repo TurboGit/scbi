@@ -176,45 +176,6 @@ function display-log-stat()
     done
 }
 
-############################## dump-function
-# dump function definition NAME, do it recursively for all used
-# functions in the $NAME.
-
-declare -A SCBI_FCT_DUMPED=[]
-
-function dump-function()
-{
-    local PLUGIN=$1
-    local NAME=$2
-    local FCT=$(type $NAME | sed '1,3d;$d')
-
-    #  Tokenize all words in FCT and if a routine, dump it
-
-    IFS=' ();=\$!/[]{}'
-
-    SCBI_FCT_DUMPED["$NAME"]=yes
-
-    for word in $FCT; do
-        if [[ ! -z "$word" ]]             \
-               && [[ "${word}" != 'if' ]]     \
-               && [[ "${word:0:1}" != '-' ]];
-        then
-            if [[ -z "${SCBI_FCT_DUMPED[$word]}" ]]; then
-                fn-exists "$word"
-                [[ $? == 0 ]] && dump-function $PLUGIN $word;
-            fi
-        fi
-    done
-
-    if [[ ${NAME#${PLUGIN}-} == $NAME ]]; then
-        echo
-        echo "   function $NAME()"
-        echo "   {"
-        echo "$FCT"
-        echo "   }"
-    fi
-}
-
 ############################## show-command
 # display bash command with original command and with substitued
 # variables
@@ -239,7 +200,7 @@ function show-command()
 
     #  then source env.cmd if present
 
-    echo "   source ../.log/fct.cmd"
+    echo "   source $SCBI_BDIR/.scbi.runtime"
     echo "   [[ -f ../.log/env.cmd ]] && source ../.log/env.cmd"
     echo ""
 
@@ -247,10 +208,6 @@ function show-command()
         cp $SCBI_PLUGINS/$PLUGIN ../.log
         echo "   source ../.log/$PLUGIN"
     fi
-
-    (
-        dump-function $PLUGIN $CMD
-    )
 
     echo ""
     echo "   $CMD $PREFIX $TARGET $VARIANT"

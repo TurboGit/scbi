@@ -1,6 +1,6 @@
 RUNS ./scbi test17
 
-source .root/builds/test17/build/.log/fct.cmd
+source .root/builds/.scbi.runtime
 source .root/builds/test17/build/.log/env.cmd
 
 IS $ROOT_DIR == /this/is/it

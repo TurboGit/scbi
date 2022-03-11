@@ -1040,10 +1040,6 @@ function handle-module()
     #  Create module build directory
 
     mkdir -p $SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log > $log 2>&1
-    local fct=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/fct.cmd
-
-    declare -f define-var          > $fct
-    echo "declare -fx define-var" >> $fct
 
     record-build-plan $module $variant
 
@@ -1877,6 +1873,10 @@ if [[ $DO_PLAN == yes ]]; then
     display-build-plan
     exit 0
 fi
+
+#  Copy the runtime for replay with {config,build,install}.cmd scripts
+
+cp $SCBI_PLUGINS/0_runtime $SCBI_BDIR/.scbi.runtime
 
 #  Run script for all modules
 

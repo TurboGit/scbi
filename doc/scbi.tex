@@ -1530,7 +1530,6 @@ The SCBI driver does record all needed information in the sandbox directory \fil
 The files created in this directory are:
 
 \begin{description}[font=\file,style=standard]
-	\item[fct.cmd] \tabto{3cm} The needed function to set the environment
 	\item[env.cmd] \tabto{3cm} The environment set to configure, build or install the module.
 	\item[config.cmd] \tabto{3cm} The commands executed to configure.
 	\item[config.log] \tabto{3cm} The full log issued during the configuration.
@@ -1548,7 +1547,7 @@ As an example, the build command file for \code{cmake} looks like this:
 # cmake-build
 (
 	cd <...>/cmake/build/build
-	source ../.log/fct.cmd
+	source /some/path/.scbi-runtime
 	[ -f ../.log/env.cmd ] && source ../.log/env.cmd
 
 	function cmake-build()
