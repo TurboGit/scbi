@@ -1547,7 +1547,7 @@ As an example, the build command file for \code{cmake} looks like this:
 # cmake-build
 (
 	cd <...>/cmake/build/build
-	source /some/path/.scbi-runtime
+	source <...>/.scbi-runtime
 	[ -f ../.log/env.cmd ] && source ../.log/env.cmd
 
 	function cmake-build()
@@ -1575,6 +1575,7 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 
 \dirtree{%
 	.1 \textbf{[\$SCBI\_BDIR]}.
+	.2 .scbi.runtime \des{scbi runtime}.
 	.2 .vcs.
 	.3 \textbf{[<module>]} \des{sources checkout}.
 	.2 .patches.
