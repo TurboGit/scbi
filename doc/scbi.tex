@@ -1171,20 +1171,20 @@ For a plug-in it is sometimes needed to have a native variant to use the OS libr
 The support routine \code{with-variant} can be used to automate this action:
 
 \begin{lstlisting}
-with-variant native [<packages>|NONE] \
+with-variant native [<packages>:[v]|NONE] \
 	--env 'cmd1 'cmd2'
 \end{lstlisting}
 
-The first parameter is the variant name. The followings are the OS package names or \code{NONE}. An optional environment section can be opened with \code{\ddash{}env}. The value \code{NONE} will create an empty \code{depends} hook and can be used if the actual OS dependency has been installed manually on the machine. A possible reason is that the library has not been packaged by the OS maintainers.
+The first parameter is the variant name. The followings are the OS package names or \code{NONE}. An optional environment section can be opened with \code{\ddash{}env}. The value \code{NONE} will create an empty \code{depends} hook and can be used if the actual OS dependency has been installed manually on the machine. A possible reason is that the library has not been packaged by the OS maintainers. The \code{[v]} tag can be used to check that install \code{<package>} has the version specified for the plug-in.
 
 For example:
 
 \begin{lstlisting}
-with-variant native pckA pckB \
+with-variant native pckA:[v] pckB \
 	--env 'set-var ROOT_DIR /usr'
 \end{lstlisting}
 
-The command above will automatically create the following hooks when called from \file{natv} module script:
+The command above will automatically create the following hooks when called from \file{natv} module script and if \code{natv} has version \code{1.2} in build plan:
 
 \begin{lstlisting}
 function natv-native-build-env ()
@@ -1204,7 +1204,7 @@ function natv-native-build-depends ()
 
 function natv-native-depends ()
 {
-	echo pckA
+	echo pckA:1.2
 	echo pckB
 }
 

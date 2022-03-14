@@ -1,0 +1,17 @@
+
+with-variant native gcc:[v]
+
+function mautov-config()
+{
+    echo mautov-config
+}
+
+function mautov-build()
+{
+    echo mautov-config
+}
+
+function mautov-install()
+{
+    echo mautov-config
+}
