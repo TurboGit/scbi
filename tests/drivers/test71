@@ -81,3 +81,7 @@ modE
 modF/notdeb
 modG/notdeb9
 EOF
+
+unset SCBI_OS_NAME
+unset SCBI_OS_VERSION
+unset SCBI_OS_MAJOR_VERSION
