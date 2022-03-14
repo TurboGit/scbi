@@ -349,6 +349,7 @@ function usage()
     echo "   -l | --log:n            log display control yes|no|on-failure"
     echo "   -f | --force            force rebuild, do not check build id"
     echo "   -p | --purge[:only]     remove build directory, build eventually"
+    echo "      | --safe             clean-up build directory before configure"
     echo "      | --shell:n          start a shell with module's environment"
     echo "      | --run:\"cmd arg\"    run command in module's environment"
     echo "      | --list-depends:n   list module's dependencies (direct, full)"
