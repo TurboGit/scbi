@@ -393,7 +393,6 @@ function check-auto-variant()
                             else
                                 ilog $MODULE module $pkg version $pver matching
                             fi
-                            res=0
                         fi
                     done < <( echo ${STATUSES[*]} )
                 fi
