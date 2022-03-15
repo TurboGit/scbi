@@ -1,0 +1,30 @@
+# check for version in plug-in
+
+LDIR=.root/builds/libpv/build/.log
+
+RUNS ./scbi libpv
+
+GREP "VERSION-C NONE" $LDIR/config.log
+GREP "VERSION-B NONE" $LDIR/build.log
+GREP "VERSION-I NONE" $LDIR/install.log
+GREP "VERSION-BE NONE" $LDIR/config.log
+GREP "VERSION-BE NONE" $LDIR/build.log
+GREP "VERSION-BE NONE" $LDIR/install.log
+
+RUNS ./scbi libpv:v1
+
+GREP "VERSION-C v1" $LDIR/config.log
+GREP "VERSION-B v1" $LDIR/build.log
+GREP "VERSION-I v1" $LDIR/install.log
+GREP "VERSION-BE v1" $LDIR/install.log
+GREP "LE 1" $LDIR/build.log
+
+RUNS ./scbi libpv:v1.2
+
+GREP "VERSION-C v1.2" $LDIR/config.log
+GREP "VERSION-B v1.2" $LDIR/build.log
+GREP "VERSION-I v1.2" $LDIR/install.log
+GREP "VERSION-BE v1.2" $LDIR/config.log
+GREP "VERSION-BE v1.2" $LDIR/build.log
+GREP "VERSION-BE v1.2" $LDIR/install.log
+GREP "GT 1" $LDIR/build.log

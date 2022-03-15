@@ -1,0 +1,64 @@
+
+function libpv-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function libpv-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo lib1-$VERSION-src.tar.bz2
+}
+
+function libpv-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    set-var VERSIONBE $(get-version)
+}
+
+function libpv-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo VERSION-C $(get-version)
+    echo VERSION-BE $VERSIONBE
+}
+
+function libpv-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local version=$(get-version)
+
+    echo VERSION-B $version
+    echo VERSION-BE $VERSIONBE
+
+    check-versions $version ">" 1
+
+    if [[ $? == 0 ]]; then
+        echo GT 1
+    else
+        echo LE 1
+    fi
+}
+
+function libpv-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo VERSION-I $(get-version)
+    echo VERSION-BE $VERSIONBE
+}
