@@ -202,6 +202,8 @@ function show-command()
 
     echo "   source $SCBI_BDIR/.scbi.runtime"
     echo "   [[ -f ../.log/env.cmd ]] && source ../.log/env.cmd"
+    echo "   [[ -f ../.log/build-plan ]] &&"
+    echo "      load-runtime-module-plan ../.log/build-plan"
     echo ""
 
     if [[ -f $SCBI_PLUGINS/$PLUGIN ]]; then

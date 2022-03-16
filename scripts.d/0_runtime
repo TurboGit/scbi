@@ -1,4 +1,6 @@
 
+declare -A MODVER
+
 ############################## fn-exists
 # check wether a function is defined
 
@@ -704,4 +706,21 @@ function check-versions()
             [ "$a" $op "$b" ]
             ;;
     esac
+}
+
+############################## load-runtime-module-plan
+#
+# Load a flat module plan. Used for replay script.
+
+function load-runtime-module-plan()
+{
+    local PLAN=$1
+
+    while read modref arg var; do
+        if [[ "${modref:0:1}" != "#" ]]; then
+            local module_info=( $(parse-module-ref $modref) )
+            local module=${module_info[0]}
+            MODVER[$module]=${modref/*=/}
+        fi
+    done < $PLAN
 }

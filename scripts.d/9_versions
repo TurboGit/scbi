@@ -33,8 +33,6 @@ function check-discriminants()
 #
 #
 
-declare -A MODVER
-
 function load-module-plan()
 {
     local NAMEREF=$1
