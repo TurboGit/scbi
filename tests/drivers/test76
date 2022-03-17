@@ -1,0 +1,245 @@
+
+# test rebuild with meta-module
+
+# all build
+
+RUNS ./scbi --deps smain
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : apply-patch filename lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default setup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default wrapup
+
+xxxx/xx/xx xx:xx:xx : Building smain [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building smain [default] (master)
+EOF
+
+# nothing build
+
+RUNS ./scbi --deps smain
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default setup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default wrapup
+
+xxxx/xx/xx xx:xx:xx : Building smain [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building smain [default] (master)
+EOF
+
+# change depA, check that depA is rebuilt and also smain
+# which is depending on depA via a meta-module.
+
+cp scripts.d/depA scripts.d/depA.keep
+
+echo >> scripts.d/depA
+
+RUNS ./scbi --deps smain
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default setup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default wrapup
+
+xxxx/xx/xx xx:xx:xx : Building smain [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building smain [default] (master)
+EOF
+
+mv scripts.d/depA.keep scripts.d/depA
+
+# Now check for a dependency on a two level metamodule
+
+RUNS ./scbi --deps smain/two
+
+# Check nothing is recompiled
+
+RUNS ./scbi --deps smain/two
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule meta-meta-default setup
+xxxx/xx/xx xx:xx:xx : End metamodule meta-meta-default setup
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default setup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default wrapup
+
+xxxx/xx/xx xx:xx:xx : Metamodule meta-meta-default wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule meta-meta-default wrapup
+
+xxxx/xx/xx xx:xx:xx : Building smain [two] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building smain [two] (master)
+EOF
+
+cp scripts.d/depA scripts.d/depA.keep
+
+echo >> scripts.d/depA
+
+# And now that depA and smain are recompiled
+
+RUNS ./scbi --deps smain/two
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule meta-meta-default setup
+xxxx/xx/xx xx:xx:xx : End metamodule meta-meta-default setup
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default setup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod-default wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod-default wrapup
+
+xxxx/xx/xx xx:xx:xx : Metamodule meta-meta-default wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule meta-meta-default wrapup
+
+xxxx/xx/xx xx:xx:xx : Building smain [two] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config [two] starting
+xxxx/xx/xx xx:xx:xx : config [two] completed
+xxxx/xx/xx xx:xx:xx : build [two] starting
+xxxx/xx/xx xx:xx:xx : build [two] completed
+xxxx/xx/xx xx:xx:xx : End Building smain [two] (master)
+EOF
+
+mv scripts.d/depA.keep scripts.d/depA

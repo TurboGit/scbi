@@ -86,7 +86,7 @@ else
 fi
 cd ..
 
-PLAN 579
+PLAN 589
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR

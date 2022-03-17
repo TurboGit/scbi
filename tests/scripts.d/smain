@@ -1,0 +1,22 @@
+
+function smain-depends()
+{
+    echo lib1
+    echo dmod
+}
+
+function smain-two-depends()
+{
+    echo lib1
+    echo meta-meta
+}
+
+function smain-config()
+{
+    echo CONFIG
+}
+
+function smain-build()
+{
+    echo BUILD
+}
