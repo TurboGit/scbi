@@ -19,6 +19,15 @@ function c-gprbuild-depends()
     echo c-gprconfig-kb
 }
 
+function c-gprbuild-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH $PREFIX/bin
+}
+
 function c-gprbuild-config()
 {
     local PREFIX=$1

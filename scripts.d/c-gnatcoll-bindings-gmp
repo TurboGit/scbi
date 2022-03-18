@@ -7,6 +7,11 @@ function c-gnatcoll-bindings-gmp-vcs()
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
 
+function c-gnatcoll-bindings-gmp-build-depends()
+{
+    echo c-gprbuild
+}
+
 function c-gnatcoll-bindings-gmp-depends()
 {
     echo c-gnatcoll-core

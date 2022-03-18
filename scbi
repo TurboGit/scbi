@@ -1845,19 +1845,19 @@ fi
 #  If a run is requested
 
 if [[ $DO_RUN == yes ]]; then
-    run-command $SCBI_TARGET $LAST_MODULE "$DO_RUN_CMD"
+    run-command $SCBI_TARGET "$MODULES" "$DO_RUN_CMD"
     exit 0
 fi
 
 #  If a shell is requested
 
 if [[ $DO_SHELL == yes ]] || [[ $DO_SHELL == yes-dev ]]; then
-    run-shell $SCBI_TARGET $LAST_MODULE $DO_SHELL
+    run-shell $SCBI_TARGET "$MODULES" $DO_SHELL
     exit 0
 fi
 
 if [[ $DO_SHELL == yes-nocd ]]; then
-    run-shell $SCBI_TARGET $LAST_MODULE no
+    run-shell $SCBI_TARGET "$MODULES" no
     exit 0
 fi
 

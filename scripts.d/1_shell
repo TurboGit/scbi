@@ -5,7 +5,7 @@
 function run-shell()
 {
     local TARGET=$1
-    local MODREF=$2
+    local MODULES=( $2 )
     local DOCD=$3
 
     if [[ -z $SHELL ]]; then
@@ -15,7 +15,14 @@ function run-shell()
 
     curcd=$(pwd)
 
-    handle-env "@root" $MODREF
+    local MODREF=${MODULES[-1]}
+
+    for M in ${MODULES[*]}; do
+        handle-env "@root" $M
+        if [[ $M != $MODREF ]]; then
+            handle-module-env "@root" $M env
+        fi
+    done
 
     local module_info=( $(get-module-ref $MODREF) )
     local module=${module_info[0]}
@@ -52,7 +59,7 @@ function run-shell()
 function run-command()
 {
     local TARGET=$1
-    local MODREF=$2
+    local MODULES=( $2 )
     local CMD="$3"
 
     if [[ -z $SHELL ]]; then
@@ -60,7 +67,14 @@ function run-command()
         exit 1
     fi
 
-    handle-env "@root" $MODREF
+    local MODREF=${MODULES[-1]}
+
+    for M in ${MODULES[*]}; do
+        handle-env "@root" $M
+        if [[ $M != $MODREF ]]; then
+            handle-module-env "@root" $M env
+        fi
+    done
 
     local module_info=( $(get-module-ref $MODREF) )
     local module=${module_info[0]}
