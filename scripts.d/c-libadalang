@@ -9,6 +9,11 @@ function c-libadalang-vcs()
     echo https://github.com/AdaCore/libadalang
 }
 
+function c-libadalang-build-depends()
+{
+    echo c-gprbuild
+}
+
 function c-libadalang-common-depends()
 {
     echo c-gnatcoll-bindings-gmp

@@ -7,6 +7,11 @@ function c-libadalang-tools-vcs()
     echo https://github.com/AdaCore/libadalang-tools
 }
 
+function c-libadalang-build-depends()
+{
+    echo c-gprbuild
+}
+
 function c-libadalang-tools-depends()
 {
     echo c-libadalang

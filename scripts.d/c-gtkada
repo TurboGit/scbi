@@ -44,6 +44,11 @@ EOF
     fi
 }
 
+function c-gtkada-build-depends()
+{
+    echo c-gprbuild
+}
+
 function c-gtkada-out-of-tree()
 {
     echo false
