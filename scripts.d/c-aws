@@ -7,15 +7,15 @@ function c-aws-vcs()
     echo https://github.com/AdaCore/aws
 }
 
-function c-aws-cross-depends()
-{
-    echo c-xmlada
-}
-
 function c-aws-build-depends()
 {
     echo c-libadalang-tools
     echo c-gprbuild
+}
+
+function c-aws-cross-depends()
+{
+    echo c-xmlada
 }
 
 function c-aws-depends()
