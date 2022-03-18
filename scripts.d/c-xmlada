@@ -52,6 +52,8 @@ function c-xmlada-out-of-tree()
     echo false
 }
 
+# No build-depends on c-gprbuild to avoid circular dependencies.
+
 function c-xmlada-env()
 {
     local PREFIX=$1
