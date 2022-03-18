@@ -7,6 +7,11 @@ function c-gnatcoll-bindings-python-vcs()
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
 
+function c-gnatcoll-bindings-python-build-depends()
+{
+    echo c-gprbuild
+}
+
 function c-gnatcoll-bindings-python-depends()
 {
     echo os@-python3-dev

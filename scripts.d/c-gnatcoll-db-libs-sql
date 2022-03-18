@@ -7,6 +7,11 @@ function c-gnatcoll-db-libs-sql-vcs()
     echo https://github.com/AdaCore/gnatcoll-db
 }
 
+function c-gnatcoll-db-libs-sql-build-depends()
+{
+    echo c-gprbuild
+}
+
 function c-gnatcoll-db-libs-sql-depends()
 {
     echo c-gnatcoll-core

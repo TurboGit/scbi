@@ -7,6 +7,11 @@ function c-gnatcoll-bindings-readline-vcs()
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
 
+function c-gnatcoll-bindings-readline-build-depends()
+{
+    echo c-gprbuild
+}
+
 function c-gnatcoll-bindings-readline-depends()
 {
     echo c-gnatcoll-core

@@ -7,6 +7,11 @@ function c-gnatcoll-core-vcs()
     echo https://github.com/AdaCore/gnatcoll-core.git
 }
 
+function c-gnatcoll-core-build-depends()
+{
+    echo c-gprbuild
+}
+
 function c-gnatcoll-core-depends()
 {
     echo c-libgpr
