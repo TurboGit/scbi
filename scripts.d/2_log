@@ -34,8 +34,8 @@ function dlog()
 
     #  output to console only if present
     tty --silent
-    [[ $? == 0 ]] && echo $TS : "  $*" > $(tty)
-    echo $ts : "  $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
+    [[ $? == 0 ]] && echo "$TS :   $*" > $(tty)
+    echo "$TS :   $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }
 
@@ -47,8 +47,8 @@ function ilog()
     local TS=$(date +"%Y/%m/%d %H:%M:%S")
 
     shift
-    echo $TS : $*
-    echo $TS : $* >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
+    echo "$TS : $*"
+    echo "$TS : $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }
 
@@ -60,8 +60,8 @@ function wlog()
     local TS=$(date +"%Y/%m/%d %H:%M:%S")
 
     shift
-    echo >&2 $TS : $*
-    echo $TS : $* >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
+    echo >&2 "$TS : $*"
+    echo "$TS : $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }
 
@@ -73,8 +73,8 @@ function elog()
     local TS=$(date +"%Y/%m/%d %H:%M:%S")
 
     shift
-    echo >&2 $TS : $MODULE \(FAILED\) $*
-    echo $TS : $* >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
+    echo >&2 "$TS : $MODULE (FAILED) $*"
+    echo "$TS : $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
     return 1
 }

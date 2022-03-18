@@ -279,10 +279,10 @@ function _internal_for-all-modules()
 
         for i in $(seq 0 $N); do
             local j=$(expr $i + 1)
-            elog $module " . " ${SCBI_RECTREE[$i]} '->' ${SCBI_RECTREE[$j]}
+            elog $module " . ${SCBI_RECTREE[$i]}" '->' ${SCBI_RECTREE[$j]}
         done
 
-        elog $module " . " ${SCBI_RECTREE[-1]} '->' $module
+        elog $module " . ${SCBI_RECTREE[-1]}" '->' $module
         exit 1
     fi
 
