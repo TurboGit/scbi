@@ -1125,7 +1125,7 @@ function handle-module()
     fi
 
     line-sep
-    ilog $module Building $module [${variant//./ }] \($DISPREF\) | tee -a $log
+    ilog $module Building $module \[${variant//./ }\] \($DISPREF\) | tee -a $log
 
     if [[ $SCBI_HOST == $SCBI_TARGET ]]; then
         ilog $module native $SCBI_TARGET | tee -a $log
@@ -1439,7 +1439,7 @@ function handle-module()
               ${_IDIR}/. > $log 2>&1
     fi || elog $module fail to copy to ${_IDIR}
 
-    ilog $module End Building $module [${variant//./ }] \($DISPREF\) \
+    ilog $module End Building $module \[${variant//./ }\] \($DISPREF\) \
         | tee -a $log
     line-sep
 }
