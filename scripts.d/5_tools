@@ -229,7 +229,20 @@ function get-all-depends()
 }
 
 ############################## for-all-modules
-
+#
+#   CALLBACK         : called for each module
+#   WITH_META        : true / false
+#   WITH_DEPS        : both        : depends and build-depends
+#                      deps        : only depends
+#                      build-deps  : only build-depends
+#                      build-deps-1 : first level build-deps then deps
+#   WITH_EXT         : true / false
+#   DEPTH            : max recursive depth, 0 top-level module
+#   LEVEL            : current recursive level
+#   IS_BUILD_DEPENDS : true if in build dependencies
+#   MODREF           : the module to iterate on
+#   FORMODULE        : the module in which the ref was found
+#                      (@root for top-level)
 function _internal_for-all-modules()
 {
     local CALLBACK=$1
@@ -259,6 +272,8 @@ function _internal_for-all-modules()
     if [[ $WITH_DEPS == deps ]]; then
         local R_BDEPS=no
     elif [[ $WITH_DEPS == build-deps ]]; then
+        local R_DEPS=no
+    elif [[ $WITH_DEPS == build-deps-1 ]]; then
         local R_DEPS=no
     fi
 
@@ -351,13 +366,17 @@ function _internal_for-all-modules()
             #  Setup build-depends recursively if any
 
             [[ $R_BDEPS == yes ]] &&
-                for dmodule in \
-                    $(get-all-depends $module $variant build-depends);
-                do
-                    _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
-                                              $WITH_EXT $DEPTH $NEXTL true \
-                                              $dmodule $module $@
-                done
+                {
+                    local NEXTD=$WITH_DEPS
+                    [[ $NEXTD == build-deps-1 ]] && NEXTD=deps
+                    for dmodule in \
+                        $(get-all-depends $module $variant build-depends);
+                    do
+                        _internal_for-all-modules $CALLBACK $WITH_META $NEXTD \
+                                                  $WITH_EXT $DEPTH $NEXTL true \
+                                                  $dmodule $module $@
+                    done
+                }
 
             $CALLBACK $FORMODULE $MODREF $LEVEL \
                       $IS_BUILD_DEPENDS false $IS_META $@
@@ -433,6 +452,23 @@ function for-all-modules-with-meta()
                               $MODREF "@root" $@
 }
 
+#  Iterate over all depends modules and meta-modules
+function for-all-modules-depends-with-meta()
+{
+    local CALLBACK=$1
+    local MODREF=$2
+    shift
+    shift
+
+    local DEPTH=99999
+    [[ $DO_DEPS == yes-direct ]] && DEPTH=2
+
+    declare -A SCBI_CHECKED
+    SCBI_RECTREE=()
+    _internal_for-all-modules $CALLBACK true deps false $DEPTH 0 false \
+                              $MODREF "@root" $@
+}
+
 #  Iterate over all modules, meta-modules and external dependencies
 function for-all-modules-with-meta-ext()
 {
@@ -461,6 +497,23 @@ function for-all-direct-modules-with-meta-ext()
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK true both true 1 0 false \
+                              $MODREF "@root" $@
+}
+
+#  Iterate over all modules, meta-modules and external
+#  dependencies. This is to construct the environment, so first we
+#  check direct build-depends and then recursively the dependencies.
+function for-all-modules-build-depends-with-meta()
+{
+    local CALLBACK=$1
+    local MODREF=$2
+    shift
+    shift
+
+    local DEPTH=99999
+    declare -A SCBI_CHECKED
+    SCBI_RECTREE=()
+    _internal_for-all-modules $CALLBACK true build-deps-1 false $DEPTH 0 false \
                               $MODREF "@root" $@
 }
 

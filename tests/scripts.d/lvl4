@@ -1,0 +1,19 @@
+
+function lvl4-build-env()
+{
+    add-to-var LVL4 build-four
+}
+
+function lvl4-env()
+{
+    add-to-var LVL4 four
+}
+
+function lvl4-build()
+{
+    echo 40 ${LVL0}x
+    echo 41 ${LVL1}x
+    echo 42 ${LVL2}x
+    echo 43 ${LVL3}x
+    echo 44 ${LVL4}x
+}

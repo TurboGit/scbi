@@ -1,0 +1,47 @@
+
+# test for build-depends and depends environment
+
+L0DIR=.root/builds/lvl0/build/.log/build.log
+L1DIR=.root/builds/lvl1/build/.log/build.log
+L2DIR=.root/builds/lvl2/build/.log/build.log
+L3DIR=.root/builds/lvl3/build/.log/build.log
+
+####################
+
+RUNS ./scbi --deps lvl0
+
+GREP "00 build-zerox" $L0DIR
+GREP "01 onex" $L0DIR
+GREP "02 twox" $L0DIR
+GREP "03 x" $L0DIR
+GREP "04 x" $L0DIR
+
+####################
+
+RUNS ./scbi --deps lvl1
+
+GREP "10 x" $L1DIR
+GREP "11 x" $L1DIR
+GREP "12 twox" $L1DIR
+GREP "13 threex" $L1DIR
+GREP "14 x" $L1DIR
+
+####################
+
+RUNS ./scbi --deps lvl2
+
+GREP "20 x" $L2DIR
+GREP "21 x" $L2DIR
+GREP "22 x" $L2DIR
+GREP "23 x" $L2DIR
+GREP "24 fourx" $L2DIR
+
+####################
+
+RUNS ./scbi --deps lvl3
+
+GREP "30 x" $L3DIR
+GREP "31 x" $L3DIR
+GREP "32 x" $L3DIR
+GREP "33 build-threex" $L3DIR
+GREP "34 x" $L3DIR
