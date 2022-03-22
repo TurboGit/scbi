@@ -529,7 +529,24 @@ function handle-env()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    for-all-modules-with-meta handle-env-callback $MODREF
+    for-all-modules-depends-with-meta handle-env-callback $MODREF
+}
+
+function handle-build-depends-env()
+{
+    local FORMODULE=$1
+    local MODREF=$2
+
+    #  Get module information
+
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    for-all-modules-build-depends-with-meta handle-env-callback $MODREF
 }
 
 ############################## is-module-up-to-date
@@ -1167,6 +1184,8 @@ function handle-module()
                 echo "export $DEF" >> $SCBI_ENV_MODULE
             done
         fi
+
+        handle-build-depends-env $FORMODULE $MODREF
 
         handle-module-env $FORMODULE $MODREF build-env >> $SCBI_ENV_MODULE
 
