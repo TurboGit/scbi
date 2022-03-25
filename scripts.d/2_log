@@ -90,7 +90,15 @@ function clean-scbi-logs()
     #  no output as the parent directory is created before the files inside,
     #  so it could be deleted before all files inside are deleted.
     [[ ! -z $SCBI_LOGS ]] &&
-        find $SCBI_LOGS -ctime +$KEEP_LOG_DAYS -delete &> /dev/null
+        [[ $SCBI_LOGS != ${SCBI_LOGS#$HOME} ]] &&
+        {
+            #  delete old log files
+            find $SCBI_LOGS  \
+                 -name "*.log" -ctime +$KEEP_LOG_DAYS -delete &> /dev/null
+            #  then delete empty directories
+            find $SCBI_LOGS \
+                 -ctime +$KEEP_LOG_DAYS -empty -type d -delete &> /dev/null
+        }
 }
 
 ############################## display log-stat
