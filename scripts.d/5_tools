@@ -964,10 +964,10 @@ function display-stat()
     echo "user's SVN repository : $SCBI_SVN_REPO"
     echo -n "e-mail notification   :"
 
-    if [[ $EMAIL_NOTIFICATION == no ]]; then
+    if [[ $SCBI_EMAIL_NOTIFICATION == no ]]; then
         echo " no"
     else
-        echo " $EMAIL"
+        echo " $SCBI_EMAIL"
     fi
 
     echo "supported platforms   : ${SCBI_OS_NAMES[*]}"

@@ -68,7 +68,7 @@ sed -i 's/dlog/ilog/g' scripts.d/7_modgen
 mkdir -p .root/.patches
 
 # kill mail for testing
-export EMAIL_NOTIFICATION=no
+export SCBI_EMAIL_NOTIFICATION=no
 
 # be sure the global install directory exists
 mkdir -p $PWD/.root/builds/install

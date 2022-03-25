@@ -1,14 +1,14 @@
 #  Support for sending mail notification
 #
-# EMAIL              : can be set to an e-mail, recipient of notifications
-# EMAIL_NOTIFICATION : [yes/no] to activate or not the notifications
+# SCBI_EMAIL              : can be set to an e-mail, recipient of notifications
+# SCBI_EMAIL_NOTIFICATION : [yes/no] to activate or not the notifications
 
-[ -z $EMAIL_NOTIFICATION ] && EMAIL_NOTIFICATION=no
+[ -z $SCBI_EMAIL_NOTIFICATION ] && SCBI_EMAIL_NOTIFICATION=no
 
 function send-mail()
 {
     local MSG="$1"
-    if [[ "$EMAIL_NOTIFICATION" = "yes" ]]; then
-        printf "%(%c)T\n" -1 | mail -s "$MSG" $EMAIL
+    if [[ "SCBI_$EMAIL_NOTIFICATION" = "yes" ]]; then
+        printf "%(%c)T\n" -1 | mail -s "$MSG" $SCBI_EMAIL
     fi
 }
