@@ -40,7 +40,7 @@ function run-shell()
     if [[ $DOCD == no ]]; then
         cd $curcd
     else
-        handle-module-env "@root" $MODREF build-env
+        handle-build-depends-env "@root" $MODREF
 
         if [[ $DOCD == yes ]]; then
             cd $(get-build-dir $TARGET $MODREF)
