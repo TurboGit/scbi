@@ -20,7 +20,7 @@ function display-opt()
     local n=64
 
     while [[ ! -z $1 ]]; do
-        n=$(( $n + 1 ))
+        ((n++))
         printf '%b %s\n' \\$(printf "%o" $n) "$1"
         shift
     done

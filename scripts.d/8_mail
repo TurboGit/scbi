@@ -9,6 +9,6 @@ function send-mail()
 {
     local MSG="$1"
     if [[ "$EMAIL_NOTIFICATION" = "yes" ]]; then
-        echo $(date) | mail -s "$MSG" $EMAIL
+        printf "%(%c)T\n" -1 | mail -s "$MSG" $EMAIL
     fi
 }

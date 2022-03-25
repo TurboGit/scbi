@@ -26,7 +26,7 @@ function check-tools()
 
     while [[ "$1" != "" ]]; do
         check-tool $1
-        res=$(expr $res + $?)
+        res=$(($res + $?))
         shift
     done
     return $res
@@ -77,7 +77,7 @@ ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
 SCBI_DLOG=on-failure
 SCBI_PLUGINS="$PWD/scripts.d"
 SCBI_JOBS=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
-SCBI_HALF_JOBS=$(( $SCBI_JOBS / 2 ))
+SCBI_HALF_JOBS=$((SCBI_JOBS / 2))
 
 #  Modules to be handled and already handled
 MODULES=

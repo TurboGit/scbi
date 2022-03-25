@@ -187,7 +187,7 @@ function module-install()
             get-build-id $PREFIX $TARGET \
                          $FORMODULE $MODULE $vid > build-id-$VARIANT
         else
-            echo -n $(date) | md5sum | cut -d' ' -f1 > build-id-$VARIANT
+            printf "%(%c)T" -1 | md5sum | cut -d' ' -f1 > build-id-$VARIANT
         fi
     fi
 

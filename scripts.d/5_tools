@@ -303,10 +303,10 @@ function _internal_for-all-modules()
         elog $module recursive dependencies detected
 
         local N=${#SCBI_RECTREE[*]}
-        N=$(expr $N - 2)
+        ((N-=2))
 
-        for i in $(seq 0 $N); do
-            local j=$(expr $i + 1)
+        for (( i=0 ; i<=$N ; i++ )); do
+            local j=$((i + 1))
             elog $module " . ${SCBI_RECTREE[$i]}" '->' ${SCBI_RECTREE[$j]}
         done
 
@@ -585,10 +585,10 @@ function get-build-id-callback()
             if [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
                 cat $SCBI_BDIR/$module/build-id-$variant
             else
-                echo $(date)
+                printf "%(%c)T" -1
             fi
         else
-            echo $(date)
+            printf "%(%c)T" -1
         fi
     fi
 }
@@ -985,7 +985,7 @@ function display-modules()
 
     for module in $SCBI_PLUGINS/[^0-9_]*; do
         bn=$(basename $module)
-        linelen=$(expr $linelen + ${#bn} + 1)
+        linelen=$((linelen + ${#bn} + 1))
         if [[ $linelen -gt 70 ]]; then
             echo
             echo -n "        "
@@ -1025,7 +1025,7 @@ function display-plans()
     else
         for module in $SCBI_PLUGINS/.plan-*; do
             bn=$(basename $module)
-            linelen=$(expr $linelen + ${#bn} + 1)
+            linelen=$((linelen + ${#bn} + 1))
             if [[ $linelen -gt 70 ]]; then
                 echo
                 echo -n "        "

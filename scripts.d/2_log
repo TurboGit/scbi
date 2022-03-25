@@ -17,7 +17,7 @@ function clog()
 
 function line-sep()
 {
-    [[ $(cat $SCBI_LINE_SEP) = 0 ]] && echo
+    [[ $(cat $SCBI_LINE_SEP) == 0 ]] && echo
     echo -n 1 > $SCBI_LINE_SEP
 }
 
@@ -28,7 +28,8 @@ function line-sep()
 function dlog()
 {
     local MODULE=$1
-    local TS=$(date +"%Y/%m/%d %H:%M:%S")
+    local TS
+    printf -v TS "%(%Y/%m/%d %H:%M:%S)T" -1
 
     shift
 
@@ -44,7 +45,8 @@ function dlog()
 function ilog()
 {
     local MODULE=$1
-    local TS=$(date +"%Y/%m/%d %H:%M:%S")
+    local TS
+    printf -v TS "%(%Y/%m/%d %H:%M:%S)T" -1
 
     shift
     echo "$TS : $*"
@@ -57,7 +59,8 @@ function ilog()
 function wlog()
 {
     local MODULE=$1
-    local TS=$(date +"%Y/%m/%d %H:%M:%S")
+    local TS
+    printf -v TS "%(%Y/%m/%d %H:%M:%S)T" -1
 
     shift
     echo >&2 "$TS : $*"
@@ -70,7 +73,8 @@ function wlog()
 function elog()
 {
     local MODULE=$1
-    local TS=$(date +"%Y/%m/%d %H:%M:%S")
+    local TS
+    printf -v TS "%(%Y/%m/%d %H:%M:%S)T" -1
 
     shift
     echo >&2 "$TS : $MODULE (FAILED) $*"
@@ -108,7 +112,7 @@ function compute-log-stat-file()
             start_time=$(date +"%s" --date="$date $time")
         elif [[ "$action" == "End" ]] && [[ "$module" != "" ]]; then
             end_time=$(date +"%s" --date="$date $time")
-            duration=$(($end_time - $start_time))
+            duration=$((end_time - start_time))
             SCBI_STATS[$module]="${SCBI_STATS[$module]} $duration"
         fi
     done < $FILE
@@ -119,7 +123,6 @@ function get-min-avr-max()
     local LIST="$1"
 
     local min=999999
-    local avr=0
     local max=0
     local n=0
     local sum=0
@@ -127,29 +130,25 @@ function get-min-avr-max()
     for value in $LIST; do
         [[ $value -gt $max ]] && max=$value
         [[ $value -lt $min ]] && min=$value
-        sum=$(($sum + $value))
-        n=$(($n + 1))
+        sum=$((sum + value))
+        ((n++))
     done
 
-    avr=$(($sum / $n))
-
     echo $min
-    echo $avr
+    echo $((sum / n))
     echo $max
 }
 
 function display-time()
 {
-    echo -n $(date --date=@$1 -u +"%M:%S")
+    printf "%(%M:%S)T" $1
 }
 
 function display-log-stat()
 {
     local MODULE=$1
 
-    FILES=$(find $SCBI_LOGS -name "*$MODULE-report.log")
-
-    for file in $FILES; do
+    for file in $(find $SCBI_LOGS -name "*$MODULE-report.log"); do
         compute-log-stat-file $file
     done
 
@@ -158,11 +157,11 @@ function display-log-stat()
     echo
 
     for key in "${!SCBI_STATS[@]}"; do
-        values="${SCBI_STATS[$key]}"
-        mam=( $(get-min-avr-max "$values") )
+        local values="${SCBI_STATS[$key]}"
+        local mam=( $(get-min-avr-max "$values") )
 
         echo -n $key
-        for s in $(seq ${#key} 55); do
+        for (( s=${#key} ; s<=55 ; s++ )); do
             echo -n ' '
         done
 
