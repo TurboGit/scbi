@@ -336,7 +336,7 @@ function with-variant()
     #  Get the caller plug-in name
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
-    module_info=( $(get-module-ref $PLUGIN) )
+    local module_info=( $(get-module-ref $PLUGIN) )
     local ref=${module_info[3]}
 
     #  Hooks with nop body
