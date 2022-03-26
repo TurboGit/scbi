@@ -8,6 +8,8 @@ xxxx/xx/xx xx:xx:xx : module gcc version 10 matching
 xxxx/xx/xx xx:xx:xx : module mautov using native variant
 xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
 xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
 
 xxxx/xx/xx xx:xx:xx : Building mautov [native] (10)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -22,6 +24,10 @@ xxxx/xx/xx xx:xx:xx : skip global install
 xxxx/xx/xx xx:xx:xx : End Building mautov [native] (10)
 EOF
 
+OK  -d .root/builds/mautov/x86_64-linux-gnu-native
+NOK -d .root/builds/mautov/x86_64-linux-gnu-mainav
+NOK -d .root/builds/mautov/x86_64-linux-gnu-for2
+
 RUNS ./scbi --plan=autov --deps mainav
 
 CLEAN-DIFF <<EOF
@@ -29,18 +35,20 @@ xxxx/xx/xx xx:xx:xx : module gcc version 10 matching
 xxxx/xx/xx xx:xx:xx : module mautov using native variant
 xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
 xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
 
-xxxx/xx/xx xx:xx:xx : Building mautov [default] (99.99)
+xxxx/xx/xx xx:xx:xx : Building mautov [mainav] (99.99)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : config starting
-xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : build starting
-xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : install starting
-xxxx/xx/xx xx:xx:xx : install completed
-xxxx/xx/xx xx:xx:xx : End Building mautov [default] (99.99)
+xxxx/xx/xx xx:xx:xx : config [mainav] starting
+xxxx/xx/xx xx:xx:xx : config [mainav] completed
+xxxx/xx/xx xx:xx:xx : build [mainav] starting
+xxxx/xx/xx xx:xx:xx : build [mainav] completed
+xxxx/xx/xx xx:xx:xx : install [mainav] starting
+xxxx/xx/xx xx:xx:xx : install [mainav] completed
+xxxx/xx/xx xx:xx:xx : End Building mautov [mainav] (99.99)
 
 xxxx/xx/xx xx:xx:xx : Building mainav [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -52,3 +60,44 @@ xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : End Building mainav [default] (master)
 EOF
+
+OK  -d .root/builds/mautov/x86_64-linux-gnu-native
+OK  -d .root/builds/mautov/x86_64-linux-gnu-mainav
+NOK -d .root/builds/mautov/x86_64-linux-gnu-for2
+
+RUNS ./scbi --plan=autov --deps mainav2
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : module gcc version 10 matching
+xxxx/xx/xx xx:xx:xx : module mautov using native variant
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
+
+xxxx/xx/xx xx:xx:xx : Building mautov [for2] (99.99)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config [for2] starting
+xxxx/xx/xx xx:xx:xx : config [for2] completed
+xxxx/xx/xx xx:xx:xx : build [for2] starting
+xxxx/xx/xx xx:xx:xx : build [for2] completed
+xxxx/xx/xx xx:xx:xx : install [for2] starting
+xxxx/xx/xx xx:xx:xx : install [for2] completed
+xxxx/xx/xx xx:xx:xx : End Building mautov [for2] (99.99)
+
+xxxx/xx/xx xx:xx:xx : Building mainav2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building mainav2 [default] (master)
+EOF
+
+OK -d .root/builds/mautov/x86_64-linux-gnu-native
+OK -d .root/builds/mautov/x86_64-linux-gnu-mainav
+OK -d .root/builds/mautov/x86_64-linux-gnu-for2

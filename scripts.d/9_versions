@@ -193,9 +193,18 @@ function handle-auto-variant()
                 MODVER[$M]=$value
                 ilog $M module $M using native variant
             elif [[ $res == 1 ]]; then
-                #  remove "auto" from the list of variants
+                #  remove "auto" from the list of variants, or replace
+                #  it with FORMODULE if defined and auto is the only
+                #  variant specified. This ensure that a separate
+                #  directory is used for the build.
                 value=${value/\/auto\./\/}
-                value=${value/\/auto}
+
+                if [[ -z $FORMODULE ]]; then
+                    value=${value/\/auto}
+                else
+                    local FMOD=${FORMODULE//[-._]/}
+                    value=${value/\/auto/\/$FMOD}
+                fi
                 MODVER[$M]=$value
                 ilog module $M using standard variant
             else
