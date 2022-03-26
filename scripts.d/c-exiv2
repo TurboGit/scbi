@@ -1,5 +1,5 @@
 
-with-variant native os@-exiv2:0.27.5 os@-exiv2-dev:0.27.5
+with-variant native os@-exiv2:[v] os@-exiv2-dev:[v]
 
 function c-exiv2-vcs()
 {
