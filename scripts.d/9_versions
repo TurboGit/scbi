@@ -174,13 +174,17 @@ function handle-auto-variant()
     for M in ${!MODVER[@]}; do
         local value=${MODVER[$M]}
 
-        local module_info=( $(get-module-ref $value) )
+        local mod=${M/*=/}
+        local FORMODULE=${M%$mod}
+        FORMODULE=${FORMODULE%=}
+
+        local module_info=( $(get-module-ref $value $FORMODULE) )
 
         local module=${module_info[0]}
         local variant=${module_info[1]}
 
         if [[ $variant =~ ^auto(\.|$) ]]; then
-            check-auto-variant ${M/*=/}
+            check-auto-variant $mod $FORMODULE
             local res=$?
 
             if [[ $res == 0 ]]; then
@@ -268,6 +272,7 @@ function set-module-ref()
 function check-auto-variant()
 {
     local MODULE=$1
+    local FORMODULE=${2:-"@root"}
 
     if [[ -f $SCBI_PLUGINS/$MODULE ]]; then
         #  Check external dependencies for native-depends
@@ -284,8 +289,23 @@ function check-auto-variant()
                 exit 2
             fi
 
-            for dmodule in $(get-all-depends $module native depends); do
+            for dmodule in $(get-all-depends $MODULE native depends); do
                 if [[ ! -f $SCBI_PLUGINS/$dmodule ]]; then
+                    #  If OS dependency on a native variant has version set
+                    #  to v (for example libtbb:v) we want this dependency
+                    #  to be checking the module's version requested.
+
+                    if [[ ${dmodule#*:} == "[v]" ]]; then
+                        dmodule=${dmodule%:*}
+
+                        local m_info=( $(get-module-ref $MODULE $FORMODULE) )
+                        local ref=${m_info[3]}
+
+                        if [[ $ref != NONE ]]; then
+                            dmodule=${dmodule}:$ref
+                        fi
+                    fi
+
                     local STATUSES=( $(check-pkg-status $dmodule) )
 
                     while read pkg pver pres; do

@@ -378,18 +378,6 @@ function with-variant()
             if [[ "${mod^^}" == "NONE" ]]; then
                 H="$H $P;"
             else
-                #  If OS dependency on a native variant has version set
-                #  to v (for example libtbb:v) we want this dependency
-                #  to be checking the module's version requested.
-
-                if [[ ${mod#*:} == "[v]" ]]; then
-                    mod=${mod%:*}
-
-                    if [[ $ref != NONE ]]; then
-                        mod=${mod}:$ref
-                    fi
-                fi
-
                 H="$H $P$mod;"
             fi
         fi

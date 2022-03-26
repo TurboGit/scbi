@@ -1,0 +1,54 @@
+
+#  Check auto variant with a for-module
+
+RUNS ./scbi --plan=autov --deps mautov
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : module gcc version 10 matching
+xxxx/xx/xx xx:xx:xx : module mautov using native variant
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
+
+xxxx/xx/xx xx:xx:xx : Building mautov [native] (10)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : native-config starting
+xxxx/xx/xx xx:xx:xx : native-config completed
+xxxx/xx/xx xx:xx:xx : native-build starting
+xxxx/xx/xx xx:xx:xx : native-build completed
+xxxx/xx/xx xx:xx:xx : native-install starting
+xxxx/xx/xx xx:xx:xx : native-install completed
+xxxx/xx/xx xx:xx:xx : skip global install
+xxxx/xx/xx xx:xx:xx : End Building mautov [native] (10)
+EOF
+
+RUNS ./scbi --plan=autov --deps mainav
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : module gcc version 10 matching
+xxxx/xx/xx xx:xx:xx : module mautov using native variant
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
+
+xxxx/xx/xx xx:xx:xx : Building mautov [default] (99.99)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End Building mautov [default] (99.99)
+
+xxxx/xx/xx xx:xx:xx : Building mainav [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building mainav [default] (master)
+EOF
