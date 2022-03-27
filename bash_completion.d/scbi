@@ -132,7 +132,7 @@ _scbicomp_1()
 _scbicomp()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
-    if [ $# -gt 2 ]; then
+    if [[ $# -gt 2 ]]; then
         cur="$3"
     fi
 
