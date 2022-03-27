@@ -93,7 +93,8 @@ _scbi_feature()
     local IFS=$'\n'
 
     for r in $(grep -s '$(is-enabled' $HOME/.config/scbi/* |
-                   sed 's/.*is-enabled \([a-zA-Z\-\_]*\).*/--enable-\1/g'); do
+                   sed 's/.*is-enabled \([a-zA-Z\-\_]*\).*/--enable-\1/g');
+    do
         printf %s$'\n' "$r "
     done
 }
@@ -114,7 +115,7 @@ _scbi_complete()
     complete -o bashdefault -o default -o nospace -F _$1 $1
 }
 
-_scbicomp_1 ()
+_scbicomp_1()
 {
     local c IFS=' '$'\t'$'\n'
     for c in $1; do
@@ -128,7 +129,7 @@ _scbicomp_1 ()
 }
 
 # generates completion reply with compgen
-_scbicomp ()
+_scbicomp()
 {
     local cur="${COMP_WORDS[COMP_CWORD]}"
     if [ $# -gt 2 ]; then
