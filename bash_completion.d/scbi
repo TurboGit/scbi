@@ -11,6 +11,8 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 --list-plan --version --clean-install --log:yes --log:no --log:on-failure
 --store --stat --stat:full --module-version"
 
+_SCBI_HOOKS="tar|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|config-options|modules"
+
 _gnat_targets()
 {
     local ROOT r b
@@ -110,6 +112,21 @@ _scbi_store_key()
     fi
 }
 
+_scbi_variants()
+{
+    local mod=$1
+    local IFS=$'\n'
+
+    for v in $(grep "function $mod-*" ~/.config/scbi/$mod | \
+                   sed "s/function $mod-//g;s/()//g;s/cross-//g" | \
+                   sed -r "s/${_SCBI_HOOKS}//g" | \
+                   tr '-' '\n' | sort | uniq | \
+                   grep -v common | grep -v default);
+    do
+        printf %s$'\n' $v
+    done
+}
+
 _scbi_complete()
 {
     complete -o bashdefault -o default -o nospace -F _$1 $1
@@ -186,6 +203,14 @@ _scbi()
             ;;
         --shell:*)
             _scbicomp "$(_scbi_shell)" "" "${cur##--shell:}"
+            return 0
+            ;;
+        */*)
+            mod=${cur%/*}
+            if [[ -f $HOME/.config/scbi/$mod ]]; then
+                curdef=${cur##*/}
+                _scbicomp "$(_scbi_variants "$mod")" "$mod/" "${curdef}"
+            fi
             return 0
             ;;
         -*)
