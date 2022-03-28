@@ -4,14 +4,14 @@
 RUNS ./scbi --plan=autov --deps mautov
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : module gcc version 10 matching
+xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
 xxxx/xx/xx xx:xx:xx : module mautov using native variant
 xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
 xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
 xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
 xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
 
-xxxx/xx/xx xx:xx:xx : Building mautov [native] (10)
+xxxx/xx/xx xx:xx:xx : Building mautov [native] (5)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : native-config starting
@@ -21,7 +21,7 @@ xxxx/xx/xx xx:xx:xx : native-build completed
 xxxx/xx/xx xx:xx:xx : native-install starting
 xxxx/xx/xx xx:xx:xx : native-install completed
 xxxx/xx/xx xx:xx:xx : skip global install
-xxxx/xx/xx xx:xx:xx : End Building mautov [native] (10)
+xxxx/xx/xx xx:xx:xx : End Building mautov [native] (5)
 EOF
 
 OK  -d .root/builds/mautov/x86_64-linux-gnu-native
@@ -31,7 +31,7 @@ NOK -d .root/builds/mautov/x86_64-linux-gnu-for2
 RUNS ./scbi --plan=autov --deps mainav
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : module gcc version 10 matching
+xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
 xxxx/xx/xx xx:xx:xx : module mautov using native variant
 xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
 xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
@@ -68,7 +68,7 @@ NOK -d .root/builds/mautov/x86_64-linux-gnu-for2
 RUNS ./scbi --plan=autov --deps mainav2
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : module gcc version 10 matching
+xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
 xxxx/xx/xx xx:xx:xx : module mautov using native variant
 xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
 xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
