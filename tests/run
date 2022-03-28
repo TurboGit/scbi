@@ -14,7 +14,16 @@ function sort-osht-output()
     cat ${OSHT_STDIO} | sort > ${OSHT_STDIO}
 }
 
+function sort-osht-output-n-first-lines()
 {
+    local N=$1
+
+    head -$N ${OSHT_STDIO} | sort > xout
+    sed -i "1,${N}d" ${OSHT_STDIO}
+    cat ${OSHT_STDIO} >> xout
+    mv xout ${OSHT_STDIO}
+}
+
 function sort-osht-output-but-n-lines()
 {
     local N=$1
