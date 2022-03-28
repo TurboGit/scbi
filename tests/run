@@ -14,12 +14,20 @@ function sort-osht-output()
     cat ${OSHT_STDIO} | sort > ${OSHT_STDIO}
 }
 
-function sort-osht-output-but-first-line()
 {
-    head -1 ${OSHT_STDIO} > xout
-    sed -i '1d' ${OSHT_STDIO}
+function sort-osht-output-but-n-lines()
+{
+    local N=$1
+
+    head -$N ${OSHT_STDIO} > xout
+    sed -i "${N}d" ${OSHT_STDIO}
     sort ${OSHT_STDIO} >> xout
     mv xout ${OSHT_STDIO}
+}
+
+function sort-osht-output-but-first-line()
+{
+    sort-osht-output-but-n-lines 1
 }
 
 function clean-up-osht-input()
