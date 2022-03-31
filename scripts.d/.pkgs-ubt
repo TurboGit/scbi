@@ -127,6 +127,7 @@ os@-qwt-qt5-dev                     libqwt-qt5-dev
 os@-rsvg2-dev                       librsvg2-dev
 os@-scotch-dev                      libscotch-dev
 os@-secret-dev                      libsecret-1-dev
+os@-sip-dev                         sip-dev
 os@-soup2-dev                       libsoup2.4-dev
 os@-sphinx-common                   sphinx-common
 os@-sphinx-intl                     sphinx-intl
