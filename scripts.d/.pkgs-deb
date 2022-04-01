@@ -86,6 +86,7 @@ os@-omniidl                         omniidl
 os@-omniorb                         omniorb
 os@-omniorb-dev                     libomniorb4-dev
 os@-omniorb-idl                     omniorb-idl
+os@-omniorb-nameserver              omniorb-nameserver
 os@-opencv-dev                      libopencv-dev
 os@-openexr-dev                     libopenexr-dev
 os@-openjp2-dev                     libopenjp2-7-dev
