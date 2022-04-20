@@ -46,29 +46,14 @@ function c-langkit-env()
     add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
-function c-langkit-do-build()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local OPTS=$3
-
-    local PRJ=$4
-
-    GOPTS="-p -m -j$SCBI_JOBS $OPTS"
-
-    for KIND in static relocatable static-pic; do
-        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
-    done
-}
-
 function c-langkit-build()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
 
-    c-langkit-do-build $PREFIX $TARGET "" \
-                       ./support/langkit_support.gpr
+    python3 manage.py build-langkit-support \
+            --library-types=static,static-pic,relocatable
 }
 
 function c-langkit-cross-build()
@@ -77,26 +62,11 @@ function c-langkit-cross-build()
     local TARGET=$2
     local VARIANT=$3
 
-    c-langkit-do-build $PREFIX $TARGET "--target=$TARGET" \
-                       ./support/langkit_support.gpr
-}
-
-function c-langkit-do-install()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local OPTS=$3
-
-    local PRJ=$4
-
-    gprinstall $OPTS --prefix=$PREFIX --uninstall langkit
-
-    BV="--build-var=LANGKIT_BUILD --build-var=LIBRARY_TYPE"
-    GOPTS="-p --prefix=$PREFIX $OPTS $BV"
+    GOPTS="-p -m -j$SCBI_JOBS $OPTS --target=$TARGET"
 
     for KIND in static relocatable static-pic; do
-        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
-                   -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
+        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND \
+                 ./langkit/support/langkit_support.gpr
     done
 }
 
@@ -106,8 +76,8 @@ function c-langkit-install()
     local TARGET=$2
     local VARIANT=$3
 
-    c-langkit-do-install $PREFIX $TARGET "" \
-                         ./support/langkit_support.gpr
+    python3 manage.py install-langkit-support \
+            $PREFIX --library-types=static,static-pic,relocatable
 }
 
 function c-langkit-cross-install()
@@ -116,8 +86,16 @@ function c-langkit-cross-install()
     local TARGET=$2
     local VARIANT=$3
 
-    c-langkit-do-install $PREFIX $TARGET "--target=$TARGET" \
-                         ./support/langkit_support.gpr
+    gprinstall --target=$TARGET --prefix=$PREFIX --uninstall langkit
+
+    BV="--build-var=LANGKIT_BUILD --build-var=LIBRARY_TYPE"
+    GOPTS="-p --prefix=$PREFIX --target=$TARGET $BV"
+
+    for KIND in static relocatable static-pic; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
+                   -XXMLADA_BUILD=$KIND --build-name=$KIND \
+                   ./langkit/support/langkit_support.gpr
+    done
 }
 
 function c-langkit-prefix()
