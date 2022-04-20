@@ -1055,6 +1055,20 @@ function handle-module()
 
     load-module $MODREF
 
+    #  Check if module to be handled only if specificed on command line
+
+    if [[ $FORMODULE != "@root" ]]; then
+        local FCT=$(get-hook $module $variant only-explicit-build)
+
+        if [[ ! -z $FCT ]]; then
+            if [[ "$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                          $SCBI_TARGET $variant)" == "true" ]]; then
+                ilog $module Module $module built only if explitly specified
+                return
+            fi
+        fi
+    fi
+
     #  Create module build directory
 
     mkdir -p $SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log > $log 2>&1
