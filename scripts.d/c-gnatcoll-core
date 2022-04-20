@@ -7,6 +7,11 @@ function c-gnatcoll-core-vcs()
     echo https://github.com/AdaCore/gnatcoll-core.git
 }
 
+function c-gnatcoll-core-cross-build-depends()
+{
+    echo c-sandbox
+}
+
 function c-gnatcoll-core-build-depends()
 {
     echo p-gnat

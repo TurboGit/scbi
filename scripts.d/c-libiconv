@@ -18,6 +18,11 @@ function c-libiconv-tar()
     echo libiconv-$VERSION.tar.gz
 }
 
+function c-libiconv-build-depends()
+{
+    echo c-sandbox
+}
+
 function c-libiconv-depends()
 {
     echo groff

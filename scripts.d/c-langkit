@@ -17,6 +17,13 @@ function c-langkit-build-depends()
     echo c-e3
 }
 
+function c-langkit-cross-build-depends()
+{
+    echo c-sandbox
+    echo c-gmp
+    echo c-libiconv
+}
+
 function c-langkit-depends()
 {
     echo c-gnatcoll-core
@@ -67,7 +74,7 @@ function c-langkit-cross-build()
     GOPTS="-p -m -j$SCBI_JOBS $OPTS --target=$TARGET"
 
     for KIND in static relocatable static-pic; do
-        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND \
+        gprbuild -vP2 $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND \
                  ./langkit/support/langkit_support.gpr
     done
 }

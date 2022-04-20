@@ -9,6 +9,11 @@ function c-libadalang-vcs()
     echo https://github.com/AdaCore/libadalang
 }
 
+function c-libadalang-cross-build-depends()
+{
+    echo c-sandbox
+}
+
 function c-libadalang-build-depends()
 {
     echo p-gnat

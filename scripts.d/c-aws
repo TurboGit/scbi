@@ -23,6 +23,12 @@ function c-aws-out-of-tree()
     echo false
 }
 
+function c-aws-cross-build-depends()
+{
+    echo p-gnat
+    echo c-libadalang-tools
+}
+
 function c-aws-build-depends()
 {
     echo p-gnat

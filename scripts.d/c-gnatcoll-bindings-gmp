@@ -7,6 +7,11 @@ function c-gnatcoll-bindings-gmp-vcs()
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
 
+function c-gnatcoll-bindings-gmp-cross-build-depends()
+{
+    echo c-sandbox
+}
+
 function c-gnatcoll-bindings-gmp-build-depends()
 {
     echo p-gnat
@@ -51,11 +56,9 @@ function c-gnatcoll-bindings-gmp-build()
 
     local GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
 
-    if [[ $SCBI_HOST == $TARGET ]]; then
-        for kind in static relocatable static-pic; do
-            gprbuild $GOPTS -XLIBRARY_TYPE=$kind gmp/gnatcoll_gmp.gpr
-        done
-    fi
+    for kind in static relocatable static-pic; do
+        gprbuild $GOPTS -XLIBRARY_TYPE=$kind gmp/gnatcoll_gmp.gpr
+    done
 }
 
 function c-gnatcoll-bindings-gmp-install()
@@ -72,12 +75,10 @@ function c-gnatcoll-bindings-gmp-install()
         gprinstall $GOPTS --uninstall gnatcoll_gmp
     fi
 
-    if [[ $SCBI_HOST == $TARGET ]]; then
-        for kind in static relocatable static-pic; do
-            gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
-                       --build-var=GNATCOLL.ICONV_BUILD \
-                       --install-name=gnatcoll_gmp \
-                       --build-name=$kind gmp/gnatcoll_gmp.gpr
-        done
-    fi
+    for kind in static relocatable static-pic; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
+                   --build-var=GNATCOLL.ICONV_BUILD \
+                   --install-name=gnatcoll_gmp \
+                   --build-name=$kind gmp/gnatcoll_gmp.gpr
+    done
 }
