@@ -9,6 +9,7 @@ function c-gnatcoll-bindings-gmp-vcs()
 
 function c-gnatcoll-bindings-gmp-build-depends()
 {
+    echo p-gnat
     echo c-gprbuild
 }
 

@@ -9,6 +9,7 @@ function c-gnatcoll-db-libs-sqlite-vcs()
 
 function c-gnatcoll-db-libs-sqlite-build-depends()
 {
+    echo p-gnat
     echo c-gprbuild
 }
 

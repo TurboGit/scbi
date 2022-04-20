@@ -12,6 +12,12 @@ function c-gprbuild-out-of-tree()
     echo true
 }
 
+function c-gprbuild-build-depends()
+{
+    echo p-gnat
+    echo c-sandbox
+}
+
 function c-gprbuild-depends()
 {
     echo c-libgpr

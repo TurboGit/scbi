@@ -12,6 +12,12 @@ function c-libgpr-out-of-tree()
     echo true
 }
 
+function c-libgpr-build-depends()
+{
+    echo p-gnat
+    echo c-sandbox
+}
+
 function c-libgpr-depends()
 {
     echo c-xmlada

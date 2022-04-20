@@ -9,6 +9,7 @@ function c-gnatcoll-bindings-readline-vcs()
 
 function c-gnatcoll-bindings-readline-build-depends()
 {
+    echo p-gnat
     echo c-gprbuild
 }
 

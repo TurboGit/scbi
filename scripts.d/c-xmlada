@@ -7,17 +7,6 @@ function c-xmlada-vcs()
     echo https://github.com/AdaCore/xmlada
 }
 
-function c-xmlada-tar()
-{
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo c-xmlada-$VERSION-src.tar.gz
-}
-
 function c-xmlada-version()
 {
     local PREFIX=$1
@@ -52,7 +41,13 @@ function c-xmlada-out-of-tree()
     echo false
 }
 
-# No build-depends on c-gprbuild to avoid circular dependencies.
+# No build-depends on c-gprbuild to avoid circular dependencies
+
+function c-xmlada-build-depends()
+{
+    echo p-gnat
+    echo c-sandbox
+}
 
 function c-xmlada-env()
 {

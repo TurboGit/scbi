@@ -9,6 +9,7 @@ function c-gnatcoll-core-vcs()
 
 function c-gnatcoll-core-build-depends()
 {
+    echo p-gnat
     echo c-gprbuild
 }
 

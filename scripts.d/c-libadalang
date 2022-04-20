@@ -11,13 +11,17 @@ function c-libadalang-vcs()
 
 function c-libadalang-build-depends()
 {
+    echo p-gnat
     echo c-gprbuild
+    echo c-e3
 }
 
 function c-libadalang-common-depends()
 {
     echo c-gnatcoll-bindings-gmp
     echo libyaml-dev
+    echo python3-funcy
+    echo python3-mako
 }
 
 function c-libadalang-stable-depends()

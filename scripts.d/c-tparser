@@ -12,6 +12,23 @@ function c-tparser-out-of-tree()
     echo false
 }
 
+function c-tparser-build-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-tparser-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
 function c-tparser-cross-config()
 {
     local PREFIX=$1

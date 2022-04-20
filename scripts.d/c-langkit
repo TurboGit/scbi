@@ -12,7 +12,9 @@ function c-langkit-vcs()
 
 function c-langkit-build-depends()
 {
+    echo p-gnat
     echo c-gprbuild
+    echo c-e3
 }
 
 function c-langkit-depends()

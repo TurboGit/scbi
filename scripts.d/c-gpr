@@ -9,6 +9,7 @@ function c-gpr-vcs()
 
 function c-gpr-build-depends()
 {
+    echo p-gnat
     echo c-gprbuild
 }
 
