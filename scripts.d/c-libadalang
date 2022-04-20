@@ -40,7 +40,7 @@ function c-libadalang-build-env()
     local TARGET=$2
     local VARIANT=$3
 
-    export LIBLANG_SUPPORT_EXTERNALLY_BUILT=false
+    set-var LIBLANG_SUPPORT_EXTERNALLY_BUILT false
 }
 
 function c-libadalang-env()
