@@ -1,0 +1,117 @@
+
+#  variants:
+#    - vcs : to build from mecurial sources
+
+function c-gmp-vcs()
+{
+    echo default
+    echo none
+    echo mercurial
+    echo https://gmplib.org/repo/gmp/
+}
+
+function c-gmp-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo curl
+    echo https://gmplib.org/download/gmp
+    echo gmp-$VERSION.tar.xz
+}
+
+function c-gmp-build-depends()
+{
+    echo c-sandbox
+}
+
+function c-gmp-vcs-depends()
+{
+    echo os@-autotools-dev
+    echo os@-automake
+    echo os@-libtool
+}
+
+function c-gmp-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var C_INCLUDE_PATH   $PREFIX/include
+    add-to-var CXX_INCLUDE_PATH $PREFIX/include
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
+    add-to-var LIBRARY_PATH     $PREFIX/lib
+    add-to-var PKG_CONFIG_PATH  $PREFIX/lib/pkgconfig
+}
+
+function c-gmp-out-of-tree()
+{
+    echo false
+}
+
+function c-gmp-vcs-pre-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./.bootstrap
+    true
+}
+
+function c-gmp-vcs-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./configure --enable-maintainer-mode --prefix=$PREFIX/$TARGET \
+                --build=$HOST --host=$TARGET
+}
+
+function c-gmp-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./configure --prefix=$PREFIX/$TARGET --build=$HOST --host=$TARGET
+}
+
+function c-gmp-vcs-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./configure --enable-maintainer-mode --prefix=$PREFIX
+}
+
+function c-gmp-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./configure --prefix=$PREFIX
+}
+
+function c-gmp-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make -j$JOBS
+}
+
+function c-gmp-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make install
+}
