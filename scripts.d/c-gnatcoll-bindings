@@ -1,8 +1,8 @@
 
 function c-gnatcoll-bindings-cross-modules()
 {
-    echo c-gnatcoll-bindings-readline
     echo c-gnatcoll-bindings-gmp
+    echo c-gnatcoll-bindings-iconv
 }
 
 function c-gnatcoll-bindings-modules()
