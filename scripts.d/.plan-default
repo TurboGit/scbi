@@ -3,3 +3,4 @@ c-libavif/auto
 c-libiconv:#1.15
 c-darktable=c-exiv2/auto:v0.27.5
 c-gmp:#6.2.1
+c-readline:#8.1
