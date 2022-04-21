@@ -77,7 +77,7 @@ function c-gnatcoll-bindings-gmp-install()
 
     for kind in static relocatable static-pic; do
         gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
-                   --build-var=GNATCOLL.ICONV_BUILD \
+                   --build-var=GNATCOLL.GMP_BUILD \
                    --install-name=gnatcoll_gmp \
                    --build-name=$kind gmp/gnatcoll_gmp.gpr
     done
