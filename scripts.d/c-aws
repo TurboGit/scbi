@@ -25,20 +25,14 @@ function c-aws-out-of-tree()
 
 function c-aws-cross-build-depends()
 {
-    echo p-gnat
-    echo c-libadalang-tools
+    echo c-sandbox
 }
 
 function c-aws-build-depends()
 {
     echo p-gnat
-    echo c-libadalang-tools
     echo c-gprbuild
-}
-
-function c-aws-cross-depends()
-{
-    echo c-xmlada
+    echo c-libadalang-tools
 }
 
 function c-aws-depends()

@@ -73,17 +73,17 @@ function c-libadalang-config()
     python3 manage.py generate
 }
 
-function c-libadalang-do-build()
+function c-libadalang-cross-build()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    local PRJ=$3
-
-    GOPTS="-p -m -j$SCBI_JOBS"
+    GOPTS="-p -m -j$SCBI_JOBS --target=$TARGET"
 
     for KIND in static relocatable static-pic; do
-        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND $PRJ
+        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND \
+                 ./build/libadalang.gpr
     done
 }
 
@@ -93,26 +93,36 @@ function c-libadalang-build()
     local TARGET=$2
     local VARIANT=$3
 
-    c-libadalang-do-build $PREFIX $TARGET \
-                          ./build/libadalang.gpr
+    GOPTS="-p -m -j$SCBI_JOBS"
+
+    for KIND in static relocatable static-pic; do
+        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND \
+                 ./build/libadalang.gpr
+    done
 }
 
-function c-libadalang-do-install()
+function c-libadalang-pre-cross-install()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    local PRJ=$3
+    gprinstall --prefix=$PREFIX --target=$TARGET --uninstall libadalang
+
+    # don't want to fail if there is no install yet
+    true
+}
+
+function c-libadalang-pre-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
 
     gprinstall --prefix=$PREFIX --uninstall libadalang
 
-    BV="--build-var=LIBADALANG_BUILD --build-var=LIBRARY_TYPE"
-    GOPTS="-p --prefix=$PREFIX $BV"
-
-    for KIND in static relocatable static-pic; do
-        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
-                   -XXMLADA_BUILD=$KIND --build-name=$KIND $PRJ
-    done
+    # don't want to fail if there is no install yet
+    true
 }
 
 function c-libadalang-install()
@@ -121,8 +131,14 @@ function c-libadalang-install()
     local TARGET=$2
     local VARIANT=$3
 
-    c-libadalang-do-install $PREFIX $TARGET \
-                            ./build/libadalang.gpr
+    BV="--build-var=LIBADALANG_BUILD --build-var=LIBRARY_TYPE"
+    GOPTS="-p --prefix=$PREFIX --target=$TARGET $BV"
+
+    for KIND in static relocatable static-pic; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
+                   -XXMLADA_BUILD=$KIND --build-name=$KIND \
+                   ./build/libadalang.gpr
+    done
 }
 
 function c-libadalang-prefix()

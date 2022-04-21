@@ -12,6 +12,14 @@ function c-tparser-out-of-tree()
     echo false
 }
 
+function c-tparser-cross-build-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo c-sandbox
+}
+
 function c-tparser-build-depends()
 {
     local PREFIX=$1
