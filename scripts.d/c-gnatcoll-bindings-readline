@@ -7,6 +7,17 @@ function c-gnatcoll-bindings-readline-vcs()
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
 
+function c-gnatcoll-bindings-readline-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo gnatcoll-bindings-$VERSION-src.tar.gz
+}
+
 function c-gnatcoll-bindings-readline-cross-build-depends()
 {
     echo c-sandbox
@@ -23,17 +34,6 @@ function c-gnatcoll-bindings-readline-depends()
     echo c-gnatcoll-core
 }
 
-function c-gnatcoll-bindings-readline-tar()
-{
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo gnatcoll-bindings-$VERSION-src.tar.gz
-}
-
 function c-gnatcoll-bindings-readline-out-of-tree()
 {
     echo false
@@ -48,12 +48,6 @@ function c-gnatcoll-bindings-readline-env()
     add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
-function c-gnatcoll-bindings-readline-cross-build()
-{
-    local PREFIX=$1
-    local TARGET=$2
-}
-
 function c-gnatcoll-bindings-readline-build()
 {
     local PREFIX=$1
@@ -66,10 +60,44 @@ function c-gnatcoll-bindings-readline-build()
     done
 }
 
+function c-gnatcoll-bindings-readline-cross-pre-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    gprinstall $GOPTS --target=$TARGET --uninstall gnatcoll_readline
+    true
+}
+
 function c-gnatcoll-bindings-readline-cross-install()
 {
     local PREFIX=$1
     local TARGET=$2
+}
+
+function c-gnatcoll-bindings-readline-pre-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    gprinstall $GOPTS --uninstall gnatcoll_readline
+    true
+}
+
+function c-gnatcoll-bindings-readline-cross-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local GOPTS="-p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET"
+    local GOPTS="$GOPTS --build-var=LIBRARY_TYPE --target=$TARGET"
+
+    for kind in static relocatable static-pic; do
+        gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
+                   --build-var=GNATCOLL.READLINE_BUILD \
+                   --install-name=gnatcoll_readline \
+                   --build-name=$kind readline/gnatcoll_readline.gpr
+    done
 }
 
 function c-gnatcoll-bindings-readline-install()
@@ -79,12 +107,6 @@ function c-gnatcoll-bindings-readline-install()
 
     local GOPTS="-p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET"
     local GOPTS="$GOPTS --build-var=LIBRARY_TYPE"
-
-    local PM=$PREFIX/share/gpr/manifests
-
-    if [[ -f $PM/gnatcoll_readline ]]; then
-        gprinstall $GOPTS --uninstall gnatcoll_readline
-    fi
 
     for kind in static relocatable static-pic; do
         gprinstall $GOPTS -XLIBRARY_TYPE=$kind \

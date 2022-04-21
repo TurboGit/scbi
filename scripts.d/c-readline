@@ -52,7 +52,8 @@ function c-readline-cross-config()
     local TARGET=$2
     local VARIANT=$3
 
-    ./configure --prefix=$PREFIX/$TARGET --build=$HOST --host=$TARGET
+    ./configure --prefix=$PREFIX/$TARGET --build=$HOST --host=$TARGET \
+                --without-curses --disable-shared
 }
 
 function c-readline-config()
