@@ -1,0 +1,83 @@
+
+function c-readline-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://git.savannah.gnu.org/git/readline.git
+}
+
+function c-readline-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo curl
+    echo http://ftp.gnu.org/gnu/readline
+    echo readline-$VERSION.tar.gz
+}
+
+function c-readline-build-depends()
+{
+    echo c-sandbox
+}
+
+function c-readline-depends()
+{
+    true
+}
+
+function c-readline-out-of-tree()
+{
+    echo false
+}
+
+function c-readline-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var C_INCLUDE_PATH   $PREFIX/include/readline
+    add-to-var CXX_INCLUDE_PATH $PREFIX/include/readline
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
+    add-to-var LIBRARY_PATH     $PREFIX/lib
+    add-to-var PKG_CONFIG_PATH  $PREFIX/lib/pkgconfig
+}
+
+function c-readline-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./configure --prefix=$PREFIX/$TARGET --build=$HOST --host=$TARGET
+}
+
+function c-readline-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./configure --prefix=$PREFIX
+}
+
+function c-readline-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make -j$JOBS
+}
+
+function c-readline-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make install
+}
