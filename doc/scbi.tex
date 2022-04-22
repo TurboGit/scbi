@@ -963,6 +963,7 @@ A module listed in a meta-module can itself be a meta-module. A meta-module can 
 \label{set-env}
 \index{variable!add}
 \index{variable!set}
+\index{variable!unset}
 \index{variable!prepend}
 \index{variable!append}
 \index{helpers!define-var}
@@ -970,22 +971,25 @@ A module listed in a meta-module can itself be a meta-module. A meta-module can 
 \index{helpers!prepend-to-var}
 \index{helpers!append-to-var}
 \index{helpers!set-var}
+\index{helpers!unset-var}
 
 The five helper routines are to be used to set environment variables in \code{env} and \code{build-env} hook. They permit a fine control about the way the variables are set and avoid duplicate values.
 
 \begin{description}[style=nextline]
-	\item[define-var {[PREPEND|APPEND|ADD|SET]} <VARIABLE> <VALUE>] Prepend, append, add or set a variable depending on the first action parameter. Note that a single character action is supported as alias.
+	\item[define-var {[PREPEND|APPEND|ADD|SET|UNSET]} <VARIABLE> <VALUE>] Prepend, append, add or set a variable depending on the first action parameter. Note that a single character action is supported as alias.
 	\begin{description}
 		\item[PREPEND | P] Prepend \code{<VALUE>} in \code{<VARIABLE>}, remove previous value if it exists. This ensures that the value is found after the current ones if needed.
 		\item[APPEND | A] Append \code{<VALUE>} in \code{<VARIABLE>}, remove previous value if it exists. This ensures that the value is found before the current ones.
 		\item[ADD] Add \code{<VALUE>} in \code{<VARIABLE>} if it is not already present. The place of the value in the variable is not important, it may be at the start, middle or end.
 		\item[SET | S] Set \code{<VARIABLE>} to \code{<VALUE>} removing all previous values. After this call we always have a single value set.
+		\item[UNSET | U] Unset \code{<VARIABLE>}. After this call \code{<VARIABLE>} is not set.
 	\end{description}
 
 	\item[prepend-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable PREPEND <VARIABLE> <VALUE>}.
 	\item[append-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable APPEND <VARIABLE> <VALUE>}.
 	\item[add-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable ADD <VARIABLE> <VALUE>}.
 	\item[set-var <VARIABLE> <VALUE>] short hand for \code{define-variable SET <VARIABLE> <VALUE>}.
+	\item[unset-var <VARIABLE>] short hand for \code{define-variable UNSET <VARIABLE>}.
 \end{description}
 
 Example:

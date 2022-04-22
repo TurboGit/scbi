@@ -6,38 +6,6 @@ source .root/builds/test17/build/.log/env.cmd
 IS $ROOT_DIR == /this/is/it
 IS $ABC_ROOT == /perfect/here
 
-function prepend-to-var()
-{
-    local VAR=$1
-    local VALUE=$2
-
-    define-var PREPEND $VAR "$VALUE"
-}
-
-function append-to-var()
-{
-    local VAR=$1
-    local VALUE=$2
-
-    define-var APPEND $VAR "$VALUE"
-}
-
-function add-to-var()
-{
-    local VAR=$1
-    local VALUE=$2
-
-    define-var ADD $VAR "$VALUE"
-}
-
-function set-var()
-{
-    local VAR=$1
-    local VALUE=$2
-
-    define-var SET $VAR "$VALUE"
-}
-
 add-to-var VDIR /this/dir
 add-to-var VDIR /another/dir
 add-to-var VDIR /first/dir
@@ -72,3 +40,7 @@ IS $VDIR == "/another/dir"
 prepend-to-var VDIR /this/dir
 
 IS $VDIR == "/this/dir:/another/dir"
+
+unset-var VDIR
+
+IS "$VDIR" == ""

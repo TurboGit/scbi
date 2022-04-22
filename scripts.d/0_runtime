@@ -521,6 +521,9 @@ function define-var()
             SET|S)
                 export $VAR="${VALUE}"
             ;;
+            UNSET|U)
+                unset $VAR
+            ;;
             ADD)
                 [[ $VALUE_EXISTS == no ]] &&
                     export $VAR="${VALUE}${!VAR:+$SEP}${!VAR}"
@@ -579,6 +582,13 @@ function set-var()
     local VALUE=$2
 
     define-var SET $VAR "$VALUE"
+}
+
+function unset-var()
+{
+    local VAR=$1
+
+    define-var UNSET $VAR
 }
 
 ############################## _internal_call-variant-hooks
