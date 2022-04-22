@@ -1195,7 +1195,7 @@ function handle-module()
             echo "# SCBI global settings" >> $SCBI_ENV_MODULE
 
             env | grep "^SCBI_" | while read DEF; do
-                echo "export $DEF" >> $SCBI_ENV_MODULE
+                echo "export ${DEF/=/=\"}\"" >> $SCBI_ENV_MODULE
             done
         fi
 
