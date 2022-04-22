@@ -9,6 +9,15 @@ function fn-exists()
     declare -f $1 > /dev/null
 }
 
+############################## copy-fonction
+
+function copy-function()
+{
+    declare -F "$1" > /dev/null || return 1
+    local func="$(declare -f "$1")"
+    eval "${2}(${func#*\(}"
+}
+
 ############################## get-config-options
 
 function get-config-options()
