@@ -1,0 +1,30 @@
+
+#  This virtual plug-in is used to break circular dependencies.
+#
+#  The c-xmlada, c-libgpr and c-gprbuild plug-ins are depending on each
+#  others. Both have a bootstrap mode and are installed into the global
+#  sandbox directory.
+#
+#  After this manual setup the corresponding projects are
+#  using c-sandbox plug-in to avoid circularities.
+
+function c-sandbox-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var PATH             $SCBI_BDIR/install/bin
+    add-to-var LD_LIBRARY_PATH  $SCBI_BDIR/install/lib
+    add-to-var GPR_PROJECT_PATH $SCBI_BDIR/install/share/gpr
+}
+
+function c-sandbox-cross-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var PATH             $SCBI_BDIR/install/$TARGET/bin
+    add-to-var PATH             $SCBI_BDIR/install/bin
+    add-to-var LD_LIBRARY_PATH  $SCBI_BDIR/install/$TARGET/lib
+    add-to-var GPR_PROJECT_PATH $SCBI_BDIR/install/$TARGET/share/gpr
+}

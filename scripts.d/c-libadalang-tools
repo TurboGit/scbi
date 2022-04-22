@@ -7,14 +7,21 @@ function c-libadalang-tools-vcs()
     echo https://github.com/AdaCore/libadalang-tools
 }
 
-function c-libadalang-build-depends()
+function c-libadalang-tools-cross-build-depends()
 {
+    echo c-sandbox
+}
+
+function c-libadalang-tools-build-depends()
+{
+    echo p-gnat
     echo c-gprbuild
 }
 
 function c-libadalang-tools-depends()
 {
     echo c-libadalang
+    echo c-tparser
 }
 
 function c-libadalang-tools-out-of-tree()

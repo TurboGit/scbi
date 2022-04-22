@@ -101,8 +101,8 @@ function hg-co()
             hg clone $URL $REPO
         else
             cd $REPO
-            [[ ! -d .git ]] &&
-                ilog build error: $(pwd) not a git repository &&
+            [[ ! -d .hg ]] &&
+                ilog build error: $(pwd) not a mercurial repository &&
                 exit 1
             #  we set the URL in case the repo has been relocated
             hg pull

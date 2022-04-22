@@ -9,6 +9,7 @@ function c-gnatcoll-db-tools-vcs()
 
 function c-gnatcoll-db-tools-build-depends()
 {
+    echo p-gnat
     echo c-gprbuild
 }
 

@@ -1,0 +1,47 @@
+
+# Use an externally installed e3
+
+function c-e3-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/e3-core
+}
+
+function c-e3-out-of-tree()
+{
+    echo false
+}
+
+function c-e3-depends()
+{
+    echo python3-tqdm
+}
+
+function c-e3-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    # Not needed as using pip3 to install
+
+#    add-to-var PATH       $PREFIX/bin
+#    add-to-var PYTHONPATH $PREFIX/lib/python3.10/site-packages
+}
+
+function c-e3-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    pip3 install e3-core
+    # python3 setup.py install --prefix=$PREFIX
+}
+
+function c-e3-prefix()
+{
+    echo NONE
+}

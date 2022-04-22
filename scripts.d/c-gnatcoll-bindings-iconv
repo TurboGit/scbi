@@ -7,6 +7,17 @@ function c-gnatcoll-bindings-iconv-vcs()
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
 
+function c-gnatcoll-bindings-iconv-cross-build-depends()
+{
+    echo c-sandbox
+}
+
+function c-gnatcoll-bindings-iconv-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
 function c-gnatcoll-bindings-iconv-depends()
 {
     echo c-gnatcoll-core
