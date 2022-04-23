@@ -58,6 +58,14 @@ function c-aunit-build-depends()
     echo c-gprbuild
 }
 
+function c-aunit-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
 function c-aunit-build()
 {
     local PREFIX=$1
