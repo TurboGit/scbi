@@ -210,12 +210,10 @@ function has-variant()
 
 ############################## inherit-plugin
 
-function inherit-plugin()
+function _inherit-plugin_internal()
 {
     local HPLUGIN=$1
-
-    #  Get the caller plug-in name
-    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+    local PLUGIN=$2
 
     #  All hooks
     local SCBI_HOOKS="vcs|tar|env|build-env|depends|build-depends|out-of-tree"
@@ -234,6 +232,16 @@ function inherit-plugin()
         H="$H { $hook \$1 \$2 \$3 \$4 \$5 \$6 \$7; }"
         eval $H
     done
+}
+
+function inherit-plugin()
+{
+    local HPLUGIN=$1
+
+    #  Get the caller plug-in name
+    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+
+    _inherit-plugin_internal $HPLUGIN $PLUGIN
 }
 
 ############################## get-version

@@ -3,6 +3,7 @@
 #  set to yes when module is loaded and $SCBI_LOADED[$module.$variant] is
 #  set to meta (for a meta-module) / final (for a standard module).
 declare -A SCBI_LOADED
+declare -A SCBI_MODULE_ALIAS
 
 declare SCBI_RECTREE=()
 
@@ -130,6 +131,14 @@ function load-module()
         if [[ -f $SCBI_PLUGINS/$module ]]; then
             source $SCBI_PLUGINS/$module
             SCBI_LOADED[$module]=yes
+        elif [[ ! -z "${SCBI_MODULE_ALIAS[$module]}" ]]; then
+            local MA=${SCBI_MODULE_ALIAS[$module]}
+
+            if [[ -f $SCBI_PLUGINS/$MA ]]; then
+                _inherit-plugin_internal $MA $module
+            else
+                return 1
+            fi
         else
             return 1
         fi
@@ -223,8 +232,23 @@ function get-all-depends()
     local VARIANT="$2"
     local HOOK="$3"
 
-    _internal_call-variant-hooks \
-        $MODULE $HOOK "$SCBI_PREFIX" "$SCBI_TARGET" $VARIANT
+    for M in $(_internal_call-variant-hooks \
+                   $MODULE $HOOK "$SCBI_PREFIX" "$SCBI_TARGET" $VARIANT);
+    do
+        #  Module is found
+        if [[ -f $SCBI_PLUGINS/$M ]]; then
+            echo $M
+        else
+            #  Check if we have an alias for it
+            local MA=${SCBI_MODULE_ALIAS[$M]}
+            if [[ ! -z $MA ]] && [[ -f $SCBI_PLUGINS/$MA ]]; then
+                echo $MA
+            else
+                echo $M
+            fi
+        fi
+    done
+
     true
 }
 

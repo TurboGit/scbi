@@ -67,6 +67,8 @@ function load-module-plan()
                     local module=${module_info[0]}
                     MODVER[$module]=${var/*=/}
                 fi
+            elif [[ "$modref" = "@alias" ]]; then
+                SCBI_MODULE_ALIAS[$arg]=$var
             elif [[ "$modref" = "" ]]; then
                 true
             elif [[ "${modref:0:1}" = "]" ]]; then

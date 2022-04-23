@@ -1,0 +1,50 @@
+
+#  Check for module alias
+
+NRUNS ./scbi --deps malias
+
+CLEAN-DIFF <<EOF
+error: missing dependencies for building malias
+error: ma-bd not found
+error: ma-d not found
+EOF
+
+NRUNS ./scbi --plan=ma1 --deps malias
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building one [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building one [default] (master)
+
+error: missing dependencies for building malias
+error: ma-d not found
+EOF
+
+RUNS ./scbi --plan=ma2 --deps malias
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building one [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building one [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building four [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building four [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building malias [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : End Building malias [default] (master)
+EOF

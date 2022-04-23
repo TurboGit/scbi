@@ -1,3 +1,4 @@
+@alias p-gnat c-sandbox
 p-gdb:gdb-head
 c-libavif/auto
 c-libiconv:#1.15

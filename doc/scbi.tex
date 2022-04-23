@@ -341,6 +341,12 @@ Some specific actions are supported with the following syntax:
 	@on fed   lcms2:v2
 	\end{lstlisting}
 
+	\item[\code{@alias <module-name1> <module-name2>}] To set an alias for modules in dependencies. If \code{<module-name1>} is not found while looking at dependencies then \code{<module-name2>} will be tried. This may be handy to propose a public alternative to some private plug-in.
+
+    \begin{lstlisting}
+	@alias private-module alternative-module
+    \end{lstlisting}
+
 	\item[\code{[ <barrier> ... ] /variant:version}] To create a group. The barrier if present must evaluate to true or the group is ignored.
 
 	A group can be used in a build plan to group together all modules with the same version and/or variant. To define a group:
