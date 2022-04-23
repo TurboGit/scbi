@@ -46,6 +46,7 @@ EOF
 
 function c-gtkada-build-depends()
 {
+    echo p-gnat
     echo c-gprbuild
 }
 
