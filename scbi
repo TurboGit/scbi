@@ -567,18 +567,27 @@ function is-module-up-to-date()
 
     local mver=$VERSION_ERROR
 
-    #  Get the version hook, if none present all version are ok
+    #  Get the version hook, if none present all versions are ok
 
     local FCT=$(get-hook $module $variant version)
 
     if [[ ! -z $FCT ]]; then
-        pushd $(mktemp -d) > /dev/null 2>&1
+        TDIR=$(mktemp -d)
 
-        mver=$($FCT $SCBI_PREFIX $SCBI_TARGET)
+        [[ $? != 0 ]] &&
+            echo cannnot create a temp directory &&
+            exit 1
 
-        [[ "${PWD:0:4}" = "/tmp" ]] && rm -r $(pwd)
+        pushd $TDIR > /dev/null 2>&1
+
+        mver=$( handle-build-depends-env "@root" $MODREF
+                handle-module-env "@root" $MODREF env
+                $FCT $SCBI_PREFIX $SCBI_TARGET
+              )
 
         popd > /dev/null 2>&1
+
+        rm -r $TDIR
     else
         mver=$VERSION_OK
     fi
