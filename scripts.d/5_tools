@@ -350,7 +350,7 @@ function _internal_for-all-modules()
         if [[ $? = 0 ]]; then
             push-dependency-tree $module
 
-            FCT=$(get-hook $module $variant modules)
+            local FCT=$(get-hook $module $variant modules)
 
             if [[ ! -z $FCT ]]; then
                 IS_META=true
@@ -563,7 +563,7 @@ function _internal_for-final-modules()
     if [[ $(is-meta-module $MODREF) == yes ]]; then
         load-module $MODREF
 
-        FCT=$(get-hook $module $variant modules)
+        local FCT=$(get-hook $module $variant modules)
 
         for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
             _internal_for-final-modules $module $dmodule
@@ -694,7 +694,7 @@ function get-build-id()
     local pid="no-patch-found"
 
     if [[ $DO_PATCH = yes ]]; then
-        FCT=$(get-hook $module $variant patches)
+        local FCT=$(get-hook $module $variant patches)
 
         if [[ ! -z $FCT ]]; then
             for patch in $($FCT $PREFIX $TARGET $variant $kind $ref); do
@@ -1133,7 +1133,7 @@ function copy-module-src-callback()
 
                 load-module $MODREF
 
-                FCT=$(get-hook $module $variant patches)
+                local FCT=$(get-hook $module $variant patches)
 
                 if [[ ! -z $FCT ]]; then
                     for patch in $($FCT $PREFIX $TARGET $VARIANT $kind $ref); do
