@@ -52,6 +52,12 @@ function c-aunit-out-of-tree()
     echo false
 }
 
+function c-aunit-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
 function c-aunit-build()
 {
     local PREFIX=$1
