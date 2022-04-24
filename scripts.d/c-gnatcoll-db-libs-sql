@@ -7,17 +7,6 @@ function c-gnatcoll-db-libs-sql-vcs()
     echo https://github.com/AdaCore/gnatcoll-db
 }
 
-function c-gnatcoll-db-libs-sql-build-depends()
-{
-    echo p-gnat
-    echo c-gprbuild
-}
-
-function c-gnatcoll-db-libs-sql-depends()
-{
-    echo c-gnatcoll-core
-}
-
 function c-gnatcoll-db-libs-sql-tar()
 {
     local VERSION=$1
@@ -27,6 +16,22 @@ function c-gnatcoll-db-libs-sql-tar()
     echo none
     echo none
     echo gnatcoll-db-libs-sql-sql-$VERSION-src.tar.gz
+}
+
+function c-gnatcoll-db-libs-sql-cross-build-depends()
+{
+    echo c-sandbox
+}
+
+function c-gnatcoll-db-libs-sql-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-gnatcoll-db-libs-sql-depends()
+{
+    echo c-gnatcoll-core
 }
 
 function c-gnatcoll-db-libs-sql-out-of-tree()

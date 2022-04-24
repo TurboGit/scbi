@@ -7,6 +7,22 @@ function c-gnatcoll-db-libs-sqlite-vcs()
     echo https://github.com/AdaCore/gnatcoll-db
 }
 
+function c-gnatcoll-db-libs-sqlite-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo gnatcoll-db-libs-sqlite-sqlite-$VERSION-src.tar.gz
+}
+
+function c-gnatcoll-db-libs-sqlite-cross-build-depends()
+{
+    echo c-sandbox
+}
+
 function c-gnatcoll-db-libs-sqlite-build-depends()
 {
     echo p-gnat
@@ -17,17 +33,6 @@ function c-gnatcoll-db-libs-sqlite-depends()
 {
     echo c-gnatcoll-core
     echo c-gnatcoll-db-libs-sql
-}
-
-function c-gnatcoll-db-libs-sqlite-tar()
-{
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo gnatcoll-db-libs-sqlite-sqlite-$VERSION-src.tar.gz
 }
 
 function c-gnatcoll-db-libs-sqlite-out-of-tree()

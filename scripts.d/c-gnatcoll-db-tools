@@ -7,6 +7,22 @@ function c-gnatcoll-db-tools-vcs()
     echo https://github.com/AdaCore/gnatcoll-db
 }
 
+function c-gnatcoll-db-tools-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo gnatcoll-db-tools-$VERSION-src.tar.gz
+}
+
+function c-gnatcoll-db-tools-cross-build-depends()
+{
+    echo c-sandbox
+}
+
 function c-gnatcoll-db-tools-build-depends()
 {
     echo p-gnat
@@ -19,17 +35,6 @@ function c-gnatcoll-db-tools-depends()
     echo c-gnatcoll-bindings-iconv
     echo c-gnatcoll-db-libs-sql
     echo c-gnatcoll-db-libs-sqlite
-}
-
-function c-gnatcoll-db-tools-tar()
-{
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo gnatcoll-db-tools-$VERSION-src.tar.gz
 }
 
 function c-gnatcoll-db-tools-out-of-tree()
