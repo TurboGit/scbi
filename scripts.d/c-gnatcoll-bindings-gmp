@@ -7,6 +7,17 @@ function c-gnatcoll-bindings-gmp-vcs()
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
 
+function c-gnatcoll-bindings-gmp-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo gnatcoll-bindings-$VERSION-src.tar.gz
+}
+
 function c-gnatcoll-bindings-gmp-cross-build-depends()
 {
     echo c-sandbox
@@ -18,21 +29,15 @@ function c-gnatcoll-bindings-gmp-build-depends()
     echo c-gprbuild
 }
 
-function c-gnatcoll-bindings-gmp-depends()
+function c-gnatcoll-bindings-gmp-common-depends()
 {
     echo c-gnatcoll-core
     echo c-xmlada
 }
 
-function c-gnatcoll-bindings-gmp-tar()
+function c-gnatcoll-bindings-gmp-cross-depends()
 {
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo gnatcoll-bindings-$VERSION-src.tar.gz
+    echo c-gmp
 }
 
 function c-gnatcoll-bindings-gmp-out-of-tree()
