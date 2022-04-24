@@ -161,7 +161,7 @@ A module is described in an SCBI plug-in script (one plug-in in one file). It ca
 \label{dev}
 
 \begin{description}[style=nextline]
-	\item[for\_module] The name of the module depending on this module reference. This is optional and can be used to select a specific variant or version when the module \code{name} is used a a dependency on \code{for\_module}.
+	\item[for\_module] The name of the module depending on this module reference. This is optional and can be used to select a specific variant or version when the module \code{name} is used a a dependency on \code{for\_module}. When specified on a build plan it is possible to use an alternative syntax, see \code{@for} \seeref{formodule}.
 
 	\item[name] The name of the module. This is the main reference for the module. The corresponding module script must be named identically and located in \code{\$SCBI\_DEFS}.
 
@@ -332,20 +332,27 @@ Some specific actions are supported with the following syntax:
 		aws:v1
 	\end{lstlisting}
 
-	\item[\code{@on <discriminants> <module-reference>}] To set a module reference only if the running OS is matching the discriminants. The discriminants are separated with coma and can be the OS name (3 letters OS acronym supported), the OS version, the full OS name (debian, fedora, etc.) and the architecture. Use option \ddash{}stat to see all supported OS and the list of discriminants for the running machine. If all discriminant are matching the module reference will overwrite previous definitions.
+	\item[\code{@on <discriminants> use <module-reference>}] To set a module reference only if the running OS is matching the discriminants. The discriminants are separated with coma and can be the OS name (3 letters OS acronym supported), the OS version, the full OS name (debian, fedora, etc.) and the architecture. Use option \ddash{}stat to see all supported OS and the list of discriminants for the running machine. If all discriminant are matching the module reference will overwrite previous definitions.
 
 	\begin{lstlisting}
 	#  Skip lcms2 on Debian-9
-	@on deb,9 lcms2:skip
+	@on deb,9 use lcms2:skip
 	#  Use v2 of lcms2 on Fedora
-	@on fed   lcms2:v2
+	@on fed use lcms2:v2
 	\end{lstlisting}
 
-	\item[\code{@alias <module-name1> <module-name2>}] To set an alias for modules in dependencies. If \code{<module-name1>} is not found while looking at dependencies then \code{<module-name2>} will be tried. This may be handy to propose a public alternative to some private plug-in.
+	\item[\code{@for <plug-in> use <modref>}] To specify a specific variant and/or version of a plug-in when used as dependencies.
+	\label{formodule}
 
     \begin{lstlisting}
-	@alias private-module alternative-module
+	@for c-darktable use c-exiv2/auto:v0.27.5
     \end{lstlisting}
+
+	\item[\code{@alias <plug-in1> use <plug-in2>}] To set an alias for modules in dependencies. If \code{<plug-in1>} is not found while looking at dependencies then \code{<plug-in2>} will be tried. This may be handy to propose a public alternative to some private plug-in.
+
+	\begin{lstlisting}
+	@alias private-plugin use alternative-plugin
+	\end{lstlisting}
 
 	\item[\code{[ <barrier> ... ] /variant:version}] To create a group. The barrier if present must evaluate to true or the group is ignored.
 

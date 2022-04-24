@@ -1,3 +1,4 @@
 mautov/auto:5
 mainav=mautov/auto:99.99
-mainav2=mautov/auto.for2:99.99
+
+@for mainav2 use mautov/auto.for2:99.99

@@ -1,7 +1,7 @@
-@alias p-gnat c-sandbox
+@alias p-gnat use c-sandbox
+@for c-darktable use c-exiv2/auto:v0.27.5
 p-gdb:gdb-head
 c-libavif/auto
 c-libiconv:#1.15
-c-darktable=c-exiv2/auto:v0.27.5
 c-gmp:#6.2.1
 c-readline:#6.2

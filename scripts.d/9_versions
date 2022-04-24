@@ -58,23 +58,43 @@ function load-module-plan()
     fi
 
     if [[ -f $PLAN ]]; then
-        while read modref arg var; do
+        while read modref arg1 arg2 arg3; do
             if [[ "$modref" = "@load" ]]; then
-                load-module-plan $arg
+                load-module-plan $arg1
             elif [[ "$modref" = "@on" ]]; then
-                if check-discriminants "$arg"; then
-                    local module_info=( $(parse-module-ref $var) )
+                if [[ "$arg2" != "use" ]]; then
+                    elog build syntax error, missing use in @on
+                    exit 1
+                fi
+
+                if check-discriminants "$arg1"; then
+                    local module_info=( $(parse-module-ref $arg3) )
                     local module=${module_info[0]}
-                    MODVER[$module]=${var/*=/}
+                    MODVER[$module]=${arg3/*=/}
                 fi
             elif [[ "$modref" = "@alias" ]]; then
-                SCBI_MODULE_ALIAS[$arg]=$var
+                if [[ "$arg2" != "use" ]]; then
+                    elog build syntax error, missing use in @alias
+                    exit 1
+                fi
+
+                SCBI_MODULE_ALIAS[$arg1]=$arg3
+            elif [[ "$modref" = "@for" ]]; then
+                if [[ "$arg2" != "use" ]]; then
+                    elog build syntax error, missing use in @for
+                    exit 1
+                fi
+
+                local module_info=( $(parse-module-ref "$arg1=$arg3") )
+                local module=${module_info[0]}
+                MODVER[$module]=$arg3
+
             elif [[ "$modref" = "" ]]; then
                 true
             elif [[ "${modref:0:1}" = "]" ]]; then
                 REF=""
-                if [[ ! -z $arg ]]; then
-                    REF=$arg
+                if [[ ! -z $arg1 ]]; then
+                    REF=$arg1
                 else
                     REF=${modref:1}
                 fi
@@ -123,25 +143,25 @@ function load-module-plan()
                 #  store all module's group in GMOD
                 [[ $GROUP == yes ]] && GMOD="$GMOD $modref"
             elif [[ "$modref" = "[" ]]; then
-                if [[ ! -z $arg ]]; then
-                    if [[ $arg = "=" ]]; then
-                        if has-variant "$VARIANT" "$var" \
-                            || check-discriminants "$var";
+                if [[ ! -z $arg1 ]]; then
+                    if [[ $arg1 = "=" ]]; then
+                        if has-variant "$VARIANT" "$arg2" \
+                            || check-discriminants "$arg2";
                         then
                             GROUP=yes
                         else
                             GROUP=closed
                         fi
-                    elif [[ $arg = "/=" ]]; then
-                        if has-variant "$VARIANT" "$var" \
-                                || check-discriminants "$var";
+                    elif [[ $arg1 = "/=" ]]; then
+                        if has-variant "$VARIANT" "$arg2" \
+                                || check-discriminants "$arg2";
                         then
                             GROUP=closed
                         else
                             GROUP=yes
                         fi
                     else
-                       elog build "build plan unexpected $arg on group start"
+                       elog build "build plan unexpected $arg1 on group start"
                        exit 1
                     fi
                 else
