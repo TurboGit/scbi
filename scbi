@@ -80,9 +80,8 @@ SCBI_JOBS=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 SCBI_HALF_JOBS=$((SCBI_JOBS / 2))
 
 #  Modules to be handled and already handled
-MODULES=
-HANDLED="$(mktemp -p /dev/shm/)"
-LAST_MODULE=
+SCBI_MODULES=
+SCBI_HANDLED="$(mktemp -p /dev/shm/)"
 SCBI_CURRENT_MODULE=
 
 #  Actions setup
@@ -136,10 +135,10 @@ function check-handled()
 {
     local KEY=$1
 
-    grep "^$KEY" $HANDLED &> /dev/null
+    grep "^$KEY" $SCBI_HANDLED &> /dev/null
 
     if [[ $? = 1 ]]; then
-        echo "$KEY" >> $HANDLED
+        echo "$KEY" >> $SCBI_HANDLED
         return 0
     else
         return 1
@@ -152,7 +151,7 @@ function check-handled()
 
 function clean-up()
 {
-    rm -f $HANDLED
+    rm -f $SCBI_HANDLED
     rm -f $SCBI_LINE_SEP
 }
 
@@ -1736,8 +1735,7 @@ while [[ $# -gt 0 ]]; do
         (--)
             ;;
         (*)
-            MODULES="$MODULES $1"
-            LAST_MODULE=$1
+            SCBI_MODULES="$SCBI_MODULES $1"
             ;;
         (-*)
             echo "$0: error - unrecognized option $1" 1>&2; exit 1
@@ -1810,13 +1808,13 @@ fi
 
 [[ ! -z $SCBI_PLAN_CL ]] && SCBI_PLAN=$SCBI_PLAN_CL
 
-[[ "$MODULES" = "" ]] &&
+[[ "$SCBI_MODULES" = "" ]] &&
     [[ $DO_SHELL != no ]] &&
     [[ $DO_RUN != no ]] &&
     [[ $DO_STAT == no ]] &&
     echo "error: shell/run commands need a plug-in, see scbi --help" && exit 0
 
-[[ "$MODULES" = "" ]] && [[ $DO_STAT == no ]] && [[ $DO_MOD_VER == no ]] &&
+[[ "$SCBI_MODULES" = "" ]] && [[ $DO_STAT == no ]] && [[ $DO_MOD_VER == no ]] &&
     usage && exit 0
 
 [[ $DO_HELP == yes ]] && usage && exit 0
@@ -1824,7 +1822,7 @@ fi
 [[ $DO_STAT != no ]] &&
     display-stat
 
-[[ "$MODULES" = "" ]] || [[ $DO_STAT == yes ]] &&
+[[ "$SCBI_MODULES" = "" ]] || [[ $DO_STAT == yes ]] &&
     display-modules && display-plans
 
 [[ $DO_STAT == yes ]] &&
@@ -1842,7 +1840,7 @@ fi
 #  Setup module reference specified on the command line. The module
 #  reference on the command line must overwrite the actual build plan.
 
-for module in $MODULES; do
+for module in $SCBI_MODULES; do
     set-module-ref $module
 done
 
@@ -1856,7 +1854,7 @@ if [[ $DO_STAT == no ]]; then
 fi
 
 if [[ $DO_DEPS != no ]]; then
-    for module in $MODULES; do
+    for module in $SCBI_MODULES; do
         for-all-modules-with-meta-ext register-depends-callback $module
     done
 
@@ -1891,26 +1889,26 @@ fi
 #  If a run is requested
 
 if [[ $DO_RUN == yes ]]; then
-    run-command $SCBI_TARGET "$MODULES" "$DO_RUN_CMD"
+    run-command $SCBI_TARGET "$SCBI_MODULES" "$DO_RUN_CMD"
     exit 0
 fi
 
 #  If a shell is requested
 
 if [[ $DO_SHELL == yes ]] || [[ $DO_SHELL == yes-dev ]]; then
-    run-shell $SCBI_TARGET "$MODULES" $DO_SHELL
+    run-shell $SCBI_TARGET "$SCBI_MODULES" $DO_SHELL
     exit 0
 fi
 
 if [[ $DO_SHELL == yes-nocd ]]; then
-    run-shell $SCBI_TARGET "$MODULES" no
+    run-shell $SCBI_TARGET "$SCBI_MODULES" no
     exit 0
 fi
 
 #  If we want to display a module version from a module plan, do it now
 
 if [[ $DO_MOD_VER == yes ]]; then
-    for module in $MODULES; do
+    for module in $SCBI_MODULES; do
         display-module-version $module
     done
     exit 0
@@ -1927,7 +1925,7 @@ cp $SCBI_PLUGINS/0_runtime $SCBI_BDIR/.scbi.runtime
 
 #  Run script for all modules
 
-for module in $MODULES; do
+for module in $SCBI_MODULES; do
     handle-module "@root" $module || exit 1
 done
 
