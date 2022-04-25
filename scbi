@@ -83,6 +83,7 @@ SCBI_HALF_JOBS=$((SCBI_JOBS / 2))
 MODULES=
 HANDLED="$(mktemp -p /dev/shm/)"
 LAST_MODULE=
+SCBI_CURRENT_MODULE=
 
 #  Actions setup
 DO_PURGE=no
@@ -125,6 +126,7 @@ DO_WARNING_EXTERNAL=no
 export SCBI_ROOT SCBI_BDIR SCBI_CLANG_VERSION SCBI_GTK_VERSION SCBI_PLAN
 export SCBI_HOST SCBI_TARGET SCBI_PLUGINS SCBI_JOBS SCBI_HALF_JOBS
 export SCBI_IS_WINDOWS SCBI_VERSION SCBI_BINARY SCBI_OS_NAME SCBI_OS_VERSION
+export SCBI_CURRENT_MODULE
 
 ############################## check-handled
 #
@@ -1039,6 +1041,8 @@ function handle-module()
     local variant=${module_info[1]}
     local kind=${module_info[2]}
     local ref=${module_info[3]}
+
+    SCBI_CURRENT_MODULE=$module
 
     #  If already handled, nothing more to do
 
