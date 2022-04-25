@@ -238,8 +238,10 @@ function inherit-plugin()
 {
     local HPLUGIN=$1
 
+    local CALLER=( $(caller) )
+
     #  Get the caller plug-in name
-    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+    local PLUGIN=$(basename ${CALLER[1]})
 
     _inherit-plugin_internal $HPLUGIN $PLUGIN
 }
@@ -248,8 +250,10 @@ function inherit-plugin()
 
 function get-version()
 {
+    local CALLER=( $(caller) )
+
     #  Get the caller plug-in name
-    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+    local PLUGIN=$(basename ${CALLER[1]})
 
     local module_info=( $(get-module-ref $PLUGIN) )
     echo ${module_info[3]}
