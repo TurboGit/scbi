@@ -12,6 +12,15 @@ function c-polyorb-out-of-tree()
     echo false
 }
 
+function c-polyorb-build-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo p-gnat
+    echo c-gprbuild
+}
+
 function c-polyorb-pre-config()
 {
     local PREFIX=$1
