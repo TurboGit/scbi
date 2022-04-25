@@ -46,6 +46,11 @@ function c-wposix-out-of-tree()
     echo false
 }
 
+function c-wposix-cross-build-depends()
+{
+    echo c-sandbox
+}
+
 function c-wposix-cross-config()
 {
     local PREFIX=$1

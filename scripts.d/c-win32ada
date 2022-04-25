@@ -41,6 +41,11 @@ function c-win32ada-out-of-tree()
     echo false
 }
 
+function c-win32ada-cross-build-depends()
+{
+    echo c-sandbox
+}
+
 function c-win32ada-build()
 {
     local PREFIX=$1
