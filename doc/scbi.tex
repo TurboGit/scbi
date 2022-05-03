@@ -644,7 +644,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	And finally the function \code{scbi-rewrite-tar} can be defined. This function takes the four values returned by the \code{tar} hook and must return the four values in the same order but possibly rewritten.
 
-	\item[<module>-patches] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
+	\item[<module>-{[}common|<variant>{]}-patches] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
 
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT \$KIND \$REF}
@@ -1267,10 +1267,11 @@ function natv-native-prefix ()
 The support routine \code{call-variant-hook} can be used to call a set of hook in a module based on the variants.
 
 \begin{lstlisting}
-call-variant-hooks hname $PREFIX $TARGET $VARIANT
+call-variant-hooks hname $PREFIX $TARGET $VARIANT \
+    [$P1 $P2...]
 \end{lstlisting}
 
-Will call all hooks in the current plug-in (<plugin>) named:
+Will call all hooks in the current plug-in (<plugin>) with arguments \code{\$PREFIX}, \code{\$TARGET}, \code{\$VARIANT} and optional parameters \code{\$P<n>} in the form:
 
 \begin{lstlisting}
    <plugin>-<variant>-hname

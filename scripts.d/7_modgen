@@ -43,10 +43,12 @@ function module-patch()
 
     local res=0
 
-    FCT=$(get-hook $module $variant patches)
+    local PATCHES=$(_internal_call-variant-hooks $module patches \
+                                                 $PREFIX $TARGET $variant \
+                                                 $kind $ref)
 
-    if [[ ! -z $FCT ]]; then
-        for patch in $($FCT $PREFIX $TARGET $VARIANT $kind $ref); do
+    if [[ ! -z $PATCHES ]]; then
+        for patch in $PATCHES; do
             module-apply-patch $module "$patch"
             [[ ! $? = 0 ]] && res=1
         done

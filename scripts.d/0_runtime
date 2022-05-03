@@ -622,6 +622,8 @@ function _internal_call-variant-hooks()
     local TARGET=$4
     local VARIANT=$5
 
+    shift 5
+
     local ALLVARS=$(all-variants $VARIANT)
     local VARFOUND=no
     local found=0
@@ -647,7 +649,7 @@ function _internal_call-variant-hooks()
 
         if [[ $found == 1 ]]; then
             [[ $v != "common" ]] && [[ $v != "default" ]] && VARFOUND=yes
-            $FCT $PREFIX $TARGET $VARIANT
+            $FCT $PREFIX $TARGET $VARIANT $*
         fi
     done
 
@@ -665,7 +667,7 @@ function _internal_call-variant-hooks()
             [[ $? = 0 ]] && found=1
         fi
 
-        [[ $found == 1 ]] && $FCT $PREFIX $TARGET $VARIANT
+        [[ $found == 1 ]] && $FCT $PREFIX $TARGET $VARIANT $*
     fi
 }
 
@@ -678,9 +680,11 @@ function call-variant-hooks()
     local TARGET=$3
     local VARIANT=$4
 
+    shift 4
+
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
-    _internal_call-variant-hooks $PLUGIN $HOOK $PREFIX $TARGET $VARIANT
+    _internal_call-variant-hooks $PLUGIN $HOOK $PREFIX $TARGET $VARIANT $*
 }
 
 ############################## check-versions

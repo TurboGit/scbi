@@ -1,0 +1,55 @@
+
+function withpatch-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function withpatch-common-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo withpatch-com-fix.patch
+}
+
+function withpatch-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo withpatch-0-fix.patch
+}
+
+function withpatch-default-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo withpatch-def-fix.patch
+}
+
+function withpatch-var-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo withpatch-var-fix.patch
+}
+function withpatch-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+}
+
+function withpatch-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+}
