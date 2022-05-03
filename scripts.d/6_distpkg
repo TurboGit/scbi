@@ -172,7 +172,9 @@ function init-cos-pkg()
         version=${N#*:};
         version=${version%-*};
         SCBI_PKGS["$pkg"]="$version"
-    done < <( dnf repoquery --installed 2> /dev/null | grep -v "^Not root" )
+    done < <( dnf repoquery --installed 2> /dev/null |
+		  grep -v "^Not root" |
+		  sed '/^ *$/d' )
 
     init-distrib-alias cos
 }
@@ -189,7 +191,9 @@ function init-fed-pkg()
         version=${N#*:};
         version=${version%-*};
         SCBI_PKGS["$pkg"]="$version"
-    done < <( dnf repoquery --installed 2> /dev/null | grep -v "^Not root" )
+    done < <( dnf repoquery --installed 2> /dev/null |
+		  grep -v "^Not root" |
+		  sed '/^ *$/d' )
 
     init-distrib-alias fed
 }
@@ -206,7 +210,10 @@ function init-rhl-pkg()
         version=${N#*:};
         version=${version%-*};
         SCBI_PKGS["$pkg"]="$version"
-    done < <( dnf repoquery --installed 2> /dev/null | grep -v "^Not root" )
+    done < <( dnf repoquery --installed 2> /dev/null |
+		  grep -v "^Not root" |
+		  grep -v "is not registered" |
+		  sed '/^ *$/d' )
 
     init-distrib-alias rhl
 }
