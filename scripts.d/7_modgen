@@ -23,7 +23,13 @@ function module-apply-patch()
     check-tools-abort patch
 
     patch -p1 < $patch > /dev/null
-    return $?
+    res=$?
+
+    if [[ ! $res = 0 ]]; then
+        elog $MODULE patch $(basename $PATCH_FILE) does not apply
+    fi
+
+    return $res
 }
 
 ############################## module-patch
