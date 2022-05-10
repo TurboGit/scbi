@@ -420,6 +420,27 @@ function handle-module-env()
         $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $SCBI_TARGET $variant
 }
 
+function setup-module-env()
+{
+    local FORMODULE=$1
+    local MODREF=$2
+    local ENV=$3
+
+    #  Get module information
+
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local ref=${module_info[3]}
+
+    [[ $ref = "skip" ]] && return 0
+
+    _internal_call-variant-hooks \
+        $module $ENV \
+        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $SCBI_TARGET $variant
+}
+
 ############################## register-depends-callback
 # used for --list-depends and --list-external
 
