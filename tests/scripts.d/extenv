@@ -1,0 +1,80 @@
+
+function extenv-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function extenv-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo extenv-$VERSION-src.tar.bz2
+}
+
+function extenv-external-env()
+{
+    echo $EXTENV_VAR
+}
+
+function extenv-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var C_INCLUDE_PATH  $PWD/include
+    add-to-var LIBRARY_PATH    .
+    add-to-var LIBRARY_PATH    $PWD/lib
+    add-to-var LD_LIBRARY_PATH .
+    add-to-var LD_LIBRARY_PATH $PWD/lib
+}
+
+function extenv-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var C_INCLUDE_PATH  $PREFIX/include
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib
+    add-to-var LIBRARY_PATH    $PREFIX/lib
+}
+
+function extenv-out-of-tree()
+{
+    echo false
+}
+
+function extenv-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f *.o
+    make
+}
+
+function extenv-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $PREFIX/include
+    mkdir -p $PREFIX/lib
+    cp liblib1.so $PREFIX/lib
+    cp lib1.h $PREFIX/include
+}
+
+function extenv-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./main
+    return 0
+}

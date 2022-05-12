@@ -708,9 +708,19 @@ function get-build-id()
 
     local did=$(get-depends-build-id $MODREF)
 
+    #  Also check if some environment values are used on this project
+
+    local eid=""
+
+    local FCT=$(get-hook $module $variant external-env)
+
+    if [[ ! -z $FCT ]]; then
+        eid=",$($FCT $PREFIX $TARGET $variant)"
+    fi
+
     #  Now compute final id
 
-    echo -n "$vid,$mid,$pid,$did" | get-md5
+    echo -n "$vid,$mid,$pid,$did$eid" | get-md5
 }
 
 ############################## check-tar-exists

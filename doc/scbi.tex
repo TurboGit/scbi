@@ -666,6 +666,16 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\end{enumerate}
 	\end{description}
 
+	\item[<module>-external-env] \index{hook!external-env}Used to compute the module's build identifier and will trigger a rebuild of the module if the value returned by this hook changes. This may be needed if the module must setup its sources depending on some external environment. The return value has no semantic, it must just reflect a change of value, generally just returning the value of the controlling environment variable is sufficient.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} value
+		\begin{enumerate}
+			\item echo \code{\$SOME\_VAR}
+		\end{enumerate}
+	\end{description}
+
 	\item[<module>-{[}common|<variant>{]}-build-depends] \index{hook!build-depends}Lists all modules required to build the actual module. These are generally some tools like \code{cmake}, \code{swig} or \code{gcc} which are only needed to build but not needed at runtime. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
 
 	\begin{description}[font=\textit,style=standard]
@@ -858,6 +868,7 @@ Some of the hooks are called by the main SCBI driver when needed as they are ret
 	\item vcs
 	\item tar
 	\item version
+	\item external-env
 	\item out-of-tree
 	\item prefix
 	\item env

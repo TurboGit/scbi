@@ -1,0 +1,111 @@
+# check that external env is properly trigerring a rebuild
+
+###### should build
+
+RUNS ./scbi extenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building extenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building extenv [default] (master)
+EOF
+
+###### no build
+
+RUNS ./scbi extenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building extenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building extenv [default] (master)
+EOF
+
+###### should build since EXTENV_VAR is set
+
+export EXTENV_VAR="one"
+
+RUNS ./scbi extenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building extenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building extenv [default] (master)
+EOF
+
+###### no build EXTENV_VAR unchanged
+
+RUNS ./scbi extenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building extenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building extenv [default] (master)
+EOF
+
+###### should build since EXTENV_VAR is changed
+
+export EXTENV_VAR="two"
+
+RUNS ./scbi extenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building extenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building extenv [default] (master)
+EOF
+
+###### should build again since EXTENV_VAR is changed
+
+export EXTENV_VAR="three"
+
+RUNS ./scbi extenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building extenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building extenv [default] (master)
+EOF
+
+###### no build EXTENV_VAR unchanged
+
+RUNS ./scbi extenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building extenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building extenv [default] (master)
+EOF
