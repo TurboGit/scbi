@@ -740,7 +740,8 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	\end{lstlisting}
 
 	\item[<module>-{[}common|<variant>{]}-build-env] \index{hook!build-env}Set the environment needed to build this module.
-	Those settings are not exported and only visible and used for the module.
+	Those settings are not exported and only visible and used for the module. The \code{build-env} hook sees only the environment of the build dependencies.
+
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
