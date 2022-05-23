@@ -46,6 +46,7 @@ function c-aws-env()
     local PREFIX=$1
     local TARGET=$2
 
+    add-to-var PATH             $PREFIX/bin
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
 }
 
