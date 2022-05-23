@@ -1343,6 +1343,14 @@ function handle-module()
         fi
 
         for step in $STEPS; do
+            #  If test step (last step for a module) ensure that the
+            #  module's env is loaded as tests are client of the module
+            #  artifacts.
+
+            if [[ $step == "tests" ]]; then
+                handle-module-env $FORMODULE $MODREF env
+            fi
+
             ########## PRE module
 
             #  Apply any generic pre-step (module-pre-setup, module-pre-purge)
