@@ -121,6 +121,7 @@ DO_SHELL=no
 DO_RUN=no
 DO_RUN_CMD=
 DO_WARNING_EXTERNAL=no
+SCBI_TESTS_OPTIONS=
 
 export SCBI_ROOT SCBI_BDIR SCBI_CLANG_VERSION SCBI_GTK_VERSION SCBI_PLAN
 export SCBI_HOST SCBI_TARGET SCBI_PLUGINS SCBI_JOBS SCBI_HALF_JOBS
@@ -247,8 +248,16 @@ function module-wrapper()
 
         local res=0
 
-        if [[ $SCBI_DLOG = yes ]] || [[ "$STEP" = "tests" ]]; then
-            $MODULE-$mstep $PREFIX $SCBI_TARGET $VARIANT 2>&1 \
+        local IS_TESTS=no
+        local TEST_OPTS=
+
+        if [[ "$STEP" =~ "tests" ]]; then
+            IS_TESTS=yes
+            TESTS_OPTS=$SCBI_TESTS_OPTIONS
+        fi
+
+        if [[ $SCBI_DLOG = yes ]] || [[ "$IS_TESTS" = "yes" ]]; then
+            $MODULE-$mstep $PREFIX $SCBI_TARGET $VARIANT $TESTS_OPTS 2>&1 \
                 | tee -a $log | tee $mlog
             #  We want the status of the first command and not the tee ones
             res=${PIPESTATUS[0]}
@@ -343,7 +352,7 @@ function usage()
     echo "   -i | --install          do install"
     echo "      | --clean-install    clean installation directory"
     echo "      | --tar              check for tar only if explicitly specified"
-    echo "      | --tests[:only]     run the testsuite, eventually build"
+    echo "      | --tests[:only][=O] run the testsuite, eventually build"
     echo "   -d | --deps[:warning]   check/build dependencies"
     echo "   -a | --archive          build binary archive"
     echo "      | --standalone       create a standalone source archive"
@@ -1538,6 +1547,18 @@ while [[ $# -gt 0 ]]; do
             DO_RUN=yes
             DO_RUN_CMD=${1/*:/}
             ;;
+        --tests:only*)
+            NSTEPS="tests"
+            DO_TEST=yes-only
+            OPTS=( ${1/=/ } )
+            SCBI_TESTS_OPTIONS=${OPTS[1]}
+            ;;
+        --tests*)
+            NSTEPS="setup config build install tests wrapup"
+            DO_TEST=yes
+            OPTS=( ${1/=/ } )
+            SCBI_TESTS_OPTIONS=${OPTS[1]}
+            ;;
         *)
             SCBIOPTS="$SCBIOPTS $1"
             ;;
@@ -1546,18 +1567,30 @@ while [[ $# -gt 0 ]]; do
 done
 
 OPTFILE=$(mktemp)
+OPTARG=
+
+function get-optional-argument()
+{
+  eval next_token=\${$OPTIND}
+  if [[ -n $next_token && $next_token != -* ]]; then
+    OPTIND=$((OPTIND + 1))
+    OPTARG=$next_token
+  else
+    OPTARG=""
+  fi
+}
 
 ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpvwWh \
                  -l store,target:,no-setup,no-install,update,setup,config \
                  -l build,build-target:,install,clean-install,tar \
                  -l log,log:yes,log:no,log:on-failure,purge,purge:only \
-                 -l prefix:,tests,tests:only,help,deps,deps:warning \
-                 -l archive,force,env:,no-patch,plan:,stat,stat:full \
+                 -l prefix:,help,version,module-version \
+                 -l deps,deps:warning,archive,force,env:,no-patch,plan: \
+                 -l stat,stat:full,no-wrapup,wrapup,safe,standalone \
                  -l list-depends:direct,list-depends:full,list-depends \
                  -l list-externals,list-externals:only,list-no-version \
                  -l list-filter:all,list-filter:dev,list-filter:runtime \
-                 -l dry-run,jobs:,no-wrapup,wrapup,safe,standalone \
-                 -l plugins:,build-dir,list-plan:,version,module-version \
+                 -l dry-run,jobs:,plugins:,build-dir,list-plan: \
                  -l shell,shell:dev,shell:sb,shell:sandbox \
                  -- $SCBIOPTS 2> $OPTFILE)
 
@@ -1613,7 +1646,7 @@ while [[ $# -gt 0 ]]; do
             DO_UPDATE=yes
             ;;
         -s|--setup)
-            NSTEPS="$NSTEPS setup"
+            NSTEPS="setup $NSTEPS"
             ;;
         --shell:sb|--shell:sandbox)
             DO_SHELL=yes
@@ -1652,14 +1685,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         --log:on-failure)
             SCBI_DLOG=on-failure
-            ;;
-        --tests)
-            NSTEPS="$NSTEPS setup config build install tests wrapup"
-            DO_TEST=yes
-            ;;
-        --tests:only)
-            NSTEPS="$NSTEPS tests"
-            DO_TEST=yes-only
             ;;
         -p|--purge)
             DO_PURGE=yes
