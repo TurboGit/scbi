@@ -1552,6 +1552,9 @@ while [[ $# -gt 0 ]]; do
         --tests:only*)
             NSTEPS="tests"
             DO_TEST=yes-only
+            #  nothing built, nothing to install and it avoids removing
+            #  the install directory.
+            DO_INSTALL=no
             OPTS=( ${1/=/ } )
             SCBI_TESTS_OPTIONS=${OPTS[1]}
             ;;
