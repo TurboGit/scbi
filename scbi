@@ -8,6 +8,17 @@ shopt -s extglob
 SCBI_VERSION=@VERSION@
 SCBI_BINARY=$(realpath $0)
 
+############################## do-clear-steps
+
+function do-clear-steps()
+{
+    [[ $DO_SETUP   == yes ]] && DO_SETUP=no
+    [[ $DO_CONFIG  == yes ]] && DO_CONFIG=no
+    [[ $DO_BUILD   == yes ]] && DO_BUILD=no
+    [[ $DO_INSTALL == yes ]] && DO_INSTALL=no
+    [[ $DO_WRAPUP  == yes ]] && DO_WRAPUP=no
+}
+
 ############################## check-tool
 
 function check-tool()
@@ -86,12 +97,9 @@ SCBI_CURRENT_MODULE=
 
 #  Actions setup
 DO_PURGE=no
-NSTEPS=
 SCBI_PREFIX=
 SCBI_DEFAULT_PREFIX=yes
-DO_INSTALL=yes
 DO_UPDATE=no
-DO_TEST=no
 DO_ARCHIVE=no
 DO_FORCE=no
 DO_MOD_VER=no
@@ -105,7 +113,7 @@ DO_STORE=no
 DEPS=no
 ISOOT=yes
 DO_PATCH=yes
-STEPS="setup config build install wrapup"
+STEPS=""
 BUILD_SCBI_TARGET=
 SCBI_PLAN=
 SCBI_PLAN_CL=
@@ -122,6 +130,13 @@ DO_RUN=no
 DO_RUN_CMD=
 DO_WARNING_EXTERNAL=no
 SCBI_TESTS_OPTIONS=
+
+DO_SETUP=yes
+DO_CONFIG=yes
+DO_BUILD=yes
+DO_INSTALL=yes
+DO_TEST=no
+DO_WRAPUP=yes
 
 export SCBI_ROOT SCBI_BDIR SCBI_CLANG_VERSION SCBI_GTK_VERSION SCBI_PLAN
 export SCBI_HOST SCBI_TARGET SCBI_PLUGINS SCBI_JOBS SCBI_HALF_JOBS
@@ -1324,7 +1339,7 @@ function handle-module()
             # if testing is expected, at least do that
 
             if [[ $DO_TEST =~ "yes" ]]; then
-                STEPS="$STEPS tests"
+                STEPS="tests"
             fi
 
         else
@@ -1550,16 +1565,12 @@ while [[ $# -gt 0 ]]; do
             DO_RUN_CMD=${1/*:/}
             ;;
         --tests:only*)
-            NSTEPS="tests"
+            do-clear-steps
             DO_TEST=yes-only
-            #  nothing built, nothing to install and it avoids removing
-            #  the install directory.
-            DO_INSTALL=no
             OPTS=( ${1/=/ } )
             SCBI_TESTS_OPTIONS=${OPTS[1]}
             ;;
         --tests*)
-            NSTEPS="setup config build install tests wrapup"
             DO_TEST=yes
             OPTS=( ${1/=/ } )
             SCBI_TESTS_OPTIONS=${OPTS[1]}
@@ -1636,13 +1647,14 @@ while [[ $# -gt 0 ]]; do
             SCBI_TARGET_SPECIFIED=yes
             ;;
         -S|--no-setup)
-            STEPS=${STEPS/setup/}
+            DO_SETUP=no
             ;;
         -W|--no-wrapup)
-            STEPS=${STEPS/wrapup/}
+            DO_WRAPUP=no
             ;;
         -w|--wrapup)
-            NSTEPS="$NSTEPS wrapup"
+            do-clear-steps
+            DO_WRAPUP=forced
             ;;
         -I|--no-install)
             DO_INSTALL=no
@@ -1651,7 +1663,8 @@ while [[ $# -gt 0 ]]; do
             DO_UPDATE=yes
             ;;
         -s|--setup)
-            NSTEPS="setup $NSTEPS"
+            do-clear-steps
+            DO_SETUP=forced
             ;;
         --shell:sb|--shell:sandbox)
             DO_SHELL=yes
@@ -1663,10 +1676,12 @@ while [[ $# -gt 0 ]]; do
             DO_SHELL=yes-nocd
             ;;
         -c|--config)
-            NSTEPS="$NSTEPS config"
+            do-clear-steps
+            DO_CONFIG=forced
             ;;
         -b|--build)
-            NSTEPS="$NSTEPS build"
+            do-clear-steps
+            DO_BUILD=forced
             ;;
         --build-target)
             BUILD_SCBI_TARGET=$2; shift
@@ -1679,8 +1694,8 @@ while [[ $# -gt 0 ]]; do
             DO_WARNING_EXTERNAL=yes
             ;;
         -i|--install)
-            NSTEPS="$NSTEPS install"
-            DO_INSTALL=yes
+            do-clear-steps
+            DO_INSTALL=forced
             ;;
         -l|--log|--log:yes)
             SCBI_DLOG=yes
@@ -1821,11 +1836,14 @@ trap clean-up EXIT
 
 load-module-env $ENV_NAME
 
-#  If we have explicitly specified some steps, use them
+#  Build the steps to be conducted
 
-if [[ "$NSTEPS" != "" ]]; then
-    STEPS=$NSTEPS
-fi
+[[ $DO_SETUP   != no ]] && STEPS="$STEPS setup"
+[[ $DO_CONFIG  != no ]] && STEPS="$STEPS config"
+[[ $DO_BUILD   != no ]] && STEPS="$STEPS build"
+[[ $DO_INSTALL != no ]] && STEPS="$STEPS install"
+[[ $DO_TEST    != no ]] && STEPS="$STEPS tests"
+[[ $DO_WRAPUP  != no ]] && STEPS="$STEPS wrapup"
 
 #  If we have specified a build directory on command line, set it now
 #  that the env is loaded (takes precedence).

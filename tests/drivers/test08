@@ -160,7 +160,6 @@ xxxx/xx/xx xx:xx:xx : tests starting
 main
 liba.A br_a
 xxxx/xx/xx xx:xx:xx : tests completed
-xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
 
 xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
@@ -171,7 +170,6 @@ xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
 libb.B v2 (variant1)
 xxxx/xx/xx xx:xx:xx : tests [variant1] completed
-xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
@@ -183,7 +181,6 @@ main on master
 liba.A br_a
 libb.B v2 (variant1)
 xxxx/xx/xx xx:xx:xx : tests completed
-xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
 EOF
 
