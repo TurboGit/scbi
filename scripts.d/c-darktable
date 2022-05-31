@@ -159,10 +159,12 @@ function c-darktable-tests()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
+    local OPTIONS=$4
 
     (
         cd ../src/src/tests/integration
-        ./run.sh
+        ./run.sh $OPTIONS
     )
 }
 
