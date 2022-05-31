@@ -386,7 +386,7 @@ function usage()
     echo "      | --list-plan        list current current plan"
     echo "      | --module-version   display version of specific module"
     echo "      | --dry-run          only list modules handled"
-    echo "      | --stat             display some status of current setup"
+    echo "      | --stat[:full]      display some status of current setup"
     echo "   -n | --no-patch         do not apply patches"
 }
 
