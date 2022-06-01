@@ -1792,8 +1792,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --store)
             DO_STORE=yes
-            shift
-            shift
+            shift 2
             STORE_KEY="$1"
             STORE_VALUE="$2"
 
@@ -1803,8 +1802,7 @@ while [[ $# -gt 0 ]]; do
             [[ ! -z $3 ]] &&
                 echo "$0: unexpected parameters for store command" &&
                 exit 1
-            shift
-            shift
+            shift 2
             ;;
         (--)
             ;;

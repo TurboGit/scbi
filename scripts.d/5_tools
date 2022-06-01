@@ -278,15 +278,7 @@ function _internal_for-all-modules()
     local IS_BUILD_DEPENDS=$7
     local MODREF=$8
     local FORMODULE=$9
-    shift
-    shift
-    shift
-    shift
-    shift
-    shift
-    shift
-    shift
-    shift
+    shift 9
 
     #  Wether to handle the depends or build-depends or both
 
@@ -430,8 +422,7 @@ function for-all-modules()
 {
     local CALLBACK=$1
     local MODREF=$2
-    shift
-    shift
+    shift 2
 
     local DEPTH=99999
     [[ $DO_DEPS == yes-direct ]] && DEPTH=2
@@ -447,8 +438,7 @@ function for-all-modules-ext()
 {
     local CALLBACK=$1
     local MODREF=$2
-    shift
-    shift
+    shift 2
 
     local DEPTH=99999
     [[ $DO_DEPS == yes-direct ]] && DEPTH=2
@@ -464,8 +454,7 @@ function for-all-modules-with-meta()
 {
     local CALLBACK=$1
     local MODREF=$2
-    shift
-    shift
+    shift 2
 
     local DEPTH=99999
     [[ $DO_DEPS == yes-direct ]] && DEPTH=2
@@ -481,8 +470,7 @@ function for-all-modules-depends-with-meta()
 {
     local CALLBACK=$1
     local MODREF=$2
-    shift
-    shift
+    shift 2
 
     local DEPTH=99999
     [[ $DO_DEPS == yes-direct ]] && DEPTH=2
@@ -498,8 +486,7 @@ function for-all-modules-with-meta-ext()
 {
     local CALLBACK=$1
     local MODREF=$2
-    shift
-    shift
+    shift 2
 
     local DEPTH=99999
     [[ $DO_DEPS == yes-direct ]] && DEPTH=2
@@ -515,8 +502,7 @@ function for-all-direct-modules-with-meta-ext()
 {
     local CALLBACK=$1
     local MODREF=$2
-    shift
-    shift
+    shift 2
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
@@ -531,8 +517,7 @@ function for-all-modules-build-depends-with-meta()
 {
     local CALLBACK=$1
     local MODREF=$2
-    shift
-    shift
+    shift 2
 
     local DEPTH=99999
     declare -A SCBI_CHECKED

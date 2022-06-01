@@ -191,8 +191,7 @@ function show-command()
 {
     local PLUGIN=$1
     local CMD=$2
-    shift
-    shift
+    shift 2
 
     local PREFIX=$1
     local TARGET=$2
