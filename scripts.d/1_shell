@@ -19,7 +19,7 @@ function run-shell()
 
     for M in ${MODULES[*]}; do
         handle-env "@root" $M
-        if [[ $M != $MODREF ]]; then
+        if [[ $M != $MODREF ]] || [[ $DOCD == no ]]; then
             handle-module-env "@root" $M env
         fi
     done
@@ -71,9 +71,7 @@ function run-command()
 
     for M in ${MODULES[*]}; do
         handle-env "@root" $M
-        if [[ $M != $MODREF ]]; then
-            handle-module-env "@root" $M env
-        fi
+        handle-module-env "@root" $M env
     done
 
     local module_info=( $(get-module-ref $MODREF) )

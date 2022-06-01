@@ -18,6 +18,14 @@ function mainmult-out-of-tree()
     echo false
 }
 
+function mainmult-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    prepend-to-var PATH $PREFIX/bin
+}
+
 function mainmult-build()
 {
     local PREFIX=$1
