@@ -356,7 +356,7 @@ function usage()
     echo "      | --enable-<name>    enable feature name"
     echo "   -t | --target=<name>    the target to build for ($SCBI_TARGET)"
     echo "      | --plugins=<dir>    specify the modules/plugins directory"
-    echo "      | --store KEY VAL    list, set or retrieved private store data"
+    echo "      | --store KEY VAL    list, set or retrieve private store data"
     echo "   -j | --jobs=<n>         max compilation jobs \$SCBI_JOBS"
     echo "   -S | --no-setup         skip setup"
     echo "   -I | --no-install       skip install"
