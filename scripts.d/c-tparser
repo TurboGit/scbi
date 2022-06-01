@@ -34,6 +34,7 @@ function c-tparser-env()
     local PREFIX=$1
     local TARGET=$2
 
+    add-to-var PATH             $PREFIX/bin
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
 }
 
@@ -69,4 +70,14 @@ function c-tparser-install()
     local TARGET=$2
 
     make install
+}
+
+function c-tparser-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var PATH /opt/gnatpython/bin
+
+    cd regtests && make test
 }
