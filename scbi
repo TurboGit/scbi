@@ -356,7 +356,7 @@ function usage()
     echo "      | --enable-<name>    enable feature name"
     echo "   -t | --target=<name>    the target to build for ($SCBI_TARGET)"
     echo "      | --plugins=<dir>    specify the modules/plugins directory"
-    echo "      | --store KEY [VAL]  set or retrieved private store data"
+    echo "      | --store KEY VAL    list, set or retrieved private store data"
     echo "   -j | --jobs=<n>         max compilation jobs \$SCBI_JOBS"
     echo "   -S | --no-setup         skip setup"
     echo "   -I | --no-install       skip install"
@@ -1796,9 +1796,6 @@ while [[ $# -gt 0 ]]; do
             STORE_KEY="$1"
             STORE_VALUE="$2"
 
-            [[ -z $1 ]] &&
-                echo "$0: missing key for store command" &&
-                exit 1
             [[ ! -z $3 ]] &&
                 echo "$0: unexpected parameters for store command" &&
                 exit 1

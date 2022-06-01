@@ -474,12 +474,33 @@ function scbi-store-set-key()
     return 0
 }
 
+function scbi-store-list-keys()
+{
+    local KEY="$1"
+
+    local VALUE=""
+    local res=1
+    local STORE_FILE=$SCBI_PLUGINS/.store
+
+    if [[ -f $STORE_FILE ]]; then
+        #  check KEY in store
+
+        while read K V; do
+            echo $K
+        done < $STORE_FILE
+    fi
+
+    return 0
+}
+
 function scbi-store()
 {
     local KEY="$1"
     local VALUE="$2"
 
-    if [[ -z "$VALUE" ]]; then
+    if [[ -z $KEY ]]; then
+        scbi-store-list-keys
+    elif [[ -z "$VALUE" ]]; then
         scbi-store-get-key "$KEY"
     else
         scbi-store-set-key "$KEY" "$VALUE"

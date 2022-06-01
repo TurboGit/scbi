@@ -545,7 +545,7 @@ The following options are supported:
 
 	\item[\ddash{}plugins=<directory>] Specify a non default location for the modules and plug-ins directory. This overrides the \code{SCBI\_DEFS} environment.
 
-	\item[\ddash{}store KEY <VALUE>] Set or retrieve private information based on KEY, VALUE pair. (\seeref{private store})
+	\item[\ddash{}store <KEY> <VALUE>] Set or retrieve private information based on KEY, VALUE pair. (\seeref{private store})
 
 \end{description}
 
@@ -1434,6 +1434,10 @@ The option to set or retrieve a value is \ddash{}store.
 	To set a key:
 
 	\cmd{scbi --store LICKEY 89AXCDPPP6BGG}
+
+	To list all stored keys:
+
+	\cmd{scbi --store}
 
 	To get value associated with a key:
 
