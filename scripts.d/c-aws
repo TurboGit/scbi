@@ -30,13 +30,13 @@ function c-aws-cross-build-depends()
 
 function c-aws-build-depends()
 {
-    echo p-gnat
     echo c-gprbuild
     echo c-libadalang-tools
 }
 
 function c-aws-depends()
 {
+    echo p-gnat
     echo c-xmlada
     echo c-libadalang
 }
