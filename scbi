@@ -561,7 +561,7 @@ function handle-env-callback()
     #  itself.
 
     [[ $LEVEL -ge 1 ]] &&
-        handle-module-env $FORMODULE $MODREF env
+        setup-module-env $FORMODULE $MODREF env
 }
 
 function handle-env()
