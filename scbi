@@ -1318,9 +1318,9 @@ function handle-module()
             #  build artifacts are not going to break new build.
             #
             #  Note that we do that only for out-of-tree build as in
-            #  the build in-tree the sources are fully syncronized from
+            #  the build in-tree the sources are fully synchronized from
             #  src directory (deleting all non existing files in source
-            #  location)
+            #  location).
 
             if [[ $SAFE_MODE = yes ]] && [[ $ISOOT = yes ]]; then
                 rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build
