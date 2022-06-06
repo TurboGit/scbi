@@ -1,5 +1,5 @@
 
-function c-tparser-vcs()
+function c-templates-parser-vcs()
 {
     echo default
     echo none
@@ -7,12 +7,12 @@ function c-tparser-vcs()
     echo https://github.com/AdaCore/templates-parser
 }
 
-function c-tparser-out-of-tree()
+function c-templates-parser-out-of-tree()
 {
     echo false
 }
 
-function c-tparser-cross-build-depends()
+function c-templates-parser-cross-build-depends()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -20,7 +20,7 @@ function c-tparser-cross-build-depends()
     echo c-sandbox
 }
 
-function c-tparser-build-depends()
+function c-templates-parser-build-depends()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -29,7 +29,7 @@ function c-tparser-build-depends()
     echo c-gprbuild
 }
 
-function c-tparser-env()
+function c-templates-parser-env()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -38,7 +38,7 @@ function c-tparser-env()
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
 }
 
-function c-tparser-cross-config()
+function c-templates-parser-cross-config()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -47,7 +47,7 @@ function c-tparser-cross-config()
         make prefix=$PREFIX TARGET=$TARGET setup
 }
 
-function c-tparser-config()
+function c-templates-parser-config()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -56,7 +56,7 @@ function c-tparser-config()
         make prefix=$PREFIX setup
 }
 
-function c-tparser-build()
+function c-templates-parser-build()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -64,7 +64,7 @@ function c-tparser-build()
     make
 }
 
-function c-tparser-install()
+function c-templates-parser-install()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -72,7 +72,7 @@ function c-tparser-install()
     make install
 }
 
-function c-tparser-tests()
+function c-templates-parser-tests()
 {
     local PREFIX=$1
     local TARGET=$2

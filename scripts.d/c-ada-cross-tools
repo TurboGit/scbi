@@ -7,5 +7,5 @@ function c-ada-cross-tools-modules()
     echo c-win32ada
     echo c-wposix
     echo c-aws
-    echo c-tparser
+    echo c-templates-parser
 }
