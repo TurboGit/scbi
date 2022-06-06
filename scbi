@@ -396,12 +396,11 @@ function usage()
 
 SCBI_ENV_MODULE=
 
-function _internal_handle-module-env()
+function handle-module-env()
 {
     local FORMODULE=$1
     local MODREF=$2
     local ENV=$3
-    local CD=$4
 
     #  Get module information
 
@@ -413,31 +412,9 @@ function _internal_handle-module-env()
 
     [[ $ref = "skip" ]] && return 0
 
-    #  For a build environment we call the hook from the build
-    #  directory otherwise we call for the install directory.
-
-    if [[ $ENV = "build-env" ]]; then
-        ENV_DIR=build
-    else
-        ENV_DIR=install
-    fi
-
     #  Then setup the current module
 
     local TVDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant
-
-    [[ $CD == yes ]] &&
-        {
-            if [[ -d $TVDIR/$ENV_DIR ]]; then
-                cd $TVDIR/$ENV_DIR
-            elif [[ -d $TVDIR ]]; then
-                cd $TVDIR
-            elif [[ -d $SCBI_BDIR/$module ]]; then
-                cd $SCBI_BDIR/$module
-            else
-                cd $SCBI_BDIR
-            fi
-        }
 
     if [[ ! -z $SCBI_ENV_MODULE ]]; then
         echo >> $SCBI_ENV_MODULE
@@ -448,24 +425,6 @@ function _internal_handle-module-env()
     _internal_call-variant-hooks \
         $module $ENV \
         $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $SCBI_TARGET $variant
-}
-
-function handle-module-env()
-{
-    local FORMODULE=$1
-    local MODREF=$2
-    local ENV=$3
-
-    _internal_handle-module-env $FORMODULE $MODREF $ENV yes
-}
-
-function setup-module-env()
-{
-    local FORMODULE=$1
-    local MODREF=$2
-    local ENV=$3
-
-    _internal_handle-module-env $FORMODULE $MODREF $ENV no
 }
 
 ############################## register-depends-callback
@@ -561,7 +520,7 @@ function handle-env-callback()
     #  itself.
 
     [[ $LEVEL -ge 1 ]] &&
-        setup-module-env $FORMODULE $MODREF env
+        handle-module-env $FORMODULE $MODREF env
 }
 
 function handle-env()
