@@ -90,13 +90,13 @@ function c-aws-tests()
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
-    local OPTS=$4
+    local OPTIONS=$4
 
     (
         add-to-var PATH /opt/gnatpython/bin
         cd regtests &&
             python2 ./gen_system_tags.py ../makefile.setup &&
-            python2 ./testsuite.py --jobs=$SCBI_JOBS $OPTS
+            python2 ./testsuite.py --jobs=$SCBI_JOBS $OPTIONS
     )
 
     display-file regtests/out/report
