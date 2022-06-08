@@ -76,8 +76,13 @@ function c-templates-parser-tests()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
+    local OPTIONS=$4
 
-    add-to-var PATH /opt/gnatpython/bin
+    add-to-var PATH /opt/e3/bin
+    add-to-var PATH .
 
-    cd regtests && make test
+    cd regtests && make build
+
+    ./testsuite.py --jobs=4 $OPTIONS
 }
