@@ -72,12 +72,20 @@ function c-gpr-build()
     make
 }
 
+function c-gpr-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make GPRINSTALL=gprinstall install
+}
+
 function c-gpr-tests()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
-    local OPTIONS=$4
+    local OPTIONS="$4"
 
     # Needed to pass the tests:
     # pip3 install git+https://github.com/AdaCore/e3-core
@@ -88,12 +96,4 @@ function c-gpr-tests()
     cd testsuite &&
         python3 ./testsuite.py --temp-dir=$HOME/tmp \
                 --show-error-output -j$SCBI_JOBS $OPTIONS
-}
-
-function c-gpr-install()
-{
-    local PREFIX=$1
-    local TARGET=$2
-
-    make GPRINSTALL=gprinstall install
 }

@@ -268,11 +268,11 @@ function module-wrapper()
 
         if [[ "$STEP" =~ "tests" ]]; then
             IS_TESTS=yes
-            TESTS_OPTS=$SCBI_TESTS_OPTIONS
+            TESTS_OPTS="$SCBI_TESTS_OPTIONS"
         fi
 
         if [[ $SCBI_DLOG = yes ]] || [[ "$IS_TESTS" = "yes" ]]; then
-            $MODULE-$mstep $PREFIX $SCBI_TARGET $VARIANT $TESTS_OPTS 2>&1 \
+            $MODULE-$mstep $PREFIX $SCBI_TARGET $VARIANT "$TESTS_OPTS" 2>&1 \
                 | tee -a $log | tee $mlog
             #  We want the status of the first command and not the tee ones
             res=${PIPESTATUS[0]}
@@ -1528,12 +1528,12 @@ while [[ $# -gt 0 ]]; do
             do-clear-steps
             DO_TEST=yes-only
             OPTS=( ${1/=/ } )
-            SCBI_TESTS_OPTIONS=${OPTS[1]}
+            SCBI_TESTS_OPTIONS="${OPTS[*]:1}"
             ;;
         --tests*)
             DO_TEST=yes
             OPTS=( ${1/=/ } )
-            SCBI_TESTS_OPTIONS=${OPTS[1]}
+            SCBI_TESTS_OPTIONS="${OPTS[*]:1}"
             ;;
         *)
             SCBIOPTS="$SCBIOPTS $1"

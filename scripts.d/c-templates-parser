@@ -77,7 +77,7 @@ function c-templates-parser-tests()
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
-    local OPTIONS=$4
+    local OPTIONS="$4"
 
     add-to-var PATH /opt/e3/bin
     add-to-var PATH .

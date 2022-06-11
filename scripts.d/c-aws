@@ -90,7 +90,7 @@ function c-aws-tests()
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
-    local OPTIONS=$4
+    local OPTIONS="$4"
 
     (
         add-to-var PATH /opt/gnatpython/bin
