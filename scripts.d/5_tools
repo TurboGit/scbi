@@ -284,9 +284,14 @@ function _internal_for-all-modules()
 
     local R_DEPS=yes
     local R_BDEPS=yes
+    local R_TDEPS=no
 
     if [[ $WITH_DEPS == deps ]]; then
         local R_BDEPS=no
+    elif [[ $WITH_DEPS == tests-deps ]]; then
+        local R_DEPS=no
+        local R_BDEPS=no
+        local R_TDEPS=yes
     elif [[ $WITH_DEPS == build-deps ]]; then
         local R_DEPS=no
     elif [[ $WITH_DEPS == build-deps-1 ]]; then
@@ -393,6 +398,17 @@ function _internal_for-all-modules()
                                                   $dmodule $module $@
                     done
                 }
+
+            #  Setup tests-depends if any
+
+            [[ $R_TDEPS == yes ]] &&
+                for dmodule in \
+                    $(get-all-depends $module $variant tests-depends);
+                do
+                    _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
+                                              $WITH_EXT $DEPTH $NEXTL true \
+                                              $dmodule $module $@
+                done
 
             $CALLBACK $FORMODULE $MODREF $LEVEL \
                       $IS_BUILD_DEPENDS false $IS_META $@
@@ -523,6 +539,20 @@ function for-all-modules-build-depends-with-meta()
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK true build-deps-1 false $DEPTH 0 false \
+                              $MODREF "@root" $@
+}
+
+function for-all-modules-tests-depends-with-meta()
+{
+    local CALLBACK=$1
+    local MODREF=$2
+    shift 2
+
+    local DEPTH=1
+    declare -A SCBI_CHECKED
+    SCBI_RECTREE=()
+
+    _internal_for-all-modules $CALLBACK true tests-deps false $DEPTH 0 false \
                               $MODREF "@root" $@
 }
 

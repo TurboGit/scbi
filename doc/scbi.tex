@@ -698,6 +698,26 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
+	\item[<module>-{[}common|<variant>{]}-tests-depends] \index{hook!tests-depends}Lists all modules required to run the test-suite for the module. These are generally some tools or frameworks like \code{cunit} which are only needed to run the tests.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+			\item echo <module1>
+			\item echo <module2>
+			\item ...
+		\end{enumerate}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+	function aws-tests-depends()
+	{
+		echo libcunit1
+	}
+	\end{lstlisting}
+
 	\item[<module>-{[}common|<variant>{]}-depends] \index{hook!depends}Lists all modules required to build the actual module and to use/execute it. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
 
 	\begin{description}[font=\textit,style=standard]
