@@ -1097,7 +1097,7 @@ function handle-module()
         fi
     fi
 
-    #  Check for depends if any, and handle them if any
+    #  Check for depends, and handle them if any
 
     if [[ $DEPS = yes ]]; then
         #  First we check for build dependencies
