@@ -11,6 +11,12 @@ function c-gpr-build-depends()
 {
     echo p-gnat
     echo c-gprbuild
+    echo c-e3
+}
+
+function c-gpr-tests-depends()
+{
+    echo c-e3
 }
 
 function c-gpr-depends()
@@ -86,12 +92,6 @@ function c-gpr-tests()
     local TARGET=$2
     local VARIANT=$3
     local OPTIONS="$4"
-
-    # Needed to pass the tests:
-    # pip3 install git+https://github.com/AdaCore/e3-core
-    # pip3 install git+https://github.com/AdaCore/e3-testsuite
-
-    add-to-var PATH /opt/e3/bin
 
     cd testsuite &&
         python3 ./testsuite.py --temp-dir=$HOME/tmp \
