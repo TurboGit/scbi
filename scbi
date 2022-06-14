@@ -82,6 +82,7 @@ fi
 
 SCBI_TARGET=$SCBI_HOST
 SCBI_TARGET_SPECIFIED=no
+SCBI_ENV_DIR=
 ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
 
 #  General script setup
@@ -141,7 +142,7 @@ DO_WRAPUP=yes
 export SCBI_ROOT SCBI_BDIR SCBI_CLANG_VERSION SCBI_GTK_VERSION SCBI_PLAN
 export SCBI_HOST SCBI_TARGET SCBI_PLUGINS SCBI_JOBS SCBI_HALF_JOBS
 export SCBI_IS_WINDOWS SCBI_VERSION SCBI_BINARY SCBI_OS_NAME SCBI_OS_VERSION
-export SCBI_CURRENT_MODULE
+export SCBI_CURRENT_MODULE SCBI_ENV_DIR
 
 ############################## check-handled
 #
@@ -197,6 +198,7 @@ function load-module-env()
     fi
 
     if [[ -f $ENV ]]; then
+        SCBI_ENV_DIR=$(dirname $ENV)
         source $ENV
     elif [[ ! -z $1 ]]; then
         echo build environment .env$1 not found
