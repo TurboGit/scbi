@@ -439,9 +439,12 @@ function register-depends-callback()
     local FORMODULE=$1
     local MODREF=$2
     local LEVEL=$3
-    local IS_BUILD_DEPENDS=$4
+    local DEPENDS_KIND=$4
     local IS_EXT=$5
     local IS_META=$6
+
+    local IS_BUILD_DEPENDS=false
+    [[ $DEPENDS_KIND == build ]] && IS_BUILD_DEPENDS=true
 
     local selext=false
     local selbuild=false
@@ -513,7 +516,7 @@ function handle-env-callback()
     local FORMODULE=$1
     local MODREF=$2
     local LEVEL=$3
-    local IS_BUILD_DEPENDS=$4
+    local DEPENDS_KIND=$4
     local IS_EXT=$5
     local IS_META=$6
 
@@ -521,7 +524,7 @@ function handle-env-callback()
     #  hook of a module is only used for clients and not for the module
     #  itself.
 
-    [[ $LEVEL -ge 1 ]] &&
+    [[ $LEVEL -ge 1 ]] || [[ $DEPENDS_KIND == tests ]] &&
         handle-module-env $FORMODULE $MODREF env
 }
 
@@ -1585,7 +1588,7 @@ ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpvwWh \
                  -l list-externals,list-externals:only,list-no-version \
                  -l list-filter:all,list-filter:dev,list-filter:runtime \
                  -l dry-run,jobs:,plugins:,build-dir,list-plan: \
-                 -l shell,shell:dev,shell:sb,shell:sandbox \
+                 -l shell,shell:dev,shell:tests,shell:sb,shell:sandbox \
                  -- $SCBIOPTS 2> $OPTFILE)
 
 if [[ $? != 0 ]]; then
@@ -1649,6 +1652,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         --shell:dev)
             DO_SHELL=yes-dev
+            ;;
+        --shell:tests)
+            DO_SHELL=yes-tests
             ;;
         --shell)
             DO_SHELL=yes-nocd
@@ -1945,13 +1951,13 @@ fi
 
 #  If a shell is requested
 
-if [[ $DO_SHELL == yes ]] || [[ $DO_SHELL == yes-dev ]]; then
-    run-shell $SCBI_TARGET "$SCBI_MODULES" $DO_SHELL
+if [[ $DO_SHELL == yes-nocd ]]; then
+    run-shell $SCBI_TARGET "$SCBI_MODULES" no
     exit 0
 fi
 
-if [[ $DO_SHELL == yes-nocd ]]; then
-    run-shell $SCBI_TARGET "$SCBI_MODULES" no
+if [[ $DO_SHELL =~ yes ]]; then
+    run-shell $SCBI_TARGET "$SCBI_MODULES" $DO_SHELL
     exit 0
 fi
 
