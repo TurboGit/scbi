@@ -263,7 +263,7 @@ function get-all-depends()
 #   WITH_EXT         : true / false
 #   DEPTH            : max recursive depth, 0 top-level module
 #   LEVEL            : current recursive level
-#   IS_BUILD_DEPENDS : true if in build dependencies
+#   DEPENDS_KINDS    : dependency kind : default | build | tests
 #   MODREF           : the module to iterate on
 #   FORMODULE        : the module in which the ref was found
 #                      (@root for top-level)
@@ -275,7 +275,7 @@ function _internal_for-all-modules()
     local WITH_EXT=$4
     local DEPTH=$5
     local LEVEL=$6
-    local IS_BUILD_DEPENDS=$7
+    local DEPENDS_KIND=$7
     local MODREF=$8
     local FORMODULE=$9
     shift 9
@@ -284,9 +284,14 @@ function _internal_for-all-modules()
 
     local R_DEPS=yes
     local R_BDEPS=yes
+    local R_TDEPS=no
 
     if [[ $WITH_DEPS == deps ]]; then
         local R_BDEPS=no
+    elif [[ $WITH_DEPS == tests-deps ]]; then
+        local R_DEPS=no
+        local R_BDEPS=no
+        local R_TDEPS=yes
     elif [[ $WITH_DEPS == build-deps ]]; then
         local R_DEPS=no
     elif [[ $WITH_DEPS == build-deps-1 ]]; then
@@ -359,12 +364,12 @@ function _internal_for-all-modules()
 
                 for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
                     _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
-                                              $WITH_EXT $DEPTH $NXL false \
-                                              $dmodule $module $@
+                                              $WITH_EXT $DEPTH $NXL \
+                                              $DEPENDS_KIND $dmodule $module $@
                 done
 
                 $CALLBACK $FORMODULE $MODREF $LEVEL \
-                          $IS_BUILD_DEPENDS false $IS_META $@
+                          $DEPENDS_KIND false $IS_META $@
 
                 pop-dependency-tree
                 return
@@ -375,8 +380,8 @@ function _internal_for-all-modules()
             [[ $R_DEPS == yes ]] &&
                 for dmodule in $(get-all-depends $module $variant depends); do
                     _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
-                                              $WITH_EXT $DEPTH $NEXTL false \
-                                              $dmodule $module $@
+                                              $WITH_EXT $DEPTH $NEXTL \
+                                              default $dmodule $module $@
                 done
 
             #  Setup build-depends recursively if any
@@ -389,13 +394,24 @@ function _internal_for-all-modules()
                         $(get-all-depends $module $variant build-depends);
                     do
                         _internal_for-all-modules $CALLBACK $WITH_META $NEXTD \
-                                                  $WITH_EXT $DEPTH $NEXTL true \
-                                                  $dmodule $module $@
+                                                  $WITH_EXT $DEPTH $NEXTL \
+                                                  build $dmodule $module $@
                     done
                 }
 
+            #  Setup tests-depends if any
+
+            [[ $R_TDEPS == yes ]] &&
+                for dmodule in \
+                    $(get-all-depends $module $variant tests-depends);
+                do
+                    _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
+                                              $WITH_EXT $DEPTH $NEXTL \
+                                              tests $dmodule $module $@
+                done
+
             $CALLBACK $FORMODULE $MODREF $LEVEL \
-                      $IS_BUILD_DEPENDS false $IS_META $@
+                      $DEPENDS_KIND false $IS_META $@
 
             pop-dependency-tree
 
@@ -406,7 +422,7 @@ function _internal_for-all-modules()
                 local PKGNAME=$(get-pkg-name $MODREF)
                 [[ ! -z $PKGNAME ]] &&
                     $CALLBACK $FORMODULE $PKGNAME $LEVEL \
-                              $IS_BUILD_DEPENDS true $IS_META $@
+                              $DEPENDS_KIND true $IS_META $@
             else
                 check-pkg $module:$ref
                 if [[ $? == 1 ]] && [[ $DO_WARNING_EXTERNAL == no ]]; then
@@ -429,7 +445,7 @@ function for-all-modules()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK false both false $DEPTH 0 false \
+    _internal_for-all-modules $CALLBACK false both false $DEPTH 0 default \
                               $MODREF "@root" $@
 }
 
@@ -445,7 +461,7 @@ function for-all-modules-ext()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK false both true $DEPTH 0 false \
+    _internal_for-all-modules $CALLBACK false both true $DEPTH 0 default \
                               $MODREF "@root" $@
 }
 
@@ -461,7 +477,7 @@ function for-all-modules-with-meta()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK true both false $DEPTH 0 false \
+    _internal_for-all-modules $CALLBACK true both false $DEPTH 0 default \
                               $MODREF "@root" $@
 }
 
@@ -477,7 +493,7 @@ function for-all-modules-depends-with-meta()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK true deps false $DEPTH 0 false \
+    _internal_for-all-modules $CALLBACK true deps false $DEPTH 0 default \
                               $MODREF "@root" $@
 }
 
@@ -493,7 +509,7 @@ function for-all-modules-with-meta-ext()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK true both true $DEPTH 0 false \
+    _internal_for-all-modules $CALLBACK true both true $DEPTH 0 default \
                               $MODREF "@root" $@
 }
 
@@ -506,7 +522,7 @@ function for-all-direct-modules-with-meta-ext()
 
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK true both true 1 0 false \
+    _internal_for-all-modules $CALLBACK true both true 1 0 default \
                               $MODREF "@root" $@
 }
 
@@ -522,7 +538,21 @@ function for-all-modules-build-depends-with-meta()
     local DEPTH=99999
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
-    _internal_for-all-modules $CALLBACK true build-deps-1 false $DEPTH 0 false \
+    _internal_for-all-modules $CALLBACK true build-deps-1 false $DEPTH 0 build \
+                              $MODREF "@root" $@
+}
+
+function for-all-modules-tests-depends-with-meta()
+{
+    local CALLBACK=$1
+    local MODREF=$2
+    shift 2
+
+    local DEPTH=999999
+    declare -A SCBI_CHECKED
+    SCBI_RECTREE=()
+
+    _internal_for-all-modules $CALLBACK true tests-deps false $DEPTH 0 tests \
                               $MODREF "@root" $@
 }
 
@@ -576,7 +606,7 @@ function get-build-id-callback()
     local FORMODULE=$1
     local MODREF=$2
     local LEVEL=$3
-    local IS_BUILD_DEPENDS=$4
+    local DEPENDS_KIND=$4
     local IS_EXT=$5
     local IS_META=$6
 
@@ -1063,7 +1093,7 @@ function copy-module-src-callback()
     local FORMODULE=$1
     local MODREF=$2
     local LEVEL=$3
-    local IS_BUILD_DEPENDS=$4
+    local DEPENDS_KIND=$4
     local IS_EXT=$5
     local IS_META=$6
     local DEST=$7

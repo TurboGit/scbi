@@ -42,10 +42,13 @@ function run-shell()
     else
         handle-build-depends-env "@root" $MODREF
 
-        if [[ $DOCD == yes ]]; then
-            cd $(get-build-dir $TARGET $MODREF)
-        else
+        [[  $DOCD == yes-tests ]] &&
+            handle-tests-depends-env "@root" $MODREF
+
+        if [[ $DOCD == yes-dev ]]; then
             cd $(get-vcs-dir $module:dev)
+        else
+            cd $(get-build-dir $TARGET $MODREF)
         fi
     fi
 

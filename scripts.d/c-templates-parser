@@ -29,6 +29,11 @@ function c-templates-parser-build-depends()
     echo c-gprbuild
 }
 
+function c-templates-parser-tests-depends()
+{
+    echo c-e3
+}
+
 function c-templates-parser-env()
 {
     local PREFIX=$1
@@ -79,10 +84,10 @@ function c-templates-parser-tests()
     local VARIANT=$3
     local OPTIONS="$4"
 
-    add-to-var PATH /opt/e3/bin
-    add-to-var PATH .
-
     cd regtests && make build
 
-    ./testsuite.py --jobs=4 $OPTIONS
+    add-to-var PATH .
+    add-to-var PATH $PREFIX/../build/.build/rbin/$TARGET/release/static
+
+    python3 ./testsuite.py --jobs=4 $OPTIONS
 }

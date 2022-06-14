@@ -1,22 +1,10 @@
 
-# Use an externally installed e3
-
-function c-e3-vcs()
-{
-    echo default
-    echo none
-    echo git
-    echo https://github.com/AdaCore/e3-core
-}
-
-function c-e3-out-of-tree()
-{
-    echo false
-}
+# This plug-in creates a unique installation for all e3 components
 
 function c-e3-depends()
 {
-    echo python3-tqdm
+    echo c-e3-core
+    echo c-e3-testsuite
 }
 
 function c-e3-env()
@@ -25,10 +13,8 @@ function c-e3-env()
     local TARGET=$2
     local VARIANT=$3
 
-    # Not needed as using pip3 to install
-
-#    add-to-var PATH       $PREFIX/bin
-#    add-to-var PYTHONPATH $PREFIX/lib/python3.10/site-packages
+    add-to-var     PATH       $PREFIX/bin
+    prepend-to-var PYTHONPATH $PREFIX/lib
 }
 
 function c-e3-install()
@@ -37,11 +23,25 @@ function c-e3-install()
     local TARGET=$2
     local VARIANT=$3
 
-    pip3 install e3-core
-    # python3 setup.py install --prefix=$PREFIX
-}
+    local E3C=${SCBI_MODULES_DIR["c-e3-core"]}
+    local E3T=${SCBI_MODULES_DIR["c-e3-testsuite"]}
 
-function c-e3-prefix()
-{
-    echo NONE
+    local PDC=$(last-modified-directory $E3C/lib/python*/site-packages)
+    local PDT=$(last-modified-directory $E3T/lib/python*/site-packages)
+
+    mkdir -p $PREFIX/bin
+    mkdir -p $PREFIX/lib
+
+    cp -r $E3C/bin/* $PREFIX/bin/.
+    cp -r $E3T/bin/* $PREFIX/bin/.
+
+    for D in $(ls -d $PDC/*.egg); do
+        [[ -d $D ]] && cp -r $D/* $PREFIX/lib/.
+    done
+
+    for D in $(ls -d $PDT/*.egg); do
+        [[ -d $D ]] && cp -r $D/* $PREFIX/lib/.
+    done
+
+    chmod a+x $PREFIX/lib/e3/os/data/*
 }
