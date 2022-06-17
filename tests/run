@@ -18,6 +18,9 @@ function sort-osht-output-n-first-lines()
 {
     local N=$1
 
+    #  Make sure we clean the time-stamp to not be sorting based on it
+    clean-up-osht-output
+
     head -$N ${OSHT_STDIO} | sort > xout
     sed -i "1,${N}d" ${OSHT_STDIO}
     cat ${OSHT_STDIO} >> xout
