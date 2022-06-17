@@ -1,0 +1,48 @@
+
+function c-gsconnect-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/andyholmes/gnome-shell-extension-gsconnect.git
+}
+
+function c-gsconnect-depends()
+{
+    echo meson
+    echo ninja-build
+    echo libglib2.0-dev
+}
+
+function c-gsconnect-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    meson . ../src/.
+}
+
+function c-gsconnect-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ninja -C . install-zip
+}
+
+function c-gsconnect-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    mkdir -p ../install
+    mv ./gsconnect@andyholmes.github.io ../install
+}
+
+function c-gsconnect-prefix()
+{
+    echo NONE
+}
