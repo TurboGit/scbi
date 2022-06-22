@@ -28,6 +28,11 @@ function c-aws-cross-build-depends()
     echo c-sandbox
 }
 
+function c-aws-tests-depends()
+{
+    echo c-sandbox
+}
+
 function c-aws-build-depends()
 {
     echo c-gprbuild
