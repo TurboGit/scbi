@@ -55,23 +55,54 @@ function c-aws-env()
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
 }
 
+function c-aws-common-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo prefix=$PREFIX
+    echo DEBUG=$(get-build-type AWS true)
+}
+
+function c-aws-openssl-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo SOCKET=openssl
+}
+
+function c-aws-gnutls-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo SOCKET=gnutls
+}
+
 function c-aws-cross-config()
 {
     local PREFIX=$1
     local TARGET=$2
 
+    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
+
     rm -f makefile.setup &&
-        make prefix=$PREFIX LAL=false ZLIB=false \
-             DEBUG=$(get-build-type GPR true) TARGET=$TARGET setup
+        make LAL=false ZLIB=false TARGET=$TARGET $OPTIONS setup
 }
 
 function c-aws-config()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    rm -f makefile.setup &&
-        make prefix=$PREFIX DEBUG=$(get-build-type GPR true) setup
+    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
+
+    rm -f makefile.setup && make $OPTIONS setup
 }
 
 function c-aws-build()
