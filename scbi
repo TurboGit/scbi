@@ -1587,7 +1587,7 @@ ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpvwWh \
                  -l list-depends:direct,list-depends:full,list-depends \
                  -l list-externals,list-externals:only,list-no-version \
                  -l list-filter:all,list-filter:dev,list-filter:runtime \
-                 -l dry-run,jobs:,plugins:,build-dir,list-plan: \
+                 -l dry-run,jobs:,plugins:,build-dir:,list-plan: \
                  -l shell,shell:dev,shell:tests,shell:sb,shell:sandbox \
                  -- $SCBIOPTS 2> $OPTFILE)
 
