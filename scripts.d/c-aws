@@ -131,8 +131,11 @@ function c-aws-tests()
     (
         add-to-var PATH /opt/gnatpython/bin
         cd regtests &&
+            rm -fr results &&
             python2 ./gen_system_tags.py ../makefile.setup &&
-            python2 ./testsuite.py --jobs=$SCBI_JOBS $OPTIONS
+            python2 ./testsuite.py --jobs=$SCBI_JOBS \
+                    --temp-dir=$PWD/results --disable-cleanup \
+                    $OPTIONS
     )
 
     display-file regtests/out/report
