@@ -910,12 +910,9 @@ function get-tar()
                      /tmp/$tarsrc.sha1 > /dev/null 2>&1
 
                 if [[ $? -ne 0 ]]; then
-                    cp /tmp/$tarsrc.sha1 $SCBI_TAR/$tarsrc.sha1
                     do_download=1
                 fi
             fi
-
-            rm -f /tmp/$tarsrc.sha1
 
             if [[ $do_download == 1 ]] || [[ ! -f $SCBI_TAR/$tarsrc ]]; then
                 do_download=1
@@ -936,8 +933,13 @@ function get-tar()
                 if [[ $? -ne 0 ]]; then
                     rm -f $SCBI_TAR/$tarsrc $SCBI_TAR/$tarsrc.sha1
                     elog $MODULE error: cannot get tar: $tarcp
+                else
+                    [[ -f /tmp/$tarsrc.sha1 ]] &&
+                        cp /tmp/$tarsrc.sha1 $SCBI_TAR/$tarsrc.sha1
                 fi
             fi
+
+            rm -f /tmp/$tarsrc.sha1
 
             return $do_download
         )
