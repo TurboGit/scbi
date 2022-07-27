@@ -31,6 +31,14 @@ function c-libgpr-env()
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
 }
 
+function c-libgpr-cross-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    [[ $TARGET =~ mingw32 ]] && set-var OS Windows_NT
+}
+
 function c-libgpr-cross-config()
 {
     local PREFIX=$1
