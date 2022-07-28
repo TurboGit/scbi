@@ -1012,9 +1012,9 @@ function handle-meta-module()
     ilog $METAMODULE End metamodule $METAMODULE-$VARIANT setup | tee -a $log
     line-sep
 
-    local FCT=$(get-hook $METAMODULE $VARIANT modules)
-
-    for module in $($FCT $SCBI_PREFIX $SCBI_TARGET $VARIANT); do
+    for module in $(_internal_call-variant-hooks \
+                        $METAMODULE modules $SCBI_PREFIX $SCBI_TARGET $VARIANT);
+    do
         handle-module $METAMODULE $module || exit 1
     done
 
@@ -1100,21 +1100,17 @@ function handle-module()
 
     #  Check if meta-module, if so call handle-module for each one
 
-    fn-exists $module-$variant-modules
+    local MVARFOUND=false
+    for v in $(all-variants $variant); do
+        fn-exists $module-$v-modules
+        [[ $? = 0 ]] && MVARFOUND=true && break
+    done
 
-    if [[ $? = 0 ]]; then
+    if [[ $MVARFOUND = true ]] || fn-exists $module-modules; then
         (
             handle-meta-module $module $variant
         )
         return $?
-    else
-        fn-exists $module-modules
-        if [[ $? = 0 ]]; then
-            (
-                handle-meta-module $module $variant
-            )
-            return $?
-        fi
     fi
 
     #  Check for depends, and handle them if any

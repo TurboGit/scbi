@@ -957,10 +957,10 @@ A meta-module is a module listing a set of modules to build. This can be used to
 
 Other modules can depend on a meta-module.
 
-A module defining the hook \code{<module>-modules} becomes a meta-module.
+A module defining the hook \code{<module>-modules} (possibly with variants) becomes a meta-module.
 
 \begin{description}[style=nextline]
-	\item[<module>-modules] \index{hook!modules}Lists the aggregated modules.
+	\item[<module>-{[}common|<variant>{]}-modules] \index{hook!modules}Lists the aggregated modules.
 		\begin{description}[font=\textit,style=standard]
 			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 			\item[return] \tabto{2cm} array
