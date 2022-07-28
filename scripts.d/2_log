@@ -165,22 +165,25 @@ function display-log-stat()
     echo
 
     for key in "${!SCBI_STATS[@]}"; do
-        local values="${SCBI_STATS[$key]}"
-        local mam=( $(get-min-avr-max "$values") )
+        echo $key
+    done | sort |
+        while read key; do
+            local values="${SCBI_STATS[$key]}"
+            local mam=( $(get-min-avr-max "$values") )
 
-        echo -n $key
-        for (( s=${#key} ; s<=55 ; s++ )); do
-            echo -n ' '
+            echo -n $key
+            for (( s=${#key} ; s<=55 ; s++ )); do
+                echo -n ' '
+            done
+
+            echo -n ": "
+            display-time ${mam[0]}
+            echo -n "   "
+            display-time ${mam[1]}
+            echo -n "   "
+            display-time ${mam[2]}
+            echo
         done
-
-        echo -n ": "
-        display-time ${mam[0]}
-        echo -n "   "
-        display-time ${mam[1]}
-        echo -n "   "
-        display-time ${mam[2]}
-        echo
-    done
 }
 
 ############################## show-command
