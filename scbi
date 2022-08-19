@@ -1323,7 +1323,7 @@ function handle-module()
             #  directory, clean it to ensure no old versions are installed
             #  into the same location.
 
-            if [[ $DO_INSTALL = yes ]]; then
+            if [[ $DO_INSTALL != no ]]; then
                 rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
                 rm -f  $SCBI_BDIR/$module/install-id
                 rm -f  $SCBI_BDIR/$module/install-${SCBI_TARGET}-id
@@ -1489,7 +1489,7 @@ function handle-module()
     if [[ $_IDIR == NONE ]]; then
         ilog $module skip global install
 
-    elif [[ "$DO_INSTALL" = "yes" ]] &&
+    elif [[ "$DO_INSTALL" != "no" ]] &&
              [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
     then
         ilog $module copy install into ${_IDIR/$SCBI_BDIR/<sandbox>}
