@@ -269,3 +269,10 @@ xxxx/xx/xx xx:xx:xx : End Building mv-default2 [default] (master)
 xxxx/xx/xx xx:xx:xx : Metamodule metavar-default wrapup
 xxxx/xx/xx xx:xx:xx : End metamodule metavar-default wrapup
 EOF
+
+for PLG in mv-common1 mv-common2 mv-var1 mv-var2 \
+           mv-new1 mv-new2 mv-new3 \
+           mv-default1 mv-default2 mv-default-ex1 mv-default-ex2;
+do
+   rm -f scripts.d/$PLG
+done
