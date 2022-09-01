@@ -57,12 +57,26 @@ function get-hook()
 ############################## get-version-number
 # return a 3 digits version number for $1
 
-VERSION_OK=9999
+VERSION_OK=99999
 VERSION_ERROR=-1
 
 function get-version-number()
 {
-    echo -n "$1" | sed -e 's/[^0-9-]*\(\-\?[0-9]*\(\.[0-9]*\)\?\(\.[0-9]*\)\?\).*/\1/g'
+    local VALUE=$1
+
+    local NUM=$(echo -n "${VALUE//_/.}" |
+                    sed -e 's/[^0-9-]*\(\-\?[0-9]*\(\.[0-9]*\)\?\(\.[0-9]*\)\?\).*/\1/g')
+
+    local NLETTERS=$(( ${#VALUE} - ${#NUM} ))
+
+    #  The label contains more than five non digit characters, very unlikely to be
+    #  a version number. Could be a branch name with some numbers for example.
+
+    if [[ $NLETTERS -gt 5 ]] || [[ ${NUM: -1} == '.' ]]; then
+        echo 0
+    else
+        echo $NUM
+    fi
 }
 
 ############################## display-version
