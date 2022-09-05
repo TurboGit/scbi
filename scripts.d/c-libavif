@@ -1,5 +1,5 @@
 
-with-variant native os@-avif-dev
+with-variant native os@-avif-dev:[v]
 
 function c-libavif-vcs()
 {
