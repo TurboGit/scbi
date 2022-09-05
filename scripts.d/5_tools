@@ -79,21 +79,6 @@ function get-version-number()
     fi
 }
 
-############################## display-version
-
-function display-version()
-{
-    local VERSION=$1
-
-    if [[ "$VERSION" = "$VERSION_OK" ]]; then
-        echo latest
-    elif [[ "$VERSION" = "$VERSION_ERROR" ]]; then
-        echo not found
-    else
-        echo $VERSION
-    fi
-}
-
 ############################## gprbuild-project
 # for testing if a project compile and link
 
