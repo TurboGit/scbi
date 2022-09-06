@@ -40,6 +40,11 @@ function c-gnatcoll-db-libs-sqlite-out-of-tree()
     echo false
 }
 
+function c-gnatcoll-db-libs-sqlite-cross-build-env()
+{
+    set-var OS Windows_NT
+}
+
 function c-gnatcoll-db-libs-sqlite-env()
 {
     local PREFIX=$1
