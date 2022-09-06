@@ -12,6 +12,7 @@ function c-libadalang-vcs()
 function c-libadalang-cross-build-depends()
 {
     echo c-sandbox
+    echo c-e3
 }
 
 function c-libadalang-build-depends()
