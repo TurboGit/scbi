@@ -88,8 +88,8 @@ ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
 #  General script setup
 SCBI_DLOG=on-failure
 SCBI_PLUGINS="$PWD/scripts.d"
-SCBI_JOBS=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
-SCBI_HALF_JOBS=$((SCBI_JOBS / 2))
+SCBI_JOBS=${SCBI_JOBS:-$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)}
+SCBI_HALF_JOBS=${SCBI_HALF_JOBS:-$((SCBI_JOBS / 2))}
 
 #  Modules to be handled and already handled
 SCBI_MODULES=
@@ -1229,8 +1229,15 @@ function handle-module()
             echo                          >> $SCBI_ENV_MODULE
             echo "# SCBI global settings" >> $SCBI_ENV_MODULE
 
-            env | grep "^SCBI_" | while read DEF; do
-                echo "export ${DEF/=/=\"}\"" >> $SCBI_ENV_MODULE
+            env | grep "^SCBI_" | tr '=' ' ' | while read NAME VALUE; do
+                case $NAME in
+                    SCBI_JOBS|SCBI_HALF_JOBS)
+                        echo export $NAME=\${$NAME:-$VALUE}
+                        ;;
+                    *)
+                        echo export $NAME=\'$VALUE\'
+                        ;;
+                esac >> $SCBI_ENV_MODULE
             done
         fi
 
