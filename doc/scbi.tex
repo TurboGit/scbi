@@ -79,9 +79,8 @@
 \newcommand{\tbd}[1]{\fbox{{\smallpencil #1 }}}
 \renewcommand{\emph}[1]{\textit{#1}}
 \newcommand{\seeref}[1]{see section \ref{#1} p.\pageref{#1}}
-\newcommand{\file}[1]{'{\path{#1}}'}
+\newcommand{\file}[1]{'{\texttt{#1}}'}
 \newcommand{\des}[1]{\tabto{4.5cm}\scriptsize\textit{: #1}}
-%\newcommand{\cmd}[1]{\tabto{1cm}$\arrowvert$\hspace{0.5cm}\texttt{\$ #1}}
 \newcommand{\cmd}[1]{\tabto{1cm}\hspace{0.5cm}\texttt{\textbf{\$} #1}}
 
 \setitemize[0]{font=\bfseries, label=$\bullet$ }
@@ -133,6 +132,8 @@ The goal is to automate the build procedures from sources. The main features are
 	\item Building from a user's checkout for easy debug with controlled environment
 	\item Support for build plans (modules with specific variant and/or version)
 \end{itemize}
+
+\file{toto}
 
 The driver and plug-in modules are all written in \code{bash} scripts.
 
@@ -236,29 +237,32 @@ An environment is a set of shell variables used to control the build environment
 	\item[SCBI\_VERSION] The scbi driver version string.
 	\\This version is \version.
 
-	\item[SCBI\_PLUGINS] The directories where the SCBI plug-ins are located. \\Default is \file{$HOME/.config/scbi}.
+	\item[SCBI\_PLUGINS] The directories where the SCBI plug-ins are located. 
+	Default is \file{\$HOME/config/scbi}.
 
 	\item[SCBI\_PLAN] The name of the build-plan to use if any.
 
-	\item[SCBI\_ROOT] The default root directory to use by SCBI. \\Default is \file{$HOME/dev}.
+	\item[SCBI\_ROOT] The default root directory to use by SCBI. \\ 
+	Default is \file{\$HOME/dev}.
 
-	\item[SCBI\_BDIR] The default directory for the build directory.  This is also called the sandbox directory. \\Default is \file{$SCBI_ROOT/builds}.
+	\item[SCBI\_BDIR] The default directory for the build directory.  This is also called the sandbox directory. \\ 
+	Default is \file{\$SCBI\_ROOT/builds}.
 
 	\item[SCBI\_MODULES\_DIR{[<module-name>]}] An associative array giving the install directory for a given module name. Directories have \code{\$SCBI\_BDIR} has prefix and point to the install directory for the module's variant. This associative array can be used in hooks \code{config}, \code{build} and \code{install}.
 
-	\item[SCBI\_PREFIX] The default global install directory. Each module after being installed into the sandbox are copied into this global installation directory. \\Default is \file{$SCBI_BDIR/install}. Each module can disable global installation (\seeref{global-install}).
+	\item[SCBI\_PREFIX] The default global install directory. Each module after being installed into the sandbox are copied into this global installation directory. \\Default is \file{\$SCBI\_BDIR/install}. Each module can disable global installation (\seeref{global-install}).
 
-	\item[SCBI\_GIT\_REPO] The directories where the user's Git checkouts are to be found. \\Default is \file{$SCBI_ROOT/repositories/git}.
+	\item[SCBI\_GIT\_REPO] The directories where the user's Git checkouts are to be found. \\ Default is \file{\$SCBI\_ROOT/repositories/git}.
 
-	\item[SCBI\_SVN\_REPO] The directories where the user's Subversion checkouts are to be found. \\Default is \file{$SCBI_ROOT/repositories/svn}.
+	\item[SCBI\_SVN\_REPO] The directories where the user's Subversion checkouts are to be found. \\ Default is \file{\$SCBI\_ROOT/repositories/svn}.
 
-	\item[SCBI\_HG\_REPO] The directories where the user's Mercurial checkouts are to be found. \\Default is \file{$SCBI_ROOT/repositories/hg}.
+	\item[SCBI\_HG\_REPO] The directories where the user's Mercurial checkouts are to be found. \\ Default is \file{\$SCBI\_ROOT/repositories/hg}.
 
-	\item[SCBI\_TAR] The directories where the tarball are located. \\Default is \file{$SCBI_ROOT/.tar}.
+	\item[SCBI\_TAR] The directories where the tarball are located. \\Default is \file{\$SCBI\_ROOT/.tar}.
 
-	\item[SCBI\_LOGS] The directories where the logs are located. \\Default is \file{$SCBI_ROOT/.logs}.
+	\item[SCBI\_LOGS] The directories where the logs are located. \\Default is \file{\$SCBI\_ROOT/.logs}.
 
-	\item[SCBI\_PATCH] The directories where the patches are located. \\Default is \file{$SCBI_ROOT/.patches}.
+	\item[SCBI\_PATCH] The directories where the patches are located. \\Default is \file{\$SCBI\_ROOT/.patches}.
 
 	\item[SCBI\_HOST] The host triplet identifying the running environment.
 
@@ -462,9 +466,9 @@ The following options are supported:
 
 	\item[-v | \ddash{}version] Display version information of the SCBI driver and versions from plug-ins distributions coming from other sources\footnote{Note that for this to be supported the plug-ins distribution must have generated and installed a file name \file{.scbi*version.txt} next to the plug-ins.}.
 
-	\item[\ddash{}prefix=<dir>] The installation directory to use instead of the default \file{$SCBI_PREFIX}.
+	\item[\ddash{}prefix=<dir>] The installation directory to use instead of the default \file{\$SCBI\_PREFIX}.
 
-	\item[\ddash{}build-dir=<dir>] The root build directory to use instead of the default \file{$SCBI_BDIR}.
+	\item[\ddash{}build-dir=<dir>] The root build directory to use instead of the default \file{\$SCBI\_BDIR}.
 
 	\item[-e | \ddash{}env=<name>] Use environment file \code{.env-<name>} instead of the default \code{.env}. (\seeref{build-env})
 
@@ -1476,7 +1480,7 @@ The option to set or retrieve a value is \ddash{}store.
 	\hspace{1.5cm}\texttt{scbi-store-get-key LICKEY}
 \end{itemize}
 
-All keys are stored into the file \file{$SCBI_PLUGINS/.store} (if using the default environment \file{$HOME/.config/scbi/.store}).
+All keys are stored into the file \file{\$SCBI\_PLUGINS/.store} (if using the default environment \file{\$HOME/.config/scbi/.store}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
@@ -1484,7 +1488,7 @@ All keys are stored into the file \file{$SCBI_PLUGINS/.store} (if using the defa
 \label{completion}
 \index{completion}
 
-A script is provided to support bash completion for scbi. The script is \file{bash_completion.d/scbi} and must be copied into \file{/etc/bash_completion.d/} OS directory.
+A script is provided to support bash completion for scbi. The script is \file{bash\_completion.d/scbi} and must be copied into \file{/etc/bash\_completion.d/} OS directory.
 
 Note that for this to work, the bash completion package must be installed, on Debian based distributions this is achieved with:
 
@@ -1589,7 +1593,7 @@ It is possible to replay a single command and display the full log to analyze wh
 
 The files to be edited are in the sandbox module's directory:
 
-\file{$SCBI_BDIR/lcms2/build/src}
+\file{\$SCBI\_BDIR/lcms2/build/src}
 
 Then one of the configuration commands above can be restarted. \emph{When the fix is found it must be applied in the module's repository outside of the sandbox or it will be lost.}
 
@@ -1678,7 +1682,7 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 
 Many scripts come with \code{scbi}, they are all good examples to learn about different features.
 
-As a complete example here, let's build latest GIMP version. The plug-in module script is called \file{gimp} (placed into \file{$SCBI_PLUGINS/.config/scbi}) and all hook functions in this script are prefixed by \code{gimp-}.
+As a complete example here, let's build latest GIMP version. The plug-in module script is called \file{gimp} (placed into \file{\$SCBI\_PLUGINS/.config/scbi}) and all hook functions in this script are prefixed by \code{gimp-}.
 
 Note that this was compiling at the time this doc was written, but some dependencies on the OS may required the script to be updated.
 
