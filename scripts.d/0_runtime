@@ -226,7 +226,7 @@ function _inherit-plugin_internal()
 
     for hook in $(declare -F \
                       | cut -d' ' -f3 \
-                      | egrep -E "$HPLUGIN-.*($SCBI_HOOKS)");
+                      | grep -E "$HPLUGIN-.*($SCBI_HOOKS)");
     do
         H="function ${hook/$HPLUGIN/$PLUGIN}()"
         H="$H { $hook \$1 \$2 \$3 \$4 \$5 \$6 \$7; }"
