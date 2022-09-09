@@ -997,11 +997,10 @@ function handle-meta-module()
 
     #  check for dependencies
 
-    if [[ $DEPS = yes ]]; then
+    [[ $DEPS = yes ]] &&
         for dmodule in $(get-all-depends $METAMODULE $VARIANT build-depends); do
             handle-depends $METAMODULE $dmodule || exit 1
         done
-    fi
 
     #  check for setup
 
