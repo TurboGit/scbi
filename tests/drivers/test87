@@ -1,0 +1,20 @@
+# check for super-module without deps (only setup & wrapup)
+#
+
+RUNS ./scbi --purge:only lib1
+RUNS ./scbi --purge:only lib2
+
+# echo ========== build supermod
+RUNS ./scbi --no-patch supermod
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Metamodule supermod-default setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod-default setup
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod-default wrapup
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod-default wrapup
+EOF

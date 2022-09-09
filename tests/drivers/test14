@@ -5,7 +5,7 @@ RUNS ./scbi --purge:only lib1
 RUNS ./scbi --purge:only lib2
 
 # echo ========== build supermod
-RUNS ./scbi --no-patch --tests supermod
+RUNS ./scbi --no-patch --tests --deps supermod
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Metamodule supermod-default setup
@@ -52,7 +52,7 @@ xxxx/xx/xx xx:xx:xx : End metamodule supermod-default wrapup
 EOF
 
 # echo ========== build supermod plan sm1
-RUNS ./scbi --no-patch --tests --plan=sm1 supermod
+RUNS ./scbi --no-patch --tests --plan=sm1 --deps supermod
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Metamodule supermod-default setup
@@ -93,7 +93,7 @@ xxxx/xx/xx xx:xx:xx : End metamodule supermod-default wrapup
 EOF
 
 # echo ========== build supermod variant best (plan var)
-RUNS ./scbi --no-patch --tests supermod/best
+RUNS ./scbi --no-patch --tests --deps supermod/best
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Metamodule supermod-best setup

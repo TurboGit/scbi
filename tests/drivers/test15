@@ -14,7 +14,7 @@ RUNS ./scbi --purge:only lib2
 )
 
 # echo ========== build supermod
-RUNS ./scbi --no-patch --tests supermod
+RUNS ./scbi --no-patch --tests --deps supermod
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Metamodule supermod-default setup
@@ -63,7 +63,7 @@ EOF
 # echo ========== build supermod with local plan myplan
 echo lib1:v1 > .scbi-plan-myplan
 echo lib2:dev >> .scbi-plan-myplan
-RUNS ./scbi --no-patch --tests --plan=myplan supermod
+RUNS ./scbi --no-patch --tests --plan=myplan --deps supermod
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Metamodule supermod-default setup

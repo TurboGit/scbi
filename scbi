@@ -1011,11 +1011,12 @@ function handle-meta-module()
     ilog $METAMODULE End metamodule $METAMODULE-$VARIANT setup | tee -a $log
     line-sep
 
-    for module in $(_internal_call-variant-hooks \
+    [[ $DEPS = yes ]] &&
+        for module in $(_internal_call-variant-hooks \
                         $METAMODULE modules $SCBI_PREFIX $SCBI_TARGET $VARIANT);
-    do
-        handle-module $METAMODULE $module || exit 1
-    done
+        do
+            handle-module $METAMODULE $module || exit 1
+        done
 
     #  check for wrapup
 
