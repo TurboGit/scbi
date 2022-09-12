@@ -1530,7 +1530,7 @@ function handle-module()
 
 ############################## body
 
-# first we check for --enable-* options
+#  First we check for --enable-*, --run* and --tests* options
 
 SCBIOPTS=""
 
