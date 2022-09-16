@@ -1101,7 +1101,7 @@ function handle-module()
     #  Check if meta-module, if so call handle-module for each one
 
     local MVARFOUND=false
-    for v in $(all-variants $variant); do
+    for v in default common $(all-variants $variant); do
         fn-exists $module-$v-modules
         [[ $? = 0 ]] && MVARFOUND=true && break
     done
