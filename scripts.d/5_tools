@@ -57,7 +57,7 @@ function get-hook()
 ############################## get-version-number
 # return a 3 digits version number for $1
 
-VERSION_OK=99999
+VERSION_OK=99999999
 VERSION_ERROR=-1
 
 function get-version-number()
