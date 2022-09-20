@@ -201,7 +201,8 @@ function git-branch()
             ilog $MODULE "scbi: $MODULE updated $CUR..$NEW"
         fi
 
-        [[ ! -z ${OPTIONS##*no-recursive*} ]] && [[ -f .gitmodules ]] &&
+        local LOPTS=",$OPTIONS,"
+        [[ "$LOPTS" == "${LOPTS/,no-recursive,}" ]] && [[ -f .gitmodules ]] &&
             git submodule update --init --recursive || true
     )
 }
