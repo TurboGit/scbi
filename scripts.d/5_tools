@@ -346,9 +346,10 @@ function _internal_for-all-modules()
         if [[ $? = 0 ]]; then
             push-dependency-tree $module
 
-            local FCT=$(get-hook $module $variant modules)
+            local MODS=$(_internal_call-variant-hooks \
+                             $module modules $PREFIX $TARGET $VARIANT)
 
-            if [[ ! -z $FCT ]]; then
+            if [[ ! -z $MODS ]]; then
                 IS_META=true
             fi
 
@@ -361,7 +362,7 @@ function _internal_for-all-modules()
                 local NXL=$LEVEL
                 [[ $DO_DEPS == yes-direct ]] && NXL=$NEXTL
 
-                for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
+                for dmodule in $MODS; do
                     _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
                                               $WITH_EXT $DEPTH $NXL \
                                               $DEPENDS_KIND $dmodule $module $@
