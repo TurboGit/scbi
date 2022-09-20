@@ -54,7 +54,8 @@ function git-co()
     local GOPTS1=""
     local GOPTS2=""
 
-    if [[ ! -z ${OPTIONS##*no-recursive*} ]]; then
+    local LOPTS=",$OPTIONS,"
+    if [[ "$LOPTS" == "${LOPTS/,no-recursive,}" ]]; then
         GOPTS1="--recursive"
         GOPTS2="--recurse-submodules"
     fi
@@ -76,7 +77,14 @@ function git-co()
             git fetch $GOPTS2
         fi &&
         cd $SCBI_BDIR/$NAME &&
-        ln -s ../.vcs/$REPO vcs
+        ln -s ../.vcs/$REPO vcs &&
+        if [[ "$LOPTS" != "${LOPTS/,lfs,}" ]]; then
+            (
+                cd vcs &&
+                    git lfs install &&
+                    git lfs fetch
+            )
+        fi
     )
 }
 
