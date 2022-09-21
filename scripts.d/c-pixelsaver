@@ -1,0 +1,33 @@
+
+function c-pixelsaver-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/deadalnix/pixel-saver.git
+}
+
+function c-pixelsaver-out-of-tree()
+{
+    echo false
+}
+
+function c-pixelsaver-depends()
+{
+    echo x11-utils
+}
+
+function c-pixelsaver-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    mkdir -p ../install
+    mv ./pixel-saver@deadalnix.me ../install
+}
+
+function c-pixelsaver-prefix()
+{
+    echo $HOME/.local/share/gnome-shell/extensions
+}
