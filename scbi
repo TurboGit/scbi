@@ -1499,7 +1499,10 @@ function handle-module()
     elif [[ "$DO_INSTALL" != "no" ]] &&
              [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
     then
-        ilog $module copy install into ${_IDIR/$SCBI_BDIR/<sandbox>}
+        local IDEST=${_IDIR/$SCBI_BDIR/<sandbox>}
+        IDEST=${IDEST/$HOME/\$HOME}
+
+        ilog $module copy install into $IDEST
 
         #  Record global install
         echo "$variant" > $SCBI_BDIR/$module/install-${SCBI_TARGET}-id
