@@ -1,0 +1,48 @@
+
+# Check for iterators
+
+export SCBI_PLUGINS=$PWD/scripts.d
+export SCBI_PREFIX=/here
+export SCBI_TARGET=x86_64-linux-gnu
+
+RUNS source ./drivers/test88-module
+
+DIFF <<EOF
+=== default
+MOD lib1 L:0 M:false D:default
+MOD lib2 L:0 M:false D:default
+MOD intmod L:0 M:true D:default
+=== default ext
+MOD lib1 L:0 M:false D:default
+MOD lib2 L:0 M:false D:default
+MOD intmod L:0 M:true D:default
+=== final default
+lib1
+lib2
+=== varA
+MOD lib1 L:0 M:false D:default
+MOD intmod L:0 M:true D:default
+=== varA ext
+MOD lib1 L:0 M:false D:default
+MOD gcc L:0 M:false D:default
+MOD intmod L:0 M:true D:default
+=== final varA
+gcc
+lib1
+=== varB
+MOD lib1 L:0 M:false D:default
+MOD depA L:0 M:false D:default
+MOD oot L:0 M:false D:default
+MOD dmod L:0 M:true D:default
+MOD intmod/varB L:0 M:true D:default
+=== varB ext
+MOD lib1 L:0 M:false D:default
+MOD depA L:0 M:false D:default
+MOD oot L:0 M:false D:default
+MOD dmod L:0 M:true D:default
+MOD intmod L:0 M:true D:default
+=== final varB
+depA
+lib1
+oot
+EOF

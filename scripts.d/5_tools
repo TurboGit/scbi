@@ -144,9 +144,10 @@ function load-module()
     fi
 
     if [[ -z "${SCBI_LOADED[$key]}" ]]; then
-        local FCT=$(get-hook $module $variant modules)
+        local MODS=$(_internal_call-variant-hooks \
+                         $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
 
-        if [[ -z $FCT ]]; then
+        if [[ -z $MODS ]]; then
             SCBI_LOADED[$key]=final
         else
             SCBI_LOADED[$key]=meta
@@ -347,7 +348,7 @@ function _internal_for-all-modules()
             push-dependency-tree $module
 
             local MODS=$(_internal_call-variant-hooks \
-                             $module modules $PREFIX $TARGET $VARIANT)
+                             $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
 
             if [[ ! -z $MODS ]]; then
                 IS_META=true
@@ -578,9 +579,10 @@ function _internal_for-final-modules()
     if [[ $(is-meta-module $MODREF) == yes ]]; then
         load-module $MODREF
 
-        local FCT=$(get-hook $module $variant modules)
+        local MODS=$(_internal_call-variant-hooks \
+                         $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
 
-        for dmodule in $($FCT $SCBI_PREFIX $SCBI_TARGET $variant); do
+        for dmodule in $MODS; do
             _internal_for-final-modules $module $dmodule
         done
     else

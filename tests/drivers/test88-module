@@ -1,0 +1,62 @@
+
+function check-tools-abort()
+{
+    true
+}
+
+source scripts.d/0_runtime
+source scripts.d/5_tools
+source scripts.d/6_distpkg
+source scripts.d/9_versions
+
+function CB()
+{
+    local FORMODULE=$1
+    local MODREF=$2
+    local LEVEL=$3
+    local DEPENDS_KIND=$4
+    local IS_EXT=$5
+    local IS_META=$6
+
+    echo MOD $MODREF L:$LEVEL M:$IS_META D:$DEPENDS_KIND
+}
+
+function run()
+{
+    echo "=== default"
+    for-all-modules-with-meta CB intmod
+
+    echo "=== default ext"
+    for-all-modules-with-meta-ext CB intmod
+
+    echo "=== final default"
+    for M in $(for-final-modules intmod); do
+        echo $M
+    done
+
+    echo "=== varA"
+    set-module-ref intmod/varA
+    for-all-modules-with-meta CB intmod
+
+    echo "=== varA ext"
+    for-all-modules-with-meta-ext CB intmod
+
+    echo "=== final varA"
+    for M in $(for-final-modules intmod); do
+        echo $M
+    done
+
+    echo "=== varB"
+    set-module-ref intmod/varB
+    for-all-modules-with-meta CB intmod/varB
+
+    echo "=== varB ext"
+    for-all-modules-with-meta-ext CB intmod
+
+    echo "=== final varB"
+    for M in $(for-final-modules intmod); do
+        echo $M
+    done
+}
+
+run
