@@ -44,5 +44,5 @@ function c-gsconnect-install()
 
 function c-gsconnect-prefix()
 {
-    echo NONE
+    echo $HOME/.local/share/gnome-shell/extensions
 }
