@@ -93,7 +93,7 @@ function load-module-plan()
                 true
             elif [[ "${modref:0:1}" = "]" ]]; then
                 REF=""
-                if [[ ! -z $arg1 ]]; then
+                if [[ -n $arg1 ]]; then
                     REF=$arg1
                 else
                     REF=${modref:1}
@@ -143,7 +143,7 @@ function load-module-plan()
                 #  store all module's group in GMOD
                 [[ $GROUP == yes ]] && GMOD="$GMOD $modref"
             elif [[ "$modref" = "[" ]]; then
-                if [[ ! -z $arg1 ]]; then
+                if [[ -n $arg1 ]]; then
                     if [[ $arg1 = "=" ]]; then
                         if has-variant "$VARIANT" "$arg2" \
                             || check-discriminants "$arg2";

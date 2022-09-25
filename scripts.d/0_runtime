@@ -48,7 +48,7 @@ function is-enabled()
         fi
         return 0
     else
-        if [[ ! -z $ELSE ]]; then
+        if [[ -n $ELSE ]]; then
             echo $ELSE
         fi
         return 1
@@ -75,7 +75,7 @@ function get-os-file()
     local FILENAME=$1
     shift
 
-    while [[ ! -z "$1" ]]; do
+    while [[ -n "$1" ]]; do
         F="$1/$FILENAME"
         RES=$(ls $F 2>&1 > /dev/null)
         if [[ $? == 0 ]]; then
@@ -333,7 +333,7 @@ function get-module-ref()
     if [[ -z $modplan ]]; then
         local modplan=${MODVER[$module]}
 
-        if [[ ! -z $modplan ]]; then
+        if [[ -n $modplan ]]; then
             module_info=( $(parse-module-ref $modplan) )
         fi
     else
@@ -387,7 +387,7 @@ function with-variant()
     #  Hook depends/env
     H="function $PLUGIN-$VNAME-depends() { "
     local P="echo "
-    while [[ ! -z "$1" ]]; do
+    while [[ -n "$1" ]]; do
         if [[ "$1" == "--env" ]]; then
             H="$H true; }"
             eval $H
@@ -519,8 +519,8 @@ function get-build-type()
     VAR_GENERIC=SCBI_${KIND}_BUILD_TYPE
     VAR_MODULE=SCBI_${PLUGIN//-/_}_BUILD_TYPE
 
-    [[ ! -z ${!VAR_GENERIC} ]] && DEFAULT=${!VAR_GENERIC}
-    [[ ! -z ${!VAR_MODULE} ]] && DEFAULT=${!VAR_MODULE}
+    [[ -n ${!VAR_GENERIC} ]] && DEFAULT=${!VAR_GENERIC}
+    [[ -n ${!VAR_MODULE} ]] && DEFAULT=${!VAR_MODULE}
 
     echo -n $DEFAULT
 }
@@ -555,7 +555,7 @@ function define-var()
             VALUE_EXISTS=yes
         fi
 
-        if [[ ! -z $SCBI_ENV_MODULE ]]; then
+        if [[ -n $SCBI_ENV_MODULE ]]; then
             echo define-var $ACTION $VAR \"$VALUE\" >> $SCBI_ENV_MODULE
         fi
 

@@ -21,7 +21,7 @@ function define-var()
 
         #  Separator of values in variable
 
-        if [[ ! -z $SCBI_ENV_MODULE ]]; then
+        if [[ -n $SCBI_ENV_MODULE ]]; then
             echo define-var $ACTION $VAR \"$VALUE\" >> $SCBI_ENV_MODULE
         fi
 

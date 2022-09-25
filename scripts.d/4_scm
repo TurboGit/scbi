@@ -262,7 +262,7 @@ function svn-branch()
         cd $SCBI_BDIR/$MODULE
 
         if [[ $BRANCH == NONE ]]; then
-            if [[ ! -z $DIR ]] && [[ -d vcs/trunk/$DIR ]]; then
+            if [[ -n $DIR ]] && [[ -d vcs/trunk/$DIR ]]; then
                 ln -s vcs/trunk/$DIR src
             elif [[ -d vcs/trunk ]]; then
                 ln -s vcs/trunk src
@@ -270,13 +270,13 @@ function svn-branch()
                 ln -s vcs src
             fi
 
-        elif [[ ! -z $DIR ]] && [[ -d vcs/branches/$BRANCH/$DIR ]]; then
+        elif [[ -n $DIR ]] && [[ -d vcs/branches/$BRANCH/$DIR ]]; then
             ln -s vcs/branches/$BRANCH/$DIR src
 
         elif [[ -d vcs/branches/$BRANCH ]]; then
             ln -s vcs/branches/$BRANCH src
 
-        elif [[ ! -z $DIR ]] && [[ -d vcs/tags/$BRANCH/$DIR ]]; then
+        elif [[ -n $DIR ]] && [[ -d vcs/tags/$BRANCH/$DIR ]]; then
             ln -s vcs/tags/$BRANCH/$DIR src
 
         elif [[ -d vcs/tags/$BRANCH ]]; then

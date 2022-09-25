@@ -130,7 +130,7 @@ function load-module()
         if [[ -f $SCBI_PLUGINS/$module ]]; then
             source $SCBI_PLUGINS/$module
             SCBI_LOADED[$module]=yes
-        elif [[ ! -z "${SCBI_MODULE_ALIAS[$module]}" ]]; then
+        elif [[ -n "${SCBI_MODULE_ALIAS[$module]}" ]]; then
             local MA=${SCBI_MODULE_ALIAS[$module]}
 
             if [[ -f $SCBI_PLUGINS/$MA ]]; then
@@ -208,8 +208,7 @@ function check-dependency-tree()
 
 function push-dependency-tree()
 {
-    local MODULE=$1
-    SCBI_RECTREE=( ${SCBI_RECTREE[*]} $MODULE )
+    SCBI_RECTREE+=($1)
 }
 
 ############################## pop-dependency-tree
@@ -218,7 +217,7 @@ function push-dependency-tree()
 
 function pop-dependency-tree()
 {
-    unset SCBI_RECTREE[${#SCBI_RECTREE[@]}-1]
+    unset SCBI_RECTREE[-1]
 }
 
 ############################## get-all-depends
@@ -241,7 +240,7 @@ function get-all-depends()
         else
             #  Check if we have an alias for it
             local MA=${SCBI_MODULE_ALIAS[$M]}
-            if [[ ! -z $MA ]] && [[ -f $SCBI_PLUGINS/$MA ]]; then
+            if [[ -n $MA ]] && [[ -f $SCBI_PLUGINS/$MA ]]; then
                 echo $MA
             else
                 echo $M
@@ -350,7 +349,7 @@ function _internal_for-all-modules()
             local MODS=$(_internal_call-variant-hooks \
                              $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
 
-            if [[ ! -z $MODS ]]; then
+            if [[ -n $MODS ]]; then
                 IS_META=true
             fi
 
@@ -367,23 +366,28 @@ function _internal_for-all-modules()
                     _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
                                               $WITH_EXT $DEPTH $NXL \
                                               $DEPENDS_KIND $dmodule $module $@
-                done
+                done || return 1
 
                 $CALLBACK $FORMODULE $MODREF $LEVEL \
                           $DEPENDS_KIND false $IS_META $@
 
                 pop-dependency-tree
-                return
+                return 0
             fi
 
             #  Setup depends recursively if any
 
             [[ $R_DEPS == yes ]] &&
-                for dmodule in $(get-all-depends $module $variant depends); do
-                    _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
-                                              $WITH_EXT $DEPTH $NEXTL \
-                                              default $dmodule $module $@
-                done
+                {
+                    for dmodule in \
+                        $(get-all-depends $module $variant depends);
+                    do
+                        _internal_for-all-modules \
+                            $CALLBACK $WITH_META $WITH_DEPS \
+                            $WITH_EXT $DEPTH $NEXTL \
+                            default $dmodule $module $@
+                    done || return 1
+                }
 
             #  Setup build-depends recursively if any
 
@@ -397,31 +401,35 @@ function _internal_for-all-modules()
                         _internal_for-all-modules $CALLBACK $WITH_META $NEXTD \
                                                   $WITH_EXT $DEPTH $NEXTL \
                                                   build $dmodule $module $@
-                    done
+                    done || return 1
                 }
 
             #  Setup tests-depends if any
 
             [[ $R_TDEPS == yes ]] &&
-                for dmodule in \
-                    $(get-all-depends $module $variant tests-depends);
-                do
-                    _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
-                                              $WITH_EXT $DEPTH $NEXTL \
-                                              tests $dmodule $module $@
-                done
+                {
+                    for dmodule in \
+                        $(get-all-depends $module $variant tests-depends);
+                    do
+                        _internal_for-all-modules \
+                            $CALLBACK $WITH_META $WITH_DEPS \
+                            $WITH_EXT $DEPTH $NEXTL \
+                            tests $dmodule $module $@
+                    done || return 1
+                }
 
             $CALLBACK $FORMODULE $MODREF $LEVEL \
                       $DEPENDS_KIND false $IS_META $@
 
             pop-dependency-tree
 
+            return 0
         else
             #  module does not exists, this is an external dependency
 
             if [[ $WITH_EXT == true ]]; then
                 local PKGNAME=$(get-pkg-name $MODREF)
-                [[ ! -z $PKGNAME ]] &&
+                [[ -n $PKGNAME ]] &&
                     $CALLBACK $FORMODULE $PKGNAME $LEVEL \
                               $DEPENDS_KIND true $IS_META $@
             else
@@ -695,7 +703,7 @@ function get-build-id()
 
     local var_module=SCBI_${module//-/_}_BUILD_TYPE
 
-    [[ ! -z ${!var_module} ]] &&
+    [[ -n ${!var_module} ]] &&
         mid="$mid,${!var_module}"
 
     #  And possibly the SCBI_*_BUILD_TYPE global settings for
@@ -703,7 +711,7 @@ function get-build-id()
 
     for builder in CMAKE CONFIGURE MAKE GPR; do
         local BVAR=SCBI_${builder}_BUILD_TYPE
-        [[ ! -z ${!BVAR} ]] && mid="$mid,${!BVAR}"
+        [[ -n ${!BVAR} ]] && mid="$mid,${!BVAR}"
     done
 
     #  If patch activated
@@ -713,7 +721,7 @@ function get-build-id()
     if [[ $DO_PATCH = yes ]]; then
         local FCT=$(get-hook $module $variant patches)
 
-        if [[ ! -z $FCT ]]; then
+        if [[ -n $FCT ]]; then
             for patch in $($FCT $PREFIX $TARGET $variant $kind $ref); do
                 pid="$pid,$(get-patch-md5 $patch)"
             done
@@ -731,7 +739,7 @@ function get-build-id()
 
     local FCT=$(get-hook $module $variant external-env)
 
-    if [[ ! -z $FCT ]]; then
+    if [[ -n $FCT ]]; then
         eid=",$($FCT $PREFIX $TARGET $variant)"
     fi
 
@@ -1164,7 +1172,7 @@ function copy-module-src-callback()
 
                 local FCT=$(get-hook $module $variant patches)
 
-                if [[ ! -z $FCT ]]; then
+                if [[ -n $FCT ]]; then
                     for patch in $($FCT $PREFIX $TARGET $VARIANT $kind $ref); do
                         cp-patch $patch
                     done
@@ -1200,7 +1208,7 @@ function create-standalone-package()
 
         cp $SCBI_BINARY bin/
         cp -p $SCBI_PLUGINS/[0-9]_* scripts.d
-        [[ ! -z $SCBI_PLAN ]] && cp -p $SCBI_PLUGINS/.plan-$SCBI_PLAN scripts.d
+        [[ -n $SCBI_PLAN ]] && cp -p $SCBI_PLUGINS/.plan-$SCBI_PLAN scripts.d
 
         #  copy repositories and tars for all modules with dependencies
 
@@ -1226,7 +1234,7 @@ function create-standalone-package()
         echo " cut -d' '"' -f2 | cut -c1-3)'                   >> build
         echo 'export PATH=$PWD/bin:$PATH'                      >> build
         echo "SCBI_MODULES=\"$SCBI_MODULES\""                  >> build
-        echo '[ ! -z $1 ] && SCBI_MODULES="$*"'                >> build
+        echo '[[ -n $1 ]] && SCBI_MODULES="$*"'                >> build
         echo './bin/scbi --env=std --deps $SCBI_MODULES'       >> build
 
         chmod u+x build

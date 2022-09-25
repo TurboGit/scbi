@@ -53,7 +53,7 @@ function module-patch()
                                                  $PREFIX $TARGET $variant \
                                                  $kind $ref)
 
-    if [[ ! -z $PATCHES ]]; then
+    if [[ -n $PATCHES ]]; then
         for patch in $PATCHES; do
             module-apply-patch $module "$patch"
             [[ ! $? = 0 ]] && res=1

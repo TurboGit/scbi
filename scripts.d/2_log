@@ -89,7 +89,7 @@ function clean-scbi-logs()
 {
     #  no output as the parent directory is created before the files inside,
     #  so it could be deleted before all files inside are deleted.
-    [[ ! -z $SCBI_LOGS ]] &&
+    [[ -n $SCBI_LOGS ]] &&
         [[ $SCBI_LOGS != ${SCBI_LOGS#$HOME} ]] &&
         {
             #  delete old log files

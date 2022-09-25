@@ -200,7 +200,7 @@ function load-module-env()
     if [[ -f $ENV ]]; then
         SCBI_ENV_DIR=$(dirname $ENV)
         source $ENV
-    elif [[ ! -z $1 ]]; then
+    elif [[ -n $1 ]]; then
         echo build environment .env$1 not found
         exit 1
     fi
@@ -326,7 +326,7 @@ function module-variant-wrapper()
 
     local FCT=$(get-hook $MODULE $VARIANT $STEP)
 
-    if [[ ! -z $FCT ]]; then
+    if [[ -n $FCT ]]; then
         module-wrapper $PREFIX $MODULE \
                        $VARIANT ${FCT#"${MODULE}-"} || exit 1
         return $?
@@ -418,7 +418,7 @@ function handle-module-env()
 
     local TVDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant
 
-    if [[ ! -z $SCBI_ENV_MODULE ]]; then
+    if [[ -n $SCBI_ENV_MODULE ]]; then
         echo >> $SCBI_ENV_MODULE
         echo "# $MODREF" >> $SCBI_ENV_MODULE
         SCBI_MODULES_DIR["$module"]+="$TVDIR/install"
@@ -574,7 +574,7 @@ function is-module-up-to-date()
 
     local FCT=$(get-hook $module $variant version)
 
-    if [[ ! -z $FCT ]]; then
+    if [[ -n $FCT ]]; then
         TDIR=$(mktemp -d)
 
         [[ $? != 0 ]] &&
@@ -636,14 +636,18 @@ function is-module-up-to-date()
         ref=$(get-version-number $ref)
     fi
 
-    [[ $DO_FORCE = yes ]] &&
+    local rbid=0
+
+    if [[ $DO_FORCE = yes ]]; then
         rm -f $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id
+        rbid=1
+    else
+        #  Check build id, only rebuild if mismatch
 
-    #  Check build id, only rebuild if mismatch
-
-    diff -q $SCBI_BDIR/$module/build-id-$variant \
-            $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
-    local rbid=$?
+        diff -q $SCBI_BDIR/$module/build-id-$variant \
+             $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
+        rbid=$?
+    fi
 
     check-versions "$ref" ">" "$mver"
     local cver=$?
@@ -674,7 +678,7 @@ function handle-depends()
 
     local module_info=( $(get-module-ref $MODREF $FORMODULE) )
 
-    if [[ ! -z ${module_info[4]} ]]; then
+    if [[ -n ${module_info[4]} ]]; then
         module_info[1]=""
         module_info[2]=""
         module_info[3]=""
@@ -1039,7 +1043,7 @@ function handle-module()
 
     local module_info=( $(get-module-ref $MODREF $FORMODULE) )
 
-    if [[ ! -z ${module_info[4]} ]]; then
+    if [[ -n ${module_info[4]} ]]; then
         module_info[1]=""
         module_info[2]=""
         module_info[3]=""
@@ -1083,7 +1087,7 @@ function handle-module()
     if [[ $FORMODULE != "@root" ]]; then
         local FCT=$(get-hook $module $variant only-explicit-build)
 
-        if [[ ! -z $FCT ]]; then
+        if [[ -n $FCT ]]; then
             if [[ "$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
                           $SCBI_TARGET $variant)" == "true" ]]; then
                 ilog $module Module $module built only if explitly specified
@@ -1100,13 +1104,7 @@ function handle-module()
 
     #  Check if meta-module, if so call handle-module for each one
 
-    local MVARFOUND=false
-    for v in default common $(all-variants $variant); do
-        fn-exists $module-$v-modules
-        [[ $? = 0 ]] && MVARFOUND=true && break
-    done
-
-    if [[ $MVARFOUND = true ]] || fn-exists $module-modules; then
+    if [[ $(is-meta-module $MODREF) == "yes" ]]; then
         (
             handle-meta-module $module $variant
         )
@@ -1273,13 +1271,13 @@ function handle-module()
         echo "==================== env " > $ENVLOG
         env >> $ENVLOG
 
-        [[ ! -z $(command -v gprls 2> /dev/null) ]] &&
+        [[ -n $(command -v gprls 2> /dev/null) ]] &&
             {
                 echo "==================== gprls " >> $ENVLOG
                 gprls -v 2>&1 >> $ENVLOG
             }
 
-        [[ ! -z $(command -v gcc 2> /dev/null) ]] &&
+        [[ -n $(command -v gcc 2> /dev/null) ]] &&
             {
                 echo "==================== gcc " >> $ENVLOG
                 gcc -v &>> $ENVLOG
@@ -1298,7 +1296,7 @@ function handle-module()
 
         local FCT=$(get-hook $module $variant out-of-tree)
 
-        [[ ! -z $FCT ]] &&
+        [[ -n $FCT ]] &&
             [[ "$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
                        $SCBI_TARGET $variant)" = "false" ]] && ISOOT=no
 
@@ -1509,7 +1507,7 @@ function handle-module()
         echo ${_IDIR}  >> $SCBI_BDIR/$module/install-${SCBI_TARGET}-id
 
         #  Finaly copy to given prefix
-        SUDO=""
+        local SUDO=""
 
         if [[ ! -d ${_IDIR} ]]; then
             mkdir -p ${_IDIR} &> /dev/null
@@ -1786,7 +1784,7 @@ while [[ $# -gt 0 ]]; do
             STORE_KEY="$1"
             STORE_VALUE="$2"
 
-            [[ ! -z $3 ]] &&
+            [[ -n $3 ]] &&
                 echo "$0: unexpected parameters for store command" &&
                 exit 1
             shift 2
@@ -1833,7 +1831,7 @@ load-module-env $ENV_NAME
 #  If we have specified a build directory on command line, set it now
 #  that the env is loaded (takes precedence).
 
-if [[ ! -z $CMDLINE_BUILD_DIR ]]; then
+if [[ -n $CMDLINE_BUILD_DIR ]]; then
     export SCBI_BDIR=$CMDLINE_BUILD_DIR
 fi
 
@@ -1868,7 +1866,7 @@ fi
 #  If a plan passed on the command line ensure that it is used instead
 #  of any other possibly set in the environment file.
 
-[[ ! -z $SCBI_PLAN_CL ]] && SCBI_PLAN=$SCBI_PLAN_CL
+[[ -n $SCBI_PLAN_CL ]] && SCBI_PLAN=$SCBI_PLAN_CL
 
 [[ "$SCBI_MODULES" = "" ]] &&
     [[ $DO_SHELL != no ]] &&
@@ -1892,7 +1890,7 @@ fi
 
 #  Load build plan if any
 
-if [[ ! -z $SCBI_PLAN ]]; then
+if [[ -n $SCBI_PLAN ]]; then
     load-module-plan $SCBI_PLAN
     [[ $? -ne 0 ]] &&
         echo "error: cannot load module plan $SCBI_PLAN" &&
