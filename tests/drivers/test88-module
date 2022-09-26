@@ -59,4 +59,7 @@ function run()
     done
 }
 
-run
+#  Run in a sub-shell to avoid conflicts with osht
+(
+    run
+)
