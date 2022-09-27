@@ -50,24 +50,38 @@ xxxx/xx/xx xx:xx:xx : Building mspace [opta optb] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : config [opta optb] starting
-xxxx/xx/xx xx:xx:xx : config [opta optb] completed
+xxxx/xx/xx xx:xx:xx : opta-config [opta optb] starting
+xxxx/xx/xx xx:xx:xx : opta-config [opta optb] completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [opta optb] (master)
 EOF
 
-RUNS cat .root/builds/mspace/x86_64-linux-gnu-opta.optb/.log/config.log
+RUNS cat .root/builds/mspace/x86_64-linux-gnu-opta.optb/.log/opta-config.log
 
 DIFF <<EOF
 A one
 B two
 C -DLIB=-L/usr/lib -lmpi_cxx -lmpi
+D -DLIB=-lz1 -lz2 -lz3
+EOF
+
+# ========== OPT-B + OPT-A
+RUNS ./scbi mspace/optb.opta
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building mspace [optb opta] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : optb-config [optb opta] starting
+xxxx/xx/xx xx:xx:xx : optb-config [optb opta] completed
+xxxx/xx/xx xx:xx:xx : End Building mspace [optb opta] (master)
+EOF
+
+RUNS cat .root/builds/mspace/x86_64-linux-gnu-optb.opta/.log/optb-config.log
+
+DIFF <<EOF
 A one
 B two
 C -DLIB=-lz1 -lz2 -lz3
-A one
-B two
-C -DLIB=-L/usr/lib -lmpi_cxx -lmpi
-A one
-B two
-C -DLIB=-lz1 -lz2 -lz3
+D -DLIB=-L/usr/lib -lmpi_cxx -lmpi
 EOF

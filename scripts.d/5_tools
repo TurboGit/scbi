@@ -23,7 +23,7 @@ function display-stacktrace()
 # return the hook name for the given step. This can be the
 # hook for a variant and/or cross build.
 
-function get-hook()
+function _internal_get-hook()
 {
     local MODULE=$1
     local VARIANT=$2
@@ -45,10 +45,29 @@ function get-hook()
         fn-exists $MODULE-$VARIANT-$STEP
         if [[ $? = 0 ]]; then
             HOOK=$MODULE-$VARIANT-$STEP
-        else
-            fn-exists $MODULE-$STEP
-            [[ $? = 0 ]] && HOOK=$MODULE-$STEP
         fi
+    fi
+
+    echo $HOOK
+}
+
+function get-hook()
+{
+    local MODULE=$1
+    local VARIANT=$2
+    local STEP=$3
+
+    local HOOK=""
+    local ALLVARS=$(all-variants $VARIANT)
+
+    for v in ${ALLVARS:-default}; do
+        local HOOK=$(_internal_get-hook $MODULE $v $STEP)
+        [[ -n $HOOK ]] && break
+    done
+
+    if [[ -z $HOOK ]]; then
+        fn-exists $MODULE-$STEP
+        [[ $? = 0 ]] && HOOK=$MODULE-$STEP
     fi
 
     echo $HOOK

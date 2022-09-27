@@ -645,6 +645,9 @@ function _internal_call-variant-hooks()
 
     shift 5
 
+    OLDIFS=$IFS
+    unset IFS
+
     local ALLVARS=$(all-variants $VARIANT)
     local VARFOUND=no
     local found=0
@@ -690,6 +693,8 @@ function _internal_call-variant-hooks()
 
         [[ $found == 1 ]] && $FCT $PREFIX $TARGET $VARIANT $*
     fi
+
+    IFS=$OLDIFS
 }
 
 ############################## call-variant-hooks
