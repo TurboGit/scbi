@@ -1615,25 +1615,21 @@ The files created in this directory are:
 	\item[install.log] \tabto{3cm} The full log issued during the installation.
 \end{description}
 
-It is possible to replay the configure, build or install step just by sourcing the corresponding \code{.cmd} file.
+It is possible to replay the configure, build or install step just by running the corresponding \code{.cmd} file. Use the Bash \code{-x} option to display the commands as they are executed.
 
-As an example, the build command file for \code{cmake} looks like this:
+As an example, the build command file for \code{c-cmake} plug-in looks like this:
 
 \begin{lstlisting}
-# cmake-build
+# c-cmake-build
 (
-	cd <...>/cmake/build/build
+	cd <...>/c-cmake/build/build
 	source <...>/.scbi-runtime
 	[ -f ../.log/env.cmd ] && source ../.log/env.cmd
 
-	function cmake-build()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-		make -j24
-	}
+	source ../.log/c-cmake
 
-	cmake-build <...>/cmake/build/install x86_64-linux-gnu
+	c-cmake-build <...>/c-cmake/build/install \
+	              x86_64-linux-gnu default
 )
 \end{lstlisting}
 
