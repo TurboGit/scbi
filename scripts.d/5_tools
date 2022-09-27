@@ -1,8 +1,4 @@
 
-#  associative array given the status of a module, $SCBI_LOADED[$module] is
-#  set to yes when module is loaded and $SCBI_LOADED[$module.$variant] is
-#  set to meta (for a meta-module) / final (for a standard module).
-declare -A SCBI_LOADED
 declare -A SCBI_MODULE_ALIAS
 
 declare SCBI_RECTREE=()
@@ -129,51 +125,6 @@ function display-file()
 function get-md5()
 {
     md5sum | cut -d' ' -f1
-}
-
-############################## load-module
-#
-# load an SCBI build script
-
-function load-module()
-{
-    local MODREF=$1
-
-    local module_info=( $(get-module-ref $MODREF) )
-    local module=${module_info[0]}
-    local variant=${module_info[1]}
-
-    local key="${module}.${variant}"
-
-    if [[ -z "${SCBI_LOADED[$module]}" ]]; then
-        if [[ -f $SCBI_PLUGINS/$module ]]; then
-            source $SCBI_PLUGINS/$module
-            SCBI_LOADED[$module]=yes
-        elif [[ -n "${SCBI_MODULE_ALIAS[$module]}" ]]; then
-            local MA=${SCBI_MODULE_ALIAS[$module]}
-
-            if [[ -f $SCBI_PLUGINS/$MA ]]; then
-                _inherit-plugin_internal $MA $module
-            else
-                return 1
-            fi
-        else
-            return 1
-        fi
-    fi
-
-    if [[ -z "${SCBI_LOADED[$key]}" ]]; then
-        local MODS=$(_internal_call-variant-hooks \
-                         $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
-
-        if [[ -z $MODS ]]; then
-            SCBI_LOADED[$key]=final
-        else
-            SCBI_LOADED[$key]=meta
-        fi
-    fi
-
-    return 0
 }
 
 ############################## is-meta-module
