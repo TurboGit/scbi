@@ -247,7 +247,12 @@ function display-build-plan()
 {
     echo "There is ${#MODVER[*]} module(s) in the plan"
     for module in ${!MODVER[*]}; do
-        echo ${MODVER[$module]}
+        local FM=${module%=*}
+        if [[ $FM != $module ]]; then
+            echo @for $FM use ${MODVER[$module]}
+        else
+            echo ${MODVER[$module]}
+        fi
     done
 }
 
