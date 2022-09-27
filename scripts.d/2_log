@@ -190,6 +190,23 @@ function display-log-stat()
 # display bash command with original command and with substitued
 # variables
 
+function _internal_copy-plugin()
+{
+    local PLG=$1
+    local DIR=$2
+
+    if [[ -f $SCBI_PLUGINS/$PLG ]]; then
+        cp $SCBI_PLUGINS/$PLG $DIR
+
+        #  And copy recursively all the inherited-plugins
+
+        cat $DIR/$PLG | grep "inherit-plugin" |
+            while read kw pg; do
+                _internal_copy-plugin $pg $DIR
+            done
+    fi
+}
+
 function show-command()
 {
     local PLUGIN=$1
@@ -215,10 +232,9 @@ function show-command()
     echo "      load-runtime-module-plan ../.log/build-plan"
     echo ""
 
-    if [[ -f $SCBI_PLUGINS/$PLUGIN ]]; then
-        cp $SCBI_PLUGINS/$PLUGIN ../.log
-        echo "   source ../.log/$PLUGIN"
-    fi
+    _internal_copy-plugin $PLUGIN ../.log
+
+    echo "   source ../.log/$PLUGIN"
 
     echo ""
     echo "   $CMD $PREFIX $TARGET $VARIANT"
