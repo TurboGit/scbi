@@ -298,8 +298,8 @@ function module-wrapper()
             case $STEP in
                 config|build|install|cross-config|cross-build|cross-install)
                     elog $MODULE to reproduce:
-                    elog $MODULE cd $RDIR
-                    elog $MODULE bash ./$mstep.cmd
+                    elog $MODULE bash $RDIR/$mstep.cmd
+                    elog $MODULE use bash -x option for debug
                     ;;
             esac
 
