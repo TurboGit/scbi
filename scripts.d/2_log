@@ -118,7 +118,7 @@ function compute-log-stat-file()
         if [[ "$action" == "Building" ]]; then
             module=$word
             start_time=$(date +"%s" --date="$date $time")
-        elif [[ "$action" == "End" ]] && [[ "$module" != "" ]]; then
+        elif [[ "$action" == "End" ]] && [[ -n $module ]]; then
             end_time=$(date +"%s" --date="$date $time")
             duration=$((end_time - start_time))
             SCBI_STATS[$module]="${SCBI_STATS[$module]} $duration"

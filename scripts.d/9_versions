@@ -89,7 +89,7 @@ function load-module-plan()
                 local module=${module_info[0]}
                 MODVER[$module]=$arg3
 
-            elif [[ "$modref" = "" ]]; then
+            elif [[ -z $modref ]]; then
                 true
             elif [[ "${modref:0:1}" = "]" ]]; then
                 REF=""

@@ -305,7 +305,7 @@ function get-vcs-data()
 
     VAR=SCBI_${MODULE//-/_}_VCS_VARIANT
 
-    if [[ "${!VAR}" != "" ]]; then
+    if [[ -n ${!VAR} ]]; then
         fn-exists $MODULE-${!VAR}-vcs
         if [[ $? = 0 ]]; then
             VCS_VARIANT=${!VAR}
@@ -314,7 +314,7 @@ function get-vcs-data()
             elog build "error: vcs specific function for $MODULE not found."
             exit 1
         fi
-    elif [[ "${SCBI_VCS_VARIANT}" != "" ]]; then
+    elif [[ -n ${SCBI_VCS_VARIANT} ]]; then
         fn-exists $MODULE-${SCBI_VCS_VARIANT}-vcs
         if [[ $? = 0 ]]; then
             VCS_VARIANT=${SCBI_VCS_VARIANT}

@@ -816,7 +816,7 @@ function get-tar-data()
     if [[ $VARIANT != "native" ]]; then
         VAR=SCBI_${MODULE//-/_}_TAR_VARIANT
 
-        if [[ "${!VAR}" != "" ]]; then
+        if [[ -n ${!VAR} ]]; then
             fn-exists $MODULE-${!VAR}-tar
             if [[ $? = 0 ]]; then
                 TAR_VARIANT=${!VAR}
@@ -825,7 +825,7 @@ function get-tar-data()
                 elog build "error: tar specific function for $module not found."
                 exit 1
             fi
-        elif [[ "${SCBI_TAR_VARIANT}" != "" ]]; then
+        elif [[ -n ${SCBI_TAR_VARIANT} ]]; then
             fn-exists $module-${SCBI_TAR_VARIANT}-tar
             if [[ $? = 0 ]]; then
                 TAR_VARIANT=${SCBI_TAR_VARIANT}

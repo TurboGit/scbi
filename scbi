@@ -35,7 +35,7 @@ function check-tools()
 {
     local res=0
 
-    while [[ "$1" != "" ]]; do
+    while [[ -n $1 ]]; do
         check-tool $1
         res=$(($res + $?))
         shift
@@ -225,7 +225,7 @@ function module-wrapper()
         dvariant=" [${VARIANT//./ }]"
     fi
 
-    if [[ $STEP = "build" && "$BUILD_SCBI_TARGET" != "" ]]; then
+    if [[ $STEP = "build" ]] && [[ -n $BUILD_SCBI_TARGET ]]; then
         mstep=build-$BUILD_SCBI_TARGET
     else
         mstep=$STEP
@@ -654,7 +654,7 @@ function is-module-up-to-date()
 
     if [[ $rbid -gt 0 ]]                  ||
            [[ $rsid -gt 0 ]]              ||
-           [[ "$mver" = "" ]]             ||
+           [[ -z $mver ]]                 ||
            [[ "$mver" = $VERSION_ERROR ]] ||
            [[ $cver == 0 ]];
     then
@@ -1484,7 +1484,7 @@ function handle-module()
 
     local FCT=$(get-hook $module $variant prefix)
 
-    if [[ "$FCT" != "" ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
+    if [[ -n $FCT ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
         _IDIR=$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
                      $SCBI_TARGET $variant)
     else
@@ -1868,13 +1868,13 @@ fi
 
 [[ -n $SCBI_PLAN_CL ]] && SCBI_PLAN=$SCBI_PLAN_CL
 
-[[ "$SCBI_MODULES" = "" ]] &&
+[[ -z $SCBI_MODULES ]] &&
     [[ $DO_SHELL != no ]] &&
     [[ $DO_RUN != no ]] &&
     [[ $DO_STAT == no ]] &&
     echo "error: shell/run commands need a plug-in, see scbi --help" && exit 0
 
-[[ "$SCBI_MODULES" = "" ]] && [[ $DO_STAT == no ]] && [[ $DO_MOD_VER == no ]] &&
+[[ -z $SCBI_MODULES ]] && [[ $DO_STAT == no ]] && [[ $DO_MOD_VER == no ]] &&
     usage && exit 0
 
 [[ $DO_HELP == yes ]] && usage && exit 0
@@ -1882,7 +1882,7 @@ fi
 [[ $DO_STAT != no ]] &&
     display-stat
 
-[[ "$SCBI_MODULES" = "" ]] || [[ $DO_STAT == yes ]] &&
+[[ -z $SCBI_MODULES ]] || [[ $DO_STAT == yes ]] &&
     display-modules && display-plans
 
 [[ $DO_STAT == yes ]] &&
