@@ -243,20 +243,27 @@ function handle-auto-variant()
 #
 #
 
-function display-build-plan()
+function _internal_list-build-plan()
 {
-    echo "There is ${#MODVER[*]} module(s) in the plan"
+    local module=""
+
     for module in ${!MODVER[*]}; do
         local FM=${module%=*}
-        if [[ $FM != $module ]]; then
-            echo @for $FM use ${MODVER[$module]}
+        if [[ "$FM" != "$module" ]]; then
+            echo "@for $FM use ${MODVER[$module]}"
         else
-            echo ${MODVER[$module]}
+            echo "${MODVER[$module]}"
         fi
     done
 }
 
-############################## display-build-plan
+function display-build-plan()
+{
+    echo "There is ${#MODVER[*]} module(s) in the plan"
+    _internal_list-build-plan
+}
+
+############################## record-build-plan
 #
 #
 
@@ -267,11 +274,8 @@ function record-build-plan()
 
     local PLAN=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/.log/build-plan
 
-    echo "# build plan" > $PLAN
-
-    for mod in ${!MODVER[*]}; do
-        echo ${MODVER[$mod]} >> $PLAN
-    done
+    echo "# build plan"        > $PLAN
+    _internal_list-build-plan >> $PLAN
 }
 
 ############################## set-module-ref
