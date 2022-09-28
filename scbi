@@ -1032,6 +1032,31 @@ function handle-meta-module()
     line-sep
 }
 
+############################## record-module-env
+
+function record-module-env()
+{
+    local MODULE=$1
+    local VARIANT=$2
+
+    local ENVLOG=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-$VARIANT-env.log
+
+    echo "==================== env " > $ENVLOG
+    env >> $ENVLOG
+
+    [[ -n $(command -v gprls 2> /dev/null) ]] &&
+        {
+            echo "==================== gprls " >> $ENVLOG
+            gprls -v 2>&1 >> $ENVLOG
+        }
+
+    [[ -n $(command -v gcc 2> /dev/null) ]] &&
+        {
+            echo "==================== gcc " >> $ENVLOG
+            gcc -v &>> $ENVLOG
+        }
+}
+
 ############################## handle-module
 
 function handle-module()
@@ -1099,8 +1124,6 @@ function handle-module()
     #  Create module build directory
 
     mkdir -p $SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log > $log 2>&1
-
-    record-build-plan $module $variant
 
     #  Check if meta-module, if so call handle-module for each one
 
@@ -1215,31 +1238,11 @@ function handle-module()
             target-env $SCBI_BDIR/install $SCBI_TARGET
         fi
 
-        #  Setup the build environment for the current module
-
-        SCBI_ENV_MODULE=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/env.cmd
-        rm -f $SCBI_ENV_MODULE
-
-        declare -A SCBI_MODULES_DIR=()
-
-        if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]]; then
-            #  Exports all environment variables starting with SCBI_
-            echo                          >> $SCBI_ENV_MODULE
-            echo "# SCBI global settings" >> $SCBI_ENV_MODULE
-
-            env | grep "^SCBI_" | tr '=' ' ' | while read NAME VALUE; do
-                case $NAME in
-                    SCBI_JOBS|SCBI_HALF_JOBS)
-                        echo export $NAME=\${$NAME:-$VALUE}
-                        ;;
-                    *)
-                        echo export $NAME=\'$VALUE\'
-                        ;;
-                esac >> $SCBI_ENV_MODULE
-            done
-        fi
-
         handle-build-depends-env $FORMODULE $MODREF
+
+        ENVTMP="$(mktemp -p /dev/shm/)"
+        SCBI_ENV_MODULE=$ENVTMP
+        declare -A SCBI_MODULES_DIR=()
 
         handle-module-env $FORMODULE $MODREF build-env >> $SCBI_ENV_MODULE
 
@@ -1247,41 +1250,7 @@ function handle-module()
 
         handle-env $FORMODULE $MODREF
 
-        # Generate the SCBI_MODULES_DIR associative array
-        {
-            echo
-            echo "# SCBI_MODULES_DIR"
-            echo "declare -A SCBI_MODULES_DIR=("
-
-            for D in ${!SCBI_MODULES_DIR[@]}; do
-                local V="${SCBI_MODULES_DIR[$D]}"
-                local V=${V/$SCBI_TARGET/\$SCBI_TARGET}
-                echo "  [\"$D\"]=\"\$SCBI_BDIR${V#$SCBI_BDIR}\""
-            done
-
-            echo ")"
-        } >> $SCBI_ENV_MODULE
-
-        SCBI_ENV_MODULE=
-
-        #  Log module enviroment
-
-        ENVLOG=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$module-$variant-env.log
-
-        echo "==================== env " > $ENVLOG
-        env >> $ENVLOG
-
-        [[ -n $(command -v gprls 2> /dev/null) ]] &&
-            {
-                echo "==================== gprls " >> $ENVLOG
-                gprls -v 2>&1 >> $ENVLOG
-            }
-
-        [[ -n $(command -v gcc 2> /dev/null) ]] &&
-            {
-                echo "==================== gcc " >> $ENVLOG
-                gcc -v &>> $ENVLOG
-            }
+        unset SCBI_ENV_MODULE
 
         #  We need to remove the link/sources to ensure proper setting by
         #  the module.
@@ -1324,6 +1293,55 @@ function handle-module()
             fi
 
         else
+            #  Recood the build-plan
+
+            record-build-plan $module $variant
+
+            #  Log module enviroment
+
+            record-module-env $module $variant
+
+            #  Setup the build environment for the current module
+
+            SCBI_ENV_MODULE=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/env.cmd
+            rm -f $SCBI_ENV_MODULE
+
+            if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]]; then
+                #  Exports all environment variables starting with SCBI_
+                echo                          >> $SCBI_ENV_MODULE
+                echo "# SCBI global settings" >> $SCBI_ENV_MODULE
+
+                env | grep "^SCBI_" | tr '=' ' ' | while read NAME VALUE; do
+                    case $NAME in
+                        SCBI_JOBS|SCBI_HALF_JOBS)
+                            echo export $NAME=\${$NAME:-$VALUE}
+                            ;;
+                        *)
+                            echo export $NAME=\'$VALUE\'
+                            ;;
+                    esac >> $SCBI_ENV_MODULE
+                done
+            fi
+
+            cat $ENVTMP >> $SCBI_ENV_MODULE
+
+            # Generate the SCBI_MODULES_DIR associative array
+            {
+                echo
+                echo "# SCBI_MODULES_DIR"
+                echo "declare -A SCBI_MODULES_DIR=("
+
+                for D in ${!SCBI_MODULES_DIR[@]}; do
+                    local V="${SCBI_MODULES_DIR[$D]}"
+                    local V=${V/$SCBI_TARGET/\$SCBI_TARGET}
+                    echo "  [\"$D\"]=\"\$SCBI_BDIR${V#$SCBI_BDIR}\""
+                done
+
+                echo ")"
+            } >> $SCBI_ENV_MODULE
+
+            unset SCBI_ENV_MODULE
+
             #  If install is requested and we already have a local install
             #  directory, clean it to ensure no old versions are installed
             #  into the same location.
@@ -1348,6 +1366,8 @@ function handle-module()
                 rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id
             fi
         fi
+
+        rm -f $ENVTMP
 
         for step in $STEPS; do
             #  If test step (last step for a module) ensure that the
