@@ -6,7 +6,7 @@ RUNS ./scbi -f test60
 
 RUNS grep -h '@@@' .root/builds/test60/build/.log/config.log
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 @@@OPT1=
 @@@OPT2=
 @@@OPT3=native
@@ -20,7 +20,7 @@ RUNS ./scbi -f --enable-safe-arch test60
 
 RUNS grep -h '@@@' .root/builds/test60/build/.log/config.log
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 @@@OPT1=yes
 @@@OPT2=amd
 @@@OPT3=i686

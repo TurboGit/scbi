@@ -68,7 +68,7 @@ EOF
 
 RUNS grep -h '@@@' .root/builds/.logs/*test19*config*
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 @@@ ALT/CONFIG  test19/x86_64-linux-gnu-alt/src
 @@@ ALT/POST-CONFIG  test19/x86_64-linux-gnu-alt/src
 @@@ CONFIG  test19/x86_64-linux-gnu-default/src
@@ -77,14 +77,14 @@ EOF
 
 RUNS grep -h '@@@' .root/builds/.logs/*test19*setup*
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 @@@ ALT/PRE-SETUP  test19
 @@@ PRE-SETUP  test19
 EOF
 
 RUNS grep -h '@@@' .root/builds/.logs/*test19*build*
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 @@@ BUILD  test19/x86_64-linux-gnu-alt/src
 @@@ POST-BUILD  test19/x86_64-linux-gnu-alt/src
 @@@ PRE-BUILD  test19/x86_64-linux-gnu-alt/src
@@ -95,7 +95,7 @@ EOF
 
 RUNS grep -h '@@@' .root/builds/.logs/*test19*install*
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 @@@ ALT/INSTALL  test19/x86_64-linux-gnu-alt/src
 @@@ POST-INSTALL  test19/x86_64-linux-gnu-alt/src
 @@@ PRE-INSTALL  test19/x86_64-linux-gnu-alt/src
@@ -105,7 +105,7 @@ EOF
 
 RUNS grep -h '@@@' .root/builds/.logs/*test19*wrapup*
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 @@@ ALT/POST-WRAPUP  test19
 @@@ ALT/WRAPUP  test19
 @@@ PRE-WRAPUP  test19

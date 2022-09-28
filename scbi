@@ -279,9 +279,14 @@ function module-wrapper()
             #  We want the status of the first command and not the tee ones
             res=${PIPESTATUS[0]}
         else
-            $MODULE-$mstep $PREFIX $SCBI_TARGET $VARIANT 2>&1 \
-                | tee $mlog >> $log
-            #  We want the status of the first command and not the tee ones
+            {
+                PS4="_TRACE: "
+                set -o xtrace
+                $MODULE-$mstep $PREFIX $SCBI_TARGET $VARIANT
+                res=$?
+                set +o xtrace
+                return $res
+            } 2>&1 | tee $mlog &>> $log
             res=${PIPESTATUS[0]}
         fi
 
@@ -289,7 +294,7 @@ function module-wrapper()
 
         if [[ $res -ne 0 ]]; then
             if [[ $SCBI_DLOG = on-failure ]] && [[ "$STEP" != "tests" ]]; then
-                tail -100 $mlog
+                tail -100 $mlog | grep -v "^_TRACE: "
             fi
             elog $MODULE $mstep failed with error $res
 

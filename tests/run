@@ -45,6 +45,7 @@ function sort-osht-output-but-first-line()
 function clean-up-osht-input()
 {
     sed 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;}'
+    sed -i "/_[_]*TRACE:/d" ${OSHT_STDIO}
 }
 
 function CLEAN-DIFF()

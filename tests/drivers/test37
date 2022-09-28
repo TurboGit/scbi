@@ -21,7 +21,7 @@ OK -f .root/builds/test37/build/.log/test17
 
 RUNS cat .root/builds/.logs/*test37*config.log
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 in config (overriding)
 # ROOT_DIR /this/is/it
 # ABC_ROOT /perfect/here
@@ -31,7 +31,7 @@ EOF
 
 RUNS cat .root/builds/.logs/*test37*build.log
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 in build
 ROOT_DIR /this/is/it
 ABC_ROOT /perfect/here
@@ -41,7 +41,7 @@ EOF
 
 RUNS cat .root/builds/.logs/*test37*install.log
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 in install (overriding)
 EOF
 
@@ -57,7 +57,7 @@ declare -fx define-var
 
 RUNS source .root/builds/test37/build/.log/env.cmd
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 ADD ROOT_DIR /this/is/it
 ADD ROOT_DIR /this/is/it
 ADD ROOT_DIR /this/is/it

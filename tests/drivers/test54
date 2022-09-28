@@ -1,5 +1,7 @@
 # Check handling of parameters with spaces & get-config-options
 
+MDIR=.root/builds/mspace
+
 # ========== OPT-A
 RUNS ./scbi mspace/opta
 
@@ -13,9 +15,9 @@ xxxx/xx/xx xx:xx:xx : opta-config completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [opta] (master)
 EOF
 
-RUNS cat .root/builds/mspace/x86_64-linux-gnu-opta/.log/opta-config.log
+RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-opta/.log/opta-config.log
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 A one
 B two
 C -DLIB=-L/usr/lib -lmpi_cxx -lmpi
@@ -34,9 +36,9 @@ xxxx/xx/xx xx:xx:xx : optb-config completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [optb] (master)
 EOF
 
-RUNS cat .root/builds/mspace/x86_64-linux-gnu-optb/.log/optb-config.log
+RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-optb/.log/optb-config.log
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 A one
 B two
 C -DLIB=-lz1 -lz2 -lz3
@@ -55,9 +57,9 @@ xxxx/xx/xx xx:xx:xx : opta-config [opta optb] completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [opta optb] (master)
 EOF
 
-RUNS cat .root/builds/mspace/x86_64-linux-gnu-opta.optb/.log/opta-config.log
+RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-opta.optb/.log/opta-config.log
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 A one
 B two
 C -DLIB=-L/usr/lib -lmpi_cxx -lmpi
@@ -77,9 +79,9 @@ xxxx/xx/xx xx:xx:xx : optb-config [optb opta] completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [optb opta] (master)
 EOF
 
-RUNS cat .root/builds/mspace/x86_64-linux-gnu-optb.opta/.log/optb-config.log
+RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-optb.opta/.log/optb-config.log
 
-DIFF <<EOF
+CLEAN-DIFF <<EOF
 A one
 B two
 C -DLIB=-lz1 -lz2 -lz3
