@@ -294,7 +294,7 @@ function module-wrapper()
 
         if [[ $res -ne 0 ]]; then
             if [[ $SCBI_DLOG = on-failure ]] && [[ "$STEP" != "tests" ]]; then
-                tail -100 $mlog | grep -v "^_TRACE: "
+                tail -100 $mlog | grep -v "^_[_]*TRACE: "
             fi
             elog $MODULE $mstep failed with error $res
 
