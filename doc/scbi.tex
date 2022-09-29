@@ -1599,6 +1599,8 @@ Then one of the configuration commands above can be restarted. \emph{When the fi
 
 Again, note that restarting an SCBI command without specifying a specific step (like \ddash{config} or \ddash{build}) will reset all sources from the reference repository in the sandbox.
 
+It is possible to replay the configure, build or install step just by running the corresponding \code{.cmd} file. Use the Bash \code{-x} option to display the commands as they are executed.
+
 \subsubsection{Look at the sandbox status}
 
 The SCBI driver does record all needed information in the sandbox directory \file{<module>/build/.log/}.
@@ -1615,7 +1617,7 @@ The files created in this directory are:
 	\item[install.log] \tabto{3cm} The full log issued during the installation.
 \end{description}
 
-It is possible to replay the configure, build or install step just by running the corresponding \code{.cmd} file. Use the Bash \code{-x} option to display the commands as they are executed.
+In all the log files one can find a trace of every command executed. All trace line are prefixed with \code{\_TRACE:}. The \file{config.log} contains the full command used to configure the module and the \file{build.log} the full command used to build the module.
 
 As an example, the build command file for \code{c-cmake} plug-in looks like this:
 
