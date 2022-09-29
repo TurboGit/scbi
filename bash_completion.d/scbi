@@ -11,7 +11,7 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 --list-plan --version --clean-install --log:yes --log:no --log:on-failure
 --store --stat --stat:full --module-version"
 
-_SCBI_HOOKS="tar|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|config-options|modules"
+_SCBI_HOOKS="((pre|post)-)?(cross-)?(tar|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|config-options|modules|version)"
 
 _gnat_targets()
 {
@@ -115,13 +115,17 @@ _scbi_store_key()
 _scbi_variants()
 {
     local mod=$1
+    local cur=$2
     local IFS=$'\n'
 
+    # Remove current variants from the completing list
+    [[ -z $cur ]] && cur="@noname@" || cur="${cur//./|}"
+
     for v in $(grep "function $mod-*" ~/.config/scbi/$mod | \
-                   sed "s/function $mod-//g;s/()//g;s/cross-//g" | \
+                   sed "s/function $mod-//g;s/()//g" | \
                    sed -r "s/${_SCBI_HOOKS}//g" | \
                    tr '-' '\n' | sort | uniq | \
-                   grep -v common | grep -v default);
+                   grep -v common | grep -v -E "$cur");
     do
         printf %s$'\n' $v
     done
@@ -169,8 +173,8 @@ _scbicomp()
 _scbi()
 {
     COMPREPLY=()
-    cur=$(_get_cword =:)
-    prev=${COMP_WORDS[COMP_CWORD-1]}
+    local cur=$(_get_cword =:)
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
 
     case "$cur" in
         --target=*)
@@ -206,10 +210,17 @@ _scbi()
             return 0
             ;;
         */*)
-            mod=${cur%/*}
+            local mod=${cur%/*}
             if [[ -f $HOME/.config/scbi/$mod ]]; then
-                curdef=${cur##*/}
-                _scbicomp "$(_scbi_variants "$mod")" "$mod/" "${curdef}"
+                local curdef=${cur##*/}
+                local curv=""
+                local ccurv=""
+                if [[ ${curdef/./} != ${curdef} ]]; then
+                    local curv=${curdef%.*}
+                    local curdef=${curdef##*.}
+                    local ccurv="${curv}."
+                fi
+                _scbicomp "$(_scbi_variants "$mod" "$curv")" "$mod/${ccurv}" "${curdef}"
             fi
             return 0
             ;;
