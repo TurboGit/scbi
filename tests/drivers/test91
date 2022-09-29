@@ -1,0 +1,29 @@
+#  Check for --prefix & --build-dir
+
+RUNS ./scbi --prefix=$PWD/inst lib1
+
+OK -d $PWD/inst
+OK -f $PWD/inst/lib/liblib1.so
+OK -f $PWD/inst/include/lib1.h
+
+rm -fr $PWD/inst
+
+RUNS ./scbi --build-dir=$PWD/sb lib1
+
+OK -d $PWD/sb
+OK -d $PWD/sb/lib1
+OK -f $PWD/sb/lib1/source-id
+OK -d $PWD/sb/install
+
+rm -fr sb
+
+RUNS ./scbi --build-dir=$PWD/sbnew --prefix=$PWD/here lib1
+
+OK -d $PWD/sbnew
+OK -d $PWD/sbnew/lib1
+OK -f $PWD/sbnew/lib1/source-id
+NOK -d $PWD/sbnew/install
+OK -d $PWD/here
+
+rm -fr sbnew
+rm -fr here
