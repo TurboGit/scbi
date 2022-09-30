@@ -357,7 +357,7 @@ function _internal_get-branch()
                 git-branch $VCS_PROXY $VCS_OPTIONS \
                     $MODULE $REF "$VCS_DIR" >> $log 2>&1
 
-                if [[ ! $? = 0 ]]; then
+                if [[ $? != 0 ]]; then
                     ilog build "error: cannot switch to branch $REF"
                     exit 1
                 fi
@@ -369,7 +369,7 @@ function _internal_get-branch()
                 hg-branch $VCS_PROXY $VCS_OPTIONS \
                     $MODULE $REF "$VCS_DIR" >> $log 2>&1
 
-                if [[ ! $? = 0 ]]; then
+                if [[ $? != 0 ]]; then
                     ilog build "error: cannot switch to branch $REF"
                     exit 1
                 fi
@@ -381,7 +381,7 @@ function _internal_get-branch()
                 svn-branch $VCS_PROXY $VCS_OPTIONS \
                     $MODULE $REF "$VCS_DIR" >> $log 2>&1
 
-                if [[ ! $? = 0 ]]; then
+                if [[ $? != 0 ]]; then
                     ilog build "error: cannot switch to branch $REF"
                     exit 1
                 fi
@@ -462,7 +462,7 @@ function get-vcs()
             git-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
                    $module "$VCS_DIR" >> $log 2>&1
 
-            if [[ ! $? = 0 ]]; then
+            if [[ $? != 0 ]]; then
                 check-tool git
                 if [[ $? == 0 ]]; then
                     ilog build "error: cannot get sources from $VCS_URL"
@@ -478,7 +478,7 @@ function get-vcs()
             hg-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
                   $module "$VCS_DIR" >> $log 2>&1
 
-            if [[ ! $? = 0 ]]; then
+            if [[ $? != 0 ]]; then
                 check-tool hg
                 if [[ $? == 0 ]]; then
                     ilog build "error: cannot get sources from $VCS_URL"
@@ -494,7 +494,7 @@ function get-vcs()
             svn-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
                    $module "$VCS_DIR" >> $log 2>&1
 
-            if [[ ! $? = 0 ]]; then
+            if [[ $? != 0 ]]; then
                 check-tool svn
                 if [[ $? == 0 ]]; then
                     ilog build "error: cannot get sources from $VCS_URL"

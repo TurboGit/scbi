@@ -56,7 +56,7 @@ function module-patch()
     if [[ -n $PATCHES ]]; then
         for patch in $PATCHES; do
             module-apply-patch $module "$patch"
-            [[ ! $? = 0 ]] && res=1
+            [[ $? != 0 ]] && res=1
         done
     fi
 

@@ -730,7 +730,7 @@ function check-tar-exists()
 
     local tar=( $(get-tar-data $MODULE $VARIANT $VERSION) )
 
-    if [[ ! $? = 0 ]]; then
+    if [[ $? != 0 ]]; then
         return 1
     fi
 

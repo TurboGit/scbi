@@ -811,7 +811,7 @@ function handle-sources()
     if [[ $kind == VERSION ]]; then
         local tar=( $(get-tar-data $module $variant $ref) )
 
-        if [[ ! $? = 0 ]]; then
+        if [[ $? != 0 ]]; then
             echo "error: $module-tar function not defined, cannot get tarball"
             exit 1
         fi
@@ -835,7 +835,7 @@ function handle-sources()
 
             get-tar $module $variant $ref >> $log 2>&1
 
-            if [[ ! $? = 0 ]]; then
+            if [[ $? != 0 ]]; then
                 ilog $module cannot get/find tar sources
                 exit 1
             fi
@@ -925,7 +925,7 @@ function handle-sources()
 
                     get-vcs $SCBI_PREFIX $SCBI_TARGET $FORMODULE $MODREF
 
-                    if [[ ! $? = 0 ]]; then
+                    if [[ $? != 0 ]]; then
                         exit 1
                     fi
                 else
@@ -1148,7 +1148,7 @@ function handle-module()
                 handle-depends $MODREF $dmodule
             done
         )
-        if [[ ! $? = 0 ]]; then
+        if [[ $? != 0 ]]; then
             exit 1
         fi
         [[ $DRY_RUN == no ]] && line-sep
@@ -1159,7 +1159,7 @@ function handle-module()
                 handle-depends $MODREF $dmodule
             done
         )
-        if [[ ! $? = 0 ]]; then
+        if [[ $? != 0 ]]; then
             exit 1
         fi
         [[ $DRY_RUN == no ]] && line-sep
@@ -1174,7 +1174,7 @@ function handle-module()
                         handle-depends $MODREF $dmodule
                     done
                 )
-                if [[ ! $? = 0 ]]; then
+                if [[ $? != 0 ]]; then
                     exit 1
                 fi
                 [[ $DRY_RUN == no ]] && line-sep
@@ -1264,7 +1264,7 @@ function handle-module()
 
         handle-sources $FORMODULE $MODREF
 
-        [[ ! $? = 0 ]] && exit 1
+        [[ $? != 0 ]] && exit 1
 
         #  Check if envrionment is to be done for out-of-tree build
 
@@ -1536,7 +1536,7 @@ function handle-module()
 
         if [[ ! -d ${_IDIR} ]]; then
             mkdir -p ${_IDIR} &> /dev/null
-            [[ ! $? = 0 ]] && SUDO=sudo
+            [[ $? != 0 ]] && SUDO=sudo
         fi
 
         if [[ ! -w ${_IDIR} ]]; then

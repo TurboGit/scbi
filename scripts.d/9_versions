@@ -324,7 +324,7 @@ function check-auto-variant()
 
             fn-exists $MODULE-native-depends
 
-            if [[ ! $? = 0 ]]; then
+            if [[ $? != 0 ]]; then
                 #  Fatal error, stop now
                 exit 2
             fi
