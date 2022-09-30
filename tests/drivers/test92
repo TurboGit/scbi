@@ -1,0 +1,91 @@
+#  Check scbi-lint
+
+RUNS ./scbi-lint scripts.d/lib2
+
+DIFF <<EOF
+
+========== Handle scripts.d/lib2
+
+Check hooks naming:
+
+Plug-in variants:
+
+Check parameters:
+   warning: (lib2-build-env) VARIANT not declared
+   warning: (lib2-env) VARIANT not declared
+   warning: (lib2-out-of-tree) PREFIX not declared
+   warning: (lib2-out-of-tree) TARGET not declared
+   warning: (lib2-out-of-tree) VARIANT not declared
+   warning: (lib2-variant1-config) VARIANT not declared
+   warning: (lib2-config) VARIANT not declared
+   warning: (lib2-build) VARIANT not declared
+   warning: (lib2-install) VARIANT not declared
+   warning: (lib2-tests) VARIANT not declared
+EOF
+
+NRUNS ./scbi-lint scripts.d/wrong
+
+DIFF <<EOF
+
+========== Handle scripts.d/wrong
+
+Check hooks naming:
+   warning: (this-is-not-a-hook) not a hook of plug-in wrong
+   warning: (wrong-this-is-not-a-hook2) not a hook of plug-in wrong
+
+Plug-in variants:
+   boggus
+   myvar
+   nok
+   nok2
+   ok
+   opt
+   par
+
+Check parameters:
+   error:   (wrong-build) PREFIX should be \$1
+   warning: (wrong-build) TARGET not declared
+   warning: (wrong-build) VARIANT not declared
+   error:   (wrong-install) VARIANT should be \$3
+   error:   (wrong-myvar-install) VARIANT should be \$3
+   error:   (wrong-post-install) VARIANT used but not declared
+   error:   (wrong-vcs) should return 4 or 5 values
+   error:   (wrong-boggus-vcs) wrong definition, no result returned
+   warning: (wrong-par-vcs) does not require parameters
+   warning: (wrong-opt-vcs) does not require parameters
+   warning: (wrong-nok-vcs) does not require parameters
+   error:   (wrong-nok-vcs) should return 4 or 5 values
+   warning: (wrong-tar) VERSION not declared
+   error:   (wrong-tar) should return 5 values
+   warning: (wrong-ok-tar) VERSION not declared
+   error:   (wrong-nok-tar) VERSION should be \$1
+   error:   (wrong-nok-tar) should return 5 values
+   error:   (wrong-nok-patches) KIND used but not declared
+   error:   (wrong-nok-patches) REF should be \$5
+   warning: (wrong-nok2-patches) KIND not declared
+   warning: (wrong-nok2-patches) superfluous empty definition
+EOF
+
+NRUNS ./scbi-lint -e scripts.d/wrong
+
+DIFF <<EOF
+   error:   (wrong-build) PREFIX should be \$1
+   error:   (wrong-install) VARIANT should be \$3
+   error:   (wrong-myvar-install) VARIANT should be \$3
+   error:   (wrong-post-install) VARIANT used but not declared
+   error:   (wrong-vcs) should return 4 or 5 values
+   error:   (wrong-boggus-vcs) wrong definition, no result returned
+   error:   (wrong-nok-vcs) should return 4 or 5 values
+   error:   (wrong-tar) should return 5 values
+   error:   (wrong-nok-tar) VERSION should be \$1
+   error:   (wrong-nok-tar) should return 5 values
+   error:   (wrong-nok-patches) KIND used but not declared
+   error:   (wrong-nok-patches) REF should be \$5
+EOF
+
+NRUNS ./scbi-lint -e scripts.d/wrong2
+
+DIFF <<EOF
+   error:   (cpwrong2-build) not a hook of plug-in wrong2
+   error:   (wrong2-install) VARIANT should be \$3
+EOF

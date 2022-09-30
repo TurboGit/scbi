@@ -1,0 +1,135 @@
+
+function wrong-vcs()
+{
+    echo 1
+    echo 2
+    echo 3
+}
+
+function wrong-boggus-vcs()
+{
+    true
+}
+
+function wrong-par-vcs()
+{
+    local PREFIX=$1
+
+    echo 1
+    echo 2
+    echo 3
+    echo 4
+}
+
+function wrong-opt-vcs()
+{
+    local PREFIX=$1
+
+    echo 1
+    echo 2
+    echo 3
+    echo 4
+    echo 5
+}
+
+function wrong-nok-vcs()
+{
+    local PREFIX=$1
+
+    echo 1
+    echo 2
+    echo 3
+    echo 4
+    echo 5
+    echo 6
+}
+
+function wrong-tar()
+{
+    echo 1
+    echo 2
+    echo 3
+}
+
+function wrong-ok-tar()
+{
+    echo 1
+    echo 2
+    echo 3
+    echo 4
+    echo 5
+}
+
+function wrong-nok-tar()
+{
+    local VERSION=$6
+    echo 1
+    echo 2
+    echo 3
+}
+
+function wrong-ok-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+    local KIND=$4
+    local REF=$5
+
+    [[ -f toto ]] && echo this-patch.diff
+}
+
+function wrong-nok-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+    local REF=$3
+
+    [[ $KIND == "true" ]] && echo this.diff
+}
+
+function wrong-nok2-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+    local REF=$5
+}
+
+function wrong-build()
+{
+    local PREFIX=$2
+}
+
+function wrong-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$4
+}
+
+function wrong-myvar-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$4
+}
+
+function wrong-post-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo $VARIANT
+}
+
+function this-is-not-a-hook()
+{
+    true
+}
+
+function wrong-this-is-not-a-hook2()
+{
+    false
+}
