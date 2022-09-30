@@ -39,7 +39,7 @@ function c-gpr-env()
     add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
-function do-config()
+function do-gconfig()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -61,7 +61,7 @@ function c-gpr-debug-config()
     local PREFIX=$1
     local TARGET=$2
 
-    do-config $PREFIX $TARGET "BUILD=debug"
+    do-gconfig $PREFIX $TARGET "BUILD=debug"
 }
 
 function c-gpr-config()
@@ -69,7 +69,7 @@ function c-gpr-config()
     local PREFIX=$1
     local TARGET=$2
 
-    do-config $PREFIX $TARGET "BUILD=release"
+    do-gconfig $PREFIX $TARGET "BUILD=release"
 }
 
 function c-gpr-build()

@@ -87,6 +87,7 @@ function c-aws-cross-config()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
     local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
 
