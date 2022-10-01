@@ -1,0 +1,51 @@
+
+function c-librest-vcs()
+{
+    echo none
+    echo none
+    echo git
+    echo https://gitlab.gnome.org/GNOME/librest.git
+}
+
+function c-librest-out-of-tree()
+{
+    echo false
+}
+
+function c-librest-depends()
+{
+    echo libsoup-3.0-dev
+    echo python3-typogrify
+}
+
+function c-librest-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    meson _build --prefix=$PREFIX -Dexamples=false
+}
+
+function c-librest-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ninja -j$SCBI_JOBS -C _build
+}
+
+function c-librest-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    meson install -C _build
+}
+
+function c-librest-prefix()
+{
+    echo NONE
+}
