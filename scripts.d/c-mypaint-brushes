@@ -14,6 +14,9 @@ function c-mypaint-brushes-out-of-tree()
 
 function c-mypaint-brushes-env()
 {
+    local PREFIX=$1
+    local TARGET=$2
+
     system-compiler
     add-to-var PKG_CONFIG_PATH $PREFIX/share/pkgconfig
 }

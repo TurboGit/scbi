@@ -1,0 +1,364 @@
+#!/bin/bash
+
+SCBI_VERSION=@VERSION@
+
+DO_HELP=no
+DO_WARNING=yes
+
+SCBI_PLUGINS=""
+
+function usage()
+{
+    echo
+    echo SCBI-LINT $SCBI_VERSION
+    echo
+    echo $0 [options] plug-in1 [plug-in2...]
+
+    echo ""
+    echo "   -h | --help             this help message"
+    echo "   -v | --version          display driver & plug-ins versions"
+    echo "   -e | --error            report only errors"
+}
+
+ALLOPTS=$(getopt -u -o ehv -l error,help,version -- $*)
+
+set -- $ALLOPTS
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            DO_HELP=yes
+            break
+            ;;
+        -v|--version)
+            DO_VERSION=yes
+            break
+            ;;
+        -e|--error)
+            DO_WARNING=no
+            ;;
+        (--)
+            ;;
+        (*)
+            SCBI_PLUGINS+=" $1"
+            ;;
+        (-*)
+            echo "$0: error - unrecognized option $1" 1>&2; exit 1
+            ;;
+    esac
+    shift
+done
+
+if [[ $DO_VERSION == "yes" ]]; then
+    echo "SCBI LINT : $SCBI_VERSION"
+    exit 0
+fi
+
+if [[ $DO_HELP == "yes" ]]; then
+    usage
+    exit 1
+fi
+
+SCBI_HOOKS="((pre|post)-)?(cross-)?(tar|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|setup|patches)"
+
+NOTHOOK=
+ERROR=0
+
+function wlog()
+{
+    local HOOK=$1
+    shift
+    local MESSAGE="$*"
+
+    [[ $DO_WARNING == yes ]] &&
+        echo "   warning: ($HOOK) $MESSAGE"
+}
+
+function elog()
+{
+    local HOOK=$1
+    shift
+    local MESSAGE="$*"
+
+    echo "   error:   ($HOOK) $MESSAGE"
+    ERROR=1
+}
+
+function check-hooks()
+{
+    local PLUGIN=$1
+    local PGNAME=$(basename $PLUGIN)
+
+    if [[ $DO_WARNING == "yes" ]]; then
+        echo
+        echo "Check hooks naming:"
+    fi
+
+    while read H; do
+        [[ -n $(echo $H | grep -v -E "\-$SCBI_HOOKS$") ]]
+        WRONG_NAME=$?
+
+        if [[ $WRONG_NAME == 0 ]] && [[ $DO_WARNING == "yes" ]]; then
+            wlog $H not a hook of plug-in $PGNAME
+
+        elif [[ $WRONG_NAME == 1 ]]; then
+            #  Furthermore, if it is not a hook but ends with an expected
+            #  hook name, flag it as an error.
+            elog $H not a hook of plug-in $PGNAME
+        fi
+        [[ -n $NOTHOOK ]] && NOTHOOK+="|"
+        NOTHOOK+=$H
+    done < <(cat $PLUGIN |
+                 grep "function" |
+                 sed 's/()//g' |
+                 grep -v -E "function $PGNAME-([a-zA-Z0-9]*-)?$SCBI_HOOKS$" |
+                 sed 's/function /  /g')
+}
+
+function list-variants()
+{
+    local PLUGIN=$1
+    local PGNAME=$(basename $PLUGIN)
+
+    echo
+    echo "Plug-in variants:"
+
+    cat $PLUGIN |
+        grep "function $PGNAME-" |
+        grep -v -E "function ($NOTHOOK)" |
+        grep -v -E "function $PGNAME-$SCBI_HOOKS" |
+        sed "s/function $PGNAME-//g;s/()//g" |
+        sed -r "s/-${SCBI_HOOKS}//g" |
+        grep -v common | sort | uniq |
+        grep -v "^$" |
+        sed 's/^/   /g'
+}
+
+function fn-exists()
+{
+    declare -f $1 > /dev/null
+}
+
+function get-hooks()
+{
+    local PLUGIN=$1
+    local NAMES="$2"
+
+    local PGNAME=$(basename $PLUGIN)
+
+    local REGEXP="((pre|post)-)?(cross-)?($NAMES)\(\)"
+
+    cat $PLUGIN |
+        grep -E "function $PGNAME-([a-zA-Z0-9]*-)?${REGEXP}$" |
+        sed 's/function //g;s/()//g'
+}
+
+function check-exists()
+{
+    local CONTENT=$1
+    local VAR=$2
+    local PATTERN=$3
+
+    if [[ -z $(grep "$PATTERN" $CONTENT) ]]; then
+        export $VAR="no"
+        return 1
+    else
+        export $VAR="yes"
+        return 0
+    fi
+}
+
+function ensure()
+{
+    local HOOK=$1
+    local HAS=$2
+    local VAL=$3
+    local USE=$4
+    local VAR=$5
+    local PARAM=$6
+
+    if [[ $HAS == "yes" ]]; then
+        if [[ $VAL = "no" ]]; then
+            elog "$HOOK" $VAR should be \$$PARAM
+        fi
+    else
+        if [[ $USE == "no" ]]; then
+            wlog $HOOK $VAR not declared
+        else
+            elog $HOOK $VAR used but not declared
+        fi
+    fi
+}
+
+function check-std-params()
+{
+    local HOOK=$1
+
+    TMP=$(mktemp)
+
+    type $HOOK > $TMP
+    check-exists $TMP HAS_PREFIX "PREFIX="
+    check-exists $TMP VAL_PREFIX "PREFIX=\$1"
+    check-exists $TMP USE_PREFIX "\$PREFIX"
+    ensure "$HOOK" $HAS_PREFIX $VAL_PREFIX $USE_PREFIX "PREFIX" "1"
+
+    check-exists $TMP HAS_TARGET "TARGET="
+    check-exists $TMP VAL_TARGET "TARGET=\$2"
+    check-exists $TMP USE_TARGET "\$TARGET"
+    ensure "$HOOK" $HAS_TARGET $VAL_TARGET $USE_TARGET "TARGET" "2"
+
+    check-exists $TMP HAS_VARIANT "VARIANT="
+    check-exists $TMP VAL_VARIANT "VARIANT=\$3"
+    check-exists $TMP USE_VARIANT "\$VARIANT"
+    ensure "$HOOK" $HAS_VARIANT $VAL_VARIANT $USE_VARIANT "VARIANT" "3"
+
+    rm -f $TMP
+}
+
+function check-vcs-params()
+{
+    local HOOK=$1
+
+    TMP=$(mktemp)
+
+    type $HOOK > $TMP
+    check-exists $TMP HAS_PARAM "\$1"
+
+    if [[ $HAS_PARAM == "yes" ]]; then
+        wlog $HOOK does not require parameters
+    fi
+
+    local n=$(grep -E " *echo " $TMP | wc -l)
+
+    if [[ "$n" == 0 ]]; then
+        elog $HOOK wrong definition, no result returned
+    elif [[ "$n" != 4 ]] && [[ "$n" != 5 ]]; then
+        elog $HOOK should return 4 or 5 values
+    fi
+
+    rm -f $TMP
+}
+
+function check-tar-params()
+{
+    local HOOK=$1
+
+    TMP=$(mktemp)
+
+    type $HOOK > $TMP
+
+    check-exists $TMP HAS_VERSION "VERSION="
+    check-exists $TMP VAL_VERSION "\$1"
+    check-exists $TMP USE_VERSION "\$VERSION"
+    ensure "$HOOK" $HAS_VERSION $VAL_VERSION $USE_VERSION "VERSION" "1"
+
+    local n=$(grep -E " *echo " $TMP | wc -l)
+
+    if [[ "$n" != 5 ]]; then
+        echo "   error:   ($HOOK) should return 5 values"
+    fi
+
+    rm -f $TMP
+}
+
+function check-patches-params()
+{
+    local HOOK=$1
+
+    check-std-params $HOOK
+
+    TMP=$(mktemp)
+
+    type $HOOK > $TMP
+
+    check-exists $TMP HAS_KIND "KIND="
+    check-exists $TMP VAL_KIND "\$4"
+    check-exists $TMP USE_KIND "\$KIND"
+    ensure "$HOOK" $HAS_KIND $VAL_KIND $USE_KIND "KIND" "4"
+
+    check-exists $TMP HAS_REF "REF="
+    check-exists $TMP VAL_REF "\$5"
+    check-exists $TMP USE_REF "\$REF"
+    ensure "$HOOK" $HAS_REF $VAL_REF $USE_REF "REF" "5"
+
+    local n=$(grep -E " echo " $TMP | wc -l)
+
+    if [[ "$n" == 0 ]]; then
+        wlog $HOOK superfluous empty definition
+    fi
+
+    rm -f $TMP
+}
+
+function check-params()
+{
+    local PLUGIN=$1
+    local PGNAME=$(basename $PLUGIN)
+
+    if [[ $DO_WARNING == "yes" ]]; then
+        echo
+        echo "Check parameters:"
+    fi
+
+    #  Standard parameters
+
+    HOOKS="build|config|install|config-options"
+    HOOKS+="|depends|build-depends|tests-depends"
+    HOOKS+="|env|build-env"
+    HOOKS+="|setup|wrapup"
+    HOOKS+="|prefix|out-of-tree|only-explicit-build|version|tests"
+
+    (
+        source $PLUGIN
+
+        while read H; do
+            check-std-params $H
+        done < <(get-hooks $PLUGIN "$HOOKS")
+
+        #  VCS parameters (no parameter)
+
+        while read H; do
+            check-vcs-params $H
+        done < <(get-hooks $PLUGIN "vcs")
+
+        #  TAR parameters
+
+        while read H; do
+            check-tar-params $H
+        done < <(get-hooks $PLUGIN "tar")
+
+        #  PATCHES parameters
+
+        while read H; do
+            check-patches-params $H
+        done < <(get-hooks $PLUGIN "patches")
+
+        return $ERROR
+    ) || ERROR=1
+}
+
+#  Import runtime for proper plugin loading
+source ~/.config/scbi/0_runtime
+
+#  Also add a fake cygpath when checking windows plug-ins
+
+function cygpath()
+{
+    true
+}
+
+for PLUGIN in $SCBI_PLUGINS; do
+    if [[ $DO_WARNING == "yes" ]]; then
+        echo
+        echo "========== Handle $PLUGIN"
+    fi
+
+    check-hooks $PLUGIN
+
+    [[ $DO_WARNING == "yes" ]] &&
+        list-variants $PLUGIN
+
+    check-params $PLUGIN
+done
+
+[[ $ERROR == 0 ]]

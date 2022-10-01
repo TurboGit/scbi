@@ -1484,7 +1484,9 @@ All keys are stored into the file \file{\$SCBI\_PLUGINS/.store} (if using the de
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
-\section{Completion support}
+\section{Support tools}
+
+\subsection{Completion support}
 \label{completion}
 \index{completion}
 
@@ -1493,6 +1495,29 @@ A script is provided to support bash completion for scbi. The script is \file{ba
 Note that for this to work, the bash completion package must be installed, on Debian based distributions this is achieved with:
 
 \cmd{apt install bash-completion}
+
+\subsection{Linter}
+\label{linter}
+\index{linter}
+
+The tool \code{scbi-lint} can be used to check for common plug-in errors.
+
+For example:
+
+\cmd{scbi-lint lcms2}
+
+It will report:
+
+\begin{itemize}
+	\item Function not recognized as hook name (warning),
+	\item Lists all variants,
+	\item Check that parameters \code{PREFIX}, \code{TARGET}, etc. are declared with proper parameter number,
+	\item Check that the number of expected parameters is correct,
+	\item Reports undeclared hook parameter (warning),
+	\item Reports parameters used but not declared (error).
+\end{itemize}
+
+The option \code{\ddash{}error} will only report errors.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 

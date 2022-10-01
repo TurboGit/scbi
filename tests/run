@@ -76,6 +76,7 @@ rm -f scripts.d/.store
 
 # copy scripts
 cp ../scbi .
+cp ../scbi-lint .
 cp ../scripts.d/0_runtime scripts.d/
 cp ../scripts.d/[1-9]* scripts.d/
 cp ../scripts.d/.pkgs-* scripts.d/
@@ -107,7 +108,7 @@ else
 fi
 cd ..
 
-PLAN 729
+PLAN 737
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR

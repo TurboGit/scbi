@@ -16,7 +16,9 @@ install: all
 all: clean.install
 	mkdir -p $(HOME)/bin $(HOME)/.bash_completion.d/
 	cat scbi | sed "s/@VERSION@/$(CORE_VER)/" > $(HOME)/bin/scbi
+	cat scbi-lint | sed "s/@VERSION@/$(CORE_VER)/" > $(HOME)/bin/scbi-lint
 	chmod u+x $(HOME)/bin/scbi
+	chmod u+x $(HOME)/bin/scbi-lint
 	mkdir -p $(SCRDIR)
 	rm -f $(SCRDIR)/*~ $(SCRDIR)/.*~ scripts.d/*~ scripts.d/.*~
 	cp -r scripts.d/* scripts.d/.[a-z]* $(SCRDIR)
@@ -35,6 +37,10 @@ clean.install:
 		rm -f $(SCRDIR)/.scbi_core_version.txt;    \
 	fi
 	rm -f $(HOME)/.bash_completion.d/scbi
+
+lint:
+	./scbi-lint --error scripts.d/c-*
+	echo No problem detected
 
 test:
 	make -C tests test

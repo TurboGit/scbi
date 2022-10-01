@@ -14,6 +14,9 @@ function c-libmypaint-out-of-tree()
 
 function c-libmypaint-env()
 {
+    local PREFIX=$1
+    local TARGET=$2
+
     system-compiler
     add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
 }
