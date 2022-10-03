@@ -695,10 +695,10 @@ function _internal_call-variant-hooks()
 
     shift 5
 
-    OLDIFS=$IFS
+    local IFS
     unset IFS
-
     local ALLVARS=$(all-variants $VARIANT)
+
     local VARFOUND=no
     local found=0
     local FCT=""
@@ -706,6 +706,8 @@ function _internal_call-variant-hooks()
     #  Always check the common hook, then the variants if defined
     #  or otherwise the default variant. Then if nothing found
     #  we call the main hook (no variant).
+
+    local v
 
     for v in common ${ALLVARS:-default}; do
         found=0
@@ -743,8 +745,6 @@ function _internal_call-variant-hooks()
 
         [[ $found == 1 ]] && $FCT $PREFIX $TARGET $VARIANT $*
     fi
-
-    IFS=$OLDIFS
 }
 
 ############################## call-variant-hooks
