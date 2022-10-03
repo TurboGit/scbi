@@ -338,7 +338,11 @@ function check-params()
 }
 
 #  Import runtime for proper plugin loading
-source $HOME/.config/scbi/0_runtime
+if [[ -f ./scripts.d/0_runtime ]]; then
+    source ./scripts.d/0_runtime
+else
+    source $HOME/.config/scbi/0_runtime
+fi
 
 #  Also add a fake cygpath when checking windows plug-ins
 
