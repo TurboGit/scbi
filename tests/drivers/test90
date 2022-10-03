@@ -1,41 +1,47 @@
 
 RUNS ./scbi --plan=autov --list-plan mautov
 
+sort-osht-output
+
 CLEAN-DIFF <<EOF
-2022/09/27 20:35:13 : module gcc version 5 matching
-2022/09/27 20:35:13 : module mautov using native variant
-2022/09/27 20:35:13 : module gcc version 99.99 not found
-2022/09/27 20:35:13 : mainav=mautov using standard variant
-2022/09/27 20:35:13 : module gcc version 99.99 not found
-2022/09/27 20:35:13 : mainav2=mautov using standard variant
-There is 3 module(s) in the plan
-mautov/native:5
+xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
+xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
+xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : module mautov using native variant
 @for mainav use mautov/mainav:99.99
 @for mainav2 use mautov/for2:99.99
+There is 3 module(s) in the plan
+mautov/native:5
 EOF
 
 RUNS ./scbi --plan=autov --list-plan mainav=mautov/new mautov
 
+sort-osht-output
+
 CLEAN-DIFF <<EOF
-2022/09/27 20:35:13 : module gcc version 5 matching
-2022/09/27 20:35:13 : module mautov using native variant
-2022/09/27 20:35:13 : module gcc version 99.99 not found
-2022/09/27 20:35:13 : mainav2=mautov using standard variant
-There is 3 module(s) in the plan
-mautov/native:5
+xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
+xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : module mautov using native variant
 @for mainav use mautov/new
 @for mainav2 use mautov/for2:99.99
+There is 3 module(s) in the plan
+mautov/native:5
 EOF
 
 RUNS ./scbi --plan=autov --list-plan mautov/new mautov
 
+sort-osht-output
+
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
 xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
-2022/09/27 20:35:13 : module gcc version 99.99 not found
-2022/09/27 20:35:13 : mainav2=mautov using standard variant
-There is 3 module(s) in the plan
-mautov/new
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
 @for mainav use mautov/mainav:99.99
 @for mainav2 use mautov/for2:99.99
+There is 3 module(s) in the plan
+mautov/new
 EOF
