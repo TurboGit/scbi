@@ -1,47 +1,50 @@
 
 RUNS ./scbi --plan=autov --list-plan mautov
 
+clean-up-osht-output
 sort-osht-output
 
-CLEAN-DIFF <<EOF
+DIFF <<EOF
+@for mainav use mautov/mainav:99.99
+@for mainav2 use mautov/for2:99.99
+There is 3 module(s) in the plan
+mautov/native:5
 xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
 xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
 xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
 xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
 xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
 xxxx/xx/xx xx:xx:xx : module mautov using native variant
-@for mainav use mautov/mainav:99.99
-@for mainav2 use mautov/for2:99.99
-There is 3 module(s) in the plan
-mautov/native:5
 EOF
 
 RUNS ./scbi --plan=autov --list-plan mainav=mautov/new mautov
 
+clean-up-osht-output
 sort-osht-output
 
-CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
-xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
-xxxx/xx/xx xx:xx:xx : module mautov using native variant
+DIFF <<EOF
 @for mainav use mautov/new
 @for mainav2 use mautov/for2:99.99
 There is 3 module(s) in the plan
 mautov/native:5
+xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
+xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : module mautov using native variant
 EOF
 
 RUNS ./scbi --plan=autov --list-plan mautov/new mautov
 
+clean-up-osht-output
 sort-osht-output
 
-CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
-xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+DIFF <<EOF
 @for mainav use mautov/mainav:99.99
 @for mainav2 use mautov/for2:99.99
 There is 3 module(s) in the plan
 mautov/new
+xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
+xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
+xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
 EOF
