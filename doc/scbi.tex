@@ -1403,13 +1403,11 @@ function mod-config()
 	local TARGET=$2
 	local VARIANT=$3
 
-	IFS=$'\n'
+	local IFS=$'\n'
 
 	local OPTIONS=($(get-config-options /usr lin $VARIANT))
 
 	cmake ${OPTIONS[*]} ../src
-
-	unset IFS
 }
 \end{lstlisting}
 

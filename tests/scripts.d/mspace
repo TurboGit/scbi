@@ -32,13 +32,11 @@ function mspace-opta-config()
     local TARGET=$2
     local VARIANT=$3
 
-    IFS=$'\n'
+    local IFS=$'\n'
 
     local OPTIONS=( $(get-config-options $PREFIX $TARGET $VARIANT) )
 
     display-opt ${OPTIONS[*]}
-
-    unset IFS
 }
 
 function mspace-optb-config()
@@ -47,13 +45,11 @@ function mspace-optb-config()
     local TARGET=$2
     local VARIANT=$3
 
-    IFS=$'\n'
+    local IFS=$'\n'
 
     local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
 
     display-opt $OPTIONS
-
-    unset IFS
 }
 
 function mspace-config()
