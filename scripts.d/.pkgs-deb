@@ -65,6 +65,7 @@ os@-heif-dev                        libheif-dev
 os@-image-exiftool-perl             libimage-exiftool-perl
 os@-intltool                        intltool
 os@-jpeg-dev                        libjpeg-dev
+os@-jxl-dev                         libjxl-dev
 os@-json-glib-dev                   libjson-glib-dev
 os@-lapack-dev                      liblapack-dev
 os@-lcms2-dev                       liblcms2-dev
