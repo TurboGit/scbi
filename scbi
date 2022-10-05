@@ -1237,6 +1237,15 @@ function handle-module()
     #  Set module environment if defined
 
     (
+        #  We need to remove the link/sources to ensure proper setting by
+        #  the module.
+
+        [[ -d $SCBI_BDIR/$module ]] && cd $SCBI_BDIR/$module && rm -fr src vcs
+
+        handle-sources $FORMODULE $MODREF
+
+        [[ $? != 0 ]] && exit 1
+
         #  Set cross-env if needed
 
         if [[ "$SCBI_HOST" != "$SCBI_TARGET" ]]; then
@@ -1256,15 +1265,6 @@ function handle-module()
         handle-env $FORMODULE $MODREF
 
         unset SCBI_ENV_MODULE
-
-        #  We need to remove the link/sources to ensure proper setting by
-        #  the module.
-
-        [[ -d $SCBI_BDIR/$module ]] && cd $SCBI_BDIR/$module && rm -fr src vcs
-
-        handle-sources $FORMODULE $MODREF
-
-        [[ $? != 0 ]] && exit 1
 
         #  Check if envrionment is to be done for out-of-tree build
 
