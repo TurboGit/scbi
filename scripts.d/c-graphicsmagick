@@ -1,0 +1,55 @@
+
+with-variant native libgraphicsmagick1-dev:[v]
+
+function c-graphicsmagick-vcs()
+{
+    echo none
+    echo none
+    echo mercurial
+    echo https://hg.osdn.net/view/graphicsmagick/GM
+}
+
+function c-graphicsmagick-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH               $PREFIX/bin
+    add-to-var C_INCLUDE_PATH     $PREFIX/GraphicsMagick
+    add-to-var CPLUS_INCLUDE_PATH $PREFIX/GraphicsMagick
+    add-to-var LD_LIBRARY_PATH    $PREFIX/lib
+    add-to-var PKG_CONFIG_PATH    $PREFIX/lib/pkgconfig
+}
+
+function c-graphicsmagick-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ../src/configure --prefix=$PREFIX
+}
+
+function c-graphicsmagick-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make -j$SCBI_JOBS
+}
+
+function c-graphicsmagick-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make install
+}
+
+function c-graphicsmagick-prefix()
+{
+    echo none
+}
