@@ -66,6 +66,11 @@ function c-darktable-depends()
     echo c-libavif
 }
 
+function c-darktable-im-depends()
+{
+    echo c-imagemagick
+}
+
 function c-darktable-clang-build-env()
 {
     add-to-var CMAKE_C_COMPILER   clang-$SCBI_CLANG_VERSION
@@ -119,6 +124,16 @@ function c-darktable-common-config-options()
 
     echo -DCMAKE_INSTALL_PREFIX=$PREFIX
     echo -DUSE_GAME=OFF
+}
+
+function c-darktable-im-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo -DUSE_GRAPHICSMAGICK=OFF
+    echo -DUSE_IMAGEMAGICK=ON
 }
 
 function c-darktable-config()
