@@ -1,0 +1,58 @@
+
+function c-imagemagick-vcs()
+{
+    echo none
+    echo none
+    echo git
+    echo https://github.com/ImageMagick/ImageMagick.git
+}
+
+function c-imagemagick-depends()
+{
+    echo os@-jxl-dev
+}
+
+function c-imagemagick-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH               $PREFIX/bin
+    add-to-var C_INCLUDE_PATH     $(ls $PREFIX/include/*)
+    add-to-var CPLUS_INCLUDE_PATH $(ls $PREFIX/include/*)
+    add-to-var LD_LIBRARY_PATH    $PREFIX/lib
+    add-to-var PKG_CONFIG_PATH    $PREFIX/lib/pkgconfig
+}
+
+function c-imagemagick-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ../src/configure --with-jxl=yes --prefix=$PREFIX
+}
+
+function c-imagemagick-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make -j$SCBI_JOBS
+}
+
+function c-imagemagick-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make install
+}
+
+function c-imagemagick-prefix()
+{
+    echo none
+}
