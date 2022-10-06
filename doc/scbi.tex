@@ -237,15 +237,15 @@ An environment is a set of shell variables used to control the build environment
 	\item[SCBI\_VERSION] The scbi driver version string.
 	\\This version is \version.
 
-	\item[SCBI\_PLUGINS] The directories where the SCBI plug-ins are located. 
+	\item[SCBI\_PLUGINS] The directories where the SCBI plug-ins are located.
 	Default is \file{\$HOME/config/scbi}.
 
 	\item[SCBI\_PLAN] The name of the build-plan to use if any.
 
-	\item[SCBI\_ROOT] The default root directory to use by SCBI. \\ 
+	\item[SCBI\_ROOT] The default root directory to use by SCBI. \\
 	Default is \file{\$HOME/dev}.
 
-	\item[SCBI\_BDIR] The default directory for the build directory.  This is also called the sandbox directory. \\ 
+	\item[SCBI\_BDIR] The default directory for the build directory.  This is also called the sandbox directory. \\
 	Default is \file{\$SCBI\_ROOT/builds}.
 
 	\item[SCBI\_MODULES\_DIR{[<module-name>]}] An associative array giving the install directory for a given module name. Directories have \code{\$SCBI\_BDIR} has prefix and point to the install directory for the module's variant. This associative array can be used in hooks \code{config}, \code{build} and \code{install}.
@@ -649,7 +649,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[\code{SCBI\_TAR\_VARIANT}] Same as above for the all modules.
 	\end{description}
 
-	And finally the function \code{scbi-rewrite-tar} can be defined. This function takes the four values returned by the \code{tar} hook and must return the four values in the same order but possibly rewritten.
+	And finally the function \code{scbi-rewrite-tar} can be defined. This function takes the five values returned by the \code{tar} hook and must return the five values in the same order but possibly rewritten.
 
 	\item[<module>-{[}common|<variant>{]}-patches] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
 
