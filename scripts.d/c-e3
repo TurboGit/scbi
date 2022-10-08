@@ -13,8 +13,8 @@ function c-e3-env()
     local TARGET=$2
     local VARIANT=$3
 
-    add-to-var     PATH       $PREFIX/bin
-    prepend-to-var PYTHONPATH $PREFIX/lib
+    add-to-var     PATH       $PREFIX/local/bin
+    prepend-to-var PYTHONPATH $PREFIX/local/lib
 }
 
 function c-e3-install()
@@ -26,22 +26,22 @@ function c-e3-install()
     local E3C=${SCBI_MODULES_DIR["c-e3-core"]}
     local E3T=${SCBI_MODULES_DIR["c-e3-testsuite"]}
 
-    local PDC=$(last-modified-directory $E3C/lib/python*/site-packages)
-    local PDT=$(last-modified-directory $E3T/lib/python*/site-packages)
+    local PDC=$(last-modified-directory $E3C/local/lib/python*/dist-packages)
+    local PDT=$(last-modified-directory $E3T/local/lib/python*/dist-packages)
 
-    mkdir -p $PREFIX/bin
-    mkdir -p $PREFIX/lib
+    mkdir -p $PREFIX/local/bin
+    mkdir -p $PREFIX/local/lib
 
-    cp -r $E3C/bin/* $PREFIX/bin/.
-    cp -r $E3T/bin/* $PREFIX/bin/.
+    cp -r $E3C/local/bin/* $PREFIX/local/bin/.
+    cp -r $E3T/local/bin/* $PREFIX/local/bin/.
 
     for D in $(ls -d $PDC/*.egg); do
-        [[ -d $D ]] && cp -r $D/* $PREFIX/lib/.
+        [[ -d $D ]] && cp -r $D/* $PREFIX/local/lib/.
     done
 
     for D in $(ls -d $PDT/*.egg); do
-        [[ -d $D ]] && cp -r $D/* $PREFIX/lib/.
+        [[ -d $D ]] && cp -r $D/* $PREFIX/local/lib/.
     done
 
-    chmod a+x $PREFIX/lib/e3/os/data/*
+    chmod a+x $PREFIX/local/lib/e3/os/data/*
 }

@@ -20,7 +20,7 @@ function c-e3-core-env()
 
     local PYDIR=$(last-modified-directory $PREFIX/lib/python*)
 
-    add-to-var PATH       $PREFIX/bin
+    add-to-var PATH       $PREFIX/local/bin
     add-to-var PYTHONPATH $PYDIR/site-packages
 }
 
