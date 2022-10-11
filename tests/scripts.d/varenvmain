@@ -1,0 +1,10 @@
+
+function varenvmain-depends()
+{
+    echo varenv
+}
+
+function varenvmain-build()
+{
+    echo VENV $VENV
+}

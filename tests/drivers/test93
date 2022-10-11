@@ -1,0 +1,20 @@
+#  Check env & build-env variants
+
+VDIR=.root/builds/varenv/build/.log/build.log
+MDIR=.root/builds/varenvmain/build/.log/build.log
+
+RUNS ./scbi --deps varenvmain
+
+GREP  "^VENV NONE:default:common"  $MDIR
+NGREP "^VENV NONE:default:common"  $VDIR
+GREP  "^VBENV NONE:default:common" $VDIR
+
+RUNS ./scbi --deps varenv/another varenvmain
+
+GREP  "^VENV another:common"  $MDIR
+GREP  "^VBENV another:common" $VDIR
+
+RUNS ./scbi --deps varenv/another.fast varenvmain
+
+GREP  "^VENV another:common"  $MDIR
+GREP  "^VBENV fast:another:common" $VDIR
