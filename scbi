@@ -1617,7 +1617,8 @@ ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpvwWh \
                  -l list-externals,list-externals:only,list-no-version \
                  -l list-filter:all,list-filter:dev,list-filter:runtime \
                  -l dry-run,jobs:,plugins:,build-dir:,list-plan: \
-                 -l shell,shell:dev,shell:tests,shell:sb,shell:sandbox \
+                 -l shell,shell:use,shell:dev,shell:tests,shell:sb \
+                 -l shell:sandbox \
                  -- $SCBIOPTS 2> $OPTFILE)
 
 if [[ $? != 0 ]]; then
@@ -1684,6 +1685,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         --shell:tests)
             DO_SHELL=yes-tests
+            ;;
+        --shell:use)
+            DO_SHELL=yes-nocd
             ;;
         --shell)
             DO_SHELL=yes-nocd
