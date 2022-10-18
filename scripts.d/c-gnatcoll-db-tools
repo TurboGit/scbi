@@ -63,7 +63,8 @@ function c-gnatcoll-db-tools-config()
     local PREFIX=$1
     local TARGET=$2
 
-    make -C gnatcoll_db2ada prefix=$PREFIX setup && make -C xref setup
+    make -C gnatcoll_db2ada prefix=$PREFIX setup &&
+        make -C xref prefix=$PREFIX setup
 }
 
 function c-gnatcoll-db-tools-cross-build()
