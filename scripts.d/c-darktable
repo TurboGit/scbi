@@ -27,7 +27,7 @@ function c-darktable-clang-build-depends()
     echo os@-clang-11
 }
 
-function c-darktable-depends()
+function c-darktable-common-depends()
 {
     echo os@-sqlite3-dev
     echo os@-png-dev
