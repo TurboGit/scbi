@@ -23,3 +23,4 @@ tests/scripts.d/.pkgs-*
 tests/scripts.d/.store
 tests/logs
 tests/scbi
+tests/scbi-lint
