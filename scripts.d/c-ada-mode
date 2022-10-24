@@ -1,0 +1,54 @@
+
+function c-ada-mode-vcs()
+{
+    echo none
+    echo none
+    echo git
+    echo https://github.com/emacsmirror/ada-mode.git
+}
+
+function c-ada-mode-out-of-tree()
+{
+    echo false
+}
+
+function c-ada-mode-build-depends()
+{
+    echo c-sandbox
+    echo c-wisi-token
+}
+
+function c-ada-mode-config-options()
+{
+    echo -DHAVE_LIBADALANG=no
+    echo -DELPA=yes
+    echo -DHAVE_GNAT_UTIL=no
+}
+
+function c-ada-mode-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
+
+    gnatprep $OPTIONS ada_mode_wisi_parse.gpr.gp ada_mode_wisi_parse.gpr
+}
+
+function c-ada-mode-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local WISI_DIR=${SCBI_MODULES_DIR["c-wisi-token"]}
+    local WISI_DIR=$(dirname $WISI_DIR)/src
+
+    gprbuild -m -p -j$SCBI_JOBS ada_mode_wisi_parse.gpr
+}
+
+function c-ada-mode-prefix()
+{
+    echo none
+}
