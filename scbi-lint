@@ -5,7 +5,8 @@ SCBI_VERSION=@VERSION@
 DO_HELP=no
 DO_WARNING=yes
 
-SCBI_PLUGINS=""
+SCBI_PLUGINS_LIST=""
+SCBI_PLUGINS="$PWD/scripts.d"
 
 function usage()
 {
@@ -17,10 +18,11 @@ function usage()
     echo ""
     echo "   -h | --help             this help message"
     echo "   -v | --version          display driver & plug-ins versions"
+    echo "      | --plugins=<dir>    specify the plugins' directory"
     echo "   -e | --error            report only errors"
 }
 
-ALLOPTS=$(getopt -u -o ehv -l error,help,version -- $*)
+ALLOPTS=$(getopt -u -o ehv -l error,help,version,plugins: -- $*)
 
 set -- $ALLOPTS
 
@@ -37,10 +39,17 @@ while [[ $# -gt 0 ]]; do
         -e|--error)
             DO_WARNING=no
             ;;
+        --plugins)
+            SCBI_PLUGINS=$2; shift
+            if [[ ! -d "$SCBI_PLUGINS" ]]; then
+                echo "$0: plugins directory not found"
+                exit 1
+            fi
+            ;;
         (--)
             ;;
         (*)
-            SCBI_PLUGINS+=" $1"
+            SCBI_PLUGINS_LIST+=" $1"
             ;;
         (-*)
             echo "$0: error - unrecognized option $1" 1>&2; exit 1
@@ -337,9 +346,18 @@ function check-params()
     ) || ERROR=1
 }
 
+[[ ! -d "$SCBI_PLUGINS" ]] ||
+    [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]] &&
+        SCBI_PLUGINS=$HOME/.config/scbi
+
+[[ ! -d "$SCBI_PLUGINS" ]] &&
+    echo "$0: cannot find module definition files" && exit 1
+
 #  Import runtime for proper plugin loading
 if [[ -f ./scripts.d/0_runtime ]]; then
     source ./scripts.d/0_runtime
+elif [[ -f $SCBI_PLUGINS/0_runtime ]]; then
+    source $SCBI_PLUGINS/0_runtime
 else
     source $HOME/.config/scbi/0_runtime
 fi
@@ -351,18 +369,25 @@ function cygpath()
     true
 }
 
-for PLUGIN in $SCBI_PLUGINS; do
+for PLUGIN in $SCBI_PLUGINS_LIST; do
+    PLG=$PLUGIN
+    [[ ! -f $PLG ]] && PLG=$SCBI_PLUGINS/$PLG
+    if [[ ! -f $PLG ]]; then
+        echo
+        echo "========== Skip $PLUGIN as not found"
+        continue
+    fi
     if [[ $DO_WARNING == "yes" ]]; then
         echo
-        echo "========== Handle $PLUGIN"
+        echo "========== Handle ${PLG/$HOME/\$HOME}"
     fi
 
-    check-hooks $PLUGIN
+    check-hooks $PLG
 
     [[ $DO_WARNING == "yes" ]] &&
-        list-variants $PLUGIN
+        list-variants $PLG
 
-    check-params $PLUGIN
+    check-params $PLG
 done
 
 [[ $ERROR == 0 ]]
