@@ -1,0 +1,64 @@
+
+function c-wisi-token-vcs()
+{
+    echo none
+    echo none
+    echo git
+    echo https://github.com/emacsmirror/wisi.git
+}
+
+function c-wisi-token-out-of-tree()
+{
+    echo false
+}
+
+function c-wisi-token-build-depends()
+{
+    echo c-sandbox
+}
+
+function c-wisi-token-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH             $PREFIX
+    add-to-var GPR_PROJECT_PATH $PREFIX
+}
+
+function c-wisi-token-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    gnatprep -DELPA="yes" wisi.gpr.gp wisi.gpr
+}
+
+function c-wisi-token-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    gprbuild -p -j$SCBI_JOBS wisi.gpr wisitoken-bnf-generate \
+             -cargs:ada -gnatws
+}
+
+function c-wisi-token-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    cd ..
+
+    rm -f $PREFIX
+    ln -s build $PREFIX
+}
+
+function c-wisi-token-prefix()
+{
+    echo none
+}
