@@ -9,7 +9,7 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
  --list-filter: --deps:warning
 --dry-run -w --wrapup --force --enable- --safe --plugins --build-dir
 --list-plan --version --clean-install --log:yes --log:no --log:on-failure
---store --stat --stat:full --module-version"
+--store --stat --stat:full --module-version --prefix="
 
 _SCBI_HOOKS="((pre|post)-)?(cross-)?(tar|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches)"
 
