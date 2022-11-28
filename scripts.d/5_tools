@@ -778,9 +778,14 @@ function get-tar-data()
     local TAR_FUNCTION=$(get-hook $MODULE $VARIANT tar)
     TAR_FUNCTION=${TAR_FUNCTION:=${MODULE}-tar}
 
-    local TAR_VARIANT=default
+    #  Get selected variant out of the hook function name
 
-    #  check first for module specifc VCS variant except for native
+    local TAR_VARIANT=${TAR_FUNCTION#$MODULE}
+    TAR_VARIANT=${TAR_VARIANT%-tar}
+    TAR_VARIANT=${TAR_VARIANT#-}
+    TAR_VARIANT=${TAR_VARIANT:-default} # no variant use default
+
+    #  check first for module specifc tar variant except for native
     #  variant.
 
     if [[ $VARIANT != "native" ]]; then
