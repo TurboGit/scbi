@@ -1252,11 +1252,11 @@ function handle-module()
             target-env $SCBI_BDIR/install $SCBI_TARGET
         fi
 
-        handle-build-depends-env $FORMODULE $MODREF
-
         ENVTMP="$(mktemp -p /dev/shm/)"
         SCBI_ENV_MODULE=$ENVTMP
         declare -A SCBI_MODULES_DIR=()
+
+        handle-build-depends-env $FORMODULE $MODREF
 
         handle-module-env $FORMODULE $MODREF build-env >> $SCBI_ENV_MODULE
 
