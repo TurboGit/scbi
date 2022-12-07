@@ -74,7 +74,7 @@ function git-co()
                 exit 1
             #  we set the URL in case the repo has been relocated
             git remote set-url origin $URL
-            git fetch $GOPTS2
+            git fetch --tags $GOPTS2
         fi &&
         cd $SCBI_BDIR/$NAME &&
         ln -s ../.vcs/$REPO vcs &&
@@ -140,7 +140,7 @@ function git-branch()
         #  first, let's update the repository
 
         git checkout master
-        git fetch
+        git fetch --tags
 
         #  if no branch specified use the default branch
         #  possibly not "master", do check for it
