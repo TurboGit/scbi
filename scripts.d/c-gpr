@@ -25,7 +25,6 @@ function c-gpr-depends()
     echo c-gnatcoll-bindings-iconv
     echo c-gnatcoll-bindings-gmp
     echo c-langkit
-    echo c-libadalang
     echo c-gprconfig-kb
 }
 
@@ -77,7 +76,9 @@ function c-gpr-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make
+    # Do not build gprname which is based on libadalang
+
+    make build-tools build-lib-relocatable build-lib-static-pic
 }
 
 function c-gpr-install()
@@ -85,7 +86,8 @@ function c-gpr-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make GPRINSTALL=gprinstall install
+    make GPRINSTALL=gprinstall install-tools \
+         install-lib-relocatable install-lib-static-pic
 }
 
 function c-gpr-tests()

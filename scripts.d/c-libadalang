@@ -25,6 +25,7 @@ function c-libadalang-build-depends()
 function c-libadalang-common-depends()
 {
     echo c-gnatcoll-bindings-gmp
+    echo c-gpr
     echo libyaml-dev
     echo python3-funcy
     echo python3-mako
