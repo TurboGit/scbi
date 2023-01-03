@@ -189,6 +189,59 @@ function load-module-plan()
 # Checks all auto variant and use the native one or the default variant
 # depending on the availability of the dependencies.
 
+function handle-plan-meta-module()
+{
+    local M=$1
+
+    local value=${MODVER[$M]}
+
+    local mod=${M/*=/}
+    local FORMODULE=${M%$mod}
+    FORMODULE=${FORMODULE%=}
+
+    local module_info=( $(get-module-ref $value $FORMODULE) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local ref=${module_info[3]}
+
+    if [[ $ref != master ]] &&
+           [[ $ref != NONE ]] &&
+           [[ -f $SCBI_PLUGINS/$module ]];
+    then
+        source $SCBI_PLUGINS/$module
+
+        is-hook-true $module $variant propagate-version TRUE || return
+
+        for mod in $(_internal_call-variant-hooks \
+                         $module modules $SCBI_PREFIX $SCBI_TARGET $variant);
+        do
+            local mref=""
+
+            if [[ -z ${MODVER[$mod]} ]]; then
+                mref=:$ref
+            else
+                local s=${MODVER[$mod]}
+                local s_module_info=( $(get-module-ref $s $module) )
+                local s_variant=${s_module_info[1]}
+                local s_ref=${s_module_info[3]}
+
+                [[ $s_variant != default ]] &&
+                    mref=/$s_variant
+
+                if [[ $s_ref == NONE ]]; then
+                    mref=$mref:$ref
+                else
+                    mref=$mref:$s_ref
+                fi
+            fi
+
+            [[ -n $mref ]] &&
+                echo 0 $mod $mod$mref
+        done
+    fi
+}
+
 function handle-plan-auto-variant()
 {
     local M=$1
@@ -238,6 +291,8 @@ function rewrite-module-plan()
 {
     local eres=0
 
+    #  Rewrite plan for auto-variant
+
     while read E K V; do
         if [[ $E == 0 ]]; then
             MODVER[$K]=$V
@@ -251,6 +306,32 @@ function rewrite-module-plan()
         for M in ${!MODVER[@]}; do
             handle-plan-auto-variant $M &
         done )
+
+    #  Rewrite plan for meta-module (this is done recursively until there
+    #  is no new module plan entry rewritten.
+
+    declare MOREMOD=( ${!MODVER[@]} )
+
+    while [[ ${#MOREMOD[@]} > 0 ]]; do
+        declare NEWMOD=()
+
+        while read E K V; do
+            if [[ $E == 0 ]]; then
+                MODVER[$K]=$V
+                NEWMOD+=($K)
+            elif [[ $E == 1 ]]; then
+                ilog $K "$V"
+            else
+                elog $K "$V"
+                eres=1
+            fi
+        done < <(
+            for M in ${MOREMOD[@]}; do
+                handle-plan-meta-module $M &
+            done )
+
+        MOREMOD=( ${NEWMOD[@]} )
+    done
 
     wait
 

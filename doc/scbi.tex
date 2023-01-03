@@ -319,6 +319,8 @@ File \file{.plan-next}:
  aws:v1
 \end{lstlisting}
 
+A version specified for a meta-module is propagated to all aggregated modules and recursively to all aggregated meta-modules. Note that this specification is \emph{soft}, meaning that it won't override any specific version specified for a module anywhere in the build plan or on the command line.
+
 Some specific actions are supported with the following syntax:
 
 \begin{description}
@@ -972,6 +974,11 @@ A module defining the hook \code{<module>-modules} (possibly with variants) beco
 					\item echo <module2>
 		\end{enumerate}
 	\end{description}
+	\item[<module>-{[}common|<variant>{]}-propagate-version] \index{hook!propagate-version}Whether the meta-module version is to be propagated to aggregated modules.
+		\begin{description}[font=\textit,style=standard]
+			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+			\item[return] \tabto{2cm} \code{true | false}
+		\end{description}
 \end{description}
 
 And can list a build-plan to use for building all listed modules:
@@ -1005,12 +1012,15 @@ A module listed in a meta-module can itself be a meta-module. A meta-module can 
 
 \begin{itemize}[font=\texttt]
 	\item {[variant]-setup}
+	\item {[variant]-propagate-version}
 	\item {[variant]-build-depends}
 	\item {[variant]-plan}
 	\item {[variant]-modules}
 	\item {[variant]-prefix}
 	\item {[variant]-wrapup}
 \end{itemize}
+
+It is possible to specify a version for a meta-module even if there is no sources as this version will be propagated to all aggregated modules and recursively for all meta-modules.
 
 \subsection{Setting environment}
 \label{set-env}
