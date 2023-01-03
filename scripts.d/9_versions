@@ -189,52 +189,70 @@ function load-module-plan()
 # Checks all auto variant and use the native one or the default variant
 # depending on the availability of the dependencies.
 
-function handle-auto-variant()
+function handle-plan-auto-variant()
+{
+    local M=$1
+
+    local value=${MODVER[$M]}
+
+    local mod=${M/*=/}
+    local FORMODULE=${M%$mod}
+    FORMODULE=${FORMODULE%=}
+
+    local module_info=( $(get-module-ref $value $FORMODULE) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+
+    if [[ $variant =~ ^auto(\.|$) ]]; then
+        check-auto-variant $mod $FORMODULE
+        local res=$?
+
+        if [[ $res == 0 ]]; then
+            #  replaces all variants by a single "native"
+            value=${value/\/auto*([.a-zA-Z])/\/native}
+            echo 0 $M "$value"
+            echo 1 $M "module $M using native variant"
+        elif [[ $res == 1 ]]; then
+            #  remove "auto" from the list of variants, or replace
+            #  it with FORMODULE if defined and auto is the only
+            #  variant specified. This ensure that a separate
+            #  directory is used for the build.
+            value=${value/\/auto\./\/}
+
+            if [[ -z $FORMODULE ]]; then
+                value=${value/\/auto}
+            else
+                local FMOD=${FORMODULE//[-._]/}
+                value=${value/\/auto/\/$FMOD}
+            fi
+            echo 0 $M "$value"
+            echo 1 $M "$M using standard variant"
+        else
+            echo 2 $M "$M auto mode must define a native variant"
+        fi
+    fi
+}
+
+function rewrite-module-plan()
 {
     local eres=0
 
-    for M in ${!MODVER[@]}; do
-        local value=${MODVER[$M]}
-
-        local mod=${M/*=/}
-        local FORMODULE=${M%$mod}
-        FORMODULE=${FORMODULE%=}
-
-        local module_info=( $(get-module-ref $value $FORMODULE) )
-
-        local module=${module_info[0]}
-        local variant=${module_info[1]}
-
-        if [[ $variant =~ ^auto(\.|$) ]]; then
-            check-auto-variant $mod $FORMODULE
-            local res=$?
-
-            if [[ $res == 0 ]]; then
-                #  replaces all variants by a single "native"
-                value=${value/\/auto*([.a-zA-Z])/\/native}
-                MODVER[$M]=$value
-                ilog $M module $M using native variant
-            elif [[ $res == 1 ]]; then
-                #  remove "auto" from the list of variants, or replace
-                #  it with FORMODULE if defined and auto is the only
-                #  variant specified. This ensure that a separate
-                #  directory is used for the build.
-                value=${value/\/auto\./\/}
-
-                if [[ -z $FORMODULE ]]; then
-                    value=${value/\/auto}
-                else
-                    local FMOD=${FORMODULE//[-._]/}
-                    value=${value/\/auto/\/$FMOD}
-                fi
-                MODVER[$M]=$value
-                ilog module $M using standard variant
-            else
-                elog $M "$M auto mode must define a native variant"
-                eres=1
-            fi
+    while read E K V; do
+        if [[ $E == 0 ]]; then
+            MODVER[$K]=$V
+        elif [[ $E == 1 ]]; then
+            ilog $K "$V"
+        else
+            elog $K "$V"
+            eres=1
         fi
-    done
+    done < <(
+        for M in ${!MODVER[@]}; do
+            handle-plan-auto-variant $M &
+        done )
+
+    wait
 
     return $eres
 }
@@ -350,19 +368,19 @@ function check-auto-variant()
 
                     while read pkg pver pres; do
                         if [[ $pres == $SCBI_PKG_NOT_FOUND ]]; then
-                            ilog $MODULE unknown dependency $pkg
+                            echo 1 $MODULE "unknown dependency $pkg"
                             res=1
                         elif [[ $pres == $SCBI_PKG_NOT_INSTALLED ]]; then
-                            ilog $MODULE dependency $pkg not installed
+                            echo 1 $MODULE "dependency $pkg not installed"
                             res=1
                         elif [[ $pres == $SCBI_PKG_VERSION_NOK ]]; then
-                            ilog $MODULE module $pkg version $pver not found
+                            echo 1 $MODULE "module $pkg version $pver not found"
                             res=1
                         elif [[ $pres == $SCBI_PKG_VERSION_OK ]]; then
                             if [[ $pver == 0 ]]; then
-                                ilog $MODULE module $pkg found
+                                echo 1 $MODULE "module $pkg found"
                             else
-                                ilog $MODULE module $pkg version $pver matching
+                                echo 1 $MODULE "module $pkg version $pver matching"
                             fi
                         fi
                     done < <( echo ${STATUSES[*]} )

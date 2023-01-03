@@ -1935,9 +1935,9 @@ done
 
 if [[ $DO_STAT == no ]]; then
     if [[ $DO_MOD_VER == no ]]; then
-        handle-auto-variant
+        rewrite-module-plan
     else
-        handle-auto-variant > /dev/null
+        rewrite-module-plan > /dev/null
     fi
     [[ $? == 1 ]] && exit 1
 fi
