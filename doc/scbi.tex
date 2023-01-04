@@ -366,9 +366,25 @@ Some specific actions are supported with the following syntax:
 	A group can be used in a build plan to group together all modules with the same version and/or variant. To define a group:
 
 	\begin{description}
-		\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} which will be searched on the specified module's plan variants or a set of OS discriminants.
+		\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} or \code{discriminant} which will be searched on the specified module's plan variants or a set of OS discriminants.
 
 		\code{\ddash{}plan=name/variant1.variant2}
+
+		The barrier can have multiple variants or discriminants separated with a coma:
+
+		\code{= deb,9}
+
+		All of them must be set for the barrier to be true.
+
+		Finally the barrier can have two groups of values, for a \code{=} condition only one of the group can match (OR) for the barrier to evaluate to TRUE., for a \code{/=} condition all both groups must match (AND) for the barrier to evaluate to TRUE.
+
+		\code{= deb,9 deb,11}
+
+		Will be true on GNU/Debian 9 and 11.
+
+		\code{/= deb,9 deb,11}
+
+		Will be true on all versions of GNU/Debian except version 9 and 11.
 
 		The group will be evaluated only if the barrier evaluate to true otherwise it will be skipped. If the barrier is not specified the group will always be evaluated (i.e. the barrier is by default TRUE).
 

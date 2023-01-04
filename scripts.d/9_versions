@@ -149,6 +149,14 @@ function load-module-plan()
                             || check-discriminants "$arg2";
                         then
                             GROUP=yes
+                        elif [[ -n $arg3 ]]; then
+                            if has-variant "$VARIANT" "$arg3" \
+                                    || check-discriminants "$arg3";
+                            then
+                                GROUP=yes
+                            else
+                                GROUP=closed
+                            fi
                         else
                             GROUP=closed
                         fi
@@ -157,6 +165,14 @@ function load-module-plan()
                                 || check-discriminants "$arg2";
                         then
                             GROUP=closed
+                        elif [[ -n $arg3 ]]; then
+                            if has-variant "$VARIANT" "$arg3" \
+                                    || check-discriminants "$arg3";
+                            then
+                                GROUP=closed
+                            else
+                                GROUP=yes
+                            fi
                         else
                             GROUP=yes
                         fi

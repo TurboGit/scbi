@@ -1,0 +1,19 @@
+modA
+modB
+modC
+
+[ = deb,1 9.3
+        modA/mpi.fast
+        modG/mpi
+        modH/mpi:v8
+] :master
+
+[ /= mpi deb,9
+        modA
+        modG
+        modH
+] :master
+
+[ = deb,1 mpi
+        modH
+] /fast:rz
