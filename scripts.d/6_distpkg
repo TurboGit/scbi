@@ -65,16 +65,21 @@ function setup-discriminants()
     else
         local VER=$(lsb_release -r | tr -d '[ \t]')
         local OID=$(lsb_release -i | tr -d '[ \t]')
+        local CNM=$(lsb_release -c | tr -d '[ \t]')
 
         SCBI_OS_VERSION=${VER#Release:}
+        SCBI_OS_CODENAME=${CNM#Codename:}
         SCBI_OS_MAJOR_VERSION=${SCBI_OS_VERSION%%.*}
         SCBI_OS_ID=${OID#*:}
 
         SCBI_OS_DISCRIMINANTS+=(linux)
         SCBI_OS_DISCRIMINANTS+=($(uname -m))
+        SCBI_OS_DISCRIMINANTS+=($(hostname --short))
+        SCBI_OS_DISCRIMINANTS+=($(hostname --domain))
         SCBI_OS_DISCRIMINANTS+=(${SCBI_OS_ID,,})
         SCBI_OS_DISCRIMINANTS+=($SCBI_OS_VERSION)
         SCBI_OS_DISCRIMINANTS+=($SCBI_OS_MAJOR_VERSION)
+        SCBI_OS_DISCRIMINANTS+=($SCBI_OS_CODENAME)
     fi
 }
 
