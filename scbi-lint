@@ -68,7 +68,7 @@ if [[ $DO_HELP == "yes" ]]; then
     exit 1
 fi
 
-SCBI_HOOKS="((pre|post)-)?(cross-)?(tar|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|setup|patches)"
+SCBI_HOOKS="((pre|post)-)?(cross-)?(tar|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|plan|propagate-version|setup|patches)"
 
 NOTHOOK=
 ERROR=0
@@ -316,6 +316,7 @@ function check-params()
     HOOKS+="|env|build-env"
     HOOKS+="|setup|wrapup"
     HOOKS+="|prefix|out-of-tree|only-explicit-build|version|tests"
+    HOOKS+="|propagate-version|plan"
 
     (
         source $PLUGIN
