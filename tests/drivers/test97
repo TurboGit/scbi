@@ -1,0 +1,37 @@
+
+RUNS ./scbi --deps exp explicit
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building exp [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building exp [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building explicit [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building explicit [default] (master)
+EOF
+
+RUNS ./scbi --deps explicit
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Module exp built only if explitly specified
+
+xxxx/xx/xx xx:xx:xx : Building explicit [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building explicit [default] (master)
+EOF

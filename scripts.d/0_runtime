@@ -60,6 +60,42 @@ function is-enabled()
     fi
 }
 
+############################## get-hook-value
+
+function get-hook-value()
+{
+    local MODULE=$1
+    local VARIANT=$2
+    local HOOK=$3
+
+    local FCT=$(get-hook $MODULE $VARIANT $HOOK)
+
+    local RESULT=""
+
+    if [[ -n $FCT ]]; then
+        RESULT=$($FCT $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/install \
+                      $SCBI_TARGET $VARIANT)
+    fi
+
+    echo $RESULT
+}
+
+############################## is-hook-true
+
+function is-hook-true()
+{
+    local MODULE=$1
+    local VARIANT=$2
+    local HOOK=$3
+    local DEFAULT=$4
+
+    local VALUE=$(get-hook-value $MODULE $VARIANT $HOOK)
+    VALUE=${VALUE:-$DEFAULT}
+    VALUE=${VALUE^^}
+
+    [[ ${VALUE} = "TRUE" ]] || [[ ${VALUE} == "YES" ]]
+}
+
 ############################## last-modified-directory
 # returns the newest (last modified) directory matching pattern
 

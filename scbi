@@ -1115,14 +1115,11 @@ function handle-module()
     #  Check if module to be handled only if specificed on command line
 
     if [[ $FORMODULE != "@root" ]]; then
-        local FCT=$(get-hook $module $variant only-explicit-build)
+        is-hook-true $module $variant only-explicit-build FALSE
 
-        if [[ -n $FCT ]]; then
-            if [[ "$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
-                          $SCBI_TARGET $variant)" == "true" ]]; then
-                ilog $module Module $module built only if explitly specified
-                return
-            fi
+        if [[ $? == 0 ]]; then
+            ilog $module Module $module built only if explitly specified
+            return
         fi
     fi
 
@@ -1268,11 +1265,7 @@ function handle-module()
 
         #  Check if envrionment is to be done for out-of-tree build
 
-        local FCT=$(get-hook $module $variant out-of-tree)
-
-        [[ -n $FCT ]] &&
-            [[ "$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
-                       $SCBI_TARGET $variant)" = "false" ]] && ISOOT=no
+        is-hook-true $module $variant out-of-tree TRUE || ISOOT=no
 
         #  make sure the current build softlink is pointing to
         #  the variant. this is needed as the setup won't be
@@ -1935,9 +1928,9 @@ done
 
 if [[ $DO_STAT == no ]]; then
     if [[ $DO_MOD_VER == no ]]; then
-        handle-auto-variant
+        rewrite-module-plan
     else
-        handle-auto-variant > /dev/null
+        rewrite-module-plan > /dev/null
     fi
     [[ $? == 1 ]] && exit 1
 fi

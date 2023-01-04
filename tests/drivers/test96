@@ -1,0 +1,52 @@
+# Note that we transform all 1 to A and 2 to B to have a better check
+# of the final output.
+
+export SCBI_OS_NAME=deb
+export SCBI_OS_VERSION=9
+export SCBI_OS_MAJOR_VERSION=9.3
+
+# ========================= A
+RUNS ./scbi --plan=group5 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 5 module(s) in the plan
+modA/mpi.fast:master
+modB
+modC
+modG/mpi:master
+modH/mpi:master
+EOF
+
+# ========================= B
+RUNS ./scbi --plan=group5/mpi --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 5 module(s) in the plan
+modA/mpi.fast:master
+modB
+modC
+modG/mpi:master
+modH/fast:rz
+EOF
+
+export SCBI_OS_NAME=deb
+export SCBI_OS_VERSION=11
+export SCBI_OS_MAJOR_VERSION=11.1
+
+# ========================= C
+RUNS ./scbi --plan=group5/fast --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 5 module(s) in the plan
+modA:master
+modB
+modC
+modG:master
+modH:master
+EOF

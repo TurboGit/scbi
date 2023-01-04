@@ -1,0 +1,72 @@
+RUNS ./scbi --plan=meta --list-plan meta:v5
+
+clean-up-osht-output
+sort-osht-output
+
+DIFF <<EOF
+There is 3 module(s) in the plan
+m1:v5
+m2:v5
+meta:v5
+EOF
+
+RUNS ./scbi --plan=meta --list-plan meta
+
+clean-up-osht-output
+sort-osht-output
+
+DIFF <<EOF
+There is 3 module(s) in the plan
+m1:v2
+m2:v2
+meta/cc:v2
+EOF
+
+RUNS ./scbi --plan=meta-meta --list-plan meta-meta
+
+clean-up-osht-output
+sort-osht-output
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+depA:1.8
+dmod:1.8
+meta-meta:1.8
+oot:1.8
+EOF
+
+RUNS ./scbi --plan=meta-meta --list-plan depA:9 meta-meta
+
+clean-up-osht-output
+sort-osht-output
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+depA:9
+dmod:1.8
+meta-meta:1.8
+oot:1.8
+EOF
+
+RUNS ./scbi --plan=meta-meta-2 --list-plan meta-meta
+
+clean-up-osht-output
+sort-osht-output
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+depA/toto:v9
+dmod/x:v9
+meta-meta:1.8
+oot:v9
+EOF
+
+RUNS ./scbi --plan=meta-meta-3 --list-plan meta-meta-2
+
+clean-up-osht-output
+sort-osht-output
+
+DIFF <<EOF
+There is 1 module(s) in the plan
+meta-meta-2:1.8
+EOF

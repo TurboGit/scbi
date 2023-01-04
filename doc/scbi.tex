@@ -319,6 +319,8 @@ File \file{.plan-next}:
  aws:v1
 \end{lstlisting}
 
+A version specified for a meta-module is propagated to all aggregated modules and recursively to all aggregated meta-modules. Note that this specification is \emph{soft}, meaning that it won't override any specific version specified for a module anywhere in the build plan or on the command line.
+
 Some specific actions are supported with the following syntax:
 
 \begin{description}
@@ -364,9 +366,25 @@ Some specific actions are supported with the following syntax:
 	A group can be used in a build plan to group together all modules with the same version and/or variant. To define a group:
 
 	\begin{description}
-		\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} which will be searched on the specified module's plan variants or a set of OS discriminants.
+		\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} or \code{discriminant} which will be searched on the specified module's plan variants or a set of OS discriminants.
 
 		\code{\ddash{}plan=name/variant1.variant2}
+
+		The barrier can have multiple variants or discriminants separated with a coma:
+
+		\code{= deb,9}
+
+		All of them must be set for the barrier to be true.
+
+		Finally the barrier can have two groups of values, for a \code{=} condition only one of the group can match (OR) for the barrier to evaluate to TRUE., for a \code{/=} condition all both groups must match (AND) for the barrier to evaluate to TRUE.
+
+		\code{= deb,9 deb,11}
+
+		Will be true on GNU/Debian 9 and 11.
+
+		\code{/= deb,9 deb,11}
+
+		Will be true on all versions of GNU/Debian except version 9 and 11.
 
 		The group will be evaluated only if the barrier evaluate to true otherwise it will be skipped. If the barrier is not specified the group will always be evaluated (i.e. the barrier is by default TRUE).
 
@@ -972,6 +990,11 @@ A module defining the hook \code{<module>-modules} (possibly with variants) beco
 					\item echo <module2>
 		\end{enumerate}
 	\end{description}
+	\item[<module>-{[}common|<variant>{]}-propagate-version] \index{hook!propagate-version}Whether the meta-module version is to be propagated to aggregated modules.
+		\begin{description}[font=\textit,style=standard]
+			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+			\item[return] \tabto{2cm} \code{true | false}
+		\end{description}
 \end{description}
 
 And can list a build-plan to use for building all listed modules:
@@ -1005,12 +1028,15 @@ A module listed in a meta-module can itself be a meta-module. A meta-module can 
 
 \begin{itemize}[font=\texttt]
 	\item {[variant]-setup}
+	\item {[variant]-propagate-version}
 	\item {[variant]-build-depends}
 	\item {[variant]-plan}
 	\item {[variant]-modules}
 	\item {[variant]-prefix}
 	\item {[variant]-wrapup}
 \end{itemize}
+
+It is possible to specify a version for a meta-module even if there is no sources as this version will be propagated to all aggregated modules and recursively for all meta-modules.
 
 \subsection{Setting environment}
 \label{set-env}
