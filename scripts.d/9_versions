@@ -287,6 +287,26 @@ function handle-plan-auto-variant()
     fi
 }
 
+function parallel-do()
+{
+    local FCT=$1
+    local MAX=$2
+    shift 2
+
+    local N=0
+
+    for P in $*; do
+        $FCT $P &
+        (( n++ ))
+        if [[ $n -gt $MAX ]]; then
+            wait
+            n=0
+        fi
+    done
+
+    wait
+}
+
 function rewrite-module-plan()
 {
     local eres=0
@@ -302,10 +322,7 @@ function rewrite-module-plan()
             elog $K "$V"
             eres=1
         fi
-    done < <(
-        for M in ${!MODVER[@]}; do
-            handle-plan-auto-variant $M &
-        done )
+    done < <( parallel-do handle-plan-auto-variant 20 ${!MODVER[@]} )
 
     #  Rewrite plan for meta-module (this is done recursively until there
     #  is no new module plan entry rewritten.
@@ -325,10 +342,7 @@ function rewrite-module-plan()
                 elog $K "$V"
                 eres=1
             fi
-        done < <(
-            for M in ${MOREMOD[@]}; do
-                handle-plan-meta-module $M &
-            done )
+        done < <( parallel-do handle-plan-meta-module 20 ${MOREMOD[@]} )
 
         MOREMOD=( ${NEWMOD[@]} )
     done
