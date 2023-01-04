@@ -1,0 +1,16 @@
+
+function explicit-depends()
+{
+    echo exp
+}
+
+function explicit-config()
+{
+    echo config
+
+}
+
+function explicit-build()
+{
+    echo config
+}

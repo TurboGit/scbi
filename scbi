@@ -1115,14 +1115,11 @@ function handle-module()
     #  Check if module to be handled only if specificed on command line
 
     if [[ $FORMODULE != "@root" ]]; then
-        local FCT=$(get-hook $module $variant only-explicit-build)
+        is-hook-true $module $variant only-explicit-build FALSE
 
-        if [[ -n $FCT ]]; then
-            if [[ "$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
-                          $SCBI_TARGET $variant)" == "true" ]]; then
-                ilog $module Module $module built only if explitly specified
-                return
-            fi
+        if [[ $? == 0 ]]; then
+            ilog $module Module $module built only if explitly specified
+            return
         fi
     fi
 
