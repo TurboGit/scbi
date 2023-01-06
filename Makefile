@@ -2,6 +2,7 @@
 .SILENT: test
 
 SCRDIR=$(HOME)/.config/scbi
+INSTALL_DIR=$(HOME)/.local/bin
 
 #  Get SHA-1 of last commit in core SCBI
 CORE_SHA1=$(shell git log -1 --format="%h" -- scbi scripts.d/[0-9]* \
@@ -15,10 +16,13 @@ install: all
 
 all: clean.install
 	mkdir -p $(HOME)/bin $(HOME)/.bash_completion.d/
-	cat scbi | sed "s/@VERSION@/$(CORE_VER)/" > $(HOME)/bin/scbi
-	cat scbi-lint | sed "s/@VERSION@/$(CORE_VER)/" > $(HOME)/bin/scbi-lint
-	chmod u+x $(HOME)/bin/scbi
-	chmod u+x $(HOME)/bin/scbi-lint
+	cat scbi | sed "s/@VERSION@/$(CORE_VER)/" > $(INSTALL_DIR)/scbi
+	cat scbi-lint | sed "s/@VERSION@/$(CORE_VER)/" > $(INSTALL_DIR)/scbi-lint
+	chmod u+x $(INSTALL_DIR)/scbi
+	chmod u+x $(INSTALL_DIR)/scbi-lint
+	#  Remove old installation if any
+	rm -f $(HOME)/bin/scbi
+	rm -f $(HOME)/bin/scbi-lint
 	mkdir -p $(SCRDIR)
 	rm -f $(SCRDIR)/*~ $(SCRDIR)/.*~ scripts.d/*~ scripts.d/.*~
 	cp -r scripts.d/* scripts.d/.[a-z]* $(SCRDIR)
