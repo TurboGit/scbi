@@ -66,13 +66,18 @@ function setup-discriminants()
         local VER=$(lsb_release -r | tr -d '[ \t]')
         local OID=$(lsb_release -i | tr -d '[ \t]')
         local CNM=$(lsb_release -c | tr -d '[ \t]')
+        local DES=$(lsb_release -d)
+        local DES=${DES#*:}
+        local DES=${DES//\// }
+        local DES=${DES//\(/ }
+        local DES=${DES//\)/ }
 
         SCBI_OS_VERSION=${VER#Release:}
         SCBI_OS_CODENAME=${CNM#Codename:}
         SCBI_OS_MAJOR_VERSION=${SCBI_OS_VERSION%%.*}
         SCBI_OS_ID=${OID#*:}
 
-        SCBI_OS_DISCRIMINANTS+=(linux)
+        SCBI_OS_DISCRIMINANTS+=(${DES,,})
         SCBI_OS_DISCRIMINANTS+=($(uname -m))
         SCBI_OS_DISCRIMINANTS+=($(hostname --short))
         SCBI_OS_DISCRIMINANTS+=($(hostname --domain))
@@ -80,6 +85,10 @@ function setup-discriminants()
         SCBI_OS_DISCRIMINANTS+=($SCBI_OS_VERSION)
         SCBI_OS_DISCRIMINANTS+=($SCBI_OS_MAJOR_VERSION)
         SCBI_OS_DISCRIMINANTS+=($SCBI_OS_CODENAME)
+
+        # Remove duplicates values
+        SCBI_OS_DISCRIMINANTS=($(echo ${SCBI_OS_DISCRIMINANTS[*]} \
+                                    | tr ' ' '\n' | sort | uniq | tr '\n' ' '))
     fi
 }
 
