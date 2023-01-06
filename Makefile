@@ -15,7 +15,7 @@ PLG_VER=$(shell git describe $(PLG_SHA1))
 install: all
 
 all: clean.install
-	mkdir -p $(HOME)/bin $(HOME)/.bash_completion.d/
+	mkdir -p $(INSTALL_DIR) $(HOME)/.bash_completion.d/
 	cat scbi | sed "s/@VERSION@/$(CORE_VER)/" > $(INSTALL_DIR)/scbi
 	cat scbi-lint | sed "s/@VERSION@/$(CORE_VER)/" > $(INSTALL_DIR)/scbi-lint
 	chmod u+x $(INSTALL_DIR)/scbi
