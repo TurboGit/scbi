@@ -18,7 +18,7 @@ function c-cmake-env()
     local PREFIX=$1
     local TARGET=$2
 
-    add-to-var PATH $PREFIX/bin
+    prepend-to-var PATH $PREFIX/bin
 }
 
 function c-cmake-config()
