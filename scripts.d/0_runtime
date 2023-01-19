@@ -432,6 +432,26 @@ function get-module-ref()
     echo ${module_info[3]}
 }
 
+############################## get-module-name
+# Get full module name according to the module plan
+
+function get-module-name()
+{
+    local MODREF=$1
+
+    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    [[ $variant != "default" ]] && module+="/$variant"
+    [[ $ref != "NONE" ]] && module+=":$ref"
+
+    echo $module
+}
+
 ############################## with-variant
 # parameters are the OS library for the native support
 
