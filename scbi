@@ -1312,7 +1312,7 @@ function handle-module()
 
             record-build-plan $module $variant
 
-            #  Log module enviroment
+            #  Log module environment
 
             record-module-env $module $variant
 
