@@ -1,4 +1,10 @@
 
+function Mdepslibdeps-next-depends()
+{
+    echo lib1
+    echo depslibdeps
+}
+
 function Mdepslibdeps-depends()
 {
     echo depslibdeps
