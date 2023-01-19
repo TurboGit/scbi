@@ -475,6 +475,9 @@ function with-variant()
         H="function $PLUGIN-$VNAME-$hook()"
         H="$H { true; }"
         eval $H
+        H="function $PLUGIN-$VNAME-cross-$hook()"
+        H="$H { true; }"
+        eval $H
     done
 
     #  Hooks with NONE body
