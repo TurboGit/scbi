@@ -21,12 +21,23 @@ function c-cmake-env()
     prepend-to-var PATH $PREFIX/bin
 }
 
+function c-cmake-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo --prefix=$PREFIX
+}
+
 function c-cmake-config()
 {
     local PREFIX=$1
     local TARGET=$2
 
-    ../src/configure --prefix=$PREFIX
+    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
+
+    ../src/configure $OPTIONS
 }
 
 function c-cmake-build()
