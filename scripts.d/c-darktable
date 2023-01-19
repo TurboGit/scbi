@@ -33,7 +33,6 @@ function c-darktable-common-depends()
     echo os@-png-dev
     echo os@-jpeg-dev
     echo os@-heif-dev
-    echo os@-jxl-dev
     echo os@-openjp2-dev
     echo os@-pugixml-dev
     echo os@-xml2-dev
@@ -69,6 +68,11 @@ function c-darktable-common-depends()
 function c-darktable-im-depends()
 {
     echo c-imagemagick
+}
+
+function c-darktable-jxl-depends()
+{
+    echo os@-jxl-dev
 }
 
 function c-darktable-clang-build-env()
