@@ -955,9 +955,16 @@ function get-tar()
 
     cd tartmp
 
+    if [[ "$tarsrc" =~ "tar.zst" ]]; then
+        check-tools unzstd
+        [[ $? == 1 ]] &&
+            elog $MODULE missing zst tool to decompress this archive &&
+            return 1
+    fi
+
     tar xf $SCBI_TAR/$tarsrc
 
-    [[ $? == 1 ]] &&
+    [[ $? != 0 ]] &&
         elog $MODULE error: tarball $tarsrc is corrupted &&
         return 1
 
@@ -966,7 +973,7 @@ function get-tar()
     if [[ -d "$topdir" ]]; then
         mv $topdir ../tarsrc
         cd ..
-        rmdir tartmp
+        rm -fr tartmp
         ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc) tar
         [[ -f $SCBI_TAR/$tarsrc.sha1 ]] &&
             ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc.sha1) \

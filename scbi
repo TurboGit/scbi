@@ -845,6 +845,8 @@ function handle-sources()
             get-tar $module $variant $ref >> $log 2>&1
 
             if [[ $? != 0 ]]; then
+                #  In case of error display log from get-tar
+                grep ' : ' $log
                 ilog $module cannot get/find tar sources
                 exit 1
             fi
