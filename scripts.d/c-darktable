@@ -14,11 +14,11 @@ function c-darktable-out-of-tree()
 
 function c-darktable-build-depends()
 {
-    echo os@-cmake
     echo os@-python3-jsonschema
     echo os@-intltool
     echo os@-xsltproc
     echo os@-findbin
+    echo c-cmake
 }
 
 function c-darktable-clang-build-depends()

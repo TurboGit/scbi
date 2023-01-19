@@ -16,8 +16,8 @@ function c-exiv2-out-of-tree()
 
 function c-exiv2-build-depends()
 {
-    echo os@-cmake
     echo os@-g++
+    echo c-cmake
 }
 
 function c-exiv2-env()

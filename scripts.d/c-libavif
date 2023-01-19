@@ -9,6 +9,11 @@ function c-libavif-vcs()
     echo https://github.com/AOMediaCodec/libavif.git
 }
 
+function c-libavif-build-depends()
+{
+    echo c-cmake
+}
+
 function c-libavif-depends()
 {
     echo libgav1-dev
