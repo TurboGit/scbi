@@ -1,4 +1,6 @@
 
+with-variant native os@-cmake:[v]
+
 function c-cmake-vcs()
 {
     echo default
