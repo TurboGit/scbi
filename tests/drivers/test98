@@ -1,0 +1,26 @@
+
+NRUNS ./scbi --deps depslibdeps
+
+CLEAN-DIFF <<EOF
+error: missing dependencies for building libdeps
+error    required by depslibdeps
+error: unknown-lib not found
+EOF
+
+NRUNS ./scbi --deps Mdepslibdeps
+
+CLEAN-DIFF <<EOF
+error: missing dependencies for building libdeps
+error    required by depslibdeps
+error    required by Mdepslibdeps
+error: unknown-lib not found
+EOF
+
+NRUNS ./scbi --plan=deps --deps Mdepslibdeps
+
+CLEAN-DIFF <<EOF
+error: missing dependencies for building libdeps/gothere
+error    required by depslibdeps/here:dev
+error    required by Mdepslibdeps/go:v9
+error: unknown-lib not found
+EOF

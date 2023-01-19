@@ -1,0 +1,5 @@
+
+function Mdepslibdeps-depends()
+{
+    echo depslibdeps
+}

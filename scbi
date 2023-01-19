@@ -742,6 +742,15 @@ function handle-depends()
 
             echo "$MSG: missing dependencies for building $MNAME"
 
+            local IDX=${#SCBI_MODULES_LIST[*]}
+            (( IDX-- ))
+
+            while [[ $IDX -gt 0 ]]; do
+                (( IDX-- ))
+                local MNAME=${SCBI_MODULES_LIST[$IDX]}
+                echo "$MSG    required by $(get-module-name $MNAME)"
+            done
+
             for dmodule in $(get-all-depends $fmodule $fvariant build-depends); do
                 [[ ! -f $SCBI_PLUGINS/$dmodule ]] && check-pkg $dmodule
             done
@@ -1125,6 +1134,8 @@ function handle-module()
 
     #  Create module build directory
 
+    SCBI_MODULES_LIST+=( "$MODREF" )
+
     mkdir -p $SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log > $log 2>&1
 
     #  Check if meta-module, if so call handle-module for each one
@@ -1133,7 +1144,9 @@ function handle-module()
         (
             handle-meta-module $module $variant
         )
-        return $?
+        res=$?
+        unset SCBI_MODULES_LIST[-1]
+        return $res
     fi
 
     #  Check for depends, and handle them if any
@@ -1177,6 +1190,7 @@ function handle-module()
 
     if [[ $DRY_RUN == yes ]]; then
         echo "$MODREF"
+        unset SCBI_MODULES_LIST[-1]
         return 0
     fi
 
@@ -1197,12 +1211,16 @@ function handle-module()
             module-clean-install \
                 $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
                 $FORMODULE $module $variant $SCBI_TARGET
+        unset SCBI_MODULES_LIST[-1]
         return 0
     fi
 
     #  If purge-only, stop there
 
-    [[ $DO_PURGE = only ]] && return 0
+    if [[ $DO_PURGE = only ]]; then
+        unset SCBI_MODULES_LIST[-1]
+        return 0
+    fi
 
     if [[ $ref == NONE ]]; then
         DISPREF=master
@@ -1542,6 +1560,8 @@ function handle-module()
     ilog $module End Building $module \[${variant//./ }\] \($DISPREF\) \
         | tee -a $log
     line-sep
+
+    unset SCBI_MODULES_LIST[-1]
 }
 
 ############################## body
