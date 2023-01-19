@@ -1145,9 +1145,8 @@ function handle-module()
                 handle-depends $MODREF $dmodule
             done
         )
-        if [[ $? != 0 ]]; then
-            exit 1
-        fi
+        [[ $? != 0 ]] && exit 1
+
         [[ $DRY_RUN == no ]] && line-sep
 
         #  And then we check for standard dependencies
@@ -1156,9 +1155,8 @@ function handle-module()
                 handle-depends $MODREF $dmodule
             done
         )
-        if [[ $? != 0 ]]; then
-            exit 1
-        fi
+        [[ $? != 0 ]] && exit 1
+
         [[ $DRY_RUN == no ]] && line-sep
 
         #  Finaly check for tests dependencies if needed
@@ -1171,9 +1169,8 @@ function handle-module()
                         handle-depends $MODREF $dmodule
                     done
                 )
-                if [[ $? != 0 ]]; then
-                    exit 1
-                fi
+                [[ $? != 0 ]] && exit 1
+
                 [[ $DRY_RUN == no ]] && line-sep
             }
     fi
