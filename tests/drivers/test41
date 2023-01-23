@@ -18,8 +18,128 @@ natv-native-build-env ()
 {
     true
 }
+natv-native-common-build-depends is a function
+natv-native-common-build-depends ()
+{
+    true
+}
+natv-native-common-build-env is a function
+natv-native-common-build-env ()
+{
+    true
+}
+natv-native-common-cross-build-depends is a function
+natv-native-common-cross-build-depends ()
+{
+    true
+}
+natv-native-common-cross-build-env is a function
+natv-native-common-cross-build-env ()
+{
+    true
+}
+natv-native-common-cross-env is a function
+natv-native-common-cross-env ()
+{
+    true
+}
+natv-native-common-env is a function
+natv-native-common-env ()
+{
+    true
+}
 natv-native-config is a function
 natv-native-config ()
+{
+    true
+}
+natv-native-cross-build is a function
+natv-native-cross-build ()
+{
+    true
+}
+natv-native-cross-build-depends is a function
+natv-native-cross-build-depends ()
+{
+    true
+}
+natv-native-cross-build-env is a function
+natv-native-cross-build-env ()
+{
+    true
+}
+natv-native-cross-config is a function
+natv-native-cross-config ()
+{
+    true
+}
+natv-native-cross-env is a function
+natv-native-cross-env ()
+{
+    true
+}
+natv-native-cross-install is a function
+natv-native-cross-install ()
+{
+    true
+}
+natv-native-cross-post-build is a function
+natv-native-cross-post-build ()
+{
+    true
+}
+natv-native-cross-post-config is a function
+natv-native-cross-post-config ()
+{
+    true
+}
+natv-native-cross-post-install is a function
+natv-native-cross-post-install ()
+{
+    true
+}
+natv-native-cross-pre-build is a function
+natv-native-cross-pre-build ()
+{
+    true
+}
+natv-native-cross-pre-config is a function
+natv-native-cross-pre-config ()
+{
+    true
+}
+natv-native-cross-pre-install is a function
+natv-native-cross-pre-install ()
+{
+    true
+}
+natv-native-default-build-depends is a function
+natv-native-default-build-depends ()
+{
+    true
+}
+natv-native-default-build-env is a function
+natv-native-default-build-env ()
+{
+    true
+}
+natv-native-default-cross-build-depends is a function
+natv-native-default-cross-build-depends ()
+{
+    true
+}
+natv-native-default-cross-build-env is a function
+natv-native-default-cross-build-env ()
+{
+    true
+}
+natv-native-default-cross-env is a function
+natv-native-default-cross-env ()
+{
+    true
+}
+natv-native-default-env is a function
+natv-native-default-env ()
 {
     true
 }
@@ -37,6 +157,36 @@ natv-native-env ()
 }
 natv-native-install is a function
 natv-native-install ()
+{
+    true
+}
+natv-native-post-build is a function
+natv-native-post-build ()
+{
+    true
+}
+natv-native-post-config is a function
+natv-native-post-config ()
+{
+    true
+}
+natv-native-post-install is a function
+natv-native-post-install ()
+{
+    true
+}
+natv-native-pre-build is a function
+natv-native-pre-build ()
+{
+    true
+}
+natv-native-pre-config is a function
+natv-native-pre-config ()
+{
+    true
+}
+natv-native-pre-install is a function
+natv-native-pre-install ()
 {
     true
 }

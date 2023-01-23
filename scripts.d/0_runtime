@@ -466,24 +466,50 @@ function with-variant()
     local module_info=( $(get-module-ref $PLUGIN) )
     local ref=${module_info[3]}
 
-    #  Hooks with nop body
-    local SCBI_HOOKS="config build install env build-env build-depends"
+    #  Hooks with nop body & pre/post
+    local SCBI_HOOKS=()
+
+    for H in config build install; do
+        local SCBI_HOOKS+=($H)
+        local SCBI_HOOKS+=(pre-$H)
+        local SCBI_HOOKS+=(post-$H)
+        local SCBI_HOOKS+=(cross-$H)
+        local SCBI_HOOKS+=(cross-pre-$H)
+        local SCBI_HOOKS+=(cross-post-$H)
+    done
 
     local H=""
 
-    for hook in $SCBI_HOOKS; do
+    for hook in ${SCBI_HOOKS[*]}; do
         H="function $PLUGIN-$VNAME-$hook()"
         H="$H { true; }"
         eval $H
-        H="function $PLUGIN-$VNAME-cross-$hook()"
+    done
+
+    #  Hooks with nop body & pre/post
+    local SCBI_HOOKS=()
+
+    for H in env build-env build-depends; do
+        local SCBI_HOOKS+=($H)
+        local SCBI_HOOKS+=(common-$H)
+        local SCBI_HOOKS+=(default-$H)
+        local SCBI_HOOKS+=(cross-$H)
+        local SCBI_HOOKS+=(common-cross-$H)
+        local SCBI_HOOKS+=(default-cross-$H)
+    done
+
+    local H=""
+
+    for hook in ${SCBI_HOOKS[*]}; do
+        H="function $PLUGIN-$VNAME-$hook()"
         H="$H { true; }"
         eval $H
     done
 
     #  Hooks with NONE body
-    local SCBI_HOOKS="vcs tar"
+    local SCBI_HOOKS=( vcs tar )
 
-    for hook in $SCBI_HOOKS; do
+    for hook in ${SCBI_HOOKS[*]}; do
         H="function $PLUGIN-$VNAME-$hook()"
         H="$H { echo NONE; echo NONE; echo NONE; echo NONE; }"
         eval $H
