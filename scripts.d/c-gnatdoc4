@@ -1,0 +1,86 @@
+
+function c-gnatdoc4-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gnatdoc
+}
+
+function c-gnatdoc4-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-gnatdoc4-depends()
+{
+    echo c-gpr
+    echo c-libadalang
+    echo c-langkit
+    echo c-vss
+    echo c-markdown
+}
+
+function c-gnatdoc4-out-of-tree()
+{
+    echo false
+}
+
+function c-gnatdoc4-pre-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local MKD=${SCBI_MODULES_DIR["c-markdown@src"]}
+
+    cp -r $MKD subprojects/markdown
+}
+
+function c-gnatdoc4-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    set-var LIBRARY_TYPE static-pic
+}
+
+function c-gnatdoc4-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH             $PREFIX/bin
+    add-to-var GPR_PROJECT_PATH $PREFIX/gnat
+}
+
+function c-gnatdoc4-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make INSTALL_DIR=$PREFIX
+}
+
+function c-gnatdoc4-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    mkdir -p $PREFIX
+
+    cp -r bin $PREFIX &&
+        cp -r .objs $PREFIX &&
+        cp -r source $PREFIX &&
+        cp -r gnat $PREFIX
+}
+
+function c-gnatdoc4-prefix()
+{
+    echo NONE
+}
