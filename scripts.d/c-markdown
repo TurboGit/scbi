@@ -1,0 +1,26 @@
+
+function c-markdown-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/markdown
+}
+
+function c-markdown-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/gnat
+}
+
+function c-markdown-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ln -s src ../install
+}
