@@ -85,7 +85,7 @@ function c-libadalang-cross-build()
 
     for KIND in static relocatable static-pic; do
         gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND \
-                 ./build/libadalang.gpr
+                 ./build/libadalang.gpr || return 1
     done
 }
 
@@ -99,7 +99,7 @@ function c-libadalang-build()
 
     for KIND in static relocatable static-pic; do
         gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND \
-                 ./build/libadalang.gpr
+                 ./build/libadalang.gpr || return 1
     done
 }
 
@@ -139,7 +139,7 @@ function c-libadalang-install()
     for KIND in static relocatable static-pic; do
         gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
                    -XXMLADA_BUILD=$KIND --build-name=$KIND \
-                   ./build/libadalang.gpr
+                   ./build/libadalang.gpr || return 1
     done
 }
 

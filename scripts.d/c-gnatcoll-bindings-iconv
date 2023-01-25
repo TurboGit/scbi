@@ -58,8 +58,8 @@ function c-gnatcoll-bindings-iconv-build()
     local GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
 
     for kind in static relocatable static-pic; do
-        gprbuild $GOPTS -XLIBRARY_TYPE=$kind iconv/gnatcoll_iconv.gpr
-        [[ $res != 0 ]] && exit 1
+        gprbuild $GOPTS -XLIBRARY_TYPE=$kind iconv/gnatcoll_iconv.gpr \
+            || return 1
     done
 
     true
@@ -83,8 +83,7 @@ function c-gnatcoll-bindings-iconv-install()
         gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
                    --build-var=GNATCOLL.ICONV_BUILD \
                    --install-name=gnatcoll_iconv \
-                   --build-name=$kind iconv/gnatcoll_iconv.gpr
-        [[ $? != 0 ]] && exit 1
+                   --build-name=$kind iconv/gnatcoll_iconv.gpr || return 1
     done
 
     true

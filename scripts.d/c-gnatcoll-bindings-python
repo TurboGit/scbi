@@ -77,7 +77,8 @@ function c-gnatcoll-bindings-python-build()
     local GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
 
     for kind in static relocatable; do
-        gprbuild -v $GOPTS -XLIBRARY_TYPE=$kind python/gnatcoll_python.gpr
+        gprbuild -v $GOPTS -XLIBRARY_TYPE=$kind python/gnatcoll_python.gpr \
+            || return 1
     done
 }
 
@@ -99,6 +100,6 @@ function c-gnatcoll-bindings-python-install()
         gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
                    --build-var=GNATCOLL.PYTHON_BUILD \
                    --build-name=$kind \
-                   python/gnatcoll_python.gpr
+                   python/gnatcoll_python.gpr || return 1
     done
 }

@@ -62,7 +62,7 @@ function c-gnatcoll-bindings-gmp-build()
     local GOPTS="-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
 
     for kind in static relocatable static-pic; do
-        gprbuild $GOPTS -XLIBRARY_TYPE=$kind gmp/gnatcoll_gmp.gpr
+        gprbuild $GOPTS -XLIBRARY_TYPE=$kind gmp/gnatcoll_gmp.gpr || return 1
     done
 }
 
@@ -84,6 +84,6 @@ function c-gnatcoll-bindings-gmp-install()
         gprinstall $GOPTS -XLIBRARY_TYPE=$kind \
                    --build-var=GNATCOLL.GMP_BUILD \
                    --install-name=gnatcoll_gmp \
-                   --build-name=$kind gmp/gnatcoll_gmp.gpr
+                   --build-name=$kind gmp/gnatcoll_gmp.gpr || return 1
     done
 }

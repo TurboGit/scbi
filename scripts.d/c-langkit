@@ -75,7 +75,7 @@ function c-langkit-cross-build()
 
     for KIND in static relocatable static-pic; do
         gprbuild -vP2 $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND \
-                 ./langkit/support/langkit_support.gpr
+                 ./langkit/support/langkit_support.gpr || return 1
     done
 }
 
@@ -103,7 +103,7 @@ function c-langkit-cross-install()
     for KIND in static relocatable static-pic; do
         gprinstall $GOPTS -XLIBRARY_TYPE=$KIND \
                    -XXMLADA_BUILD=$KIND --build-name=$KIND \
-                   ./langkit/support/langkit_support.gpr
+                   ./langkit/support/langkit_support.gpr || return 1
     done
 }
 
