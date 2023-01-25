@@ -1,0 +1,57 @@
+
+function c-adasat-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/adasat
+}
+
+function c-adasat-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-adasat-cross-build-depends()
+{
+    echo c-sandbox
+}
+
+function c-adasat-out-of-tree()
+{
+    echo false
+}
+
+function c-adasat-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
+}
+
+function c-adasat-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make INSTALL_DIR=$PREFIX all-libs
+}
+
+function c-adasat-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make INSTALL_DIR=$PREFIX install
+}
+
+function c-adasat-prefix()
+{
+    echo NONE
+}
