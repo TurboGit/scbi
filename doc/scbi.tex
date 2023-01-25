@@ -248,7 +248,7 @@ An environment is a set of shell variables used to control the build environment
 	\item[SCBI\_BDIR] The default directory for the build directory.  This is also called the sandbox directory. \\
 	Default is \file{\$SCBI\_ROOT/builds}.
 
-	\item[SCBI\_MODULES\_DIR{[<module-name>]}] An associative array giving the install directory for a given module name. Directories have \code{\$SCBI\_BDIR} has prefix and point to the install directory for the module's variant. This associative array can be used in hooks \code{config}, \code{build} and \code{install}.
+	\item[SCBI\_MODULES\_DIR{[<module-name>[@src|@build]]}] An associative array giving the \emph{install}, \emph{source} or \emph{build} directories for a given module name and variant. It is possible to get the \emph{source} and \emph{build} directories by adding respectively \code{@src} and \code{@build} at the end of the \code{<module-name>}. For example \code{SCBI\_MODULES\_DIR{[<module-name>@src]}} points to the source directory and \code{SCBI\_MODULES\_DIR{[<module-name>@build]}} point to the build directory. This associative array can be used in hooks \code{config}, \code{build} and \code{install}.
 
 	\item[SCBI\_PREFIX] The default global install directory. Each module after being installed into the sandbox are copied into this global installation directory. \\Default is \file{\$SCBI\_BDIR/install}. Each module can disable global installation (\seeref{global-install}).
 

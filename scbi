@@ -425,6 +425,8 @@ function handle-module-env()
         echo >> $SCBI_ENV_MODULE
         echo "# $MODREF" >> $SCBI_ENV_MODULE
         SCBI_MODULES_DIR["$module"]+="$TVDIR/install"
+        SCBI_MODULES_DIR["${module}@src"]+="$TVDIR/src"
+        SCBI_MODULES_DIR["${module}@build"]+="$TVDIR/build"
     fi
 
     _internal_call-variant-hooks \

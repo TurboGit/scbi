@@ -11,3 +11,8 @@ GREP "^# testme" $EFILE
 # check SCBI_MODULES_DIR entries
 GREP '\["testme"\]' $EFILE
 GREP '\["gentool"\]' $EFILE
+
+GREP '\["testme@src"\]' $EFILE
+GREP '\["testme@build"\]' $EFILE
+GREP '\["gentool@src"\]' $EFILE
+GREP '\["gentool@build"\]' $EFILE
