@@ -7,9 +7,14 @@ function c-ada-libfswatch-vcs()
     echo https://github.com/AdaCore/ada_libfswatch
 }
 
+function c-ada-libfswatch-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
 function c-ada-libfswatch-depends()
 {
-    echo c-gprbuild
     echo c-gnatcoll
     echo c-libfswatch
 }

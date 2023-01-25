@@ -22,6 +22,7 @@ function c-libadalang-tools-depends()
 {
     echo c-libadalang
     echo c-templates-parser
+    echo c-vss
 }
 
 function c-libadalang-tools-out-of-tree()

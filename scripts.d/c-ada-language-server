@@ -17,18 +17,20 @@ function c-ada-language-server-out-of-tree()
 
 function c-ada-language-server-build-depends()
 {
+    echo p-gnat
     echo c-gprbuild
 }
 
 function c-ada-language-server-depends()
 {
-    echo c-libgpr
-    echo c-xmlada
-    echo c-gnatcoll
-    echo c-vss
-    echo c-libadalang-tools
-    echo c-ada-libfswatch
     echo c-spawn
+    echo c-vss
+    echo c-ada-libfswatch
+    echo c-libadalang-tools
+    echo c-langkit
+    echo c-gpr
+    echo c-templates-parser
+    echo c-gnatdoc4
 }
 
 function c-ada-language-server-env()
