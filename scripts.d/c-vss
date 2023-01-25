@@ -22,6 +22,12 @@ function c-vss-env()
     add-to-var GPR_PROJECT_PATH $PREFIX/../build/gnat
 }
 
+function c-vss-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
 function c-vss-build()
 {
     local PREFIX=$1
