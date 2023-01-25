@@ -78,7 +78,8 @@ function c-gpr-build()
 
     # Do not build gprname which is based on libadalang
 
-    make build-tools build-lib-relocatable build-lib-static-pic
+    make build-tools build-lib-relocatable \
+         build-lib-static-pic build-lib-static
 }
 
 function c-gpr-install()
@@ -87,7 +88,8 @@ function c-gpr-install()
     local TARGET=$2
 
     make GPRINSTALL=gprinstall install-tools \
-         install-lib-relocatable install-lib-static-pic
+         install-lib-relocatable \
+         install-lib-static-pic install-lib-static
 }
 
 function c-gpr-tests()
