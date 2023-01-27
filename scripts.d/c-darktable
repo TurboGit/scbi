@@ -39,7 +39,7 @@ function c-darktable-common-depends()
     echo os@-lcms2-dev
     echo os@-tiff-dev
     echo os@-curl4
-    echo os@-curl4-gnutls-dev
+    echo os@-curl4-openssl-dev
     echo os@-gphoto2-dev
     echo os@-openexr-dev
     echo os@-soup2-dev
