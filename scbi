@@ -2024,6 +2024,18 @@ fi
 
 cp $SCBI_PLUGINS/0_runtime $SCBI_BDIR/.scbi.runtime
 
+#  Some more helpers that cannot be put in 0_runtime as needed in scbi
+#  script very early (before plug-in dir is set).
+{
+    echo
+    echo "###### helpers"
+    echo
+    for fct in check-tool check-tools check-tools-abort; do
+        echo "function $(declare -f $fct)"
+        echo
+    done
+} >> $SCBI_BDIR/.scbi.runtime
+
 #  Run script for all modules
 
 for module in $SCBI_MODULES; do
