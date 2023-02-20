@@ -49,7 +49,7 @@ function module-patch()
 
     local res=0
 
-    local PATCHES=$(_internal_call-variant-hooks $module patches \
+    local PATCHES=$(plugin-call-variant-hooks $module patches \
                                                  $PREFIX $TARGET $variant \
                                                  $kind $ref)
 

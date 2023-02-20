@@ -201,7 +201,7 @@ function get-all-depends()
     local VARIANT="$2"
     local HOOK="$3"
 
-    for M in $(_internal_call-variant-hooks \
+    for M in $(plugin-call-variant-hooks \
                    $MODULE $HOOK "$SCBI_PREFIX" "$SCBI_TARGET" $VARIANT);
     do
         #  Module is found
@@ -316,7 +316,7 @@ function _internal_for-all-modules()
         if [[ $? = 0 ]]; then
             push-dependency-tree $module
 
-            local MODS=$(_internal_call-variant-hooks \
+            local MODS=$(plugin-call-variant-hooks \
                              $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
 
             if [[ -n $MODS ]]; then
@@ -557,7 +557,7 @@ function _internal_for-final-modules()
     if [[ $(is-meta-module $MODREF) == yes ]]; then
         load-module $MODREF
 
-        local MODS=$(_internal_call-variant-hooks \
+        local MODS=$(plugin-call-variant-hooks \
                          $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
 
         for dmodule in $MODS; do

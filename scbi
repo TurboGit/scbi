@@ -429,7 +429,7 @@ function handle-module-env()
         SCBI_MODULES_DIR["${module}@build"]+="$TVDIR/build"
     fi
 
-    _internal_call-variant-hooks \
+    plugin-call-variant-hooks \
         $module $ENV \
         $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $SCBI_TARGET $variant
 }
@@ -1032,7 +1032,7 @@ function handle-meta-module()
     line-sep
 
     [[ $DEPS = yes ]] &&
-        for module in $(_internal_call-variant-hooks \
+        for module in $(plugin-call-variant-hooks \
                         $METAMODULE modules $SCBI_PREFIX $SCBI_TARGET $VARIANT);
         do
             handle-module $METAMODULE $module || exit 1

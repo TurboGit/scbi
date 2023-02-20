@@ -229,7 +229,7 @@ function handle-plan-meta-module()
 
         is-hook-true $module $variant propagate-version TRUE || return
 
-        for mod in $(_internal_call-variant-hooks \
+        for mod in $(plugin-call-variant-hooks \
                          $module modules $SCBI_PREFIX $SCBI_TARGET $variant);
         do
             local mref=""

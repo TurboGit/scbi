@@ -33,7 +33,7 @@ function get-config-options()
 
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
-    _internal_call-variant-hooks $PLUGIN config-options $PREFIX $TARGET $VARIANT
+    plugin-call-variant-hooks $PLUGIN config-options $PREFIX $TARGET $VARIANT
 }
 
 ############################## is-enabled
@@ -281,7 +281,7 @@ function load-module()
     fi
 
     if [[ -z "${SCBI_LOADED[$key]}" ]]; then
-        local MODS=$(_internal_call-variant-hooks \
+        local MODS=$(plugin-call-variant-hooks \
                          $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
 
         if [[ -z $MODS ]]; then
@@ -768,9 +768,9 @@ function unset-var()
     define-var UNSET $VAR
 }
 
-############################## _internal_call-variant-hooks
+############################## plugin-call-variant-hooks
 
-function _internal_call-variant-hooks()
+function plugin-call-variant-hooks()
 {
     local PLUGIN=$1
     local HOOK=$2
@@ -845,7 +845,7 @@ function call-variant-hooks()
 
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
-    _internal_call-variant-hooks $PLUGIN $HOOK $PREFIX $TARGET $VARIANT $*
+    plugin-call-variant-hooks $PLUGIN $HOOK $PREFIX $TARGET $VARIANT $*
 }
 
 ############################## check-versions
