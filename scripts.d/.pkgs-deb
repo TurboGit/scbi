@@ -158,3 +158,13 @@ os@-zlib1g-dev                      zlib1g-dev
 os@-libgmp-dev                      libgmp-dev
 os@-libmpc-dev                      libmpc-dev
 os@-libmpfr-dev                     libmpfr-dev
+os@-llvm-11                         llvm-11
+os@-clang-11                        clang-11
+os@-llvm-14                         llvm-14
+os@-clang-14                        clang-14
+os@-llvm-15                         llvm-15
+os@-clang-15                        clang-15
+os@-llvm-16                         llvm-16
+os@-clang-16                        clang-16
+os@-llvm-17                         llvm-17
+os@-clang-17                        clang-17
