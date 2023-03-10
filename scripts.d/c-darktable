@@ -23,8 +23,8 @@ function c-darktable-build-depends()
 
 function c-darktable-clang-build-depends()
 {
-    echo os@-llvm-11
-    echo os@-clang-11
+    echo os@-llvm-$SCBI_CLANG_VERSION
+    echo os@-clang-$SCBI_CLANG_VERSION
 }
 
 function c-darktable-common-depends()
@@ -77,14 +77,14 @@ function c-darktable-jxl-depends()
 
 function c-darktable-clang-build-env()
 {
-    add-to-var CMAKE_C_COMPILER   clang-$SCBI_CLANG_VERSION
-    add-to-var CMAKE_CXX_COMPILER clang++-$SCBI_CLANG_VERSION
+    set-var CMAKE_C_COMPILER   clang-$SCBI_CLANG_VERSION
+    set-var CMAKE_CXX_COMPILER clang++-$SCBI_CLANG_VERSION
 }
 
-function c-darktable-build-env()
+function c-darktable-default-build-env()
 {
-    add-to-var CMAKE_C_COMPILER   gcc
-    add-to-var CMAKE_CXX_COMPILER g++
+    set-var CMAKE_C_COMPILER   gcc
+    set-var CMAKE_CXX_COMPILER g++
 }
 
 function c-darktable-env()
@@ -111,7 +111,25 @@ function c-darktable-release-config-options()
     echo -DCMAKE_BUILD_TYPE=Release
 }
 
+function c-darktable-debug-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo -DCMAKE_BUILD_TYPE=Debug
+}
+
 function c-darktable-default-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo -DCMAKE_BUILD_TYPE=RelWithDebInfo
+}
+
+function c-darktable-clang-config-options()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -127,6 +145,8 @@ function c-darktable-common-config-options()
     local VARIANT=$3
 
     echo -DCMAKE_INSTALL_PREFIX=$PREFIX
+    echo -DCMAKE_C_COMPILER=$CMAKE_C_COMPILER
+    echo -DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER
     echo -DUSE_GAME=OFF
 }
 
