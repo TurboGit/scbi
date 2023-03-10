@@ -1308,7 +1308,7 @@ function handle-module()
             fi
 
         else
-            #  Recood the build-plan
+            #  Record the build-plan
 
             record-build-plan $module $variant
 
