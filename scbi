@@ -1015,6 +1015,8 @@ function handle-meta-module()
         fi
     fi
 
+    record-build-plan $METAMODULE $VARIANT
+
     #  check for dependencies
 
     [[ $DEPS = yes ]] &&
