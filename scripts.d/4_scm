@@ -541,10 +541,10 @@ function vcs-build-id()
         fi
 
         if [[ -d .git ]]; then
-            local gver=$(git rev-list -1 HEAD)
-            local gdif=$( ( git diff HEAD ;
+            local gver=$(git rev-list -1 HEAD --)
+            local gdif=$( ( git diff HEAD -- ;
                              git submodule --quiet foreach --recursive \
-                                 git diff HEAD ) | md5sum | cut -d' ' -f1)
+                                 git diff HEAD -- ) | md5sum | cut -d' ' -f1)
 
             echo $gver$gdif
 
