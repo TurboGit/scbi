@@ -330,9 +330,17 @@ function module-variant-wrapper()
     local FCT=$(get-hook $MODULE $VARIANT $STEP)
 
     if [[ -n $FCT ]]; then
-        module-wrapper $PREFIX $MODULE \
-                       $VARIANT ${FCT#"${MODULE}-"} || exit 1
-        return $?
+        #  Now check that the body is not empty (default variant)
+        local BODY=$(declare -f $FCT | tail --lines=-3)
+        local BODY=$(echo $BODY)
+        local res=0
+
+        if [[ "$BODY" != "{ true }" ]]; then
+            module-wrapper $PREFIX $MODULE \
+                           $VARIANT ${FCT#"${MODULE}-"} || exit 1
+            res=$?
+        fi
+        return $res
     fi
 }
 
