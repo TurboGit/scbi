@@ -25,6 +25,7 @@ function c-darktable-clang-build-depends()
 {
     echo os@-llvm-$SCBI_CLANG_VERSION
     echo os@-clang-$SCBI_CLANG_VERSION
+    echo os@-libomp-$SCBI_CLANG_VERSION
 }
 
 function c-darktable-common-depends()

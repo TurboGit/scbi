@@ -168,3 +168,8 @@ os@-llvm-16                         llvm-16
 os@-clang-16                        clang-16
 os@-llvm-17                         llvm-17
 os@-clang-17                        clang-17
+os@-libomp-11                       libomp-11-dev
+os@-libomp-14                       libomp-14-dev
+os@-libomp-15                       libomp-15-dev
+os@-libomp-16                       libomp-16-dev
+os@-libomp-17                       libomp-17-dev
