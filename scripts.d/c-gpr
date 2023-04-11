@@ -100,7 +100,11 @@ function c-gpr-tests()
     local VARIANT=$3
     local OPTIONS="$4"
 
+    local TSTDIR=$HOME/.local/tmp
+
+    [[ ! -d $TSTDIR ]] && mkdir $TSTDIR
+
     cd testsuite &&
-        python3 ./testsuite.py --temp-dir=$HOME/tmp \
+        python3 ./testsuite.py --temp-dir=$TSTDIR \
                 --show-error-output -j$SCBI_JOBS $OPTIONS
 }
