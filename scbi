@@ -1010,18 +1010,10 @@ function handle-meta-module()
 
     #  check for plan
 
-    fn-exists $METAMODULE-$VARIANT-plan
+    local FCT=$(get-hook $METAMODULE $VARIANT plan)
 
-    if [[ $? = 0 ]]; then
-        SCBI_PLAN=$($METAMODULE-$VARIANT-plan)
-        load-module-plan $SCBI_PLAN
-    else
-        fn-exists $METAMODULE-plan
-        if [[ $? = 0 ]]; then
-            SCBI_PLAN=$($METAMODULE-plan)
-            load-module-plan $SCBI_PLAN
-        fi
-    fi
+    [[ -n $FCT ]] &&
+        load-module-plan $($FCT $SCBI_PLAN)
 
     record-build-plan $METAMODULE $VARIANT
 
