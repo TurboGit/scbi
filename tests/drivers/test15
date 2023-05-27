@@ -17,10 +17,10 @@ RUNS ./scbi --purge:only lib2
 RUNS ./scbi --no-patch --tests --deps supermod
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Metamodule supermod-default setup
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] setup
 xxxx/xx/xx xx:xx:xx : setup starting
 xxxx/xx/xx xx:xx:xx : setup completed
-xxxx/xx/xx xx:xx:xx : End metamodule supermod-default setup
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] setup
 
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -54,10 +54,10 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 
-xxxx/xx/xx xx:xx:xx : Metamodule supermod-default wrapup
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
 xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
-xxxx/xx/xx xx:xx:xx : End metamodule supermod-default wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
 EOF
 
 # echo ========== build supermod with local plan myplan
@@ -66,10 +66,10 @@ echo lib2:dev >> .scbi-plan-myplan
 RUNS ./scbi --no-patch --tests --plan=myplan --deps supermod
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Metamodule supermod-default setup
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] setup
 xxxx/xx/xx xx:xx:xx : setup starting
 xxxx/xx/xx xx:xx:xx : setup completed
-xxxx/xx/xx xx:xx:xx : End metamodule supermod-default setup
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] setup
 
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -102,10 +102,10 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (dev)
 
-xxxx/xx/xx xx:xx:xx : Metamodule supermod-default wrapup
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
 xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
-xxxx/xx/xx xx:xx:xx : End metamodule supermod-default wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
 EOF
 
 rm .scbi-plan-myplan

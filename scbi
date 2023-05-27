@@ -1027,10 +1027,12 @@ function handle-meta-module()
     #  check for setup
 
     line-sep
-    ilog $METAMODULE Metamodule $METAMODULE-$VARIANT setup | tee -a $log
+    ilog $METAMODULE Metamodule $METAMODULE \[${VARIANT//./ }\] setup \
+        | tee -a $log
     module-variant-wrapper $SCBI_BDIR/install \
                            $METAMODULE $VARIANT setup || exit 1
-    ilog $METAMODULE End metamodule $METAMODULE-$VARIANT setup | tee -a $log
+    ilog $METAMODULE End metamodule $METAMODULE \[${VARIANT//./ }\] setup \
+        | tee -a $log
     line-sep
 
     [[ $DEPS = yes ]] &&
@@ -1043,10 +1045,12 @@ function handle-meta-module()
     #  check for wrapup
 
     line-sep
-    ilog $METAMODULE Metamodule $METAMODULE-$VARIANT wrapup | tee -a $log
+    ilog $METAMODULE Metamodule $METAMODULE \[${VARIANT//./ }\] wrapup \
+        | tee -a $log
     module-variant-wrapper $SCBI_BDIR/install \
                            $METAMODULE $VARIANT wrapup || exit 1
-    ilog $METAMODULE End metamodule $METAMODULE-$VARIANT wrapup | tee -a $log
+    ilog $METAMODULE End metamodule $METAMODULE \[${VARIANT//./ }\] wrapup \
+        | tee -a $log
     line-sep
 }
 

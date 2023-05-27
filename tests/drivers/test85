@@ -16,8 +16,8 @@ done
 RUNS ./scbi --deps metavar
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Metamodule metavar-default setup
-xxxx/xx/xx xx:xx:xx : End metamodule metavar-default setup
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [default] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [default] setup
 
 xxxx/xx/xx xx:xx:xx : Building mv-common1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -67,15 +67,15 @@ xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-default2 [default] (master)
 
-xxxx/xx/xx xx:xx:xx : Metamodule metavar-default wrapup
-xxxx/xx/xx xx:xx:xx : End metamodule metavar-default wrapup
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [default] wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [default] wrapup
 EOF
 
 RUNS ./scbi --deps metavar/var
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Metamodule metavar-var setup
-xxxx/xx/xx xx:xx:xx : End metamodule metavar-var setup
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [var] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [var] setup
 
 xxxx/xx/xx xx:xx:xx : Building mv-common1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -107,15 +107,15 @@ xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-var2 [default] (master)
 
-xxxx/xx/xx xx:xx:xx : Metamodule metavar-var wrapup
-xxxx/xx/xx xx:xx:xx : End metamodule metavar-var wrapup
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [var] wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [var] wrapup
 EOF
 
 RUNS ./scbi --deps metavar/var.new
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Metamodule metavar-var.new setup
-xxxx/xx/xx xx:xx:xx : End metamodule metavar-var.new setup
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [var new] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [var new] setup
 
 xxxx/xx/xx xx:xx:xx : Building mv-common1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -169,15 +169,15 @@ xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-new3 [default] (master)
 
-xxxx/xx/xx xx:xx:xx : Metamodule metavar-var.new wrapup
-xxxx/xx/xx xx:xx:xx : End metamodule metavar-var.new wrapup
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [var new] wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [var new] wrapup
 EOF
 
 RUNS ./scbi --deps metavar/new
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Metamodule metavar-new setup
-xxxx/xx/xx xx:xx:xx : End metamodule metavar-new setup
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [new] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [new] setup
 
 xxxx/xx/xx xx:xx:xx : Building mv-common1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -214,15 +214,15 @@ xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : End Building mv-new3 [default] (master)
 
-xxxx/xx/xx xx:xx:xx : Metamodule metavar-new wrapup
-xxxx/xx/xx xx:xx:xx : End metamodule metavar-new wrapup
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [new] wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [new] wrapup
 EOF
 
 RUNS ./scbi --deps metavar/default
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Metamodule metavar-default setup
-xxxx/xx/xx xx:xx:xx : End metamodule metavar-default setup
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [default] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [default] setup
 
 xxxx/xx/xx xx:xx:xx : Building mv-common1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -266,8 +266,8 @@ xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : End Building mv-default2 [default] (master)
 
-xxxx/xx/xx xx:xx:xx : Metamodule metavar-default wrapup
-xxxx/xx/xx xx:xx:xx : End metamodule metavar-default wrapup
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [default] wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [default] wrapup
 EOF
 
 for PLG in mv-common1 mv-common2 mv-var1 mv-var2 \
