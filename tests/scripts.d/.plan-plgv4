@@ -1,0 +1,10 @@
+
+@load plgv1
+@load plgv3
+
+[
+        plg1
+        plg2/exp
+        plg3:vx
+        plg4/newB:v1
+] /ng

@@ -1,0 +1,102 @@
+
+
+RUNS ./scbi --plan=plgv1 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+plg1
+plg2/exp
+plg3:v1
+plg4/new:v1
+EOF
+
+RUNS ./scbi --plan=plgv2 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+plg1
+plg2/exp2
+plg3:v2
+plg4/new2:v2
+EOF
+
+RUNS ./scbi --plan=plgv3 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+EOF
+
+RUNS ./scbi --plan=plgv4 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 8 module(s) in the plan
+plg1/ng
+plg2/ng
+plg3/ng:vx
+plg4/ng:v1
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+EOF
+
+RUNS ./scbi --plan=plgv5 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 8 module(s) in the plan
+plg1/ng
+plg2/exp:v7
+plg3/ng:v1
+plg4/ng:v5
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+EOF
+
+RUNS ./scbi --plan=plgv6 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 8 module(s) in the plan
+plg1/ng
+plg2/ng
+plg3/ng:v1
+plg4/ng:v1
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+EOF
+
+RUNS ./scbi --plan=plgv7 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 9 module(s) in the plan
+plg1/ng
+plg2/ng
+plg3/ng:v2
+plg4/ng:v2
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+plg9/ng
+EOF

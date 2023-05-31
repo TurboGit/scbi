@@ -106,6 +106,19 @@ function load-module-plan()
                     local kind=${module_info[2]}
                     local version=${module_info[3]}
 
+                    #  If version is inherit then just take the
+                    #  current recorded version for this module.
+
+                    if [[ $version == "NONE" ]] && [[ $variant == "default" ]]; then
+                        if [[ -n ${MODVER[$module]} ]]; then
+                            local module_info=( $(parse-module-ref ${MODVER[$module]}) )
+                            local module=${module_info[0]}
+                            local variant=${module_info[1]}
+                            local kind=${module_info[2]}
+                            local version=${module_info[3]}
+                        fi
+                    fi
+
                     local ref_info=( $(parse-module-ref "name$REF") )
                     local rvariant=${ref_info[1]}
                     local rkind=${ref_info[2]}
@@ -186,6 +199,7 @@ function load-module-plan()
             elif [[ "${modref:0:1}" != "#" ]]; then
                 local module_info=( $(parse-module-ref $modref) )
                 local module=${module_info[0]}
+
                 MODVER[$module]=${modref/*=/}
             fi
         done < $PLAN
