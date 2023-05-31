@@ -125,11 +125,23 @@ function load-module-plan()
                     local rversion=${ref_info[3]}
 
                     local FREF=""
+                    local AREF=""
+
+                    #  If variant starts with +, add it to the current variant
+                    #  list of each module.
+
+                    if [[ ${rvariant:0:1} == "+" ]]; then
+                        local rvariant=${rvariant:1}
+
+                        if [[ $variant != "default" ]]; then
+                            local AREF=".$variant"
+                        fi
+                    fi
 
                     #  Override the variant & version only if defined in REF
 
                     if [[ $rvariant != "default" ]]; then
-                        FREF="/$rvariant"
+                        FREF="/$rvariant$AREF"
                     elif [[ $variant != "default" ]]; then
                         FREF="/$variant"
                     fi

@@ -361,7 +361,7 @@ Some specific actions are supported with the following syntax:
 	@alias private-plugin use alternative-plugin
 	\end{lstlisting}
 
-	\item[\code{[ <barrier> ... ] /variant:version}] To create a group. The barrier if present must evaluate to true or the group is ignored.
+	\item[\code{[ <barrier> ... ] /[+]variant:version}] To create a group. The barrier if present must evaluate to true or the group is ignored.
 
 	A group can be used in a build plan to group together all modules with the same version and/or variant. To define a group:
 
@@ -376,7 +376,7 @@ Some specific actions are supported with the following syntax:
 
 		All of them must be set for the barrier to be true.
 
-		Finally the barrier can have two groups of values, for a \code{=} condition only one of the group can match (OR) for the barrier to evaluate to TRUE., for a \code{/=} condition all both groups must match (AND) for the barrier to evaluate to TRUE.
+		Finally the barrier can have two groups of values, for a \code{=} condition only one of the group can match (OR) for the barrier to evaluate to TRUE. For a \code{/=} condition both groups must match (AND) for the barrier to evaluate to TRUE.
 
 		\code{= deb,9 deb,11}
 
@@ -389,7 +389,8 @@ Some specific actions are supported with the following syntax:
 		The group will be evaluated only if the barrier evaluate to true otherwise it will be skipped. If the barrier is not specified the group will always be evaluated (i.e. the barrier is by default TRUE).
 
 		Modules listed in the group without variant and version will inherit the current variant and version (if any).
-		\item[ {]} /variant:version ] Ends with \code{/variant:version} which is the variant and version to apply to all modules in the group. Both \code{variant} and \code{version} are optional.
+
+		\item[ {]} /{[}+{]}variant:version ] Ends with \code{/[+]variant:version} which is the variant and version to apply to all modules in the group. Both \code{variant} and \code{version} are optional. If the variant starts with a plus it is added to all modules in the group instead of replacing it.
 	\end{description}
 
 	Without a barrier, will always be open:
