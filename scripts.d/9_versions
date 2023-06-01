@@ -33,6 +33,58 @@ function check-discriminants()
 #
 #
 
+function _internal_merge_variant()
+{
+    local cvariant=$1
+    local rvariant=$2
+
+    local rvariant=${rvariant//+/ +}
+    local rvariant=${rvariant//-/ -}
+    local rvariant=${rvariant//\./ .}
+
+    local REF="${cvariant}"
+    [[ $REF == "default" ]] && REF=""
+
+    local AREF=""
+    local DREF=()
+    local ACTION=no
+
+    for v in ${rvariant}; do
+        if [[ ${v:0:1} == "+" ]]; then
+            local ACTION=add
+            [[ -n $AREF ]] && AREF+="."
+            AREF+=${v:1}
+        elif [[ ${v:0:1} == "-" ]]; then
+            local ACTION=del
+            DREF+=(${v:1})
+        elif [[ $ACTION == add ]]; then
+            [[ -n $AREF ]] && AREF+="."
+            AREF+=${v:1}
+        elif [[ $ACTION == del ]]; then
+            DREF+=(${v:1})
+        else
+            REF=""
+            [[ -n $AREF ]] && AREF+="."
+            AREF+=${v/\./}
+        fi
+    done
+
+    #  Add current variant (if any) after group variants
+
+    [[ -n $AREF ]] && [[ -n $REF ]] && AREF+="."
+    local REF="${AREF}${REF}"
+
+    #  Remove variants if needed
+
+    for n in ${DREF}; do
+        local REF=${REF#$n\.}
+        local REF=${REF%\.$n}
+        local REF=${REF//\.$n\./\.}
+    done
+
+    echo "/$REF"
+}
+
 function load-module-plan()
 {
     local NAMEREF=$1
@@ -106,6 +158,20 @@ function load-module-plan()
                     local kind=${module_info[2]}
                     local version=${module_info[3]}
 
+                    #  If version is inherit then just take the
+                    #  current recorded version for this module.
+
+                    if [[ $version == "NONE" ]] &&
+                           [[ $variant == "default" ]] &&
+                           [[ -n ${MODVER[$module]} ]];
+                    then
+                        local module_info=( $(parse-module-ref ${MODVER[$module]}) )
+                        local module=${module_info[0]}
+                        local variant=${module_info[1]}
+                        local kind=${module_info[2]}
+                        local version=${module_info[3]}
+                    fi
+
                     local ref_info=( $(parse-module-ref "name$REF") )
                     local rvariant=${ref_info[1]}
                     local rkind=${ref_info[2]}
@@ -116,7 +182,7 @@ function load-module-plan()
                     #  Override the variant & version only if defined in REF
 
                     if [[ $rvariant != "default" ]]; then
-                        FREF="/$rvariant"
+                        FREF=$(_internal_merge_variant "$variant" "$rvariant")
                     elif [[ $variant != "default" ]]; then
                         FREF="/$variant"
                     fi
@@ -186,6 +252,7 @@ function load-module-plan()
             elif [[ "${modref:0:1}" != "#" ]]; then
                 local module_info=( $(parse-module-ref $modref) )
                 local module=${module_info[0]}
+
                 MODVER[$module]=${modref/*=/}
             fi
         done < $PLAN

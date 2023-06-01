@@ -1,0 +1,10 @@
+
+@load plgv1
+@load plgv3
+
+[
+        plg1
+        plg2
+        plg3
+        plg4
+] /ng

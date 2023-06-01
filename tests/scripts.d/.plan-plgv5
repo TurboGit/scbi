@@ -1,0 +1,13 @@
+
+@load plgv1
+@load plgv3
+
+[
+        plg1
+        plg3
+        plg4:v5
+] /ng
+
+[
+        plg2
+] :v7

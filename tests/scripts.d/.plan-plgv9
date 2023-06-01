@@ -1,0 +1,33 @@
+
+@load plgv1
+@load plgv2
+@load plgv3
+
+[
+        plg2
+] /xx
+
+[
+        plg1
+        plg2
+        plg3
+        plg4
+        plg9
+] /+ng
+
+[
+        plg2
+        plg8
+] /+azerty
+
+[
+        plg2
+] /-xx+newxx
+
+[
+        plg8
+] /+newazerty-azerty
+
+[
+        plg4
+] /-new2
