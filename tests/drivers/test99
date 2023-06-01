@@ -117,3 +117,20 @@ plg7:v1
 plg8/azerty.new:v1
 plg9/ng
 EOF
+
+RUNS ./scbi --plan=plgv9 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 9 module(s) in the plan
+plg1/ng
+plg2/newxx.azerty.ng
+plg3/ng:v2
+plg4/ng:v2
+plg5
+plg6/exp
+plg7:v1
+plg8/newazerty.new:v1
+plg9/ng
+EOF
