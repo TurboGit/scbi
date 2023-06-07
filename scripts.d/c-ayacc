@@ -1,0 +1,55 @@
+
+function c-ayacc-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/Ada-France/ayacc.git
+}
+
+function c-ayacc-out-of-tree()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo false
+}
+
+function c-ayacc-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH $PREFIX/bin
+}
+
+function c-ayacc-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-ayacc-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make build
+}
+
+function c-ayacc-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make prefix=$PREFIX install
+}
+
+function c-ayacc-prefix()
+{
+    echo NONE
+}
