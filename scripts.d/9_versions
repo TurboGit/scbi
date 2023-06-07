@@ -71,8 +71,17 @@ function _internal_merge_variant()
 
     #  Add current variant (if any) after group variants
 
-    [[ -n $AREF ]] && [[ -n $REF ]] && AREF+="."
-    local REF="${AREF}${REF}"
+    local NREF="${AREF}"
+
+    for o in ${REF}; do
+        ! has-variant "$NREF" $o &&
+            {
+                [[ -n $NREF ]] && NREF+="."
+                local NREF+="$o"
+            }
+    done
+
+    local REF=$NREF
 
     #  Remove variants if needed
 
