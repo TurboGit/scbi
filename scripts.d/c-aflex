@@ -1,0 +1,55 @@
+
+function c-aflex-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/Ada-France/aflex.git
+}
+
+function c-aflex-out-of-tree()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo false
+}
+
+function c-aflex-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH $PREFIX/bin
+}
+
+function c-aflex-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-aflex-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make build
+}
+
+function c-aflex-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make prefix=$PREFIX install
+}
+
+function c-aflex-prefix()
+{
+    echo NONE
+}
