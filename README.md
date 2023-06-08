@@ -24,8 +24,11 @@ By default the scbi build directories can be displayed with --stat option (outpu
 
       $ scbi --stat
 
+      SCBI : v6.7
+
       stats
       -----
+      host                  : Debian GNU/Linux 11 (bullseye)
       build dir             : $HOME/dev/builds
       install prefix        : $HOME/dev/builds/install
       tar dir               : $HOME/dev/builds/.tar
@@ -33,6 +36,9 @@ By default the scbi build directories can be displayed with --stat option (outpu
       user's Git repository : $HOME/dev/repositories/git
       user's SVN repository : $HOME/dev/repositories/svn
       e-mail notification   : no
+      supported platforms   : deb ubt cos rhl fed win
+      discriminants         : 11 bullseye deb debian gnu linux x86_64
+                              <machine_name> <machine_name.domain>
 
 
 # lcms module
@@ -70,7 +76,7 @@ By default the scbi build directories can be displayed with --stat option (outpu
       ```
 
    Note that this routine is optional, and when not defined it means
-   that we are building into the source directory.
+   that we are building out of the source directory.
 
 3. Then we need to configure the project:
 
@@ -79,6 +85,7 @@ By default the scbi build directories can be displayed with --stat option (outpu
       {
           local PREFIX=$1
           local TARGET=$2
+          local VARIANT=$3
 
           ../src/configure --prefix=$PREFIX
       }
@@ -88,12 +95,13 @@ By default the scbi build directories can be displayed with --stat option (outpu
    are called in the proper location. That is, it is never needed to
    change directory. So above we are in the build directory and the
    source directory is always on the same level and named src. This is
-   true whether we are building out-of-tree or not. Above src the a
-   separate directory where the sources are to be found.
+   true whether we are building out-of-tree or not.
 
-   Note also that hook functions are passed PREFIX and TARGET. The
-   PREFIX is not the final install location. It is the location of the
-   module install directory.
+   Note also that hook functions are passed PREFIX, TARGET &
+   VARIANT. The PREFIX is not the final install location. It is the
+   location of the module's install directory in the sandbox. The
+   final installation location is given by the hook "prefix" (see
+   below).
 
 4. Now it is time to build the project:
 
@@ -102,6 +110,7 @@ By default the scbi build directories can be displayed with --stat option (outpu
       {
           local PREFIX=$1
           local TARGET=$2
+          local VARIANT=$3
 
           make -j4
       }
@@ -116,12 +125,13 @@ By default the scbi build directories can be displayed with --stat option (outpu
       {
           local PREFIX=$1
           local TARGET=$2
+          local VARIANT=$3
 
           make install
       }
       ```
 
-   Note, that this will install into the module install directory.
+   Note, that this will install into the module's install directory.
 
 6. This is optional, but if we want to have the final installation
    done in a specific location (default in /usr for Little-CMS) we can
@@ -147,6 +157,7 @@ By default the scbi build directories can be displayed with --stat option (outpu
 And that's all is needed to build this project. Now to build it:
 
       $ scbi lcms
+
       2019/12/03 13:16:24 : Building lcms [default] (master)
       2019/12/03 13:16:24 : native x86_64-linux-gnu
       2019/12/03 13:16:24 : steps : setup config build install wrapup
@@ -164,6 +175,7 @@ If you call it again, nothing will happen as scbi will detect that the
 sources have not changed:
 
       $ scbi lcms
+
       2019/12/03 13:18:01 : Building lcms [default] (master)
       2019/12/03 13:18:01 : native x86_64-linux-gnu
       2019/12/03 13:18:01 : steps : setup config build install wrapup
@@ -182,6 +194,7 @@ to build with just "-O3" at configuration step:
       {
           local PREFIX=$1
           local TARGET=$2
+          local VARIANT=$3
 
           CFLAGS="-O3" ../src/configure --prefix=$PREFIX
       }
@@ -189,6 +202,7 @@ to build with just "-O3" at configuration step:
 And then build the release version:
 
       $ scbi lcms/release
+
       2019/12/03 13:18:23 : Building lcms [release] (master)
       2019/12/03 13:18:23 : native x86_64-linux-gnu
       2019/12/03 13:18:23 : steps : setup config build install wrapup
@@ -210,7 +224,8 @@ Up to now we have been building on the master branch. Whatever code is
 there, each time we call scbi we can update the source from upstream
 repository and rebuild if some modifications are found:
 
-      $ scbi -u lcms/release
+      $ scbi --update lcms/release
+
       2019/12/03 13:21:30 : Building lcms [release] (master)
       2019/12/03 13:21:30 : native x86_64-linux-gnu
       2019/12/03 13:21:30 : steps : setup config build install wrapup
@@ -223,7 +238,8 @@ There was no modification, so nothing built. But for our project we
 want a stable version properly identified and tagged. Latest version
 of Little-CMS is 2.9, tagged as lcms2.9, to build it it is as simple as:
 
-      $ scbi -u lcms/release:lcms2.9
+      $ scbi --update lcms/release:lcms2.9
+
       2019/12/03 13:22:59 : Building lcms [release] (lcms2.9)
       2019/12/03 13:22:59 : native x86_64-linux-gnu
       2019/12/03 13:22:59 : steps : setup config build install wrapup
@@ -270,6 +286,7 @@ And to test this new developer's version, we need to pass :dev as
 version to scbi:
 
       $ scbi lcms:dev
+
       2019/12/03 13:24:33 : Building lcms [default] (dev)
       2019/12/03 13:24:33 : native x86_64-linux-gnu
       2019/12/03 13:24:33 : steps : setup config build install wrapup
