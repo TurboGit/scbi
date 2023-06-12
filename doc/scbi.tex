@@ -55,6 +55,19 @@
 	style=nextline,
 }
 
+\lstdefinelanguage{Ini}
+{
+	basicstyle=\ttfamily\small,
+	columns=fullflexible,
+	morecomment=[s][\color{black}\bfseries]{[}{]},
+	morecomment=[l]{\#},
+	morecomment=[l]{;},
+	commentstyle=\color{gray}\ttfamily,
+	morekeywords={},
+	otherkeywords={=,:},
+	keywordstyle={\color{black}\bfseries}
+}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMMANDS
 
 \newenvironment{shellcommand}{
@@ -361,7 +374,7 @@ Some specific actions are supported with the following syntax:
 	@alias private-plugin use alternative-plugin
 	\end{lstlisting}
 
-	\item[\code{[ <barrier> ... ] /[+-]variant:version}] To create a group. The barrier if present must evaluate to true or the group is ignored.
+	\item[\code{[ <barrier> ... ] /variant:version}] To create a group. The barrier if present must evaluate to true or the group is ignored.
 
 	A group can be used in a build plan to group together all modules with the same version and/or variant. To define a group:
 
@@ -376,7 +389,7 @@ Some specific actions are supported with the following syntax:
 
 		All of them must be set for the barrier to be true.
 
-		Finally the barrier can have two groups of values, for a \code{=} condition only one of the group can match (OR) for the barrier to evaluate to TRUE. For a \code{/=} condition both groups must match (AND) for the barrier to evaluate to TRUE.
+		Finally the barrier can have two groups of values, for a \code{=} condition only one of the group can match (OR) for the barrier to evaluate to TRUE., for a \code{/=} condition all both groups must match (AND) for the barrier to evaluate to TRUE.
 
 		\code{= deb,9 deb,11}
 
@@ -388,9 +401,7 @@ Some specific actions are supported with the following syntax:
 
 		The group will be evaluated only if the barrier evaluate to true otherwise it will be skipped. If the barrier is not specified the group will always be evaluated (i.e. the barrier is by default TRUE).
 
-		Modules listed in the group without variant and version will inherit the current variant and version (if any).
-
-		\item[ {]} /{[}+-{]}variant:version ] Ends with \code{/[+-]variant:version} which is the variant and version to apply to all modules in the group. Both \code{variant} and \code{version} are optional. If the variant starts with a plus (+) it is added to all modules in the group instead of replacing it. If the variant starts with a minus (-) it is removed from all modules in the group instead of replacing it.
+		\item[ {]} /variant:version ] Ends with \code{/variant:version} which is the variant and version to apply to all modules in the group. Both \code{variant} and \code{version} are optional.
 	\end{description}
 
 	Without a barrier, will always be open:
@@ -486,6 +497,8 @@ The following options are supported:
 
 	\item[-v | \ddash{}version] Display version information of the SCBI driver and versions from plug-ins distributions coming from other sources\footnote{Note that for this to be supported the plug-ins distribution must have generated and installed a file name \file{.scbi*version.txt} next to the plug-ins.}.
 
+	\item[\ddash{}ini{[}=<section>{]}] Load the ini file given section. If no section given the global/common values are used.
+
 	\item[\ddash{}prefix=<dir>] The installation directory to use instead of the default \file{\$SCBI\_PREFIX}.
 
 	\item[\ddash{}build-dir=<dir>] The root build directory to use instead of the default \file{\$SCBI\_BDIR}.
@@ -577,6 +590,50 @@ The following options are supported:
 \end{description}
 
 A completion support for bash is provided. If activated many options will give hints about possible values like listing plans for \code{\ddash{}plan=} option or listing the supported modules.
+
+\subsubsection{Options from INI file}
+\label{inifile}
+
+An ini file can be activated using \code{--ini} option. Such file contains sections. The sub-option given to \code{--ini} option is the one activated. Also the \code{common} section is always activated and takes precedence over the global settings.
+
+The searched ini files are:
+
+\begin{itemize}
+	\item \$HOME/.scbi
+	\item \$PWD/.scbi
+	\item \$SCBI\_INI\_FILE
+\end{itemize}
+
+The following options are supported in the ini file:
+
+\begin{itemize}
+	\item env, plan, target
+	\item root-dir, plugins, prefix, build-dir
+	\item git-repo, svn-repo, hg-repo
+	\item jobs, tar, patch
+	\item setup, config, build, install, wrapup
+	\item force, update, purge, archive
+	\item modules (list of modules as passed on command line)
+	\item enable (list of features)
+	\item options (specific options as passed on command line)
+	\item run (specific command line to run)
+\end{itemize}
+
+All other options are set as exported variables.
+
+Example:
+
+\begin{lstlisting}[language={Ini}]
+prefix = $HOME/sandbox
+
+[aws]
+   env = std
+   modules = c-aws
+
+[common]
+   git-repo = $HOME/dev/git
+   jobs = 2
+\end{lstlisting}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 

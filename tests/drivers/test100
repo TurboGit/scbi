@@ -1,0 +1,47 @@
+
+export SCBI_INI_FILE=$ROOTDIR/.scbiini
+
+cat <<EOF > $SCBI_INI_FILE
+[sc]
+   setup = yes
+   config = yes
+   build = no
+   install = no
+   wrapup = no
+
+[full]
+   update = yes
+   force = yes
+
+[common]
+   modules = test2
+EOF
+
+RUNS ./scbi --ini=sc
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building test2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building test2 [default] (master)
+EOF
+
+RUNS ./scbi --ini=full
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building test2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building test2 [default] (master)
+EOF

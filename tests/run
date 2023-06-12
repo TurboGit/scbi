@@ -103,13 +103,13 @@ mkdir -p $PWD/logs
 
 cd drivers
 if [ -z "$1" ]; then
-    TESTS=( test?? )
+    TESTS=( test??? )
 else
     TESTS=( $* )
 fi
 cd ..
 
-PLAN 805
+PLAN 808
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR
