@@ -5,7 +5,7 @@ export SCBI_PLUGINS=$PWD/scripts.d
 export SCBI_PREFIX=/here
 export SCBI_TARGET=x86_64-linux-gnu
 
-RUNS source ./drivers/test88-module
+RUNS source ./drivers/test088-module
 
 DIFF <<EOF
 === default

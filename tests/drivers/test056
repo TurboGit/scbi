@@ -1,6 +1,6 @@
 # Check depends with common, default & variants
 
-RUNS source ./drivers/test56-module
+RUNS source ./drivers/test056-module
 
 DIFF <<EOF
 === default
@@ -27,7 +27,7 @@ function internal-depends()
 }
 declare -fx internal-depends
 
-RUNS source ./drivers/test56-module
+RUNS source ./drivers/test056-module
 
 DIFF <<EOF
 === default

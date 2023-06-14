@@ -184,6 +184,7 @@ function display-log-stat()
             display-time ${mam[2]}
             echo
         done
+    echo
 }
 
 ############################## show-command

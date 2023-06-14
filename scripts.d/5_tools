@@ -1013,15 +1013,14 @@ function display-stat()
         echo "$SCBI_EMAIL"
     fi
 
-    printf "%-21s : %s\n" "supported platforms" "${SCBI_OS_NAMES[*]}"
-    printf "%-21s : %s\n" "discriminants"       "${SCBI_OS_DISCRIMINANTS[*]}"
+    printf "%-21s : %s\n"   "supported platforms" "${SCBI_OS_NAMES[*]}"
+    printf "%-21s : %s\n\n" "discriminants"       "${SCBI_OS_DISCRIMINANTS[*]}"
 }
 
 ############################## display-modules
 
 function display-modules()
 {
-    echo
     echo -n "modules:"
 
     local linelen=0
@@ -1036,6 +1035,7 @@ function display-modules()
         fi
         echo -n " $bn"
     done
+    echo
     echo
 }
 
@@ -1059,7 +1059,6 @@ function display-module-version()
 
 function display-plans()
 {
-    echo
     echo -n "plans  :"
     local linelen=0
 
