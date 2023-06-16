@@ -1,0 +1,73 @@
+
+function c-pipewire-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://gitlab.freedesktop.org/pipewire/pipewire.git
+}
+
+function c-pipewire-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    system-compiler
+}
+
+function c-pipewire-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH $PREFIX/bin
+}
+
+function c-pipewire-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+    local KIND=$4
+    local REF=$5
+
+    echo libpulse-dev
+}
+
+function c-pipewire-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    meson setup --prefix=$PREFIX . ../src
+}
+
+function c-pipewire-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    meson compile -C .
+}
+
+function c-pipewire-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    meson install -C .
+}
+
+function c-pipewire-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo NONE
+}
