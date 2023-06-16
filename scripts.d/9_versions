@@ -100,6 +100,23 @@ function load-module-plan()
 
     local VARIANT=${NAMEREF#*/}
 
+    declare -A _SETS
+
+    function resolve-set()
+    {
+        local REF=$1
+
+        if [[ ${#_SETS[*]} > 0 ]] && [[ ${REF/\$//} != $REF ]]; then
+            for VAR in ${!_SETS[*]}; do
+                local VAL=${_SETS[$VAR]}
+                REF=${REF/\$\{$VAR\}/$VAL}
+                REF=${REF/\$$VAR/$VAL}
+            done
+        fi
+
+        echo $REF
+    }
+
     if [[ $VARIANT == $NAMEREF ]]; then
         VARIANT=""
         NAME=${NAMEREF}
@@ -148,7 +165,14 @@ function load-module-plan()
 
                 local module_info=( $(parse-module-ref "$arg1=$arg3") )
                 local module=${module_info[0]}
-                MODVER[$module]=$arg3
+                MODVER[$module]=$(resolve-set $arg3)
+
+            elif [[ "$modref" = "@set" ]]; then
+                if [[ "$arg2" != "=" ]]; then
+                    elog build syntax error, missing "=" in @set
+                    exit 1
+                fi
+                _SETS["$arg1"]="$arg3"
 
             elif [[ -z $modref ]]; then
                 true
@@ -210,7 +234,7 @@ function load-module-plan()
                         fi
                     fi
 
-                    MODVER[$module]=${module}${FREF}
+                    MODVER[$module]=$(resolve-set "${module}${FREF}")
                 done
                 GROUP=no
                 GMOD=""
@@ -262,7 +286,7 @@ function load-module-plan()
                 local module_info=( $(parse-module-ref $modref) )
                 local module=${module_info[0]}
 
-                MODVER[$module]=${modref/*=/}
+                MODVER[$module]=$(resolve-set "${modref/*=/}")
             fi
         done < $PLAN
     else

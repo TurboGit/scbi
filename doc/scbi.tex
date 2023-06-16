@@ -352,6 +352,16 @@ Some specific actions are supported with the following syntax:
 		aws:v1
 	\end{lstlisting}
 
+	\item[\code{@set <variable-name> = <value>}] To set a variable to the specified \code{value} that can be referenced later in the plan using \code{\$<variable>} or \code{\$\{<variable>\}}. This make it possible to share a version for a set of related plug-ins for example.
+
+	\begin{lstlisting}
+		@set VERSION = v2
+		@set VARIANT = fast
+
+		module1/$VARIANT:$VERSION
+		module2:$VERSION
+	\end{lstlisting}
+
 	\item[\code{@on <discriminants> use <module-reference>}] To set a module reference only if the running OS is matching the discriminants. The discriminants are separated with coma and can be the OS name (3 letters OS acronym supported), the OS version, the full OS name (debian, fedora, etc.) and the architecture. Use option \ddash{}stat to see all supported OS and the list of discriminants for the running machine. If all discriminant are matching the module reference will overwrite previous definitions.
 
 	\begin{lstlisting}
