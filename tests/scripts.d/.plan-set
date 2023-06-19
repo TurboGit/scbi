@@ -1,0 +1,16 @@
+
+@set VERSION = 12
+@set GLOBAL = 87
+@set VARIANT = kl
+
+module1:${VERSION}
+module2:${UNKNOWN}
+module3/${VARIANT}:${VERSION}
+
+[
+   module4:9
+   module5:$VERSION
+   module6
+] :${VERSION}
+
+@for main use module7:${GLOBAL}

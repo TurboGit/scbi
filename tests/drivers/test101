@@ -1,0 +1,15 @@
+
+RUNS ./scbi --plan=set --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 7 module(s) in the plan
+@for main use module7:87
+module1:12
+module2:\${UNKNOWN}
+module3/kl:12
+module4:12
+module5:12
+module6:12
+EOF
