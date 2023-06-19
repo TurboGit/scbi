@@ -50,3 +50,7 @@ xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : End Building ondeps [default] (master)
 EOF
+
+unset SCBI_OS_NAME
+unset SCBI_OS_VERSION
+unset SCBI_OS_MAJOR_VERSION

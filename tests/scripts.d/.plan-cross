@@ -1,0 +1,21 @@
+
+modA
+modB
+modC
+modD
+
+[ = cross
+  modA
+] /cross
+
+[ = cross-i686
+  modB
+] /crossi686
+
+[ = cross-mingw32
+  modC
+] /crossmingw32
+
+[ = cross-unknonwn
+  modD
+] /bug

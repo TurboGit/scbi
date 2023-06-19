@@ -6,7 +6,7 @@ function has-discriminant()
     local disc=$1
 
     for d in ${SCBI_OS_DISCRIMINANTS[*]}; do
-        if [[ $disc == $d ]]; then
+        if [[ "$disc" == "$d" ]]; then
             return 0
         fi
     done
@@ -22,7 +22,7 @@ function check-discriminants()
     local discs="$1"
 
     for d in ${discs/,/ }; do
-        has-discriminant $d
+        has-discriminant "$d"
         [[ $? == 1 ]] && return 1
     done
 

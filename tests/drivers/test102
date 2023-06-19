@@ -1,0 +1,24 @@
+
+RUNS ./scbi --target=i686-pc-mingw32 --plan=cross --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+modA/cross
+modB/crossi686
+modC/crossmingw32
+modD
+EOF
+
+RUNS ./scbi --target=x86_64-pc-mingw32 --plan=cross --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+modA/cross
+modB
+modC/crossmingw32
+modD
+EOF

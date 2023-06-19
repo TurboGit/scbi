@@ -85,11 +85,17 @@ function setup-discriminants()
         SCBI_OS_DISCRIMINANTS+=($SCBI_OS_VERSION)
         SCBI_OS_DISCRIMINANTS+=($SCBI_OS_MAJOR_VERSION)
         SCBI_OS_DISCRIMINANTS+=($SCBI_OS_CODENAME)
-
-        # Remove duplicates values
-        SCBI_OS_DISCRIMINANTS=($(echo ${SCBI_OS_DISCRIMINANTS[*]} \
-                                    | tr ' ' '\n' | sort | uniq | tr '\n' ' '))
     fi
+
+    if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
+        SCBI_OS_DISCRIMINANTS+=(cross)
+        local TGT=(${SCBI_TARGET//-/ })
+        SCBI_OS_DISCRIMINANTS+=(${TGT[@]/#/cross-})
+    fi
+
+    # Remove duplicates values
+    SCBI_OS_DISCRIMINANTS=($(echo ${SCBI_OS_DISCRIMINANTS[*]} \
+                                 | tr ' ' '\n' | sort | uniq | tr '\n' ' '))
 }
 
 #  Can be forced in test driver
