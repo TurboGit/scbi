@@ -1014,7 +1014,7 @@ function display-stat()
     fi
 
     printf "%-21s : %s\n"   "supported platforms" "${SCBI_OS_NAMES[*]}"
-    printf "%-21s : %s\n\n" "discriminants"       "${SCBI_OS_DISCRIMINANTS[*]}"
+    printf "%-21s : %s\n\n" "discriminants"       "${!SCBI_OS_DISCRIMINANTS[*]}"
 }
 
 ############################## display-modules

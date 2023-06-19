@@ -7,6 +7,8 @@
 #     - implement check-<distrib>-pkg
 #     - implement get-<distrib>-lib-for-dev (optional)
 
+declare -A SCBI_OS_DISCRIMINANTS
+
 SCBI_PKG_NOT_FOUND=3
 SCBI_PKG_NOT_INSTALLED=2
 SCBI_PKG_VERSION_NOK=1
@@ -77,25 +79,27 @@ function setup-discriminants()
         SCBI_OS_MAJOR_VERSION=${SCBI_OS_VERSION%%.*}
         SCBI_OS_ID=${OID#*:}
 
-        SCBI_OS_DISCRIMINANTS+=(${DES,,})
-        SCBI_OS_DISCRIMINANTS+=($(uname -m))
-        SCBI_OS_DISCRIMINANTS+=($(hostname --short))
-        SCBI_OS_DISCRIMINANTS+=($(hostname --domain))
-        SCBI_OS_DISCRIMINANTS+=(${SCBI_OS_ID,,})
-        SCBI_OS_DISCRIMINANTS+=($SCBI_OS_VERSION)
-        SCBI_OS_DISCRIMINANTS+=($SCBI_OS_MAJOR_VERSION)
-        SCBI_OS_DISCRIMINANTS+=($SCBI_OS_CODENAME)
+        for D in ${DES,,}; do
+            SCBI_OS_DISCRIMINANTS+=([$D]="yes")
+        done
+
+        SCBI_OS_DISCRIMINANTS+=([$(uname -m)]="yes")
+        SCBI_OS_DISCRIMINANTS+=([$(hostname --short)]="yes")
+        SCBI_OS_DISCRIMINANTS+=([$(hostname --domain)]="yes")
+        SCBI_OS_DISCRIMINANTS+=([${SCBI_OS_ID,,}]="yes")
+        SCBI_OS_DISCRIMINANTS+=([$SCBI_OS_VERSION]="yes")
+        SCBI_OS_DISCRIMINANTS+=([$SCBI_OS_MAJOR_VERSION]="yes")
+        SCBI_OS_DISCRIMINANTS+=([$SCBI_OS_CODENAME]="yes")
     fi
 
     if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
-        SCBI_OS_DISCRIMINANTS+=(cross)
+        SCBI_OS_DISCRIMINANTS+=(["cross"]="yes")
         local TGT=(${SCBI_TARGET//-/ })
-        SCBI_OS_DISCRIMINANTS+=(${TGT[@]/#/cross-})
-    fi
 
-    # Remove duplicates values
-    SCBI_OS_DISCRIMINANTS=($(echo ${SCBI_OS_DISCRIMINANTS[*]} \
-                                 | tr ' ' '\n' | sort | uniq | tr '\n' ' '))
+        for D in ${TGT[@]/#/cross-}; do
+            SCBI_OS_DISCRIMINANTS+=([$D]="yes")
+        done
+    fi
 }
 
 #  Can be forced in test driver
@@ -103,10 +107,12 @@ function setup-discriminants()
 if [[ -z $SCBI_OS_NAME ]]; then
     export SCBI_OS_NAME=$(get-distrib)
 
-    export SCBI_OS_DISCRIMINANTS=($SCBI_OS_NAME)
+    SCBI_OS_DISCRIMINANTS=([$SCBI_OS_NAME]="yes")
     setup-discriminants
 else
-    export SCBI_OS_DISCRIMINANTS=($SCBI_OS_MAJOR_VERSION $SCBI_OS_VERSION $SCBI_OS_NAME)
+    SCBI_OS_DISCRIMINANTS=([${SCBI_OS_MAJOR_VERSION:-default}]="yes"
+                           [${SCBI_OS_VERSION:-default}]="yes"
+                           [${SCBI_OS_NAME:-default}]="yes")
 fi
 
 ############################## init-alias

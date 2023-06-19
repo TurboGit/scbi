@@ -5,13 +5,11 @@ function has-discriminant()
 {
     local disc=$1
 
-    for d in ${SCBI_OS_DISCRIMINANTS[*]}; do
-        if [[ "$disc" == "$d" ]]; then
-            return 0
-        fi
-    done
-
-    return 1
+    if [[ ${SCBI_OS_DISCRIMINANTS[$disc]} == "yes" ]]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 # ############################## check-discriminants
