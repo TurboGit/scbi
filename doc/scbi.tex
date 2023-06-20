@@ -760,7 +760,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\end{enumerate}
 	\end{description}
 
-	\item[<module>{[}-<variant>{]}-external-env] \index{hook!external-env}Used to compute the module's build identifier and will trigger a rebuild of the module if the value returned by this hook changes. This may be needed if the module must setup its sources depending on some external environment. The return value has no semantic, it must just reflect a change of value, generally just returning the value of the controlling environment variable is sufficient.
+	\item[<module>{[}-common|<variant>{]}-external-env] \index{hook!external-env}Used to compute the module's build identifier and will trigger a rebuild of the module if the value returned by this hook changes. This may be needed if the module must setup its sources depending on some external environment. The return value has no semantic, it must just reflect a change of value, generally just returning the value of the controlling environment variable is sufficient.
 
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}

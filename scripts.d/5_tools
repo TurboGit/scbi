@@ -707,11 +707,12 @@ function get-build-id()
 
     local eid=""
 
-    local FCT=$(get-hook $module $variant external-env)
-
-    if [[ -n $FCT ]]; then
-        eid=",$($FCT $PREFIX $TARGET $variant)"
-    fi
+    for extenv in \
+        $(plugin-call-variant-hooks $module external-env \
+                                    $PREFIX $TARGET $variant);
+    do
+        eid+=",$extenv"
+    done
 
     #  Now compute final id
 
