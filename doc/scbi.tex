@@ -332,7 +332,7 @@ File \file{.plan-next}:
  aws:v1
 \end{lstlisting}
 
-A version specified for a meta-module is propagated to all aggregated modules and recursively to all aggregated meta-modules. Note that this specification is \emph{soft}, meaning that it won't override any specific version specified for a module anywhere in the build plan or on the command line.
+A version specified for a meta-module is propagated to all aggregated modules and recursively to all aggregated meta-modules by default see \ref{propagate-version}. Note that this specification is \emph{soft}, meaning that it won't override any specific version specified for a module anywhere in the build plan or on the command line.
 
 Some specific actions are supported with the following syntax:
 
@@ -665,7 +665,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 \begin{description}[font=\large\texttt]
 
-	\item[<module>-vcs] \index{hook!vcs}Describe the module source VCS.
+	\item[<module>{[}-<variant>{]}-vcs] \index{hook!vcs}Describe the module source VCS.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} NONE
 		\item[return] \tabto{2cm} array
@@ -700,7 +700,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	And finally the function \code{scbi-rewrite-vcs} can be defined. This function takes the five values returned by the \code{vcs} hook and must return the five values in the same order but possibly rewritten.
 
-	\item[<module>-tar] \index{hook!tar}Describe the tar filename and location of the tar containing the module sources.
+	\item[<module>{[}-<variant>{]}-tar] \index{hook!tar}Describe the tar filename and location of the tar containing the module sources.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$VERSION}
 		\item[return] \tabto{2cm} array
@@ -738,7 +738,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	And finally the function \code{scbi-rewrite-tar} can be defined. This function takes the five values returned by the \code{tar} hook and must return the five values in the same order but possibly rewritten.
 
-	\item[<module>-{[}common|<variant>{]}-patches] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
+	\item[<module>{[}-common|<variant>{]}-patches] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
 
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT \$KIND \$REF}
@@ -751,7 +751,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\end{enumerate}
 	\end{description}
 
-	\item[<module>-version] \index{hook!version}Returns the current version of the installed module.
+	\item[<module>{[}-<variant>{]}-version] \index{hook!version}Returns the current version of the installed module.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} version or \code{\$VERSION\_OK} or \code{\$VERSION\_ERROR}
@@ -760,7 +760,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\end{enumerate}
 	\end{description}
 
-	\item[<module>-external-env] \index{hook!external-env}Used to compute the module's build identifier and will trigger a rebuild of the module if the value returned by this hook changes. This may be needed if the module must setup its sources depending on some external environment. The return value has no semantic, it must just reflect a change of value, generally just returning the value of the controlling environment variable is sufficient.
+	\item[<module>{[}-<variant>{]}-external-env] \index{hook!external-env}Used to compute the module's build identifier and will trigger a rebuild of the module if the value returned by this hook changes. This may be needed if the module must setup its sources depending on some external environment. The return value has no semantic, it must just reflect a change of value, generally just returning the value of the controlling environment variable is sufficient.
 
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
@@ -770,7 +770,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\end{enumerate}
 	\end{description}
 
-	\item[<module>-{[}common|<variant>{]}-build-depends] \index{hook!build-depends}Lists all modules required to build the actual module. These are generally some tools like \code{cmake}, \code{swig} or \code{gcc} which are only needed to build but not needed at runtime. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
+	\item[<module>{[}-common|<variant>{]}-build-depends] \index{hook!build-depends}Lists all modules required to build the actual module. These are generally some tools like \code{cmake}, \code{swig} or \code{gcc} which are only needed to build but not needed at runtime. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
 
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
@@ -790,7 +790,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	\item[<module>-{[}common|<variant>{]}-tests-depends] \index{hook!tests-depends}Lists all modules required to run the test-suite for the module. These are generally some tools or frameworks like \code{cunit} which are only needed to run the tests.
+	\item[<module>{[}-common|<variant>{]}-tests-depends] \index{hook!tests-depends}Lists all modules required to run the test-suite for the module. These are generally some tools or frameworks like \code{cunit} which are only needed to run the tests.
 
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
@@ -810,7 +810,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	\item[<module>-{[}common|<variant>{]}-depends] \index{hook!depends}Lists all modules required to build the actual module and to use/execute it. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
+	\item[<module>{[}-common|<variant>{]}-depends] \index{hook!depends}Lists all modules required to build the actual module and to use/execute it. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
 
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
@@ -831,7 +831,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	\item[<module>-{[}common|<variant>{]}-env] \index{hook!env}Set the environment to use this module as a dependency. This is the exported environment. The know how to set the environment using the helper routines \seeref{set-env}.
+	\item[<module>{[}-common|<variant>{]}-env] \index{hook!env}Set the environment to use this module as a dependency. This is the exported environment. The know how to set the environment using the helper routines \seeref{set-env}.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
@@ -853,7 +853,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	\item[<module>-{[}common|<variant>{]}-build-env] \index{hook!build-env}Set the environment needed to build this module.
+	\item[<module>{[}-common|<variant>{]}-build-env] \index{hook!build-env}Set the environment needed to build this module.
 	Those settings are not exported and only visible and used for the module. The \code{build-env} hook sees only the environment of the build dependencies.
 
 	\begin{description}[font=\textit,style=standard]
@@ -865,13 +865,13 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
-	\item[<module>-setup] \index{hook!setup}To put in place the sources just before configuration step. This is generally not needed as the sources are setup by \code{scbi} using the information provided by the tar or vcs hook. This may be needed in some complex case or if the sources are generated based on the running environment.
+	\item[<module>{[}-<variant>{]}-setup] \index{hook!setup}To put in place the sources just before configuration step. This is generally not needed as the sources are setup by \code{scbi} using the information provided by the tar or vcs hook. This may be needed in some complex case or if the sources are generated based on the running environment.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
-	\item[<module>-out-of-tree] \index{hook!out-of-tree}Whether to build out of the source tree or not.
+	\item[<module>{[}-<variant>{]}-out-of-tree] \index{hook!out-of-tree}Whether to build out of the source tree or not.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} \code{true | false}
@@ -885,7 +885,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	\item[<module>-only-explicit-build] \index{hook!only-explicit-build}Whether to build when found in dependencies or only when the plug-in is passed on the command line. If function returns \code{true} then it will be built only when on the command line. In all cases it will be used to get the environment when found in dependencies.
+	\item[<module>{[}-<variant>{]}-only-explicit-build] \index{hook!only-explicit-build}Whether to build when found in dependencies or only when the plug-in is passed on the command line. If function returns \code{true} then it will be built only when on the command line. In all cases it will be used to get the environment when found in dependencies.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} \code{true | false}
@@ -899,7 +899,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	\item[<module>-config] \index{hook!config}To configure the sources before starting the build. This is generally a call to GNU \code{configure} or \code{cmake}. The source tree is always accessible as \code{../src}.
+	\item[<module>{[}-<variant>{]}-config] \index{hook!config}To configure the sources before starting the build. This is generally a call to GNU \code{configure} or \code{cmake}. The source tree is always accessible as \code{../src}.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
@@ -908,7 +908,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
-	\item[<module>-{[}common|<variant>{]}-config-options] \index{hook!config-options}Returns a list of options for the configuration step. The config (see above) hook is then supposed to be using the \code{get-config-options} routine to get the options to pass to the configuration tools like \code{cmake} or \code{configure} (\seeref{get config options}).
+	\item[<module>{[}-common|<variant>{]}-config-options] \index{hook!config-options}Returns a list of options for the configuration step. The config (see above) hook is then supposed to be using the \code{get-config-options} routine to get the options to pass to the configuration tools like \code{cmake} or \code{configure} (\seeref{get config options}).
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 		\item[return] \tabto{2cm} array
@@ -919,7 +919,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\end{enumerate}
 	\end{description}
 
-	\item[<module>-build] \index{hook!build}The command to build the application. This is most of the case a simple call to \code{make}.
+	\item[<module>{[}-<variant>{]}-build] \index{hook!build}The command to build the application. This is most of the case a simple call to \code{make}.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
@@ -939,7 +939,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	\item[<module>-install] \index{hook!install}The command to install the application. This is most of the case a simple call to \code{make} with target \code{install}.
+	\item[<module>{[}-<variant>{]}-install] \index{hook!install}The command to install the application. This is most of the case a simple call to \code{make} with target \code{install}.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\begin{enumerate}
@@ -948,13 +948,13 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
-	\item[<module>-wrapup] \index{hook!wrapup}This is to do whatever is needed after the installation step.
+	\item[<module>{[}-<variant>{]}-wrapup] \index{hook!wrapup}This is to do whatever is needed after the installation step.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
-	\item[<module>-prefix] \index{hook!prefix}The directory for the installation of the module. The returned value can be set to NONE to skip the installation step. If this hook is not defined the module will be installed into \code{\$SCBI\_PREFIX}.
+	\item[<module>{[}-<variant>{]}-prefix] \index{hook!prefix}The directory for the installation of the module. The returned value can be set to NONE to skip the installation step. If this hook is not defined the module will be installed into \code{\$SCBI\_PREFIX}.
 	\label{global-install}
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
@@ -966,7 +966,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\end{enumerate}
 	\end{description}
 
-	\item[<module>-tests] \index{hook!tests}Set of commands to run the tests for the module.
+	\item[<module>{[}-<variant>{]}-tests] \index{hook!tests}Set of commands to run the tests for the module.
 	\label{tests-hook}
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT [\$OPTIONS]}
@@ -1050,7 +1050,7 @@ Other modules can depend on a meta-module.
 A module defining the hook \code{<module>-modules} (possibly with variants) becomes a meta-module.
 
 \begin{description}[style=nextline]
-	\item[<module>-{[}common|<variant>{]}-modules] \index{hook!modules}Lists the aggregated modules.
+	\item[<module>{[}-common|<variant>{]}-modules] \index{hook!modules}Lists the aggregated modules.
 		\begin{description}[font=\textit,style=standard]
 			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 			\item[return] \tabto{2cm} array
@@ -1059,7 +1059,7 @@ A module defining the hook \code{<module>-modules} (possibly with variants) beco
 					\item echo <module2>
 		\end{enumerate}
 	\end{description}
-	\item[<module>-{[}common|<variant>{]}-propagate-version] \index{hook!propagate-version}Whether the meta-module version is to be propagated to aggregated modules.
+	\item[<module>{[}-<variant>{]}-propagate-version] \index{hook!propagate-version}\label{propagate-version}Whether the meta-module version is to be propagated to aggregated modules.
 		\begin{description}[font=\textit,style=standard]
 			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 			\item[return] \tabto{2cm} \code{true | false}
@@ -1069,7 +1069,7 @@ A module defining the hook \code{<module>-modules} (possibly with variants) beco
 And can list a build-plan to use for building all listed modules:
 
 \begin{description}
-	\item[<module>-plan] \index{hook!plan}Returns the build-plan to use.
+	\item[<module>{[}-<variant>{]}-plan] \index{hook!plan}Returns the build-plan to use.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} NONE
 		\item[return] \tabto{2cm} string
