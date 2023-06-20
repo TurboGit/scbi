@@ -8,14 +8,14 @@ modD
   modA
 ] /cross
 
-[ = cross-i686
+[ = target-i686
   modB
-] /crossi686
+] /targeti686
 
-[ = cross-mingw32
+[ = target-mingw32
   modC
-] /crossmingw32
+] /targetmingw32
 
-[ = cross-unknonwn
+[ = target-unknonwn
   modD
 ] /bug

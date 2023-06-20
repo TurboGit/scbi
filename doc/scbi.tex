@@ -314,6 +314,29 @@ Or using an environment variable:
 
 \cmd{scbi lcms2}
 
+\subsection{Discriminants}
+\label{discriminants}
+\index{discriminants}
+\index{plan|discriminants}
+
+A list of discriminants are generated for each build. Those discriminants can be used in barrier (\see{planbarrier}). The discriminants are host and target specific and can be used to tune build plans.
+
+The discriminant list contains:
+
+\begin{itemize}
+	\item The hostname,
+	\item The domain name,
+	\item The OS (e.g. \code{windows}, \code{linux})
+	\item The OS name (e.g. \code{debian})
+	\item A 3 letters acronym for the OS name (e.g. \code{deb}, \code{fed})
+	\item The OS major version,
+	\item The OS code name,
+	\item The architecture (i.e. \code{x86\_64}, \code{i686}),
+	\item For cross configuration the \code{cross} discriminant and each part of the target triplet prefixed with \code{target-} (e.g. \code{target-mingw32}, \code{target-arm})
+\end{itemize}
+
+Use option \ddash{}stat to see the list of discriminants for the running machine.
+
 \subsection{Build plans}
 \label{build-plan}
 \index{build plan}
@@ -362,7 +385,7 @@ Some specific actions are supported with the following syntax:
 		module2:$VERSION
 	\end{lstlisting}
 
-	\item[\code{@on <discriminants> use <module-reference>}] To set a module reference only if the running OS is matching the discriminants. The discriminants are separated with coma and can be the OS name (3 letters OS acronym supported), the OS version, the full OS name (debian, fedora, etc.) and the architecture. Use option \ddash{}stat to see all supported OS and the list of discriminants for the running machine. If all discriminant are matching the module reference will overwrite previous definitions.
+	\item[\code{@on <discriminants> use <module-reference>}] To set a module reference only if the running OS is matching the discriminants (\seeref{discriminants}). If all discriminant are matching the module reference will overwrite previous definitions.
 
 	\begin{lstlisting}
 	#  Skip lcms2 on Debian-9
@@ -389,7 +412,8 @@ Some specific actions are supported with the following syntax:
 	A group can be used in a build plan to group together all modules with the same version and/or variant. To define a group:
 
 	\begin{description}
-		\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} or \code{discriminant} which will be searched on the specified module's plan variants or a set of OS discriminants.
+		\label{plan|barrier}
+		\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} or \code{discriminant} (\seeref{discriminants}).
 
 		\code{\ddash{}plan=name/variant1.variant2}
 

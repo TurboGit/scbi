@@ -6,8 +6,8 @@ sort-osht-output-but-first-line
 DIFF <<EOF
 There is 4 module(s) in the plan
 modA/cross
-modB/crossi686
-modC/crossmingw32
+modB/targeti686
+modC/targetmingw32
 modD
 EOF
 
@@ -19,6 +19,6 @@ DIFF <<EOF
 There is 4 module(s) in the plan
 modA/cross
 modB
-modC/crossmingw32
+modC/targetmingw32
 modD
 EOF

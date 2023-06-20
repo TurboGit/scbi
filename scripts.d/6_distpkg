@@ -62,7 +62,7 @@ function setup-discriminants()
     export SCBI_OS_ID=unknown
 
     if [[ $SCBI_IS_WINDOWS == yes ]]; then
-        SCBI_OS_DISCRIMINANTS+=(windows)
+        SCBI_OS_DISCRIMINANTS+=([windows]="yes")
         ##  ??? how to get architecture & version
     else
         local VER=$(lsb_release -r | tr -d '[ \t]')
@@ -83,21 +83,22 @@ function setup-discriminants()
             SCBI_OS_DISCRIMINANTS+=([$D]="yes")
         done
 
+        local HND=$(hostname --domain)
         SCBI_OS_DISCRIMINANTS+=([$(uname -m)]="yes")
         SCBI_OS_DISCRIMINANTS+=([$(hostname --short)]="yes")
-        SCBI_OS_DISCRIMINANTS+=([$(hostname --domain)]="yes")
+        [[ -n $HND ]] && SCBI_OS_DISCRIMINANTS+=([HND]="yes")
         SCBI_OS_DISCRIMINANTS+=([${SCBI_OS_ID,,}]="yes")
         SCBI_OS_DISCRIMINANTS+=([$SCBI_OS_VERSION]="yes")
         SCBI_OS_DISCRIMINANTS+=([$SCBI_OS_MAJOR_VERSION]="yes")
-        SCBI_OS_DISCRIMINANTS+=([$SCBI_OS_CODENAME]="yes")
+        SCBI_OS_DISCRIMINANTS+=([${SCBI_OS_CODENAME,,}]="yes")
     fi
 
     if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
         SCBI_OS_DISCRIMINANTS+=(["cross"]="yes")
         local TGT=(${SCBI_TARGET//-/ })
 
-        for D in ${TGT[@]/#/cross-}; do
-            SCBI_OS_DISCRIMINANTS+=([$D]="yes")
+        for D in ${TGT[@]/#/target-}; do
+            SCBI_OS_DISCRIMINANTS+=([${D,,}]="yes")
         done
     fi
 }
