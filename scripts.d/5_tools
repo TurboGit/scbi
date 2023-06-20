@@ -689,13 +689,13 @@ function get-build-id()
     local pid="no-patch-found"
 
     if [[ $DO_PATCH = yes ]]; then
-        local FCT=$(get-hook $module $variant patches)
-
-        if [[ -n $FCT ]]; then
-            for patch in $($FCT $PREFIX $TARGET $variant $kind $ref); do
-                pid="$pid,$(get-patch-md5 $patch)"
-            done
-        fi
+        for patch in \
+            $(plugin-call-variant-hooks $module patches \
+                                        $PREFIX $TARGET $variant \
+                                        $kind $ref);
+        do
+            pid="$pid,$(get-patch-md5 $patch)"
+        done
     fi
 
     #  Also compute id from dependencies to ensure we rebuild if one
@@ -1128,37 +1128,40 @@ function copy-module-src-callback()
         if [[ -f $SCBI_PLUGINS/$module ]]; then
             cp -p $SCBI_PLUGINS/$module $DEST/scripts.d
 
-            #  and then copy patches if any
-            (
-                function cp-patch()
-                {
-                    local PATCH_FILE="$1"
+            if [[ $DO_PATCH = yes ]]; then
+                #  and then copy patches if any
+                (
+                    function cp-patch()
+                    {
+                        local PATCH_FILE="$1"
 
-                    local patch=""
+                        local patch=""
 
-                    if [[ -f "$SCBI_PATCH/$PATCH_FILE" ]]; then
-                        patch="$SCBI_PATCH/$PATCH_FILE"
-                    elif [[ -f "$SCBI_PLUGINS/patches/$PATCH_FILE" ]]; then
-                        patch="$SCBI_PLUGINS/patches/$PATCH_FILE"
-                    else
-                        elog standalone patch filename \
-                             $(basename $PATCH_FILE) not found
-                        return 1
-                    fi
+                        if [[ -f "$SCBI_PATCH/$PATCH_FILE" ]]; then
+                            patch="$SCBI_PATCH/$PATCH_FILE"
+                        elif [[ -f "$SCBI_PLUGINS/patches/$PATCH_FILE" ]]; then
+                            patch="$SCBI_PLUGINS/patches/$PATCH_FILE"
+                        else
+                            elog standalone patch filename \
+                                 $(basename $PATCH_FILE) not found
+                            return 1
+                        fi
 
-                    cp $patch $DEST/builds/.patches
-                }
+                        cp $patch $DEST/builds/.patches
+                    }
 
-                load-module $MODREF
+                    load-module $MODREF
 
-                local FCT=$(get-hook $module $variant patches)
 
-                if [[ -n $FCT ]]; then
-                    for patch in $($FCT $PREFIX $TARGET $VARIANT $kind $ref); do
+                    for patch in \
+                        $(plugin-call-variant-hooks $module patches \
+                                                    $PREFIX $TARGET $variant \
+                                                    $kind $ref);
+                    do
                         cp-patch $patch
                     done
-                fi
-            )
+                )
+            fi
         fi
     fi
 }
