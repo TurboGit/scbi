@@ -614,8 +614,11 @@ function get-build-id-callback()
 
 function get-depends-build-id()
 {
+    local MODREF=$1
+
     (
-        for-all-direct-modules-with-meta-ext get-build-id-callback $1 | get-md5
+        for-all-direct-modules-with-meta-ext \
+            get-build-id-callback $MODREF | get-md5
     )
 }
 
