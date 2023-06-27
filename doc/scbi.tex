@@ -628,7 +628,9 @@ A completion support for bash is provided. If activated many options will give h
 \subsubsection{Options from INI file}
 \label{inifile}
 
-An ini file can be activated using \code{--ini} option. Such file contains sections. The sub-option given to \code{--ini} option is the one activated. Also the \code{common} section is always activated and takes precedence over the global settings.
+An ini file can be used to store options to be used. Such file contains sections. The sub-option given to \code{--ini} option is the section to be activated. Also the \code{common} section is always activated and takes precedence over the global settings.
+
+The global settings, first in the file and so not in a specific section, are always used.
 
 The searched ini files are:
 

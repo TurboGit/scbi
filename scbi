@@ -89,6 +89,13 @@ function ini-load-file()
     done < $INIFILE
 }
 
+function ini-load-files()
+{
+    [[ -f $HOME/.scbi ]] && ini-load-file $HOME/.scbi
+    [[ -f .scbi ]] && ini-load-file .scbi
+    [[ -f $SCBI_INI_FILE ]] && ini-load-file $SCBI_INI_FILE
+}
+
 ############################## ini-apply-values
 
 #  A table of value to be read in the ini file and the
@@ -127,7 +134,7 @@ function ini-get-option()
 
     if [[ -n ${SCBI_INI_DB[$SECTION.$VAR]} ]]; then
         eval echo "${SCBI_INI_DB[$SECTION.$VAR]}"
-    elif [[ -n ${SCBI_INI_DB[common.$VAR]} ]]; then
+    elif [[ -n $SECTION ]] && [[ -n ${SCBI_INI_DB[common.$VAR]} ]]; then
         eval echo "${SCBI_INI_DB[common.$VAR]}"
     elif [[ -n ${SCBI_INI_DB[$VAR]} ]]; then
         eval echo "${SCBI_INI_DB[$VAR]}"
@@ -159,14 +166,14 @@ function ini-apply-values()
         local _SKIP=",setup,config,build,install,wrapup,force,modules,stat,"
         local _SKIP+="update,purge,archive,deps,safe,tar,no-patch,enable,run,"
 
-        if [[ $sec == "" ]] ||
-               [[ $sec == "common" ]] ||
-               [[ $SECTION = $sec ]];
+        if ( [[ -z $sec ]] && [[ -z $SECTION ]] ) ||
+               ( [[ $sec == "common" ]] && [[ -n $SECTION ]] ) ||
+               [[ $SECTION == $sec ]];
         then
             #  If this is a controlled variable (known in KV table)
             if [[ -n ${KV[$var]} ]]; then
                 var=${KV[$var]}
-                val=$(ini-get-option $SECTION $K)
+                val=$(ini-get-option "$SECTION" $K)
             else
                 #  A free variable, just assign
                 val=$(eval echo ${SCBI_INI_DB[$K]})
@@ -183,7 +190,7 @@ function ini-apply-values()
 
     #  Set features if enabled
 
-    local FEAT=$(ini-get-option $SECTION enable)
+    local FEAT=$(ini-get-option "$SECTION" enable)
 
     if [[ -n $FEAT ]]; then
         ini-set-enable $FEAT
@@ -191,7 +198,7 @@ function ini-apply-values()
 
     #  Set modules' list
 
-    SCBI_MODULES=$(ini-get-option $SECTION modules)
+    SCBI_MODULES=$(ini-get-option "$SECTION" modules)
 
     #  Set options controlled with a DO_<NAME>
 
@@ -199,24 +206,24 @@ function ini-apply-values()
                       force update purge archive stat;
     do
         local VAR=DO_${OPTS^^}
-        local O=$(ini-get-option $SECTION $OPTS)
+        local O=$(ini-get-option "$SECTION" $OPTS)
         [[ -n $O ]] && export $VAR=$O
     done
 
     #  Set other options
 
     for OPTS in safe tar no-patch; do
-        local O=$(ini-get-option $SECTION $OPTS)
+        local O=$(ini-get-option "$SECTION" $OPTS)
         [[ ${O^^} == YES ]] &&
             SCBI_INI_OPTIONS+="${SCBI_INI_OPTIONS:+ }--$OPTS"
     done
 
-    local O="$(ini-get-option $SECTION deps)"
+    local O="$(ini-get-option "$SECTION" deps)"
     [[ -n ${O} ]] && DEPS=$O
 
     #  Run option
 
-    local O="$(ini-get-option $SECTION run)"
+    local O="$(ini-get-option "$SECTION" run)"
     [[ -n ${O} ]] &&
         {
             DO_RUN=yes
@@ -225,7 +232,7 @@ function ini-apply-values()
 
     #  Finally whatever specific options are given
 
-    SCBI_INI_OPTIONS+="${SCBI_INI_OPTIONS:+ }$(ini-get-option $SECTION options)"
+    SCBI_INI_OPTIONS+="${SCBI_INI_OPTIONS:+ }"$(ini-get-option "$SECTION" options)
 }
 
 CDPATH=
@@ -1754,6 +1761,11 @@ function handle-module()
 #    --enable-*
 #    --run:"some command"
 
+#  Load ini file
+ini-load-files
+#  Apply default global values
+ini-apply-values ""
+
 SCBIOPTS=""
 
 while [[ $# -gt 0 ]]; do
@@ -1778,15 +1790,7 @@ while [[ $# -gt 0 ]]; do
             SCBI_TESTS_OPTIONS="${OPTS[*]:1}"
             ;;
         --ini*)
-            [[ -f $HOME/.scbi ]] ||
-                [[ -f $HOME/.scbi ]] ||
-                [[ -f $SCBI_INI_FILE ]] &&
-                    {
-                        [[ -f $HOME/.scbi ]] && ini-load-file $HOME/.scbi
-                        [[ -f .scbi ]] && ini-load-file .scbi
-                        [[ -f $SCBI_INI_FILE ]] && ini-load-file $SCBI_INI_FILE
-                        ini-apply-values ${1#*=}
-                    }
+            ini-apply-values ${1#*=}
             shift
             ;;
         *)
