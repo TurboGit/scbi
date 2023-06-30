@@ -381,7 +381,7 @@ function load-module-env()
         SCBI_ENV_DIR=$(dirname $ENV)
         source $ENV
     elif [[ -n $1 ]]; then
-        echo build environment .env$ENAME not found
+        echo build environment .$ENAME not found
         exit 1
     fi
 }
