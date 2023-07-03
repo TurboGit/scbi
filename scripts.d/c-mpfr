@@ -1,0 +1,89 @@
+
+#  variants:
+#    - vcs : to build from Git sources
+
+function c-mpfr-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://gitlab.inria.fr/mpfr/mpfr.git
+}
+
+function c-mpfr-tar()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo curl
+    echo https://www.mpfr.org/mpfr-current/
+    echo mpfr-$VERSION.tar.xz
+}
+
+function c-mpfr-build-depends()
+{
+    echo c-sandbox
+}
+
+function c-mpfr-vcs-depends()
+{
+    echo os@-autotools-dev
+    echo os@-automake
+    echo os@-libtool
+}
+
+function c-mpfr-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var C_INCLUDE_PATH   $PREFIX/include
+    add-to-var CXX_INCLUDE_PATH $PREFIX/include
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
+    add-to-var LIBRARY_PATH     $PREFIX/lib
+    add-to-var PKG_CONFIG_PATH  $PREFIX/lib/pkgconfig
+}
+
+function c-mpfr-out-of-tree()
+{
+    echo false
+}
+
+function c-mpfr-vcs-pre-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./autogen.sh
+    true
+}
+
+function c-mpfr-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./configure --prefix=$PREFIX
+}
+
+function c-mpfr-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make -j$JOBS
+}
+
+function c-mpfr-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make install
+}
