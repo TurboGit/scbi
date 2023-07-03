@@ -1,6 +1,11 @@
 
 #  variants:
-#    - vcs : to build from mecurial sources
+#    - vcs    : to build from mecurial sources
+#    - native : to use OS installed package
+
+with-variant native os@-libgmp-dev:[v] \
+             --env 'set-var GMP_INCLUDE_DIR /usr/include' \
+                   'set-var GMP_LIBRARY_DIR /usr/lib/$SCBI_TARGET'
 
 function c-gmp-vcs()
 {
