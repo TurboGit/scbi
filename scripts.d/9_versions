@@ -92,6 +92,8 @@ function _internal_merge_variant()
     echo "/$REF"
 }
 
+declare -A _PLAN_LOADED
+
 function load-module-plan()
 {
     local NAMEREF=$1
@@ -122,12 +124,20 @@ function load-module-plan()
         NAME=${NAMEREF%/*}
     fi
 
+    #  Load a plan only once
+
+    if [[ ${_PLAN_LOADED[$NAME]} == yes ]]; then
+        return
+    else
+        _PLAN_LOADED[$NAME]=yes
+    fi
+
     local PLAN=$PWD/.scbi-plan-$NAME
 
     local GROUP=no
     local GMOD=""
 
-    #  if not found in definitions install dir, look in current directory
+    #  If not found in definitions install dir, look in current directory
 
     if [[ ! -f $PLAN ]]; then
         PLAN=$SCBI_PLUGINS/.plan-$NAME

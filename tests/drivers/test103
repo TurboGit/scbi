@@ -1,0 +1,20 @@
+
+RUNS ./scbi --plan=final1 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 2 module(s) in the plan
+plg1:vz
+plg2:vz
+EOF
+
+RUNS ./scbi --plan=final2 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 2 module(s) in the plan
+plg1:vz
+plg2:vz
+EOF
