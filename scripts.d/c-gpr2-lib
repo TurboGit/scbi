@@ -1,5 +1,5 @@
 
-function c-gpr-vcs()
+function c-gpr2-lib-vcs()
 {
     echo default
     echo none
@@ -7,21 +7,24 @@ function c-gpr-vcs()
     echo https://github.com/AdaCore/gpr
 }
 
-function c-gpr-build-depends()
+function c-gpr2-lib-build-depends()
 {
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
     echo p-gnat
     echo c-gprbuild
     echo c-e3
     echo c-adasat
 }
 
-function c-gpr-tests-depends()
+function c-gpr2-lib-depends()
 {
-    echo c-e3
-}
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
 
-function c-gpr-depends()
-{
     echo c-gnatcoll-core
     echo c-gnatcoll-bindings-iconv
     echo c-gnatcoll-bindings-gmp
@@ -29,17 +32,17 @@ function c-gpr-depends()
     echo c-gprconfig-kb
 }
 
-function c-gpr-env()
+function c-gpr2-lib-env()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
-    add-to-var PATH             $PREFIX/bin
     add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
-function do-gconfig()
+function do-gpr2-lib-config()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -48,63 +51,62 @@ function do-gconfig()
     make PYTHONEXE=python3 -C langkit &&
         rm -f src/kb/gprconfig_kb &&
         ln -s $SCBI_BDIR/c-gprconfig-kb/src/db src/kb/gprconfig_kb &&
-        make $BUILD prefix=$PREFIX PYTHON=python3 GPR2_TOOLS_PREFIX=gpr2 setup
+        make $BUILD prefix=$PREFIX PYTHON=python3 setup
 }
 
-function c-gpr-out-of-tree()
-{
-    echo false
-}
-
-function c-gpr-debug-config()
-{
-    local PREFIX=$1
-    local TARGET=$2
-
-    do-gconfig $PREFIX $TARGET "BUILD=debug"
-}
-
-function c-gpr-config()
-{
-    local PREFIX=$1
-    local TARGET=$2
-
-    do-gconfig $PREFIX $TARGET "BUILD=release"
-}
-
-function c-gpr-build()
-{
-    local PREFIX=$1
-    local TARGET=$2
-
-    # Do not build gprname which is based on libadalang
-
-    make build-tools build-lib-relocatable \
-         build-lib-static-pic build-lib-static
-}
-
-function c-gpr-install()
-{
-    local PREFIX=$1
-    local TARGET=$2
-
-    make GPRINSTALL=gprinstall install-tools \
-         install-lib-relocatable \
-         install-lib-static-pic install-lib-static
-}
-
-function c-gpr-tests()
+function c-gpr2-lib-out-of-tree()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
-    local OPTIONS="$4"
 
-    local TSTDIR=$HOME/.local/tmp
+    echo false
+}
 
-    [[ ! -d $TSTDIR ]] && mkdir $TSTDIR
+function c-gpr2-lib-debug-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
 
-    cd testsuite &&
-        python3 ./testsuite.py --temp-dir=$TSTDIR \
-                --show-error-output -j$SCBI_JOBS $OPTIONS
+    do-gpr2-lib-config $PREFIX $TARGET "BUILD=debug"
+}
+
+function c-gpr2-lib-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    do-gpr2-lib-config $PREFIX $TARGET "BUILD=release"
+}
+
+function c-gpr2-lib-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make build-lib-relocatable \
+         build-lib-static-pic build-lib-static
+}
+
+function c-gpr2-lib-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make GPRINSTALL=gprinstall \
+         install-lib-relocatable \
+         install-lib-static-pic install-lib-static
+}
+
+function c-gpr2-lib-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo NONE
 }

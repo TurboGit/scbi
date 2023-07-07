@@ -28,7 +28,7 @@ function c-ada-language-server-depends()
     echo c-ada-libfswatch
     echo c-libadalang-tools
     echo c-langkit
-    echo c-gpr
+    echo c-gpr2-lib
     echo c-templates-parser
     echo c-gnatdoc4
 }

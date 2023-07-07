@@ -15,7 +15,7 @@ function c-gnatdoc4-build-depends()
 
 function c-gnatdoc4-depends()
 {
-    echo c-gpr
+    echo c-gpr2-lib
     echo c-libadalang
     echo c-langkit
     echo c-vss

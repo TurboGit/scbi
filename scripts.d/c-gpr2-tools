@@ -1,0 +1,134 @@
+
+function c-gpr2-tools-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gpr
+}
+
+function c-gpr2-tools-build-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-gpr2-tools-tests-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo c-e3
+}
+
+function c-gpr2-tools-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo c-gpr2-lib
+    echo c-libadalang
+    echo c-langkit
+}
+
+function c-gpr2-tools-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var PATH             $PREFIX/bin
+}
+
+function do-gpr2-tools-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local BUILD=$3
+
+    # Let's reuse c-gpr2-lib KB setup
+    # It is then not needed to have a build depends on e3
+
+    rm -f .build/kb
+    mkdir .build
+    ln -s ${SCBI_MODULES_DIR["c-gpr2-lib@build"]}/.build/kb .build/kb
+
+    make $BUILD prefix=$PREFIX setup
+}
+
+function c-gpr2-tools-out-of-tree()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo false
+}
+
+function c-gpr2-tools-debug-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    do-gpr2-tools-config $PREFIX $TARGET "BUILD=debug"
+}
+
+function c-gpr2-tools-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    do-gpr2-tools-config $PREFIX $TARGET "BUILD=release"
+}
+
+function c-gpr2-tools-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make build-tools
+}
+
+function c-gpr2-tools-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make GPRINSTALL=gprinstall install-tools
+}
+
+function c-gpr2-tools-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+    local OPTIONS="$4"
+
+    local TSTDIR=$HOME/.local/tmp
+
+    [[ ! -d $TSTDIR ]] && mkdir $TSTDIR
+
+    cd testsuite &&
+        python3 ./testsuite.py --temp-dir=$TSTDIR \
+                --show-error-output -j$SCBI_JOBS $OPTIONS
+}
+
+function c-gpr2-tools-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo NONE
+}
