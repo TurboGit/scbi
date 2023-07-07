@@ -7,6 +7,11 @@ function c-e3-depends()
     echo c-e3-testsuite
 }
 
+function c-e3-only-explicit-build()
+{
+    echo true
+}
+
 function c-e3-env()
 {
     local PREFIX=$1

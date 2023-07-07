@@ -9,6 +9,11 @@ function c-e3-testsuite-vcs()
     echo https://github.com/AdaCore/e3-testsuite
 }
 
+function c-e3-testsuite-only-explicit-build()
+{
+    echo true
+}
+
 function c-e3-testsuite-out-of-tree()
 {
     echo false

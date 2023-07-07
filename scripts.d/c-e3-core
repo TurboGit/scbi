@@ -7,6 +7,11 @@ function c-e3-core-vcs()
     echo https://github.com/AdaCore/e3-core
 }
 
+function c-e3-core-only-explicit-build()
+{
+    echo true
+}
+
 function c-e3-core-out-of-tree()
 {
     echo false
