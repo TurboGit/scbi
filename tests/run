@@ -82,6 +82,10 @@ cp ../scripts.d/0_runtime scripts.d/
 cp ../scripts.d/[1-9]* scripts.d/
 cp ../scripts.d/.pkgs-* scripts.d/
 
+# patch scbi driver to avoid loading $HOME/.scbi ini file
+
+sed -i 's,\(.*ini-load-file \$HOME/.scbi\),#\1,g' scbi
+
 # patch rsync to use safe mode (checksum) as the tests repositories are small,
 # and has some files with same time-stamp.
 
