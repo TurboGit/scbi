@@ -1,0 +1,61 @@
+
+function c-libadalang-refactor-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/lal-refactor
+}
+
+function c-libadalang-refactor-cross-build-depends()
+{
+    echo c-sandbox
+}
+
+function c-libadalang-refactor-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-libadalang-refactor-depends()
+{
+    echo c-libadalang-tools
+}
+
+function c-libadalang-refactor-out-of-tree()
+{
+    echo false
+}
+
+function c-libadalang-refactor-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH             $PREFIX/bin
+    add-to-var GPR_PROJECT_PATH $PREFIX/install/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
+}
+
+function c-libadalang-refactor-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make BUILD_MODE=prod
+}
+
+function c-libadalang-refactor-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install PREFIX=$PREFIX
+}
+
+function c-libadalang-refactor-prefix()
+{
+    echo NONE
+}
