@@ -20,6 +20,14 @@ function c-spawn-build-depends()
     echo c-gprbuild
 }
 
+function c-spawn-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/../build/gnat
+}
+
 function c-spawn-env()
 {
     local PREFIX=$1
