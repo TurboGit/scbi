@@ -92,15 +92,13 @@ function _internal_merge_variant()
     echo "/$REF"
 }
 
-declare -A _PLAN_LOADED
+declare -A SCBI_PLAN_LOADED
 
 function load-module-plan()
 {
     local NAMEREF=$1
 
     local VARIANT=${NAMEREF#*/}
-
-    declare -A _SETS
 
     function resolve-set()
     {
@@ -126,11 +124,13 @@ function load-module-plan()
 
     #  Load a plan only once
 
-    if [[ ${_PLAN_LOADED[$NAME]} == yes ]]; then
+    if [[ ${SCBI_PLAN_LOADED[$NAME]} == yes ]]; then
         return
     else
-        _PLAN_LOADED[$NAME]=yes
+        SCBI_PLAN_LOADED[$NAME]=yes
     fi
+
+    declare -A _SETS
 
     local PLAN=$PWD/.scbi-plan-$NAME
 
@@ -156,7 +156,7 @@ function load-module-plan()
                 if check-discriminants "$arg1"; then
                     local module_info=( $(parse-module-ref $arg3) )
                     local module=${module_info[0]}
-                    MODVER[$module]=${arg3/*=/}
+                    SCBI_MODVER[$module]=${arg3/*=/}
                 fi
             elif [[ "$modref" = "@alias" ]]; then
                 if [[ "$arg2" != "use" ]]; then
@@ -173,7 +173,7 @@ function load-module-plan()
 
                 local module_info=( $(parse-module-ref "$arg1=$arg3") )
                 local module=${module_info[0]}
-                MODVER[$module]=$(resolve-set $arg3)
+                SCBI_MODVER[$module]=$(resolve-set $arg3)
 
             elif [[ "$modref" = "@set" ]]; then
                 if [[ "$arg2" != "=" ]]; then
@@ -204,9 +204,10 @@ function load-module-plan()
 
                     if [[ $version == "NONE" ]] &&
                            [[ $variant == "default" ]] &&
-                           [[ -n ${MODVER[$module]} ]];
+                           [[ -n ${SCBI_MODVER[$module]} ]];
                     then
-                        local module_info=( $(parse-module-ref ${MODVER[$module]}) )
+                        local module_info=(
+                            $(parse-module-ref ${SCBI_MODVER[$module]}) )
                         local module=${module_info[0]}
                         local variant=${module_info[1]}
                         local kind=${module_info[2]}
@@ -242,7 +243,7 @@ function load-module-plan()
                         fi
                     fi
 
-                    MODVER[$module]=$(resolve-set "${module}${FREF}")
+                    SCBI_MODVER[$module]=$(resolve-set "${module}${FREF}")
                 done
                 GROUP=no
                 GMOD=""
@@ -294,7 +295,7 @@ function load-module-plan()
                 local module_info=( $(parse-module-ref $modref) )
                 local module=${module_info[0]}
 
-                MODVER[$module]=$(resolve-set "${modref/*=/}")
+                SCBI_MODVER[$module]=$(resolve-set "${modref/*=/}")
             fi
         done < $PLAN
     else
@@ -306,6 +307,8 @@ function load-module-plan()
         elog build build plan group is not closed .plan-$1
         exit 1
     fi
+
+    unset _SETS
 }
 
 ############################## load-module-plan
@@ -317,7 +320,7 @@ function handle-plan-meta-module()
 {
     local M=$1
 
-    local value=${MODVER[$M]}
+    local value=${SCBI_MODVER[$M]}
 
     local mod=${M/*=/}
     local FORMODULE=${M%$mod}
@@ -342,10 +345,10 @@ function handle-plan-meta-module()
         do
             local mref=""
 
-            if [[ -z ${MODVER[$mod]} ]]; then
+            if [[ -z ${SCBI_MODVER[$mod]} ]]; then
                 mref=:$ref
             else
-                local s=${MODVER[$mod]}
+                local s=${SCBI_MODVER[$mod]}
                 local s_module_info=( $(get-module-ref $s $module) )
                 local s_variant=${s_module_info[1]}
                 local s_ref=${s_module_info[3]}
@@ -370,7 +373,7 @@ function handle-plan-auto-variant()
 {
     local M=$1
 
-    local value=${MODVER[$M]}
+    local value=${SCBI_MODVER[$M]}
 
     local mod=${M/*=/}
     local FORMODULE=${M%$mod}
@@ -439,39 +442,42 @@ function rewrite-module-plan()
 
     while read E K V; do
         if [[ $E == 0 ]]; then
-            MODVER[$K]=$V
+            SCBI_MODVER[$K]=$V
         elif [[ $E == 1 ]]; then
             ilog $K "$V"
         else
             elog $K "$V"
             eres=1
         fi
-    done < <( parallel-do handle-plan-auto-variant 20 ${!MODVER[@]} )
+    done < <( parallel-do handle-plan-auto-variant 20 ${!SCBI_MODVER[@]} )
 
     #  Rewrite plan for meta-module (this is done recursively until there
     #  is no new module plan entry rewritten.
 
-    declare MOREMOD=( ${!MODVER[@]} )
+    declare _MOREMOD=( ${!SCBI_MODVER[@]} )
 
-    while [[ ${#MOREMOD[@]} > 0 ]]; do
-        declare NEWMOD=()
+    while [[ ${#_MOREMOD[@]} > 0 ]]; do
+        declare _NEWMOD=()
 
         while read E K V; do
             if [[ $E == 0 ]]; then
-                MODVER[$K]=$V
-                NEWMOD+=($K)
+                SCBI_MODVER[$K]=$V
+                _NEWMOD+=($K)
             elif [[ $E == 1 ]]; then
                 ilog $K "$V"
             else
                 elog $K "$V"
                 eres=1
             fi
-        done < <( parallel-do handle-plan-meta-module 20 ${MOREMOD[@]} )
+        done < <( parallel-do handle-plan-meta-module 20 ${_MOREMOD[@]} )
 
-        MOREMOD=( ${NEWMOD[@]} )
+        _MOREMOD=( ${_NEWMOD[@]} )
     done
 
     wait
+
+    unset _MOREMOD
+    unset _NEWMOD
 
     return $eres
 }
@@ -484,19 +490,19 @@ function _internal_list-build-plan()
 {
     local module=""
 
-    for module in ${!MODVER[*]}; do
+    for module in ${!SCBI_MODVER[*]}; do
         local FM=${module%=*}
         if [[ "$FM" != "$module" ]]; then
-            echo "@for $FM use ${MODVER[$module]}"
+            echo "@for $FM use ${SCBI_MODVER[$module]}"
         else
-            echo "${MODVER[$module]}"
+            echo "${SCBI_MODVER[$module]}"
         fi
     done
 }
 
 function display-build-plan()
 {
-    echo "There is ${#MODVER[*]} module(s) in the plan"
+    echo "There is ${#SCBI_MODVER[*]} module(s) in the plan"
     _internal_list-build-plan
 }
 
@@ -537,9 +543,9 @@ function set-module-ref()
          || [[ "${ref^^}" != "NONE" ]];
     then
         if [[ "$ref" == "force" ]]; then
-            MODVER[$module]=$module/$variant
+            SCBI_MODVER[$module]=$module/$variant
         else
-            MODVER[$module]=${MODREF/*=/}
+            SCBI_MODVER[$module]=${MODREF/*=/}
         fi
     fi
 }

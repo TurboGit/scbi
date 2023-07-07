@@ -4,7 +4,7 @@
 #  set to meta (for a meta-module) / final (for a standard module).
 declare -A SCBI_LOADED
 
-declare -A MODVER
+declare -A SCBI_MODVER
 
 ############################## fn-exists
 # check wether a function is defined
@@ -414,10 +414,10 @@ function get-module-ref()
     local module_info=( $(parse-module-ref $MODREF) )
     local module=${module_info[0]}
 
-    local modplan=${MODVER[$FORMODULE"="$module]}
+    local modplan=${SCBI_MODVER[$FORMODULE"="$module]}
 
     if [[ -z $modplan ]]; then
-        local modplan=${MODVER[$module]}
+        local modplan=${SCBI_MODVER[$module]}
 
         if [[ -n $modplan ]]; then
             module_info=( $(parse-module-ref $modplan) )
@@ -904,7 +904,7 @@ function load-runtime-module-plan()
         if [[ "${modref:0:1}" != "#" ]]; then
             local module_info=( $(parse-module-ref $modref) )
             local module=${module_info[0]}
-            MODVER[$module]=${modref/*=/}
+            SCBI_MODVER[$module]=${modref/*=/}
         fi
     done < $PLAN
 }
