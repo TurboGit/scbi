@@ -31,6 +31,8 @@ function c-aws-cross-build-depends()
 function c-aws-tests-depends()
 {
     echo c-sandbox
+    echo c-e3
+    echo c-python3-modules/net
 }
 
 function c-aws-build-depends()
