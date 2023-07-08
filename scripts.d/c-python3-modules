@@ -1,0 +1,42 @@
+
+function c-python3-modules-only-explicit-build()
+{
+    echo true
+}
+
+function c-python3-modules-out-of-tree()
+{
+    echo false
+}
+
+function c-python3-modules-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local PYDIR=$(last-modified-directory $PREFIX/local/lib/python*)
+
+    add-to-var PYTHONPATH $PYDIR/dist-packages
+}
+
+function c-python3-modules-net-config-options()
+{
+    echo websocket-client
+}
+
+function c-python3-modules-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local MODULES_LIST="$(get-config-options $PREFIX $TARGET $VARIANT)"
+
+    pip3 install $MODULES_LIST --prefix $PREFIX
+}
+
+function c-python3-modules-prefix()
+{
+    echo NONE
+}
