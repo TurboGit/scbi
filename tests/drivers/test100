@@ -101,4 +101,5 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 EOF
 
+rm -f $SCBI_INI_FILE
 unset SCBI_INI_FILE
