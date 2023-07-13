@@ -1018,7 +1018,15 @@ function display-stat()
     fi
 
     printf "%-21s : %s\n"   "supported platforms" "${SCBI_OS_NAMES[*]}"
-    printf "%-21s : %s\n\n" "discriminants"       "${!SCBI_OS_DISCRIMINANTS[*]}"
+    printf "%-21s :" "discriminants"
+
+    local FMT="%s%s\n"
+    echo "${!SCBI_OS_DISCRIMINANTS[*]}" | fold -s -w 50 - |
+        while read line; do
+            printf $FMT " " "$line"
+            FMT="%-24s%s\n"
+        done
+    echo
 }
 
 ############################## display-modules
