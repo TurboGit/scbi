@@ -70,12 +70,6 @@ function c-gnatcoll-bindings-readline-cross-pre-install()
     true
 }
 
-function c-gnatcoll-bindings-readline-cross-install()
-{
-    local PREFIX=$1
-    local TARGET=$2
-}
-
 function c-gnatcoll-bindings-readline-pre-install()
 {
     local PREFIX=$1
