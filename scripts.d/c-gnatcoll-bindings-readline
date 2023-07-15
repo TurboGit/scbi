@@ -29,9 +29,14 @@ function c-gnatcoll-bindings-readline-build-depends()
     echo c-gprbuild
 }
 
-function c-gnatcoll-bindings-readline-depends()
+function c-gnatcoll-bindings-readline-common-depends()
 {
     echo c-gnatcoll-core
+}
+
+function c-gnatcoll-bindings-readline-cross-depends()
+{
+    echo c-readline
 }
 
 function c-gnatcoll-bindings-readline-out-of-tree()
