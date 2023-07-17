@@ -100,6 +100,42 @@ function check-hooks()
 
     if [[ $DO_WARNING == "yes" ]]; then
         echo
+        echo "Check hooks definitions:"
+    fi
+
+    while read H; do
+        elog $H defined multiple times
+    done < <(cat $PLUGIN |
+                 grep "function" |
+                 sed 's/()//g' |
+                 sed 's/function /  /g' |
+                 sort |
+                 uniq --repeated)
+
+    (
+        source $PLUGIN
+        TMP=$(mktemp)
+
+        while read H; do
+
+            type $H |
+                grep -v $H |
+                grep -v "^ *local " |
+                grep -v '{' |
+                grep -v '}' > $TMP
+
+            [[ -z $(cat $TMP) ]] &&
+                wlog $H defined but empty
+        done < <(cat $PLUGIN |
+                     grep "function" |
+                     sed 's/()//g' |
+                     sed 's/function /  /g' |
+                     sort |
+                     uniq --repeated)
+    )
+
+    if [[ $DO_WARNING == "yes" ]]; then
+        echo
         echo "Check hooks naming:"
     fi
 
