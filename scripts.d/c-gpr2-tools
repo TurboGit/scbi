@@ -56,7 +56,7 @@ function do-gpr2-tools-config()
     # Let's reuse c-gpr2-lib KB setup
     # It is then not needed to have a build depends on e3
 
-    rm -f .build/kb
+    rm -fr .build/kb
     mkdir .build
     ln -s ${SCBI_MODULES_DIR["c-gpr2-lib@build"]}/.build/kb .build/kb
 
