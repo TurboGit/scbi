@@ -30,8 +30,6 @@ function run-shell()
 
     export SCBI_SHELL=$module
 
-    [[ $kind == DEV ]] && DOCD=yes-dev
-
     #  If docd set (no cwd sub-option specified), we are moving into
     #  the module's build directory. In this mode we not only want the
     #  environment of all dependencies to be set but we also want the
@@ -45,7 +43,7 @@ function run-shell()
         [[  $DOCD == yes-tests ]] &&
             handle-tests-depends-env "@root" $MODREF
 
-        if [[ $DOCD == yes-dev ]]; then
+        if [[ $kind == DEV ]] || [[ $DOCD == yes-dev ]]; then
             cd $(get-vcs-dir $module:dev)
         else
             cd $(get-build-dir $TARGET $MODREF)
