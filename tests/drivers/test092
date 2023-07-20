@@ -6,6 +6,8 @@ DIFF <<EOF
 
 ========== Handle scripts.d/lib2
 
+Check hooks definitions:
+
 Check hooks naming:
 
 Plug-in variants:
@@ -28,6 +30,8 @@ NRUNS ./scbi-lint scripts.d/wrong
 DIFF <<EOF
 
 ========== Handle scripts.d/wrong
+
+Check hooks definitions:
 
 Check hooks naming:
    warning: (this-is-not-a-hook) not a hook of plug-in wrong
