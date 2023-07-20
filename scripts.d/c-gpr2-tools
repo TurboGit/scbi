@@ -119,6 +119,8 @@ function c-gpr2-tools-tests()
 
     [[ ! -d $TSTDIR ]] && mkdir $TSTDIR
 
+    export LIBRARY_TYPE=static
+
     cd testsuite &&
         python3 ./testsuite.py --temp-dir=$TSTDIR \
                 --show-error-output -j$SCBI_JOBS $OPTIONS
