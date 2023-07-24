@@ -72,10 +72,11 @@ TMP=$(mktemp)
 # to clear discriminants we need to remove all lines starting
 # with indentation.
 cat ${OSHT_STDIO} |
-    grep -v discriminants |
+    grep -v ^discriminants |
     grep -v "^                        " |
     grep -v platforms |
-    grep -v host |
+    grep -v ^host |
+    grep -v ^arch |
     grep -v SVN > $TMP
 mv $TMP ${OSHT_STDIO}
 
