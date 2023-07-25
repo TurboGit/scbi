@@ -1003,9 +1003,9 @@ function display-stat()
     else
         printf "%-21s : %s\n" "host" "$(lsb_release -s -d)"
     fi
-    printf "%-21s : %s\n" "arch"                  "$SCBI_HOST"
+    printf "%-21s   %s\n" ""                      "$SCBI_HOST"
     if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
-        printf "%-21s : %s\n" "cross target"      "$SCBI_TARGET"
+        printf "%-21s : %s\n" "target"            "$SCBI_TARGET"
     fi
     printf "%-21s : %s\n" "build dir"             "$SCBI_BDIR"
     printf "%-21s : %s\n" "install prefix"        "$SCBI_PREFIX"
