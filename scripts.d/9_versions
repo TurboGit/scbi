@@ -71,7 +71,7 @@ function _internal_merge_variant()
 
     local NREF="${AREF}"
 
-    for o in ${REF}; do
+    for o in ${REF//./ }; do
         ! has-variant "$NREF" $o &&
             {
                 [[ -n $NREF ]] && NREF+="."
