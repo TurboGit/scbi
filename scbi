@@ -1713,7 +1713,7 @@ function handle-module()
         _IDIR=$SCBI_PREFIX
     fi
 
-    if [[ $_IDIR == NONE ]]; then
+    if [[ ${_IDIR^^} == NONE ]]; then
         ilog $module skip global install
 
     elif [[ "$DO_INSTALL" != "no" ]] &&
