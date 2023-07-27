@@ -1,0 +1,25 @@
+
+function plgwronghook-wrong-vcs()
+{
+    echo 1
+    echo 2
+    echo 3
+}
+
+function plgwronghook-wrong-tar()
+{
+    echo 1
+    echo 2
+    echo 3
+    echo 4
+}
+
+function plgwronghook-build()
+{
+    echo build
+}
+
+function plgwronghook-install()
+{
+    echo install
+}

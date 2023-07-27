@@ -299,7 +299,12 @@ function get-vcs-data()
     local VCS_FUNCTION=$(get-hook $MODULE $VARIANT vcs)
     VCS_FUNCTION=${VCS_FUNCTION:=${MODULE}-vcs}
 
-    local VCS_VARIANT=default
+    #  Get selected variant out of the hook function name
+
+    local VCS_VARIANT=${VCS_FUNCTION#$MODULE}
+    VCS_VARIANT=${VCS_VARIANT%-vcs}
+    VCS_VARIANT=${VCS_VARIANT#-}
+    VCS_VARIANT=${VCS_VARIANT:-default} # no variant use default
 
     #  check first for module specifc VCS variant
 
@@ -333,6 +338,7 @@ function get-vcs-data()
             scbi-rewrite-vcs $($VCS_FUNCTION)
         else
             $VCS_FUNCTION
+            return 0
         fi
     else
         return 1

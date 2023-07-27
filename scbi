@@ -1008,9 +1008,22 @@ function handle-sources()
 
     if [[ $kind == VERSION ]]; then
         local tar=( $(get-tar-data $module $variant $ref) )
+        local nv=${#tar[*]}
 
-        if [[ $? != 0 ]]; then
+        if [[ $nv == 0 ]]; then
             echo "error: $module-tar function not defined, cannot get tarball"
+            exit 1
+        fi
+
+        if [[ $nv != 6 ]]; then
+            local V=${tar[0]}
+            if [[ $V == default ]]; then
+                V=""
+            else
+                V+="-"
+            fi
+            local nv=$(( $nv - 1 ))
+            echo "error: $module-${V}tar function returned $nv values, 5 expected"
             exit 1
         fi
 
@@ -1061,13 +1074,34 @@ function handle-sources()
     else
         #  Get sources from repository
 
-        vcs=( $(get-vcs-data $module $variant) )
-        res=$?
+        local vcs=( $(get-vcs-data $module $variant) )
+
+        local nv=${#vcs[*]}
+
+        #  We request a specific version but there is no VCS hook defined
+        #  this is an error.
+
+        if [[ $kind == BRANCH ]] && [[ $nv == 0 ]]; then
+            echo "error: $module-vcs function not defined, cannot get vcs"
+            exit 1
+        fi
+
+        if [[ $nv != 0 ]] && [[ $nv != 5 ]] && [[ $nv != 6 ]]; then
+            local V=${vcs[0]}
+            if [[ $V == default ]]; then
+                V=""
+            else
+                V+="-"
+            fi
+            local nv=$(( $nv - 1 ))
+            echo "error: $module-${V}vcs function returned $nv values, 4 or 5 expected"
+            exit 1
+        fi
 
         local VCS_NAME=${vcs[3]}
         local VCS_URL=${vcs[4]}
 
-        if [[ $res = 0 ]] && [[ "${VCS_NAME^^}" != "NONE" ]]; then
+        if [[ $nv > 0 ]] && [[ "${VCS_NAME^^}" != "NONE" ]]; then
             REPO=$(basename $VCS_URL .git)
 
             if [[ $kind = DEV ]]; then

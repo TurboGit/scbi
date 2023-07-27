@@ -39,7 +39,7 @@ xxxx/xx/xx xx:xx:xx : module mautov using native variant
 xxxx/xx/xx xx:xx:xx : Building mautov [mainav] (99.99)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : config [mainav] starting
 xxxx/xx/xx xx:xx:xx : config [mainav] completed
 xxxx/xx/xx xx:xx:xx : build [mainav] starting
@@ -78,7 +78,6 @@ xxxx/xx/xx xx:xx:xx : module mautov using native variant
 xxxx/xx/xx xx:xx:xx : Building mautov [for2] (99.99)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [for2] starting
 xxxx/xx/xx xx:xx:xx : config [for2] completed
 xxxx/xx/xx xx:xx:xx : build [for2] starting

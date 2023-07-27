@@ -1,6 +1,14 @@
 
 with-variant native gcc:[v]
 
+function mautov-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/mautov.bundle
+}
+
 function mautov-config()
 {
     echo mautov-config

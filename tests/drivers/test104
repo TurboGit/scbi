@@ -1,0 +1,36 @@
+
+NRUNS ./scbi plgwronghook:#v9
+
+CLEAN-DIFF <<EOF
+2023/07/27 11:17:04 : Building plgwronghook [default] (v9)
+2023/07/27 11:17:04 : native x86_64-linux-gnu
+2023/07/27 11:17:04 : steps : setup config build install wrapup
+error: plgwronghook-tar function not defined, cannot get tarball
+EOF
+
+NRUNS ./scbi plgwronghook/wrong:#v7
+
+CLEAN-DIFF <<EOF
+2023/07/27 11:17:42 : Building plgwronghook [wrong] (v7)
+2023/07/27 11:17:42 : native x86_64-linux-gnu
+2023/07/27 11:17:42 : steps : setup config build install wrapup
+error: plgwronghook-wrong-tar function returned 4 values, 5 expected
+EOF
+
+NRUNS ./scbi plgwronghook:1.2
+
+CLEAN-DIFF <<EOF
+2023/07/27 11:18:07 : Building plgwronghook [default] (1.2)
+2023/07/27 11:18:07 : native x86_64-linux-gnu
+2023/07/27 11:18:07 : steps : setup config build install wrapup
+error: plgwronghook-vcs function not defined, cannot get vcs
+EOF
+
+NRUNS ./scbi plgwronghook/wrong:1.2
+
+CLEAN-DIFF <<EOF
+2023/07/27 11:18:07 : Building plgwronghook [wrong] (1.2)
+2023/07/27 11:18:07 : native x86_64-linux-gnu
+2023/07/27 11:18:07 : steps : setup config build install wrapup
+error: plgwronghook-wrong-vcs function returned 3 values, 4 or 5 expected
+EOF
