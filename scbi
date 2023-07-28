@@ -500,6 +500,28 @@ function module-wrapper()
 # called for each module, variant and step, switch to proper step to call
 # depending on the existence of the variant.
 
+function _internal_module-variant-wrapper()
+{
+    local PREFIX=$1
+    local MODULE=$2
+    local VARIANT=$3
+    local FCT=$4
+
+    [[ -z $FCT ]] && return
+
+    #  Now check that the body is not empty (default variant)
+    local BODY=$(declare -f $FCT | tail --lines=-3)
+    local BODY=$(echo $BODY)
+    local res=0
+
+    if [[ "$BODY" != "{ true }" ]]; then
+        module-wrapper $PREFIX $MODULE \
+                       $VARIANT ${FCT#"${MODULE}-"} || exit 1
+        res=$?
+    fi
+    return $res
+}
+
 function module-variant-wrapper()
 {
     local PREFIX=$1
@@ -510,17 +532,7 @@ function module-variant-wrapper()
     local FCT=$(get-hook $MODULE $VARIANT $STEP)
 
     if [[ -n $FCT ]]; then
-        #  Now check that the body is not empty (default variant)
-        local BODY=$(declare -f $FCT | tail --lines=-3)
-        local BODY=$(echo $BODY)
-        local res=0
-
-        if [[ "$BODY" != "{ true }" ]]; then
-            module-wrapper $PREFIX $MODULE \
-                           $VARIANT ${FCT#"${MODULE}-"} || exit 1
-            res=$?
-        fi
-        return $res
+        _internal_module-variant-wrapper $PREFIX $MODULE $VARIANT $FCT
     fi
 }
 
@@ -1241,16 +1253,19 @@ function handle-meta-module()
 
     #  check for setup
 
+    local FCT_SETUP=$(get-hook $METAMODULE $VARIANT setup)
+    local FCT_WRAPUP=$(get-hook $METAMODULE $VARIANT wrapup)
+
     line-sep
     ilog $METAMODULE Metamodule $METAMODULE \[${VARIANT//./ }\] setup \
         | tee -a $log
-    module-variant-wrapper $SCBI_BDIR/install \
-                           $METAMODULE $VARIANT setup || exit 1
+    _internal_module-variant-wrapper $SCBI_BDIR/install \
+                                     $METAMODULE $VARIANT $FCT_SETUP || exit 1
     ilog $METAMODULE End metamodule $METAMODULE \[${VARIANT//./ }\] setup \
         | tee -a $log
     line-sep
 
-    [[ $DEPS = yes ]] &&
+    [[ $DEPS == yes ]] || ( [[ -z $FCT_SETUP ]] && [[ -z $FCT_WRAPUP ]] ) &&
         for module in $(plugin-call-variant-hooks \
                         $METAMODULE modules $SCBI_PREFIX $SCBI_TARGET $VARIANT);
         do
@@ -1262,8 +1277,8 @@ function handle-meta-module()
     line-sep
     ilog $METAMODULE Metamodule $METAMODULE \[${VARIANT//./ }\] wrapup \
         | tee -a $log
-    module-variant-wrapper $SCBI_BDIR/install \
-                           $METAMODULE $VARIANT wrapup || exit 1
+    _internal_module-variant-wrapper $SCBI_BDIR/install \
+                                     $METAMODULE $VARIANT $FCT_WRAPUP || exit 1
     ilog $METAMODULE End metamodule $METAMODULE \[${VARIANT//./ }\] wrapup \
         | tee -a $log
     line-sep
