@@ -1,0 +1,6 @@
+
+function c-gpr2-modules()
+{
+    echo c-gpr2-lib
+    echo c-gpr2-tools
+}
