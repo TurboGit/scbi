@@ -1234,7 +1234,7 @@ function handle-meta-module()
 
     #  check for dependencies
 
-    [[ $DEPS = yes ]] &&
+    [[ $DEPS == yes ]] &&
         for dmodule in $(get-all-depends $METAMODULE $VARIANT build-depends); do
             handle-depends $METAMODULE $dmodule || exit 1
         done
