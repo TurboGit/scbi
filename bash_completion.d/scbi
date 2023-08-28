@@ -73,6 +73,8 @@ _scbi_shell()
 
     echo dev
     echo sandbox
+    echo tests
+    echo use
 }
 
 _scbi_env()
