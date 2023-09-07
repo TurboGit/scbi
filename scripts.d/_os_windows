@@ -45,7 +45,6 @@ function define-var()
             SET|S)
                 export $VAR="${VALUE}"
             ;;
-            ;;
             UNSET|U)
                 unset $VAR
             ;;
