@@ -49,7 +49,7 @@ function ilog()
     printf -v TS "%(%Y/%m/%d %H:%M:%S)T" -1
 
     shift
-    echo "$TS : $*"
+    [[ $DO_QUIET == no ]] && echo "$TS : $*"
     echo "$TS : $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }

@@ -279,6 +279,7 @@ SCBI_CURRENT_MODULE=
 DO_PURGE=no
 SCBI_PREFIX=
 SCBI_DEFAULT_PREFIX=yes
+DO_QUIET=no
 DO_UPDATE=no
 DO_ARCHIVE=no
 DO_FORCE=no
@@ -554,6 +555,7 @@ function usage()
     echo ""
     echo "   -h | --help             this help message"
     echo "   -v | --version          display driver & plug-ins versions"
+    echo "   -q | --quiet            do not display information log"
     echo "      | --ini=<section>    load ini file given section"
     echo "   -t | --prefix=<dir>     the global install directory"
     echo "      | --build-dir=<dir>  the root build directory."
@@ -1864,11 +1866,11 @@ function get-optional-argument()
   fi
 }
 
-ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpvwWh \
+ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpqvwWh \
                  -l store,target:,no-setup,no-install,update,setup,config \
                  -l build,build-target:,install,clean-install,tar \
                  -l log,log:yes,log:no,log:on-failure,purge,purge:only \
-                 -l prefix:,help,version,module-ref \
+                 -l quiet,prefix:,help,version,module-ref \
                  -l module-ref:version,module-ref:variant,module-ref:full \
                  -l deps,deps:warning,archive,force,env:,no-patch,plan: \
                  -l stat,stat:full,no-wrapup,wrapup,safe,standalone \
@@ -1901,6 +1903,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         -f|--force)
             DO_FORCE=yes
+            ;;
+        -q|--quiet)
+            DO_QUIET=yes
             ;;
         -a|--archive)
             DO_ARCHIVE=yes
@@ -2026,18 +2031,23 @@ while [[ $# -gt 0 ]]; do
             ;;
         --list-depends:direct)
             DO_DEPS=yes-direct;
+            DO_QUIET=yes;
             ;;
         --list-depends:full)
             DO_DEPS=yes;
+            DO_QUIET=yes;
             ;;
         --list-depends)
             DO_DEPS=yes;
+            DO_QUIET=yes;
             ;;
         --list-externals:only)
             DO_EXT=yes-only;
+            DO_QUIET=yes;
             ;;
         --list-externals)
             DO_EXT=yes;
+            DO_QUIET=yes;
             ;;
         --list-no-version)
             DO_LIST_VER=no
