@@ -590,7 +590,7 @@ function usage()
     echo "      | --list-no-version  do not display modules/externals version"
     echo "      | --list-filter:n    filter depends/external for dev or runtime"
     echo "      | --list-plan        list current current plan"
-    echo "      | --module-ref       display variant/version of specific module"
+    echo "      | --module-ref:n     display variant/version of specific module"
     echo "      | --dry-run          only list modules handled"
     echo "      | --stat[:full]      display some status of current setup"
     echo "   -n | --no-patch         do not apply patches"
