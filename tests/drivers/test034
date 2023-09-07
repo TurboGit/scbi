@@ -1,7 +1,7 @@
 # test build plan with a :dev version
 
-# =================== module version (v1)
-RUNS ./scbi --plan=dev --module-version lib1
+# =================== module ref (v1)
+RUNS ./scbi --plan=dev --module-ref:version lib1
 # add eof to osht output
 echo >> ${OSHT_STDIO}
 
@@ -9,18 +9,42 @@ DIFF <<EOF
 v1
 EOF
 
-# =================== module version (v2)
-RUNS ./scbi --plan=dev --module-version lib1:v2
+# =================== module ref (v2)
+RUNS ./scbi --plan=dev --module-ref:version lib1:v2
 echo >> ${OSHT_STDIO}
 
 DIFF <<EOF
 v2
 EOF
 
-# =================== module version (NONE)
-RUNS ./scbi --module-version lib1
+# =================== module ref (NONE)
+RUNS ./scbi --module-ref:version lib1
 echo >> ${OSHT_STDIO}
 
 DIFF <<EOF
 NONE
+EOF
+
+# =================== module ref (default)
+RUNS ./scbi --plan=dev --module-ref:variant lib1
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+default
+EOF
+
+# =================== module ref (/variant1:dev)
+RUNS ./scbi --plan=dev --module-ref:full lib2
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+/variant1:dev
+EOF
+
+# =================== module ref (/variant1:dev)
+RUNS ./scbi --plan=dev --module-ref lib2
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+/variant1:dev
 EOF

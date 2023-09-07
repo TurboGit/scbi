@@ -590,7 +590,7 @@ function usage()
     echo "      | --list-no-version  do not display modules/externals version"
     echo "      | --list-filter:n    filter depends/external for dev or runtime"
     echo "      | --list-plan        list current current plan"
-    echo "      | --module-version   display version of specific module"
+    echo "      | --module-ref       display variant/version of specific module"
     echo "      | --dry-run          only list modules handled"
     echo "      | --stat[:full]      display some status of current setup"
     echo "   -n | --no-patch         do not apply patches"
@@ -1868,7 +1868,8 @@ ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpvwWh \
                  -l store,target:,no-setup,no-install,update,setup,config \
                  -l build,build-target:,install,clean-install,tar \
                  -l log,log:yes,log:no,log:on-failure,purge,purge:only \
-                 -l prefix:,help,version,module-version \
+                 -l prefix:,help,version,module-ref \
+                 -l module-ref:version,module-ref:variant,module-ref:full \
                  -l deps,deps:warning,archive,force,env:,no-patch,plan: \
                  -l stat,stat:full,no-wrapup,wrapup,safe,standalone \
                  -l list-depends:direct,list-depends:full,list-depends \
@@ -1994,8 +1995,20 @@ while [[ $# -gt 0 ]]; do
             SCBI_DEFAULT_PREFIX=no
             SCBI_PREFIX=$2; shift
             ;;
-        --module-version)
-            DO_MOD_VER=yes
+        --module-ref)
+            DO_MOD_VER=full
+            shift
+            ;;
+        --module-ref:version)
+            DO_MOD_VER=ver
+            shift
+            ;;
+        --module-ref:variant)
+            DO_MOD_VER=var
+            shift
+            ;;
+        --module-ref:full)
+            DO_MOD_VER=full
             shift
             ;;
         -j|--jobs)
@@ -2252,9 +2265,9 @@ fi
 
 #  If we want to display a module version from a module plan, do it now
 
-if [[ $DO_MOD_VER == yes ]]; then
+if [[ $DO_MOD_VER != no ]]; then
     for module in $SCBI_MODULES; do
-        display-module-version $module
+        display-module-ref $module $DO_MOD_VER
     done
     exit 0
 fi
