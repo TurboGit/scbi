@@ -83,13 +83,14 @@ function _internal_merge_variant()
 
     #  Remove variants if needed
 
-    for n in ${DREF}; do
+    for n in ${DREF[*]}; do
         local REF=${REF#$n\.}
         local REF=${REF%\.$n}
         local REF=${REF//\.$n\./\.}
+        [[ $REF == $n ]] && local REF=""
     done
 
-    echo "/$REF"
+    echo "${REF:+/}$REF"
 }
 
 declare -A SCBI_PLAN_LOADED

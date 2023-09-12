@@ -1,0 +1,11 @@
+
+toto/one.two.three:v7
+titi/one.two
+
+[
+   toto
+] /-two-three
+
+[
+   titi
+] /-one.two

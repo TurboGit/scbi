@@ -143,3 +143,13 @@ DIFF <<EOF
 There is 1 module(s) in the plan
 module/2.four.one.three
 EOF
+
+RUNS ./scbi --plan=plgv11 --list-plan lib1
+
+sort-osht-output-but-first-line
+
+DIFF <<EOF
+There is 2 module(s) in the plan
+titi
+toto/one:v7
+EOF
