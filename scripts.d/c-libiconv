@@ -7,7 +7,7 @@ function c-libiconv-vcs()
     echo https://git.savannah.gnu.org/git/libiconv.git
 }
 
-function c-libiconv-tar()
+function c-libiconv-archive()
 {
     local VERSION=$1
 

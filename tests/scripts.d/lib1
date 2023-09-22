@@ -7,7 +7,7 @@ function lib1-vcs()
     echo ${TESTREPOS}/lib1.bundle
 }
 
-function lib1-tar()
+function lib1-archive()
 {
     local VERSION=$1
 

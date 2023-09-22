@@ -6,7 +6,7 @@ function plgwronghook-wrong-vcs()
     echo 3
 }
 
-function plgwronghook-wrong-tar()
+function plgwronghook-wrong-archive()
 {
     echo 1
     echo 2

@@ -114,7 +114,7 @@ declare -A KV=(
     ["prefix"]="SCBI_PREFIX"
     ["root-dir"]="SCBI_ROOT"
     ["svn-repo"]="SCBI_SVN_REPO"
-    ["tar"]="SCBI_TAR"
+    ["archives"]="SCBI_ARCHIVES"
     ["target"]="SCBI_TARGET"
 )
 
@@ -298,7 +298,7 @@ STEPS=""
 BUILD_SCBI_TARGET=
 SCBI_PLAN=
 SCBI_PLAN_CL=
-TAR_CACHE=yes
+ARCHIVE_CACHE=yes
 DRY_RUN=no
 SAFE_MODE=no
 DO_STANDALONE=no
@@ -815,7 +815,7 @@ function is-module-up-to-date()
                 SID="vcs-$ref"
                 ;;
             VERSION)
-                SID="tar-$ref"
+                SID="archive-$ref"
                 ;;
             DEV)
                 SID="$ref"
@@ -1009,23 +1009,23 @@ function handle-sources()
             return 0;
         }
 
-    #  Check if a given tar exists even if a standard branch ref has
-    #  been provided. This is an optimization to used a local tar
+    #  Check if a given archive exists even if a standard branch ref has
+    #  been provided. This is an optimization to used a local archive
     #  instead of a repository branch.
 
-    if [[ $kind == BRANCH ]] && [[ "$TAR_CACHE" == "yes" ]]; then
-        check-tar-exists $module $variant $ref
+    if [[ $kind == BRANCH ]] && [[ "$ARCHIVE_CACHE" == "yes" ]]; then
+        check-archive-exists $module $variant $ref
         [[ $? == 0 ]] && kind=VERSION
     fi
 
-    #  If building from tarball, extract it now
+    #  If building from archive, extract it now
 
     if [[ $kind == VERSION ]]; then
-        local tar=( $(get-tar-data $module $variant $ref) )
+        local tar=( $(get-archive-data $module $variant $ref) )
         local nv=${#tar[*]}
 
         if [[ $nv == 0 ]]; then
-            echo "error: $module-tar function not defined, cannot get tarball"
+            echo "error: $module-archive function not defined, cannot get archive"
             exit 1
         fi
 
@@ -1037,53 +1037,53 @@ function handle-sources()
                 V+="-"
             fi
             local nv=$(( $nv - 1 ))
-            echo "error: $module-${V}tar function returned $nv values, 5 expected"
+            echo "error: $module-${V}archive function returned $nv values, 5 expected"
             exit 1
         fi
 
         tarsrc=${tar[5]}
 
-        #  We need to extract the tarball if the version does not match
+        #  We need to extract the archive if the version does not match
         #  the one currently extracted.
 
         if [[ -f source-id ]]; then
-            if [[ "$(cat source-id)" != "tar-$ref" ]] ||
+            if [[ "$(cat source-id)" != "archive-$ref" ]] ||
                    [[ ${tarsrc^^} = "NONE" ]];
             then
-                rm -fr tarsrc
+                rm -fr archive-src
             fi
         fi
 
-        if [[ $DO_UPDATE = yes ]] || [[ ! -d tarsrc ]] || [[ ! -f tar ]]; then
+        if [[ $DO_UPDATE = yes ]] || [[ ! -d archive-src ]] || [[ ! -f archive ]]; then
             V=${tar[0]#default}
-            ilog $module get sources from tar ${V:+[$V]}
+            ilog $module get sources from archive ${V:+[$V]}
 
-            get-tar $module $variant $ref >> $log 2>&1
+            get-archive $module $variant $ref >> $log 2>&1
 
             if [[ $? != 0 ]]; then
-                #  In case of error display log from get-tar
+                #  In case of error display log from get-archive
                 grep ' : ' $log
-                ilog $module cannot get/find tar sources
+                ilog $module cannot get/find archive sources
                 exit 1
             fi
         fi
 
-        echo -n "tar-$ref" > source-id
+        echo -n "archive-$ref" > source-id
 
         #  Compute and store the version id of the sources. This includes the
         #  tar sha1 if present to ensure a tar with the same name but different
         #  content will trigger a build.
 
         local tar_sha1=""
-        [[ -e tar-sha1 ]] && tar_sha1=$(cat tar-sha1)
+        [[ -e archive-sha1 ]] && archive_sha1=$(cat archive-sha1)
 
         get-build-id $SCBI_PREFIX $SCBI_TARGET \
-                     $FORMODULE $MODREF tar-$ref$tar_sha1 > build-id-$variant
+                     $FORMODULE $MODREF archive-$ref$archive_sha1 > build-id-$variant
 
         #  We set the link for the source so that no module will have to
         #  do it.
 
-        ln -s tarsrc src
+        ln -s archive-src src
 
     else
         #  Get sources from repository
@@ -1907,15 +1907,15 @@ while [[ $# -gt 0 ]]; do
         -q|--quiet)
             DO_QUIET=yes
             ;;
-        -a|--archive)
+        -a|--create-archive)
             DO_ARCHIVE=yes
             ;;
         -e|--env)
             ENV_NAME="$2"
             shift
             ;;
-        --tar)
-            TAR_CACHE=no
+        --archive)
+            ARCHIVE_CACHE=no
             ;;
         -t|--target)
             SCBI_TARGET=$2; shift
@@ -2239,10 +2239,10 @@ if [[ $DO_DEPS != no ]]; then
     exit 1
 fi
 
-#  Prepare log dir and tarball dir
+#  Prepare log dir and archive dir
 
 mkdir -p $SCBI_LOGS/$TODAY
-mkdir -p $SCBI_TAR
+mkdir -p $SCBI_ARCHIVES
 
 if [[ $DRY_RUN == yes ]]; then
     DO_PURGE=no

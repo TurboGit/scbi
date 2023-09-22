@@ -7,7 +7,7 @@ function c-gnatcoll-bindings-readline-vcs()
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
 
-function c-gnatcoll-bindings-readline-tar()
+function c-gnatcoll-bindings-readline-archive()
 {
     local VERSION=$1
 

@@ -14,7 +14,7 @@ function c-mpfr-vcs()
     echo https://gitlab.inria.fr/mpfr/mpfr.git
 }
 
-function c-mpfr-tar()
+function c-mpfr-archive()
 {
     local VERSION=$1
 

@@ -1,6 +1,6 @@
 # Check for corrupted tar
 
-rm -f .root/.tar/dltar-src.tar.bz2*
+rm -f .root/.archives/dltar-src.tar.bz2*
 
 cp .root/.store/dltar-1-src.tar.bz2 .root/.store/dltar-src.tar.bz2
 cp .root/.store/dltar-1-src.tar.bz2.sha1 .root/.store/dltar-src.tar.bz2.sha1
@@ -11,7 +11,7 @@ CLEAN-DIFF <<EOF
 2022/01/04 19:22:11 : Building dltar [default] (0)
 2022/01/04 19:22:11 : native x86_64-linux-gnu
 2022/01/04 19:22:11 : steps : setup config build install tests wrapup
-2022/01/04 19:22:11 : get sources from tar
+2022/01/04 19:22:11 : get sources from archive
 2022/01/04 19:22:11 : install starting
 2022/01/04 19:22:11 : install completed
 2022/01/04 19:22:11 : tests starting
@@ -21,9 +21,9 @@ Script 1
 2022/01/04 19:22:11 : End Building dltar [default] (0)
 EOF
 
-#  Corruped tarball, check that the error message is clear
+#  Corruped archive, check that the error message is clear
 
-rm -f .root/.tar/dltar-src.tar.bz2*
+rm -f .root/.archives/dltar-src.tar.bz2*
 
 cp .root/.store/dltar-1-src.tar.bz2 .root/.store/dltar-src.tar.bz2
 cp .root/.store/dltar-1-src.tar.bz2.sha1 .root/.store/dltar-src.tar.bz2.sha1
@@ -36,10 +36,10 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building dltar [default] (0)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : get sources from tar
-xxxx/xx/xx xx:xx:xx : dltar (FAILED) error: tarball dltar-src.tar.bz2 is corrupted
+xxxx/xx/xx xx:xx:xx : get sources from archive
+xxxx/xx/xx xx:xx:xx : dltar (FAILED) error: archive dltar-src.tar.bz2 is corrupted
 xxxx/xx/xx xx:xx:xx : dltar (FAILED) error: no top directory found
-xxxx/xx/xx xx:xx:xx : cannot get/find tar sources
+xxxx/xx/xx xx:xx:xx : cannot get/find archive sources
 EOF
 
 GREP "tar: Error is not recoverable" .root/builds/.logs/*dltar*report.log

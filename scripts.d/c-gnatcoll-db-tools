@@ -7,7 +7,7 @@ function c-gnatcoll-db-tools-vcs()
     echo https://github.com/AdaCore/gnatcoll-db
 }
 
-function c-gnatcoll-db-tools-tar()
+function c-gnatcoll-db-tools-archive()
 {
     local VERSION=$1
 

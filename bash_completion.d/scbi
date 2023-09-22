@@ -3,8 +3,8 @@
 _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 -s --setup -c --config -b --build -i --install -r --tests -v -q --quiet
 -l --shell --shell:use --shell:sandbox --shell:dev --shell:tests --no-log
--p --purge -P --purge:only --run -d --deps -a --archive -h --help
--j --jobs= --target= --ini= --env= -e --tests:only --plan= -n --no-patch --tar
+-p --purge -P --purge:only --run -d --deps -a --create-archive -h --help
+-j --jobs= --target= --ini= --env= -e --tests:only --plan= -n --no-patch --archive
 --list-depends: --list-externals --list-externals:only --list-no-version
  --list-filter: --deps:warning
 --dry-run -w --wrapup --force --enable- --safe --plugins --build-dir
@@ -12,7 +12,7 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 --store --stat --stat:full --prefix=
 --module-ref --module-ref:version --module-ref:variant --module-ref:full"
 
-_SCBI_HOOKS="((pre|post)-)?(cross-)?(tar|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches)"
+_SCBI_HOOKS="((pre|post)-)?(cross-)?(archive|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches)"
 
 _gnat_ini()
 {

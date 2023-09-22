@@ -20,7 +20,7 @@ function c-gnatcoll-bindings-python-depends()
     echo c-gnatcoll-core
 }
 
-function c-gnatcoll-bindings-python-tar()
+function c-gnatcoll-bindings-python-archive()
 {
     local VERSION=$1
 

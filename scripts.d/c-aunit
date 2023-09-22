@@ -7,7 +7,7 @@ function c-aunit-vcs()
     echo https://github.com/AdaCore/aunit
 }
 
-function c-aunit-tar()
+function c-aunit-archive()
 {
     local VERSION=$1
 

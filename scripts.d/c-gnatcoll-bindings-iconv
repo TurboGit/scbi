@@ -25,7 +25,7 @@ function c-gnatcoll-bindings-iconv-depends()
     echo c-libiconv:#1.15
 }
 
-function c-gnatcoll-bindings-iconv-tar()
+function c-gnatcoll-bindings-iconv-archive()
 {
     local VERSION=$1
 

@@ -7,7 +7,7 @@ function boggus-vcs()
     echo ${TESTREPOS}/lib1.bundle
 }
 
-function boggus-tar()
+function boggus-archive()
 {
     local VERSION=$1
 
