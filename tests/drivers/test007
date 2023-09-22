@@ -3,7 +3,7 @@
 
 DIR=$PWD/.root/builds/lib2/build
 
-NOK -f $DIR/.log/env.cmd
+NOK -f $DIR/logs/env.cmd
 
 RUNS ./scbi --tests lib2
 
@@ -26,11 +26,11 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 EOF
 
-OK -f $DIR/.log/env.cmd
+OK -f $DIR/logs/env.cmd
 
-GREP  SCBI_MODULES_DIR $DIR/.log/env.cmd
-GREP  '\-default' $DIR/.log/env.cmd
-NGREP '\-variant1' $DIR/.log/env.cmd
+GREP  SCBI_MODULES_DIR $DIR/logs/env.cmd
+GREP  '\-default' $DIR/logs/env.cmd
+NGREP '\-variant1' $DIR/logs/env.cmd
 
 # ========== build/install lib2/variant
 RUNS ./scbi --tests lib2/variant1
@@ -129,8 +129,8 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v1.0.0)
 EOF
 
-OK -f $DIR/.log/env.cmd
+OK -f $DIR/logs/env.cmd
 
-GREP  SCBI_MODULES_DIR $DIR/.log/env.cmd
-NGREP '\-default' $DIR/.log/env.cmd
-GREP  '\-variant1' $DIR/.log/env.cmd
+GREP  SCBI_MODULES_DIR $DIR/logs/env.cmd
+NGREP '\-default' $DIR/logs/env.cmd
+GREP  '\-variant1' $DIR/logs/env.cmd

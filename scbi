@@ -416,8 +416,8 @@ function module-wrapper()
     log=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-$VARIANT-$mstep.log
 
     #  local log for last module command
-    mlog=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/.log/$mstep.log
-    clog=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/.log/$mstep.cmd
+    mlog=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/logs/$mstep.log
+    clog=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/logs/$mstep.cmd
 
     ilog $MODULE $mstep$dvariant starting
 
@@ -477,7 +477,7 @@ function module-wrapper()
             fi
             elog $MODULE $mstep failed with error $res
 
-            RDIR=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/.log
+            RDIR=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/logs
 
             case $STEP in
                 config|build|install|cross-config|cross-build|cross-install)
@@ -1376,7 +1376,7 @@ function handle-module()
 
     SCBI_MODULES_LIST+=( "$MODREF" )
 
-    mkdir -p $SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log > $log 2>&1
+    mkdir -p $SCBI_BDIR/$module/$SCBI_TARGET-$variant/logs > $log 2>&1
 
     #  Check if meta-module, if so call handle-module for each one
 
@@ -1556,7 +1556,7 @@ function handle-module()
 
             #  Setup the build environment for the current module
 
-            SCBI_ENV_MODULE=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/.log/env.cmd
+            SCBI_ENV_MODULE=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/logs/env.cmd
             rm -f $SCBI_ENV_MODULE
 
             if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]]; then

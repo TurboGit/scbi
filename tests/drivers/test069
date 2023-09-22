@@ -1,7 +1,7 @@
 RUNS ./scbi test17
 
 source .root/builds/.scbi.runtime
-source .root/builds/test17/build/.log/env.cmd
+source .root/builds/test17/build/logs/env.cmd
 
 IS $ROOT_DIR == /this/is/it
 IS $ABC_ROOT == /perfect/here

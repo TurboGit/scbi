@@ -16,8 +16,8 @@ xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : End Building test37 [default] (master)
 EOF
 
-OK -f .root/builds/test37/build/.log/test37
-OK -f .root/builds/test37/build/.log/test17
+OK -f .root/builds/test37/build/logs/test37
+OK -f .root/builds/test37/build/logs/test17
 
 RUNS cat .root/builds/.logs/*test37*config.log
 
@@ -55,7 +55,7 @@ function define-var()
 }
 declare -fx define-var
 
-RUNS source .root/builds/test37/build/.log/env.cmd
+RUNS source .root/builds/test37/build/logs/env.cmd
 
 CLEAN-DIFF <<EOF
 ADD ROOT_DIR /this/is/it

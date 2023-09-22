@@ -15,7 +15,7 @@ xxxx/xx/xx xx:xx:xx : opta-config completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [opta] (master)
 EOF
 
-RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-opta/.log/opta-config.log
+RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-opta/logs/opta-config.log
 
 CLEAN-DIFF <<EOF
 A one
@@ -36,7 +36,7 @@ xxxx/xx/xx xx:xx:xx : optb-config completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [optb] (master)
 EOF
 
-RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-optb/.log/optb-config.log
+RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-optb/logs/optb-config.log
 
 CLEAN-DIFF <<EOF
 A one
@@ -57,7 +57,7 @@ xxxx/xx/xx xx:xx:xx : opta-config [opta optb] completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [opta optb] (master)
 EOF
 
-RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-opta.optb/.log/opta-config.log
+RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-opta.optb/logs/opta-config.log
 
 CLEAN-DIFF <<EOF
 A one
@@ -79,7 +79,7 @@ xxxx/xx/xx xx:xx:xx : optb-config [optb opta] completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [optb opta] (master)
 EOF
 
-RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-optb.opta/.log/optb-config.log
+RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-optb.opta/logs/optb-config.log
 
 CLEAN-DIFF <<EOF
 A one

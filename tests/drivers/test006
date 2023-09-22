@@ -56,8 +56,11 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Purging lib1 for x86_64-linux-gnu/default
 EOF
 
-# OK build directory removed, only manifest found
-IS $(ls $REP/x86_64-linux-gnu-default) == "manifest"
+# OK build directory removed, only manifest + logs found
+FILES="$(ls $REP/x86_64-linux-gnu-default | sort | tr '\n' ' ')"
+FILES="${FILES:0:-1}"
+
+IS "$FILES" == "logs manifest"
 
 unset REP
 

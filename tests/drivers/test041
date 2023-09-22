@@ -222,4 +222,4 @@ xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : End Building natv [default] (master)
 EOF
 
-GREP env .root/builds/natv/build/.log/env.cmd
+GREP env .root/builds/natv/build/logs/env.cmd

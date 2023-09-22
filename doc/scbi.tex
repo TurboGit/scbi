@@ -1749,7 +1749,7 @@ It is possible to replay the configure, build or install step just by running th
 
 \subsubsection{Look at the sandbox status}
 
-The SCBI driver does record all needed information in the sandbox directory \file{<module>/build/.log/}.
+The SCBI driver does record all needed information in the sandbox directory \file{<module>/build/logs/}.
 
 The files created in this directory are:
 
@@ -1772,9 +1772,11 @@ As an example, the build command file for \code{c-cmake} plug-in looks like this
 (
 	cd <...>/c-cmake/build/build
 	source <...>/.scbi-runtime
-	[ -f ../.log/env.cmd ] && source ../.log/env.cmd
+	[ -f ../logs/env.cmd ] && source ../logs/env.cmd
+	[[ -f ../logs/build-plan ]] &&
+		load-runtime-module-plan ../logs/build-plan
 
-	source ../.log/c-cmake
+	source ../logs/c-cmake
 
 	c-cmake-build <...>/c-cmake/build/install \
 	              x86_64-linux-gnu default
@@ -1814,7 +1816,7 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 	.3 install-<target>-id \des{version of the module installed globally}.
 	.3 vcs $\rightarrow$ \des{symlink to repository (.vcs or user's checkout)}.
 	.3 \textbf{[<target>-<variant>]}.
-	.4 .log \des{commands \& output for each steps}.
+	.4 \textbf{[logs]} \des{commands \& output for each steps}.
 	.4 \textbf{[build]} \des{build directory}.
 	.4 build-id \des{sha1 to identify the build}.
 	.4 \textbf{[install]} \des{installation directory}.

@@ -228,14 +228,14 @@ function show-command()
     #  then source env.cmd if present
 
     echo "   source $SCBI_BDIR/.scbi.runtime"
-    echo "   [[ -f ../.log/env.cmd ]] && source ../.log/env.cmd"
-    echo "   [[ -f ../.log/build-plan ]] &&"
-    echo "      load-runtime-module-plan ../.log/build-plan"
+    echo "   [[ -f ../logs/env.cmd ]] && source ../logs/env.cmd"
+    echo "   [[ -f ../logs/build-plan ]] &&"
+    echo "      load-runtime-module-plan ../logs/build-plan"
     echo ""
 
-    _internal_copy-plugin $PLUGIN ../.log
+    _internal_copy-plugin $PLUGIN ../logs
 
-    echo "   source ../.log/$PLUGIN"
+    echo "   source ../logs/$PLUGIN"
 
     echo ""
     echo "   $CMD $PREFIX $TARGET $VARIANT"

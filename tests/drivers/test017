@@ -58,7 +58,7 @@ declare -fx define-var
 
 # In driver:
 export PATH=/bin:/usr/bin
-RUNS source .root/builds/test17/build/.log/env.cmd
+RUNS source .root/builds/test17/build/logs/env.cmd
 
 CLEAN-DIFF <<EOF
 ADD ROOT_DIR /this/is/it

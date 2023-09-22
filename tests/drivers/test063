@@ -1,6 +1,6 @@
 # check for common / default / variant (config & build hooks)
 
-LDIR=.root/builds/hookskind/build/.log
+LDIR=.root/builds/hookskind/build/logs
 
 RUNS ./scbi hookskind
 

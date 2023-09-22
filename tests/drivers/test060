@@ -4,7 +4,7 @@
 
 RUNS ./scbi -f test60
 
-RUNS grep -h '@@@' .root/builds/test60/build/.log/config.log
+RUNS grep -h '@@@' .root/builds/test60/build/logs/config.log
 
 CLEAN-DIFF <<EOF
 @@@OPT1=
@@ -18,7 +18,7 @@ EOF
 
 RUNS ./scbi -f --enable-safe-arch test60
 
-RUNS grep -h '@@@' .root/builds/test60/build/.log/config.log
+RUNS grep -h '@@@' .root/builds/test60/build/logs/config.log
 
 CLEAN-DIFF <<EOF
 @@@OPT1=yes

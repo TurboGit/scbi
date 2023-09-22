@@ -1,5 +1,5 @@
 
-EFILE=.root/builds/testme/build/.log/env.cmd
+EFILE=.root/builds/testme/build/logs/env.cmd
 
 RUNS ./scbi --deps testme
 
