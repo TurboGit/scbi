@@ -141,7 +141,7 @@ The goal is to automate the build procedures from sources. The main features are
 	\item Supports build variants
 	\item Supports for cross compilation
 	\item Building a specific branch or tag (Git only)
-	\item Building from a tarball
+	\item Building from an archive
 	\item Building from a user's checkout for easy debug with controlled environment
 	\item Support for build plans (modules with specific variant and/or version)
 \end{itemize}
@@ -195,7 +195,7 @@ A module is described in an SCBI plug-in script (one plug-in in one file). It ca
 	\item[version] The version to build. This version string can be either:
 
 	\begin{description}[font=\texttt]
-		\item[<ID>] A reference to a VCS version (branch or a Git SHA-1 for example), or a tar version when starting with \#.
+		\item[<ID>] A reference to a VCS version (branch or a Git SHA-1 for example), or an archive version when starting with \#.
 		\item[dev] \index{version!dev}To take the source from a user's checkout.
 		\item[skip] \index{version!skip}To specify that the module must be ignored.
 		\item[force] \index{version!force}To enable an otherwise skip module (possibly set to skip in a build plan).
@@ -227,7 +227,7 @@ The following are examples of module references:
 
 	\item[lcms2:bfaf7b82ed] Build \code{lcms2} from repository using sources from SHA-1 \emph{bfaf7b82ed} (Git only).
 
-	\item[lcms2:\#v1.0] Build \code{lcms2} using sources from tar version \emph{1.0}.
+	\item[lcms2:\#v1.0] Build \code{lcms2} using sources from archive version \emph{1.0}.
 
 	\item[lcms2:dev] Build \code{lcms2} using sources from user's repository checkout found in \code{\$SCBI\_GIT\_REPO} (assuming \code{lcms2} is using Git). For a discussion about user's check-out \seeref{userco}.
 
@@ -271,7 +271,7 @@ An environment is a set of shell variables used to control the build environment
 
 	\item[SCBI\_HG\_REPO] The directories where the user's Mercurial checkouts are to be found. \\ Default is \file{\$SCBI\_ROOT/repositories/hg}.
 
-	\item[SCBI\_TAR] The directories where the tarball are located. \\Default is \file{\$SCBI\_ROOT/.tar}.
+	\item[SCBI\_ARCHIVES] The directories where the archives are located. \\Default is \file{\$SCBI\_ROOT/.archives}.
 
 	\item[SCBI\_LOGS] The directories where the logs are located. \\Default is \file{\$SCBI\_ROOT/.logs}.
 
@@ -495,7 +495,7 @@ A build-plan can be set in the following files searched in this exact order:
 \label{standalone}
 \index{source archive}
 
-Using the \code{\ddash{}standalone} option it is possible to build a fully self contained source archive. This archive embed all necessary sources and scripts to rebuild the software without the need to get access to repositories or source tar files.
+Using the \code{\ddash{}standalone} option it is possible to build a fully self contained source archive. This archive embed all necessary sources and scripts to rebuild the software without the need to get access to repositories or source archive files.
 
 On the root of the archive a build script is provided, so starting a build from such standalone source archive boil done to:
 
@@ -567,13 +567,13 @@ The following options are supported:
 
 	\item[-w | \ddash{}wrapup] Do the wrapup step (default).
 
-	\item[\ddash{}tar] Check for tar only if explicitly specified in the module reference.
+	\item[\ddash{}archive] Check for archives only if explicitly specified in the module reference.
 
 	\item[\ddash{}tests{[:only]}{[=OPTIONS]}] Do a standard build cycle and run the testsuite if any. If suboption \code{only} is specified only run the testsuite (no build is checked/done). The optional OPTIONS parameters is passed as 4th parameter of the tests hook (\seeref{tests-hook})
 
 	\item[-d | \ddash{}deps{[:warning]}] Check all dependencies and build them if necessary. Do not fail when a missing external dependencies is found when sub-option warning is set.
 
-	\item[-a | \ddash{}archive] Build binary archive when build is successful.
+	\item[-a | \ddash{}create-archive] Build binary archive when build is successful.
 
         \item[\ddash{}standalone] Create a standalone source archive
 
@@ -648,7 +648,7 @@ The following options are supported in the ini file:
 	\item env, plan, target
 	\item root-dir, plugins, prefix, build-dir
 	\item git-repo, svn-repo, hg-repo
-	\item jobs, tar, patch
+	\item jobs, archive, patch
 	\item setup, config, build, install, wrapup
 	\item force, update, purge, archive
 	\item modules (list of modules as passed on command line)
@@ -681,7 +681,7 @@ To create a new plug-in for SCBI you need to create a single \code{bash} script 
 
 The plug-in script describes, using different hooks, the steps for building. One for configuring, one for building and one for installing. These are the mains steps generally used to build all software.
 
-The different steps are described by a simple \code{bash} code snippet. And some hooks are just descriptions to retrieve artifacts (like VCS sources or tar file).
+The different steps are described by a simple \code{bash} code snippet. And some hooks are just descriptions to retrieve artifacts (like VCS sources or archive file).
 
 In the following section all the supported hooks are described. Then the calling order conducted by SCBI is described.
 
@@ -728,7 +728,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	And finally the function \code{scbi-rewrite-vcs} can be defined. This function takes the five values returned by the \code{vcs} hook and must return the five values in the same order but possibly rewritten.
 
-	\item[<module>{[}-<variant>{]}-tar] \index{hook!tar}Describe the tar filename and location of the tar containing the module sources.
+	\item[<module>{[}-<variant>{]}-archive] \index{hook!tar}Describe the archive filename and location of the archive containing the module sources.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$VERSION}
 		\item[return] \tabto{2cm} array
@@ -736,14 +736,14 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item proxy : name of a proxy, or \emph{default} to use default system one. (\seeref{proxy}).
 		\item options : comma separated list of options to be used on the command line for the tool used (see protocol below). Use \emph{none} if no option are needed.
 		\item protocol: \emph{scp}, \emph{cp}, \emph{wget}, \emph{curl}, \emph{none}.
-		\item URL: location where the tarball can be downloaded.
+		\item URL: location where the archive can be downloaded.
 		\item filename : name of the archive with a possible \$VERSION in the pattern.
 		\end{enumerate}
 	\end{description}
 
 	Example:
 	\begin{lstlisting}
-	function cmake-tar()
+	function cmake-archive()
 	{
 		local VERSION=$1
 
@@ -755,16 +755,16 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	It is possible specify a specific \code{tar} hook in an environment file by two means:
+	It is possible specify a specific \code{archive} hook in an environment file by two means:
 
 	\begin{description}[style=standard]
-		\item[\code{SCBI\_<module>\_TAR\_VARIANT}] \hfill \\
-		If environment variable \code{SCBI\_<module>\_TAR\_VARIANT} is set then the hook \\ \code{<module>-\$\{SCBI\_<module>\_TAR\_VARIANT\}-tar} is looked for before the generic \code{<module>-tar}. This is specific to module name \code{<module>}.
+		\item[\code{SCBI\_<module>\_ARCHIVE\_VARIANT}] \hfill \\
+		If environment variable \code{SCBI\_<module>\_ARCHIVE\_VARIANT} is set then the hook \\ \code{<module>-\$\{SCBI\_<module>\_ARCHIVE\_VARIANT\}-archive} is looked for before the generic \code{<module>-archive}. This is specific to module name \code{<module>}.
 
-		\item[\code{SCBI\_TAR\_VARIANT}] Same as above for the all modules.
+		\item[\code{SCBI\_ARCHIVE\_VARIANT}] Same as above for the all modules.
 	\end{description}
 
-	And finally the function \code{scbi-rewrite-tar} can be defined. This function takes the five values returned by the \code{tar} hook and must return the five values in the same order but possibly rewritten.
+	And finally the function \code{scbi-rewrite-archive} can be defined. This function takes the five values returned by the \code{tar} hook and must return the five values in the same order but possibly rewritten.
 
 	\item[<module>{[}-common|<variant>{]}-patches] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
 
@@ -893,7 +893,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
-	\item[<module>{[}-<variant>{]}-setup] \index{hook!setup}To put in place the sources just before configuration step. This is generally not needed as the sources are setup by \code{scbi} using the information provided by the tar or vcs hook. This may be needed in some complex case or if the sources are generated based on the running environment.
+	\item[<module>{[}-<variant>{]}-setup] \index{hook!setup}To put in place the sources just before configuration step. This is generally not needed as the sources are setup by \code{scbi} using the information provided by the archive or vcs hook. This may be needed in some complex case or if the sources are generated based on the running environment.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} NONE
@@ -1010,7 +1010,7 @@ Some of the hooks are called by the main SCBI driver when needed as they are ret
 
 \begin{itemize}
 	\item vcs
-	\item tar
+	\item archive
 	\item version
 	\item external-env
 	\item out-of-tree
@@ -1187,7 +1187,7 @@ Example:
 \label{proxy}
 \index{proxy}
 
-When a Web protocol is used to retrieve a tar archive with the sources or a VCS it may be necessary to pass through a proxy. In the tar and vcs hook description the name of a proxy can be given. This name corresponds to a bash function named \code{proxy-<name>} that is used to set the proxy.
+When a Web protocol is used to retrieve an archive with the sources or a VCS it may be necessary to pass through a proxy. In the archive and vcs hook description the name of a proxy can be given. This name corresponds to a bash function named \code{proxy-<name>} that is used to set the proxy.
 
 \begin{description}[style=nextline]
 	\item[proxy-<name>] Set a proxy.
@@ -1749,7 +1749,7 @@ It is possible to replay the configure, build or install step just by running th
 
 \subsubsection{Look at the sandbox status}
 
-The SCBI driver does record all needed information in the sandbox directory \file{<module>/build/.log/}.
+The SCBI driver does record all needed information in the sandbox directory \file{<module>/build/logs/}.
 
 The files created in this directory are:
 
@@ -1772,9 +1772,11 @@ As an example, the build command file for \code{c-cmake} plug-in looks like this
 (
 	cd <...>/c-cmake/build/build
 	source <...>/.scbi-runtime
-	[ -f ../.log/env.cmd ] && source ../.log/env.cmd
+	[ -f ../logs/env.cmd ] && source ../logs/env.cmd
+	[[ -f ../logs/build-plan ]] &&
+		load-runtime-module-plan ../logs/build-plan
 
-	source ../.log/c-cmake
+	source ../logs/c-cmake
 
 	c-cmake-build <...>/c-cmake/build/install \
 	              x86_64-linux-gnu default
@@ -1796,10 +1798,10 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 \dirtree{%
 	.1 \textbf{[\$SCBI\_BDIR]}.
 	.2 .scbi.runtime \des{scbi runtime}.
-	.2 .vcs.
+	.2 \textbf{[.vcs]}.
 	.3 \textbf{[<module>]} \des{sources checkout}.
-	.2 .patches.
-	.2 .tar.
+	.2 \textbf{[.patches]}.
+	.2 \textbf{[.archives]}.
 	.3 <module>-<version>-src.tar.gz.
 	.2 \textbf{[.logs]} \des{global log directory with history}.
 	.3 \textbf{[YYYY-MM-DD]}.
@@ -1807,19 +1809,19 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 	.2 \textbf{[<module>]}.
 	.3 build $\rightarrow$ \des{symlink to current/latest target build dir}.
 	.3 build-id-<variant> \des{build id to check for changes}.
-	.3 src $\rightarrow$ \des{symlink to sources (vcs or tarball)}.
-	.3 tar $\rightarrow$ \des{symlink to extracted tarball}.
-	.3 tarsrc \des{extract of tarball}.
-	.3 source-id \des{version of the source (tar or vcs)}.
+	.3 src $\rightarrow$ \des{symlink to sources (vcs or archive)}.
+	.3 archive $\rightarrow$ \des{symlink to extracted archive}.
+	.3 \textbf{[archive-src]} \des{extract of archive}.
+	.3 source-id \des{version of the source (archive or vcs)}.
 	.3 install-<target>-id \des{version of the module installed globally}.
 	.3 vcs $\rightarrow$ \des{symlink to repository (.vcs or user's checkout)}.
 	.3 \textbf{[<target>-<variant>]}.
-	.4 .log \des{commands \& output for each steps}.
+	.4 \textbf{[logs]} \des{commands \& output for each steps}.
 	.4 \textbf{[build]} \des{build directory}.
 	.4 build-id \des{sha1 to identify the build}.
 	.4 \textbf{[install]} \des{installation directory}.
 	.4 manifest \des{list of all files in install above}.
-	.4 src \des{rsync of ../src}.
+	.4 \textbf{[src]} \des{rsync of ../src}.
 }
 
 \section{Complete example}

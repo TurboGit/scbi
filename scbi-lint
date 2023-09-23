@@ -68,7 +68,7 @@ if [[ $DO_HELP == "yes" ]]; then
     exit 1
 fi
 
-SCBI_HOOKS="((pre|post)-)?(cross-)?(tar|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|plan|propagate-version|setup|patches)"
+SCBI_HOOKS="((pre|post)-)?(cross-)?(archive|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|plan|propagate-version|setup|patches)"
 
 NOTHOOK=
 ERROR=0
@@ -284,7 +284,7 @@ function check-vcs-params()
     rm -f $TMP
 }
 
-function check-tar-params()
+function check-archive-params()
 {
     local HOOK=$1
 
@@ -367,11 +367,11 @@ function check-params()
             check-vcs-params $H
         done < <(get-hooks $PLUGIN "vcs")
 
-        #  TAR parameters
+        #  ARCHIVE parameters
 
         while read H; do
-            check-tar-params $H
-        done < <(get-hooks $PLUGIN "tar")
+            check-archive-params $H
+        done < <(get-hooks $PLUGIN "archive")
 
         #  PATCHES parameters
 

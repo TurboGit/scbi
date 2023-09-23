@@ -46,7 +46,7 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1.2)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : get sources from tar
+xxxx/xx/xx xx:xx:xx : get sources from archive
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
@@ -78,13 +78,13 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v2)
 EOF
 
-RUNS ./scbi --no-patch --tests --tar lib1:#v1.2
+RUNS ./scbi --no-patch --tests --archive lib1:#v1.2
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1.2)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : get sources from tar
+xxxx/xx/xx xx:xx:xx : get sources from archive
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting

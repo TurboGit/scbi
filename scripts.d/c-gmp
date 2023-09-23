@@ -15,7 +15,7 @@ function c-gmp-vcs()
     echo https://gmplib.org/repo/gmp/
 }
 
-function c-gmp-tar()
+function c-gmp-archive()
 {
     local VERSION=$1
 

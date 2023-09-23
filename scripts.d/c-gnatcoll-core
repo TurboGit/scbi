@@ -24,7 +24,7 @@ function c-gnatcoll-core-depends()
     echo c-xmlada
 }
 
-function c-gnatcoll-core-tar()
+function c-gnatcoll-core-archive()
 {
     local VERSION=$1
 

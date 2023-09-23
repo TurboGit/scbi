@@ -59,11 +59,11 @@ Check parameters:
    warning: (wrong-opt-vcs) does not require parameters
    warning: (wrong-nok-vcs) does not require parameters
    error:   (wrong-nok-vcs) should return 4 or 5 values
-   warning: (wrong-tar) VERSION not declared
-   error:   (wrong-tar) should return 5 values
-   warning: (wrong-ok-tar) VERSION not declared
-   error:   (wrong-nok-tar) VERSION should be \$1
-   error:   (wrong-nok-tar) should return 5 values
+   warning: (wrong-archive) VERSION not declared
+   error:   (wrong-archive) should return 5 values
+   warning: (wrong-ok-archive) VERSION not declared
+   error:   (wrong-nok-archive) VERSION should be \$1
+   error:   (wrong-nok-archive) should return 5 values
    error:   (wrong-nok-patches) KIND used but not declared
    error:   (wrong-nok-patches) REF should be \$5
    warning: (wrong-nok2-patches) KIND not declared
@@ -80,9 +80,9 @@ DIFF <<EOF
    error:   (wrong-vcs) should return 4 or 5 values
    error:   (wrong-boggus-vcs) wrong definition, no result returned
    error:   (wrong-nok-vcs) should return 4 or 5 values
-   error:   (wrong-tar) should return 5 values
-   error:   (wrong-nok-tar) VERSION should be \$1
-   error:   (wrong-nok-tar) should return 5 values
+   error:   (wrong-archive) should return 5 values
+   error:   (wrong-nok-archive) VERSION should be \$1
+   error:   (wrong-nok-archive) should return 5 values
    error:   (wrong-nok-patches) KIND used but not declared
    error:   (wrong-nok-patches) REF should be \$5
 EOF

@@ -7,7 +7,7 @@ function c-gnatcoll-bindings-gmp-vcs()
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
 
-function c-gnatcoll-bindings-gmp-tar()
+function c-gnatcoll-bindings-gmp-archive()
 {
     local VERSION=$1
 

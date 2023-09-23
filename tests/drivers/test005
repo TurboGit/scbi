@@ -35,7 +35,7 @@ xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
 EOF
 
 # ============ re-build lib1 on v1
-RUNS ./scbi --no-patch --tar lib1:v1
+RUNS ./scbi --no-patch --archive lib1:v1
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)

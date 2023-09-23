@@ -1,4 +1,4 @@
-function c-blaslapack-tar()
+function c-blaslapack-archive()
 {
     local VERSION=$1
 

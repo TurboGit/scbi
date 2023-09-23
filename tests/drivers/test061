@@ -1,6 +1,6 @@
 # Check that a change in the SCBI_*_BUILD_TYPE do force a rebuild of modules.
 
-LOGC61=.root/builds/btype/build/.log/config.log
+LOGC61=.root/builds/btype/build/logs/config.log
 
 RUNS ./scbi btype
 

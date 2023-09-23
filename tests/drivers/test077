@@ -1,10 +1,10 @@
 
 # test for build-depends and depends environment
 
-L0DIR=.root/builds/lvl0/build/.log/build.log
-L1DIR=.root/builds/lvl1/build/.log/build.log
-L2DIR=.root/builds/lvl2/build/.log/build.log
-L3DIR=.root/builds/lvl3/build/.log/build.log
+L0DIR=.root/builds/lvl0/build/logs/build.log
+L1DIR=.root/builds/lvl1/build/logs/build.log
+L2DIR=.root/builds/lvl2/build/logs/build.log
+L3DIR=.root/builds/lvl3/build/logs/build.log
 
 ####################
 

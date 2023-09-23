@@ -7,7 +7,7 @@ function c-aws-vcs()
     echo https://github.com/AdaCore/aws
 }
 
-function c-aws-tar()
+function c-aws-archive()
 {
     local VERSION=$1
 

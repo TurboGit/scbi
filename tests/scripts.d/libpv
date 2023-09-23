@@ -7,7 +7,7 @@ function libpv-vcs()
     echo ${TESTREPOS}/lib1.bundle
 }
 
-function libpv-tar()
+function libpv-archive()
 {
     local VERSION=$1
 

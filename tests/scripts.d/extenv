@@ -7,7 +7,7 @@ function extenv-vcs()
     echo ${TESTREPOS}/lib1.bundle
 }
 
-function extenv-tar()
+function extenv-archive()
 {
     local VERSION=$1
 

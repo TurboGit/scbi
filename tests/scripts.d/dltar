@@ -1,5 +1,5 @@
 
-function dltar-tar()
+function dltar-archive()
 {
     local VERSION=$1
 

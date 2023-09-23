@@ -7,7 +7,7 @@ function c-gnatcoll-db-libs-sqlite-vcs()
     echo https://github.com/AdaCore/gnatcoll-db
 }
 
-function c-gnatcoll-db-libs-sqlite-tar()
+function c-gnatcoll-db-libs-sqlite-archive()
 {
     local VERSION=$1
 

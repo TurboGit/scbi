@@ -1,6 +1,6 @@
 # check for version in plug-in
 
-LDIR=.root/builds/libpv/build/.log
+LDIR=.root/builds/libpv/build/logs
 
 RUNS ./scbi libpv
 

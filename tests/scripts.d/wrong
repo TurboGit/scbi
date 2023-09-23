@@ -44,14 +44,14 @@ function wrong-nok-vcs()
     echo 6
 }
 
-function wrong-tar()
+function wrong-archive()
 {
     echo 1
     echo 2
     echo 3
 }
 
-function wrong-ok-tar()
+function wrong-ok-archive()
 {
     echo 1
     echo 2
@@ -60,7 +60,7 @@ function wrong-ok-tar()
     echo 5
 }
 
-function wrong-nok-tar()
+function wrong-nok-archive()
 {
     local VERSION=$6
     echo 1

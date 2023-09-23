@@ -5,7 +5,7 @@ CLEAN-DIFF <<EOF
 2023/07/27 11:17:04 : Building plgwronghook [default] (v9)
 2023/07/27 11:17:04 : native x86_64-linux-gnu
 2023/07/27 11:17:04 : steps : setup config build install wrapup
-error: plgwronghook-tar function not defined, cannot get tarball
+error: plgwronghook-archive function not defined, cannot get archive
 EOF
 
 NRUNS ./scbi plgwronghook/wrong:#v7
@@ -14,7 +14,7 @@ CLEAN-DIFF <<EOF
 2023/07/27 11:17:42 : Building plgwronghook [wrong] (v7)
 2023/07/27 11:17:42 : native x86_64-linux-gnu
 2023/07/27 11:17:42 : steps : setup config build install wrapup
-error: plgwronghook-wrong-tar function returned 4 values, 5 expected
+error: plgwronghook-wrong-archive function returned 4 values, 5 expected
 EOF
 
 NRUNS ./scbi plgwronghook:1.2

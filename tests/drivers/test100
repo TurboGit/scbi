@@ -76,7 +76,6 @@ cat ${OSHT_STDIO} |
     grep -v "^                        " |
     grep -v platforms |
     grep -v ^host |
-    grep -v ^arch |
     grep -v SVN > $TMP
 mv $TMP ${OSHT_STDIO}
 
@@ -87,7 +86,7 @@ stats
 -----
 build dir             : <pwd>/.root/builds
 install prefix        : <pwd>/.root/builds/install
-tar dir               : <pwd>/.root/.tar
+archive dir           : <pwd>/.root/.archives
 patches dir           : <pwd>/.root/.patches
 user's Git repository : <pwd>/.root/git
 e-mail notification   : no

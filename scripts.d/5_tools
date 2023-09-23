@@ -722,17 +722,17 @@ function get-build-id()
     echo -n "$vid,$mid,$pid,$did$eid" | get-md5
 }
 
-############################## check-tar-exists
-# check if the tarball exists locally, do not try to download it
+############################## check-archive-exists
+# check if the archive exists locally, do not try to download it
 # exit status 0 = FOUND / 1 = NOT_FOUND
 
-function check-tar-exists()
+function check-archive-exists()
 {
     local MODULE=$1
     local VARIANT=$2
     local VERSION=$3
 
-    local tar=( $(get-tar-data $MODULE $VARIANT $VERSION) )
+    local tar=( $(get-archive-data $MODULE $VARIANT $VERSION) )
 
     if [[ $? != 0 ]]; then
         return 1
@@ -744,7 +744,7 @@ function check-tar-exists()
     #local tarurl=${tar[4]}
     local tarsrc=${tar[5]}
 
-    if [[ -f $SCBI_TAR/$tarsrc ]]; then
+    if [[ -f $SCBI_ARCHIVES/$tarsrc ]]; then
         return 0
     else
         return 1
@@ -762,7 +762,7 @@ function set-proxy()
     [[ $? = 0 ]] && proxy-$NAME
 }
 
-############################## get-tar-data
+############################## get-archive-data
 # returns in order:
 #
 #  hook-variant-name-used
@@ -773,57 +773,57 @@ function set-proxy()
 #  src   _|
 #
 
-function get-tar-data()
+function get-archive-data()
 {
     local MODULE=$1
     local VARIANT=$2
     local VERSION=$3
 
-    local TAR_FUNCTION=$(get-hook $MODULE $VARIANT tar)
-    TAR_FUNCTION=${TAR_FUNCTION:=${MODULE}-tar}
+    local ARCHIVE_FUNCTION=$(get-hook $MODULE $VARIANT archive)
+    ARCHIVE_FUNCTION=${ARCHIVE_FUNCTION:=${MODULE}-archive}
 
     #  Get selected variant out of the hook function name
 
-    local TAR_VARIANT=${TAR_FUNCTION#$MODULE}
-    TAR_VARIANT=${TAR_VARIANT%-tar}
-    TAR_VARIANT=${TAR_VARIANT#-}
-    TAR_VARIANT=${TAR_VARIANT:-default} # no variant use default
+    local ARCHIVE_VARIANT=${ARCHIVE_FUNCTION#$MODULE}
+    ARCHIVE_VARIANT=${ARCHIVE_VARIANT%-archive}
+    ARCHIVE_VARIANT=${ARCHIVE_VARIANT#-}
+    ARCHIVE_VARIANT=${ARCHIVE_VARIANT:-default} # no variant use default
 
     #  check first for module specifc tar variant except for native
     #  variant.
 
     if [[ $VARIANT != "native" ]]; then
-        VAR=SCBI_${MODULE//-/_}_TAR_VARIANT
+        VAR=SCBI_${MODULE//-/_}_ARCHIVE_VARIANT
 
         if [[ -n ${!VAR} ]]; then
-            fn-exists $MODULE-${!VAR}-tar
+            fn-exists $MODULE-${!VAR}-archive
             if [[ $? = 0 ]]; then
-                TAR_VARIANT=${!VAR}
-                TAR_FUNCTION=$module-${TAR_VARIANT}-tar
+                ARCHIVE_VARIANT=${!VAR}
+                ARCHIVE_FUNCTION=$module-${ARCHIVE_VARIANT}-archive
             else
                 elog build "error: tar specific function for $module not found."
                 exit 1
             fi
-        elif [[ -n ${SCBI_TAR_VARIANT} ]]; then
-            fn-exists $module-${SCBI_TAR_VARIANT}-tar
+        elif [[ -n ${SCBI_ARCHIVE_VARIANT} ]]; then
+            fn-exists $module-${SCBI_ARCHIVE_VARIANT}-archive
             if [[ $? = 0 ]]; then
-                TAR_VARIANT=${SCBI_TAR_VARIANT}
-                TAR_FUNCTION=$MODULE-${TAR_VARIANT}-tar
+                ARCHIVE_VARIANT=${SCBI_ARCHIVE_VARIANT}
+                ARCHIVE_FUNCTION=$MODULE-${ARCHIVE_VARIANT}-archive
             fi
         fi
     fi
 
-    fn-exists $TAR_FUNCTION
+    fn-exists $ARCHIVE_FUNCTION
 
     if [[ $? = 0 ]]; then
         #  First we output the actual variant used
-        echo $TAR_VARIANT
+        echo $ARCHIVE_VARIANT
 
-        fn-exists scbi-rewrite-tar
+        fn-exists scbi-rewrite-archive
         if [[ $? = 0 ]]; then
-            scbi-rewrite-tar $($TAR_FUNCTION $VERSION)
+            scbi-rewrite-archive $($ARCHIVE_FUNCTION $VERSION)
         else
-            $TAR_FUNCTION $VERSION
+            $ARCHIVE_FUNCTION $VERSION
         fi
         return 0
     else
@@ -831,9 +831,9 @@ function get-tar-data()
     fi
 }
 
-############################## get-tar
+############################## get-archive
 
-function get-tar()
+function get-archive()
 {
     local MODULE=$1
     local VARIANT=$2
@@ -841,7 +841,7 @@ function get-tar()
 
     local res=0
 
-    local tar=( $(get-tar-data $MODULE $VARIANT $VERSION) )
+    local tar=( $(get-archive-data $MODULE $VARIANT $VERSION) )
 
     local proxy=${tar[1]}
     local taropts=${tar[2]}
@@ -861,7 +861,7 @@ function get-tar()
         options="${taropts/,/ }"
     fi
 
-    #  The tarball is not present, try downloading it
+    #  The archive is not present, try downloading it
 
     if [[ "${tarcp^^}" != "NONE" ]]  \
            && [[ "${tarurl^^}" != "NONE" ]];
@@ -895,7 +895,7 @@ function get-tar()
             #  Check SHA1 if found, check up-to-date
 
             if [[ $? == 0 ]]; then
-                diff -q $SCBI_TAR/$tarsrc.sha1 \
+                diff -q $SCBI_ARCHIVES/$tarsrc.sha1 \
                      /tmp/$tarsrc.sha1 > /dev/null 2>&1
 
                 if [[ $? -ne 0 ]]; then
@@ -903,28 +903,29 @@ function get-tar()
                 fi
             fi
 
-            if [[ $do_download == 1 ]] || [[ ! -f $SCBI_TAR/$tarsrc ]]; then
+            if [[ $do_download == 1 ]] || [[ ! -f $SCBI_ARCHIVES/$tarsrc ]]; then
                 do_download=1
 
                 if [[ $tarcp == wget ]]; then
                     $tarcp $options $tarurl/$tarsrc \
-                           -O $SCBI_TAR/$tarsrc > $log 2>&1
+                           -O $SCBI_ARCHIVES/$tarsrc > $log 2>&1
                 elif [[ $tarcp == curl ]]; then
                     $tarcp $options $tarurl/$tarsrc \
-                           --output $SCBI_TAR/$tarsrc > $log 2>&1
+                           --output $SCBI_ARCHIVES/$tarsrc > $log 2>&1
                 elif [[ $tarcp == cp ]] || [[ $tarcp == scp ]]; then
                     $tarcp $options $tarurl/$tarsrc \
-                           $SCBI_TAR/$tarsrc > $log 2>&1
+                           $SCBI_ARCHIVES/$tarsrc > $log 2>&1
                 else
                     elog $MODULE error: unknown tar protocol $tarcp
                 fi
 
                 if [[ $? -ne 0 ]]; then
-                    rm -f $SCBI_TAR/$tarsrc $SCBI_TAR/$tarsrc.sha1
-                    elog $MODULE error: cannot get tar: $tarcp
+                    rm -f $SCBI_ARCHIVES/$tarsrc $SCBI_ARCHIVES/$tarsrc.sha1
+                    elog $MODULE error: cannot get archive: $tarcp
+                    elog $MODULE error: from $tarurl/$tarsrc
                 else
                     [[ -f /tmp/$tarsrc.sha1 ]] &&
-                        cp /tmp/$tarsrc.sha1 $SCBI_TAR/$tarsrc.sha1
+                        cp /tmp/$tarsrc.sha1 $SCBI_ARCHIVES/$tarsrc.sha1
                 fi
             fi
 
@@ -938,13 +939,14 @@ function get-tar()
 
     local downloaded=$?
 
-    [[ ! -f $SCBI_TAR/$tarsrc ]] &&
-        elog $MODULE error: tarball $tarsrc not found &&
+    if [[ ! -f $SCBI_ARCHIVES/$tarsrc ]]; then
+        elog $MODULE error: archive $tarsrc not found
         return 1
+    fi
 
-    [[ $downloaded == 0 ]] && [[ -d $SCBI_BDIR/$MODULE/tarsrc ]] && return 0
+    [[ $downloaded == 0 ]] && [[ -d $SCBI_BDIR/$MODULE/archive-src ]] && return 0
 
-    ilog build extract tarball $tarsrc
+    ilog build extract archive $tarsrc
 
     [[ ! -d $SCBI_BDIR/$MODULE ]] &&
         mkdir -p $SCBI_BDIR/$MODULE > $log 2>&1
@@ -952,12 +954,12 @@ function get-tar()
     cd $SCBI_BDIR/$MODULE
 
     {
-        rm -fr tarsrc tar tar-sha1
-        rm -fr tartmp
-        mkdir -p tartmp
+        rm -fr tarsrc tar tar-sha1 archive-src archive archive-sha1
+        rm -fr archivetmp
+        mkdir -p archivetmp
     } > $log 2>&1
 
-    cd tartmp
+    cd archivetmp
 
     if [[ "$tarsrc" =~ "tar.zst" ]]; then
         check-tools unzstd
@@ -966,22 +968,30 @@ function get-tar()
             return 1
     fi
 
-    tar xf $SCBI_TAR/$tarsrc
+    if [[ "$tarsrc" =~ ".zip" ]]; then
+        check-tools unzip
+        [[ $? == 1 ]] &&
+            elog $MODULE missing unzip tool to decompress this archive &&
+            return 1
+        unzip $SCBI_ARCHIVES/$tarsrc
+    else
+        tar xf $SCBI_ARCHIVES/$tarsrc
+    fi
 
     [[ $? != 0 ]] &&
-        elog $MODULE error: tarball $tarsrc is corrupted &&
+        elog $MODULE error: archive $tarsrc is corrupted &&
         return 1
 
     topdir=$(ls -d *)
 
     if [[ -d "$topdir" ]]; then
-        mv $topdir ../tarsrc
+        mv $topdir ../archive-src
         cd ..
-        rm -fr tartmp
-        ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc) tar
-        [[ -f $SCBI_TAR/$tarsrc.sha1 ]] &&
-            ln -s $(realpath --relative-to="$PWD" $SCBI_TAR/$tarsrc.sha1) \
-               tar-sha1
+        rm -fr archivetmp
+        ln -s $(realpath --relative-to="$PWD" $SCBI_ARCHIVES/$tarsrc) archive
+        [[ -f $SCBI_ARCHIVES/$tarsrc.sha1 ]] &&
+            ln -s $(realpath --relative-to="$PWD" $SCBI_ARCHIVES/$tarsrc.sha1) \
+               archive-sha1
     else
         elog $MODULE error: no top directory found
         res=1
@@ -1009,7 +1019,7 @@ function display-stat()
     fi
     printf "%-21s : %s\n" "build dir"             "$SCBI_BDIR"
     printf "%-21s : %s\n" "install prefix"        "$SCBI_PREFIX"
-    printf "%-21s : %s\n" "tar dir"               "$SCBI_TAR"
+    printf "%-21s : %s\n" "archive dir"           "$SCBI_ARCHIVES"
     printf "%-21s : %s\n" "patches dir"           "$SCBI_PATCH"
     printf "%-21s : %s\n" "user's Git repository" "$SCBI_GIT_REPO"
     printf "%-21s : %s\n" "user's SVN repository" "$SCBI_SVN_REPO"
@@ -1132,16 +1142,16 @@ function copy-module-src-callback()
         echo -n " $module" >> $DEST/build-deps
 
     else
-        #  copy tarball or vcs sources
+        #  Copy archive or vcs sources
 
         if [[ -d $SCBI_BDIR/$module ]]; then
             ilog standalone "-   $module"
 
-            #  two modules may share the same VCS or tarball
-            if [[ -h $SCBI_BDIR/$module/tar ]]; then
-                FILE=$(readlink -f $SCBI_BDIR/$module/tar)
-                [[ ! -f $DEST/.tar/$(basename $FILE) ]] &&
-                    cp -p $FILE $DEST/builds/.tar
+            #  two modules may share the same VCS or archive
+            if [[ -h $SCBI_BDIR/$module/archive ]]; then
+                FILE=$(readlink -f $SCBI_BDIR/$module/archive)
+                [[ ! -f $DEST/.archives/$(basename $FILE) ]] &&
+                    cp -p $FILE $DEST/builds/.archives
             elif [[ -h $SCBI_BDIR/$module/vcs ]]; then
                 DIR=$(readlink -f $SCBI_BDIR/$module/vcs)
                 [[ ! -d $DEST/.vcs/$(basename $DIR) ]] &&
@@ -1233,13 +1243,13 @@ function create-standalone-package()
 
         #  create default local environment
 
-        echo 'SCBI_ROOT=$PWD'                  > .scbi-env-std
-        echo 'SCBI_BDIR=$SCBI_ROOT/builds'    >> .scbi-env-std
-        echo 'SCBI_PREFIX=$SCBI_BDIR/install' >> .scbi-env-std
-        echo 'SCBI_TAR=$SCBI_BDIR/.tar'       >> .scbi-env-std
-        echo 'SCBI_PATCH=$SCBI_BDIR/.patches' >> .scbi-env-std
-        echo 'SCBI_LOGS=$SCBI_BDIR/.logs'     >> .scbi-env-std
-        echo "SCBI_PLAN=$SCBI_PLAN"           >> .scbi-env-std
+        echo 'SCBI_ROOT=$PWD'                      > .scbi-env-std
+        echo 'SCBI_BDIR=$SCBI_ROOT/builds'        >> .scbi-env-std
+        echo 'SCBI_PREFIX=$SCBI_BDIR/install'     >> .scbi-env-std
+        echo 'SCBI_ARCHIVES=$SCBI_BDIR/.archives' >> .scbi-env-std
+        echo 'SCBI_PATCH=$SCBI_BDIR/.patches'     >> .scbi-env-std
+        echo 'SCBI_LOGS=$SCBI_BDIR/.logs'         >> .scbi-env-std
+        echo "SCBI_PLAN=$SCBI_PLAN"               >> .scbi-env-std
 
         #  then create the build script
 
