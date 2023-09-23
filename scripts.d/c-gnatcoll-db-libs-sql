@@ -7,17 +7,6 @@ function c-gnatcoll-db-libs-sql-vcs()
     echo https://github.com/AdaCore/gnatcoll-db
 }
 
-function c-gnatcoll-db-libs-sql-archive()
-{
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo gnatcoll-db-libs-sql-sql-$VERSION-src.tar.gz
-}
-
 function c-gnatcoll-db-libs-sql-cross-build-depends()
 {
     echo c-sandbox

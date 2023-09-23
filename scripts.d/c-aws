@@ -7,17 +7,6 @@ function c-aws-vcs()
     echo https://github.com/AdaCore/aws
 }
 
-function c-aws-archive()
-{
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo aws-$VERSION-src.tar.gz
-}
-
 function c-aws-out-of-tree()
 {
     echo false

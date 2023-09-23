@@ -20,17 +20,6 @@ function c-gnatcoll-bindings-python-depends()
     echo c-gnatcoll-core
 }
 
-function c-gnatcoll-bindings-python-archive()
-{
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo gnatcoll-bindings-$VERSION-src.tar.gz
-}
-
 function c-gnatcoll-bindings-python-out-of-tree()
 {
     echo false

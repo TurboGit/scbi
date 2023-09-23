@@ -7,17 +7,6 @@ function c-gnatcoll-bindings-gmp-vcs()
     echo https://github.com/AdaCore/gnatcoll-bindings
 }
 
-function c-gnatcoll-bindings-gmp-archive()
-{
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo gnatcoll-bindings-$VERSION-src.tar.gz
-}
-
 function c-gnatcoll-bindings-gmp-cross-build-depends()
 {
     echo c-sandbox

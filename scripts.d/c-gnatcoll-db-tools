@@ -7,17 +7,6 @@ function c-gnatcoll-db-tools-vcs()
     echo https://github.com/AdaCore/gnatcoll-db
 }
 
-function c-gnatcoll-db-tools-archive()
-{
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo gnatcoll-db-tools-$VERSION-src.tar.gz
-}
-
 function c-gnatcoll-db-tools-cross-build-depends()
 {
     echo c-sandbox
