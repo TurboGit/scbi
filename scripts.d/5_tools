@@ -939,10 +939,11 @@ function get-archive()
 
     local downloaded=$?
 
-    if [[ ! -f $SCBI_ARCHIVES/$tarsrc ]]; then
-        elog $MODULE error: archive $tarsrc not found
-        return 1
-    fi
+    [[ ! -f $SCBI_ARCHIVES/$tarsrc ]] &&
+        {
+            elog $MODULE error: archive $tarsrc not found
+            return 1
+        }
 
     [[ $downloaded == 0 ]] && [[ -d $SCBI_BDIR/$MODULE/archive-src ]] && return 0
 
@@ -964,23 +965,29 @@ function get-archive()
     if [[ "$tarsrc" =~ "tar.zst" ]]; then
         check-tools unzstd
         [[ $? == 1 ]] &&
-            elog $MODULE missing zst tool to decompress this archive &&
-            return 1
+            {
+                elog $MODULE missing zst tool to decompress this archive
+                return 1
+            }
     fi
 
     if [[ "$tarsrc" =~ ".zip" ]]; then
         check-tools unzip
         [[ $? == 1 ]] &&
-            elog $MODULE missing unzip tool to decompress this archive &&
-            return 1
+            {
+                elog $MODULE missing unzip tool to decompress this archive
+                return 1
+            }
         unzip $SCBI_ARCHIVES/$tarsrc
     else
         tar xf $SCBI_ARCHIVES/$tarsrc
     fi
 
     [[ $? != 0 ]] &&
-        elog $MODULE error: archive $tarsrc is corrupted &&
-        return 1
+        {
+            elog $MODULE error: archive $tarsrc is corrupted
+            return 1
+        }
 
     topdir=$(ls -d *)
 
