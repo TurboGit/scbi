@@ -1,0 +1,152 @@
+# Some tests for scbi source-archive
+
+#################### DEFAULT
+
+RUNS ./scbi source-archive libarch:v1
+
+CLEAN-DIFF <<EOF
+Create source archive for libarch [default] (v1)
+  from  <pwd>/.root/repos/lib1.bundle
+    to  lib1-v1.tar.gz
+EOF
+
+RUNS tar tf lib1-v1.tar.gz
+
+sort-osht-output
+
+DIFF <<EOF
+lib1.bundle/
+lib1.bundle/Makefile
+lib1.bundle/lib1.c
+lib1.bundle/lib1.h
+lib1.bundle/main.c
+EOF
+
+OK ! -f lib1-v1.tar.gz.sha1
+OK ! -f lib1-v1.tar.gz.sha256
+
+rm lib1-v1.tar.gz
+
+#################### GZ
+
+RUNS ./scbi source-archive libarch/gz
+
+CLEAN-DIFF <<EOF
+Create source archive for libarch [gz] (master)
+  from  <pwd>/.root/repos/lib1.bundle
+    to  libarch-master-src.tar.gz
+EOF
+
+RUNS tar tf libarch-master-src.tar.gz
+
+sort-osht-output
+
+DIFF <<EOF
+lib1.bundle/
+lib1.bundle/Makefile
+lib1.bundle/lib1.c
+lib1.bundle/lib1.h
+lib1.bundle/main.c
+EOF
+
+rm libarch-master-src.tar.gz
+
+#################### BZ2
+
+RUNS ./scbi source-archive libarch/bz2:v2
+
+CLEAN-DIFF <<EOF
+Create source archive for libarch [bz2] (v2)
+  from  <pwd>/.root/repos/lib1.bundle
+    to  libarch-v2.tar.bz2
+EOF
+
+RUNS tar tf libarch-v2.tar.bz2
+
+sort-osht-output
+
+DIFF <<EOF
+lib1.bundle/
+lib1.bundle/Makefile
+lib1.bundle/lib1.c
+lib1.bundle/lib1.h
+lib1.bundle/main.c
+EOF
+
+rm libarch-v2.tar.bz2
+
+#################### TAR
+
+RUNS ./scbi source-archive --lower-case libarch/tar:v1
+
+CLEAN-DIFF <<EOF
+Create source archive for libarch [tar] (v1)
+  from  <pwd>/.root/repos/lib1.bundle
+    to  libarch-v1-nocomp.tar
+EOF
+
+RUNS tar tf libarch-v1-nocomp.tar
+
+sort-osht-output
+
+DIFF <<EOF
+lib1.bundle/
+lib1.bundle/Makefile
+lib1.bundle/lib1.c
+lib1.bundle/lib1.h
+lib1.bundle/main.c
+EOF
+
+rm libarch-v1-nocomp.tar
+
+#################### XZ
+
+RUNS ./scbi source-archive --sha1 libarch/xz
+
+CLEAN-DIFF <<EOF
+Create source archive for libarch [xz] (master)
+  from  <pwd>/.root/repos/lib1.bundle
+    to  libarch-master.tar.xz
+EOF
+
+RUNS tar tf libarch-master.tar.xz
+
+sort-osht-output
+
+DIFF <<EOF
+lib1.bundle/
+lib1.bundle/Makefile
+lib1.bundle/lib1.c
+lib1.bundle/lib1.h
+lib1.bundle/main.c
+EOF
+
+OK -f libarch-master.tar.xz.sha1
+
+rm libarch-master.tar.xz*
+
+#################### ZIP
+
+RUNS ./scbi source-archive --sha256 --clean-version libarch/zip:v1
+
+CLEAN-DIFF <<EOF
+Create source archive for libarch [zip] (v1)
+  from  <pwd>/.root/repos/lib1.bundle
+    to  libarch-1.zip
+EOF
+
+RUNS zipinfo -1 libarch-1.zip
+
+sort-osht-output
+
+DIFF <<EOF
+lib1.bundle/
+lib1.bundle/Makefile
+lib1.bundle/lib1.c
+lib1.bundle/lib1.h
+lib1.bundle/main.c
+EOF
+
+OK -f libarch-1.zip.sha256
+
+rm libarch-1.zip*

@@ -728,7 +728,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 
 	And finally the function \code{scbi-rewrite-vcs} can be defined. This function takes the five values returned by the \code{vcs} hook and must return the five values in the same order but possibly rewritten.
 
-	\item[<module>{[}-<variant>{]}-archive] \index{hook!tar}Describe the archive filename and location of the archive containing the module sources.
+	\item[<module>{[}-<variant>{]}-archive] \label{hookarchive}\index{hook!archive}Describe the archive filename and location of the archive containing the module sources.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$VERSION}
 		\item[return] \tabto{2cm} array
@@ -1294,7 +1294,7 @@ Which will force a \code{Debug} build for all modules using \code{cmake}, or:
  export SCBI_lcms2_BUILD_TYPE=Debug
 \end{lstlisting}
 
-With will force a \code{Debug} build for the \code{lcms2} module only. In both cases, the corresponding module must have been coded to use the \code{get-build-type} routine as seen above. Note that the \code{export} must use \emph{underscores} instead of dashes in module name as dashes are forbidden in variable name.
+With will force a \code{Debug} build for the \code{lcms2} plug-in only. In both cases, the corresponding plug-in must have been coded to use the \code{get-build-type} routine as seen above. Note that the \code{export} must use \emph{underscores} instead of dashes in plug-in name as dashes are forbidden in variable name.
 
 \subsection{Checking installed tools}
 \index{helpers!check-tool}\index{check-tool}
@@ -1625,7 +1625,7 @@ The tool \code{scbi-lint} can be used to check for common plug-in errors.
 
 For example:
 
-\cmd{scbi-lint lcms2}
+\cmd{scbi lint lcms2}
 
 It will report:
 
@@ -1639,6 +1639,31 @@ It will report:
 \end{itemize}
 
 The option \code{\ddash{}error} will only report errors.
+
+\subsection{Create Source Archive}
+\label{createsourcearchive}
+\index{source archive}
+
+The tool \code{scbi create-archive} can be used to create source archive for a plug-in. This is useful if a \code{vcs} and \code{archive} hooks are defined for a plug-in. One can then avoid using the \code{vcs} repository and use a specific archive uploaded in some safe/secure server without requiring an Internet connection for example.
+
+The sources are downloaded using the \code{vcs} hook defined for the plug-in. The archive's created is by default is named \code{<REPOSITORY-NAME>-<VERSION>.tar.gz} expect if the plug-in has defined the \code{archive} hook. In this later case the archive will be named according to the template in the \code{archive} hook, \seeref{hookarchive}. The supported archive formats are:
+
+\begin{description}[style=nextline]
+	\item[.tar] Archive tar not compressed.
+	\item[.tar.gz] Archive tar compressed with best gzip compression.
+	\item[.tar.bz2] Archive tar compressed with best Bzip2 compression.
+	\item[.tar.zst] Archive tar compressed with best Zstandard compression.
+	\item[.tar.xz] Archive tar compressed with best XZ compression.
+	\item[.zip] Archive zip compressed with default zip compression.
+\end{description}
+
+For example:
+
+\cmd{scbi create-archive lcms2:2.12}
+
+Will create an archive named \file{Little-CMS-2.12.tar.gz}. This is the default naming as no \code{archive} hook is defined for this plug-in.
+
+The tool can also create \code{SHA-1} or \code{SHA-256} for the generated archive.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 

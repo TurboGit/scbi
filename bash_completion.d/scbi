@@ -7,12 +7,19 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 -j --jobs= --target= --ini= --env= -e --tests:only --plan= -n --no-patch --archive
 --list-depends: --list-externals --list-externals:only --list-no-version
  --list-filter: --deps:warning
---dry-run -w --wrapup --force --enable- --safe --plugins --build-dir
+--dry-run -w --wrapup --force --enable- --safe --plugins= --build-dir
 --list-plan --version --clean-install --log:yes --log:no --log:on-failure
 --store --stat --stat:full --prefix=
 --module-ref --module-ref:version --module-ref:variant --module-ref:full"
 
+_SCBI_ARC_ARGS="-h --help -v --version --plugins= -e --env= --plan=
+-c --clean-version -l --lower-case --sha1 --sha256"
+
+_SCBI_LNT_ARGS="-h --help -v --version --plugins= -e --error"
+
 _SCBI_HOOKS="((pre|post)-)?(cross-)?(archive|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches)"
+
+_SCBI_MODE=std
 
 _gnat_ini()
 {
@@ -190,6 +197,14 @@ _scbi()
     local cur=$(_get_cword =:)
     local prev=${COMP_WORDS[COMP_CWORD-1]}
 
+    if [[ $prev == source-archive ]]; then
+        _SCBI_MODE=arc
+    elif [[ $prev == lint ]]; then
+        _SCBI_MODE=lnt
+    else
+        _SCBI_MODE=std
+    fi
+
     case "$cur" in
         --ini=*)
             _scbicomp "$(_gnat_ini)" "" "${cur##--ini=}"
@@ -243,9 +258,15 @@ _scbi()
             return 0
             ;;
         -*)
-            _scbicomp "$_SCBI_ARGS"
+            if [[ ${_SCBI_MODE} == std ]]; then
+                _scbicomp "$_SCBI_ARGS"
+            elif [[ ${_SCBI_MODE} == lnt ]]; then
+                _scbicomp "$_SCBI_LNT_ARGS"
+            else
+                _scbicomp "$_SCBI_ARC_ARGS"
+            fi
             ;;
-         *)
+        *)
             case "$prev" in
                 -t)
                     _scbicomp "$(_gnat_targets)" "" "${cur##--target=}"
@@ -256,7 +277,7 @@ _scbi()
                     return 0
                     ;;
                 *)
-                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*)"
+                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*) source-archive lint"
                     ;;
             esac
     esac

@@ -1,0 +1,63 @@
+
+function libarch-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function libarch-gz-archive()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo libarch-$VERSION-src.tar.gz
+}
+
+function libarch-bz2-archive()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo libarch-$VERSION.tar.bz2
+}
+
+function libarch-tar-archive()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo LIBARCH-$VERSION-nocomp.tar
+}
+
+function libarch-xz-archive()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo libarch-$VERSION.tar.xz
+}
+
+function libarch-zip-archive()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo libarch-$VERSION.zip
+}

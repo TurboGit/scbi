@@ -1,0 +1,304 @@
+#!/bin/bash
+
+SCBI_PLUGINS="$PWD/scripts.d"
+SCBI_PLAN=
+SCBI_PLAN_CL=
+DO_VERSION=no
+DO_HELP=no
+DO_CLEAN_VERSION=no
+DO_LOWER=no
+DO_SHA=no
+ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
+
+function usage()
+{
+    echo
+    echo SCBI-SOURCE-ARCHIVCE $SCBI_VERSION
+    echo
+    echo $0 [options] plug-in1 [plug-in2...]
+
+    echo ""
+    echo "   -h | --help             this help message"
+    echo "   -v | --version          display driver & plug-ins versions"
+    echo "      | --plugins=<dir>    specify the plugins' directory"
+    echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
+    echo "      | --plan=<name>      a build plan for modules"
+    echo "   -c | --clean-version    use only numbers/dots in version"
+    echo "      | --sha1             create a sha-1 for the archive"
+    echo "      | --sha256           create a sha-256 for the archive"
+    echo "   -l | --lower-case       for lower-case archive name"
+}
+
+function handle-module()
+{
+    local MODREF=$1
+
+    local WORKDIR=$(mktemp -d /dev/shm/XXXXXX)
+
+    export log=$WORKDIR/$module.log
+    export SCBI_BDIR=$WORKDIR
+
+    (
+        local CDIR=$PWD
+
+        cd $WORKDIR
+
+        local module_info=( $(get-module-ref $MODREF "root") )
+        local module=${module_info[0]}
+        local variant=${module_info[1]}
+        local kind=${module_info[2]}
+        local ref=${module_info[3]}
+
+        if [[ $ref == NONE ]]; then
+            ref=master
+        fi
+
+        mkdir -p $module
+        echo Create source archive for $module \[${variant//./ }\] \($ref\)
+
+        #  Load plug-in if exists
+
+        if [[ ! -f $SCBI_PLUGINS/$module ]]; then
+            echo "error: cannot find $module plugin"
+            exit 1
+        else
+            source $SCBI_PLUGINS/$module
+        fi
+
+        #  Get the VCS
+
+        local vcs=( $(get-vcs-data $module $variant) )
+        local VCS_NAME=${vcs[3]}
+
+        local nv=${#vcs[*]}
+
+        #  We request a specific version but there is no VCS hook defined
+        #  this is an error.
+
+        if [[ $kind == BRANCH ]] && [[ $nv == 0 ]]; then
+            echo "error: $module-vcs function not defined, cannot get vcs"
+            exit 1
+        fi
+
+        get-vcs PREFIX TARGET ROOT $MODREF
+
+        #  Create the archive from the VCS reference
+
+        cd $SCBI_BDIR/.vcs
+
+        if [[ $DO_CLEAN_VERSION == yes ]]; then
+            ref=$(echo $ref | sed 's/[A-Z]\|[a-z]//g;s/_/\./g')
+        fi
+
+        local tar=( $(get-archive-data $module $variant $ref) )
+        local nv=${#tar[*]}
+
+        local VCS_URL=${vcs[4]}
+        local REP=$(basename ${VCS_URL})
+        local ARCHIVE_NAME=$REP
+
+        case $VCS_NAME in
+            git)
+                local REP=$(basename $REP .git)
+                local ARCHIVE_NAME=$(basename $ARCHIVE_NAME .bundle)
+                ;;
+            svn|subversion)
+                ;;
+            hg)
+                ;;
+            *)
+                ;;
+        esac
+
+        local ARCHIVE_NAME=$ARCHIVE_NAME-$ref.tar.gz
+
+        if [[ $nv != 0 ]]; then
+            ARCHIVE_NAME=${tar[5]}
+        fi
+
+        [[ $DO_LOWER == yes ]] && ARCHIVE_NAME=${ARCHIVE_NAME,,}
+
+        echo "  from " $VCS_URL
+        echo "    to " $ARCHIVE_NAME
+
+        case $ARCHIVE_NAME in
+            *tar.gz)
+                local FILE=$CDIR/$(basename $ARCHIVE_NAME .gz)
+                rm -f $FILE $FILE.gz
+                tar --exclude-vcs --create --file $FILE $REP
+                gzip -9 $FILE
+                ;;
+            *tar.bz2)
+                local FILE=$CDIR/$(basename $ARCHIVE_NAME .bz2)
+                rm -f $FILE $FILE.bz2
+                tar --exclude-vcs --create --file $FILE $REP
+                bzip2 -9 $FILE
+                ;;
+            *tar.zst)
+                local FILE=$CDIR/$(basename $ARCHIVE_NAME .zst)
+                rm -f $FILE $FILE.zst
+                tar --exclude-vcs --create --file $FILE $REP
+                zstd -9 $FILE
+                ;;
+            *tar.xz)
+                local FILE=$CDIR/$(basename $ARCHIVE_NAME .xz)
+                rm -f $FILE $FILE.xz
+                tar --exclude-vcs --create --file $FILE $REP
+                xz -9 $FILE
+                ;;
+            *tar)
+                local FILE=$CDIR/$(basename $ARCHIVE_NAME)
+                rm -f $FILE
+                tar --exclude-vcs --create --file $FILE $REP
+                ;;
+            *zip)
+                local FILE=$CDIR/$ARCHIVE_NAME
+                rm -f $FILE.zip
+                rm -fr $REP/.git $REP/.hg $REP/.svn
+                zip -qr $FILE $REP
+                ;;
+            *)
+                echo "error: unknown archive format"
+                ;;
+        esac
+
+        case $DO_SHA in
+            sha1)
+                sha1sum $CDIR/$ARCHIVE_NAME > $CDIR/$ARCHIVE_NAME.sha1
+                ;;
+            sha256)
+                sha256sum $CDIR/$ARCHIVE_NAME > $CDIR/$ARCHIVE_NAME.sha256
+                ;;
+            *)
+                ;;
+        esac
+    )
+
+    rm -fr $WORKDIR
+}
+
+if [[ $1 == "subcommand" ]]; then
+    shift
+else
+    echo "error: use scbi source-archive [options]"
+    exit 1
+fi
+
+OPTFILE=$(mktemp)
+OPTARG=
+
+ALLOPTS=$(getopt -u -o chevl \
+                 -l env:,plugins:,version,plan:,help,clean-version \
+                 -l lower-case,sha1,sha256 \
+                 -- $* 2> $OPTFILE)
+
+if [[ $? != 0 ]]; then
+    cat $OPTFILE
+    echo try \"scbi source-archive --help\" for more information.
+    rm -f $OPTFILE
+    exit 1
+fi
+
+set -- $ALLOPTS
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            DO_HELP=yes
+            break
+            ;;
+        -v|--version)
+            DO_VERSION=yes
+            break
+            ;;
+        -e|--env)
+            ENV_NAME="$2"
+            shift
+            ;;
+        --plan)
+            SCBI_PLAN_CL=$2; shift
+            ;;
+        -c|--clean-version)
+            DO_CLEAN_VERSION=yes
+            ;;
+        --sha1)
+            DO_SHA=sha1
+            ;;
+        --sha256)
+            DO_SHA=sha256
+            ;;
+        -l|--lower-case)
+            DO_LOWER=yes
+            ;;
+        --plugins)
+            SCBI_PLUGINS=$2; shift
+            if [[ ! -d "$SCBI_PLUGINS" ]] || \
+                   [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]];
+            then
+                echo "$0: no plugins found in $SCBI_PLUGINS"
+                exit 1
+            fi
+            ;;
+        (--)
+            ;;
+        (*)
+            SCBI_MODULES="$SCBI_MODULES $1"
+            ;;
+        (-*)
+            echo "$0: error - unrecognized option $1" 1>&2; exit 1
+            usage
+            ;;
+    esac
+    shift
+done
+
+if [[ $DO_HELP = yes ]]; then
+    usage
+    exit 0
+fi
+
+#  Load module definitions
+
+[[ ! -d "$SCBI_PLUGINS" ]] ||
+    [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]] &&
+        SCBI_PLUGINS=$HOME/.config/scbi
+
+#  Load user's environment if any now that SCBI_PLUGINS is set
+
+load-module-env $ENV_NAME
+
+#  Then load any global settings, not overriding user's ones
+
+for setup in $SCBI_PLUGINS/[0-9]*; do
+    source $setup
+done
+
+#  Nothing to build, display usage
+
+if [[ $DO_VERSION = yes ]]; then
+    echo "SCBI : $SCBI_VERSION"
+    for file in $(ls $SCBI_PLUGINS/.scbi*version.txt 2> /dev/null); do
+        cat $file
+    done
+    exit 0
+fi
+
+#  Load build plan if any
+
+if [[ -n $SCBI_PLAN ]]; then
+    load-module-plan $SCBI_PLAN
+    [[ $? -ne 0 ]] &&
+        echo "error: cannot load module plan $SCBI_PLAN" &&
+        exit 1
+fi
+
+#  Setup module reference specified on the command line. The module
+#  reference on the command line must overwrite the actual build plan.
+
+for module in $SCBI_MODULES; do
+    set-module-ref $module
+done
+
+for module in $SCBI_MODULES; do
+    handle-module $module || exit 1
+done
