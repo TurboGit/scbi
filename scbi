@@ -1869,17 +1869,6 @@ OPTFILE=$(mktemp)
 OPTARG=
 SCBIOPTS+="${SCBIOPTS:+ }$SCBI_INI_OPTIONS"
 
-function get-optional-argument()
-{
-  eval next_token=\${$OPTIND}
-  if [[ -n $next_token && $next_token != -* ]]; then
-    OPTIND=$((OPTIND + 1))
-    OPTARG=$next_token
-  else
-    OPTARG=""
-  fi
-}
-
 ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpqvwWh \
                  -l store,target:,no-setup,no-install,update,setup,config \
                  -l build,build-target:,install,clean-install,tar \
