@@ -13,7 +13,7 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
 --module-ref --module-ref:version --module-ref:variant --module-ref:full"
 
 _SCBI_ARC_ARGS="-h --help -v --version --plugins= -e --env= --plan=
--c --clean-version -l --lower-case --sha1 --sha256"
+-c --clean-version -l --lower-case --sha1 --sha256 --md5"
 
 _SCBI_LNT_ARGS="-h --help -v --version --plugins= -e --error"
 

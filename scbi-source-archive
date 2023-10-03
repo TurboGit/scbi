@@ -24,6 +24,7 @@ function usage()
     echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
     echo "      | --plan=<name>      a build plan for modules"
     echo "   -c | --clean-version    use only numbers/dots in version"
+    echo "      | --md5              create a md5 for the archive"
     echo "      | --sha1             create a sha-1 for the archive"
     echo "      | --sha256           create a sha-256 for the archive"
     echo "   -l | --lower-case       for lower-case archive name"
@@ -163,6 +164,9 @@ function handle-module()
         esac
 
         case $DO_SHA in
+            md5)
+                md5sum $CDIR/$ARCHIVE_NAME > $CDIR/$ARCHIVE_NAME.md5
+                ;;
             sha1)
                 sha1sum $CDIR/$ARCHIVE_NAME > $CDIR/$ARCHIVE_NAME.sha1
                 ;;
@@ -189,7 +193,7 @@ OPTARG=
 
 ALLOPTS=$(getopt -u -o chevl \
                  -l env:,plugins:,version,plan:,help,clean-version \
-                 -l lower-case,sha1,sha256 \
+                 -l lower-case,sha1,sha256,md5 \
                  -- $* 2> $OPTFILE)
 
 if [[ $? != 0 ]]; then
@@ -220,6 +224,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         -c|--clean-version)
             DO_CLEAN_VERSION=yes
+            ;;
+        --md5)
+            DO_SHA=md5
             ;;
         --sha1)
             DO_SHA=sha1
