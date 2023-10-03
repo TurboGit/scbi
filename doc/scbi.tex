@@ -1644,7 +1644,7 @@ The option \code{\ddash{}error} will only report errors.
 \label{createsourcearchive}
 \index{source archive}
 
-The tool \code{scbi create-archive} can be used to create source archive for a plug-in. This is useful if a \code{vcs} and \code{archive} hooks are defined for a plug-in. One can then avoid using the \code{vcs} repository and use a specific archive uploaded in some safe/secure server without requiring an Internet connection for example.
+The tool \code{scbi source-archive} can be used to create source archive for a plug-in. This is useful if a \code{vcs} and \code{archive} hooks are defined for a plug-in. One can then avoid using the \code{vcs} repository and use a specific archive uploaded in some safe/secure server without requiring an Internet connection for example.
 
 The sources are downloaded using the \code{vcs} hook defined for the plug-in. The archive's created is by default is named \code{<REPOSITORY-NAME>-<VERSION>.tar.gz} expect if the plug-in has defined the \code{archive} hook. In this later case the archive will be named according to the template in the \code{archive} hook, \seeref{hookarchive}. The supported archive formats are:
 
