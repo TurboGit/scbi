@@ -85,7 +85,7 @@ function handle-module()
 
         #  Create the archive from the VCS reference
 
-        cd $SCBI_BDIR/.vcs
+        cd $SCBI_BDIR/$module
 
         if [[ $DO_CLEAN_VERSION == yes ]]; then
             ref=$(echo $ref | sed 's/[A-Z]\|[a-z]//g;s/_/\./g')
@@ -123,40 +123,49 @@ function handle-module()
         echo "  from " $VCS_URL
         echo "    to " $ARCHIVE_NAME
 
+        #  Rename VCS link to proper module checkout to get a correct
+        #  top directory into the archives.
+
+        if [[ -h src ]]; then
+            mv src $REP
+        else
+            mv vcs $REP
+        fi
+
         case $ARCHIVE_NAME in
             *tar.gz)
                 local FILE=$CDIR/$(basename $ARCHIVE_NAME .gz)
                 rm -f $FILE $FILE.gz
-                tar --exclude-vcs --create --file $FILE $REP
+                tar --exclude-vcs --dereference --create --file $FILE $REP
                 gzip -9 $FILE
                 ;;
             *tar.bz2)
                 local FILE=$CDIR/$(basename $ARCHIVE_NAME .bz2)
                 rm -f $FILE $FILE.bz2
-                tar --exclude-vcs --create --file $FILE $REP
+                tar --exclude-vcs --dereference --create --file $FILE $REP
                 bzip2 -9 $FILE
                 ;;
             *tar.zst)
                 local FILE=$CDIR/$(basename $ARCHIVE_NAME .zst)
                 rm -f $FILE $FILE.zst
-                tar --exclude-vcs --create --file $FILE $REP
+                tar --exclude-vcs --dereference --create --file $FILE $REP
                 zstd -9 $FILE
                 ;;
             *tar.xz)
                 local FILE=$CDIR/$(basename $ARCHIVE_NAME .xz)
                 rm -f $FILE $FILE.xz
-                tar --exclude-vcs --create --file $FILE $REP
+                tar --exclude-vcs --dereference --create --file $FILE $REP
                 xz -9 $FILE
                 ;;
             *tar)
                 local FILE=$CDIR/$(basename $ARCHIVE_NAME)
                 rm -f $FILE
-                tar --exclude-vcs --create --file $FILE $REP
+                tar --exclude-vcs --dereference --create --file $FILE $REP
                 ;;
             *zip)
                 local FILE=$CDIR/$ARCHIVE_NAME
                 rm -f $FILE.zip
-                rm -fr $REP/.git $REP/.hg $REP/.svn
+                rm -fr $REP/.git* $REP/.hg $REP/.svn
                 zip -qr $FILE $REP
                 ;;
             *)
