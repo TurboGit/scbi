@@ -101,6 +101,7 @@ function handle-module()
         case $VCS_NAME in
             git)
                 local REP=$(basename $REP .git)
+                local ARCHIVE_NAME=$(basename $ARCHIVE_NAME .git)
                 local ARCHIVE_NAME=$(basename $ARCHIVE_NAME .bundle)
                 ;;
             svn|subversion)
