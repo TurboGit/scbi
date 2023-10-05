@@ -3,6 +3,14 @@
 RUNS ./scbi natv
 
 CLEAN-DIFF <<EOF
+natv-native-archive is a function
+natv-native-archive ()
+{
+    echo NONE;
+    echo NONE;
+    echo NONE;
+    echo NONE
+}
 natv-native-build is a function
 natv-native-build ()
 {
@@ -193,14 +201,6 @@ natv-native-pre-install ()
 natv-native-prefix is a function
 natv-native-prefix ()
 {
-    echo NONE
-}
-natv-native-tar is a function
-natv-native-tar ()
-{
-    echo NONE;
-    echo NONE;
-    echo NONE;
     echo NONE
 }
 natv-native-vcs is a function
