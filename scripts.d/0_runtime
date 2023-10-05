@@ -302,8 +302,8 @@ function _inherit-plugin_internal()
     local PLUGIN=$2
 
     #  All hooks
-    local SCBI_HOOKS="vcs|tar|env|build-env|depends|build-depends|out-of-tree"
-    local SCBI_HOOKS="$SCBI_HOOKS|setup|config|build|install|prefix"
+    local SCBI_HOOKS="vcs|archive|env|build-env|depends|build-depends"
+    local SCBI_HOOKS="$SCBI_HOOKS|out-of-tree|setup|config|build|install|prefix"
 
     load-module $HPLUGIN
 
@@ -507,7 +507,7 @@ function with-variant()
     done
 
     #  Hooks with NONE body
-    local SCBI_HOOKS=( vcs tar )
+    local SCBI_HOOKS=( vcs archive )
 
     for hook in ${SCBI_HOOKS[*]}; do
         H="function $PLUGIN-$VNAME-$hook()"
