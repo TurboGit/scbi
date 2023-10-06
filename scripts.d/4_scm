@@ -273,11 +273,17 @@ function svn-branch()
         elif [[ -n $DIR ]] && [[ -d vcs/branches/$BRANCH/$DIR ]]; then
             ln -s vcs/branches/$BRANCH/$DIR src
 
+        elif [[ -n $DIR ]] && [[ -d vcs/branches/$DIR/$BRANCH ]]; then
+            ln -s vcs/branches/$DIR/$BRANCH src
+
         elif [[ -d vcs/branches/$BRANCH ]]; then
             ln -s vcs/branches/$BRANCH src
 
         elif [[ -n $DIR ]] && [[ -d vcs/tags/$BRANCH/$DIR ]]; then
             ln -s vcs/tags/$BRANCH/$DIR src
+
+        elif [[ -n $DIR ]] && [[ -d vcs/tags/$DIR/$BRANCH ]]; then
+            ln -s vcs/tags/$DIR/$BRANCH src
 
         elif [[ -d vcs/tags/$BRANCH ]]; then
             ln -s vcs/tags/$BRANCH src
