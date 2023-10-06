@@ -702,7 +702,12 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 			\item options : comma separated list of options, possible values are \emph{none}, \emph{no-recursive}, \emph{lfs}
 			\item protocol : \emph{git}, \emph{svn}, \emph{hg}
 			\item URL : repository location with protocol
-			\item DIR (optional): name of the directory if the repository is hosting multiple projects. This is mostly needed for Subversion non standard repository layout. If \code{URL} is pointing to the tree when \code{trunk}, \code{branches} and \code{tags} directories are found, then SCBI will check for the actual sources in \code{<root>/trunk/\$DIR} or \code{<root>/branches/<VER>/\$DIR} for example.
+			\item DIR (optional): name of the directory if the repository is hosting multiple projects. This is mostly needed for Subversion non standard repository layout. If \code{URL} is pointing to the tree where \code{trunk}, \code{branches} and \code{tags} directories are found, then SCBI will check for the actual sources in:
+			\begin{itemize}
+				\item \code{<root>/trunk/\$DIR}
+				\item \code{<root>/[branches|tags]/<VER>/\$DIR}
+				\item \code{<root>/[branches|tags]/\$DIR/<VER>}
+			\end{itemize}.
 		\end{enumerate}
 	\end{description}
 
