@@ -203,7 +203,7 @@ function ini-apply-values()
     #  Set options controlled with a DO_<NAME>
 
     for OPTS in setup config build install wrapup \
-                      force update purge archive stat;
+                      quiet force update purge archive stat;
     do
         local VAR=DO_${OPTS^^}
         local O=$(ini-get-option "$SECTION" $OPTS)

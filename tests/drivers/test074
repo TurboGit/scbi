@@ -1,23 +1,25 @@
+GVER=$(gcc --version | grep gcc | awk '{print $4}')
+
 # check for auto variant depending on os package with specific version
 
 RUNS ./scbi mautov/auto:4.3.1
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : module gcc version 4.3.1 matching
-xxxx/xx/xx xx:xx:xx : module mautov using native variant
+xxxx/xx/xx xx:xx:xx : mautov 4.3.1 using native variant
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 
-xxxx/xx/xx xx:xx:xx : Building mautov [native] (4.3.1)
+xxxx/xx/xx xx:xx:xx : Building mautov [native] ($GVER)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : skip global install
-xxxx/xx/xx xx:xx:xx : End Building mautov [native] (4.3.1)
+xxxx/xx/xx xx:xx:xx : End Building mautov [native] ($GVER)
 EOF
 
 RUNS ./scbi mautov/auto:99.99.09
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99.09 not found
-xxxx/xx/xx xx:xx:xx : mautov using standard variant
+xxxx/xx/xx xx:xx:xx : mautov 99.99.09 using standard variant
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
 
 xxxx/xx/xx xx:xx:xx : Building mautov [default] (99.99.09)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu

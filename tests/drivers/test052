@@ -20,8 +20,8 @@ EOF
 RUNS ./scbi autovarB/auto
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : dependency squid-cgi not installed
 xxxx/xx/xx xx:xx:xx : autovarB using standard variant
+xxxx/xx/xx xx:xx:xx :   ↳ squid-cgi not installed
 
 xxxx/xx/xx xx:xx:xx : Building autovarB [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -39,8 +39,8 @@ EOF
 RUNS ./scbi --plan=autob autovarB
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : dependency squid-cgi not installed
 xxxx/xx/xx xx:xx:xx : autovarB using standard variant
+xxxx/xx/xx xx:xx:xx :   ↳ squid-cgi not installed
 
 xxxx/xx/xx xx:xx:xx : Building autovarB [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -55,8 +55,8 @@ EOF
 RUNS ./scbi autovarC/auto
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : unknown dependency shouldnotexist-dev
 xxxx/xx/xx xx:xx:xx : autovarC using standard variant
+xxxx/xx/xx xx:xx:xx :   ↳ unknown dependency shouldnotexist-dev
 
 xxxx/xx/xx xx:xx:xx : Building autovarC [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu

@@ -17,7 +17,7 @@ function clog()
 
 function line-sep()
 {
-    [[ $(cat $SCBI_LINE_SEP) == 0 ]] && echo
+    [[ $(cat $SCBI_LINE_SEP) == 0 ]] && [[ $DO_QUIET == no ]] && echo
     echo -n 1 > $SCBI_LINE_SEP
 }
 

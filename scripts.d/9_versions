@@ -384,34 +384,88 @@ function handle-plan-auto-variant()
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
+    local ref=${module_info[3]}
 
     if [[ $variant =~ ^auto(\.|$) ]]; then
-        check-auto-variant $mod $FORMODULE
-        local res=$?
+        local PKVER=( $(check-auto-variant $mod $FORMODULE) )
 
-        if [[ $res == 0 ]]; then
-            #  replaces all variants by a single "native"
-            value=${value/\/auto*([.a-zA-Z])/\/native}
-            echo 0 $M "$value"
-            echo 1 $M "module $M using native variant"
-        elif [[ $res == 1 ]]; then
-            #  remove "auto" from the list of variants, or replace
-            #  it with FORMODULE if defined and auto is the only
-            #  variant specified. This ensure that a separate
-            #  directory is used for the build.
-            value=${value/\/auto\./\/}
+        local cnt=${#PKVER[*]}
+        local gstatus=$SCBI_STATUS_VERSION_OK
+        local gosver=0
 
-            if [[ -z $FORMODULE ]]; then
-                value=${value/\/auto}
+        local last=$(( cnt - 1 ))
+
+        for k in $(seq 0 4 $last); do
+            local status=${PKVER[$k]}
+            local osver=${PKVER[(( $k + 2 ))]}
+            gstatus=$status
+            if [[ $status != $SCBI_STATUS_VERSION_OK ]]; then
+                break
             else
-                local FMOD=${FORMODULE//[-._]/}
-                value=${value/\/auto/\/$FMOD}
+                gosver=$osver
             fi
-            echo 0 $M "$value"
-            echo 1 $M "$M using standard variant"
-        else
-            echo 2 $M "$M auto mode must define a native variant"
-        fi
+        done
+
+        SCBI_AUTO_FILE=$(mktemp -p /dev/shm)
+
+        {
+            if [[ $ref == NONE ]]; then
+                local ref=""
+            else
+                local ref=" $ref"
+            fi
+
+            if [[ $gstatus == $SCBI_STATUS_VERSION_OK ]]; then
+                #  replaces all variants by a single "native"
+                #  and use the new version for this module
+                value=${value/\/auto*([.a-zA-Z])/\/native}
+                echo 0 $M "${value%:*}${gosver+:$gosver}"
+                echo 1 $M "$M$ref using native variant"
+            elif [[ $gstatus != $SCBI_ERROR_HOOK_NOT_FOUND ]]; then
+                #  remove "auto" from the list of variants, or replace
+                #  it with FORMODULE if defined and auto is the only
+                #  variant specified. This ensure that a separate
+                #  directory is used for the build.
+                value=${value/\/auto\./\/}
+
+                if [[ -z $FORMODULE ]]; then
+                    value=${value/\/auto}
+                else
+                    local FMOD=${FORMODULE//[-._]/}
+                    value=${value/\/auto/\/$FMOD}
+                fi
+                echo 0 $M "$value"
+                echo 1 $M "$M$ref using standard variant"
+            fi
+
+            #  The explanation of the choice above
+
+            for k in $(seq 0 4 $last); do
+                local status=${PKVER[$k]}
+                local mver=${PKVER[(($k + 1))]}
+                local osver=${PKVER[(( $k + 2 ))]}
+                local pkg=${PKVER[(( $k + 3 ))]}
+
+                if [[ $status == $SCBI_STATUS_PKG_NOT_INSTALLED ]]; then
+                    echo 1 $M "  ↳ $pkg not installed"
+                elif [[ $status == $SCBI_STATUS_PKG_NOT_FOUND ]]; then
+                    echo 1 $M "  ↳ unknown dependency $pkg"
+                elif [[ $status == $SCBI_STATUS_VERSION_NOK ]]; then
+                    if [[ -z $ref ]]; then
+                        echo 1 $M "  ↳ $pkg $mver found $osver"
+                    else
+                        echo 1 $M "  ↳ $pkg $osver found"
+                    fi
+                elif [[ $status == $SCBI_STATUS_VERSION_OK ]]; then
+                    echo 1 $M "  ↳ $pkg $osver used"
+                elif [[ $status == $SCBI_ERROR_HOOK_NOT_FOUND ]]; then
+                    echo 2 $M "$M auto mode must define a native variant"
+                fi
+            done
+        } > $SCBI_AUTO_FILE
+
+        cat $SCBI_AUTO_FILE
+        rm $SCBI_AUTO_FILE
     fi
 }
 
@@ -450,7 +504,8 @@ function rewrite-module-plan()
             elog $K "$V"
             eres=1
         fi
-    done < <( parallel-do handle-plan-auto-variant 20 ${!SCBI_MODVER[@]} )
+    done < <( parallel-do handle-plan-auto-variant \
+                          $(( $SCBI_JOBS + $SCBI_HALF_JOBS )) ${!SCBI_MODVER[@]} )
 
     #  Rewrite plan for meta-module (this is done recursively until there
     #  is no new module plan entry rewritten.
@@ -470,7 +525,8 @@ function rewrite-module-plan()
                 elog $K "$V"
                 eres=1
             fi
-        done < <( parallel-do handle-plan-meta-module 20 ${_MOREMOD[@]} )
+        done < <( parallel-do handle-plan-meta-module \
+                              $(( $SCBI_JOBS + $SCBI_HALF_JOBS )) ${_MOREMOD[@]} )
 
         _MOREMOD=( ${_NEWMOD[@]} )
     done
@@ -552,6 +608,13 @@ function set-module-ref()
 }
 
 ############################## check-auto-variant
+#
+# Returns for each OS dependencies:
+#
+#   STATUS
+#   REQUIRED_VERSION
+#   OS_VERSION
+#   PACKAGE
 
 function check-auto-variant()
 {
@@ -562,21 +625,23 @@ function check-auto-variant()
         #  Check external dependencies for native-depends
 
         (
-            local res=0
-
             source $SCBI_PLUGINS/$MODULE
 
             fn-exists $MODULE-native-depends
 
             if [[ $? != 0 ]]; then
                 #  Fatal error, stop now
+                echo $SCBI_ERROR_HOOK_NOT_FOUND
+                echo 0
+                echo 0
+                echo NONE
                 exit 2
             fi
 
             for dmodule in $(get-all-depends $MODULE native depends); do
                 if [[ ! -f $SCBI_PLUGINS/$dmodule ]]; then
                     #  If OS dependency on a native variant has version set
-                    #  to v (for example libtbb:v) we want this dependency
+                    #  to v (for example libtbb:[v]) we want this dependency
                     #  to be checking the module's version requested.
 
                     if [[ ${dmodule#*:} == "[v]" ]]; then
@@ -590,36 +655,19 @@ function check-auto-variant()
                         fi
                     fi
 
-                    local STATUSES=( $(check-pkg-status $dmodule) )
-
-                    while read pkg pver pres; do
-                        if [[ $pres == $SCBI_PKG_NOT_FOUND ]]; then
-                            echo 1 $MODULE "unknown dependency $pkg"
-                            res=1
-                        elif [[ $pres == $SCBI_PKG_NOT_INSTALLED ]]; then
-                            echo 1 $MODULE "dependency $pkg not installed"
-                            res=1
-                        elif [[ $pres == $SCBI_PKG_VERSION_NOK ]]; then
-                            echo 1 $MODULE "module $pkg version $pver not found"
-                            res=1
-                        elif [[ $pres == $SCBI_PKG_VERSION_OK ]]; then
-                            if [[ $pver == 0 ]]; then
-                                echo 1 $MODULE "module $pkg found"
-                            else
-                                echo 1 $MODULE "module $pkg version $pver matching"
-                            fi
-                        fi
-                    done < <( echo ${STATUSES[*]} )
+                    # 4 items per line: status module-version package-version package-name
+                    check-pkg-status $dmodule
                 fi
             done
-
-            exit $res
         )
-        return $?
 
     else
         #  No module definition, cannot have a native variant, error will
         #  be reported upward.
+        echo $SCBI_ERROR_PLUGIN_NOT_FOUND
+        echo 0
+        echo 0
+        echo NONE
         return 1
     fi
 }
