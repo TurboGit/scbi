@@ -1,0 +1,25 @@
+
+with-variant native gcc:[v] coreutils
+
+function mautov2-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/mautov.bundle
+}
+
+function mautov2-config()
+{
+    echo mautov-config
+}
+
+function mautov2-build()
+{
+    echo mautov-config
+}
+
+function mautov2-install()
+{
+    echo mautov-config
+}

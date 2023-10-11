@@ -1,3 +1,4 @@
+GVER=$(gcc --version | grep gcc | awk '{print $4}')
 
 #  Check auto variant with a for-module
 
@@ -6,18 +7,18 @@ RUNS ./scbi --plan=autov --deps mautov
 sort-osht-output-n-first-lines 6
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
-xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
-xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
-xxxx/xx/xx xx:xx:xx : module mautov using native variant
+xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
+xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
+xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 
-xxxx/xx/xx xx:xx:xx : Building mautov [native] (5)
+xxxx/xx/xx xx:xx:xx : Building mautov [native] ($GVER)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : skip global install
-xxxx/xx/xx xx:xx:xx : End Building mautov [native] (5)
+xxxx/xx/xx xx:xx:xx : End Building mautov [native] ($GVER)
 EOF
 
 OK  -d .root/builds/mautov/x86_64-linux-gnu-native
@@ -29,12 +30,12 @@ RUNS ./scbi --plan=autov --deps mainav
 sort-osht-output-n-first-lines 6
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
-xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
-xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
-xxxx/xx/xx xx:xx:xx : module mautov using native variant
+xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
+xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
+xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 
 xxxx/xx/xx xx:xx:xx : Building mautov [mainav] (99.99)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -68,12 +69,12 @@ RUNS ./scbi --plan=autov --deps mainav2
 sort-osht-output-n-first-lines 6
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : mainav2=mautov using standard variant
-xxxx/xx/xx xx:xx:xx : mainav=mautov using standard variant
-xxxx/xx/xx xx:xx:xx : module gcc version 5 matching
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
-xxxx/xx/xx xx:xx:xx : module gcc version 99.99 not found
-xxxx/xx/xx xx:xx:xx : module mautov using native variant
+xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
+xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
+xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 
 xxxx/xx/xx xx:xx:xx : Building mautov [for2] (99.99)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
