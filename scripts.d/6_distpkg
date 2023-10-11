@@ -162,6 +162,8 @@ function init-deb-pkg()
         pkg=${pkg%:*}
         version=${version#*:}
         version=${version%-*}
+        version=${version%+repack*}
+        version=${version%+dfsg*}
         version=${version%\~*}
         SCBI_PKGS["$pkg"]=$version
     done < <( dpkg-query -l | tail -n+6 )
@@ -177,6 +179,8 @@ function init-ubt-pkg()
         pkg=${pkg%:*}
         version=${version#*:}
         version=${version%-*}
+        version=${version%+repack*}
+        version=${version%+dfsg*}
         version=${version%\~*}
         SCBI_PKGS["$pkg"]=$version
     done < <( dpkg-query -l | tail -n+6 )
