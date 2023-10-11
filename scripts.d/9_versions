@@ -450,7 +450,8 @@ function rewrite-module-plan()
             elog $K "$V"
             eres=1
         fi
-    done < <( parallel-do handle-plan-auto-variant 20 ${!SCBI_MODVER[@]} )
+    done < <( parallel-do handle-plan-auto-variant \
+                          $(( $SCBI_JOBS + $SCBI_HALF_JOBS )) ${!SCBI_MODVER[@]} )
 
     #  Rewrite plan for meta-module (this is done recursively until there
     #  is no new module plan entry rewritten.
@@ -470,7 +471,8 @@ function rewrite-module-plan()
                 elog $K "$V"
                 eres=1
             fi
-        done < <( parallel-do handle-plan-meta-module 20 ${_MOREMOD[@]} )
+        done < <( parallel-do handle-plan-meta-module \
+                              $(( $SCBI_JOBS + $SCBI_HALF_JOBS )) ${_MOREMOD[@]} )
 
         _MOREMOD=( ${_NEWMOD[@]} )
     done
