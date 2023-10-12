@@ -23,49 +23,51 @@ function display-stacktrace()
     done
 }
 
-############################## get-hooks
+############################## _internal_get-hook
 # return the hook name for the given step. This can be the
 # hook for a variant and/or cross build.
 
 function _internal_get-hook()
 {
-    local MODULE=$1
-    local VARIANT=$2
-    local STEP=$3
+    local -n RESULT=$1
+    local MODULE=$2
+    local VARIANT=$3
+    local STEP=$4
 
-    local HOOK=""
+    local _HOOK=""
 
     if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
         fn-exists $MODULE-$VARIANT-cross-$STEP
         if [[ $? = 0 ]]; then
-            HOOK=$MODULE-$VARIANT-cross-$STEP
+            _HOOK=$MODULE-$VARIANT-cross-$STEP
         else
             fn-exists $MODULE-cross-$STEP
-            [[ $? = 0 ]] && HOOK=$MODULE-cross-$STEP
+            [[ $? = 0 ]] && _HOOK=$MODULE-cross-$STEP
         fi
     fi
 
-    if [[ -z $HOOK ]]; then
+    if [[ -z $_HOOK ]]; then
         fn-exists $MODULE-$VARIANT-$STEP
         if [[ $? = 0 ]]; then
-            HOOK=$MODULE-$VARIANT-$STEP
+            _HOOK=$MODULE-$VARIANT-$STEP
         fi
     fi
 
-    echo $HOOK
+    RESULT=$_HOOK
 }
 
 function get-hook()
 {
-    local MODULE=$1
-    local VARIANT=$2
-    local STEP=$3
+    local -n RESULT=$1
+    local MODULE=$2
+    local VARIANT=$3
+    local STEP=$4
 
-    local HOOK=""
     local ALLVARS=$(all-variants $VARIANT)
+    local HOOK=""
 
     for v in ${ALLVARS:-default}; do
-        local HOOK=$(_internal_get-hook $MODULE $v $STEP)
+        _internal_get-hook HOOK $MODULE $v $STEP
         [[ -n $HOOK ]] && break
     done
 
@@ -74,7 +76,7 @@ function get-hook()
         [[ $? = 0 ]] && HOOK=$MODULE-$STEP
     fi
 
-    echo $HOOK
+    RESULT=$HOOK
 }
 
 ############################## get-version-number
@@ -85,7 +87,8 @@ VERSION_ERROR=-1
 
 function get-version-number()
 {
-    local VALUE=$1
+    local -n RESULT=$1
+    local VALUE=$2
 
     local NUM=$(echo -n "${VALUE//_/.}" |
                     sed -e 's/[^0-9-]*\(\-\?[0-9]*\(\.[0-9]*\)\?\(\.[0-9]*\)\?\).*/\1/g')
@@ -96,9 +99,9 @@ function get-version-number()
     #  a version number. Could be a branch name with some numbers for example.
 
     if [[ $NLETTERS -gt 5 ]] || [[ ${NUM: -1} == '.' ]]; then
-        echo 0
+        RESULT=0
     else
-        echo $NUM
+        RESULT=$NUM
     fi
 }
 
@@ -143,7 +146,8 @@ function is-meta-module()
 {
     local MODREF=$1
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=()
+    get-module-ref module_info $MODREF
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
@@ -281,7 +285,8 @@ function _internal_for-all-modules()
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -553,7 +558,8 @@ function _internal_for-final-modules()
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -598,7 +604,8 @@ function get-build-id-callback()
     local IS_EXT=$5
     local IS_META=$6
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
@@ -663,7 +670,8 @@ function get-build-id()
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -787,7 +795,8 @@ function get-archive-data()
     local VARIANT=$2
     local VERSION=$3
 
-    local ARCHIVE_FUNCTION=$(get-hook $MODULE $VARIANT archive)
+    local ARCHIVE_FUNCTION=""
+    get-hook ARCHIVE_FUNCTION $MODULE $VARIANT archive
     ARCHIVE_FUNCTION=${ARCHIVE_FUNCTION:=${MODULE}-archive}
 
     #  Get selected variant out of the hook function name
@@ -1087,7 +1096,8 @@ function display-module-ref()
     local MODREF=$1
     local MODE=$2
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=()
+    get-module-ref module_info $MODREF
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1146,7 +1156,8 @@ function copy-module-src-callback()
     local IS_META=$6
     local DEST=$7
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1293,7 +1304,8 @@ function get-source-dir()
     local TARGET=$1
     local MODREF=$2
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=()
+    get-module-ref module_info $MODREF
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1342,7 +1354,8 @@ function get-build-dir()
     local TARGET=$1
     local MODREF=$2
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=()
+    get-module-ref module_info $MODREF
 
     local module=${module_info[0]}
     local variant=${module_info[1]}

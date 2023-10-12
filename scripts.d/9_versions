@@ -155,8 +155,9 @@ function load-module-plan()
                 fi
 
                 if check-discriminants "$arg1"; then
-                    local module_info=( $(parse-module-ref $arg3) )
-                    local module=${module_info[0]}
+                    local minfo=()
+                    parse-module-ref minfo $arg3
+                    local module=${minfo[0]}
                     SCBI_MODVER[$module]=${arg3/*=/}
                 fi
             elif [[ "$modref" = "@alias" ]]; then
@@ -172,8 +173,9 @@ function load-module-plan()
                     exit 1
                 fi
 
-                local module_info=( $(parse-module-ref "$arg1=$arg3") )
-                local module=${module_info[0]}
+                local minfo=()
+                parse-module-ref minfo "$arg1=$arg3"
+                local module=${minfo[0]}
                 SCBI_MODVER[$module]=$(resolve-set $arg3)
 
             elif [[ "$modref" = "@set" ]]; then
@@ -194,11 +196,12 @@ function load-module-plan()
                 fi
                 #  set REF to all module's group in GMOD
                 for mod in $GMOD; do
-                    local module_info=( $(parse-module-ref $mod) )
-                    local module=${module_info[0]}
-                    local variant=${module_info[1]}
-                    local kind=${module_info[2]}
-                    local version=${module_info[3]}
+                    local minfo=()
+                    parse-module-ref minfo $mod
+                    local module=${minfo[0]}
+                    local variant=${minfo[1]}
+                    local kind=${minfo[2]}
+                    local version=${minfo[3]}
 
                     #  If version is inherit then just take the
                     #  current recorded version for this module.
@@ -207,18 +210,19 @@ function load-module-plan()
                            [[ $variant == "default" ]] &&
                            [[ -n ${SCBI_MODVER[$module]} ]];
                     then
-                        local module_info=(
-                            $(parse-module-ref ${SCBI_MODVER[$module]}) )
-                        local module=${module_info[0]}
-                        local variant=${module_info[1]}
-                        local kind=${module_info[2]}
-                        local version=${module_info[3]}
+                        local minfo=()
+                        parse-module-ref minfo ${SCBI_MODVER[$module]}
+                        local module=${minfo[0]}
+                        local variant=${minfo[1]}
+                        local kind=${minfo[2]}
+                        local version=${minfo[3]}
                     fi
 
-                    local ref_info=( $(parse-module-ref "name$REF") )
-                    local rvariant=${ref_info[1]}
-                    local rkind=${ref_info[2]}
-                    local rversion=${ref_info[3]}
+                    local rinfo=()
+                    parse-module-ref rinfo "name$REF"
+                    local rvariant=${rinfo[1]}
+                    local rkind=${rinfo[2]}
+                    local rversion=${rinfo[3]}
 
                     local FREF=""
 
@@ -293,8 +297,9 @@ function load-module-plan()
                     GROUP=yes
                 fi
             elif [[ "${modref:0:1}" != "#" ]]; then
-                local module_info=( $(parse-module-ref $modref) )
-                local module=${module_info[0]}
+                local minfo=()
+                parse-module-ref minfo $modref
+                local module=${minfo[0]}
 
                 SCBI_MODVER[$module]=$(resolve-set "${modref/*=/}")
             fi
@@ -327,7 +332,8 @@ function handle-plan-meta-module()
     local FORMODULE=${M%$mod}
     FORMODULE=${FORMODULE%=}
 
-    local module_info=( $(get-module-ref $value $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $value $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -350,9 +356,10 @@ function handle-plan-meta-module()
                 mref=:$ref
             else
                 local s=${SCBI_MODVER[$mod]}
-                local s_module_info=( $(get-module-ref $s $module) )
-                local s_variant=${s_module_info[1]}
-                local s_ref=${s_module_info[3]}
+                local s_minfo=( $() )
+                get-module-ref s_minfo $s $module
+                local s_variant=${s_minfo[1]}
+                local s_ref=${s_minfo[3]}
 
                 [[ $s_variant != default ]] &&
                     mref=/$s_variant
@@ -380,7 +387,8 @@ function handle-plan-auto-variant()
     local FORMODULE=${M%$mod}
     FORMODULE=${FORMODULE%=}
 
-    local module_info=( $(get-module-ref $value $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $value $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -592,12 +600,13 @@ function set-module-ref()
     #  full module reference is name[/variant][:version]
     local MODREF="$1"
 
-    local module_info=( $(parse-module-ref $MODREF) )
+    local sminfo=()
+    parse-module-ref sminfo $MODREF
 
-    local module=${module_info[0]}
-    local variant=${module_info[1]}
-    local kind=${module_info[2]}
-    local ref=${module_info[3]}
+    local module=${sminfo[0]}
+    local variant=${sminfo[1]}
+    local kind=${sminfo[2]}
+    local ref=${sminfo[3]}
 
     if [[ "$variant" != "default" ]]   \
          || [[ "${kind^^}" != "NONE" ]]   \
@@ -651,8 +660,9 @@ function check-auto-variant()
                     if [[ ${dmodule#*:} == "[v]" ]]; then
                         dmodule=${dmodule%:*}
 
-                        local m_info=( $(get-module-ref $MODULE $FORMODULE) )
-                        local ref=${m_info[3]}
+                        local module_info=()
+                        get-module-ref module_info $MODULE $FORMODULE
+                        local ref=${module_info[3]}
 
                         if [[ $ref != NONE ]]; then
                             dmodule=${dmodule}:$ref

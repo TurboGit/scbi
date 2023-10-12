@@ -302,7 +302,7 @@ function get-vcs-data()
     local MODULE=$1
     local VARIANT=$2
 
-    local VCS_FUNCTION=$(get-hook $MODULE $VARIANT vcs)
+    get-hook VCS_FUNCTION $MODULE $VARIANT vcs
     VCS_FUNCTION=${VCS_FUNCTION:=${MODULE}-vcs}
 
     #  Get selected variant out of the hook function name
@@ -416,7 +416,8 @@ function get-branch()
 
     #  get module information
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -450,7 +451,8 @@ function get-vcs()
 
     #  get module information
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -584,7 +586,8 @@ function get-vcs-dir()
 {
     local MODREF=$1
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=()
+    get-module-ref module_info $MODREF
 
     local module=${module_info[0]}
     local variant=${module_info[1]}

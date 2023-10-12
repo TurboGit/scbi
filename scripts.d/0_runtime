@@ -64,20 +64,20 @@ function is-enabled()
 
 function get-hook-value()
 {
-    local MODULE=$1
-    local VARIANT=$2
-    local HOOK=$3
+    local -n RESULT=$1
+    local MODULE=$2
+    local VARIANT=$3
+    local HOOK=$4
 
-    local FCT=$(get-hook $MODULE $VARIANT $HOOK)
+    local FCT=""
+    get-hook FCT $MODULE $VARIANT $HOOK
 
-    local RESULT=""
+    RESULT=""
 
     if [[ -n $FCT ]]; then
         RESULT=$($FCT $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/install \
                       $SCBI_TARGET $VARIANT)
     fi
-
-    echo $RESULT
 }
 
 ############################## is-hook-true
@@ -89,7 +89,9 @@ function is-hook-true()
     local HOOK=$3
     local DEFAULT=$4
 
-    local VALUE=$(get-hook-value $MODULE $VARIANT $HOOK)
+    local VALUE=""
+    get-hook-value VALUE $MODULE $VARIANT $HOOK
+
     VALUE=${VALUE:-$DEFAULT}
     VALUE=${VALUE^^}
 
@@ -257,7 +259,8 @@ function load-module()
 {
     local MODREF=$1
 
-    local module_info=( $(get-module-ref $MODREF) )
+    local module_info=()
+    get-module-ref module_info $MODREF
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
@@ -341,7 +344,8 @@ function get-version()
     #  Get the caller plug-in name
     local PLUGIN=$(basename ${CALLER[1]})
 
-    local module_info=( $(get-module-ref $PLUGIN) )
+    local module_info=()
+    get-module-ref module_info $PLUGIN
     echo ${module_info[3]}
 }
 
@@ -352,7 +356,8 @@ function get-version()
 
 function parse-module-ref()
 {
-    local MODREF=$1
+    local -n RESULT=$1
+    local MODREF=$2
 
     local module=""
 
@@ -392,10 +397,10 @@ function parse-module-ref()
         module=${module%/*}
     fi
 
-    echo $module
-    echo $variant
-    echo $KIND
-    echo $version
+    RESULT=($module)
+    RESULT+=($variant)
+    RESULT+=($KIND)
+    RESULT+=($version)
 }
 
 ############################## get-module-ref
@@ -404,15 +409,18 @@ function parse-module-ref()
 
 function get-module-ref()
 {
-    local MODREF=$1
-    local FORMODULE=${2:-"@root"}
+    local -n RESULT="$1"
+    local MODREF=$2
+    local FORMODULE=${3:-"@root"}
 
     #  Remove variants and version
     FORMODULE=${FORMODULE/:*/}
     FORMODULE=${FORMODULE/\/*/}
 
-    local module_info=( $(parse-module-ref $MODREF) )
-    local module=${module_info[0]}
+    local gminfo=()
+    parse-module-ref gminfo $MODREF
+
+    local module=${gminfo[0]}
 
     local modplan=${SCBI_MODVER[$FORMODULE"="$module]}
 
@@ -420,16 +428,16 @@ function get-module-ref()
         local modplan=${SCBI_MODVER[$module]}
 
         if [[ -n $modplan ]]; then
-            module_info=( $(parse-module-ref $modplan) )
+            parse-module-ref gminfo $modplan
         fi
     else
-        module_info=( $(parse-module-ref $modplan) )
+        parse-module-ref gminfo $modplan
     fi
 
-    echo ${module_info[0]}
-    echo ${module_info[1]}
-    echo ${module_info[2]}
-    echo ${module_info[3]}
+    RESULT=(${gminfo[0]})
+    RESULT+=(${gminfo[1]})
+    RESULT+=(${gminfo[2]})
+    RESULT+=(${gminfo[3]})
 }
 
 ############################## get-module-name
@@ -439,7 +447,8 @@ function get-module-name()
 {
     local MODREF=$1
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -463,7 +472,8 @@ function with-variant()
     #  Get the caller plug-in name
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
-    local module_info=( $(get-module-ref $PLUGIN) )
+    local module_info=()
+    get-module-ref module_info $PLUGIN
     local ref=${module_info[3]}
 
     #  Hooks with nop body & pre/post
@@ -906,8 +916,9 @@ function load-runtime-module-plan()
 
     while read modref arg var; do
         if [[ "${modref:0:1}" != "#" ]]; then
-            local module_info=( $(parse-module-ref $modref) )
-            local module=${module_info[0]}
+            local minfo=()
+            parse-module-ref minfo $modref
+            local module=${minfo[0]}
             SCBI_MODVER[$module]=${modref/*=/}
         fi
     done < $PLAN

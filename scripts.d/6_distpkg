@@ -145,6 +145,21 @@ function init-distrib-alias()
     done
 }
 
+############################## clean-version-string
+# returns the version string number only
+
+function clean-version-string()
+{
+    local -n RESULT="$1"
+    local VERSION=$2
+
+    RESULT=${VERSION#*:}
+    RESULT=${RESULT%-*}
+    RESULT=${RESULT%+repack*}
+    RESULT=${RESULT%+dfsg*}
+    RESULT=${RESULT%\~*}
+}
+
 ############################## init-deb-pkg
 # cache all installed packages
 
@@ -160,11 +175,7 @@ function init-deb-pkg()
 
     while read ii pkg version dummy; do
         pkg=${pkg%:*}
-        version=${version#*:}
-        version=${version%-*}
-        version=${version%+repack*}
-        version=${version%+dfsg*}
-        version=${version%\~*}
+        clean-version-string version $version
         SCBI_PKGS["$pkg"]=$version
     done < <( dpkg-query -l | tail -n+6 )
 
@@ -177,11 +188,7 @@ function init-ubt-pkg()
 
     while read ii pkg version dummy; do
         pkg=${pkg%:*}
-        version=${version#*:}
-        version=${version%-*}
-        version=${version%+repack*}
-        version=${version%+dfsg*}
-        version=${version%\~*}
+        clean-version-string version $version
         SCBI_PKGS["$pkg"]=$version
     done < <( dpkg-query -l | tail -n+6 )
 
@@ -197,8 +204,7 @@ function init-cos-pkg()
     while read N; do
         pkg=${N%%:*};
         pkg=${pkg%-*};
-        version=${N#*:};
-        version=${version%-*};
+        clean-version-string version $version
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null |
                   grep -v "^Not root" |
@@ -216,8 +222,7 @@ function init-fed-pkg()
     while read N; do
         pkg=${N%%:*};
         pkg=${pkg%-*};
-        version=${N#*:};
-        version=${version%-*};
+        clean-version-string version $version
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null |
                   grep -v "^Not root" |
@@ -235,8 +240,7 @@ function init-rhl-pkg()
     while read N; do
         pkg=${N%%:*};
         pkg=${pkg%-*};
-        version=${N#*:};
-        version=${version%-*};
+        clean-version-string version $version
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null |
                   grep -v "^Not root" |
@@ -271,7 +275,8 @@ function check-win-pkg()
 function check-deb-pkg()
 {
     local PCK=$1
-    local VERSION=$(get-version-number $2)
+    local VERSION=""
+    get-version-number VERSION $2
 
     local inst_ver=${SCBI_PKGS[$PCK]}
 
@@ -281,11 +286,7 @@ function check-deb-pkg()
         local cand=( $(LANG=C apt-cache policy $PCK | grep Candidate 2> /dev/null) )
 
         if [[ -n ${cand[1]} ]]; then
-            version=${cand[1]#*:}
-            version=${version%-*}
-            version=${version%+repack*}
-            version=${version%+dfsg*}
-            version=${version%\~*}
+            clean-version-string version ${cand[1]}
             SCBI_PKGS[$PCK]=$version
             return $SCBI_STATUS_PKG_NOT_INSTALLED
         else
@@ -313,7 +314,8 @@ function check-ubt-pkg()
 function check-cos-pkg()
 {
     local PCK=$1
-    local VERSION=$(get-version-number $2)
+    local VERSION=""
+    get-version-number VERSION $2
 
     local inst_ver=${SCBI_PKGS[$PCK]}
 

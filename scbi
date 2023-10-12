@@ -530,7 +530,8 @@ function module-variant-wrapper()
     local VARIANT=$3
     local STEP=$4
 
-    local FCT=$(get-hook $MODULE $VARIANT $STEP)
+    local FCT=""
+    get-hook FCT $MODULE $VARIANT $STEP
 
     if [[ -n $FCT ]]; then
         _internal_module-variant-wrapper $PREFIX $MODULE $VARIANT $FCT
@@ -612,7 +613,8 @@ function handle-module-env()
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -690,7 +692,8 @@ function register-depends-callback()
         #  Do we need the version of the module
 
         if [[ $DO_LIST_VER == yes ]]; then
-            local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+            local module_info=()
+            get-module-ref module_info $MODREF $FORMODULE
 
             local module=${module_info[0]}
             local ref=${module_info[3]}
@@ -767,7 +770,8 @@ function is-module-up-to-date()
     local MODREF=$1
     local FORMODULE=$2
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -780,7 +784,8 @@ function is-module-up-to-date()
 
     #  Get the version hook, if none present all versions are ok
 
-    local FCT=$(get-hook $module $variant version)
+    local FCT=""
+    get-hook FCT $module $variant version
 
     if [[ -n $FCT ]]; then
         TDIR=$(mktemp -d)
@@ -836,12 +841,12 @@ function is-module-up-to-date()
 
     #  Clean-up the version number (only digits and a single dot)
 
-    mver=$(get-version-number $mver)
+    get-version-number mver $mver
 
     if [[ "${ref^^}" = "NONE" ]]; then
         ref=0
     else
-        ref=$(get-version-number $ref)
+        get-version-number ref $ref
     fi
 
     local rbid=0
@@ -884,7 +889,8 @@ function handle-depends()
     local FORMODULE=$1
     local MODREF=$2
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     if [[ -n ${module_info[4]} ]]; then
         module_info[1]=""
@@ -925,7 +931,8 @@ function handle-depends()
 
     cd $SCBI_ROOT
 
-    local formodule_info=( $(get-module-ref $FORMODULE) )
+    local formodule_info=()
+    get-module-ref formodule_info $FORMODULE
     fmodule=${formodule_info[0]}
     fvariant=${formodule_info[1]}
 
@@ -996,7 +1003,8 @@ function handle-sources()
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
@@ -1239,7 +1247,8 @@ function handle-meta-module()
 
     #  check for plan
 
-    local FCT=$(get-hook $METAMODULE $VARIANT plan)
+    local FCT=""
+    get-hook FCT $METAMODULE $VARIANT plan
 
     [[ -n $FCT ]] &&
         load-module-plan $($FCT $SCBI_PLAN)
@@ -1255,8 +1264,11 @@ function handle-meta-module()
 
     #  check for setup
 
-    local FCT_SETUP=$(get-hook $METAMODULE $VARIANT setup)
-    local FCT_WRAPUP=$(get-hook $METAMODULE $VARIANT wrapup)
+    local FCT_SETUP=""
+    get-hook FCT_SETUP $METAMODULE $VARIANT setup
+
+    local FCT_WRAPUP=""
+    get-hook FCT_WRAPUP $METAMODULE $VARIANT wrapup
 
     line-sep
     ilog $METAMODULE Metamodule $METAMODULE \[${VARIANT//./ }\] setup \
@@ -1320,7 +1332,8 @@ function handle-module()
 
     #  Get module information
 
-    local module_info=( $(get-module-ref $MODREF $FORMODULE) )
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
 
     if [[ -n ${module_info[4]} ]]; then
         module_info[1]=""
@@ -1755,7 +1768,8 @@ function handle-module()
 
     local _IDIR=""
 
-    local FCT=$(get-hook $module $variant prefix)
+    local FCT=""
+    get-hook FCT $module $variant prefix
 
     if [[ -n $FCT ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
         _IDIR=$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \

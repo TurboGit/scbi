@@ -44,7 +44,8 @@ function handle-module()
 
         cd $WORKDIR
 
-        local module_info=( $(get-module-ref $MODREF "root") )
+        local module_info=()
+        get-module-ref module_info $MODREF "root"
         local module=${module_info[0]}
         local variant=${module_info[1]}
         local kind=${module_info[2]}
