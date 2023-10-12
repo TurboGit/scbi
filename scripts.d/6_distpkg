@@ -278,9 +278,15 @@ function check-deb-pkg()
     if [[ -z $inst_ver ]]; then
         #  Package is not installed, check if it exists
 
-        apt-cache show $PCK &> /dev/null
+        local cand=( $(LANG=C apt-cache policy $PCK | grep Candidate 2> /dev/null) )
 
-        if [[ $? = 0 ]]; then
+        if [[ -n ${cand[1]} ]]; then
+            version=${cand[1]#*:}
+            version=${version%-*}
+            version=${version%+repack*}
+            version=${version%+dfsg*}
+            version=${version%\~*}
+            SCBI_PKGS[$PCK]=$version
             return $SCBI_STATUS_PKG_NOT_INSTALLED
         else
             return $SCBI_STATUS_PKG_NOT_FOUND

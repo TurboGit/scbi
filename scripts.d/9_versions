@@ -447,7 +447,11 @@ function handle-plan-auto-variant()
                 local pkg=${PKVER[(( $k + 3 ))]}
 
                 if [[ $status == $SCBI_STATUS_PKG_NOT_INSTALLED ]]; then
-                    echo 1 $M "  ↳ $pkg not installed"
+                    if [[ $osver == 0 ]]; then
+                        echo 1 $M "  ↳ $pkg not installed"
+                    else
+                        echo 1 $M "  ↳ $pkg $osver not installed"
+                    fi
                 elif [[ $status == $SCBI_STATUS_PKG_NOT_FOUND ]]; then
                     echo 1 $M "  ↳ unknown dependency $pkg"
                 elif [[ $status == $SCBI_STATUS_VERSION_NOK ]]; then
