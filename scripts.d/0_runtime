@@ -303,7 +303,7 @@ function _inherit-plugin_internal()
 
     #  All hooks
     local SCBI_HOOKS="vcs|archive|env|build-env|depends|build-depends"
-    local SCBI_HOOKS="$SCBI_HOOKS|out-of-tree|setup|config|build|install|prefix"
+    local SCBI_HOOKS+="|out-of-tree|setup|config|build|install|prefix"
 
     load-module $HPLUGIN
 
