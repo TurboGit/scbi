@@ -456,9 +456,9 @@ function handle-plan-auto-variant()
                     echo 1 $M "  ↳ unknown dependency $pkg"
                 elif [[ $status == $SCBI_STATUS_VERSION_NOK ]]; then
                     if [[ -z $ref ]]; then
-                        echo 1 $M "  ↳ $pkg $mver found $osver"
+                        echo 1 $M "  ↳ $pkg $mver installed $osver"
                     else
-                        echo 1 $M "  ↳ $pkg $osver found"
+                        echo 1 $M "  ↳ $pkg $osver installed"
                     fi
                 elif [[ $status == $SCBI_STATUS_VERSION_OK ]]; then
                     echo 1 $M "  ↳ $pkg $osver used"

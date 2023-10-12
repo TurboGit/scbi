@@ -7,7 +7,7 @@ RUNS ./scbi mautov2/auto:99.99
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : mautov2 99.99 using standard variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 xxxx/xx/xx xx:xx:xx :   ↳ coreutils $TVER used
 
 xxxx/xx/xx xx:xx:xx : Building mautov2 [default] (99.99)

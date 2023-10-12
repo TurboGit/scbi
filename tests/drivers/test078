@@ -10,8 +10,8 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
 xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
 xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 
 xxxx/xx/xx xx:xx:xx : Building mautov [native] ($GVER)
@@ -33,8 +33,8 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
 xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
 xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 
 xxxx/xx/xx xx:xx:xx : Building mautov [mainav] (99.99)
@@ -72,8 +72,8 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
 xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
 xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 
 xxxx/xx/xx xx:xx:xx : Building mautov [for2] (99.99)

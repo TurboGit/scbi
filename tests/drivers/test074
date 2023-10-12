@@ -19,7 +19,7 @@ RUNS ./scbi mautov/auto:99.99.09
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : mautov 99.99.09 using standard variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 
 xxxx/xx/xx xx:xx:xx : Building mautov [default] (99.99.09)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu

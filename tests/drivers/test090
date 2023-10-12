@@ -14,8 +14,8 @@ mautov/native:$GVER
 xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
 xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
 xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 EOF
 
@@ -31,7 +31,7 @@ There is 3 module(s) in the plan
 mautov/native:$GVER
 xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
 xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 EOF
 
@@ -47,6 +47,6 @@ There is 3 module(s) in the plan
 mautov/new
 xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
 xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER found
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 EOF
