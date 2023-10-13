@@ -74,6 +74,16 @@ _scbi_log()
     echo on-failure
 }
 
+_scbi_color()
+{
+    local ROOT r b
+    local IFS=$'\n'
+
+    echo no
+    echo light
+    echo dark
+}
+
 _scbi_shell()
 {
     local ROOT r b
@@ -236,6 +246,10 @@ _scbi()
             ;;
         --log:*)
             _scbicomp "$(_scbi_log)" "" "${cur##--log:}"
+            return 0
+            ;;
+        --color:*)
+            _scbicomp "$(_scbi_color)" "" "${cur##--color:}"
             return 0
             ;;
         --shell:*)
