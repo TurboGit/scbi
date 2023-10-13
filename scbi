@@ -566,7 +566,7 @@ function usage()
     echo "   -h | --help             this help message"
     echo "   -v | --version          display driver & plug-ins versions"
     echo "   -q | --quiet            do not display information log"
-    echo "      | --color:[n]        use colored output, n in dark | light"
+    echo "      | --color:[n]        use colored output (no, dark, light)"
     echo "      | --ini=<section>    load ini file given section"
     echo "   -t | --prefix=<dir>     the global install directory"
     echo "      | --build-dir=<dir>  the root build directory."
