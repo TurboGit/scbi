@@ -25,6 +25,19 @@ function line-sep()
 # just force display on the console
 # useful in user's hooks
 
+function c-log-message()
+{
+    local -n RESULT=$1
+    shift
+
+    RESULT="${*//%B/$SCBI_CBOLD}"
+    RESULT="${RESULT//%t/$SCBI_CTEXT}"
+    RESULT="${RESULT//%r/$SCBI_CRED}"
+    RESULT="${RESULT//%g/$SCBI_CGREEN}"
+    RESULT="${RESULT//%b/$SCBI_CBLUE}"
+    RESULT="${RESULT//%c/$SCBI_CCLEAR}"
+}
+
 function dlog()
 {
     local MODULE=$1
@@ -32,11 +45,13 @@ function dlog()
     printf -v TS "%(%Y/%m/%d %H:%M:%S)T" -1
 
     shift
+    local MSG="$*"
+    c-log-message MSG "$MSG"
 
     #  output to console only if present
     tty --silent
-    [[ $? == 0 ]] && echo "$TS :   $*" > $(tty)
-    echo "$TS :   $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
+    [[ $? == 0 ]] && printf "$TS :   $MSG\n" > $(tty)
+    printf "$TS :   $MSG\n" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }
 
@@ -49,22 +64,11 @@ function ilog()
     printf -v TS "%(%Y/%m/%d %H:%M:%S)T" -1
 
     shift
-    [[ $DO_QUIET == no ]] && echo "$TS : $*"
-    echo "$TS : $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
-    echo -n 0 > $SCBI_LINE_SEP
-}
+    local MSG="$*"
+    c-log-message MSG "$MSG"
 
-############################## wlog
-
-function wlog()
-{
-    local MODULE=$1
-    local TS
-    printf -v TS "%(%Y/%m/%d %H:%M:%S)T" -1
-
-    shift
-    echo >&2 "$TS : $*"
-    echo "$TS : $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
+    [[ $DO_QUIET == no ]] && printf "$TS : $MSG\n"
+    printf "$TS : $MSG\n" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
 }
 
@@ -77,8 +81,11 @@ function elog()
     printf -v TS "%(%Y/%m/%d %H:%M:%S)T" -1
 
     shift
-    echo >&2 "$TS : $MODULE (FAILED) $*"
-    echo "$TS : $*" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
+    local MSG="$*"
+    c-log-message MSG "$MSG"
+
+    printf "$TS : $MODULE %s(FAILED)%s $MSG\n" $SCBI_CRED $SCBI_CCLEAR >&2
+    printf "$TS : $MSG\n" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
     return 1
 }

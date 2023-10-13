@@ -9,7 +9,7 @@ _SCBI_ARGS="-t -S --no-setup -W --no-wrapup -I --no-install -u --update
  --list-filter: --deps:warning
 --dry-run -w --wrapup --force --enable- --safe --plugins= --build-dir
 --list-plan --version --clean-install --log:yes --log:no --log:on-failure
---store --stat --stat:full --prefix=
+--store --stat --stat:full --prefix=  --color:dark  --color:light --color:no
 --module-ref --module-ref:version --module-ref:variant --module-ref:full"
 
 _SCBI_ARC_ARGS="-h --help -v --version --plugins= -e --env= --plan=

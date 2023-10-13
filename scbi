@@ -202,7 +202,7 @@ function ini-apply-values()
 
     #  Set options controlled with a DO_<NAME>
 
-    for OPTS in setup config build install wrapup \
+    for OPTS in setup config build install wrapup color \
                       quiet force update purge archive stat;
     do
         local VAR=DO_${OPTS^^}
@@ -312,6 +312,14 @@ DO_RUN_CMD=
 DO_WARNING_EXTERNAL=no
 SCBI_TESTS_OPTIONS=
 
+DO_COLOR=no
+SCBI_CBOLD=""
+SCBI_CTEXT=""
+SCBI_CCLEAR=""
+SCBI_CRED=""
+SCBI_CGREEN=""
+SCBI_CBLUE=""
+
 DO_SETUP=yes
 DO_CONFIG=yes
 DO_BUILD=yes
@@ -323,6 +331,7 @@ export SCBI_ROOT SCBI_BDIR SCBI_CLANG_VERSION SCBI_GTK_VERSION SCBI_PLAN
 export SCBI_HOST SCBI_TARGET SCBI_PLUGINS SCBI_JOBS SCBI_HALF_JOBS
 export SCBI_IS_WINDOWS SCBI_VERSION SCBI_BINARY SCBI_OS_NAME SCBI_OS_VERSION
 export SCBI_CURRENT_MODULE SCBI_ENV_DIR
+export SCBI_CBOLD SCBI_CRED SCBI_CGREEN SCBI_CBLUE SCBI_CCLEAR SCBI_CTEXT
 
 ############################## check-handled
 #
@@ -557,6 +566,7 @@ function usage()
     echo "   -h | --help             this help message"
     echo "   -v | --version          display driver & plug-ins versions"
     echo "   -q | --quiet            do not display information log"
+    echo "      | --color:[n]        use colored output, n in dark | light"
     echo "      | --ini=<section>    load ini file given section"
     echo "   -t | --prefix=<dir>     the global install directory"
     echo "      | --build-dir=<dir>  the root build directory."
@@ -915,9 +925,9 @@ function handle-depends()
 
     if [[ "$ref" == "skip" ]]; then
         if [[ $IS_MODULE == true ]]; then
-            ilog $module Module $module marked to be skipped
+            ilog $module %BModule %t$module%c marked to be skipped
         else
-            ilog $module Dependency $module marked to be skipped
+            ilog $module %BDependency %t$module%c marked to be skipped
         fi
         return
     fi
@@ -1271,7 +1281,7 @@ function handle-meta-module()
     get-hook FCT_WRAPUP $METAMODULE $VARIANT wrapup
 
     line-sep
-    ilog $METAMODULE Metamodule $METAMODULE \[${VARIANT//./ }\] setup \
+    ilog $METAMODULE %BMetamodule %t$METAMODULE%c \[%g${VARIANT//./ }%c\] setup \
         | tee -a $log
     _internal_module-variant-wrapper $SCBI_BDIR/install \
                                      $METAMODULE $VARIANT $FCT_SETUP || exit 1
@@ -1289,7 +1299,7 @@ function handle-meta-module()
     #  check for wrapup
 
     line-sep
-    ilog $METAMODULE Metamodule $METAMODULE \[${VARIANT//./ }\] wrapup \
+    ilog $METAMODULE %BMetamodule %t$METAMODULE%c \[%g${VARIANT//./ }%c\] wrapup \
         | tee -a $log
     _internal_module-variant-wrapper $SCBI_BDIR/install \
                                      $METAMODULE $VARIANT $FCT_WRAPUP || exit 1
@@ -1358,7 +1368,7 @@ function handle-module()
     #  If this module is marked as to be skipped
 
     if [[ "$ref" == "skip" ]]; then
-        ilog $module Module $module marked to be skipped
+        ilog $module %BModule %t$module%c marked to be skipped
         return
     fi
 
@@ -1482,7 +1492,7 @@ function handle-module()
     fi
 
     line-sep
-    ilog $module Building $module \[${variant//./ }\] \($DISPREF\) | tee -a $log
+    ilog $module %BBuilding %t$module%c \[%g${variant//./ }%c\] \(%g$DISPREF%c\) | tee -a $log
 
     if [[ $SCBI_HOST == $SCBI_TARGET ]]; then
         ilog $module native $SCBI_TARGET | tee -a $log
@@ -1870,7 +1880,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         --ini*)
             ini-apply-values ${1#*=}
-            shift
             ;;
         *)
             SCBIOPTS+="${SCBIOPTS:+ }$1"
@@ -1896,7 +1905,7 @@ ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpqvwWh \
                  -l list-filter:all,list-filter:dev,list-filter:runtime \
                  -l dry-run,jobs:,plugins:,build-dir:,list-plan: \
                  -l shell,shell:use,shell:dev,shell:tests,shell:sb \
-                 -l shell:sandbox \
+                 -l shell:sandbox,color:dark,color:light,color:no \
                  -- $SCBIOPTS 2> $OPTFILE)
 
 if [[ $? != 0 ]]; then
@@ -1923,6 +1932,15 @@ while [[ $# -gt 0 ]]; do
             ;;
         -q|--quiet)
             DO_QUIET=yes
+            ;;
+        --color:dark)
+            DO_COLOR=dark
+            ;;
+        --color:light)
+            DO_COLOR=light
+            ;;
+        --color:no)
+            DO_COLOR=no
             ;;
         -a|--create-archive)
             DO_ARCHIVE=yes
@@ -2130,6 +2148,22 @@ done
 
 if [[ $DO_EXT != no && $DO_DEPS == no ]]; then
     DO_DEPS=yes
+fi
+
+if [[ $DO_COLOR == dark ]]; then
+    SCBI_CBOLD=$(tput bold)
+    SCBI_CTEXT=$(tput setaf 15)
+    SCBI_CCLEAR=$(tput sgr0)
+    SCBI_CRED=$SCBI_CBOLD$(tput setaf 9)
+    SCBI_CBLUE=$SCBI_CBOLD$(tput setaf 12)
+    SCBI_CGREEN=$SCBI_CBOLD$(tput setaf 10)
+elif [[ $DO_COLOR == light ]]; then
+    SCBI_CBOLD=$(tput bold)$(tput setaf 239)
+    SCBI_CTEXT=$(tput setaf 0)
+    SCBI_CCLEAR=$(tput sgr0)
+    SCBI_CRED=$SCBI_CBOLD$(tput setaf 1)
+    SCBI_CBLUE=$SCBI_CBOLD$(tput setaf 4)
+    SCBI_CGREEN=$SCBI_CBOLD$(tput setaf 2)
 fi
 
 trap clean-up EXIT
