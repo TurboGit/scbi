@@ -428,7 +428,7 @@ function handle-plan-auto-variant()
                 #  and use the new version for this module
                 value=${value/\/auto*([.a-zA-Z])/\/native}
                 echo 0 $M "${value%:*}${gosver+:$gosver}"
-                echo 1 $M "%B%t$M%c%g$ref%c using native variant"
+                echo 1 $M "%B%t$M%c%g$ref%c using %B%tnative%c variant"
             elif [[ $gstatus != $SCBI_ERROR_HOOK_NOT_FOUND ]]; then
                 #  remove "auto" from the list of variants, or replace
                 #  it with FORMODULE if defined and auto is the only
@@ -443,7 +443,7 @@ function handle-plan-auto-variant()
                     value=${value/\/auto/\/$FMOD}
                 fi
                 echo 0 $M "$value"
-                echo 1 $M "%B%t$M%c%g$ref%c using standard variant"
+                echo 1 $M "%B%t$M%c%g$ref%c using %B%tstandard%c variant"
             fi
 
             #  The explanation of the choice above
