@@ -154,7 +154,7 @@ function ini-apply-values()
     for K in ${!SCBI_INI_DB[*]}; do
         if [[ "$K" =~ ^([^\.]+)\.([^\.]+)$ ]]; then
             sec=${BASH_REMATCH[1]}
-            var=${BASH_REMATCH[2]}
+            var=${BASH_REMATCH[2]//-/_}
         else
             sec=""
             var=$K
@@ -228,6 +228,25 @@ function ini-apply-values()
         {
             DO_RUN=yes
             DO_RUN_CMD="$O"
+        }
+
+    #  Tests option
+
+    local O="$(ini-get-option "$SECTION" tests)"
+    [[ -n ${O} ]] &&
+        {
+            DO_TEST=yes
+            [[ $O == only ]] &&
+                {
+                    do-clear-steps
+                    DO_TEST=yes-only
+                }
+        }
+
+    local O="$(ini-get-option "$SECTION" tests-list)"
+    [[ -n "${O}" ]] &&
+        {
+            SCBI_TESTS_OPTIONS="$O"
         }
 
     #  Finally whatever specific options are given

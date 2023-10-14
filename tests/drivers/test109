@@ -1,0 +1,38 @@
+# check that different versions are properly built
+#
+# use local environment
+
+export SCBI_INI_FILE=$ROOTDIR/.scbiini
+
+cat <<EOF > $SCBI_INI_FILE
+[lib1]
+   modules = lib1
+   tests = only
+
+[stest]
+   setup = yes
+   config = yes
+   modules = stest
+   tests = yes
+   tests-list = "opt1 opt2"
+
+[common]
+   quiet = yes
+EOF
+
+NRUNS ./scbi --ini=lib1
+
+RUNS ./scbi lib1
+
+RUNS ./scbi --ini=lib1
+
+DIFF <<EOF
+main
+liba.C patched version
+EOF
+
+RUNS ./scbi --ini=stest
+
+DIFF <<EOF
+stest: opt1 opt2
+EOF

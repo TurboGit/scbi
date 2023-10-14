@@ -87,5 +87,10 @@ function lib1-tests()
     local TARGET=$2
 
     ./main
-    return 0
+
+    if [[ -f main ]]; then
+        return 0
+    else
+        return 1
+    fi
 }
