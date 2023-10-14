@@ -322,7 +322,7 @@ function get-vcs-data()
             VCS_VARIANT=${!VAR}
             VCS_FUNCTION=$MODULE-${VCS_VARIANT}-vcs
         else
-            elog build "error: vcs specific function for $MODULE not found."
+            elog $MODULE "vcs specific function for not found"
             exit 1
         fi
     elif [[ -n ${SCBI_VCS_VARIANT} ]]; then

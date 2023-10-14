@@ -84,7 +84,8 @@ function elog()
     local MSG="$*"
     c-log-message MSG "$MSG"
 
-    printf "$TS : $MODULE %s(FAILED)%s $MSG\n" $SCBI_CRED $SCBI_CCLEAR >&2
+    printf "$TS : %s$MODULE%s %s(FAILED)%s $MSG\n" \
+           $SCBI_CBOLD$SCBI_CTEXT $SCBI_CCLEAR $SCBI_CRED $SCBI_CCLEAR >&2
     printf "$TS : $MSG\n" >> $SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-report.log
     echo -n 0 > $SCBI_LINE_SEP
     return 1

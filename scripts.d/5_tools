@@ -818,7 +818,7 @@ function get-archive-data()
                 ARCHIVE_VARIANT=${!VAR}
                 ARCHIVE_FUNCTION=$module-${ARCHIVE_VARIANT}-archive
             else
-                elog build "error: tar specific function for $module not found."
+                elog $module "tar specific function not found"
                 exit 1
             fi
         elif [[ -n ${SCBI_ARCHIVE_VARIANT} ]]; then
@@ -933,13 +933,13 @@ function get-archive()
                     $tarcp $options $tarurl/$tarsrc \
                            $SCBI_ARCHIVES/$tarsrc > $log 2>&1
                 else
-                    elog $MODULE error: unknown tar protocol $tarcp
+                    elog $MODULE unknown tar protocol $tarcp
                 fi
 
                 if [[ $? -ne 0 ]]; then
                     rm -f $SCBI_ARCHIVES/$tarsrc $SCBI_ARCHIVES/$tarsrc.sha1
-                    elog $MODULE error: cannot get archive: $tarcp
-                    elog $MODULE error: from $tarurl/$tarsrc
+                    elog $MODULE cannot get archive: $tarcp
+                    elog $MODULE from $tarurl/$tarsrc
                 else
                     [[ -f /tmp/$tarsrc.sha1 ]] &&
                         cp /tmp/$tarsrc.sha1 $SCBI_ARCHIVES/$tarsrc.sha1
@@ -958,7 +958,7 @@ function get-archive()
 
     [[ ! -f $SCBI_ARCHIVES/$tarsrc ]] &&
         {
-            elog $MODULE error: archive $tarsrc not found
+            elog $MODULE archive $tarsrc not found
             return 1
         }
 
@@ -1002,7 +1002,7 @@ function get-archive()
 
     [[ $? != 0 ]] &&
         {
-            elog $MODULE error: archive $tarsrc is corrupted
+            elog $MODULE archive $tarsrc is corrupted
             return 1
         }
 
@@ -1017,7 +1017,7 @@ function get-archive()
             ln -s $(realpath --relative-to="$PWD" $SCBI_ARCHIVES/$tarsrc.sha1) \
                archive-sha1
     else
-        elog $MODULE error: no top directory found
+        elog $MODULE no top directory found
         res=1
     fi
 
@@ -1184,8 +1184,7 @@ function copy-module-src-callback()
                     cp -rp $DIR $DEST/builds/.vcs/
             fi
         else
-            elog standalone \
-                 "-   $module sources not found, cannot create archive"
+            elog $module "sources not found, cannot create archive"
             exit 1
         fi
 
@@ -1208,8 +1207,7 @@ function copy-module-src-callback()
                         elif [[ -f "$SCBI_PLUGINS/patches/$PATCH_FILE" ]]; then
                             patch="$SCBI_PLUGINS/patches/$PATCH_FILE"
                         else
-                            elog standalone patch filename \
-                                 $(basename $PATCH_FILE) not found
+                            elog $module patch filename $(basename $PATCH_FILE) not found
                             return 1
                         fi
 
