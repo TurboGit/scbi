@@ -1125,6 +1125,8 @@ function handle-sources()
     else
         #  Get sources from repository
 
+        #local vcs=()
+        #get-rvalues vcs get-vcs-data $module $variant
         local vcs=( $(get-vcs-data $module $variant) )
 
         local nv=${#vcs[*]}

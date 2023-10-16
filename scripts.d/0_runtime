@@ -243,7 +243,11 @@ function has-variant()
     local VARIANTS=$1
     local VAR=$2
 
+#    local ALLVARS=""
+#    get-rvalue ALLVARS all-variants $VARIANTS
+
     for v in $(all-variants $VARIANTS); do
+#    for v in ${ALLVARS}; do
         if [[ $v == $VAR ]]; then
             return 0
         fi
@@ -793,6 +797,8 @@ function plugin-call-variant-hooks()
     local IFS
     unset IFS
     local ALLVARS=$(all-variants $VARIANT)
+#    local ALLVARS=""
+#    get-rvalue ALLVARS all-variants $VARIANT
 
     #  Check common variant only for non native variant
     local CVAR=""

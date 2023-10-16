@@ -426,7 +426,8 @@ function get-branch()
 
     #  get vcs information
 
-    vcs=( $(get-vcs-data $module $variant) )
+    #get-rvalues vcs get-vcs-data $module $variant
+    local vcs=( $(get-vcs-data $module $variant) )
 
     local VCS_PROXY=${vcs[1]}
     local VCS_OPTIONS=${vcs[2]}
@@ -461,7 +462,8 @@ function get-vcs()
 
     #  get vcs information
 
-    vcs=( $(get-vcs-data $module $variant) )
+    # get-rvalues vcs get-vcs-data $module $variant
+    local vcs=( $(get-vcs-data $module $variant) )
 
     local VCS_PROXY=${vcs[1]}
     local VCS_OPTIONS=${vcs[2]}
@@ -594,8 +596,8 @@ function get-vcs-dir()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    vcs=( $(get-vcs-data $module $variant) )
-    res=$?
+    # get-rvalues vcs get-vcs-data $module $variant
+    local vcs=( $(get-vcs-data $module $variant) )
 
     local VCS_NAME=${vcs[3]}
     local VCS_URL=${vcs[4]}
