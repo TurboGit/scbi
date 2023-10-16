@@ -498,7 +498,7 @@ function parallel-do()
         fi
     done
 
-    wait
+    wait $(jobs -rp | grep -v $CAT_PID)
 }
 
 function rewrite-module-plan()
@@ -542,8 +542,6 @@ function rewrite-module-plan()
 
         _MOREMOD=( ${_NEWMOD[@]} )
     done
-
-    wait
 
     unset _MOREMOD
     unset _NEWMOD

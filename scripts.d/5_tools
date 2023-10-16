@@ -31,6 +31,7 @@ function display-stacktrace()
 # Call FCT and return one or multiple values from FCT into VAR
 # without using sub-shell
 #
+
 coproc CAT ( cat ; )
 
 function get-rvalue()
@@ -56,10 +57,12 @@ function get-rvalues()
     local VAL=""
 
     while true; do
-        read -u ${CAT[0]} VAL
+        read VAL <$${CAT[0]}
         [[ $VAL == "@SENTINEL@" ]] && break
         VAR[$P]=$VAL
+        echo p:$P v:$VAR >> $(tty)
         (( P++ ))
+        [[ $P -gt 10 ]] && exit 1
     done
 }
 
@@ -265,10 +268,16 @@ function get-all-depends()
     local HOOK="$3"
 
     local MODS=()
+    echo HERE1 > $(tty)
     get-rvalues MODS plugin-call-variant-hooks \
                 $MODULE $HOOK "$SCBI_PREFIX" "$SCBI_TARGET" $VARIANT
+    echo HERE2 > $(tty)
 
     for M in ${MODS[*]}; do
+
+#    for M in $(plugin-call-variant-hooks \
+#                   $MODULE $HOOK "$SCBI_PREFIX" "$SCBI_TARGET" $VARIANT);
+#    do
         #  Module is found
         if [[ -f $SCBI_PLUGINS/$M ]]; then
             echo $M
@@ -382,11 +391,10 @@ function _internal_for-all-modules()
         if [[ $? = 0 ]]; then
             push-dependency-tree $module
 
-            local MODS=()
-            get-rvalues MODS plugin-call-variant-hooks \
-                        $module modules "$SCBI_PREFIX" "$SCBI_TARGET" $variant
+            local MODS=$(plugin-call-variant-hooks \
+                             $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
 
-            if [[ ${#MODS[*]} > 0 ]]; then
+            if [[ -n $MODS ]]; then
                 IS_META=true
             fi
 
@@ -399,7 +407,7 @@ function _internal_for-all-modules()
                 local NXL=$LEVEL
                 [[ $DO_DEPS == yes-direct ]] && NXL=$NEXTL
 
-                for dmodule in ${MODS[*]}; do
+                for dmodule in $MODS; do
                     _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
                                               $WITH_EXT $DEPTH $NXL \
                                               $DEPENDS_KIND $dmodule $module $@
@@ -625,11 +633,10 @@ function _internal_for-final-modules()
     if [[ $(is-meta-module $MODREF) == yes ]]; then
         load-module $MODREF
 
-        local MODS=()
-        get-rvalues MODS plugin-call-variant-hooks \
-                    $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
+        local MODS=$(plugin-call-variant-hooks \
+                         $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
 
-        for dmodule in ${MODS[*]}; do
+        for dmodule in $MODS; do
             _internal_for-final-modules $module $dmodule
         done
     else
@@ -763,10 +770,11 @@ function get-build-id()
     local pid="no-patch-found"
 
     if [[ $DO_PATCH = yes ]]; then
-        local PATCHES=()
-        get-rvalues PATCHES plugin-call-variant-hooks $module patches \
-                    $PREFIX $TARGET $variant $kind $ref
-        for patch in ${PATCHES[*]}; do
+        for patch in \
+            $(plugin-call-variant-hooks $module patches \
+                                        $PREFIX $TARGET $variant \
+                                        $kind $ref);
+        do
             pid="$pid,$(get-patch-md5 $patch)"
         done
     fi
@@ -774,18 +782,16 @@ function get-build-id()
     #  Also compute id from dependencies to ensure we rebuild if one
     #  dependency has changed.
 
-    local did=""
-    get-rvalue did get-depends-build-id $MODREF
+    local did=$(get-depends-build-id $MODREF)
 
     #  Also check if some environment values are used on this project
 
     local eid=""
 
-    local EXENV=()
-    get-rvalues EXENV plugin-call-variant-hooks \
-                $module external-env $PREFIX $TARGET $variant
-
-    for extenv in ${EXTENV[*]}; do
+    for extenv in \
+        $(plugin-call-variant-hooks $module external-env \
+                                    $PREFIX $TARGET $variant);
+    do
         eid+=",$extenv"
     done
 
