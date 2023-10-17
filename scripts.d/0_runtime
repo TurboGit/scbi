@@ -231,6 +231,17 @@ function all-variants()
     fi
 }
 
+function all-variants-v()
+{
+    local -n RESULT=$1
+    local VARIANTS=$2
+
+    RESULT=()
+    if [[ "$VARIANTS" != "default" ]]; then
+        RESULT=( ${VARIANTS//./ } )
+    fi
+}
+
 ############################## has variant
 # returns true if variants exists
 #
@@ -243,7 +254,10 @@ function has-variant()
     local VARIANTS=$1
     local VAR=$2
 
-    for v in $(all-variants $VARIANTS); do
+    local ALLVARS=()
+    all-variants-v ALLVARS $VARIANTS
+
+    for v in ${ALLVARS[*]}; do
         if [[ $v == $VAR ]]; then
             return 0
         fi
@@ -792,7 +806,8 @@ function plugin-call-variant-hooks()
 
     local IFS
     unset IFS
-    local ALLVARS=$(all-variants $VARIANT)
+    local ALLVARS=()
+    all-variants-v ALLVARS $VARIANT
 
     #  Check common variant only for non native variant
     local CVAR=""
@@ -808,7 +823,7 @@ function plugin-call-variant-hooks()
 
     local v
 
-    for v in $CVAR ${ALLVARS:-default}; do
+    for v in $CVAR ${ALLVARS[*]:-default}; do
         found=0
         if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
             FCT="$PLUGIN-$v-cross-$HOOK"

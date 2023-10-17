@@ -63,10 +63,12 @@ function get-hook()
     local VARIANT=$3
     local STEP=$4
 
-    local ALLVARS=$(all-variants $VARIANT)
+    local ALLVARS=()
+    all-variants-v ALLVARS $VARIANT
+
     local HOOK=""
 
-    for v in ${ALLVARS:-default}; do
+    for v in ${ALLVARS[*]:-default}; do
         _internal_get-hook HOOK $MODULE $v $STEP
         [[ -n $HOOK ]] && break
     done
