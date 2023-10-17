@@ -32,16 +32,30 @@ function display-stacktrace()
 # without using sub-shell
 #
 
-coproc CAT ( cat ; )
+function create-coproc()
+{
+    local N=${SCBICAT[1]}
+
+    if [[ -z $N ]]; then
+        coproc SCBICAT ( cat ; )
+    else
+        { true >&${N} ; } 2> /dev/null
+        if [[ $? == 1 ]]; then
+            coproc SCBICAT ( cat ; )
+        fi
+    fi
+}
 
 function get-rvalue()
 {
     local -n VAR=$1
     local FCT=$2
 
+    create-coproc
+
     shift 2
-    $FCT $* >&${CAT[1]}
-    read -u ${CAT[0]} VAR
+    $FCT $* >&${SCBICAT[1]}
+    read -u ${SCBICAT[0]} VAR
 }
 
 function get-rvalues()
@@ -49,20 +63,19 @@ function get-rvalues()
     local -n VAR=$1
     local FCT=$2
 
-    shift 2
-    $FCT $* >&${CAT[1]}
-    echo '@SENTINEL@'>&${CAT[1]}
+    create-coproc
 
-    local P=0
+    shift 2
+    $FCT $* >&${SCBICAT[1]}
+    echo '@SENTINEL@'>&${SCBICAT[1]}
+
+    VAR=()
     local VAL=""
 
     while true; do
-        read VAL <&${CAT[0]}
+        read -u ${SCBICAT[0]} VAL
         [[ $VAL == "@SENTINEL@" ]] && break
-        VAR[$P]=$VAL
-        echo p:$P v:$VAR >> $(tty)
-        (( P++ ))
-        [[ $P -gt 10 ]] && exit 1
+        VAR+=($VAL)
     done
 }
 
@@ -188,6 +201,7 @@ function get-file-md5()
 {
     local FILE=$1
 
+    local MD5=()
     get-rvalues MD5 md5sum $FILE
     echo ${MD5[0]}
 }
@@ -268,16 +282,17 @@ function get-all-depends()
     local HOOK="$3"
 
     local MODS=()
-    echo HERE1 > $(tty)
     get-rvalues MODS plugin-call-variant-hooks \
                 $MODULE $HOOK "$SCBI_PREFIX" "$SCBI_TARGET" $VARIANT
-    echo HERE2 > $(tty)
+#    for M in ${MODS[*]}; do
+#        echo M1: $M > $(tty)
+#    done
 
     for M in ${MODS[*]}; do
-
 #    for M in $(plugin-call-variant-hooks \
 #                   $MODULE $HOOK "$SCBI_PREFIX" "$SCBI_TARGET" $VARIANT);
 #    do
+#        echo M2: $M > $(tty)
         #  Module is found
         if [[ -f $SCBI_PLUGINS/$M ]]; then
             echo $M
@@ -391,10 +406,13 @@ function _internal_for-all-modules()
         if [[ $? = 0 ]]; then
             push-dependency-tree $module
 
-            local MODS=$(plugin-call-variant-hooks \
-                             $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
+            local MODS=()
+            get-rvalues MODS plugin-call-variant-hooks \
+                        $module modules $SCBI_PREFIX $SCBI_TARGET $variant
+#            local MODS=$(plugin-call-variant-hooks \
+#                             $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
 
-            if [[ -n $MODS ]]; then
+            if [[ -n ${MODS[*]} ]]; then
                 IS_META=true
             fi
 
@@ -407,7 +425,7 @@ function _internal_for-all-modules()
                 local NXL=$LEVEL
                 [[ $DO_DEPS == yes-direct ]] && NXL=$NEXTL
 
-                for dmodule in $MODS; do
+                for dmodule in ${MODS[*]}; do
                     _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
                                               $WITH_EXT $DEPTH $NXL \
                                               $DEPENDS_KIND $dmodule $module $@
@@ -633,10 +651,14 @@ function _internal_for-final-modules()
     if [[ $(is-meta-module $MODREF) == yes ]]; then
         load-module $MODREF
 
-        local MODS=$(plugin-call-variant-hooks \
-                         $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
+        local MODS=()
+        get-rvalues MODS plugin-call-variant-hooks \
+                    $module modules $SCBI_PREFIX $SCBI_TARGET $variant
 
-        for dmodule in $MODS; do
+#        local MODS=$(plugin-call-variant-hooks \
+#                         $module modules $SCBI_PREFIX $SCBI_TARGET $variant)
+
+        for dmodule in ${MODS[*]}; do
             _internal_for-final-modules $module $dmodule
         done
     else
@@ -770,11 +792,14 @@ function get-build-id()
     local pid="no-patch-found"
 
     if [[ $DO_PATCH = yes ]]; then
-        for patch in \
-            $(plugin-call-variant-hooks $module patches \
-                                        $PREFIX $TARGET $variant \
-                                        $kind $ref);
-        do
+        local PATHCES=()
+        get-rvalues PATCHES plugin-call-variant-hooks $module patches \
+                    $PREFIX $TARGET $variant $kind $ref
+#        for patch in \
+#            $(plugin-call-variant-hooks $module patches \
+#                                        $PREFIX $TARGET $variant \
+#                                        $kind $ref);
+        for patch in ${PATCHES[*]}; do
             pid="$pid,$(get-patch-md5 $patch)"
         done
     fi
@@ -788,10 +813,14 @@ function get-build-id()
 
     local eid=""
 
-    for extenv in \
-        $(plugin-call-variant-hooks $module external-env \
-                                    $PREFIX $TARGET $variant);
-    do
+    local EXTENVS=()
+    get-rvalues EXTENVS plugin-call-variant-hooks $module external-env \
+                $PREFIX $TARGET $variant
+
+#    for extenv in \
+#        $(plugin-call-variant-hooks $module external-env \
+#                                    $PREFIX $TARGET $variant);
+    for extenv in ${EXTENVS[*]}; do
         eid+=",$extenv"
     done
 

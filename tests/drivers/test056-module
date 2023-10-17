@@ -25,6 +25,9 @@ function internal-varB-depends()
 
 function run()
 {
+    SCBI_PREFIX=prefix
+    SCBI_TARGET=target
+
     echo "=== default"
     get-all-depends internal default depends
 

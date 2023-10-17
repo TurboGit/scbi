@@ -498,7 +498,7 @@ function parallel-do()
         fi
     done
 
-    wait $(jobs -rp | grep -v $CAT_PID)
+    wait
 }
 
 function rewrite-module-plan()
