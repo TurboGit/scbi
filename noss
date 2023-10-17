@@ -1,0 +1,152 @@
+#!/bin/bash
+
+coproc CAT ( cat ; )
+
+function get-rvalue()
+{
+    local -n VAR=$1
+    local FCT=$2
+
+    shift 2
+    $FCT $* >&${CAT[1]}
+    read -u ${CAT[0]} VAR
+}
+
+function get-rvalues()
+{
+    local -n VAR=$1
+    local FCT=$2
+
+    shift 2
+    $FCT $* >&${CAT[1]}
+    echo '@SENTINEL@'>&${CAT[1]}
+
+    local P=0
+    local VAL=""
+
+    while true; do
+        read -u ${CAT[0]} VAL
+        [[ $VAL == "@SENTINEL@" ]] && break
+        VAR[$P]=$VAL
+        (( P++ ))
+    done
+}
+
+function get-xrvalues()
+{
+    local -n VAR=$1
+    local FCT=$2
+
+    rm -f /tmp/scbi
+    mkfifo /tmp/scbi
+
+    shift 2
+    $FCT $* > /tmp/scbi &
+    PID=$!
+    jobs -l
+    echo $$ $BASHPID $PID
+    [[ $BASHPID != $PID ]] && wait $PID
+
+    echo H1
+
+    echo '@SENTINEL@' && sleep 0 >> /tmp/scbi &
+    [[ $$ != $! ]] && wait -n $!
+#    wait $!
+
+    echo H2
+
+    local P=0
+    local VAL=""
+
+    while true; do
+        read VAL < /tmp/scbi
+        echo $VAL
+        [[ $VAL == "@SENTINEL@" ]] && break
+        VAR[$P]=$VAL
+        (( P++ ))
+    done
+}
+
+function toout()
+{
+    echo one
+    echo two
+    echo three
+    echo $1
+    echo four
+}
+
+echo $$ $BASHPID $PID
+
+time for n in {1..1000}; do
+    VAR1=( $(toout xx) )
+done
+
+for K in $(seq 0 $(( ${#VAR1[*]} - 1 )) ); do
+    printf "1/%d - %s\n" $K ${VAR1[K]}
+done
+echo
+
+
+#VAR2 < ${CAT[0]}
+MAX=5
+
+time for n in {1..1000}; do
+    VAR2=()
+    toout xx >&${CAT[1]}
+
+    P=0
+
+    while [[ $P < $MAX ]]; do
+        read -u ${CAT[0]} VAR2[$P]
+        P=$(( P + 1 ))
+    done
+done
+
+for K in $(seq 0 $(( ${#VAR2[*]} - 1 )) ); do
+    printf "2/%d - %s\n" $K ${VAR2[K]}
+done
+echo
+
+time for n in {1..1000}; do
+    get-rvalues VAR3 toout xx
+done
+
+for K in $(seq 0 $(( ${#VAR3[*]} - 1 )) ); do
+    printf "3/%d - %s\n" $K ${VAR3[K]}
+done
+
+exit 0
+
+get-xrvalues VAR4 toout xx
+echo OK there
+
+time for n in {1..1000}; do
+    get-xrvalues VAR4 toout xx
+done
+
+for K in $(seq 0 $(( ${#VAR4[*]} - 1 )) ); do
+    printf "4/%d - %s\n" $K ${VAR4[K]}
+done
+
+
+function get-file-md5()
+{
+    local FILE=$1
+
+    get-rvalues MD5 md5sum $FILE
+    echo ${MD5[0]}
+}
+
+get-file-md5 .gitignore
+
+exit 0
+
+# read VAR2[0] VAR2[1] VAR2[2] d e f < ${CAT[0]}
+# IFS=$'\\' read -u ${CAT[0]} p1 p2 p3 p4 p5
+# read -u ${CAT[0]} p1 p2 p3 p4 p5
+printf "%d - %s\n" 0 $p1
+printf "%d - %s\n" 1 $p2
+printf "%d - %s\n" 2 $p3
+printf "%d - %s\n" 3 $p4
+printf "%d - %s\n" 4 $p5

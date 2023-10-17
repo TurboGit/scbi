@@ -57,7 +57,7 @@ function get-rvalues()
     local VAL=""
 
     while true; do
-        read VAL <$${CAT[0]}
+        read VAL <&${CAT[0]}
         [[ $VAL == "@SENTINEL@" ]] && break
         VAR[$P]=$VAL
         echo p:$P v:$VAR >> $(tty)

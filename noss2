@@ -1,0 +1,80 @@
+#!/bin/bash
+
+function toout()
+{
+    echo one
+    echo two
+    echo three
+    echo $1
+    echo four
+}
+
+function get-xrvalues()
+{
+    local -n VAR=$1
+    local FCT=$2
+
+    FIFO="/tmp/scbi"
+    rm -f $FIFO
+    mkfifo $FIFO
+
+    shift 2
+
+    {
+        exec $FCT $* > $FIFO
+    } &
+
+    PID=$!
+    jobs -l
+    echo $$ $BASHPID $PID
+    [[ $BASHPID != $PID ]] && wait $PID
+
+    echo H1
+
+    echo '@SENTINEL@' >> /tmp/scbi &
+#    [[ $$ != $! ]] && wait -n $!
+#    wait $!
+
+    echo H2
+
+    local P=0
+    local VAL=""
+
+    while true; do
+        read VAL < /tmp/scbi
+        echo $VAL
+        [[ $VAL == "@SENTINEL@" ]] && break
+        VAR[$P]=$VAL
+        (( P++ ))
+    done
+}
+
+function get-rvalues()
+{
+    local -n VAR=$1
+    local FCT=$2
+
+    FIFO="/tmp/scbi"
+
+    shift 2
+    $FCT $* > $FIFO
+    echo '@SENTINEL@' >> $FIFO
+
+    local P=0
+    local VAL=""
+
+    while true; do
+        read VAL
+        [[ $VAL == "@SENTINEL@" ]] && break
+        VAR[$P]=$VAL
+        (( P++ ))
+    done < <( cat $FIFO )
+}
+
+time for n in {1..1000}; do
+    get-xrvalues VAR4 toout xx
+done
+
+for K in $(seq 0 $(( ${#VAR4[*]} - 1 )) ); do
+    printf "4/%d - %s\n" $K ${VAR4[K]}
+done
