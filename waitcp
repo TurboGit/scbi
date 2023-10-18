@@ -1,0 +1,15 @@
+#!/bin/bash
+
+
+coproc CAT ( cat ; )
+
+( ls | sh256sum &> /dev/null ) &
+( ls | sh256sum &> /dev/null ) &
+( ls | sh256sum &> /dev/null ) &
+( ls | sh256sum &> /dev/null ) &
+( ls | sh256sum &> /dev/null ) &
+( ls | sh256sum &> /dev/null ) &
+
+
+
+wait $(jobs -rp | grep -v $CAT_PID)

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+readarray VAR < <( echo toto ; echo titi ; echo tata *; sleep 20 )
+
+echo N ${#VAR[*]}
+
+for K in $(seq 0 $(( ${#VAR[*]} - 1 )) ); do
+    printf "a/%d - %s\n" $K ${VAR[K]}
+done

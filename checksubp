@@ -1,0 +1,63 @@
+#!/bin/bash
+
+function go()
+{
+    echo GO1 $1 : $BASHPID
+}
+
+function go2()
+{
+    local -n RESULT="$1"
+
+    RESULT="GO2 $2 : $BASHPID"
+}
+
+echo Script PID: $BASHPID
+
+go 1
+
+X=$(go 2)
+
+echo $X
+
+go2 RES 1
+echo $RES
+
+function me()
+{
+    local LOC=""
+
+    go2 LOC 2
+    echo $LOC
+    go2 LOC 3
+    echo $LOC
+}
+
+me
+
+
+function get-array()
+{
+    local -n RESULT=$1
+    local P=$2
+
+#    RESULT=($P)
+#    for k in {1..10}; do
+#        RESULT+=("ARRAY$k")
+#    done
+
+    local xmodule_info=(a b c)
+    RESULT=(${xmodule_info[0]})
+    RESULT+=(${xmodule_info[1]})
+    RESULT+=(${xmodule_info[2]})
+}
+
+function call()
+{
+    local module_info=()
+    get-array module_info one
+
+    echo ${#module_info[*]} 0:${module_info[0]} 1:${module_info[1]} 2:${module_info[2]}
+}
+
+call

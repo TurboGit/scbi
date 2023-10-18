@@ -1,0 +1,76 @@
+#!/bin/bash
+
+function create-coproc()
+{
+    local N=${CAT[1]}
+
+    if [[ -z $N ]]; then
+        coproc CAT ( cat ; )
+    else
+        { true >&${N} ; } 2> /dev/null
+        if [[ $? == 1 ]]; then
+            coproc CAT ( cat ; )
+        fi
+    fi
+}
+
+#declare -fx CAT
+
+function get-rvalue()
+{
+    local -n VAR=$1
+    local FCT=$2
+
+    shift 2
+    $FCT $* >&${CAT[1]}
+    read -u ${CAT[0]} VAR
+}
+
+function get-rvalues()
+{
+    local -n VAR=$1
+    local FCT=$2
+
+    create-coproc
+
+    shift 2
+    $FCT $* >&${CAT[1]}
+    echo '@SENTINEL@'>&${CAT[1]}
+
+    local P=0
+    local VAL=""
+
+    while true; do
+        read -u ${CAT[0]} VAL
+        [[ $VAL == "@SENTINEL@" ]] && break
+        VAR[$P]=$VAL
+        (( P++ ))
+    done
+}
+
+function toout()
+{
+    echo one
+    echo two
+    echo three
+    echo $1
+    echo four
+}
+
+time for n in {1..10000}; do
+    get-rvalues VAR1 toout zz1
+done
+
+for K in $(seq 0 $(( ${#VAR1[*]} - 1 )) ); do
+    printf "1/%d - %s\n" $K ${VAR1[K]}
+done
+echo
+
+(
+    get-rvalues VAR1 toout zz
+
+    for K in $(seq 0 $(( ${#VAR1[*]} - 1 )) ); do
+        printf "2/%d - %s\n" $K ${VAR1[K]}
+    done
+    echo
+)
