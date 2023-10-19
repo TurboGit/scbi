@@ -202,8 +202,8 @@ function init-cos-pkg()
     #  format : cmake-0:3.11.4-7.el8.x86_64
     #           <name>-<indice>:<version>-<level>.<rel>.<arch>
     while read N; do
-        pkg=${N%%:*};
-        pkg=${pkg%-*};
+        pkg=${N%%:*}
+        pkg=${pkg%-*}
         clean-version-string version $version
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null |
@@ -220,8 +220,8 @@ function init-fed-pkg()
     #  format : cmake-0:3.11.4-7.el8.x86_64
     #           <name>-<indice>:<version>-<level>.<rel>.<arch>
     while read N; do
-        pkg=${N%%:*};
-        pkg=${pkg%-*};
+        pkg=${N%%:*}
+        pkg=${pkg%-*}
         clean-version-string version $version
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null |
@@ -238,8 +238,8 @@ function init-rhl-pkg()
     #  format : cmake-0:3.11.4-7.el8.x86_64
     #           <name>-<indice>:<version>-<level>.<rel>.<arch>
     while read N; do
-        pkg=${N%%:*};
-        pkg=${pkg%-*};
+        pkg=${N%%:*}
+        pkg=${pkg%-*}
         clean-version-string version $version
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null |
