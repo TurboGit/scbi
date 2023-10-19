@@ -204,7 +204,7 @@ function init-cos-pkg()
     while read N; do
         pkg=${N%%:*}
         pkg=${pkg%-*}
-        clean-version-string version $version
+        clean-version-string version ${N#*:}
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null |
                   grep -v "^Not root" |
@@ -222,7 +222,7 @@ function init-fed-pkg()
     while read N; do
         pkg=${N%%:*}
         pkg=${pkg%-*}
-        clean-version-string version $version
+        clean-version-string version ${N#*:}
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null |
                   grep -v "^Not root" |
@@ -240,7 +240,7 @@ function init-rhl-pkg()
     while read N; do
         pkg=${N%%:*}
         pkg=${pkg%-*}
-        clean-version-string version $version
+        clean-version-string version ${N#*:}
         SCBI_PKGS["$pkg"]="$version"
     done < <( dnf repoquery --installed 2> /dev/null |
                   grep -v "^Not root" |
