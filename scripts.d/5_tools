@@ -423,6 +423,8 @@ function _internal_for-all-modules()
                     exit 1
                 fi
             fi
+
+            return 0
         fi
     fi
 }

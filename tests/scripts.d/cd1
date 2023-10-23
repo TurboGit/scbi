@@ -1,0 +1,11 @@
+
+function cd1-default-build-depends()
+{
+    echo cdb
+}
+
+function cd1-default-depends()
+{
+    echo cd2
+    echo cd3
+}

@@ -1,0 +1,6 @@
+
+function cdb-build-depends()
+{
+    echo os@-make
+    echo os@-openssl-dev
+}
