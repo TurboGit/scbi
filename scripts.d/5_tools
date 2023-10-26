@@ -1051,6 +1051,7 @@ function display-stat()
     printf "%-21s : %s\n" "patches dir"           "$SCBI_PATCH"
     printf "%-21s : %s\n" "user's Git repository" "$SCBI_GIT_REPO"
     printf "%-21s : %s\n" "user's SVN repository" "$SCBI_SVN_REPO"
+    printf "%-21s : %s\n" "plan"                  "${SCBI_PLAN:-no}"
     printf "%-21s : "     "e-mail notification"
 
     if [[ $SCBI_EMAIL_NOTIFICATION == no ]]; then

@@ -89,6 +89,7 @@ install prefix        : <pwd>/.root/builds/install
 archive dir           : <pwd>/.root/.archives
 patches dir           : <pwd>/.root/.patches
 user's Git repository : <pwd>/.root/git
+plan                  : no
 e-mail notification   : no
 
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
