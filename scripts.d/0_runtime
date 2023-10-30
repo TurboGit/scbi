@@ -563,7 +563,7 @@ function with-variant()
         fi
         shift
     done
-    H="$H }"
+    H="$H true; }"
     eval $H
 }
 

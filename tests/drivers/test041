@@ -161,7 +161,8 @@ natv-native-depends ()
 natv-native-env is a function
 natv-native-env ()
 {
-    add-to-var ROOT_DIR /usr
+    add-to-var ROOT_DIR /usr;
+    true
 }
 natv-native-install is a function
 natv-native-install ()
