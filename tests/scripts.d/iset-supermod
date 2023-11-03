@@ -1,0 +1,6 @@
+inherit-plugin --hooks=setup,wrapup supermod
+
+# dump created routines
+declare -F | grep iset-supermod | while read d1 d1 n; do
+    type $n | sed 's/ $//g'
+done
