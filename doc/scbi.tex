@@ -1349,18 +1349,19 @@ Two helper routines are provided for this:
 \label{inheritance}
 \index{inheritance}\index{inherit-plugin}\index{helpers!inherit-plugin}
 
-It is possible to create a plug-in module by inheriting from the definition
-of another module. To do this the first line on the module should be:
+It is possible to create a plug-in by inheriting from the definition
+of another plug-in. This can be done by adding one or multiple commands \code{inherit-plugin} into the plug-in definition:
 
 \begin{lstlisting}
-	inherit-plugin <name>
+	inherit-plugin [--no-variant] <name>
 \end{lstlisting}
 
-The \code{<name>} above is the name of an existing module from which we want
-to inherit all the current hooks.
+\begin{description}
+	\item[--no-variant] This option is to not inherit from any hook's variant. Only the default variants will be inherited.
+	\item[<name>] The name of an existing plug-in from which we want to inherit all the current hooks.
+\end{description}
 
-After this line it is possible to redefine any hook as it would be done
-without inheritance. This may be handy if a module need to redefine only
+After this line it is possible to redefine any hook if needed. This may be handy if a module need to redefine only
 the \code{vcs} or \code{proxy} hook for a specific context.
 
 \subsection{Native variant}

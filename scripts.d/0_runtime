@@ -288,7 +288,7 @@ function load-module()
             local MA=${SCBI_MODULE_ALIAS[$module]}
 
             if [[ -f $SCBI_PLUGINS/$MA ]]; then
-                _inherit-plugin_internal $MA $module
+                _inherit-plugin_internal no $MA $module
             else
                 return 1
             fi
@@ -315,8 +315,9 @@ function load-module()
 
 function _inherit-plugin_internal()
 {
-    local HPLUGIN=$1
-    local PLUGIN=$2
+    local NOVARIANT=$1
+    local HPLUGIN=$2
+    local PLUGIN=$3
 
     #  All hooks
     local SCBI_HOOKS="vcs|archive|env|build-env|depends|build-depends"
@@ -327,9 +328,14 @@ function _inherit-plugin_internal()
     #  For each known & existing hook name, create a wrapper with the
     #  name of the caller plug-in.
 
+    local REGEXP="$HPLUGIN-.*($SCBI_HOOKS)"
+
+    [[ $NOVARIANT == yes ]] &&
+        REGEXP="$HPLUGIN(-pre|-post|-cross)*-($SCBI_HOOKS)"
+
     for hook in $(declare -F \
                       | cut -d' ' -f3 \
-                      | grep -E "$HPLUGIN-.*($SCBI_HOOKS)");
+                      | grep -E $REGEXP);
     do
         H="function ${hook/$HPLUGIN/$PLUGIN}()"
         H="$H { $hook \$1 \$2 \$3 \$4 \$5 \$6 \$7; }"
@@ -341,12 +347,20 @@ function inherit-plugin()
 {
     local HPLUGIN=$1
 
+    local NOVARIANT=no
+
+    [[ $HPLUGIN == "--no-variant" ]] &&
+        {
+            NOVARIANT=yes
+            HPLUGIN=$2
+        }
+
     local CALLER=( $(caller) )
 
     #  Get the caller plug-in name
     local PLUGIN=$(basename ${CALLER[1]})
 
-    _inherit-plugin_internal $HPLUGIN $PLUGIN
+    _inherit-plugin_internal $NOVARIANT $HPLUGIN $PLUGIN
 }
 
 ############################## get-version

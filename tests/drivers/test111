@@ -1,0 +1,86 @@
+#  Test inherit no variant
+
+RUNS ./scbi inv-test19
+
+CLEAN-DIFF <<EOF
+inv-test19-build is a function
+inv-test19-build ()
+{
+    test19-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+inv-test19-config is a function
+inv-test19-config ()
+{
+    test19-config \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+inv-test19-install is a function
+inv-test19-install ()
+{
+    test19-install \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+inv-test19-out-of-tree is a function
+inv-test19-out-of-tree ()
+{
+    test19-out-of-tree \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+inv-test19-post-build is a function
+inv-test19-post-build ()
+{
+    test19-post-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+inv-test19-post-config is a function
+inv-test19-post-config ()
+{
+    test19-post-config \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+inv-test19-pre-build is a function
+inv-test19-pre-build ()
+{
+    test19-pre-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+inv-test19-pre-install is a function
+inv-test19-pre-install ()
+{
+    test19-pre-install \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+inv-test19-pre-setup is a function
+inv-test19-pre-setup ()
+{
+    test19-pre-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+inv-test19-pre-wrapup is a function
+inv-test19-pre-wrapup ()
+{
+    test19-pre-wrapup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+inv-test19-wrapup is a function
+inv-test19-wrapup ()
+{
+    test19-wrapup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+xxxx/xx/xx xx:xx:xx : Building inv-test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : pre-setup starting
+xxxx/xx/xx xx:xx:xx : pre-setup completed
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : post-config starting
+xxxx/xx/xx xx:xx:xx : post-config completed
+xxxx/xx/xx xx:xx:xx : pre-build starting
+xxxx/xx/xx xx:xx:xx : pre-build completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : post-build starting
+xxxx/xx/xx xx:xx:xx : post-build completed
+xxxx/xx/xx xx:xx:xx : pre-install starting
+xxxx/xx/xx xx:xx:xx : pre-install completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : pre-wrapup starting
+xxxx/xx/xx xx:xx:xx : pre-wrapup completed
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End Building inv-test19 [default] (master)
+EOF
