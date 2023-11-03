@@ -1,0 +1,6 @@
+inherit-plugin --no-variant --hooks=build --hooks setup test19
+
+# dump created routines
+declare -F | grep invset-test19 | while read d1 d1 n; do
+    type $n | sed 's/ $//g'
+done

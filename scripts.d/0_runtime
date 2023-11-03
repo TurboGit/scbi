@@ -288,7 +288,7 @@ function load-module()
             local MA=${SCBI_MODULE_ALIAS[$module]}
 
             if [[ -f $SCBI_PLUGINS/$MA ]]; then
-                _inherit-plugin_internal no $MA $module
+                _inherit-plugin_internal no "" $MA $module
             else
                 return 1
             fi
@@ -316,12 +316,16 @@ function load-module()
 function _inherit-plugin_internal()
 {
     local NOVARIANT=$1
-    local HPLUGIN=$2
-    local PLUGIN=$3
+    local SCBI_HOOKS=$2
+    local HPLUGIN=$3
+    local PLUGIN=$4
 
-    #  All hooks
-    local SCBI_HOOKS="vcs|archive|env|build-env|depends|build-depends"
-    local SCBI_HOOKS+="|out-of-tree|setup|config|build|install|prefix"
+    #  All hooks if no filter
+    [[ -z $SCBI_HOOKS ]] &&
+        {
+            local SCBI_HOOKS="vcs|archive|env|build-env|depends|build-depends"
+            local SCBI_HOOKS+="|out-of-tree|setup|config|build|install|prefix"
+        }
 
     load-module $HPLUGIN
 
@@ -345,22 +349,43 @@ function _inherit-plugin_internal()
 
 function inherit-plugin()
 {
-    local HPLUGIN=$1
-
+    local HPLUGIN=""
     local NOVARIANT=no
-
-    [[ $HPLUGIN == "--no-variant" ]] &&
-        {
-            NOVARIANT=yes
-            HPLUGIN=$2
-        }
+    local HOOKS=""
 
     local CALLER=( $(caller) )
 
     #  Get the caller plug-in name
     local PLUGIN=$(basename ${CALLER[1]})
 
-    _inherit-plugin_internal $NOVARIANT $HPLUGIN $PLUGIN
+    local options=$(getopt -l no-variant,hooks: -- dummy $*)
+
+    eval set -- "$options"
+    while true; do
+        case "$1" in
+            --no-variant)
+                NOVARIANT=yes
+                ;;
+            --hooks)
+                shift
+                [[ -n $HOOKS ]] && HOOKS+="|"
+                HOOKS+=$1
+                ;;
+            --)
+                shift
+                HPLUGIN=$1
+                break
+                ;;
+            -*)
+                echo unknown option in $PLUGIN
+                exit 1
+                break
+                ;;
+        esac
+        shift
+    done
+
+    _inherit-plugin_internal $NOVARIANT "${HOOKS//,/|}" $HPLUGIN $PLUGIN
 }
 
 ############################## get-version

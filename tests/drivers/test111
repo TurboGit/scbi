@@ -84,3 +84,88 @@ xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
 xxxx/xx/xx xx:xx:xx : End Building inv-test19 [default] (master)
 EOF
+
+#  Test inherit of limited set of hook
+
+RUNS ./scbi iset-test19
+
+CLEAN-DIFF <<EOF
+iset-test19-alt-pre-setup is a function
+iset-test19-alt-pre-setup ()
+{
+    test19-alt-pre-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+iset-test19-build is a function
+iset-test19-build ()
+{
+    test19-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+iset-test19-post-build is a function
+iset-test19-post-build ()
+{
+    test19-post-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+iset-test19-pre-build is a function
+iset-test19-pre-build ()
+{
+    test19-pre-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+iset-test19-pre-setup is a function
+iset-test19-pre-setup ()
+{
+    test19-pre-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+xxxx/xx/xx xx:xx:xx : Building iset-test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : pre-setup starting
+xxxx/xx/xx xx:xx:xx : pre-setup completed
+xxxx/xx/xx xx:xx:xx : pre-build starting
+xxxx/xx/xx xx:xx:xx : pre-build completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : post-build starting
+xxxx/xx/xx xx:xx:xx : post-build completed
+xxxx/xx/xx xx:xx:xx : End Building iset-test19 [default] (master)
+EOF
+
+#  Test inherit of limited set of hook and without variant
+
+RUNS ./scbi invset-test19
+
+CLEAN-DIFF <<EOF
+invset-test19-build is a function
+invset-test19-build ()
+{
+    test19-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+invset-test19-post-build is a function
+invset-test19-post-build ()
+{
+    test19-post-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+invset-test19-pre-build is a function
+invset-test19-pre-build ()
+{
+    test19-pre-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+invset-test19-pre-setup is a function
+invset-test19-pre-setup ()
+{
+    test19-pre-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+}
+xxxx/xx/xx xx:xx:xx : Building invset-test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : pre-setup starting
+xxxx/xx/xx xx:xx:xx : pre-setup completed
+xxxx/xx/xx xx:xx:xx : pre-build starting
+xxxx/xx/xx xx:xx:xx : pre-build completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : post-build starting
+xxxx/xx/xx xx:xx:xx : post-build completed
+xxxx/xx/xx xx:xx:xx : End Building invset-test19 [default] (master)
+EOF
