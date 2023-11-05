@@ -690,21 +690,21 @@ function get-build-id()
     local mid=$variant:$ref
 
     [[ -f $SCBI_PLUGINS/$module ]] &&
-        mid="$mid,$(cat $SCBI_PLUGINS/$module | get-md5)"
+        mid+=",$(cat $SCBI_PLUGINS/$module | get-md5)"
 
     #  And add possible SCBI_<module>_BUILD_TYPE that is in the environment
 
     local var_module=SCBI_${module//-/_}_BUILD_TYPE
 
     [[ -n ${!var_module} ]] &&
-        mid="$mid,${!var_module}"
+        mid+=",${!var_module}"
 
     #  And possibly the SCBI_*_BUILD_TYPE global settings for
     #  some known builders.
 
     for builder in CMAKE CONFIGURE MAKE GPR; do
         local BVAR=SCBI_${builder}_BUILD_TYPE
-        [[ -n ${!BVAR} ]] && mid="$mid,${!BVAR}"
+        [[ -n ${!BVAR} ]] && mid+=",${!BVAR}"
     done
 
     #  If patch activated

@@ -236,15 +236,15 @@ function load-module-plan()
 
                     if [[ $rversion != NONE ]]; then
                         if [[ $rkind == VERSION ]]; then
-                            FREF="$FREF:#$rversion"
+                            FREF+=":#$rversion"
                         else
-                            FREF="$FREF:$rversion"
+                            FREF+=":$rversion"
                         fi
                     elif [[ $version != NONE ]]; then
                         if [[ $kind == VERSION ]]; then
-                            FREF="$FREF:#$version"
+                            FREF+=":#$version"
                         else
-                            FREF="$FREF:$version"
+                            FREF+=":$version"
                         fi
                     fi
 

@@ -129,7 +129,7 @@ function compute-log-stat-file()
         elif [[ "$action" == "End" ]] && [[ -n $module ]]; then
             end_time=$(date +"%s" --date="$date $time")
             duration=$((end_time - start_time))
-            SCBI_STATS[$module]="${SCBI_STATS[$module]} $duration"
+            SCBI_STATS[$module]+=" $duration"
         fi
     done < $FILE
 }

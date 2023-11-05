@@ -545,7 +545,7 @@ function with-variant()
 
     for hook in ${SCBI_HOOKS[*]}; do
         H="function $PLUGIN-$VNAME-$hook()"
-        H="$H { true; }"
+        H+="{ true; }"
         eval $H
     done
 
@@ -565,7 +565,7 @@ function with-variant()
 
     for hook in ${SCBI_HOOKS[*]}; do
         H="function $PLUGIN-$VNAME-$hook()"
-        H="$H { true; }"
+        H+="{ true; }"
         eval $H
     done
 
@@ -574,7 +574,7 @@ function with-variant()
 
     for hook in ${SCBI_HOOKS[*]}; do
         H="function $PLUGIN-$VNAME-$hook()"
-        H="$H { echo NONE; echo NONE; echo NONE; echo NONE; }"
+        H+="{ echo NONE; echo NONE; echo NONE; echo NONE; }"
         eval $H
     done
 
