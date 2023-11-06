@@ -1598,7 +1598,8 @@ function handle-module()
 
             #  Setup the build environment for the current module
 
-            SCBI_ENV_MODULE=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/logs/env.cmd
+            local SCBI_LOGS_DIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/logs
+            SCBI_ENV_MODULE=$SCBI_LOGS_DIR/env.cmd
             rm -f $SCBI_ENV_MODULE
 
             if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]]; then
@@ -1610,6 +1611,9 @@ function handle-module()
                     case $NAME in
                         SCBI_JOBS|SCBI_HALF_JOBS)
                             echo export $NAME=\${$NAME:-$VALUE}
+                            ;;
+                        SCBI_PLUGINS)
+                            echo export $NAME=\'$SCBI_LOGS_DIR\'
                             ;;
                         *)
                             echo export $NAME=\'$VALUE\'
