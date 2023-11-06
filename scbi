@@ -1607,19 +1607,23 @@ function handle-module()
                 echo                          >> $SCBI_ENV_MODULE
                 echo "# SCBI global settings" >> $SCBI_ENV_MODULE
 
-                env | grep "^SCBI_" | tr '=' ' ' | while read NAME VALUE; do
-                    case $NAME in
-                        SCBI_JOBS|SCBI_HALF_JOBS)
-                            echo export $NAME=\${$NAME:-$VALUE}
-                            ;;
-                        SCBI_PLUGINS)
-                            echo export $NAME=\'$SCBI_LOGS_DIR\'
-                            ;;
-                        *)
-                            echo export $NAME=\'$VALUE\'
-                            ;;
-                    esac >> $SCBI_ENV_MODULE
-                done
+                while read VAR; do
+                    if [[ "$VAR" != "${VAR#SCBI_*}" ]]; then
+                        local NAME=${VAR%=*}
+                        local VALUE=${VAR#*=}
+                        case $NAME in
+                            SCBI_JOBS|SCBI_HALF_JOBS)
+                                echo export $NAME=\${$NAME:-$VALUE}
+                                ;;
+                            SCBI_PLUGINS)
+                                echo export $NAME=\'$SCBI_LOGS_DIR\'
+                                ;;
+                            *)
+                                echo export $NAME=\'$VALUE\'
+                                ;;
+                        esac >> $SCBI_ENV_MODULE
+                    fi
+                done < <( env )
             fi
 
             cat $ENVTMP >> $SCBI_ENV_MODULE

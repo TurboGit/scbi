@@ -209,29 +209,32 @@ function _internal_copy-plugin()
 
         #  And copy recursively all the inherited-plugins
 
-        while read line; do
-            local HPLUGIN=""
-            local options=$(getopt -l no-variant,hooks: -- $line)
+        while read kw line; do
+            [[ $kw == "inherit-plugin" ]] &&
+                {
+                    local HPLUGIN=""
+                    local options=$(getopt -l no-variant,hooks: -- $kw $line)
 
-            eval set -- "$options"
-            while true; do
-                case "$1" in
-                    --no-variant)
-                        ;;
-                    --hooks)
-                        shift
-                        ;;
-                    --)
-                        shift
-                        HPLUGIN=$1
+                    eval set -- "$options"
+                    while true; do
+                        case "$1" in
+                            --no-variant)
+                            ;;
+                            --hooks)
+                                shift
+                                ;;
+                            --)
+                                shift
+                                HPLUGIN=$1
                         break
                         ;;
-                esac
-                shift
-            done
+                        esac
+                        shift
+                    done
 
-            _internal_copy-plugin $HPLUGIN $DIR
-        done < <( cat $DIR/$PLG | grep "inherit-plugin" )
+                    _internal_copy-plugin $HPLUGIN $DIR
+                }
+        done < $DIR/$PLG
 
     fi
 }

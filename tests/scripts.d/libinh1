@@ -1,1 +1,1 @@
-inherit-plugin --no-variant lib1
+ inherit-plugin  --no-variant lib1
