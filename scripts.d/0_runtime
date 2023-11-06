@@ -323,8 +323,10 @@ function _inherit-plugin_internal()
     #  All hooks if no filter
     [[ -z $SCBI_HOOKS ]] &&
         {
-            local SCBI_HOOKS="vcs|archive|env|build-env|depends|build-depends|modules"
-            local SCBI_HOOKS+="|out-of-tree|setup|wrapup|config|build|install|prefix"
+            local SCBI_HOOKS="vcs|archive|env|build-env"
+            local SCBI_HOOKS+="|depends|build-depends|modules"
+            local SCBI_HOOKS+="|out-of-tree|setup|wrapup|config|build"
+            local SCBI_HOOKS+="|install|tests|prefix"
         }
 
     load-module $HPLUGIN
