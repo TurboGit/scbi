@@ -41,9 +41,9 @@ function lib1-build-env()
     local PREFIX=$1
     local TARGET=$2
 
-    export C_INCLUDE_PATH=$PWD/include:$C_INCLUDE_PATH
-    export LIBRARY_PATH=.:$PWD/lib:$LIBRARY_PATH
-    export LD_LIBRARY_PATH=.:$PWD/lib:$LD_LIBRARY_PATH
+    set-var C_INCLUDE_PATH  $PWD/include:$C_INCLUDE_PATH
+    set-var LIBRARY_PATH    .:$PWD/lib:$LIBRARY_PATH
+    set-var LD_LIBRARY_PATH .:$PWD/lib:$LD_LIBRARY_PATH
 }
 
 function lib1-env()
