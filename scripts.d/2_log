@@ -209,10 +209,30 @@ function _internal_copy-plugin()
 
         #  And copy recursively all the inherited-plugins
 
-        cat $DIR/$PLG | grep "inherit-plugin" |
-            while read kw pg; do
-                _internal_copy-plugin $pg $DIR
+        while read line; do
+            local HPLUGIN=""
+            local options=$(getopt -l no-variant,hooks: -- $line)
+
+            eval set -- "$options"
+            while true; do
+                case "$1" in
+                    --no-variant)
+                        ;;
+                    --hooks)
+                        shift
+                        ;;
+                    --)
+                        shift
+                        HPLUGIN=$1
+                        break
+                        ;;
+                esac
+                shift
             done
+
+            _internal_copy-plugin $HPLUGIN $DIR
+        done < <( cat $DIR/$PLG | grep "inherit-plugin" )
+
     fi
 }
 
