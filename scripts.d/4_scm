@@ -371,7 +371,7 @@ function _internal_get-branch()
 
                 if [[ $? != 0 ]]; then
                     ilog build "error: cannot switch to branch $REF"
-                    exit 1
+                    return 1
                 fi
             fi
             ;;
@@ -383,7 +383,7 @@ function _internal_get-branch()
 
                 if [[ $? != 0 ]]; then
                     ilog build "error: cannot switch to branch $REF"
-                    exit 1
+                    return 1
                 fi
             fi
             ;;
@@ -395,7 +395,7 @@ function _internal_get-branch()
 
                 if [[ $? != 0 ]]; then
                     ilog build "error: cannot switch to branch $REF"
-                    exit 1
+                    return 1
                 fi
             fi
             ;;
@@ -547,35 +547,38 @@ function vcs-build-id()
 
     [[ ! -d $vcs ]] && echo $MODREF | get-md5 && return 0
 
-    local vid=$(
-        cd $vcs
+    local vid=""
+    local res=0
 
-        if [[ $DO_UPDATE = no ]]; then
-            get-branch $PREFIX $TARGET $FORMODULE $MODREF
-        fi
+    pushd $vcs &> /dev/null
 
-        if [[ -d .git ]]; then
-            local gver=$(git rev-list -1 HEAD --)
-            local gdif=$( ( git diff HEAD -- ;
-                             git submodule --quiet foreach --recursive \
-                                 git diff HEAD -- ) | md5sum | cut -d' ' -f1)
+    if [[ $DO_UPDATE = no ]]; then
+        get-branch $PREFIX $TARGET $FORMODULE $MODREF &> /dev/null
+        [[ $? == 1 ]] && vid=$(date | get-md5)
+    fi
 
-            echo $gver$gdif
+    if [[ -d .git ]]; then
+        local gver=$(git rev-list -1 HEAD --)
+        local gdif=$( ( git diff HEAD -- ; \
+                        git submodule --quiet foreach --recursive \
+                            git diff HEAD -- ) | get-md5 )
 
-        elif [[ -d .svn ]]; then
-            echo "r$(LANG=C svn info | \
+        vid+="$gver$gdif"
+
+    elif [[ -d .svn ]]; then
+        vid+="r$(LANG=C svn info | \
                   sed -n -e '/^Revision: \([0-9]*\).*$/s//\1/p')"
 
-        elif [[ -d .hg ]]; then
-            local hver=$(hg identify --num)
-            local hdif=$(hg diff | tail -n+4 | md5sum | cut -d' ' -f1)
+    elif [[ -d .hg ]]; then
+        local hver=$(hg identify --num)
+        local hdif=$(hg diff | tail -n+4 | get-md5)
 
-            echo $hver$hdif
+        vid+="$hver$hdif"
+    else
+        vid="0"
+    fi
 
-        else
-            echo 0
-        fi
-          )
+    popd &> /dev/null
 
     get-build-id $PREFIX $TARGET $FORMODULE $MODREF $vid
 }

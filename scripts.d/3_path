@@ -138,8 +138,9 @@ function built-compiler()
 #  make an alias for x86_64-linux if necessary
 
 if [[ -e $PREFIX/x86_64-linux-gnu ]] && [[ ! -e $PREFIX/x86_64-linux ]]; then
-    (
-        cd $PREFIX
+    {
+        pushd $PREFIX &> /dev/null
         ln -s x86_64-linux-gnu x86_64-linux
-    )
+        popd &> /dev/null
+    }
 fi

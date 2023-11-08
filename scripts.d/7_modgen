@@ -102,12 +102,12 @@ function module-setup()
 
         #  If some patches are present, apply them now
         if [[ $DO_PATCH == yes ]]; then
-            (
-                cd $SRCDIR
-
+            {
+                pushd $SRCDIR &> /dev/null
                 module-patch $PREFIX $TARGET $MODULE
-            )
-            res=$?
+                res=$?
+                popd &> /dev/null
+            }
         fi
     fi
 
@@ -205,10 +205,11 @@ function module-install()
     #  install anything.
 
     if [[ -d ./build/install ]]; then
-        (
-            cd ./build/install
+        {
+            pushd ./build/install &> /dev/null
             find . -type f > ../manifest
-        )
+            popd &> /dev/null
+        }
     fi
 
     cp build-id-$VARIANT $TARGET-$VARIANT/build-id
