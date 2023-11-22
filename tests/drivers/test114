@@ -1,0 +1,54 @@
+
+# Check for OS specific function in env scripts
+
+LDIR=.root/builds/osenv/build/logs
+
+RUNS ./scbi osenv
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building osenv [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building osenv [default] (master)
+EOF
+
+# Test that values in build.log are equivalent to env.cmd
+
+GREP "BOSENV benv-val"                  $LDIR/build.log
+GREP "PATH /tmp"                        $LDIR/build.log
+GREP "define-var SET BOSENV \"benv-val" $LDIR/env.cmd
+GREP "define-var ADD PATH \"/tmp\""     $LDIR/env.cmd
+
+sed -i 's/^SCBI_OS_MODULE=.*/SCBI_OS_MODULE=windows/g' scbi
+
+RUNS ./scbi -f osenv
+
+# Test that values in build.log are transformed but not those in env.cmd
+
+GREP "BOSENV benv-val"                  $LDIR/build.log
+GREP "PATH /path/osenv/tmp"             $LDIR/build.log
+GREP "define-var SET BOSENV \"benv-val" $LDIR/env.cmd
+GREP "define-var ADD PATH \"/tmp\""     $LDIR/env.cmd
+
+cp ../scbi .
+
+# Test that running build.cmd is fully equivalent and properly using the
+# OS dependant routines.
+
+function cygpath()
+{
+    echo /path/osenv$2
+}
+declare -fx cygpath
+
+RUNS source $LDIR/build.cmd
+
+CLEAN-DIFF <<EOF
+BOSENV benv-val
+PATH /path/osenv/tmp
+EOF
+
+unset -f cygpath

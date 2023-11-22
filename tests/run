@@ -80,6 +80,7 @@ cp ../scbi .
 cp ../scbi-lint .
 cp ../scbi-source-archive .
 cp ../scripts.d/0_runtime scripts.d/
+cp ../scripts.d/_os_* scripts.d/
 cp ../scripts.d/[1-9]* scripts.d/
 cp ../scripts.d/.pkgs-* scripts.d/
 
@@ -114,7 +115,7 @@ else
 fi
 cd ..
 
-PLAN 905
+PLAN 918
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR
