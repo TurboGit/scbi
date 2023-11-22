@@ -36,3 +36,5 @@ RUNS ./scbi --ini=stest
 DIFF <<EOF
 stest: opt1 opt2
 EOF
+
+rm $SCBI_INI_FILE
