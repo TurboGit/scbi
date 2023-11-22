@@ -19,6 +19,7 @@ tests/.root/.patches
 tests/.root/.store
 tests/.root/.tar/dltar-src*
 tests/scripts.d/[0-9]_*
+tests/scripts.d/_os_*
 tests/scripts.d/.pkgs-*
 tests/scripts.d/.store
 tests/logs
