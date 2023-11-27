@@ -82,7 +82,7 @@ function c-darktable-clang-build-env()
     set-var CMAKE_CXX_COMPILER clang++-$SCBI_CLANG_VERSION
 }
 
-function c-darktable-default-build-env()
+function c-darktable-build-env()
 {
     set-var CMAKE_C_COMPILER   gcc
     set-var CMAKE_CXX_COMPILER g++
