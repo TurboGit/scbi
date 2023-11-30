@@ -103,6 +103,18 @@ function c-darktable-env()
     add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/plugins/imageio/storage
 }
 
+function c-darktable-relaxclang-pre-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    #  Keep compatibility with Clang version $SCBI_CLANG_VERSION
+    sed -i "s/\(.*\"Clang\".*\)COMPILER_VERSION VERSION_LESS [0-9][0-9]/\1COMPILER_VERSION VERSION_LESS $SCBI_CLANG_VERSION/" \
+        ../src/cmake/compiler-versions.cmake \
+        ../src/src/external/rawspeed/cmake/compiler-versions.cmake
+}
+
 function c-darktable-release-config-options()
 {
     local PREFIX=$1
