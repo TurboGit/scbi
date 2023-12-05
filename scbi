@@ -154,7 +154,7 @@ function ini-apply-values()
     for K in ${!SCBI_INI_DB[*]}; do
         if [[ "$K" =~ ^([^\.]+)\.([^\.]+)$ ]]; then
             sec=${BASH_REMATCH[1]}
-            var=${BASH_REMATCH[2]//-/_}
+            var=${BASH_REMATCH[2]}
         else
             sec=""
             var=$K
@@ -176,6 +176,7 @@ function ini-apply-values()
                 val=$(ini-get-option "$SECTION" $K)
             else
                 #  A free variable, just assign
+                var=${var//-/_}
                 val=$(eval echo ${SCBI_INI_DB[$K]})
             fi
 
