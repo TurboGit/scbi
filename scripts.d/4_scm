@@ -295,6 +295,32 @@ function svn-branch()
     )
 }
 
+############################## get-vcs-ref
+
+function get-vcs-ref()
+{
+    local VCS_NAME=$1
+    local DIR=$2
+
+    case $VCS_NAME in
+        git)
+            echo -n "git sha-1 "
+            git --git-dir $DIR/.git rev-parse HEAD
+            ;;
+
+        hg|mercurial)
+            echo -n "mercurial revision "
+            hg id -i $DIR/
+            ;;
+
+        svn|subversion)
+            printf "subversion revision %s %s" \
+                   $(svn info --show-item revision $DIR/) \
+                   $(readlink src)
+            ;;
+    esac
+}
+
 ############################## get-vcs-data
 
 function get-vcs-data()

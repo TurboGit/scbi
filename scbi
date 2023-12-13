@@ -843,7 +843,7 @@ function is-module-up-to-date()
 
     if [[ $variant == "native" ]]; then
         #  A native variant
-        SID="native"
+        SID="native-$ref"
     elif [[ -e $SCBI_BDIR/$module/src ]]; then
         #  A VCS or TAR
         case "$kind" in
@@ -1044,9 +1044,11 @@ function handle-sources()
 
     [[ "$variant" = "native" ]] &&
         {
-            echo -n "native" > source-id
+            echo -n "native-$ref" > source-id
             return 0;
         }
+
+    rm -f source-ref
 
     #  Check if a given archive exists even if a standard branch ref has
     #  been provided. This is an optimization to used a local archive
@@ -1113,8 +1115,12 @@ function handle-sources()
         #  tar sha1 if present to ensure a tar with the same name but different
         #  content will trigger a build.
 
-        local tar_sha1=""
-        [[ -e archive-sha1 ]] && archive_sha1=$(cat archive-sha1)
+        local archive_sha1=""
+        [[ -e archive-sha1 ]] &&
+            {
+                archive_sha1=$(cat archive-sha1)
+                echo "archive sha-1 ${archive_sha1// */}" > source-ref
+            }
 
         get-build-id $SCBI_PREFIX $SCBI_TARGET \
                      $FORMODULE $MODREF archive-$ref$archive_sha1 > build-id-$variant
@@ -1244,6 +1250,8 @@ function handle-sources()
                         ;;
                 esac
             fi
+
+            get-vcs-ref $VCS_NAME $(pwd)/vcs > source-ref
 
             return 0
 
