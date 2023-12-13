@@ -1,4 +1,7 @@
 # simple check for mercurial repository
+
+REP=$PWD/.root/builds/test4
+
 RUNS ./scbi --tests test4
 
 CLEAN-DIFF <<EOF
@@ -15,3 +18,5 @@ hello scbi in mercurial
 xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : End Building test4 [default] (master)
 EOF
+
+GREP "mercurial revision e6a1a52e9fb5" $REP/source-ref

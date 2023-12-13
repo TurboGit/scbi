@@ -25,6 +25,8 @@
 #  <REPO>/prj1 and we end up with root directory with trunk/branches/tags.
 #
 
+REP=$PWD/.root/builds/svnstd
+
 ( cd $TESTREPOS && tar xf repostd.tar.bz2 && tar xf repomlt.tar.bz2 )
 
 RUNS ./scbi --tests svnstd
@@ -44,6 +46,8 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : skip global install
 xxxx/xx/xx xx:xx:xx : End Building svnstd [default] (master)
 EOF
+
+GREP "subversion revision 7 vcs/trunk" $REP/source-ref
 
 RUNS ./scbi --tests svnstd:v1
 
@@ -80,6 +84,8 @@ xxxx/xx/xx xx:xx:xx : tests [prj1] completed
 xxxx/xx/xx xx:xx:xx : skip global install
 xxxx/xx/xx xx:xx:xx : End Building svnmlt [prj1] (v1.0)
 EOF
+
+GREP "subversion revision 7 vcs/branches/v1" $REP/source-ref
 
 RUNS ./scbi --tests svnmlt/prj2:v1
 
