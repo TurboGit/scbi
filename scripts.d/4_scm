@@ -314,9 +314,8 @@ function get-vcs-ref()
             ;;
 
         svn|subversion)
-            printf "subversion revision %s %s" \
-                   $(svn info --show-item revision $DIR/) \
-                   $(readlink src)
+            echo -n "subversion revision "
+            svn log -l 1 $DIR/../src | grep -e "^r[0-9].*" | cut -d' ' -f1
             ;;
     esac
 }
