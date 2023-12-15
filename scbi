@@ -1045,6 +1045,7 @@ function handle-sources()
     [[ "$variant" = "native" ]] &&
         {
             echo -n "native-$ref" > source-id
+            echo "native $ref" > source-ref
             return 0;
         }
 
@@ -1119,11 +1120,12 @@ function handle-sources()
         [[ -e archive-sha1 ]] &&
             {
                 archive_sha1=$(cat archive-sha1)
-                echo "archive sha-1 ${archive_sha1// */}" > source-ref
+                echo "archive $ref sha-1 ${archive_sha1// */}" > source-ref
             }
 
         get-build-id $SCBI_PREFIX $SCBI_TARGET \
-                     $FORMODULE $MODREF archive-$ref$archive_sha1 > build-id-$variant
+                     $FORMODULE $MODREF archive-$ref$archive_sha1 \
+                     > build-id-$variant
 
         #  We set the link for the source so that no module will have to
         #  do it.
@@ -1251,7 +1253,7 @@ function handle-sources()
                 esac
             fi
 
-            get-vcs-ref $VCS_NAME $(pwd)/vcs > source-ref
+            get-vcs-ref $VCS_NAME $ref $(pwd)/vcs > source-ref
 
             return 0
 

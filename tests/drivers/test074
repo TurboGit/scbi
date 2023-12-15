@@ -1,4 +1,6 @@
+
 GVER=$(gcc --version | grep gcc | awk '{print $4}')
+REP=$PWD/.root/builds/mautov
 
 # check for auto variant depending on os package with specific version
 
@@ -14,6 +16,8 @@ xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : skip global install
 xxxx/xx/xx xx:xx:xx : End Building mautov [native] ($GVER)
 EOF
+
+GREP "native $GVER" $REP/source-ref
 
 RUNS ./scbi mautov/auto:99.99.09
 

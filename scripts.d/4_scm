@@ -300,21 +300,22 @@ function svn-branch()
 function get-vcs-ref()
 {
     local VCS_NAME=$1
-    local DIR=$2
+    local REF=$2
+    local DIR=$3
 
     case $VCS_NAME in
         git)
-            echo -n "git sha-1 "
+            echo -n "git ${REF/NONE/master} sha-1 "
             git --git-dir $DIR/.git rev-parse HEAD
             ;;
 
         hg|mercurial)
-            echo -n "mercurial revision "
+            echo -n "mercurial ${REF/NONE/default} revision "
             hg id -i $DIR/
             ;;
 
         svn|subversion)
-            echo -n "subversion revision "
+            echo -n "subversion ${REF/NONE/trunk} revision "
             svn log -l 1 $DIR/../src | grep -e "^r[0-9].*" | cut -d' ' -f1
             ;;
     esac
