@@ -1,0 +1,11 @@
+
+RUNS ./scbi metadeps
+
+RUNS grep -h '^@@@' .root/builds/.logs/*metadeps-default-wrapup*
+
+DIFF <<EOF
+@@@ f:dep1     m:lib1     d:build   m:false e:false
+@@@ f:metadeps m:dep1     d:default m:false e:false
+@@@ f:metadeps m:lib1     d:default m:false e:false
+@@@ f:@root    m:metadeps d:default m:true  e:false
+EOF

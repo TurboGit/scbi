@@ -1,0 +1,28 @@
+
+function metadeps-common-modules()
+{
+    echo dep1
+}
+
+function metadeps-modules()
+{
+    echo lib1
+}
+
+function metadeps-wrapup()
+{
+    function mod-callback()
+    {
+        local FORMODULE=$1
+        local MODREF=$2
+        local LEVEL=$3
+        local DEPENDS_KIND=$4
+        local IS_EXT=$5
+        local IS_META=$6
+
+        printf "@@@ f:%-8s m:%-8s d:%-7s m:%-5s e:%-5s\n" \
+               $FORMODULE $MODREF $DEPENDS_KIND $IS_META $IS_EXT
+    }
+
+    for-all-modules-with-meta mod-callback metadeps
+}

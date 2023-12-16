@@ -323,8 +323,10 @@ function _internal_for-all-modules()
 
     local IS_META=false
 
-    if [[ -z "${SCBI_CHECKED[$module]}" ]]; then
-        SCBI_CHECKED[$module]=yes
+    local MKEY="$MODREF:$DEPENDS_KIND"
+
+    if [[ -z "${SCBI_CHECKED[$MKEY]}" ]]; then
+        SCBI_CHECKED[$MKEY]=yes
 
         load-module $MODREF
 
