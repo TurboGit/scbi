@@ -295,6 +295,37 @@ function svn-branch()
     )
 }
 
+############################## get-vcs-commit-id
+
+function get-vcs-commit-id()
+{
+    local SHORT=$1
+    local VCS_NAME=$2
+    local DIR=$3
+
+    if [[ ! -d $DIR ]]; then
+        echo ""
+    else
+        case $VCS_NAME in
+            git)
+                if [[ $SHORT == true ]]; then
+                    git --git-dir $DIR/.git rev-parse --short=6 HEAD
+                else
+                    git --git-dir $DIR/.git rev-parse HEAD
+                fi
+                ;;
+
+            hg|mercurial)
+                hg id -i $DIR/
+                ;;
+
+            svn|subversion)
+                svn log -l 1 $DIR/../src | grep -e "^r[0-9].*" | cut -d' ' -f1
+                ;;
+        esac
+    fi
+}
+
 ############################## get-vcs-ref
 
 function get-vcs-ref()
@@ -306,19 +337,18 @@ function get-vcs-ref()
     case $VCS_NAME in
         git)
             echo -n "git ${REF/NONE/master} sha-1 "
-            git --git-dir $DIR/.git rev-parse HEAD
             ;;
 
         hg|mercurial)
             echo -n "mercurial ${REF/NONE/default} revision "
-            hg id -i $DIR/
             ;;
 
         svn|subversion)
             echo -n "subversion ${REF/NONE/trunk} revision "
-            svn log -l 1 $DIR/../src | grep -e "^r[0-9].*" | cut -d' ' -f1
             ;;
     esac
+
+    get-vcs-commit-id false $VCS_NAME $DIR
 }
 
 ############################## get-vcs-data
