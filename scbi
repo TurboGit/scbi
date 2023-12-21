@@ -98,26 +98,6 @@ function ini-load-files()
 
 ############################## ini-apply-values
 
-#  A table of value to be read in the ini file and the
-#  corresponding SCBI variable.
-
-declare -A KV=(
-    ["build-dir"]="SCBI_BDIR"
-    ["env"]="ENV_NAME"
-    ["git-repo"]="SCBI_GIT_REPO"
-    ["hg-repo"]="SCBI_HG_REPO"
-    ["jobs"]="SCBI_JOBS"
-    ["log"]="SCBI_LOGS"
-    ["patch"]="SCBI_PATCH"
-    ["plan"]="SCBI_PLAN"
-    ["plugins"]="SCBI_PLUGINS"
-    ["prefix"]="SCBI_PREFIX"
-    ["root-dir"]="SCBI_ROOT"
-    ["svn-repo"]="SCBI_SVN_REPO"
-    ["archives"]="SCBI_ARCHIVES"
-    ["target"]="SCBI_TARGET"
-)
-
 function ini-set-enable()
 {
     local FEATURES=$1
@@ -150,6 +130,26 @@ function ini-apply-values()
     local sec
     local var
     local val
+
+    #  A table of value to be read in the ini file and the
+    #  corresponding SCBI variable.
+
+    declare -A KV=(
+        ["build-dir"]="SCBI_BDIR"
+        ["env"]="ENV_NAME"
+        ["git-repo"]="SCBI_GIT_REPO"
+        ["hg-repo"]="SCBI_HG_REPO"
+        ["jobs"]="SCBI_JOBS"
+        ["log"]="SCBI_LOGS"
+        ["patch"]="SCBI_PATCH"
+        ["plan"]="SCBI_PLAN"
+        ["plugins"]="SCBI_PLUGINS"
+        ["prefix"]="SCBI_PREFIX"
+        ["root-dir"]="SCBI_ROOT"
+        ["svn-repo"]="SCBI_SVN_REPO"
+        ["archives"]="SCBI_ARCHIVES"
+        ["target"]="SCBI_TARGET"
+    )
 
     for K in ${!SCBI_INI_DB[*]}; do
         if [[ "$K" =~ ^([^\.]+)\.([^\.]+)$ ]]; then
