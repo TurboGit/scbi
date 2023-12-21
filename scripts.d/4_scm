@@ -295,6 +295,30 @@ function svn-branch()
     )
 }
 
+############################## get-vcs-user-co-dir
+
+function get-vcs-user-co-dir()
+{
+    local -n OOTDIR=$1
+    local MODULE=$2
+    local VCS_NAME=$3
+
+    case $VCS_NAME in
+        git)
+            OOTDIR=$SCBI_GIT_REPO
+            ;;
+        svn|subversion)
+            OOTDIR=$SCBI_SVN_REPO
+            ;;
+        hg)
+            OOTDIR=$SCBI_HG_REPO
+            ;;
+        *)
+            OOTDIR=NONE
+            ;;
+    esac
+}
+
 ############################## get-vcs-commit-id
 
 function get-vcs-commit-id()
