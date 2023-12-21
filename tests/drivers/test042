@@ -4,7 +4,7 @@
 RUNS ./scbi varhook
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building varhook [default] (master)
+xxxx/xx/xx xx:xx:xx : Building varhook [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -14,14 +14,14 @@ xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
-xxxx/xx/xx xx:xx:xx : End Building varhook [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building varhook [default] (n/a)
 EOF
 
 # ============= 1
 RUNS ./scbi varhook/mpi
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building varhook [mpi] (master)
+xxxx/xx/xx xx:xx:xx : Building varhook [mpi] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -31,7 +31,7 @@ xxxx/xx/xx xx:xx:xx : build [mpi] starting
 xxxx/xx/xx xx:xx:xx : build [mpi] completed
 xxxx/xx/xx xx:xx:xx : install [mpi] starting
 xxxx/xx/xx xx:xx:xx : install [mpi] completed
-xxxx/xx/xx xx:xx:xx : End Building varhook [mpi] (master)
+xxxx/xx/xx xx:xx:xx : End Building varhook [mpi] (n/a)
 EOF
 
 # ============= 2

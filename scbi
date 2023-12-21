@@ -1508,11 +1508,8 @@ function handle-module()
         return 0
     fi
 
-    if [[ $ref == NONE ]]; then
-        DISPREF=master
-    else
-        DISPREF=$ref
-    fi
+    local DISPREF=""
+    get-module-display-ref DISPREF $module $variant $ref
 
     line-sep
     ilog $module %BBuilding %t$module%c \[%g${variant//./ }%c\] \(%g$DISPREF%c\) | tee -a $log

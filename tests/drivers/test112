@@ -13,7 +13,7 @@ iset-supermod-wrapup ()
 {
     supermod-wrapup \$1 \$2 \$3 \$4 \$5 \$6 \$7
 }
-xxxx/xx/xx xx:xx:xx : Building iset-supermod [default] (master)
+xxxx/xx/xx xx:xx:xx : Building iset-supermod [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -22,7 +22,7 @@ xxxx/xx/xx xx:xx:xx : setup completed
 xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
 xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
-xxxx/xx/xx xx:xx:xx : End Building iset-supermod [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building iset-supermod [default] (n/a)
 EOF
 
 RUNS ./scbi i-supermod

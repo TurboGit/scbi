@@ -49,7 +49,7 @@ xxxx/xx/xx xx:xx:xx : install [mainav] starting
 xxxx/xx/xx xx:xx:xx : install [mainav] completed
 xxxx/xx/xx xx:xx:xx : End Building mautov [mainav] (99.99)
 
-xxxx/xx/xx xx:xx:xx : Building mainav [default] (master)
+xxxx/xx/xx xx:xx:xx : Building mainav [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -57,7 +57,7 @@ xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : End Building mainav [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building mainav [default] (n/a)
 EOF
 
 OK  -d .root/builds/mautov/x86_64-linux-gnu-native
@@ -87,7 +87,7 @@ xxxx/xx/xx xx:xx:xx : install [for2] starting
 xxxx/xx/xx xx:xx:xx : install [for2] completed
 xxxx/xx/xx xx:xx:xx : End Building mautov [for2] (99.99)
 
-xxxx/xx/xx xx:xx:xx : Building mainav2 [default] (master)
+xxxx/xx/xx xx:xx:xx : Building mainav2 [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -95,7 +95,7 @@ xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : End Building mainav2 [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building mainav2 [default] (n/a)
 EOF
 
 OK -d .root/builds/mautov/x86_64-linux-gnu-native

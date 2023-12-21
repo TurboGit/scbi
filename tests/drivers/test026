@@ -9,7 +9,7 @@ done
 RUNS ./scbi var
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building var [default] (master)
+xxxx/xx/xx xx:xx:xx : Building var [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -19,14 +19,14 @@ xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
-xxxx/xx/xx xx:xx:xx : End Building var [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building var [default] (n/a)
 EOF
 
 # ========== build/install var/one
 RUNS ./scbi var/one
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building var [one] (master)
+xxxx/xx/xx xx:xx:xx : Building var [one] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -36,14 +36,14 @@ xxxx/xx/xx xx:xx:xx : build [one] starting
 xxxx/xx/xx xx:xx:xx : build [one] completed
 xxxx/xx/xx xx:xx:xx : install [one] starting
 xxxx/xx/xx xx:xx:xx : install [one] completed
-xxxx/xx/xx xx:xx:xx : End Building var [one] (master)
+xxxx/xx/xx xx:xx:xx : End Building var [one] (n/a)
 EOF
 
 # ========== build/install var/two
 RUNS ./scbi var/two
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building var [two] (master)
+xxxx/xx/xx xx:xx:xx : Building var [two] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -53,14 +53,14 @@ xxxx/xx/xx xx:xx:xx : build [two] starting
 xxxx/xx/xx xx:xx:xx : build [two] completed
 xxxx/xx/xx xx:xx:xx : install [two] starting
 xxxx/xx/xx xx:xx:xx : install [two] completed
-xxxx/xx/xx xx:xx:xx : End Building var [two] (master)
+xxxx/xx/xx xx:xx:xx : End Building var [two] (n/a)
 EOF
 
 # ========== build/install var/one.two
 RUNS ./scbi var/one.two
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building var [one two] (master)
+xxxx/xx/xx xx:xx:xx : Building var [one two] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -70,14 +70,14 @@ xxxx/xx/xx xx:xx:xx : build [one two] starting
 xxxx/xx/xx xx:xx:xx : build [one two] completed
 xxxx/xx/xx xx:xx:xx : install [one two] starting
 xxxx/xx/xx xx:xx:xx : install [one two] completed
-xxxx/xx/xx xx:xx:xx : End Building var [one two] (master)
+xxxx/xx/xx xx:xx:xx : End Building var [one two] (n/a)
 EOF
 
 # ========== build/install var/two.one
 RUNS ./scbi var/two.one
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building var [two one] (master)
+xxxx/xx/xx xx:xx:xx : Building var [two one] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -87,14 +87,14 @@ xxxx/xx/xx xx:xx:xx : build [two one] starting
 xxxx/xx/xx xx:xx:xx : build [two one] completed
 xxxx/xx/xx xx:xx:xx : install [two one] starting
 xxxx/xx/xx xx:xx:xx : install [two one] completed
-xxxx/xx/xx xx:xx:xx : End Building var [two one] (master)
+xxxx/xx/xx xx:xx:xx : End Building var [two one] (n/a)
 EOF
 
 # ========== build/install var/one.two.three.four
 RUNS ./scbi var/one.two.three.four
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building var [one two three four] (master)
+xxxx/xx/xx xx:xx:xx : Building var [one two three four] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -104,7 +104,7 @@ xxxx/xx/xx xx:xx:xx : build [one two three four] starting
 xxxx/xx/xx xx:xx:xx : build [one two three four] completed
 xxxx/xx/xx xx:xx:xx : install [one two three four] starting
 xxxx/xx/xx xx:xx:xx : install [one two three four] completed
-xxxx/xx/xx xx:xx:xx : End Building var [one two three four] (master)
+xxxx/xx/xx xx:xx:xx : End Building var [one two three four] (n/a)
 EOF
 
 LPRE=.root/builds/.logs/x86_64-linux-gnu

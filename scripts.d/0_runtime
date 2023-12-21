@@ -458,6 +458,30 @@ function parse-module-ref()
     RESULT+=($version)
 }
 
+############################## get-module-display-ref
+# Returns the ref of the module to be displayed
+
+function get-module-display-ref()
+{
+    local -n RESULT="$1"
+    local MODULE=$2
+    local VARIANT=$3
+    local REF=$4
+
+    local vcs=( $(get-vcs-data $MODULE $VARIANT) )
+    local vcs_name=${vcs[3]}
+
+    if [[ $VARIANT == "native" ]]; then
+        RESULT=${REF/NONE/"os"}
+    elif [[ -z $vcs_name ]]; then
+        # Not a VCS (probably a ref for an archive) use REF as-is if
+        # defined or n/a if not.
+        RESULT=${REF/NONE/"n/a"}
+    else
+        get-vcs-display-ref RESULT $vcs_name $REF
+    fi
+}
+
 ############################## get-module-ref
 # Returns a module reference given the module name and possibly
 # the parent package (for-module).

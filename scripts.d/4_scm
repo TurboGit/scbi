@@ -295,6 +295,36 @@ function svn-branch()
     )
 }
 
+############################## get-vcs-display-ref
+
+function get-vcs-display-ref()
+{
+    local -n DRESULT="$1"
+    local VCS_NAME=$2
+    local REF=$3
+
+    if [[ $REF == "dev" ]]; then
+        DRESULT=$REF
+    else
+        case $VCS_NAME in
+            git)
+                DRESULT=${REF/NONE/master}
+                ;;
+
+            hg|mercurial)
+                DRESULT=${REF/NONE/default}
+                ;;
+
+            svn|subversion)
+                DRESULT=${REF/NONE/trunk}
+                ;;
+            *)
+                DRESULT=$REF
+                ;;
+        esac
+    fi
+}
+
 ############################## get-vcs-user-co-dir
 
 function get-vcs-user-co-dir()
@@ -358,17 +388,20 @@ function get-vcs-ref()
     local REF=$2
     local DIR=$3
 
+    local DISPREF=""
+    get-vcs-display-ref DISPREF $VCS_NAME $REF
+
     case $VCS_NAME in
         git)
-            echo -n "git ${REF/NONE/master} sha-1 "
+            echo -n "git ${DISPREF} sha-1 "
             ;;
 
         hg|mercurial)
-            echo -n "mercurial ${REF/NONE/default} revision "
+            echo -n "mercurial ${DISPREF} revision "
             ;;
 
         svn|subversion)
-            echo -n "subversion ${REF/NONE/trunk} revision "
+            echo -n "subversion ${DISPREF} revision "
             ;;
     esac
 

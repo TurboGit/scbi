@@ -5,7 +5,7 @@ LOGC61=.root/builds/btype/build/logs/config.log
 RUNS ./scbi btype
 
 CLEAN-DIFF <<EOF
-2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
 2021/12/09 18:48:32 : steps : setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
@@ -15,7 +15,7 @@ CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : build completed
 2021/12/09 18:48:32 : install starting
 2021/12/09 18:48:32 : install completed
-2021/12/09 18:48:32 : End Building btype [default] (master)
+2021/12/09 18:48:32 : End Building btype [default] (n/a)
 EOF
 
 GREP Release $LOGC61
@@ -23,12 +23,12 @@ GREP Release $LOGC61
 RUNS ./scbi btype
 
 CLEAN-DIFF <<EOF
-2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
 2021/12/09 18:48:32 : steps : setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 2021/12/09 18:48:32 : no build needed, versions match
-2021/12/09 18:48:32 : End Building btype [default] (master)
+2021/12/09 18:48:32 : End Building btype [default] (n/a)
 EOF
 
 # Let's change global build-type
@@ -38,7 +38,7 @@ export SCBI_CMAKE_BUILD_TYPE=Debug
 RUNS ./scbi btype
 
 CLEAN-DIFF <<EOF
-2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
 2021/12/09 18:48:32 : steps : setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
@@ -48,7 +48,7 @@ CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : build completed
 2021/12/09 18:48:32 : install starting
 2021/12/09 18:48:32 : install completed
-2021/12/09 18:48:32 : End Building btype [default] (master)
+2021/12/09 18:48:32 : End Building btype [default] (n/a)
 EOF
 
 GREP Debug $LOGC61
@@ -56,12 +56,12 @@ GREP Debug $LOGC61
 RUNS ./scbi btype
 
 CLEAN-DIFF <<EOF
-2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
 2021/12/09 18:48:32 : steps : setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 2021/12/09 18:48:32 : no build needed, versions match
-2021/12/09 18:48:32 : End Building btype [default] (master)
+2021/12/09 18:48:32 : End Building btype [default] (n/a)
 EOF
 
 export SCBI_toto_BUILD_TYPE=Debug
@@ -69,12 +69,12 @@ export SCBI_toto_BUILD_TYPE=Debug
 RUNS ./scbi btype
 
 CLEAN-DIFF <<EOF
-2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
 2021/12/09 18:48:32 : steps : setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 2021/12/09 18:48:32 : no build needed, versions match
-2021/12/09 18:48:32 : End Building btype [default] (master)
+2021/12/09 18:48:32 : End Building btype [default] (n/a)
 EOF
 
 unset SCBI_CMAKE_BUILD_TYPE
@@ -82,7 +82,7 @@ unset SCBI_CMAKE_BUILD_TYPE
 RUNS ./scbi btype
 
 CLEAN-DIFF <<EOF
-2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
 2021/12/09 18:48:32 : steps : setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
@@ -92,7 +92,7 @@ CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : build completed
 2021/12/09 18:48:32 : install starting
 2021/12/09 18:48:32 : install completed
-2021/12/09 18:48:32 : End Building btype [default] (master)
+2021/12/09 18:48:32 : End Building btype [default] (n/a)
 EOF
 
 GREP Release $LOGC61
@@ -102,12 +102,12 @@ unset SCBI_toto_BUILD_TYPE
 RUNS ./scbi btype
 
 CLEAN-DIFF <<EOF
-2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
 2021/12/09 18:48:32 : steps : setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 2021/12/09 18:48:32 : no build needed, versions match
-2021/12/09 18:48:32 : End Building btype [default] (master)
+2021/12/09 18:48:32 : End Building btype [default] (n/a)
 EOF
 
 export SCBI_btype_BUILD_TYPE=WhatEver
@@ -115,7 +115,7 @@ export SCBI_btype_BUILD_TYPE=WhatEver
 RUNS ./scbi btype
 
 CLEAN-DIFF <<EOF
-2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
 2021/12/09 18:48:32 : steps : setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
@@ -125,7 +125,7 @@ CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : build completed
 2021/12/09 18:48:32 : install starting
 2021/12/09 18:48:32 : install completed
-2021/12/09 18:48:32 : End Building btype [default] (master)
+2021/12/09 18:48:32 : End Building btype [default] (n/a)
 EOF
 
 GREP WhatEver $LOGC61
@@ -133,12 +133,12 @@ GREP WhatEver $LOGC61
 RUNS ./scbi btype
 
 CLEAN-DIFF <<EOF
-2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
 2021/12/09 18:48:32 : steps : setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 2021/12/09 18:48:32 : no build needed, versions match
-2021/12/09 18:48:32 : End Building btype [default] (master)
+2021/12/09 18:48:32 : End Building btype [default] (n/a)
 EOF
 
 unset SCBI_btype_BUILD_TYPE
@@ -146,7 +146,7 @@ unset SCBI_btype_BUILD_TYPE
 RUNS ./scbi btype
 
 CLEAN-DIFF <<EOF
-2021/12/09 18:48:32 : Building btype [default] (master)
+2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
 2021/12/09 18:48:32 : steps : setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
@@ -156,7 +156,7 @@ CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : build completed
 2021/12/09 18:48:32 : install starting
 2021/12/09 18:48:32 : install completed
-2021/12/09 18:48:32 : End Building btype [default] (master)
+2021/12/09 18:48:32 : End Building btype [default] (n/a)
 EOF
 
 GREP Release $LOGC61

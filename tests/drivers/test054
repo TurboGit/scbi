@@ -6,13 +6,13 @@ MDIR=.root/builds/mspace
 RUNS ./scbi mspace/opta
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building mspace [opta] (master)
+xxxx/xx/xx xx:xx:xx : Building mspace [opta] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : opta-config starting
 xxxx/xx/xx xx:xx:xx : opta-config completed
-xxxx/xx/xx xx:xx:xx : End Building mspace [opta] (master)
+xxxx/xx/xx xx:xx:xx : End Building mspace [opta] (n/a)
 EOF
 
 RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-opta/logs/opta-config.log
@@ -27,13 +27,13 @@ EOF
 RUNS ./scbi mspace/optb
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building mspace [optb] (master)
+xxxx/xx/xx xx:xx:xx : Building mspace [optb] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : optb-config starting
 xxxx/xx/xx xx:xx:xx : optb-config completed
-xxxx/xx/xx xx:xx:xx : End Building mspace [optb] (master)
+xxxx/xx/xx xx:xx:xx : End Building mspace [optb] (n/a)
 EOF
 
 RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-optb/logs/optb-config.log
@@ -48,13 +48,13 @@ EOF
 RUNS ./scbi mspace/opta.optb
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building mspace [opta optb] (master)
+xxxx/xx/xx xx:xx:xx : Building mspace [opta optb] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : opta-config [opta optb] starting
 xxxx/xx/xx xx:xx:xx : opta-config [opta optb] completed
-xxxx/xx/xx xx:xx:xx : End Building mspace [opta optb] (master)
+xxxx/xx/xx xx:xx:xx : End Building mspace [opta optb] (n/a)
 EOF
 
 RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-opta.optb/logs/opta-config.log
@@ -70,13 +70,13 @@ EOF
 RUNS ./scbi mspace/optb.opta
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building mspace [optb opta] (master)
+xxxx/xx/xx xx:xx:xx : Building mspace [optb opta] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : optb-config [optb opta] starting
 xxxx/xx/xx xx:xx:xx : optb-config [optb opta] completed
-xxxx/xx/xx xx:xx:xx : End Building mspace [optb opta] (master)
+xxxx/xx/xx xx:xx:xx : End Building mspace [optb opta] (n/a)
 EOF
 
 RUNS grep "^[A-F] " $MDIR/x86_64-linux-gnu-optb.opta/logs/optb-config.log

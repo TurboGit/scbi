@@ -21,13 +21,13 @@ xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
 xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
 
-xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -40,7 +40,7 @@ xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
 xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
 xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
 
-xxxx/xx/xx xx:xx:xx : Building smain [default] (master)
+xxxx/xx/xx xx:xx:xx : Building smain [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -48,7 +48,7 @@ xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : End Building smain [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building smain [default] (n/a)
 EOF
 
 # nothing build
@@ -66,12 +66,12 @@ xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
 xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
 
-xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
-xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -82,12 +82,12 @@ xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
 xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
 xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
 
-xxxx/xx/xx xx:xx:xx : Building smain [default] (master)
+xxxx/xx/xx xx:xx:xx : Building smain [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
-xxxx/xx/xx xx:xx:xx : End Building smain [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building smain [default] (n/a)
 EOF
 
 # change depA, check that depA is rebuilt and also smain
@@ -110,13 +110,13 @@ xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
 xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
 
-xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -127,7 +127,7 @@ xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
 xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
 xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
 
-xxxx/xx/xx xx:xx:xx : Building smain [default] (master)
+xxxx/xx/xx xx:xx:xx : Building smain [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -135,7 +135,7 @@ xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : End Building smain [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building smain [default] (n/a)
 EOF
 
 mv scripts.d/depA.keep scripts.d/depA
@@ -162,12 +162,12 @@ xxxx/xx/xx xx:xx:xx : End metamodule meta-meta [default] setup
 xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
 xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
 
-xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
-xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -181,12 +181,12 @@ xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
 xxxx/xx/xx xx:xx:xx : Metamodule meta-meta [default] wrapup
 xxxx/xx/xx xx:xx:xx : End metamodule meta-meta [default] wrapup
 
-xxxx/xx/xx xx:xx:xx : Building smain [two] (master)
+xxxx/xx/xx xx:xx:xx : Building smain [two] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
-xxxx/xx/xx xx:xx:xx : End Building smain [two] (master)
+xxxx/xx/xx xx:xx:xx : End Building smain [two] (n/a)
 EOF
 
 cp scripts.d/depA scripts.d/depA.keep
@@ -211,13 +211,13 @@ xxxx/xx/xx xx:xx:xx : End metamodule meta-meta [default] setup
 xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
 xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
 
-xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -231,7 +231,7 @@ xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
 xxxx/xx/xx xx:xx:xx : Metamodule meta-meta [default] wrapup
 xxxx/xx/xx xx:xx:xx : End metamodule meta-meta [default] wrapup
 
-xxxx/xx/xx xx:xx:xx : Building smain [two] (master)
+xxxx/xx/xx xx:xx:xx : Building smain [two] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -239,7 +239,7 @@ xxxx/xx/xx xx:xx:xx : config [two] starting
 xxxx/xx/xx xx:xx:xx : config [two] completed
 xxxx/xx/xx xx:xx:xx : build [two] starting
 xxxx/xx/xx xx:xx:xx : build [two] completed
-xxxx/xx/xx xx:xx:xx : End Building smain [two] (master)
+xxxx/xx/xx xx:xx:xx : End Building smain [two] (n/a)
 EOF
 
 mv scripts.d/depA.keep scripts.d/depA

@@ -23,7 +23,7 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : autovarB using standard variant
 xxxx/xx/xx xx:xx:xx :   ↳ squid-cgi v.vv not installed
 
-xxxx/xx/xx xx:xx:xx : Building autovarB [default] (master)
+xxxx/xx/xx xx:xx:xx : Building autovarB [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -32,7 +32,7 @@ xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : skip global install
-xxxx/xx/xx xx:xx:xx : End Building autovarB [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building autovarB [default] (n/a)
 EOF
 
 # =============== B AUTO on plan
@@ -42,13 +42,13 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : autovarB using standard variant
 xxxx/xx/xx xx:xx:xx :   ↳ squid-cgi v.vv not installed
 
-xxxx/xx/xx xx:xx:xx : Building autovarB [default] (master)
+xxxx/xx/xx xx:xx:xx : Building autovarB [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : skip global install
-xxxx/xx/xx xx:xx:xx : End Building autovarB [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building autovarB [default] (n/a)
 EOF
 
 # =============== C AUTO on command line
@@ -58,7 +58,7 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : autovarC using standard variant
 xxxx/xx/xx xx:xx:xx :   ↳ unknown dependency shouldnotexist-dev
 
-xxxx/xx/xx xx:xx:xx : Building autovarC [default] (master)
+xxxx/xx/xx xx:xx:xx : Building autovarC [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -67,5 +67,5 @@ xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : skip global install
-xxxx/xx/xx xx:xx:xx : End Building autovarC [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building autovarC [default] (n/a)
 EOF

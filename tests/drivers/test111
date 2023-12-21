@@ -58,7 +58,7 @@ inv-test19-wrapup ()
 {
     test19-wrapup \$1 \$2 \$3 \$4 \$5 \$6 \$7
 }
-xxxx/xx/xx xx:xx:xx : Building inv-test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : Building inv-test19 [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -82,7 +82,7 @@ xxxx/xx/xx xx:xx:xx : pre-wrapup starting
 xxxx/xx/xx xx:xx:xx : pre-wrapup completed
 xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
-xxxx/xx/xx xx:xx:xx : End Building inv-test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building inv-test19 [default] (n/a)
 EOF
 
 #  Test inherit of limited set of hook
@@ -115,7 +115,7 @@ iset-test19-pre-setup ()
 {
     test19-pre-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
 }
-xxxx/xx/xx xx:xx:xx : Building iset-test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : Building iset-test19 [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -127,7 +127,7 @@ xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : post-build starting
 xxxx/xx/xx xx:xx:xx : post-build completed
-xxxx/xx/xx xx:xx:xx : End Building iset-test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building iset-test19 [default] (n/a)
 EOF
 
 #  Test inherit of limited set of hook and without variant
@@ -155,7 +155,7 @@ invset-test19-pre-setup ()
 {
     test19-pre-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
 }
-xxxx/xx/xx xx:xx:xx : Building invset-test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : Building invset-test19 [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -167,5 +167,5 @@ xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : post-build starting
 xxxx/xx/xx xx:xx:xx : post-build completed
-xxxx/xx/xx xx:xx:xx : End Building invset-test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building invset-test19 [default] (n/a)
 EOF

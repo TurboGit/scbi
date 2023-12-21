@@ -4,86 +4,86 @@
 RUNS ./scbi --log:yes --deps dephook2
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config starting
 depA
 xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
 
-xxxx/xx/xx xx:xx:xx : Building dephook2 [default] (master)
+xxxx/xx/xx xx:xx:xx : Building dephook2 [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config starting
 call -DOnlyCommon
 xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : End Building dephook2 [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building dephook2 [default] (n/a)
 EOF
 
 #variant vara
 RUNS ./scbi --log:yes --deps dephook2/vara
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
-xxxx/xx/xx xx:xx:xx : End Building depA [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
 
-xxxx/xx/xx xx:xx:xx : Building dephook2 [vara] (master)
+xxxx/xx/xx xx:xx:xx : Building dephook2 [vara] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [vara] starting
 call -DOnlyCommon -DA=yes
 xxxx/xx/xx xx:xx:xx : config [vara] completed
-xxxx/xx/xx xx:xx:xx : End Building dephook2 [vara] (master)
+xxxx/xx/xx xx:xx:xx : End Building dephook2 [vara] (n/a)
 EOF
 
 #variant varb
 RUNS ./scbi --log:yes --deps dephook2/varb
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building depB [default] (master)
+xxxx/xx/xx xx:xx:xx : Building depB [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config starting
 depB
 xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : End Building depB [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building depB [default] (n/a)
 
-xxxx/xx/xx xx:xx:xx : Building dephook2 [varb] (master)
+xxxx/xx/xx xx:xx:xx : Building dephook2 [varb] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [varb] starting
 call -DOnlyCommon
 xxxx/xx/xx xx:xx:xx : config [varb] completed
-xxxx/xx/xx xx:xx:xx : End Building dephook2 [varb] (master)
+xxxx/xx/xx xx:xx:xx : End Building dephook2 [varb] (n/a)
 EOF
 
 #variant vara and varb
 RUNS ./scbi --log:yes --deps dephook2/vara.varb
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building depB [default] (master)
+xxxx/xx/xx xx:xx:xx : Building depB [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
-xxxx/xx/xx xx:xx:xx : End Building depB [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building depB [default] (n/a)
 
-xxxx/xx/xx xx:xx:xx : Building dephook2 [vara varb] (master)
+xxxx/xx/xx xx:xx:xx : Building dephook2 [vara varb] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : config [vara varb] starting
 call -DOnlyCommon -DA=yes
 xxxx/xx/xx xx:xx:xx : config [vara varb] completed
-xxxx/xx/xx xx:xx:xx : End Building dephook2 [vara varb] (master)
+xxxx/xx/xx xx:xx:xx : End Building dephook2 [vara varb] (n/a)
 EOF

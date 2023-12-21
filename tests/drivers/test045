@@ -4,11 +4,11 @@
 RUNS ./scbi --deps lib3:#v1.2
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building inhnat [native] (master)
+xxxx/xx/xx xx:xx:xx : Building inhnat [native] (os)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : skip global install
-xxxx/xx/xx xx:xx:xx : End Building inhnat [native] (master)
+xxxx/xx/xx xx:xx:xx : End Building inhnat [native] (os)
 
 xxxx/xx/xx xx:xx:xx : Building lib3 [default] (v1.2)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -26,12 +26,12 @@ EOF
 RUNS ./scbi --deps lib3:#v1.2
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building inhnat [native] (master)
+xxxx/xx/xx xx:xx:xx : Building inhnat [native] (os)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : skip global install
-xxxx/xx/xx xx:xx:xx : End Building inhnat [native] (master)
+xxxx/xx/xx xx:xx:xx : End Building inhnat [native] (os)
 
 xxxx/xx/xx xx:xx:xx : Building lib3 [default] (v1.2)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
