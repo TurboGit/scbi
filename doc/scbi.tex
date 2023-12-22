@@ -907,10 +907,10 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
-	\item[<module>{[}-<variant>{]}-out-of-tree] \index{hook!out-of-tree}Whether to build out of the source tree or not.
+	\item[<module>{[}-<variant>{]}-out-of-tree] \index{hook!out-of-tree}Whether to build out of the source tree or not. Default is \code{true}.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} \code{true | false}
+		\item[return] \tabto{2cm} \code{\textbf{true} | false}
 	\end{description}
 
 	Example:
@@ -921,10 +921,10 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 	}
 	\end{lstlisting}
 
-	\item[<module>{[}-<variant>{]}-only-explicit-build] \index{hook!only-explicit-build}Whether to build when found in dependencies or only when the plug-in is passed on the command line. If function returns \code{true} then it will be built only when on the command line. In all cases it will be used to get the environment when found in dependencies.
+	\item[<module>{[}-<variant>{]}-only-explicit-build] \index{hook!only-explicit-build}Whether to build when found in dependencies or only when the plug-in is passed on the command line. If function returns \code{true} then it will be built only when on the command line. In all cases it will be used to get the environment when found in dependencies. Default is \code{false}.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} \code{true | false}
+		\item[return] \tabto{2cm} \code{true | \textbf{false}}
 	\end{description}
 
 	Example:
@@ -1052,7 +1052,7 @@ It must be noted that for those steps we have generic internal version and \code
 
 For example, the generic internal setup step (\code{module-setup}) is used by the scbi driver to setup the sources (creating the build environment and populating the proper sources to compile) using the \code{vcs}, \code{version}, \code{tar} and \code{out-of-tree} hooks.
 
-The \code{depends}, \code{build-depends}, \code{env}, \code{build-env} and \code{config-options} can have a \code{common} variant which is cumulative with the corresponding variant hooks or with the default hook. If a variant hook is present then the default hook is not called (we stop at the first \code{<variant>} call below:
+The \code{patches}, \code{depends}, \code{build-depends}, \code{tests-depends}, \code{env}, \code{build-env}, \code{external-env} and \code{config-options} can have a \code{common} variant which is cumulative with the corresponding variant hooks or with the default hook. If a variant hook is present then the default hook is not called, we stop at the first \code{<variant>} call below:
 
 \begin{enumerate}
 	\item <module>-common-cross-<step>
@@ -1066,7 +1066,7 @@ The \code{depends}, \code{build-depends}, \code{env}, \code{build-env} and \code
 The \code{cross} hooks are used when the target is different than the host.
 \index{hook!cross}
 
-For all other hooks there is no \code{common} variant. Again if a variant hook is present the default hook is not called (we stop at the first \code{<variant>} call below:
+For all other hooks there is no \code{common} variant. Again if a variant hook is present the default hook is not called, we stop at the first \code{<variant>} call below:
 
 \begin{enumerate}
 	\item <module>-<variant>-cross-<step>
@@ -1095,10 +1095,10 @@ A module defining the hook \code{<module>-modules} (possibly with variants) beco
 					\item echo <module2>
 		\end{enumerate}
 	\end{description}
-	\item[<module>{[}-<variant>{]}-propagate-version] \index{hook!propagate-version}\label{propagate-version}Whether the meta-module version is to be propagated to aggregated modules.
+	\item[<module>{[}-<variant>{]}-propagate-version] \index{hook!propagate-version}\label{propagate-version}Whether the meta-module version is to be propagated to aggregated modules. Default is \code{true}.
 		\begin{description}[font=\textit,style=standard]
 			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
-			\item[return] \tabto{2cm} \code{true | false}
+			\item[return] \tabto{2cm} \code{\textbf{true} | false}
 		\end{description}
 \end{description}
 
@@ -1141,7 +1141,7 @@ A module listed in a meta-module can itself be a meta-module. A meta-module can 
 	\item {[variant]-wrapup}
 \end{itemize}
 
-It is possible to specify a version for a meta-module even if there is no sources as this version will be propagated to all aggregated modules and recursively for all meta-modules.
+It is possible to specify a version for a meta-module even if there is no sources as this version will be propagated to all aggregated modules and recursively for all meta-modules. To disable this feature it is necessary to define the hook \code{propagate-version} and returns \code{false}.
 
 \subsection{Setting environment}
 \label{set-env}
@@ -1674,7 +1674,9 @@ For example:
 Will create an archive named \file{Little-CMS-2.12.tar.gz}. This is the default naming as no \code{archive} hook is defined for this plug-in.
 
 The tool can also create a \code{MD5}, \code{SHA-1} or \code{SHA-256}
-file for the generated archive.
+file for the generated archive. Use the following command to get the usage output:
+
+\cmd{scbi source-archive \ddash{}help}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
