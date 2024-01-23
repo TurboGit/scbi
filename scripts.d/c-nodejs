@@ -1,0 +1,34 @@
+
+function c-nodejs-archive()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo curl
+    echo https://nodejs.org/dist/$VERSION
+    echo node-$VERSION-linux-x64.tar.xz
+}
+
+function c-nodejs-out-of-tree()
+{
+    echo false
+}
+
+function c-nodejs-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH $PREFIX/bin
+}
+
+function c-nodejs-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    rsync -a . ../install
+}
