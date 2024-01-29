@@ -22,6 +22,7 @@ GREP "PATH /tmp"                        $LDIR/build.log
 GREP "define-var SET BOSENV \"benv-val" $LDIR/env.cmd
 GREP "define-var ADD PATH \"/tmp\""     $LDIR/env.cmd
 
+cp scbi scbi.keep
 sed -i 's/^SCBI_OS_MODULE=.*/SCBI_OS_MODULE=windows/g' scbi
 
 RUNS ./scbi -f osenv
@@ -33,7 +34,7 @@ GREP "PATH /path/osenv/tmp"             $LDIR/build.log
 GREP "define-var SET BOSENV \"benv-val" $LDIR/env.cmd
 GREP "define-var ADD PATH \"/tmp\""     $LDIR/env.cmd
 
-cp ../scbi .
+mv scbi.keep ./scbi
 
 # Test that running build.cmd is fully equivalent and properly using the
 # OS dependant routines.
