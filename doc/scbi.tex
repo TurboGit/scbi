@@ -597,7 +597,7 @@ The following options are supported:
 		\item[use|no sub-option] The shell stays in the current working directory and setup the environment for the module to be used by another one. That is the given module is a dependency (and all dependents modules recursively) for the work to be done.
 	\end{description}
 
-	\item[\ddash{}run:"command args..."] Run the given command with the module's environment variables set. This is meant to be used to run a command which is depending on some libraries or binaries that are in the sandbox.
+	\item[\ddash{}run{[}:"command args..."{]}] \label{cmd!run}Run the given command with the module's environment variables set. This is meant to be used to run a command which is depending on some libraries or binaries that are in the sandbox. If optional \code{command args...} is not specified the hook \code{run} is used to get the command to run.
 
 	\item[\ddash{}list-depends:{[}direct|full{]}] Recursively list module's dependencies. Either list all dependencies recursively (the default) or only the direct dependencies of the given module.
 
@@ -1009,6 +1009,18 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
+	\item[<module>{[}-common|<variant>{]}-run] \index{hook!run}Set the command line to run when option \code{\ddash{}run} is used without argument (\seeref{cmd!run}).
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\begin{enumerate}
+			\item echo myprog
+			\item echo option1
+			\item echo option2...
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
 \end{description}
 
 \subsubsection{Calling order}
@@ -1027,6 +1039,7 @@ Some of the hooks are called by the main SCBI driver when needed as they are ret
 	\item build-env
 	\item depends
 	\item build-depends
+	\item run
 \end{itemize}
 
 For all other hooks there is a specific calling order which is:

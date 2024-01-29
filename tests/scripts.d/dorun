@@ -1,0 +1,20 @@
+
+function dorun-common-run()
+{
+    echo echo dorun
+}
+
+function dorun-run()
+{
+    echo default
+}
+
+function dorun-one-run()
+{
+    echo one
+}
+
+function dorun-two-run()
+{
+    echo two
+}

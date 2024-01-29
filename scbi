@@ -1902,6 +1902,10 @@ while [[ $# -gt 0 ]]; do
             DO_RUN=yes
             DO_RUN_CMD=${1/*:/}
             ;;
+        --run)
+            DO_RUN=yes
+            DO_RUN_CMD=""
+            ;;
         --tests:only*)
             do-clear-steps
             DO_TEST=yes-only

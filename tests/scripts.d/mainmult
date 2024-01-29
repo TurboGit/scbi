@@ -44,6 +44,11 @@ function mainmult-install()
     cp mainmult $PREFIX/bin
 }
 
+function mainmult-run()
+{
+    echo mainmult
+}
+
 function mainmult-tests()
 {
     local PREFIX=$1

@@ -79,6 +79,22 @@ function run-command()
     local module_info=()
     get-module-ref module_info $MODREF
     local module=${module_info[0]}
+    local variant=${module_info[1]}
+
+    if [[ -z $CMD ]]; then
+        local PREFIX=$SCBI_BDIR/$module/$TARGET-$variant/install
+        # CMD is not specified, try using the one defined in
+        # the plug-in itself.
+        for C in $(plugin-call-variant-hooks $module run \
+                                             $PREFIX $TARGET $variant);
+        do
+            CMD+="$C "
+        done
+
+        if [[ -z $CMD ]]; then
+            elog $module no command specified for run option
+        fi
+    fi
 
     export SCBI_SHELL=$module
 

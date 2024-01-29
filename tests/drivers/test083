@@ -47,3 +47,11 @@ main on master
 liba.C patched version
 libb.B master (default)
 EOF
+
+RUNS ./scbi --run mainmult
+
+CLEAN-DIFF <<EOF
+main on master
+liba.C patched version
+libb.B master (default)
+EOF
