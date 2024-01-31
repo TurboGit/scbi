@@ -1865,15 +1865,12 @@ function handle-module()
 
 ############################## sub-commands
 
-if [[ $1 == "source-archive" ]]; then
+if [[ -n "$(which scbi-$1)" ]]; then
+    SUBCMD=$1
     shift
     declare -fx load-module-env check-tools-abort check-tools check-tool
     export DO_QUIET
-    $(dirname $SCBI_BINARY)/scbi-source-archive subcommand $*
-    exit $?
-elif [[ $1 == "lint" ]]; then
-    shift
-    $(dirname $SCBI_BINARY)/scbi-lint $*
+    $(dirname $SCBI_BINARY)/scbi-$SUBCMD subcommand $*
     exit $?
 fi
 

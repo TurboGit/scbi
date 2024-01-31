@@ -22,6 +22,8 @@ function usage()
     echo "   -e | --error            report only errors"
 }
 
+[[ $1 == "subcommand" ]] && shift
+
 ALLOPTS=$(getopt -u -o ehv -l error,help,version,plugins: -- $*)
 
 set -- $ALLOPTS
