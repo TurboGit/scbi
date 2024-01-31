@@ -93,7 +93,7 @@ function _internal_merge_variant()
     echo "${REF:+/}$REF"
 }
 
-declare -A SCBI_PLAN_LOADED
+declare -gA SCBI_PLAN_LOADED
 
 function load-module-plan()
 {

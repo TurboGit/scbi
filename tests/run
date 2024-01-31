@@ -84,6 +84,8 @@ cp ../scripts.d/_os_* scripts.d/
 cp ../scripts.d/[1-9]* scripts.d/
 cp ../scripts.d/.pkgs-* scripts.d/
 
+export PATH="$PWD:$PATH"
+
 # patch scbi driver to avoid loading $HOME/.scbi ini file
 
 sed -i 's,\(.*ini-load-file \$HOME/.scbi\),#\1,g' scbi

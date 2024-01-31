@@ -5,7 +5,7 @@
 
 shopt -s extglob
 
-declare -A SCBI_INI_DB
+declare -gA SCBI_INI_DB
 
 SCBI_VERSION=@VERSION@
 SCBI_BINARY=$(realpath $0)
@@ -1863,12 +1863,109 @@ function handle-module()
     unset SCBI_MODULES_LIST[-1]
 }
 
+############################## setup-generic-tool-env
+#
+# Routine to share the env settings with sub-commands
+
+function setup-generic-tool-env()
+{
+    #  Load module definitions
+
+    [[ ! -d "$SCBI_PLUGINS" ]] ||
+        [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]] &&
+            SCBI_PLUGINS=$HOME/.config/scbi
+
+    [[ ! -d "$SCBI_PLUGINS" ]] &&
+        echo "$0: cannot find module definition files" && exit 1
+
+    #  Load user's environment if any now that SCBI_PLUGINS is set
+
+    load-module-env $ENV_NAME
+    #  If we have specified a build directory on command line, set it now
+    #  that the env is loaded (takes precedence).
+
+    if [[ -n $CMDLINE_BUILD_DIR ]]; then
+        export SCBI_BDIR=$CMDLINE_BUILD_DIR
+    fi
+
+    #  Then load any global settings, not overriding user's ones
+
+    for setup in $SCBI_PLUGINS/[0-9]*; do
+        source $setup
+    done
+
+    #  Then load any OS dependent runtime module
+
+    [[ -f $SCBI_PLUGINS/_os_$SCBI_OS_MODULE ]] &&
+        {
+            SCBI_OS_MODULE_FILE=$SCBI_PLUGINS/_os_$SCBI_OS_MODULE
+            source $SCBI_OS_MODULE_FILE
+        }
+
+    #  Nothing to build, display version
+
+    if [[ $DO_VERSION = yes ]]; then
+        echo "SCBI : $SCBI_VERSION"
+        for file in $(ls $SCBI_PLUGINS/.scbi*version.txt 2> /dev/null); do
+            cat $file
+        done
+        exit 0
+    fi
+
+    #  If a plan passed on the command line ensure that it is used instead
+    #  of any other possibly set in the environment file.
+
+    [[ -n $SCBI_PLAN_CL ]] && SCBI_PLAN=$SCBI_PLAN_CL
+
+    #  Load build plan if any
+
+    if [[ -n $SCBI_PLAN ]]; then
+        load-module-plan $SCBI_PLAN
+        [[ $? -ne 0 ]] &&
+            echo "error: cannot load module plan $SCBI_PLAN" &&
+            exit 1
+    fi
+
+    [[ $DO_STORE == yes ]] && return
+
+    [[ -z $SCBI_MODULES ]] &&
+        [[ $DO_STAT == no ]] &&
+        [[ $DO_MOD_VER == no ]] &&
+        usage && exit 0
+
+    [[ $DO_HELP == yes ]] && usage && exit 0
+
+    [[ $DO_STAT != no ]] &&
+        display-stat
+
+    [[ -z $SCBI_MODULES ]] || [[ $DO_STAT == yes ]] &&
+        display-modules && display-plans
+
+    [[ $DO_STAT == yes ]] &&
+        display-log-stat
+
+    #  Setup module reference specified on the command line. The module
+    #  reference on the command line must overwrite the actual build plan.
+
+    for module in $SCBI_MODULES; do
+        set-module-ref $module
+    done
+
+    if [[ $DO_MOD_VER == no ]]; then
+        rewrite-module-plan
+    else
+        rewrite-module-plan > /dev/null
+    fi
+    [[ $? == 1 ]] && exit 1
+}
+
 ############################## sub-commands
 
 if [[ -n "$(which scbi-$1)" ]]; then
     SUBCMD=$1
     shift
     declare -fx load-module-env check-tools-abort check-tools check-tool
+    declare -fx setup-generic-tool-env
     export DO_QUIET
     $(dirname $SCBI_BINARY)/scbi-$SUBCMD subcommand $*
     exit $?
@@ -2204,18 +2301,6 @@ fi
 
 trap clean-up EXIT
 
-#  Load module definitions
-
-[[ ! -d "$SCBI_PLUGINS" ]] || [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]] &&
-    SCBI_PLUGINS=$HOME/.config/scbi
-
-[[ ! -d "$SCBI_PLUGINS" ]] &&
-    echo "$0: cannot find module definition files" && exit 1
-
-#  Load user's environment if any now that SCBI_PLUGINS is set
-
-load-module-env $ENV_NAME
-
 #  Build the steps to be conducted
 
 [[ $DO_SETUP   != no ]] && STEPS="$STEPS setup"
@@ -2225,26 +2310,7 @@ load-module-env $ENV_NAME
 [[ $DO_TEST    != no ]] && STEPS="$STEPS tests"
 [[ $DO_WRAPUP  != no ]] && STEPS="$STEPS wrapup"
 
-#  If we have specified a build directory on command line, set it now
-#  that the env is loaded (takes precedence).
-
-if [[ -n $CMDLINE_BUILD_DIR ]]; then
-    export SCBI_BDIR=$CMDLINE_BUILD_DIR
-fi
-
-#  Then load any global settings, not overriding user's ones
-
-for setup in $SCBI_PLUGINS/[0-9]*; do
-    source $setup
-done
-
-#  Then load any OS dependent runtime module
-
-[[ -f $SCBI_PLUGINS/_os_$SCBI_OS_MODULE ]] &&
-    {
-        SCBI_OS_MODULE_FILE=$SCBI_PLUGINS/_os_$SCBI_OS_MODULE
-        source $SCBI_OS_MODULE_FILE
-    }
+setup-generic-tool-env
 
 #  Handle store command
 
@@ -2253,63 +2319,11 @@ if [[ $DO_STORE = yes ]]; then
     exit $?
 fi
 
-#  Nothing to build, display version
-
-if [[ $DO_VERSION = yes ]]; then
-    echo "SCBI : $SCBI_VERSION"
-    for file in $(ls $SCBI_PLUGINS/.scbi*version.txt 2> /dev/null); do
-        cat $file
-    done
-    exit 0
-fi
-
-#  If a plan passed on the command line ensure that it is used instead
-#  of any other possibly set in the environment file.
-
-[[ -n $SCBI_PLAN_CL ]] && SCBI_PLAN=$SCBI_PLAN_CL
-
 [[ -z $SCBI_MODULES ]] &&
     [[ $DO_SHELL != no ]] &&
     [[ $DO_RUN != no ]] &&
     [[ $DO_STAT == no ]] &&
     echo "error: shell/run commands need a plug-in, see scbi --help" && exit 0
-
-[[ -z $SCBI_MODULES ]] && [[ $DO_STAT == no ]] && [[ $DO_MOD_VER == no ]] &&
-    usage && exit 0
-
-[[ $DO_HELP == yes ]] && usage && exit 0
-
-[[ $DO_STAT != no ]] &&
-    display-stat
-
-[[ -z $SCBI_MODULES ]] || [[ $DO_STAT == yes ]] &&
-    display-modules && display-plans
-
-[[ $DO_STAT == yes ]] &&
-    display-log-stat
-
-#  Load build plan if any
-
-if [[ -n $SCBI_PLAN ]]; then
-    load-module-plan $SCBI_PLAN
-    [[ $? -ne 0 ]] &&
-        echo "error: cannot load module plan $SCBI_PLAN" &&
-        exit 1
-fi
-
-#  Setup module reference specified on the command line. The module
-#  reference on the command line must overwrite the actual build plan.
-
-for module in $SCBI_MODULES; do
-    set-module-ref $module
-done
-
-if [[ $DO_MOD_VER == no ]]; then
-    rewrite-module-plan
-else
-    rewrite-module-plan > /dev/null
-fi
-[[ $? == 1 ]] && exit 1
 
 if [[ $DO_DEPS != no ]]; then
     for module in $SCBI_MODULES; do

@@ -1,5 +1,5 @@
 
-declare -A SCBI_MODULE_ALIAS
+declare -gA SCBI_MODULE_ALIAS
 
 SCBI_STATUS_VERSION_OK=0
 SCBI_STATUS_VERSION_NOK=1
@@ -9,7 +9,7 @@ SCBI_STATUS_PKG_NOT_FOUND=3
 SCBI_ERROR_HOOK_NOT_FOUND=4
 SCBI_ERROR_PLUGIN_NOT_FOUND=5
 
-declare SCBI_RECTREE=()
+declare -g SCBI_RECTREE=()
 
 ############################## display-stacktrace
 #

@@ -7,13 +7,13 @@
 #     - implement check-<distrib>-pkg
 #     - implement get-<distrib>-lib-for-dev (optional)
 
-declare -A SCBI_OS_DISCRIMINANTS
+declare -gA SCBI_OS_DISCRIMINANTS
 
 #  All currently installed packages
-declare -A SCBI_PKGS
+declare -gA SCBI_PKGS
 
 #  OS dependent alias map
-declare -g -A SCBI_ALIAS
+declare -gA SCBI_ALIAS
 
 SCBI_OS_NAMES=( deb ubt cos rhl fed win )
 

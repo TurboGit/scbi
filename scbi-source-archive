@@ -8,6 +8,7 @@ DO_HELP=no
 DO_CLEAN_VERSION=no
 DO_LOWER=no
 DO_SHA=no
+DO_STAT=no
 ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
 
 function usage()
@@ -204,7 +205,7 @@ OPTARG=
 
 ALLOPTS=$(getopt -u -o chevl \
                  -l env:,plugins:,version,plan:,help,clean-version \
-                 -l lower-case,sha1,sha256,md5 \
+                 -l stat,lower-case,sha1,sha256,md5 \
                  -- $* 2> $OPTFILE)
 
 if [[ $? != 0 ]]; then
@@ -232,6 +233,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         --plan)
             SCBI_PLAN_CL=$2; shift
+            ;;
+        --stat)
+            DO_STAT=info-only;
             ;;
         -c|--clean-version)
             DO_CLEAN_VERSION=yes
@@ -275,47 +279,7 @@ if [[ $DO_HELP = yes ]]; then
     exit 0
 fi
 
-#  Load module definitions
-
-[[ ! -d "$SCBI_PLUGINS" ]] ||
-    [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]] &&
-        SCBI_PLUGINS=$HOME/.config/scbi
-
-#  Load user's environment if any now that SCBI_PLUGINS is set
-
-load-module-env $ENV_NAME
-
-#  Then load any global settings, not overriding user's ones
-
-for setup in $SCBI_PLUGINS/[0-9]*; do
-    source $setup
-done
-
-#  Nothing to build, display usage
-
-if [[ $DO_VERSION = yes ]]; then
-    echo "SCBI : $SCBI_VERSION"
-    for file in $(ls $SCBI_PLUGINS/.scbi*version.txt 2> /dev/null); do
-        cat $file
-    done
-    exit 0
-fi
-
-#  Load build plan if any
-
-if [[ -n $SCBI_PLAN ]]; then
-    load-module-plan $SCBI_PLAN
-    [[ $? -ne 0 ]] &&
-        echo "error: cannot load module plan $SCBI_PLAN" &&
-        exit 1
-fi
-
-#  Setup module reference specified on the command line. The module
-#  reference on the command line must overwrite the actual build plan.
-
-for module in $SCBI_MODULES; do
-    set-module-ref $module
-done
+setup-generic-tool-env
 
 for module in $SCBI_MODULES; do
     handle-module $module || exit 1
