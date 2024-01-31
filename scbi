@@ -2253,7 +2253,7 @@ if [[ $DO_STORE = yes ]]; then
     exit $?
 fi
 
-#  Nothing to build, display usage
+#  Nothing to build, display version
 
 if [[ $DO_VERSION = yes ]]; then
     echo "SCBI : $SCBI_VERSION"
