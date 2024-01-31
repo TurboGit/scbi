@@ -1,4 +1,6 @@
 
+shopt -s extglob
+
 #  associative array given the status of a module, $SCBI_LOADED[$module] is
 #  set to yes when module is loaded and $SCBI_LOADED[$module.$variant] is
 #  set to meta (for a meta-module) / final (for a standard module).
