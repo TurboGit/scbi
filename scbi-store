@@ -1,0 +1,240 @@
+#!/bin/bash
+
+SCBI_VERSION=@VERSION@S
+SCBI_PLUGINS="$PWD/scripts.d"
+DO_VERSION=no
+DO_HELP=no
+DO_LIST=no
+DO_DELETE=no
+DO_STAT=no
+DO_PLAN=no
+SCBI_MODULES=no
+ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
+KEY=""
+
+############################################## sto-usage
+#
+#  Display script usage
+#
+function sto-usage()
+{
+    echo
+    echo SCBI-STORE $SCBI_VERSION
+    echo
+    echo $0 [options] plug-in1 [plug-in2...]
+
+    echo ""
+    echo "   -h | --help             this help message"
+    echo "   -v | --version          display driver & plug-ins versions"
+    echo "      | --plugins=<dir>    specify the plugins' directory"
+    echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
+    echo "      | --list-keys        list all stored keys"
+    echo "   -l | --list[:full]      list stored keys possibly with values"
+    echo "   -d | --delete           remove a key"
+}
+
+declare -A SCBI_STORE=()
+
+############################################## sto-load
+#
+#  Load store database
+#
+function sto-load()
+{
+    [[ -f  $SCBI_PLUGINS/.store ]] &&
+        while read key value; do
+            SCBI_STORE+=( [$key]="$value" )
+        done < $SCBI_PLUGINS/.store
+}
+
+############################################## sto-list
+#
+#  Save store database
+#
+function sto-save()
+{
+    for key in ${!SCBI_STORE[*]}; do
+        echo $key ${SCBI_STORE[$key]}
+    done > $SCBI_PLUGINS/.store
+}
+
+############################################## sto-list
+#
+#  List keys / values
+#
+function sto-list()
+{
+    local KEY=$1
+
+    sto-load
+
+    for key in ${!SCBI_STORE[*]}; do
+        if [[ $key == $KEY ]] || [[ -z $KEY ]]; then
+            if [[ $DO_LIST == full ]]; then
+                echo $key ${SCBI_STORE[$key]}
+            else
+                echo $key
+            fi
+        fi
+    done
+}
+
+############################################## sto-delete
+#
+#  Delete keys
+#
+function sto-delete()
+{
+    local KEY=$1
+
+    sto-load
+
+    unset SCBI_STORE[$KEY]
+
+    sto-save
+}
+
+############################################## sto-get
+#
+#  Get value for corresponding key
+#
+function sto-get()
+{
+    local KEY=$1
+
+    sto-load
+
+    local res=1
+
+    [[ "${SCBI_STORE[$KEY]+abc}" ]] && res=0
+
+    if [[ -t 1 ]]; then
+        echo ${SCBI_STORE[$KEY]}
+    else
+        echo -n ${SCBI_STORE[$KEY]}
+    fi
+
+    return $res
+}
+
+############################################## sto-record
+#
+#  Record a new key / value
+#
+function sto-record()
+{
+    local KEY=$1
+    local VALUE=$2
+
+    sto-load
+
+    SCBI_STORE[$KEY]="$VALUE"
+
+    sto-save
+}
+
+#  Check that this script has properly been called by scbi main
+#  script.
+
+if [[ $1 == "subcommand" ]]; then
+    shift
+fi
+
+OPTFILE=$(mktemp)
+OPTARG=
+
+ALLOPTS=$(getopt -u -o kehvld \
+             -l env,plugins:,version,help,list-keys,list:full:,list,delete \
+             -- $* 2> $OPTFILE)
+
+if [[ $? != 0 ]]; then
+    cat $OPTFILE
+    echo try \"scbi store --help\" for more information.
+    rm -f $OPTFILE
+    exit 1
+fi
+
+set -- $ALLOPTS
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            DO_HELP=yes
+            break
+            ;;
+        -v|--version)
+            DO_VERSION=yes
+            break
+            ;;
+        -e|--env)
+            ENV_NAME="$2"
+            shift
+            ;;
+        -k|--list-keys)
+            DO_LIST=yes
+            ;;
+        --list:full)
+            DO_LIST=full
+            ;;
+        -l|--list)
+            DO_LIST=yes
+            ;;
+        -d|--delete)
+            DO_DELETE=yes
+            ;;
+        --plugins)
+            SCBI_PLUGINS=$2; shift
+            if [[ ! -d "$SCBI_PLUGINS" ]] || \
+                   [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]];
+            then
+                echo "$0: no plugins found in $SCBI_PLUGINS"
+                exit 1
+            fi
+            ;;
+        (--)
+            ;;
+        (*)
+            SCBI_STORE_KEYS+=( $1 )
+            ;;
+        (-*)
+            echo "$0: error - unrecognized option $1" 1>&2; exit 1
+            sto-usage
+            ;;
+    esac
+    shift
+done
+
+if [[ $DO_HELP = yes ]]; then
+    sto-usage
+    exit 0
+fi
+
+setup-generic-tool-env
+
+if [[ $DO_LIST != no ]]; then
+    if [[ -z $SCBI_STORE_KEYS ]]; then
+        sto-list ""
+    else
+        for KEY in ${SCBI_STORE_KEYS[*]}; do
+            sto-list $KEY
+        done
+    fi
+    exit 0
+
+elif [[ $DO_DELETE == yes ]]; then
+    for KEY in ${SCBI_STORE_KEYS[*]}; do
+        sto-delete $KEY
+    done
+    exit 0
+
+elif [[ ${#SCBI_STORE_KEYS[*]} == 2 ]]; then
+    sto-record ${SCBI_STORE_KEYS[0]} ${SCBI_STORE_KEYS[1]}
+    exit 0
+
+elif [[ ${#SCBI_STORE_KEYS[*]} == 1 ]]; then
+    sto-get ${SCBI_STORE_KEYS[0]}
+    exit $?
+fi
+
+#  No parameter
+sto-usage

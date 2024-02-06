@@ -1591,54 +1591,78 @@ For example on Debian 10.6 the searched files will be, and in that order:
 
 So \code{.pkgs-deb-10} can add new dependencies or override some dependencies that are set in \code{.pkgs-deb}.
 
-\subsection{SCBI Private Store}
+\subsection{Private Store}
+\index{Private Store}
+\index{API|Private Store}
+
+See below (\ref{store}) how to handle the SCBI's private store. Using the runtime it is possible to handle it from within a plug-in:
+
+\begin{itemize}
+	\item The runtime routine to set a key:
+
+	\hspace{1.5cm}\texttt{scbi-store-set-key LICKEY 89AXCDPPP6BGG}
+
+	\item To get value associated with a key:
+
+	\hspace{1.5cm}\texttt{scbi-store-get-key LICKEY}
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
+
+\section{Support tools}
+
+\subsection{Private Store}
 \label{private store}
 \label{store}
 \index{private store}
 
 It is sometimes needed to use some private information (like software keys) to activate a module. Such information cannot be stored directly into a plug-in which could be made public. To cope with this specific case SCBI comes with support for storing pair of information into an external private store.
 
-The option to set or retrieve a value is \ddash{}store.
+This support is given by the \code{store} sub-command:
+
+\cmd{scbi store [options] [key1, key2...] [value]}
+
+The following options are supported:
+
+\begin{description}[font=\texttt]
+	\item[-h | \ddash{}help] List options and usage information.
+
+	\item[-v | \ddash{}version] Display version information of the SCBI driver and versions from plug-ins distributions coming from other sources\footnote{Note that for this to be supported the plug-ins distribution must have generated and installed a file name \file{.scbi*version.txt} next to the plug-ins.}.
+
+	\item[-e | \ddash{}env=<name>] Use environment file \code{.env-<name>} instead of the default \code{.env}. (\seeref{build-env})
+
+	\item[\ddash{}stat:{[}full{]}] Display some statistics about of current setup. With sub-option full also gives stats about module's build time.
+
+	\item[\ddash{}plugins=<directory>] Specify a non default location for the modules and plug-ins directory. This overrides the \code{SCBI\_DEFS} environment.
+
+	\item[\ddash{}list-keys] List all registered keys.
+
+	\item[\ddash{}list{[}:full{]}] List keys given as parameter or empty string if not defined. If \code{:full} is given the values for the given keys are also displayed.
+
+	\item[-d | \ddash{}delete] Delete the given keys.
+\end{description}
+
+Some exmaples:
 
 \begin{itemize}
-	\item On the command line:\\
-	To set a key:
+	\item To set a key
 
-	\cmd{scbi --store LICKEY 89AXCDPPP6BGG}
+	\cmd{scbi store LICKEY 89AXCDPPP6BGG}
 
-	To list all stored keys:
+	\item To list all stored keys
 
-	\cmd{scbi --store}
+	\cmd{scbi store \ddash{}list-keys}
 
-	To get value associated with a key:
+	\item To get value associated with a key
 
-	\cmd{scbi --store LICKEY}
+	\cmd{scbi store LICKEY}
 
-	\item Inside a plug-in script:\\
-	To set a key:
+	\item To remove a key
 
-	\hspace{1.5cm}\texttt{scbi-store-set-key LICKEY 89AXCDPPP6BGG}
-
-	To get value associated with a key:
-
-	\hspace{1.5cm}\texttt{scbi-store-get-key LICKEY}
+    \cmd{scbi store \ddash{}delete LICKEY}
 \end{itemize}
 
 All keys are stored into the file \file{\$SCBI\_PLUGINS/.store} (if using the default environment \file{\$HOME/.config/scbi/.store}).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
-
-\section{Support tools}
-
-\subsection{Completion support}
-\label{completion}
-\index{completion}
-
-A script is provided to support bash completion for scbi. The script is \file{bash\_completion.d/scbi} and must be copied into \file{/etc/bash\_completion.d/} OS directory.
-
-Note that for this to work, the bash completion package must be installed, on Debian based distributions this is achieved with:
-
-\cmd{apt install bash-completion}
 
 \subsection{Linter}
 \label{linter}
@@ -1690,6 +1714,16 @@ The tool can also create a \code{MD5}, \code{SHA-1} or \code{SHA-256}
 file for the generated archive. Use the following command to get the usage output:
 
 \cmd{scbi source-archive \ddash{}help}
+
+\subsection{Completion support}
+\label{completion}
+\index{completion}
+
+A script is provided to support bash completion for scbi. The script is \file{bash\_completion.d/scbi} and must be copied into \file{/etc/bash\_completion.d/} OS directory.
+
+Note that for this to work, the bash completion package must be installed, on Debian based distributions this is achieved with:
+
+\cmd{apt install bash-completion}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 

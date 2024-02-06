@@ -18,9 +18,11 @@ all: clean.install
 	mkdir -p $(INSTALL_DIR) $(HOME)/.bash_completion.d/
 	cat scbi | sed "s/@VERSION@/$(CORE_VER)/" > $(INSTALL_DIR)/scbi
 	cat scbi-lint | sed "s/@VERSION@/$(CORE_VER)/" > $(INSTALL_DIR)/scbi-lint
+	cat scbi-store | sed "s/@VERSION@/$(CORE_VER)/" > $(INSTALL_DIR)/scbi-store
 	cp scbi-source-archive $(INSTALL_DIR)/scbi-source-archive
 	chmod u+x $(INSTALL_DIR)/scbi
 	chmod u+x $(INSTALL_DIR)/scbi-lint
+	chmod u+x $(INSTALL_DIR)/scbi-store
 	#  Remove old installation if any
 	rm -f $(HOME)/bin/scbi
 	rm -f $(HOME)/bin/scbi-lint

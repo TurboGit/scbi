@@ -311,7 +311,6 @@ DO_EXT=no
 DO_CLEAN_INSTALL=no
 DO_LIST_VER=yes
 DO_PLAN=no
-DO_STORE=no
 DEPS=no
 ISOOT=yes
 DO_PATCH=yes
@@ -596,7 +595,6 @@ function usage()
     echo "      | --enable-<name>    enable feature name"
     echo "   -t | --target=<name>    the target to build for ($SCBI_TARGET)"
     echo "      | --plugins=<dir>    specify the modules/plugins directory"
-    echo "      | --store KEY VAL    list, set or retrieve private store data"
     echo "   -j | --jobs=<n>         max compilation jobs \$SCBI_JOBS"
     echo "   -S | --no-setup         skip setup"
     echo "   -I | --no-install       skip install"
@@ -1926,8 +1924,6 @@ function setup-generic-tool-env()
             exit 1
     fi
 
-    [[ $DO_STORE == yes ]] && return
-
     [[ -z $SCBI_MODULES ]] &&
         [[ $DO_STAT == no ]] &&
         [[ $DO_MOD_VER == no ]] &&
@@ -2026,7 +2022,7 @@ OPTARG=
 SCBIOPTS+="${SCBIOPTS:+ }$SCBI_INI_OPTIONS"
 
 ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpqvwWh \
-                 -l store,target:,no-setup,no-install,update,setup,config \
+                 -l target:,no-setup,no-install,update,setup,config \
                  -l build,build-target:,install,clean-install,tar \
                  -l log,log:yes,log:no,log:on-failure,purge,purge:only \
                  -l quiet,prefix:,help,version,module-ref \
@@ -2256,17 +2252,6 @@ while [[ $# -gt 0 ]]; do
         --clean-install)
             DO_CLEAN_INSTALL=yes
             ;;
-        --store)
-            DO_STORE=yes
-            shift 2
-            STORE_KEY="$1"
-            STORE_VALUE="$2"
-
-            [[ -n $3 ]] &&
-                echo "$0: unexpected parameters for store command" &&
-                exit 1
-            shift 2
-            ;;
         (--)
             ;;
         (*)
@@ -2311,13 +2296,6 @@ trap clean-up EXIT
 [[ $DO_WRAPUP  != no ]] && STEPS="$STEPS wrapup"
 
 setup-generic-tool-env
-
-#  Handle store command
-
-if [[ $DO_STORE = yes ]]; then
-    scbi-store "$STORE_KEY" "$STORE_VALUE"
-    exit $?
-fi
 
 [[ -z $SCBI_MODULES ]] &&
     [[ $DO_SHELL != no ]] &&
