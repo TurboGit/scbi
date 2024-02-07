@@ -1,0 +1,54 @@
+
+function c-prettier-ada-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/prettier-ada
+}
+
+function c-prettier-ada-out-of-tree()
+{
+    echo false
+}
+
+function c-prettier-ada-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-prettier-ada-depends()
+{
+    echo c-vss
+    echo c-gnatcoll-core
+}
+
+function c-prettier-ada-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
+function c-prettier-ada-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make all
+}
+
+function c-prettier-ada-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make PREFIX=$PREFIX install
+}
+
+function c-prettier-ada-prefix()
+{
+    echo NONE
+}
