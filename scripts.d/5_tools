@@ -1267,7 +1267,7 @@ function create-standalone-package()
 
         #  copy repositories and tars for all modules with dependencies
 
-        for module in $SCBI_MODULES; do
+        for module in ${SCBI_MODULES[*]}; do
             for-all-modules-with-meta-ext \
                 copy-module-src-callback $module $STANDALONE
         done
@@ -1288,7 +1288,7 @@ function create-standalone-package()
         echo -n 'export PYTHON_VERSION=$(python3 --version |'  >> build
         echo " cut -d' '"' -f2 | cut -c1-3)'                   >> build
         echo 'export PATH=$PWD/bin:$PATH'                      >> build
-        echo "SCBI_MODULES=\"$SCBI_MODULES\""                  >> build
+        echo "SCBI_MODULES=\"${SCBI_MODULES[*]}\""             >> build
         echo '[[ -n $1 ]] && SCBI_MODULES="$*"'                >> build
         echo './bin/scbi --env=std --deps $SCBI_MODULES'       >> build
 

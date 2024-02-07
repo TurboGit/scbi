@@ -1,12 +1,8 @@
 #!/bin/bash
 
-SCBI_VERSION=@VERSION@
-
-DO_HELP=no
 DO_WARNING=yes
 
-SCBI_PLUGINS_LIST=""
-SCBI_PLUGINS="$PWD/scripts.d"
+SCBI_PLUGINS_LIST=()
 
 function usage()
 {
@@ -19,10 +15,15 @@ function usage()
     echo "   -h | --help             this help message"
     echo "   -v | --version          display driver & plug-ins versions"
     echo "      | --plugins=<dir>    specify the plugins' directory"
-    echo "   -e | --error            report only errors"
+    echo "      | --error            report only errors"
 }
 
-[[ $1 == "subcommand" ]] && shift
+if [[ $1 == "subcommand" ]]; then
+    shift
+else
+    echo "error: use scbi lint [options]"
+    exit 1
+fi
 
 ALLOPTS=$(getopt -u -o ehv -l error,help,version,plugins: -- $*)
 
@@ -30,28 +31,13 @@ set -- $ALLOPTS
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -h|--help)
-            DO_HELP=yes
-            break
-            ;;
-        -v|--version)
-            DO_VERSION=yes
-            break
-            ;;
-        -e|--error)
+        --error)
             DO_WARNING=no
-            ;;
-        --plugins)
-            SCBI_PLUGINS=$2; shift
-            if [[ ! -d "$SCBI_PLUGINS" ]]; then
-                echo "$0: plugins directory not found"
-                exit 1
-            fi
             ;;
         (--)
             ;;
         (*)
-            SCBI_PLUGINS_LIST+=" $1"
+            SCBI_PLUGINS_LIST+=( $1 )
             ;;
         (-*)
             echo "$0: error - unrecognized option $1" 1>&2; exit 1
@@ -408,7 +394,7 @@ function cygpath()
     true
 }
 
-for PLUGIN in $SCBI_PLUGINS_LIST; do
+for PLUGIN in ${SCBI_PLUGINS_LIST[*]}; do
     PLG=$PLUGIN
     [[ ! -f $PLG ]] && PLG=$SCBI_PLUGINS/$PLG
     if [[ ! -f $PLG ]]; then

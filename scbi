@@ -199,7 +199,7 @@ function ini-apply-values()
 
     #  Set modules' list
 
-    SCBI_MODULES=$(ini-get-option "$SECTION" modules)
+    SCBI_MODULES=( $(ini-get-option "$SECTION" modules) )
 
     #  Set options controlled with a DO_<NAME>
 
@@ -216,7 +216,7 @@ function ini-apply-values()
     for OPTS in safe tar no-patch; do
         local O=$(ini-get-option "$SECTION" $OPTS)
         [[ ${O^^} == YES ]] &&
-            SCBI_INI_OPTIONS+="${SCBI_INI_OPTIONS:+ }--$OPTS"
+            SCBI_INI_OPTIONS+=( --$OPTS )
     done
 
     local O="$(ini-get-option "$SECTION" deps)"
@@ -252,7 +252,7 @@ function ini-apply-values()
 
     #  Finally whatever specific options are given
 
-    SCBI_INI_OPTIONS+="${SCBI_INI_OPTIONS:+ }"$(ini-get-option "$SECTION" options)
+    SCBI_INI_OPTIONS+=( $(ini-get-option "$SECTION" options) )
 }
 
 CDPATH=
@@ -292,7 +292,7 @@ SCBI_JOBS=${SCBI_JOBS:-$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl 
 SCBI_HALF_JOBS=${SCBI_HALF_JOBS:-$((SCBI_JOBS / 2))}
 
 #  Modules to be handled and already handled
-SCBI_MODULES=
+SCBI_MODULES=()
 SCBI_HANDLED="$(mktemp -p /dev/shm/)"
 SCBI_CURRENT_MODULE=
 
@@ -311,6 +311,7 @@ DO_EXT=no
 DO_CLEAN_INSTALL=no
 DO_LIST_VER=yes
 DO_PLAN=no
+DO_SUBCMD=no
 DEPS=no
 ISOOT=yes
 DO_PATCH=yes
@@ -1924,17 +1925,20 @@ function setup-generic-tool-env()
             exit 1
     fi
 
-    [[ -z $SCBI_MODULES ]] &&
+    [[ -z ${SCBI_MODULES[*]} ]] &&
         [[ $DO_STAT == no ]] &&
         [[ $DO_MOD_VER == no ]] &&
+        [[ $DO_SUBCMD == no ]] &&
         usage && exit 0
 
-    [[ $DO_HELP == yes ]] && usage && exit 0
+    [[ $DO_SUBCMD == no ]] &&
+        [[ $DO_HELP == yes ]] && usage && exit 0
 
     [[ $DO_STAT != no ]] &&
         display-stat
 
-    [[ -z $SCBI_MODULES ]] || [[ $DO_STAT == yes ]] &&
+    [[ $DO_SUBCMD == no ]] &&
+        ( [[ -z ${SCBI_MODULES[*]} ]] || [[ $DO_STAT == yes ]] ) &&
         display-modules && display-plans
 
     [[ $DO_STAT == yes ]] &&
@@ -1943,11 +1947,11 @@ function setup-generic-tool-env()
     #  Setup module reference specified on the command line. The module
     #  reference on the command line must overwrite the actual build plan.
 
-    for module in $SCBI_MODULES; do
+    for module in ${SCBI_MODULES[*]}; do
         set-module-ref $module
     done
 
-    if [[ $DO_MOD_VER == no ]]; then
+    if [[ $DO_MOD_VER == no ]] && [[ $DO_SUBCMD == no ]]; then
         rewrite-module-plan
     else
         rewrite-module-plan > /dev/null
@@ -1955,96 +1959,22 @@ function setup-generic-tool-env()
     [[ $? == 1 ]] && exit 1
 }
 
-############################## sub-commands
-
-if [[ -n "$(which scbi-$1)" ]]; then
-    SUBCMD=$1
-    shift
-    declare -fx load-module-env check-tools-abort check-tools check-tool
-    declare -fx setup-generic-tool-env
-    export DO_QUIET
-    $(dirname $SCBI_BINARY)/scbi-$SUBCMD subcommand $*
-    exit $?
-fi
-
 ############################## body
 
-#  First we check for --enable-*, --run* and --tests* options
+#  Check for common options shared with sub-commands
+#  And check for --enable-*, --run* and --tests* options
 
-#  First handle specific parameters:
+#  We also handle specific parameters:
 #    --enable-*
 #    --run:"some command"
+
+declare SCBIOPTS=()
+declare SCBIARGS=()
 
 #  Load ini file
 ini-load-files
 #  Apply default global values
 ini-apply-values ""
-
-SCBIOPTS=""
-
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --enable-*)
-            VAR=${1/--enable-/}
-            export SCBI_${VAR//-/_}_SET=true
-            ;;
-        --run:*)
-            DO_RUN=yes
-            DO_RUN_CMD=${1/*:/}
-            ;;
-        --run)
-            DO_RUN=yes
-            DO_RUN_CMD=""
-            ;;
-        --tests:only*)
-            do-clear-steps
-            DO_TEST=yes-only
-            OPTS=( ${1/=/ } )
-            SCBI_TESTS_OPTIONS="${OPTS[*]:1}"
-            ;;
-        --tests*)
-            DO_TEST=yes
-            OPTS=( ${1/=/ } )
-            SCBI_TESTS_OPTIONS="${OPTS[*]:1}"
-            ;;
-        --ini*)
-            ini-apply-values ${1#*=}
-            ;;
-        *)
-            SCBIOPTS+="${SCBIOPTS:+ }$1"
-            ;;
-    esac
-    shift
-done
-
-OPTFILE=$(mktemp)
-OPTARG=
-SCBIOPTS+="${SCBIOPTS:+ }$SCBI_INI_OPTIONS"
-
-ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpqvwWh \
-                 -l target:,no-setup,no-install,update,setup,config \
-                 -l build,build-target:,install,clean-install,tar \
-                 -l log,log:yes,log:no,log:on-failure,purge,purge:only \
-                 -l quiet,prefix:,help,version,module-ref \
-                 -l module-ref:version,module-ref:variant,module-ref:full \
-                 -l deps,deps:warning,archive,force,env:,no-patch,plan: \
-                 -l stat,stat:full,no-wrapup,wrapup,safe,standalone \
-                 -l list-depends:direct,list-depends:full,list-depends \
-                 -l list-externals,list-externals:only,list-no-version \
-                 -l list-filter:all,list-filter:dev,list-filter:runtime \
-                 -l dry-run,jobs:,plugins:,build-dir:,list-plan: \
-                 -l shell,shell:use,shell:dev,shell:tests,shell:sb \
-                 -l shell:sandbox,color:dark,color:light,color:no \
-                 -- $SCBIOPTS 2> $OPTFILE)
-
-if [[ $? != 0 ]]; then
-    cat $OPTFILE
-    echo try \"scbi --help\" for more information.
-    rm -f $OPTFILE
-    exit 1
-fi
-
-set -- $ALLOPTS
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -2071,12 +2001,119 @@ while [[ $# -gt 0 ]]; do
         --color:no)
             DO_COLOR=no
             ;;
+        -e)
+            ENV_NAME=${2}
+            shift
+            ;;
+        --env*)
+            ENV_NAME=${1#*=}
+            ;;
+        --plan*)
+            SCBI_PLAN_CL=${1#*=}
+            ;;
+        --stat:full)
+            DO_STAT=yes;
+            ;;
+        --stat)
+            DO_STAT=info-only;
+            ;;
+        --plugins*)
+            SCBI_PLUGINS=${1#*=}
+            if [[ ! -d "$SCBI_PLUGINS" ]] || \
+                   [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]];
+            then
+                echo "$0: no plugins found in $SCBI_PLUGINS"
+                exit 1
+            fi
+            ;;
+        --enable-*)
+            VAR=${1/--enable-/}
+            export SCBI_${VAR//-/_}_SET=true
+            ;;
+        --run:*)
+            DO_RUN=yes
+            DO_RUN_CMD=${1/*:/}
+            ;;
+        --run)
+            DO_RUN=yes
+            DO_RUN_CMD=""
+            ;;
+        --tests:only*)
+            do-clear-steps
+            DO_TEST=yes-only
+            OPTS=( ${1/=/ } )
+            SCBI_TESTS_OPTIONS="${OPTS[*]:1}"
+            ;;
+        --tests*)
+            DO_TEST=yes
+            OPTS=( ${1/=/ } )
+            SCBI_TESTS_OPTIONS="${OPTS[*]:1}"
+            ;;
+        --ini*)
+            ini-apply-values ${1#*=}
+            ;;
+        (-*)
+            SCBIOPTS+=( $1 )
+            ;;
+        (*)
+            SCBIARGS+=( $1 )
+            ;;
+    esac
+    shift
+done
+
+############################## sub-commands
+
+#  Check if first argument is a sub-command
+SUBCMD=${SCBIARGS[0]}
+
+if [[ -n "$(which scbi-$SUBCMD)" ]]; then
+    export DO_SUBCMD=yes
+
+    #  Setup the generic SCBI environment for the sub-command
+    setup-generic-tool-env
+
+    unset SCBIARGS[0]
+
+    source $(dirname $SCBI_BINARY)/scbi-$SUBCMD subcommand ${SCBIOPTS[*]} ${SCBIARGS[*]}
+    exit $?
+fi
+
+SCBIOPTS+=( ${SCBI_INI_OPTIONS[*]} ${SCBIARGS[*]} )
+
+OPTFILE=$(mktemp)
+
+ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpqvwWh \
+                 -l target:,no-setup,no-install,update,setup,config \
+                 -l build,build-target:,install,clean-install,tar \
+                 -l log,log:yes,log:no,log:on-failure,purge,purge:only \
+                 -l prefix:,module-ref \
+                 -l module-ref:version,module-ref:variant,module-ref:full \
+                 -l deps,deps:warning,archive,force,env:,no-patch \
+                 -l no-wrapup,wrapup,safe,standalone \
+                 -l list-depends:direct,list-depends:full,list-depends \
+                 -l list-externals,list-externals:only,list-no-version \
+                 -l list-filter:all,list-filter:dev,list-filter:runtime \
+                 -l dry-run,jobs:,build-dir:,list-plan: \
+                 -l shell,shell:use,shell:dev,shell:tests,shell:sb \
+                 -l shell:sandbox \
+                 -- ${SCBIOPTS[*]} 2> $OPTFILE)
+
+if [[ $? != 0 ]]; then
+    cat $OPTFILE
+    echo try \"scbi --help\" for more information.
+    rm -f $OPTFILE
+    exit 1
+fi
+
+rm -f $OPTFILE
+
+set -- $ALLOPTS
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
         -a|--create-archive)
             DO_ARCHIVE=yes
-            ;;
-        -e|--env)
-            ENV_NAME="$2"
-            shift
             ;;
         --archive)
             ARCHIVE_CACHE=no
@@ -2184,15 +2221,6 @@ while [[ $# -gt 0 ]]; do
             SCBI_JOBS=$2; shift
             SCBI_HALF_JOBS=$SCBI_JOBS
             ;;
-        --plan)
-            SCBI_PLAN_CL=$2; shift
-            ;;
-        --stat:full)
-            DO_STAT=yes;
-            ;;
-        --stat)
-            DO_STAT=info-only;
-            ;;
         --list-depends:direct)
             DO_DEPS=yes-direct;
             DO_QUIET=yes;
@@ -2237,15 +2265,6 @@ while [[ $# -gt 0 ]]; do
         --standalone)
             DO_STANDALONE=yes;
             ;;
-        --plugins)
-            SCBI_PLUGINS=$2; shift
-            if [[ ! -d "$SCBI_PLUGINS" ]] || \
-                   [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]];
-            then
-                echo "$0: no plugins found in $SCBI_PLUGINS"
-                exit 1
-            fi
-            ;;
         --build-dir)
             CMDLINE_BUILD_DIR=$2; shift
             ;;
@@ -2255,7 +2274,7 @@ while [[ $# -gt 0 ]]; do
         (--)
             ;;
         (*)
-            SCBI_MODULES+="${SCBI_MODULES:+ }$1"
+            SCBI_MODULES+=( $1 )
             ;;
         (-*)
             echo "$0: error - unrecognized option $1" 1>&2; exit 1
@@ -2297,14 +2316,14 @@ trap clean-up EXIT
 
 setup-generic-tool-env
 
-[[ -z $SCBI_MODULES ]] &&
+[[ -z ${SCBI_MODULES[*]} ]] &&
     [[ $DO_SHELL != no ]] &&
     [[ $DO_RUN != no ]] &&
     [[ $DO_STAT == no ]] &&
     echo "error: shell/run commands need a plug-in, see scbi --help" && exit 0
 
 if [[ $DO_DEPS != no ]]; then
-    for module in $SCBI_MODULES; do
+    for module in ${SCBI_MODULES[*]}; do
         for-all-modules-with-meta-ext register-depends-callback $module
     done
 
@@ -2339,26 +2358,26 @@ fi
 #  If a run is requested
 
 if [[ $DO_RUN == yes ]]; then
-    run-command $SCBI_TARGET "$SCBI_MODULES" "$DO_RUN_CMD"
+    run-command $SCBI_TARGET "${SCBI_MODULES[*]}" "$DO_RUN_CMD"
     exit 0
 fi
 
 #  If a shell is requested
 
 if [[ $DO_SHELL == yes-nocd ]]; then
-    run-shell $SCBI_TARGET "$SCBI_MODULES" no
+    run-shell $SCBI_TARGET "${SCBI_MODULES[*]}" no
     exit 0
 fi
 
 if [[ $DO_SHELL =~ yes ]]; then
-    run-shell $SCBI_TARGET "$SCBI_MODULES" $DO_SHELL
+    run-shell $SCBI_TARGET "${SCBI_MODULES[*]}" $DO_SHELL
     exit 0
 fi
 
 #  If we want to display a module version from a module plan, do it now
 
 if [[ $DO_MOD_VER != no ]]; then
-    for module in $SCBI_MODULES; do
+    for module in ${SCBI_MODULES[*]}; do
         display-module-ref $module $DO_MOD_VER
     done
     exit 0
@@ -2387,7 +2406,7 @@ cp $SCBI_PLUGINS/0_runtime $SCBI_BDIR/.scbi.runtime
 
 #  Run script for all modules
 
-for module in $SCBI_MODULES; do
+for module in ${SCBI_MODULES[*]}; do
     handle-module "@root" $module || exit 1
 done
 

@@ -1,6 +1,6 @@
 #  Check scbi-lint
 
-RUNS ./scbi-lint scripts.d/lib2
+RUNS ./scbi lint scripts.d/lib2
 
 DIFF <<EOF
 
@@ -25,7 +25,7 @@ Check parameters:
    warning: (lib2-tests) VARIANT not declared
 EOF
 
-NRUNS ./scbi-lint scripts.d/wrong
+NRUNS ./scbi lint scripts.d/wrong
 
 DIFF <<EOF
 
@@ -70,7 +70,7 @@ Check parameters:
    warning: (wrong-nok2-patches) superfluous empty definition
 EOF
 
-NRUNS ./scbi-lint -e scripts.d/wrong
+NRUNS ./scbi lint --error scripts.d/wrong
 
 DIFF <<EOF
    error:   (wrong-build) PREFIX should be \$1
@@ -87,7 +87,7 @@ DIFF <<EOF
    error:   (wrong-nok-patches) REF should be \$5
 EOF
 
-NRUNS ./scbi-lint -e scripts.d/wrong2
+NRUNS ./scbi lint --error scripts.d/wrong2
 
 DIFF <<EOF
    error:   (cpwrong2-build) not a hook of plug-in wrong2

@@ -1,16 +1,8 @@
 #!/bin/bash
 
-SCBI_VERSION=@VERSION@S
-SCBI_PLUGINS="$PWD/scripts.d"
-DO_VERSION=no
-DO_HELP=no
 DO_LIST=no
 DO_DELETE=no
-DO_STAT=no
-DO_PLAN=no
-SCBI_MODULES=no
-ENV_NAME=${SCBI_DEFAULT_ENV:+-$SCBI_DEFAULT_ENV}
-KEY=""
+SCBI_STORE_KEYS=()
 
 ############################################## sto-usage
 #
@@ -138,13 +130,15 @@ function sto-record()
 
 if [[ $1 == "subcommand" ]]; then
     shift
+else
+    echo "error: use scbi store [options]"
+    exit 1
 fi
 
 OPTFILE=$(mktemp)
-OPTARG=
 
-ALLOPTS=$(getopt -u -o kehvld \
-             -l env,plugins:,version,help,list-keys,list:full:,list,delete \
+ALLOPTS=$(getopt -u -o kld \
+             -l list-keys,list:full:,list,delete \
              -- $* 2> $OPTFILE)
 
 if [[ $? != 0 ]]; then
@@ -158,18 +152,6 @@ set -- $ALLOPTS
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -h|--help)
-            DO_HELP=yes
-            break
-            ;;
-        -v|--version)
-            DO_VERSION=yes
-            break
-            ;;
-        -e|--env)
-            ENV_NAME="$2"
-            shift
-            ;;
         -k|--list-keys)
             DO_LIST=yes
             ;;
@@ -181,15 +163,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         -d|--delete)
             DO_DELETE=yes
-            ;;
-        --plugins)
-            SCBI_PLUGINS=$2; shift
-            if [[ ! -d "$SCBI_PLUGINS" ]] || \
-                   [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]];
-            then
-                echo "$0: no plugins found in $SCBI_PLUGINS"
-                exit 1
-            fi
             ;;
         (--)
             ;;
@@ -204,12 +177,10 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-if [[ $DO_HELP = yes ]]; then
+if [[ $DO_HELP == yes ]]; then
     sto-usage
     exit 0
 fi
-
-setup-generic-tool-env
 
 if [[ $DO_LIST != no ]]; then
     if [[ -z $SCBI_STORE_KEYS ]]; then
