@@ -2012,10 +2012,10 @@ while [[ $# -gt 0 ]]; do
             SCBI_PLAN_CL=${1#*=}
             ;;
         --stat:full)
-            DO_STAT=yes;
+            DO_STAT=yes
             ;;
         --stat)
-            DO_STAT=info-only;
+            DO_STAT=info-only
             ;;
         --plugins*)
             SCBI_PLUGINS=${1#*=}
@@ -2119,7 +2119,8 @@ while [[ $# -gt 0 ]]; do
             ARCHIVE_CACHE=no
             ;;
         -t|--target)
-            SCBI_TARGET=$2; shift
+            SCBI_TARGET=$2
+            shift
             SCBI_TARGET_SPECIFIED=yes
             ;;
         -S|--no-setup)
@@ -2166,7 +2167,8 @@ while [[ $# -gt 0 ]]; do
             DO_BUILD=forced
             ;;
         --build-target)
-            BUILD_SCBI_TARGET=$2; shift
+            BUILD_SCBI_TARGET=$2
+            shift
             ;;
         -d|--deps)
             DEPS=yes
@@ -2199,7 +2201,8 @@ while [[ $# -gt 0 ]]; do
             ;;
         --prefix)
             SCBI_DEFAULT_PREFIX=no
-            SCBI_PREFIX=$2; shift
+            SCBI_PREFIX=$2
+            shift
             ;;
         --module-ref)
             DO_MOD_VER=full
@@ -2218,55 +2221,57 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -j|--jobs)
-            SCBI_JOBS=$2; shift
+            SCBI_JOBS=$2
+            shift
             SCBI_HALF_JOBS=$SCBI_JOBS
             ;;
         --list-depends:direct)
-            DO_DEPS=yes-direct;
-            DO_QUIET=yes;
+            DO_DEPS=yes-direct
+            DO_QUIET=yes
             ;;
         --list-depends:full)
-            DO_DEPS=yes;
-            DO_QUIET=yes;
+            DO_DEPS=yes
+            DO_QUIET=yes
             ;;
         --list-depends)
-            DO_DEPS=yes;
-            DO_QUIET=yes;
+            DO_DEPS=yes
+            DO_QUIET=yes
             ;;
         --list-externals:only)
-            DO_EXT=yes-only;
-            DO_QUIET=yes;
+            DO_EXT=yes-only
+            DO_QUIET=yes
             ;;
         --list-externals)
-            DO_EXT=yes;
-            DO_QUIET=yes;
+            DO_EXT=yes
+            DO_QUIET=yes
             ;;
         --list-no-version)
             DO_LIST_VER=no
             ;;
         --list-filter:all)
-            SCBI_FILTER=all;
+            SCBI_FILTER=all
             ;;
         --list-filter:dev)
-            SCBI_FILTER=dev;
+            SCBI_FILTER=dev
             ;;
         --list-filter:runtime)
-            SCBI_FILTER=runtime;
+            SCBI_FILTER=runtime
             ;;
         --list-plan)
-            DO_PLAN=yes;
+            DO_PLAN=yes
             ;;
         --dry-run)
-            DRY_RUN=yes;
+            DRY_RUN=yes
             ;;
         --safe)
-            SAFE_MODE=yes;
+            SAFE_MODE=yes
             ;;
         --standalone)
-            DO_STANDALONE=yes;
+            DO_STANDALONE=yes
             ;;
         --build-dir)
-            CMDLINE_BUILD_DIR=$2; shift
+            CMDLINE_BUILD_DIR=$2
+            shift
             ;;
         --clean-install)
             DO_CLEAN_INSTALL=yes

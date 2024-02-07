@@ -1274,23 +1274,27 @@ function create-standalone-package()
 
         #  create default local environment
 
-        echo 'SCBI_ROOT=$PWD'                      > .scbi-env-std
-        echo 'SCBI_BDIR=$SCBI_ROOT/builds'        >> .scbi-env-std
-        echo 'SCBI_PREFIX=$SCBI_BDIR/install'     >> .scbi-env-std
-        echo 'SCBI_ARCHIVES=$SCBI_BDIR/.archives' >> .scbi-env-std
-        echo 'SCBI_PATCH=$SCBI_BDIR/.patches'     >> .scbi-env-std
-        echo 'SCBI_LOGS=$SCBI_BDIR/.logs'         >> .scbi-env-std
-        echo "SCBI_PLAN=$SCBI_PLAN"               >> .scbi-env-std
+        {
+            echo 'SCBI_ROOT=$PWD'
+            echo 'SCBI_BDIR=$SCBI_ROOT/builds'
+            echo 'SCBI_PREFIX=$SCBI_BDIR/install'
+            echo 'SCBI_ARCHIVES=$SCBI_BDIR/.archives'
+            echo 'SCBI_PATCH=$SCBI_BDIR/.patches'
+            echo 'SCBI_LOGS=$SCBI_BDIR/.logs'
+            echo "SCBI_PLAN=$SCBI_PLAN"
+        } > .scbi-env-std
 
         #  then create the build script
 
-        echo '#!/bin/bash'                                      > build
-        echo -n 'export PYTHON_VERSION=$(python3 --version |'  >> build
-        echo " cut -d' '"' -f2 | cut -c1-3)'                   >> build
-        echo 'export PATH=$PWD/bin:$PATH'                      >> build
-        echo "SCBI_MODULES=\"${SCBI_MODULES[*]}\""             >> build
-        echo '[[ -n $1 ]] && SCBI_MODULES="$*"'                >> build
-        echo './bin/scbi --env=std --deps $SCBI_MODULES'       >> build
+        {
+            echo '#!/bin/bash'
+            echo -n 'export PYTHON_VERSION=$(python3 --version |'
+            echo " cut -d' '"' -f2 | cut -c1-3)'
+            echo 'export PATH=$PWD/bin:$PATH'
+            echo "SCBI_MODULES=\"${SCBI_MODULES[*]}\""
+            echo '[[ -n $1 ]] && SCBI_MODULES="$*"'
+            echo './bin/scbi --env=std --deps $SCBI_MODULES'
+        } > build
 
         chmod u+x build
     )
