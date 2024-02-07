@@ -29,6 +29,7 @@ function c-langkit-depends()
     echo c-gnatcoll-core
     echo c-gnatcoll-bindings
     echo c-adasat
+    echo c-prettier-ada
 }
 
 function c-langkit-out-of-tree()
