@@ -1484,7 +1484,7 @@ function handle-module()
     #  If purge is asked, first remove current build structure
 
     if [[ $DO_PURGE = yes || $DO_PURGE = only ]]; then
-        ilog $module Purging $module for $SCBI_TARGET/$variant
+        ilog $module %BPurging %t$module%c for $SCBI_TARGET/$variant
         [[ -d $SCBI_BDIR/$module ]] &&
             module-purge $SCBI_BDIR/$module $FORMODULE $module \
                          $variant $SCBI_TARGET
@@ -1951,12 +1951,17 @@ function setup-generic-tool-env()
         set-module-ref $module
     done
 
-    if [[ $DO_MOD_VER == no ]] && [[ $DO_SUBCMD == no ]]; then
+    local res=0
+
+    if [[ $DO_SUBCMD == no ]] || [[ $SUBCMD == show ]]; then
         rewrite-module-plan
+        res=$?
+        line-sep
     else
         rewrite-module-plan > /dev/null
+        res=$?
     fi
-    [[ $? == 1 ]] && exit 1
+    [[ $res == 1 ]] && exit 1
 }
 
 ############################## body
