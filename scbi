@@ -659,9 +659,9 @@ function handle-module-env()
     if [[ -n $SCBI_ENV_MODULE ]]; then
         echo >> $SCBI_ENV_MODULE
         echo "# $MODREF" >> $SCBI_ENV_MODULE
-        SCBI_MODULES_DIR["$module"]+="$TVDIR/install"
-        SCBI_MODULES_DIR["${module}@src"]+="$TVDIR/src"
-        SCBI_MODULES_DIR["${module}@build"]+="$TVDIR/build"
+        SCBI_MODULES_DIR["$module"]="$TVDIR/install"
+        SCBI_MODULES_DIR["${module}@src"]="$TVDIR/src"
+        SCBI_MODULES_DIR["${module}@build"]="$TVDIR/build"
     fi
 
     plugin-call-variant-hooks \
