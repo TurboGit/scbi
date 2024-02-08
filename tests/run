@@ -83,7 +83,7 @@ done
 
 cp ../scripts.d/0_runtime scripts.d/
 cp ../scripts.d/_os_* scripts.d/
-cp ../scripts.d/[1-9]* scripts.d/
+cp ../scripts.d/[2-9]* scripts.d/
 cp ../scripts.d/.pkgs-* scripts.d/
 
 export PATH="$PWD:$PATH"
