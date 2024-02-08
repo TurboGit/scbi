@@ -17,7 +17,7 @@ tests/.root/git
 tests/.root/builds
 tests/.root/.patches
 tests/.root/.store
-tests/.root/.tar/dltar-src*
+tests/.root/.archives/dltar-src*
 tests/scripts.d/[0-9]_*
 tests/scripts.d/_os_*
 tests/scripts.d/.pkgs-*
@@ -27,3 +27,5 @@ tests/scbi
 tests/scbi-lint
 tests/scbi-source-archive
 tests/scbi-store
+tests/scbi-shell
+tests/scbi-show
