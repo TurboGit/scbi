@@ -21,10 +21,12 @@ all: clean.install
 	cp scbi-store $(INSTALL_DIR)/scbi-store
 	cp scbi-source-archive $(INSTALL_DIR)/scbi-source-archive
 	cp scbi-show $(INSTALL_DIR)/scbi-show
+	cp scbi-shell $(INSTALL_DIR)/scbi-shell
 	chmod u+x $(INSTALL_DIR)/scbi
 	chmod u+x $(INSTALL_DIR)/scbi-lint
 	chmod u+x $(INSTALL_DIR)/scbi-store
 	chmod u+x $(INSTALL_DIR)/scbi-show
+	chmod u+x $(INSTALL_DIR)/scbi-shell
 	#  Remove old installation if any
 	rm -f $(HOME)/bin/scbi
 	rm -f $(HOME)/bin/scbi-lint

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+unset IFS
+
 DO_WARNING=yes
 
 SCBI_PLUGINS_LIST=()

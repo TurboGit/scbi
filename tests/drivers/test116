@@ -1,29 +1,29 @@
 
-RUNS ./scbi --run:"echo toto" dorun
+RUNS ./scbi shell --run:"echo toto" dorun
 
 DIFF <<EOF
 toto
 EOF
 
-RUNS ./scbi --run dorun
+RUNS ./scbi shell --run dorun
 
 DIFF <<EOF
 dorun default
 EOF
 
-RUNS ./scbi --run dorun/one
+RUNS ./scbi shell --run dorun/one
 
 DIFF <<EOF
 dorun one
 EOF
 
-RUNS ./scbi --run dorun/one.two
+RUNS ./scbi shell --run dorun/one.two
 
 DIFF <<EOF
 dorun one two
 EOF
 
-RUNS ./scbi --run dorun/two.one
+RUNS ./scbi shell --run dorun/two.one
 
 DIFF <<EOF
 dorun two one

@@ -40,7 +40,7 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
 EOF
 
-RUNS ./scbi --run:"mainmult" mainmult
+RUNS ./scbi shell --run:"mainmult" mainmult
 
 CLEAN-DIFF <<EOF
 main on master
@@ -48,7 +48,7 @@ liba.C patched version
 libb.B master (default)
 EOF
 
-RUNS ./scbi --run mainmult
+RUNS ./scbi shell --run mainmult
 
 CLEAN-DIFF <<EOF
 main on master

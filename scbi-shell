@@ -1,0 +1,241 @@
+#!/bin/bash
+
+unset IFS
+
+DO_EXT=no
+DO_LIST_VER=yes-nocd
+DO_MOD_VER=no
+DO_SHELL=yes
+SCBI_FILTER=all
+
+############################################## shl-usage
+#
+#  Display script usage
+#
+function shl-usage()
+{
+    echo
+    echo SCBI-SHELL $SCBI_VERSION
+    echo
+    echo $0 [options] plug-in1 [plug-in2...]
+
+    echo ""
+    echo "   -h | --help             this help message"
+    echo "   -v | --version          display driver & plug-ins versions"
+    echo "      | --plugins=<dir>    specify the plugins' directory"
+    echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
+    echo "      | --build-dir=<dir>  the root build directory."
+    echo "      | --mode:n           start a shell with module's environment"
+    echo "      | --run:\"cmd arg\"  run command in module's environment"
+}
+#  setup for SCBI shell & command spawn
+
+############################## shl-run-shell
+
+function shl-run-shell()
+{
+    local TARGET=$1
+    local MODULES=( $2 )
+    local DOCD=$3
+
+    if [[ -z $SHELL ]]; then
+        echo \$SHELL is not defined, cannot spawn a shell
+        exit 1
+    fi
+
+    curcd=$(pwd)
+
+    local MODREF=${MODULES[-1]}
+
+    for M in ${MODULES[*]}; do
+        handle-env "@root" $M
+        if [[ $M != $MODREF ]] || [[ $DOCD == no ]]; then
+            handle-module-env "@root" $M env
+        fi
+    done
+
+    local module_info=()
+    get-module-ref module_info $MODREF
+    local module=${module_info[0]}
+    local kind=${module_info[2]}
+
+    export SCBI_SHELL=$module
+
+    #  If docd set (no cwd sub-option specified), we are moving into
+    #  the module's build directory. In this mode we not only want the
+    #  environment of all dependencies to be set but we also want the
+    #  build environment of the root module to be set.
+
+    if [[ $DOCD == no ]]; then
+        cd $curcd
+    else
+        handle-build-depends-env "@root" $MODREF
+
+        [[  $DOCD == yes-tests ]] &&
+            handle-tests-depends-env "@root" $MODREF
+
+        if [[ $kind == DEV ]] || [[ $DOCD == yes-dev ]]; then
+            cd $(get-vcs-dir $module:dev)
+        else
+            cd $(get-build-dir $TARGET $MODREF)
+        fi
+    fi
+
+    #  Exports all functions into the bash sub-shell
+    eval "$(declare -F | sed -e 's/-f /-fx /')"
+    $SHELL
+}
+
+############################## shl-run-command
+
+function shl-run-command()
+{
+    local TARGET=$1
+    local MODULES=( $2 )
+    local CMD="$3"
+
+    if [[ -z $SHELL ]]; then
+        echo \$SHELL is not defined, cannot spawn a shell
+        exit 1
+    fi
+
+    local MODREF=${MODULES[-1]}
+
+    for M in ${MODULES[*]}; do
+        handle-env "@root" $M
+        handle-module-env "@root" $M env
+    done
+
+    local module_info=()
+    get-module-ref module_info $MODREF
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+
+    if [[ -z $CMD ]]; then
+        local PREFIX=$SCBI_BDIR/$module/$TARGET-$variant/install
+        # CMD is not specified, try using the one defined in
+        # the plug-in itself.
+        for C in $(plugin-call-variant-hooks $module run \
+                                             $PREFIX $TARGET $variant);
+        do
+            CMD+="$C "
+        done
+
+        if [[ -z $CMD ]]; then
+            elog $module no command specified for run option
+        fi
+    fi
+
+    export SCBI_SHELL=$module
+
+    #  Exports all functions into the bash sub-shell
+    eval "$(declare -F | sed -e 's/-f /-fx /')"
+
+    $SHELL -c "$CMD"
+}
+
+#  Check that this script has properly been called by scbi main
+#  script.
+
+if [[ $1 == "subcommand" ]]; then
+    shift
+else
+    echo "error: use scbi shell [options]"
+    exit 1
+fi
+
+#  Parse run without getopt as an argument to run can have spaces
+
+SCBIOPTS=()
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --run:*)
+            DO_RUN=yes
+            DO_RUN_CMD=${1/*:/}
+            ;;
+        --run)
+            DO_RUN=yes
+            DO_RUN_CMD=""
+            ;;
+        (-*)
+            SCBIOPTS+=( $1 )
+            ;;
+        (*)
+            ;;
+    esac
+    shift
+done
+
+OPTFILE=$(mktemp)
+
+ALLOPTS=$(getopt -u -o kld \
+                 -l mode:use,mode:dev,mode:tests,mode:sb,mode:sandbox \
+                 -- ${SCBIOPTS[*]} 2> $OPTFILE)
+
+if [[ $? != 0 ]]; then
+    cat $OPTFILE
+    echo try \"scbi shell --help\" for more information.
+    rm -f $OPTFILE
+    exit 1
+fi
+
+set -- $ALLOPTS
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --mode:sb|--mode:sandbox)
+            DO_SHELL=yes
+            ;;
+        --mode:dev)
+            DO_SHELL=yes-dev
+            ;;
+        --mode:tests)
+            DO_SHELL=yes-tests
+            ;;
+        --mode:use)
+            DO_SHELL=yes-nocd
+            ;;
+        (--)
+            ;;
+        (*)
+            ;;
+        (-*)
+            echo "$0: error - unrecognized option $1" 1>&2; exit 1
+            sto-usage
+            ;;
+    esac
+    shift
+done
+
+if [[ -z ${SCBI_MODULES[*]} ]] && [[ $DO_STAT == no ]]; then
+    echo "error: shell/run commands need a plug-in, see scbi shell --help"
+    exit 0
+fi
+
+if [[ $DO_HELP == yes ]]; then
+    shl-usage
+    exit 0
+fi
+
+#  If a run is requested
+
+if [[ $DO_RUN == yes ]]; then
+    shl-run-command $SCBI_TARGET "${SCBI_MODULES[*]}" "$DO_RUN_CMD"
+    exit 0
+fi
+
+#  If a shell is requested
+
+if [[ $DO_SHELL == yes-nocd ]]; then
+    shl-run-shell $SCBI_TARGET "${SCBI_MODULES[*]}" no
+    exit 0
+fi
+
+if [[ $DO_SHELL =~ yes ]]; then
+    shl-run-shell $SCBI_TARGET "${SCBI_MODULES[*]}" $DO_SHELL
+    exit 0
+fi
+
+#  No parameter
+shl-usage
