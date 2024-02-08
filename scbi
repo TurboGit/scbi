@@ -231,6 +231,7 @@ function ini-apply-values()
         {
             DO_RUN=yes
             DO_RUN_CMD="$O"
+            SCBI_INI_SUBCMD=shell
         }
 
     #  Tests option
@@ -1863,7 +1864,7 @@ function setup-generic-tool-env()
 
     local res=0
 
-    if [[ $DO_SUBCMD == no ]] || [[ $SUBCMD == show ]]; then
+    if [[ $DO_SUBCMD == no ]] || [[ $SCBI_SUBCMD == show ]]; then
         rewrite-module-plan
         res=$?
         line-sep
@@ -1988,19 +1989,20 @@ SCBI_MODULES+=( ${SCBI_INI_MODULES} )
 ############################## sub-commands
 
 #  Check if first argument is a sub-command
-SUBCMD=${SCBI_MODULES[0]}
+SCBI_SUBCMD=${SCBI_INI_SUBCMD:-${SCBI_MODULES[0]}}
 
-if [[ -n "$(which scbi-$SUBCMD)" ]]; then
+if [[ -n "$(which scbi-$SCBI_SUBCMD)" ]]; then
     export DO_SUBCMD=yes
 
-    unset SCBI_MODULES[0]
+    [[ -z $SCBI_INI_SUBCMD ]] &&
+        unset SCBI_MODULES[0]
 
     #  Setup the generic SCBI environment for the sub-command
     setup-generic-tool-env
 
     IFS=''
 
-    source $(dirname $SCBI_BINARY)/scbi-$SUBCMD \
+    source $(dirname $SCBI_BINARY)/scbi-$SCBI_SUBCMD \
            subcommand ${SCBIOPTS[*]} ${SCBI_MODULES[*]}
     exit $?
 fi
