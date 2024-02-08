@@ -193,10 +193,14 @@ if [[ $DO_LIST != no ]]; then
     exit 0
 
 elif [[ $DO_DELETE == yes ]]; then
-    for KEY in ${SCBI_STORE_KEYS[*]}; do
-        sto-delete $KEY
-    done
-    exit 0
+    if [[ ${#SCBI_STORE_KEYS[*]} == 0 ]]; then
+        echo "scbi store : delete require at least one argument."
+    else
+        for KEY in ${SCBI_STORE_KEYS[*]}; do
+            sto-delete $KEY
+        done
+        exit 0
+    fi
 
 elif [[ ${#SCBI_STORE_KEYS[*]} == 2 ]]; then
     sto-record "${SCBI_STORE_KEYS[0]}" "${SCBI_STORE_KEYS[1]}"
