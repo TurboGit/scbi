@@ -1836,23 +1836,23 @@ function setup-generic-tool-env()
             exit 1
     fi
 
-    [[ -z ${SCBI_MODULES[*]} ]] &&
-        [[ $DO_STAT == no ]] &&
-        [[ $DO_SUBCMD == no ]] &&
-        usage && exit 0
-
     [[ $DO_SUBCMD == no ]] &&
-        [[ $DO_HELP == yes ]] && usage && exit 0
+        {
+            [[ -z ${SCBI_MODULES[*]} ]] &&
+                [[ $DO_STAT == no ]] &&
+                usage && exit 0
 
-    [[ $DO_STAT != no ]] &&
-        display-stat
+            [[ $DO_HELP == yes ]] && usage && exit 0
 
-    [[ $DO_SUBCMD == no ]] &&
-        ( [[ -z ${SCBI_MODULES[*]} ]] || [[ $DO_STAT == yes ]] ) &&
-        display-modules && display-plans
+            [[ $DO_STAT != no ]] &&
+                display-stat
 
-    [[ $DO_STAT == yes ]] &&
-        display-log-stat
+            [[ -z ${SCBI_MODULES[*]} ]] || [[ $DO_STAT == yes ]] &&
+                display-modules && display-plans
+
+            [[ $DO_STAT == yes ]] &&
+                display-log-stat
+        }
 
     #  Setup module reference specified on the command line. The module
     #  reference on the command line must overwrite the actual build plan.
