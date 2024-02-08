@@ -1976,7 +1976,7 @@ while [[ $# -gt 0 ]]; do
             SCBIOPTS+=( "$1" )
             ;;
         (*)
-            SCBI_MODULES+=( $1 )
+            SCBI_MODULES+=( "$1" )
             ;;
     esac
     shift
@@ -2001,7 +2001,7 @@ if [[ -n "$(which scbi-$SCBI_SUBCMD)" ]]; then
     setup-generic-tool-env
 
     source $(dirname $SCBI_BINARY)/scbi-$SCBI_SUBCMD \
-           subcommand "${SCBIOPTS[@]}" ${SCBI_MODULES[*]}
+           subcommand "${SCBIOPTS[@]}" "${SCBI_MODULES[@]}"
 
     exit $?
 fi

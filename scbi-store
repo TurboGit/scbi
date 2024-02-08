@@ -115,8 +115,8 @@ function sto-get()
 #
 function sto-record()
 {
-    local KEY=$1
-    local VALUE=$2
+    local KEY="$1"
+    local VALUE="$2"
 
     sto-load
 
@@ -137,9 +137,9 @@ fi
 
 OPTFILE=$(mktemp)
 
-ALLOPTS=$(getopt -u -o kld \
+ALLOPTS=( "$(getopt -o kld \
              -l list-keys,list:full:,list,delete \
-             -- $* 2> $OPTFILE)
+             -- "$@" 2> $OPTFILE)" )
 
 if [[ $? != 0 ]]; then
     cat $OPTFILE
@@ -148,10 +148,10 @@ if [[ $? != 0 ]]; then
     exit 1
 fi
 
-set -- $ALLOPTS
+eval set -- "${ALLOPTS[@]}"
 
 while [[ $# -gt 0 ]]; do
-    case $1 in
+    case "$1" in
         -k|--list-keys)
             DO_LIST=yes
             ;;
@@ -167,7 +167,7 @@ while [[ $# -gt 0 ]]; do
         (--)
             ;;
         (*)
-            SCBI_STORE_KEYS+=( $1 )
+            SCBI_STORE_KEYS+=( "$1" )
             ;;
         (-*)
             echo "$0: error - unrecognized option $1" 1>&2; exit 1
@@ -199,11 +199,11 @@ elif [[ $DO_DELETE == yes ]]; then
     exit 0
 
 elif [[ ${#SCBI_STORE_KEYS[*]} == 2 ]]; then
-    sto-record ${SCBI_STORE_KEYS[0]} ${SCBI_STORE_KEYS[1]}
+    sto-record "${SCBI_STORE_KEYS[0]}" "${SCBI_STORE_KEYS[1]}"
     exit 0
 
 elif [[ ${#SCBI_STORE_KEYS[*]} == 1 ]]; then
-    sto-get ${SCBI_STORE_KEYS[0]}
+    sto-get "${SCBI_STORE_KEYS[0]}"
     exit $?
 fi
 
