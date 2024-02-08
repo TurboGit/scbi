@@ -1,7 +1,5 @@
 #!/bin/bash
 
-unset IFS
-
 DO_LIST=no
 DO_DELETE=no
 SCBI_STORE_KEYS=()

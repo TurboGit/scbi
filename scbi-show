@@ -1,7 +1,5 @@
 #!/bin/bash
 
-unset IFS
-
 DO_EXT=no
 DO_LIST_VER=yes
 DO_MOD_VER=no

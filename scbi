@@ -2000,10 +2000,9 @@ if [[ -n "$(which scbi-$SCBI_SUBCMD)" ]]; then
     #  Setup the generic SCBI environment for the sub-command
     setup-generic-tool-env
 
-    IFS=''
-
     source $(dirname $SCBI_BINARY)/scbi-$SCBI_SUBCMD \
-           subcommand ${SCBIOPTS[*]} ${SCBI_MODULES[*]}
+           subcommand "${SCBIOPTS[@]}" ${SCBI_MODULES[*]}
+
     exit $?
 fi
 

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-unset IFS
-
 DO_CLEAN_VERSION=no
 DO_LOWER=no
 DO_SHA=no
