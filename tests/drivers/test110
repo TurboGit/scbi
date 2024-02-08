@@ -1,5 +1,5 @@
 
-RUNS ./scbi --list-depends cd1
+RUNS ./scbi show --depends cd1
 
 DIFF <<EOF
 cd1

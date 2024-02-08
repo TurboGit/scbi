@@ -1,12 +1,13 @@
 
 GVER=$(gcc --version | grep gcc | awk '{print $4}')
 
-RUNS ./scbi --plan=autov --list-plan mautov
+RUNS ./scbi show --plan=autov --build-plan mautov
 
 clean-up-osht-output
 sort-osht-output
 
 DIFF <<EOF
+
 @for mainav use mautov/mainav:99.99
 @for mainav2 use mautov/for2:99.99
 There is 3 module(s) in the plan
@@ -19,12 +20,13 @@ xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 EOF
 
-RUNS ./scbi --plan=autov --list-plan mainav=mautov/new mautov
+RUNS ./scbi show --plan=autov --build-plan mainav=mautov/new mautov
 
 clean-up-osht-output
 sort-osht-output
 
 DIFF <<EOF
+
 @for mainav use mautov/new
 @for mainav2 use mautov/for2:99.99
 There is 3 module(s) in the plan
@@ -35,12 +37,13 @@ xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 EOF
 
-RUNS ./scbi --plan=autov --list-plan mautov/new mautov
+RUNS ./scbi show --plan=autov --build-plan mautov/new mautov
 
 clean-up-osht-output
 sort-osht-output
 
 DIFF <<EOF
+
 @for mainav use mautov/mainav:99.99
 @for mainav2 use mautov/for2:99.99
 There is 3 module(s) in the plan

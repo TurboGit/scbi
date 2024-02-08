@@ -1,5 +1,5 @@
 # ====== list all deps listDA
-RUNS ./scbi --list-depends listDA
+RUNS ./scbi show --depends listDA
 
 CLEAN-DIFF <<EOF
 buildA
@@ -10,7 +10,7 @@ listDD
 EOF
 
 # ====== list all deps (explicit) listDA
-RUNS ./scbi --list-depends --list-filter:all listDA
+RUNS ./scbi show --depends --filter:all listDA
 
 CLEAN-DIFF <<EOF
 buildA
@@ -21,14 +21,14 @@ listDD
 EOF
 
 # ====== list dev deps listDA
-RUNS ./scbi --list-depends --list-filter:dev listDA
+RUNS ./scbi show --depends --filter:dev listDA
 
 CLEAN-DIFF <<EOF
 buildA
 EOF
 
 # ====== list run deps listDA
-RUNS ./scbi --list-depends --list-filter:run listDA
+RUNS ./scbi show --depends --filter:run listDA
 
 CLEAN-DIFF <<EOF
 listDA
@@ -38,21 +38,21 @@ listDD
 EOF
 
 # ====== list run direct deps listDA
-RUNS ./scbi --list-depends:direct --list-filter:run listDA
+RUNS ./scbi show --depends:direct --filter:run listDA
 
 CLEAN-DIFF <<EOF
 listDB
 EOF
 
 # ====== list dev direct deps listDA
-RUNS ./scbi --list-depends:direct --list-filter:dev listDA
+RUNS ./scbi show --depends:direct --filter:dev listDA
 
 CLEAN-DIFF <<EOF
 buildA
 EOF
 
 # ====== list all direct deps listDA
-RUNS ./scbi --list-depends:direct --list-filter:all listDA
+RUNS ./scbi show --depends:direct --filter:all listDA
 
 CLEAN-DIFF <<EOF
 buildA

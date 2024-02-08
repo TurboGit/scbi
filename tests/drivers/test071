@@ -6,7 +6,7 @@ export SCBI_OS_NAME=deb
 export SCBI_OS_VERSION=9
 export SCBI_OS_MAJOR_VERSION=9.3
 
-RUNS ./scbi --plan=autobar --list-plan lib1
+RUNS ./scbi show --plan=autobar --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -25,7 +25,7 @@ EOF
 
 export SCBI_OS_MAJOR_VERSION=9.1
 
-RUNS ./scbi --plan=autobar --list-plan lib1
+RUNS ./scbi show --plan=autobar --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -46,7 +46,7 @@ export SCBI_OS_NAME=deb
 export SCBI_OS_VERSION=10
 export SCBI_OS_MAJOR_VERSION=10.4
 
-RUNS ./scbi --plan=autobar --list-plan lib1
+RUNS ./scbi show --plan=autobar --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -67,7 +67,7 @@ export SCBI_OS_NAME=win
 export SCBI_OS_VERSION=3
 export SCBI_OS_MAJOR_VERSION=3.1
 
-RUNS ./scbi --plan=autobar --list-plan lib1
+RUNS ./scbi show --plan=autobar --build-plan lib1
 
 sort-osht-output-but-first-line
 

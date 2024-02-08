@@ -1,5 +1,5 @@
 
-RUNS ./scbi --target=i686-pc-mingw32 --plan=cross --list-plan lib1
+RUNS ./scbi show --target=i686-pc-mingw32 --plan=cross --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -11,7 +11,7 @@ modC/targetmingw32
 modD
 EOF
 
-RUNS ./scbi --target=x86_64-pc-mingw32 --plan=cross --list-plan lib1
+RUNS ./scbi show --target=x86_64-pc-mingw32 --plan=cross --build-plan lib1
 
 sort-osht-output-but-first-line
 

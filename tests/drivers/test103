@@ -1,5 +1,5 @@
 
-RUNS ./scbi --plan=final1 --list-plan lib1
+RUNS ./scbi show --plan=final1 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -9,7 +9,7 @@ plg1:vz
 plg2:vz
 EOF
 
-RUNS ./scbi --plan=final2 --list-plan lib1
+RUNS ./scbi show --plan=final2 --build-plan lib1
 
 sort-osht-output-but-first-line
 

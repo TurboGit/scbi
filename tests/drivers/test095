@@ -1,4 +1,4 @@
-RUNS ./scbi --plan=meta --list-plan meta:v5
+RUNS ./scbi show --plan=meta --build-plan meta:v5
 
 clean-up-osht-output
 sort-osht-output
@@ -10,7 +10,7 @@ m2:v5
 meta:v5
 EOF
 
-RUNS ./scbi --plan=meta --list-plan meta
+RUNS ./scbi show --plan=meta --build-plan meta
 
 clean-up-osht-output
 sort-osht-output
@@ -22,7 +22,7 @@ m2:v2
 meta/cc:v2
 EOF
 
-RUNS ./scbi --plan=meta-meta --list-plan meta-meta
+RUNS ./scbi show --plan=meta-meta --build-plan meta-meta
 
 clean-up-osht-output
 sort-osht-output
@@ -35,7 +35,7 @@ meta-meta:1.8
 oot:1.8
 EOF
 
-RUNS ./scbi --plan=meta-meta --list-plan depA:9 meta-meta
+RUNS ./scbi show --plan=meta-meta --build-plan depA:9 meta-meta
 
 clean-up-osht-output
 sort-osht-output
@@ -48,7 +48,7 @@ meta-meta:1.8
 oot:1.8
 EOF
 
-RUNS ./scbi --plan=meta-meta-2 --list-plan meta-meta
+RUNS ./scbi show --plan=meta-meta-2 --build-plan meta-meta
 
 clean-up-osht-output
 sort-osht-output
@@ -61,7 +61,7 @@ meta-meta:1.8
 oot:v9
 EOF
 
-RUNS ./scbi --plan=meta-meta-3 --list-plan meta-meta-2
+RUNS ./scbi show --plan=meta-meta-3 --build-plan meta-meta-2
 
 clean-up-osht-output
 sort-osht-output

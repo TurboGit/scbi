@@ -6,7 +6,7 @@ export SCBI_OS_VERSION=9
 export SCBI_OS_MAJOR_VERSION=9.3
 
 # ========================= A
-RUNS ./scbi --plan=group5 --list-plan lib1
+RUNS ./scbi show --plan=group5 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -20,7 +20,7 @@ modH/mpi:master
 EOF
 
 # ========================= B
-RUNS ./scbi --plan=group5/mpi --list-plan lib1
+RUNS ./scbi show --plan=group5/mpi --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -38,7 +38,7 @@ export SCBI_OS_VERSION=11
 export SCBI_OS_MAJOR_VERSION=11.1
 
 # ========================= C
-RUNS ./scbi --plan=group5/fast --list-plan lib1
+RUNS ./scbi show --plan=group5/fast --build-plan lib1
 
 sort-osht-output-but-first-line
 

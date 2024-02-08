@@ -2,7 +2,7 @@
 # of the final output.
 
 # echo ========================= A
-RUNS ./scbi --plan=group --list-plan lib1
+RUNS ./scbi show --plan=group --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -21,14 +21,14 @@ modJ/speed
 EOF
 
 # echo ========================= B
-NRUNS ./scbi --plan=group2 --list-plan lib1
+NRUNS ./scbi show --plan=group2 --build-plan lib1
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : build (FAILED) build plan unexpected modB on group start
 EOF
 
 # echo ========================= C
-RUNS ./scbi --plan=group3 --list-plan lib1
+RUNS ./scbi show --plan=group3 --build-plan lib1
 
 sort-osht-output-but-first-line
 

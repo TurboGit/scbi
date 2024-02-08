@@ -1,0 +1,277 @@
+#!/bin/bash
+
+DO_EXT=no
+DO_LIST_VER=yes
+DO_MOD_VER=no
+SCBI_FILTER=all
+
+############################################## shw-usage
+#
+#  Display script usage
+#
+function shw-usage()
+{
+    echo
+    echo SCBI-SHOW $SCBI_VERSION
+    echo
+    echo $0 [options] plug-in1 [plug-in2...]
+
+    echo ""
+    echo "   -h | --help             this help message"
+    echo "   -v | --version          display driver & plug-ins versions"
+    echo "      | --plugins=<dir>    specify the plugins' directory"
+    echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
+    echo "      | --depends:n        list module's dependencies (direct, full)"
+    echo "      | --externals:n      list module's external dependencies"
+    echo "      | --no-version       do not display modules/externals version"
+    echo "      | --filter:n         filter depends/external for dev or runtime"
+    echo "      | --build-plan       list current current plan"
+    echo "      | --module-ref:n     display variant/version of specific module"
+}
+
+############################## register-depends-callback
+# used for --list-depends and --list-external
+
+declare -a MODULE_LIST
+
+function shw-register-depends-callback()
+{
+    local FORMODULE=$1
+    local MODREF=$2
+    local LEVEL=$3
+    local DEPENDS_KIND=$4
+    local IS_EXT=$5
+    local IS_META=$6
+
+    local IS_BUILD_DEPENDS=false
+    [[ $DEPENDS_KIND == build ]] && IS_BUILD_DEPENDS=true
+
+    local selext=false
+    local selbuild=false
+    local selected=false
+
+    if [[ $DO_EXT != no ]] || [[ $IS_EXT == false ]]; then
+        selext=true
+    fi
+
+    if [[ $SCBI_FILTER == all ]] || [[ $SCBI_FILTER == dev ]]; then
+        selbuild=true
+    fi
+
+    if [[ $selbuild == $IS_BUILD_DEPENDS ]] || [[ $SCBI_FILTER == all ]]; then
+        selected=true
+    fi
+
+    if [[ $DO_DEPS == yes-direct ]] && [[ $LEVEL -ne 1 ]]; then
+        selected=false
+    fi
+
+    if [[ $DO_EXT == yes-only ]] && [[ $IS_EXT == false ]]; then
+        selected=false
+    fi
+
+    if [[ $selext == true ]] && [[ $selected == true ]]; then
+        if [[ "$SCBI_FILTER" == "run" ]] &&
+               [[ "${MODREF: -4}" == "-dev" ]];
+        then
+            MOD=$(get-lib-for-dev $MODREF)
+        else
+            MOD=$MODREF
+        fi
+
+        #  Do we need the version of the module
+
+        if [[ $DO_LIST_VER == yes ]]; then
+            local module_info=()
+            get-module-ref module_info $MODREF $FORMODULE
+
+            local module=${module_info[0]}
+            local ref=${module_info[3]}
+
+            if [[ $ref == NONE ]]; then
+                if [[ $IS_EXT == true ]]; then
+                    local V=$(get-pkg-version $module)
+                    if [[ -z $V ]]; then
+                        MOD="$module"
+                    else
+                        MOD="$module:$V"
+                    fi
+                else
+                    MOD="$module"
+                fi
+            else
+                MOD="$module:$ref"
+            fi
+        fi
+
+        MODULE_LIST+=($MOD)
+    fi
+}
+
+############################## display-module-ref
+
+function shw-display-module-ref()
+{
+    local MODREF=$1
+    local MODE=$2
+
+    local module_info=()
+    get-module-ref module_info $MODREF
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local kind=${module_info[2]}
+    local ref=${module_info[3]}
+
+    [[ $kind == VERSION ]] && ref="#$ref"
+
+    case $MODE in
+        ver)
+            echo -n $ref
+            ;;
+        var)
+            echo -n $variant
+            ;;
+        full)
+            [[ $ref == NONE ]] && ref=""
+            echo -n ${variant:+/}${variant}${ref:+:}${ref}
+            ;;
+    esac
+}
+
+#  Check that this script has properly been called by scbi main
+#  script.
+
+if [[ $1 == "subcommand" ]]; then
+    shift
+else
+    echo "error: use scbi show [options]"
+    exit 1
+fi
+
+OPTFILE=$(mktemp)
+
+ALLOPTS=$(getopt -u -o kld \
+                 -l depends:direct,depends:full,depends,build-plan \
+                 -l externals,externals:only,no-version \
+                 -l filter:all,filter:dev,filter:runtime,module-ref \
+                 -l module-ref:version,module-ref:variant,module-ref:full \
+                 -- $* 2> $OPTFILE)
+
+if [[ $? != 0 ]]; then
+    cat $OPTFILE
+    echo try \"scbi show --help\" for more information.
+    rm -f $OPTFILE
+    exit 1
+fi
+
+set -- $ALLOPTS
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --depends:direct)
+            DO_DEPS=yes-direct
+            DO_QUIET=yes
+            ;;
+        --depends:full)
+            DO_DEPS=yes
+            DO_QUIET=yes
+            ;;
+        --depends)
+            DO_DEPS=yes
+            DO_QUIET=yes
+            ;;
+        --externals:only)
+            DO_EXT=yes-only
+            DO_QUIET=yes
+            ;;
+        --externals)
+            DO_EXT=yes
+            DO_QUIET=yes
+            ;;
+        --no-version)
+            DO_LIST_VER=no
+            ;;
+        --filter:all)
+            SCBI_FILTER=all
+            ;;
+        --filter:dev)
+            SCBI_FILTER=dev
+            ;;
+        --filter:runtime)
+            SCBI_FILTER=runtime
+            ;;
+        --build-plan)
+            DO_PLAN=yes
+            ;;
+        --module-ref)
+            DO_MOD_VER=full
+            shift
+            ;;
+        --module-ref:version)
+            DO_MOD_VER=ver
+            shift
+            ;;
+        --module-ref:variant)
+            DO_MOD_VER=var
+            shift
+            ;;
+        --module-ref:full)
+            DO_MOD_VER=full
+            shift
+            ;;
+        (--)
+            ;;
+        (*)
+            ;;
+        (-*)
+            echo "$0: error - unrecognized option $1" 1>&2; exit 1
+            sto-usage
+            ;;
+    esac
+    shift
+done
+
+if [[ $DO_HELP == yes ]]; then
+    shw-usage
+    exit 0
+fi
+
+if [[ $DO_EXT != no && $DO_DEPS == no ]]; then
+    DO_DEPS=yes
+fi
+
+if [[ $DO_DEPS != no ]]; then
+    for module in ${SCBI_MODULES[*]}; do
+        for-all-modules-with-meta-ext shw-register-depends-callback $module
+    done
+
+    if [[ $? = 0 ]]; then
+        {
+            for MOD in "${MODULE_LIST[@]}"; do
+                echo "${MOD}"
+            done
+        } | sort | uniq
+
+        exit 0
+    fi
+
+    exit 1
+fi
+
+#  If we want to display a module version from a module plan, do it now
+
+if [[ $DO_MOD_VER != no ]]; then
+    for module in ${SCBI_MODULES[*]}; do
+        shw-display-module-ref $module $DO_MOD_VER
+    done
+    exit 0
+fi
+
+if [[ $DO_PLAN == yes ]]; then
+    display-build-plan
+    exit 0
+fi
+
+#  No parameter
+shw-usage

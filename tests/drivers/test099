@@ -1,6 +1,6 @@
 
 
-RUNS ./scbi --plan=plgv1 --list-plan lib1
+RUNS ./scbi show --plan=plgv1 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -12,7 +12,7 @@ plg3:v1
 plg4/new:v1
 EOF
 
-RUNS ./scbi --plan=plgv2 --list-plan lib1
+RUNS ./scbi show --plan=plgv2 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -24,7 +24,7 @@ plg3:v2
 plg4/new2:v2
 EOF
 
-RUNS ./scbi --plan=plgv3 --list-plan lib1
+RUNS ./scbi show --plan=plgv3 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -36,7 +36,7 @@ plg7:v1
 plg8/new:v1
 EOF
 
-RUNS ./scbi --plan=plgv4 --list-plan lib1
+RUNS ./scbi show --plan=plgv4 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -52,7 +52,7 @@ plg7:v1
 plg8/new:v1
 EOF
 
-RUNS ./scbi --plan=plgv5 --list-plan lib1
+RUNS ./scbi show --plan=plgv5 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -68,7 +68,7 @@ plg7:v1
 plg8/new:v1
 EOF
 
-RUNS ./scbi --plan=plgv6 --list-plan lib1
+RUNS ./scbi show --plan=plgv6 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -84,7 +84,7 @@ plg7:v1
 plg8/new:v1
 EOF
 
-RUNS ./scbi --plan=plgv7 --list-plan lib1
+RUNS ./scbi show --plan=plgv7 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -101,7 +101,7 @@ plg8/new:v1
 plg9/ng
 EOF
 
-RUNS ./scbi --plan=plgv8 --list-plan lib1
+RUNS ./scbi show --plan=plgv8 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -118,7 +118,7 @@ plg8/azerty.new:v1
 plg9/ng
 EOF
 
-RUNS ./scbi --plan=plgv9 --list-plan lib1
+RUNS ./scbi show --plan=plgv9 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -135,7 +135,7 @@ plg8/newazerty.new:v1
 plg9/ng
 EOF
 
-RUNS ./scbi --plan=plgv10 --list-plan lib1
+RUNS ./scbi show --plan=plgv10 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -144,7 +144,7 @@ There is 1 module(s) in the plan
 module/2.four.one.three
 EOF
 
-RUNS ./scbi --plan=plgv11 --list-plan lib1
+RUNS ./scbi show --plan=plgv11 --build-plan lib1
 
 sort-osht-output-but-first-line
 

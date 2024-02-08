@@ -1,5 +1,5 @@
 # echo ========== dmain
-RUNS ./scbi --list-depends dmain
+RUNS ./scbi show --depends dmain
 
 CLEAN-DIFF <<EOF
 depA
@@ -10,14 +10,14 @@ oot
 EOF
 
 # echo ========== dmain externals
-RUNS ./scbi --list-externals:only dmain
+RUNS ./scbi show --externals:only dmain
 
 CLEAN-DIFF <<EOF
 libaws-dev
 EOF
 
 # echo ========== dmain modules & externals
-RUNS ./scbi --list-externals dmain
+RUNS ./scbi show --externals dmain
 
 CLEAN-DIFF <<EOF
 depA
@@ -29,7 +29,7 @@ oot
 EOF
 
 # echo ========== dmain direct modules & externals
-RUNS ./scbi --list-depends:direct --list-externals dmain
+RUNS ./scbi show --depends:direct --externals dmain
 
 CLEAN-DIFF <<EOF
 depA

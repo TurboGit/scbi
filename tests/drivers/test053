@@ -2,7 +2,7 @@
 # of the final output.
 
 # ========================= A
-RUNS ./scbi --plan=group4 --list-plan lib1
+RUNS ./scbi show --plan=group4 --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -16,7 +16,7 @@ modH:master
 EOF
 
 # ========================= B
-RUNS ./scbi --plan=group4/mpi --list-plan lib1
+RUNS ./scbi show --plan=group4/mpi --build-plan lib1
 
 sort-osht-output-but-first-line
 
@@ -30,7 +30,7 @@ modH/mpi:master
 EOF
 
 # ========================= C
-RUNS ./scbi --plan=group4/mpi.fast --list-plan lib1
+RUNS ./scbi --plan=group4/mpi.fast show --build-plan lib1
 
 sort-osht-output-but-first-line
 

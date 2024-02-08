@@ -1096,37 +1096,6 @@ function display-modules()
     echo
 }
 
-############################## display-module-ref
-
-function display-module-ref()
-{
-    local MODREF=$1
-    local MODE=$2
-
-    local module_info=()
-    get-module-ref module_info $MODREF
-
-    local module=${module_info[0]}
-    local variant=${module_info[1]}
-    local kind=${module_info[2]}
-    local ref=${module_info[3]}
-
-    [[ $kind == VERSION ]] && ref="#$ref"
-
-    case $MODE in
-        ver)
-            echo -n $ref
-            ;;
-        var)
-            echo -n $variant
-            ;;
-        full)
-            [[ $ref == NONE ]] && ref=""
-            echo -n ${variant:+/}${variant}${ref:+:}${ref}
-            ;;
-    esac
-}
-
 ############################## display-plans
 
 function display-plans()

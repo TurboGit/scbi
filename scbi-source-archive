@@ -228,7 +228,6 @@ while [[ $# -gt 0 ]]; do
         (--)
             ;;
         (*)
-            SCBI_MODULES+=( $1 )
             ;;
         (-*)
             echo "$0: error - unrecognized option $1" 1>&2; exit 1

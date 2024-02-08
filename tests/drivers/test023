@@ -19,7 +19,7 @@ xxxx/xx/xx xx:xx:xx : recc (FAILED)  ⦁ recb → recc
 EOF
 
 # ========== list-depends A
-NRUNS ./scbi --list-depends reca
+NRUNS ./scbi show --depends reca
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : reca (FAILED) recursive dependencies detected
@@ -29,7 +29,7 @@ xxxx/xx/xx xx:xx:xx : reca (FAILED)  ⦁ recc → reca
 EOF
 
 # ========== list-depends B
-NRUNS ./scbi --list-depends recb
+NRUNS ./scbi show --depends recb
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : recb (FAILED) recursive dependencies detected

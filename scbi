@@ -304,12 +304,9 @@ DO_QUIET=no
 DO_UPDATE=no
 DO_ARCHIVE=no
 DO_FORCE=no
-DO_MOD_VER=no
 DO_STAT=no
 DO_DEPS=no
-DO_EXT=no
 DO_CLEAN_INSTALL=no
-DO_LIST_VER=yes
 DO_PLAN=no
 DO_SUBCMD=no
 DEPS=no
@@ -323,7 +320,6 @@ ARCHIVE_CACHE=yes
 DRY_RUN=no
 SAFE_MODE=no
 DO_STANDALONE=no
-SCBI_FILTER=all
 CMDLINE_BUILD_DIR=
 DO_HELP=no
 DO_VERSION=no
@@ -618,12 +614,6 @@ function usage()
     echo "      | --safe             clean-up build directory before configure"
     echo "      | --shell:n          start a shell with module's environment"
     echo "      | --run:\"cmd arg\"    run command in module's environment"
-    echo "      | --list-depends:n   list module's dependencies (direct, full)"
-    echo "      | --list-externals:n list module's external dependencies"
-    echo "      | --list-no-version  do not display modules/externals version"
-    echo "      | --list-filter:n    filter depends/external for dev or runtime"
-    echo "      | --list-plan        list current current plan"
-    echo "      | --module-ref:n     display variant/version of specific module"
     echo "      | --dry-run          only list modules handled"
     echo "      | --stat[:full]      display some status of current setup"
     echo "   -n | --no-patch         do not apply patches"
@@ -667,85 +657,6 @@ function handle-module-env()
     plugin-call-variant-hooks \
         $module $ENV \
         $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $SCBI_TARGET $variant
-}
-
-############################## register-depends-callback
-# used for --list-depends and --list-external
-
-declare -a MODULE_LIST
-
-function register-depends-callback()
-{
-    local FORMODULE=$1
-    local MODREF=$2
-    local LEVEL=$3
-    local DEPENDS_KIND=$4
-    local IS_EXT=$5
-    local IS_META=$6
-
-    local IS_BUILD_DEPENDS=false
-    [[ $DEPENDS_KIND == build ]] && IS_BUILD_DEPENDS=true
-
-    local selext=false
-    local selbuild=false
-    local selected=false
-
-    if [[ $DO_EXT != no ]] || [[ $IS_EXT == false ]]; then
-        selext=true
-    fi
-
-    if [[ $SCBI_FILTER == all ]] || [[ $SCBI_FILTER == dev ]]; then
-        selbuild=true
-    fi
-
-    if [[ $selbuild == $IS_BUILD_DEPENDS ]] || [[ $SCBI_FILTER == all ]]; then
-        selected=true
-    fi
-
-    if [[ $DO_DEPS == yes-direct ]] && [[ $LEVEL -ne 1 ]]; then
-        selected=false
-    fi
-
-    if [[ $DO_EXT == yes-only ]] && [[ $IS_EXT == false ]]; then
-        selected=false
-    fi
-
-    if [[ $selext == true ]] && [[ $selected == true ]]; then
-        if [[ "$SCBI_FILTER" == "run" ]] &&
-               [[ "${MODREF: -4}" == "-dev" ]];
-        then
-            MOD=$(get-lib-for-dev $MODREF)
-        else
-            MOD=$MODREF
-        fi
-
-        #  Do we need the version of the module
-
-        if [[ $DO_LIST_VER == yes ]]; then
-            local module_info=()
-            get-module-ref module_info $MODREF $FORMODULE
-
-            local module=${module_info[0]}
-            local ref=${module_info[3]}
-
-            if [[ $ref == NONE ]]; then
-                if [[ $IS_EXT == true ]]; then
-                    local V=$(get-pkg-version $module)
-                    if [[ -z $V ]]; then
-                        MOD="$module"
-                    else
-                        MOD="$module:$V"
-                    fi
-                else
-                    MOD="$module"
-                fi
-            else
-                MOD="$module:$ref"
-            fi
-        fi
-
-        MODULE_LIST+=($MOD)
-    fi
 }
 
 ############################## handle-env
@@ -1927,7 +1838,6 @@ function setup-generic-tool-env()
 
     [[ -z ${SCBI_MODULES[*]} ]] &&
         [[ $DO_STAT == no ]] &&
-        [[ $DO_MOD_VER == no ]] &&
         [[ $DO_SUBCMD == no ]] &&
         usage && exit 0
 
@@ -2013,6 +1923,15 @@ while [[ $# -gt 0 ]]; do
         --env*)
             ENV_NAME=${1#*=}
             ;;
+        -t)
+            SCBI_TARGET=$2
+            shift
+            SCBI_TARGET_SPECIFIED=yes
+            ;;
+        --target=*)
+            SCBI_TARGET=${1#*=}
+            SCBI_TARGET_SPECIFIED=yes
+            ;;
         --plan*)
             SCBI_PLAN_CL=${1#*=}
             ;;
@@ -2061,7 +1980,7 @@ while [[ $# -gt 0 ]]; do
             SCBIOPTS+=( $1 )
             ;;
         (*)
-            SCBIARGS+=( $1 )
+            SCBI_MODULES+=( $1 )
             ;;
     esac
     shift
@@ -2070,35 +1989,31 @@ done
 ############################## sub-commands
 
 #  Check if first argument is a sub-command
-SUBCMD=${SCBIARGS[0]}
+SUBCMD=${SCBI_MODULES[0]}
 
 if [[ -n "$(which scbi-$SUBCMD)" ]]; then
     export DO_SUBCMD=yes
 
+    unset SCBI_MODULES[0]
+
     #  Setup the generic SCBI environment for the sub-command
     setup-generic-tool-env
 
-    unset SCBIARGS[0]
-
-    source $(dirname $SCBI_BINARY)/scbi-$SUBCMD subcommand ${SCBIOPTS[*]} ${SCBIARGS[*]}
+    source $(dirname $SCBI_BINARY)/scbi-$SUBCMD \
+           subcommand ${SCBIOPTS[*]} ${SCBI_MODULES[*]}
     exit $?
 fi
 
-SCBIOPTS+=( ${SCBI_INI_OPTIONS[*]} ${SCBIARGS[*]} )
+SCBIOPTS+=( ${SCBI_INI_OPTIONS[*]} ${SCBI_MODULES[*]} )
 
 OPTFILE=$(mktemp)
 
-ALLOPTS=$(getopt -u -o t:j:adefSIuscbilnpqvwWh \
-                 -l target:,no-setup,no-install,update,setup,config \
+ALLOPTS=$(getopt -u -o j:adefSIuscbilnpqvwWh \
+                 -l no-setup,no-install,update,setup,config \
                  -l build,build-target:,install,clean-install,tar \
                  -l log,log:yes,log:no,log:on-failure,purge,purge:only \
-                 -l prefix:,module-ref \
-                 -l module-ref:version,module-ref:variant,module-ref:full \
-                 -l deps,deps:warning,archive,force,env:,no-patch \
+                 -l prefix:,deps,deps:warning,archive,force,env:,no-patch \
                  -l no-wrapup,wrapup,safe,standalone \
-                 -l list-depends:direct,list-depends:full,list-depends \
-                 -l list-externals,list-externals:only,list-no-version \
-                 -l list-filter:all,list-filter:dev,list-filter:runtime \
                  -l dry-run,jobs:,build-dir:,list-plan: \
                  -l shell,shell:use,shell:dev,shell:tests,shell:sb \
                  -l shell:sandbox \
@@ -2115,6 +2030,8 @@ rm -f $OPTFILE
 
 set -- $ALLOPTS
 
+SCBI_MODULES=()
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         -a|--create-archive)
@@ -2122,11 +2039,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         --archive)
             ARCHIVE_CACHE=no
-            ;;
-        -t|--target)
-            SCBI_TARGET=$2
-            shift
-            SCBI_TARGET_SPECIFIED=yes
             ;;
         -S|--no-setup)
             DO_SETUP=no
@@ -2209,61 +2121,10 @@ while [[ $# -gt 0 ]]; do
             SCBI_PREFIX=$2
             shift
             ;;
-        --module-ref)
-            DO_MOD_VER=full
-            shift
-            ;;
-        --module-ref:version)
-            DO_MOD_VER=ver
-            shift
-            ;;
-        --module-ref:variant)
-            DO_MOD_VER=var
-            shift
-            ;;
-        --module-ref:full)
-            DO_MOD_VER=full
-            shift
-            ;;
         -j|--jobs)
             SCBI_JOBS=$2
             shift
             SCBI_HALF_JOBS=$SCBI_JOBS
-            ;;
-        --list-depends:direct)
-            DO_DEPS=yes-direct
-            DO_QUIET=yes
-            ;;
-        --list-depends:full)
-            DO_DEPS=yes
-            DO_QUIET=yes
-            ;;
-        --list-depends)
-            DO_DEPS=yes
-            DO_QUIET=yes
-            ;;
-        --list-externals:only)
-            DO_EXT=yes-only
-            DO_QUIET=yes
-            ;;
-        --list-externals)
-            DO_EXT=yes
-            DO_QUIET=yes
-            ;;
-        --list-no-version)
-            DO_LIST_VER=no
-            ;;
-        --list-filter:all)
-            SCBI_FILTER=all
-            ;;
-        --list-filter:dev)
-            SCBI_FILTER=dev
-            ;;
-        --list-filter:runtime)
-            SCBI_FILTER=runtime
-            ;;
-        --list-plan)
-            DO_PLAN=yes
             ;;
         --dry-run)
             DRY_RUN=yes
@@ -2292,10 +2153,6 @@ while [[ $# -gt 0 ]]; do
     esac
     shift
 done
-
-if [[ $DO_EXT != no && $DO_DEPS == no ]]; then
-    DO_DEPS=yes
-fi
 
 if [[ $DO_COLOR == dark ]]; then
     SCBI_CBOLD=$(tput bold)
@@ -2332,24 +2189,6 @@ setup-generic-tool-env
     [[ $DO_STAT == no ]] &&
     echo "error: shell/run commands need a plug-in, see scbi --help" && exit 0
 
-if [[ $DO_DEPS != no ]]; then
-    for module in ${SCBI_MODULES[*]}; do
-        for-all-modules-with-meta-ext register-depends-callback $module
-    done
-
-    if [[ $? = 0 ]]; then
-        {
-            for MOD in "${MODULE_LIST[@]}"; do
-                echo "${MOD}"
-            done
-        } | sort | uniq
-
-        exit 0
-    fi
-
-    exit 1
-fi
-
 #  Prepare log dir and archive dir
 
 mkdir -p $SCBI_LOGS/$TODAY
@@ -2381,20 +2220,6 @@ fi
 
 if [[ $DO_SHELL =~ yes ]]; then
     run-shell $SCBI_TARGET "${SCBI_MODULES[*]}" $DO_SHELL
-    exit 0
-fi
-
-#  If we want to display a module version from a module plan, do it now
-
-if [[ $DO_MOD_VER != no ]]; then
-    for module in ${SCBI_MODULES[*]}; do
-        display-module-ref $module $DO_MOD_VER
-    done
-    exit 0
-fi
-
-if [[ $DO_PLAN == yes ]]; then
-    display-build-plan
     exit 0
 fi
 

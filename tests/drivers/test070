@@ -6,7 +6,7 @@ export SCBI_OS_NAME=deb
 export SCBI_OS_VERSION=9.3
 export SCBI_OS_MAJOR_VERSION=9
 
-RUNS ./scbi --plan=ondeps --list-plan ondeps
+RUNS ./scbi show --plan=ondeps --build-plan ondeps
 
 sort-osht-output-but-first-line
 
@@ -20,7 +20,7 @@ EOF
 export SCBI_OS_VERSION=10.1
 export SCBI_OS_MAJOR_VERSION=10
 
-RUNS ./scbi --plan=ondeps --list-plan ondeps
+RUNS ./scbi show --plan=ondeps --build-plan ondeps
 
 sort-osht-output-but-first-line
 

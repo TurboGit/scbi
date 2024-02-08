@@ -77,9 +77,10 @@ rm -f scripts.d/.store
 
 # copy scripts
 cp ../scbi .
-cp ../scbi-lint .
-cp ../scbi-source-archive .
-cp ../scbi-store .
+for tools in lint source-archive store show; do
+    cp ../scbi-$tools .
+done
+
 cp ../scripts.d/0_runtime scripts.d/
 cp ../scripts.d/_os_* scripts.d/
 cp ../scripts.d/[1-9]* scripts.d/

@@ -1,5 +1,5 @@
 
-RUNS ./scbi --plan=set --list-plan lib1
+RUNS ./scbi show --plan=set --build-plan lib1
 
 sort-osht-output-but-first-line
 

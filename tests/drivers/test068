@@ -1,6 +1,6 @@
 # Test a group plan with a tar version
 
-RUNS ./scbi --plan=grouptar --list-plan lib1
+RUNS ./scbi show --plan=grouptar --build-plan lib1
 
 sort-osht-output-but-first-line
 
