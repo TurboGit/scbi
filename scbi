@@ -318,12 +318,10 @@ DO_PATCH=yes
 STEPS=""
 BUILD_SCBI_TARGET=
 SCBI_PLAN=
-SCBI_PLAN_CL=
 ARCHIVE_CACHE=yes
 DRY_RUN=no
 SAFE_MODE=no
 DO_STANDALONE=no
-CMDLINE_BUILD_DIR=
 DO_HELP=no
 DO_VERSION=no
 DO_SHELL=no
@@ -1792,12 +1790,12 @@ function setup-generic-tool-env()
     #  Load user's environment if any now that SCBI_PLUGINS is set
 
     load-module-env $ENV_NAME
+
     #  If we have specified a build directory on command line, set it now
     #  that the env is loaded (takes precedence).
 
-    if [[ -n $CMDLINE_BUILD_DIR ]]; then
-        export SCBI_BDIR=$CMDLINE_BUILD_DIR
-    fi
+    [[ -n ${CMDLINE_OPTS[SCBI_BDIR]} ]] &&
+        SCBI_BDIR=${CMDLINE_OPTS[SCBI_BDIR]}
 
     #  Then load any global settings, not overriding user's ones
 
@@ -1826,7 +1824,8 @@ function setup-generic-tool-env()
     #  If a plan passed on the command line ensure that it is used instead
     #  of any other possibly set in the environment file.
 
-    [[ -n $SCBI_PLAN_CL ]] && SCBI_PLAN=$SCBI_PLAN_CL
+    [[ -n ${CMDLINE_OPTS[SCBI_PLAN]} ]] &&
+        SCBI_PLAN=${CMDLINE_OPTS[SCBI_PLAN]}
 
     #  Load build plan if any
 
@@ -1844,10 +1843,13 @@ function setup-generic-tool-env()
                 usage && exit 0
 
             [[ $DO_HELP == yes ]] && usage && exit 0
+        }
 
-            [[ $DO_STAT != no ]] &&
-                display-stat
+    [[ $DO_STAT != no ]] &&
+        display-stat
 
+    [[ $DO_SUBCMD == no ]] &&
+        {
             [[ -z ${SCBI_MODULES[*]} ]] || [[ $DO_STAT == yes ]] &&
                 display-modules && display-plans
 
@@ -1908,65 +1910,68 @@ ini-load-files
 #  Apply default global values
 ini-apply-values ""
 
+declare -A CMDLINE_OPTS=()
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help)
-            DO_HELP=yes
+            CMDLINE_OPTS+=([DO_HELP]=yes)
             break
             ;;
         -v|--version)
-            DO_VERSION=yes
+            CMDLINE_OPTS+=([DO_VERSION]=yes)
             break
             ;;
         -f|--force)
-            DO_FORCE=yes
+            CMDLINE_OPTS+=([DO_FORCE]=yes)
             ;;
         -q|--quiet)
-            DO_QUIET=yes
+            CMDLINE_OPTS+=([DO_QUIET]=yes)
             ;;
         --color:dark)
-            DO_COLOR=dark
+            CMDLINE_OPTS+=([DO_COLOR]=dark)
             ;;
         --color:light)
-            DO_COLOR=light
+            CMDLINE_OPTS+=([DO_COLOR]=light)
             ;;
         --color:no)
-            DO_COLOR=no
+            CMDLINE_OPTS+=([DO_COLOR]=no)
             ;;
         -e)
-            ENV_NAME=${2}
+            CMDLINE_OPTS+=([ENV_NAME]="${2}")
             shift
             ;;
         --env*)
-            ENV_NAME=${1#*=}
+            CMDLINE_OPTS+=([ENV_NAME]="${1#*=}")
             ;;
         -t)
-            SCBI_TARGET=$2
+            CMDLINE_OPTS+=([SCBI_TARGET]="$2")
             shift
-            SCBI_TARGET_SPECIFIED=yes
+            CMDLINE_OPTS+=([SCBI_TARGET_SPECIFIED]=yes)
             ;;
         --target=*)
-            SCBI_TARGET=${1#*=}
-            SCBI_TARGET_SPECIFIED=yes
+            CMDLINE_OPTS+=([SCBI_TARGET]="${1#*=}")
+            CMDLINE_OPTS+=([SCBI_TARGET_SPECIFIED]=yes)
             ;;
         --plan*)
-            SCBI_PLAN_CL=${1#*=}
+            CMDLINE_OPTS+=([SCBI_PLAN]="${1#*=}")
             ;;
         --stat:full)
-            DO_STAT=yes
+            CMDLINE_OPTS+=([DO_STAT]=yes)
             ;;
         --stat)
-            DO_STAT=info-only
+            CMDLINE_OPTS+=([DO_STAT]=info-only)
             ;;
         --build-dir*)
-            CMDLINE_BUILD_DIR=${1#*=}
+            CMDLINE_OPTS+=([SCBI_BDIR]="${1#*=}")
             ;;
         --plugins*)
-            SCBI_PLUGINS=${1#*=}
-            if [[ ! -d "$SCBI_PLUGINS" ]] || \
+            VAL=${1#*=}
+            CMDLINE_OPTS+=([SCBI_PLUGINS]="$VAL")
+            if [[ ! -d "$VAL" ]] || \
                    [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]];
             then
-                echo "$0: no plugins found in $SCBI_PLUGINS"
+                echo "$0: no plugins found in $VAL"
                 exit 1
             fi
             ;;
@@ -1976,14 +1981,14 @@ while [[ $# -gt 0 ]]; do
             ;;
         --tests:only*)
             do-clear-steps
-            DO_TEST=yes-only
+            CMDLINE_OPTS+=([DO_TEST]=yes-only)
             OPTS=( ${1/=/ } )
-            SCBI_TESTS_OPTIONS="${OPTS[*]:1}"
+            CMDLINE_OPTS+=([SCBI_TESTS_OPTIONS]="${OPTS[*]:1}")
             ;;
         --tests*)
-            DO_TEST=yes
+            CMDLINE_OPTS+=([DO_TEST]=yes)
             OPTS=( ${1/=/ } )
-            SCBI_TESTS_OPTIONS="${OPTS[*]:1}"
+            CMDLINE_OPTS+=([SCBI_TESTS_OPTIONS]="${OPTS[*]:1}")
             ;;
         --ini*)
             ini-apply-values ${1#*=}
@@ -2013,6 +2018,18 @@ if [[ -n "$(which scbi-$SCBI_SUBCMD)" ]]; then
     [[ -z $SCBI_INI_SUBCMD ]] &&
         unset SCBI_MODULES[0]
 
+    ini-apply-values scbi-$SCBI_SUBCMD
+fi
+
+#  Apply now command line options, this must be done after
+#  ini-apply-values above as a command line option must take
+#  precedence.
+
+for O in "${!CMDLINE_OPTS[@]}"; do
+    eval $O=\"${CMDLINE_OPTS[$O]}\"
+done
+
+if [[ -n "$(which scbi-$SCBI_SUBCMD)" ]]; then
     #  Setup the generic SCBI environment for the sub-command
     setup-generic-tool-env
 
