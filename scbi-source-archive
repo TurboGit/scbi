@@ -4,7 +4,7 @@ DO_CLEAN_VERSION=no
 DO_LOWER=no
 DO_SHA=no
 
-function usage()
+function sar-usage()
 {
     echo
     echo SCBI-SOURCE-ARCHIVCE $SCBI_VERSION
@@ -24,7 +24,7 @@ function usage()
     echo "   -l | --lower-case       for lower-case archive name"
 }
 
-function handle-module()
+function sar-handle-module()
 {
     local MODREF=$1
 
@@ -246,11 +246,11 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-if [[ $DO_HELP = yes ]]; then
-    usage
+if [[ $DO_HELP = yes ]] || [[ -z ${SCBI_MODULES[*]} ]]; then
+    sar-usage
     exit 0
 fi
 
 for module in ${SCBI_MODULES[*]}; do
-    handle-module $module || exit 1
+    sar-handle-module $module || exit 1
 done
