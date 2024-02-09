@@ -185,9 +185,10 @@ function c-darktable-config()
         ln -s ../../src/.git ../src/.git
     fi
 
-    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
 
-    cmake $OPTIONS ../src
+    cmake "${OPTIONS[@]}" ../src
 }
 
 function c-darktable-build()

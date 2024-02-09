@@ -31,5 +31,8 @@ function dephook-config()
     local TARGET=$2
     local VARIANT=$3
 
-    echo call $(get-config-options $PREFIX $TARGET $VARIANT)
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    echo call ${OPTIONS[*]}
 }

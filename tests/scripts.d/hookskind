@@ -25,7 +25,10 @@ function hookskind-default-config()
     local TARGET=$2
     local VARIANT=$3
 
-    echo CONF-DEF $(get-config-options $PREFIX $TARGET $VARIANT)
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    echo CONF-DEF ${OPTIONS[*]}
 }
 
 function hookskind-config()
@@ -34,7 +37,10 @@ function hookskind-config()
     local TARGET=$2
     local VARIANT=$3
 
-    echo CONF-STD $(get-config-options $PREFIX $TARGET $VARIANT)
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    echo CONF-STD ${OPTIONS[*]}
 }
 
 function hookskind-var-config()
@@ -43,7 +49,10 @@ function hookskind-var-config()
     local TARGET=$2
     local VARIANT=$3
 
-    echo CONF-VAR $(get-config-options $PREFIX $TARGET $VARIANT)
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    echo CONF-VAR ${OPTIONS[*]}
 }
 
 function hookskind-build()

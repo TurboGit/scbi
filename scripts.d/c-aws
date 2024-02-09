@@ -80,10 +80,11 @@ function c-aws-cross-config()
     local TARGET=$2
     local VARIANT=$3
 
-    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
 
     rm -f makefile.setup &&
-        make LAL=false ZLIB=false TARGET=$TARGET $OPTIONS setup
+        make LAL=false ZLIB=false TARGET=$TARGET "${OPTIONS[@]}" setup
 }
 
 function c-aws-config()
@@ -92,9 +93,10 @@ function c-aws-config()
     local TARGET=$2
     local VARIANT=$3
 
-    local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT)
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
 
-    rm -f makefile.setup && make $OPTIONS setup
+    rm -f makefile.setup && make "${OPTIONS[@]}" setup
 }
 
 function c-aws-build()

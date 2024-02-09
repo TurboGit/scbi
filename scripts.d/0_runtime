@@ -29,13 +29,16 @@ function copy-function()
 
 function get-config-options()
 {
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
+    local -n RESULT=$1
+    local PREFIX=$2
+    local TARGET=$3
+    local VARIANT=$4
 
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
-    plugin-call-variant-hooks $PLUGIN config-options $PREFIX $TARGET $VARIANT
+    local IFS=$'\n'
+    RESULT=( $(plugin-call-variant-hooks $PLUGIN config-options \
+                                         $PREFIX $TARGET $VARIANT) )
 }
 
 ############################## is-enabled

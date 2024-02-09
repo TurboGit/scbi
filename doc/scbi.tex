@@ -1463,7 +1463,7 @@ Where \code{<variant>} is all possible values found in \code{\$VARIANT}.
 It is often needed to set configuration options based on the variant we want to build. This is for example to activate an external module.
 
 \begin{lstlisting}
-	get-config-options $PREFIX $TARGET $VARIANT
+	get-config-options OPTIONS $PREFIX $TARGET $VARIANT
 \end{lstlisting}
 
 Will call all hooks in the current plug-in (<plugin>) named:
@@ -1473,7 +1473,7 @@ Will call all hooks in the current plug-in (<plugin>) named:
 	<plugin>-<variant>-config-options
 \end{lstlisting}
 
-The \code{common} hook is designed to contain all the common options to be used regardless of the selected variant.
+The \code{common} hook is designed to contain all the common options to be used regardless of the selected variant. The options will be recorded into \code{OPTIONS} list variable.
 
 For example:
 
@@ -1499,9 +1499,10 @@ function mod-config()
 	local TARGET=$2
 	local VARIANT=$3
 
-	local OPTIONS="$(get-config-options /usr lin $VARIANT)"
+	local OPTIONS=()
+	get-config-options OPTIONS /usr lin $VARIANT
 
-	cmake $OPTIONS ../src
+	cmake "${OPTIONS[@]}" ../src
 }
 \end{lstlisting}
 
@@ -1517,36 +1518,7 @@ And if the module reference is \code{mod/mpi.openmp} the \code{cmake} command wi
 	cmake -DPREFIX=/my/path -DMPI=ON -DOpenMP=ON ../src
 \end{lstlisting}
 
-\subsubsection{Configuration options with spaces}
-\label{config options spaces}
-
-If an option has spaces in it, the split will not be correct. This is a common problem and the solution is given below.
-
-\code{echo -DLINK\_LIBRARIES="-lmpi\_cxx -lmpi"}
-
-Then the \code{OPTIONS} string as described above won't work because of the way the shell will split the option on spaces by default. And so the actual options passed to \code{cmake} will be:
-
-\begin{itemize}
-	\item -DLINK\_LIBRARIES="-lmpi\_cxx
-	\item -lmpi
-\end{itemize}
-
-The solution is to use an array and modifying the field separator temporarily:
-
-\begin{lstlisting}
-function mod-config()
-{
-	local PREFIX=$1
-	local TARGET=$2
-	local VARIANT=$3
-
-	local IFS=$'\n'
-
-	local OPTIONS=($(get-config-options /usr lin $VARIANT))
-
-	cmake ${OPTIONS[*]} ../src
-}
-\end{lstlisting}
+Note that it is important to use \code{"\$\{OPTIONS[@]\}"} to properly support parameters with spaces.
 
 \subsection{OS dependencies}
 \label{OS dependencies}
