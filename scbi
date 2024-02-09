@@ -1855,6 +1855,22 @@ function setup-generic-tool-env()
                 display-log-stat
         }
 
+    if [[ $DO_COLOR == dark ]]; then
+        SCBI_CBOLD=$(tput bold)
+        SCBI_CTEXT=$(tput setaf 15)
+        SCBI_CCLEAR=$(tput sgr0)
+        SCBI_CRED=$SCBI_CBOLD$(tput setaf 9)
+        SCBI_CBLUE=$SCBI_CBOLD$(tput setaf 12)
+        SCBI_CGREEN=$SCBI_CBOLD$(tput setaf 10)
+    elif [[ $DO_COLOR == light ]]; then
+        SCBI_CBOLD=$(tput bold)$(tput setaf 239)
+        SCBI_CTEXT=$(tput setaf 0)
+        SCBI_CCLEAR=$(tput sgr0)
+        SCBI_CRED=$SCBI_CBOLD$(tput setaf 1)
+        SCBI_CBLUE=$SCBI_CBOLD$(tput setaf 4)
+        SCBI_CGREEN=$SCBI_CBOLD$(tput setaf 2)
+    fi
+
     #  Setup module reference specified on the command line. The module
     #  reference on the command line must overwrite the actual build plan.
 
@@ -2134,22 +2150,6 @@ while [[ $# -gt 0 ]]; do
     esac
     shift
 done
-
-if [[ $DO_COLOR == dark ]]; then
-    SCBI_CBOLD=$(tput bold)
-    SCBI_CTEXT=$(tput setaf 15)
-    SCBI_CCLEAR=$(tput sgr0)
-    SCBI_CRED=$SCBI_CBOLD$(tput setaf 9)
-    SCBI_CBLUE=$SCBI_CBOLD$(tput setaf 12)
-    SCBI_CGREEN=$SCBI_CBOLD$(tput setaf 10)
-elif [[ $DO_COLOR == light ]]; then
-    SCBI_CBOLD=$(tput bold)$(tput setaf 239)
-    SCBI_CTEXT=$(tput setaf 0)
-    SCBI_CCLEAR=$(tput sgr0)
-    SCBI_CRED=$SCBI_CBOLD$(tput setaf 1)
-    SCBI_CBLUE=$SCBI_CBOLD$(tput setaf 4)
-    SCBI_CGREEN=$SCBI_CBOLD$(tput setaf 2)
-fi
 
 trap clean-up EXIT
 
