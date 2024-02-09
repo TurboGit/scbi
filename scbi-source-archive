@@ -128,6 +128,11 @@ function handle-module()
         fi
 
         case $ARCHIVE_NAME in
+            *tgz)
+                local FILE=$CDIR/$(basename $ARCHIVE_NAME)
+                rm -f $FILE $FILE.tgz
+                tar --exclude-vcs --gzip --dereference --create --file $FILE $REP
+                ;;
             *tar.gz)
                 local FILE=$CDIR/$(basename $ARCHIVE_NAME .gz)
                 rm -f $FILE $FILE.gz
@@ -168,19 +173,23 @@ function handle-module()
                 ;;
         esac
 
-        case $DO_SHA in
-            md5)
-                md5sum $CDIR/$ARCHIVE_NAME > $CDIR/$ARCHIVE_NAME.md5
-                ;;
-            sha1)
-                sha1sum $CDIR/$ARCHIVE_NAME > $CDIR/$ARCHIVE_NAME.sha1
-                ;;
-            sha256)
-                sha256sum $CDIR/$ARCHIVE_NAME > $CDIR/$ARCHIVE_NAME.sha256
-                ;;
-            *)
-                ;;
-        esac
+        (
+            cd $CDIR
+
+            case $DO_SHA in
+                md5)
+                    md5sum $ARCHIVE_NAME > $ARCHIVE_NAME.md5
+                    ;;
+                sha1)
+                    sha1sum $ARCHIVE_NAME > $ARCHIVE_NAME.sha1
+                    ;;
+                sha256)
+                    sha256sum $ARCHIVE_NAME > $ARCHIVE_NAME.sha256
+                    ;;
+                *)
+                    ;;
+            esac
+        )
     )
 
     rm -fr $WORKDIR
