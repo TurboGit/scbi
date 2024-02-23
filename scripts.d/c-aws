@@ -125,8 +125,10 @@ function c-aws-tests()
     cd regtests &&
         rm -fr results &&
         mkdir results &&
-        ./gen_system_tags.py ../makefile.setup &&
+        ./gen_system_tags.py ../$TARGET/makefile.setup \
+                             ../$TARGET/testsuite.tags &&
         ./testsuite.py --jobs=$SCBI_JOBS \
-                       --temp-dir=$PWD/results --disable-cleanup \
+                       --temp-dir=$PWD/results  \
+                       --root-dir=../ \
                        $OPTIONS
 }
