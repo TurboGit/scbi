@@ -76,15 +76,23 @@ function ini-load-file()
             cur_section=${BASH_REMATCH[2]}
 
         elif [[ "$line" =~ ^([^=]+)=([^=]+)$ ]]; then
-            cur_key=${BASH_REMATCH[1]// /}
-            cur_val=${BASH_REMATCH[2]%%+ }
+            cur_key="${BASH_REMATCH[1]// /}"
+            cur_val="${BASH_REMATCH[2]%%+ }"
 
-            if [[ -n "$cur_key" ]]; then
-                # section + key is the associative in bash array, the
-                # field seperator is a dot.
-                db_key="${cur_section}${cur_section:+.}${cur_key}"
-                SCBI_INI_DB[$db_key]=$cur_val
-            fi
+            [[ -z $cur_key ]] && continue
+
+            db_key="${cur_section}${cur_section:+.}${cur_key}"
+
+            case "$cur_key" in
+                "enable"|"modules"|"options")
+                    SCBI_INI_DB[$db_key]+="$cur_val "
+                    ;;
+                *)
+                    # section + key is the associative in bash array, the
+                    # field seperator is a dot.
+                    SCBI_INI_DB[$db_key]="$cur_val"
+                    ;;
+            esac
         fi
     done < $INIFILE
 }
@@ -102,9 +110,9 @@ SCBI_INI_MODULES=()
 
 function ini-set-enable()
 {
-    local FEATURES=$1
+    local FEATURES="$1"
 
-    for F in ${FEATURES/,/ }; do
+    for F in ${FEATURES//,/ }; do
         export SCBI_${F//-/_}_SET=true
     done
 }
@@ -196,7 +204,7 @@ function ini-apply-values()
     local FEAT=$(ini-get-option "$SECTION" enable)
 
     if [[ -n $FEAT ]]; then
-        ini-set-enable $FEAT
+        ini-set-enable "$FEAT"
     fi
 
     #  Set modules' list
