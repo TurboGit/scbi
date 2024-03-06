@@ -95,6 +95,11 @@ function module-setup()
 
     local res=0
 
+    #  Note that --link-dest is creating hard links between the module's sources
+    #  and the target source directory. This is not an issue as the tools patch
+    #  and sed -i are both unlinking hard links so changing only the sources in
+    #  the target source directory.
+
     if [[ -h src ]] || [[ -d src ]]; then
         rsync -a $OPT --exclude=".git" --exclude=".gitignore" --exclude=".svn" \
             --exclude "gcc-interface" \
