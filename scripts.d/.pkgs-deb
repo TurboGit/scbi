@@ -31,7 +31,7 @@ os@-colord-gtk-dev                  libcolord-gtk-dev
 os@-cos4-dev                        libcos4-dev
 os@-cppunit-dev                     libcppunit-dev
 os@-cups2-dev                       libcups2-dev
-os@-curl4                           libcurl4
+os@-curl4                           libcurl4t64
 os@-curl4-gnutls-dev                libcurl4-gnutls-dev
 os@-curl4-openssl-dev               libcurl4-openssl-dev
 os@-doxygen                         doxygen
