@@ -550,9 +550,9 @@ The following options are supported:
 
 	\item[-q | \ddash{}quiet] Do not display the information logs.
 
-	\item[\ddash{}color:{[}no|light|dark{]}] Enable colored output for light or dark console background. The default is \code{no}.
+	\item[\ddash{}color:{[}no|light|dark{]}] Enable colored output for \code{light} or \code{dark} console background. The default is \code{no}.
 
-	\item[\ddash{}ini{[}=<section>{]}] Load the ini file given section. If no section given the global/common values are used.
+	\item[\ddash{}ini{[}=<section>{]}] Load the ini file given \code{section}. If no section given the global/common values are used.
 
 	\item[\ddash{}prefix=<dir>] The installation directory to use instead of the default \file{\$SCBI\_PREFIX}.
 
@@ -590,7 +590,7 @@ The following options are supported:
 
 	\item[\ddash{}tests{[:only]}{[=OPTIONS]}] Do a standard build cycle and run the testsuite if any. If suboption \code{only} is specified only run the testsuite (no build is checked/done). The optional OPTIONS parameters is passed as 4th parameter of the tests hook (\seeref{tests-hook})
 
-	\item[-d | \ddash{}deps{[:warning]}] Check all dependencies and build them if necessary. Do not fail when a missing external dependencies is found when sub-option warning is set.
+	\item[-d | \ddash{}deps{[:warning]}] Check all dependencies and build them if necessary. Do not fail when a missing external dependencies is found when sub-option \code{warning} is set.
 
 	\item[-a | \ddash{}create-archive] Build binary archive when build is successful.
 
@@ -604,7 +604,7 @@ The following options are supported:
 
 	\item[\ddash{}dry-run] Only list modules to be handled.
 
-	\item[\ddash{}stat:{[}full{]}] Display some statistics about of current setup. With sub-option full also gives stats about module's build time.
+	\item[\ddash{}stat:{[}full{]}] Display some statistics about of current setup. With sub-option \code{full} also gives stats about module's build time.
 
 	\item[-n | \ddash{}no-patch] Do not apply patches.
 
