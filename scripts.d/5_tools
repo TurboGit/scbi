@@ -33,11 +33,15 @@ function display-stacktrace()
 
 function comment-out-block()
 {
-    local FILE=$1
-    local PATTERN=$2
-    local COMMENT_TOKEN=$3
+    local FILE="$1"
+    local PATTERN="$2"
+    local COMMENT_TOKEN="$3"
 
     local INBLOCK=no
+    local ISEXEC=no
+
+    #  Restore executable bit if present
+    [[ -x $FILE ]] && ISEXEC=yes
 
     #  Make sur we unlink hardlink
     cp --remove-destination $FILE $FILE.tmp
@@ -56,6 +60,10 @@ function comment-out-block()
             echo "$line"
         fi
     done < $FILE.tmp > $FILE
+
+    rm -f $FILE.tmp
+
+    [[ $ISEXEC == yes ]] && chmod a+x $FILE
 }
 
 ############################## _internal_get-hook
