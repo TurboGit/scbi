@@ -2020,7 +2020,7 @@ SCBI_MODULES+=( ${SCBI_INI_MODULES} )
 #  Check if first argument is a sub-command
 SCBI_SUBCMD=${SCBI_INI_SUBCMD:-${SCBI_MODULES[0]}}
 
-if [[ -n "$(which scbi-$SCBI_SUBCMD)" ]]; then
+if [[ -n "$(which scbi-$SCBI_SUBCMD 2> /dev/null)" ]]; then
     export DO_SUBCMD=yes
 
     [[ -z $SCBI_INI_SUBCMD ]] &&
@@ -2037,7 +2037,7 @@ for O in "${!CMDLINE_OPTS[@]}"; do
     eval $O=\"${CMDLINE_OPTS[$O]}\"
 done
 
-if [[ -n "$(which scbi-$SCBI_SUBCMD)" ]]; then
+if [[ -n "$(which scbi-$SCBI_SUBCMD 2> /dev/null)" ]]; then
     #  Setup the generic SCBI environment for the sub-command
     setup-generic-tool-env
 
