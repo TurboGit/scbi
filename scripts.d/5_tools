@@ -47,7 +47,7 @@ function comment-out-block()
     cp --remove-destination $FILE $FILE.tmp
     rm $FILE
 
-    while IFS= read line; do
+    while IFS= read -r line; do
         if [[ ! $line =~ [^[:space:]] ]]; then
             INBLOCK=no
         elif [[ $line =~ $PATTERN ]]; then
