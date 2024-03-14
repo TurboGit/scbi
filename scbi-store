@@ -138,7 +138,7 @@ fi
 OPTFILE=$(mktemp)
 
 ALLOPTS=( "$(getopt -o kld \
-             -l list-keys,list:full:,list,delete \
+             -l list-keys,list:full,list,delete \
              -- "$@" 2> $OPTFILE)" )
 
 if [[ $? != 0 ]]; then
