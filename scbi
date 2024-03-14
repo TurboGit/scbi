@@ -1532,7 +1532,7 @@ function handle-module()
                 echo                          >> $SCBI_ENV_MODULE
                 echo "# SCBI global settings" >> $SCBI_ENV_MODULE
 
-                while read VAR; do
+                while read -r VAR; do
                     if [[ "$VAR" != "${VAR#SCBI_*}" ]]; then
                         local NAME=${VAR%=*}
                         local VALUE=${VAR#*=}
