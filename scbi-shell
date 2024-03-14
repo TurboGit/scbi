@@ -24,7 +24,7 @@ function shl-usage()
     echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
     echo "      | --build-dir=<dir>  the root build directory."
     echo "      | --mode:n           start a shell with module's environment"
-    echo "      | --run:\"cmd arg\"  run command in module's environment"
+    echo "      | --run:\"cmd arg\"    run command in module's environment"
 }
 #  setup for SCBI shell & command spawn
 
