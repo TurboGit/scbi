@@ -206,13 +206,13 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-if [[ -z ${SCBI_MODULES[*]} ]] && [[ $DO_STAT == no ]]; then
-    echo "error: shell/run commands need a plug-in, see scbi shell --help"
+if [[ $DO_HELP == yes ]]; then
+    shl-usage
     exit 0
 fi
 
-if [[ $DO_HELP == yes ]]; then
-    shl-usage
+if [[ -z ${SCBI_MODULES[*]} ]] && [[ $DO_STAT == no ]]; then
+    echo "error: shell/run commands need a plug-in, see scbi shell --help"
     exit 0
 fi
 
