@@ -5,7 +5,7 @@ SCRDIR=$(HOME)/.config/scbi
 INSTALL_DIR=$(HOME)/.local/bin
 
 #  Get SHA-1 of last commit in core SCBI
-CORE_SHA1=$(shell git log -1 --format="%h" -- scbi scripts.d/[0-9]* \
+CORE_SHA1=$(shell git log -1 --format="%h" -- scbi scbi-* scripts.d/[0-9]* \
 	scripts.d/_os_*)
 CORE_VER=$(shell git describe $(CORE_SHA1))
 
