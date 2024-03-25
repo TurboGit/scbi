@@ -24,6 +24,7 @@ function c-gpr2-tools-tests-depends()
     local VARIANT=$3
 
     echo c-e3
+    echo p-gnatmem
 }
 
 function c-gpr2-tools-depends()
