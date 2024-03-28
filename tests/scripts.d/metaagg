@@ -1,0 +1,12 @@
+# This is an aggregate meta module
+
+function metaagg-modules()
+{
+    echo lib1
+    echo libenv
+}
+
+function metaagg-aggregate()
+{
+    echo yes
+}

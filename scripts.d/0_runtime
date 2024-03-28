@@ -310,6 +310,12 @@ function load-module()
             SCBI_LOADED[$key]=final
         else
             SCBI_LOADED[$key]=meta
+
+            is-hook-true $module $variant aggregate false
+
+            if [[ $? == 0 ]]; then
+                SCBI_LOADED[${key}.agg]=yes
+            fi
         fi
     fi
 
@@ -862,17 +868,18 @@ function unset-var()
     define-var UNSET $VAR
 }
 
-############################## plugin-call-variant-hooks
+############################## plugin-get-variant-hooks
 
-function plugin-call-variant-hooks()
+function plugin-get-variant-hooks()
 {
-    local PLUGIN=$1
-    local HOOK=$2
-    local PREFIX=$3
-    local TARGET=$4
-    local VARIANT=$5
+    local -n RESULT=$1
+    local PLUGIN=$2
+    local HOOK=$3
+    local PREFIX=$4
+    local TARGET=$5
+    local VARIANT=$6
 
-    shift 5
+    shift 6
 
     local IFS
     unset IFS
@@ -909,7 +916,7 @@ function plugin-call-variant-hooks()
 
         if [[ $found == 1 ]]; then
             [[ $v != "common" ]] && [[ $v != "default" ]] && VARFOUND=yes
-            $FCT $PREFIX $TARGET $VARIANT $*
+            RESULT+=( $FCT )
         fi
     done
 
@@ -927,8 +934,28 @@ function plugin-call-variant-hooks()
             [[ $? = 0 ]] && found=1
         fi
 
-        [[ $found == 1 ]] && $FCT $PREFIX $TARGET $VARIANT $*
+        [[ $found == 1 ]] && RESULT+=( $FCT )
     fi
+}
+
+############################## plugin-call-variant-hooks
+
+function plugin-call-variant-hooks()
+{
+    local PLUGIN=$1
+    local HOOK=$2
+    local PREFIX=$3
+    local TARGET=$4
+    local VARIANT=$5
+
+    shift 5
+
+    local HOOKS=()
+    plugin-get-variant-hooks HOOKS $PLUGIN $HOOK $PREFIX $TARGET $VARIANT
+
+    for H in ${HOOKS[@]}; do
+        $H $PREFIX $TARGET $VARIANT $*
+    done
 }
 
 ############################## call-variant-hooks

@@ -211,6 +211,34 @@ function is-meta-module()
     fi
 }
 
+############################## is-meta-aggregate-module
+#
+# return yes/0 if MODREF is a meta-module
+
+function is-meta-aggregate-module()
+{
+    local MODREF=$1
+
+    local module_info=()
+    get-module-ref module_info $MODREF
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+
+    local key="${module}.${variant}.agg"
+
+    if [[ -z "${SCBI_LOADED[$module]}" ]]; then
+        load-module $MODREF
+    fi
+
+    if [[ "${SCBI_LOADED[$key]}" == "yes" ]]; then
+        echo "yes"
+        return 0
+    else
+        echo "no"
+        return 1
+    fi
+}
+
 ############################## check-dependency-tree
 #
 # check whether a module is in the dependency tree
@@ -304,7 +332,8 @@ function _internal_for-all-modules()
     local DEPENDS_KIND=$7
     local MODREF=$8
     local FORMODULE=$9
-    shift 9
+    local IS_AGGREGATED=${10}
+    shift 10
 
     #  Wether to handle the depends or build-depends or both
 
@@ -392,14 +421,25 @@ function _internal_for-all-modules()
                 local NXL=$LEVEL
                 [[ $DO_DEPS == yes-direct ]] && NXL=$NEXTL
 
+                #  check if aggregate module
+
+                is-meta-aggregate-module $MODREF > /dev/null
+
+                if [[ $? == 0 ]]; then
+                    local IS_AGGREGATE=true
+                else
+                    local IS_AGGREGATE=false
+                fi
+
                 for dmodule in $MODS; do
                     _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
                                               $WITH_EXT $DEPTH $NXL \
-                                              $DEPENDS_KIND $dmodule $module $@
+                                              $DEPENDS_KIND $dmodule $module \
+                                              $IS_AGGREGATE $@
                 done || return 1
 
                 $CALLBACK $FORMODULE $MODREF $LEVEL \
-                          $DEPENDS_KIND false $IS_META $@
+                          $DEPENDS_KIND false $IS_META false $@
 
                 pop-dependency-tree
                 return 0
@@ -415,7 +455,7 @@ function _internal_for-all-modules()
                         _internal_for-all-modules \
                             $CALLBACK $WITH_META $WITH_DEPS \
                             $WITH_EXT $DEPTH $NEXTL \
-                            default $dmodule $module $@
+                            default $dmodule $module false $@
                     done || return 1
                 }
 
@@ -430,7 +470,8 @@ function _internal_for-all-modules()
                     do
                         _internal_for-all-modules $CALLBACK $WITH_META $NEXTD \
                                                   $WITH_EXT $DEPTH $NEXTL \
-                                                  build $dmodule $module $@
+                                                  build $dmodule $module \
+                                                  false $@
                     done || return 1
                 }
 
@@ -444,12 +485,12 @@ function _internal_for-all-modules()
                         _internal_for-all-modules \
                             $CALLBACK $WITH_META $WITH_DEPS \
                             $WITH_EXT $DEPTH $NEXTL \
-                            tests $dmodule $module $@
+                            tests $dmodule $module false $@
                     done || return 1
                 }
 
             $CALLBACK $FORMODULE $MODREF $LEVEL \
-                      $DEPENDS_KIND false $IS_META $@
+                      $DEPENDS_KIND false $IS_META $IS_AGGREGATED $@
 
             pop-dependency-tree
 
@@ -461,7 +502,7 @@ function _internal_for-all-modules()
                 local PKGNAME=$(get-pkg-name $MODREF)
                 [[ -n $PKGNAME ]] &&
                     $CALLBACK $FORMODULE $PKGNAME $LEVEL \
-                              $DEPENDS_KIND true $IS_META $@
+                              $DEPENDS_KIND true $IS_META $IS_AGGREGATED $@
             else
                 check-pkg $module:$ref
                 if [[ $? == 1 ]] && [[ $DO_WARNING_EXTERNAL == no ]]; then
@@ -487,7 +528,7 @@ function for-all-modules()
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK false both false $DEPTH 0 default \
-                              $MODREF "@root" $@
+                              $MODREF "@root" false $@
 }
 
 #  Iterate over all modules and external dependencies
@@ -503,7 +544,7 @@ function for-all-modules-ext()
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK false both true $DEPTH 0 default \
-                              $MODREF "@root" $@
+                              $MODREF "@root" false $@
 }
 
 #  Iterate over all modules and meta-modules
@@ -519,7 +560,7 @@ function for-all-modules-with-meta()
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK true both false $DEPTH 0 default \
-                              $MODREF "@root" $@
+                              $MODREF "@root" false $@
 }
 
 #  Iterate over all depends modules and meta-modules
@@ -535,7 +576,7 @@ function for-all-modules-depends-with-meta()
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK true deps false $DEPTH 0 default \
-                              $MODREF "@root" $@
+                              $MODREF "@root" false $@
 }
 
 #  Iterate over all modules, meta-modules and external dependencies
@@ -551,7 +592,7 @@ function for-all-modules-with-meta-ext()
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK true both true $DEPTH 0 default \
-                              $MODREF "@root" $@
+                              $MODREF "@root" false $@
 }
 
 #  Iterate over all direct modules, meta-modules and external dependencies
@@ -564,7 +605,7 @@ function for-all-direct-modules-with-meta-ext()
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK true both true 1 0 default \
-                              $MODREF "@root" $@
+                              $MODREF "@root" false $@
 }
 
 #  Iterate over all modules, meta-modules and external
@@ -580,7 +621,7 @@ function for-all-modules-build-depends-with-meta()
     declare -A SCBI_CHECKED
     SCBI_RECTREE=()
     _internal_for-all-modules $CALLBACK true build-deps-1 false $DEPTH 0 build \
-                              $MODREF "@root" $@
+                              $MODREF "@root" false $@
 }
 
 function for-all-modules-tests-depends-with-meta()
@@ -594,7 +635,7 @@ function for-all-modules-tests-depends-with-meta()
     SCBI_RECTREE=()
 
     _internal_for-all-modules $CALLBACK true tests-deps false $DEPTH 0 tests \
-                              $MODREF "@root" $@
+                              $MODREF "@root" false $@
 }
 
 ############################## for-final-modules
@@ -1187,7 +1228,8 @@ function copy-module-src-callback()
     local DEPENDS_KIND=$4
     local IS_EXT=$5
     local IS_META=$6
-    local DEST=$7
+    local IS_AGGREGATED=$7
+    local DEST=$8
 
     local module_info=()
     get-module-ref module_info $MODREF $FORMODULE

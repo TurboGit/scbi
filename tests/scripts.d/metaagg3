@@ -1,0 +1,11 @@
+# This is an aggregate meta module
+
+function metaagg3-modules()
+{
+    echo mainlib
+}
+
+function metaagg3-agg-aggregate()
+{
+    echo true
+}
