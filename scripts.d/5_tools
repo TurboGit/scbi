@@ -1163,6 +1163,20 @@ function display-plans()
     fi
 }
 
+############################## synchronize directories using hard links
+
+function sync-dir()
+{
+    local FROM=$1
+    local TO=$2
+    shift 2
+
+    local RELTO=$(realpath --relative-to=$TO $FROM)
+
+    rsync -a --exclude=".git" --exclude=".gitignore" --exclude=".svn" \
+          --link-dest=$RELTO $* $FROM $TO
+}
+
 ############################## create-standalone-package
 
 function copy-module-src-callback()
