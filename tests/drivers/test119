@@ -42,7 +42,7 @@ OK -d $REP/metaagg3
 OK -f $MDIR/bin/mainlib
 NOK -f $MDIR/include
 
-RUNS ./scbi shell --run:"which mainlib ; mainlib" metaagg3/agg
+RUNS ./scbi shell --run="which mainlib ; mainlib" metaagg3/agg
 
 CLEAN-DIFF <<EOF
 <pwd>/.root/builds/metaagg3/x86_64-linux-gnu-agg/install/bin/mainlib
@@ -50,7 +50,7 @@ main on master
 liba.C patched version
 EOF
 
-RUNS ./scbi shell --run:"which mainlib ; mainlib" metaagg3
+RUNS ./scbi shell --run="which mainlib ; mainlib" metaagg3
 
 CLEAN-DIFF <<EOF
 <pwd>/.root/builds/mainlib/x86_64-linux-gnu-default/install/bin/mainlib

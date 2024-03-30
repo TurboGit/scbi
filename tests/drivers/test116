@@ -1,5 +1,5 @@
 
-RUNS ./scbi shell --run:"echo toto" dorun
+RUNS ./scbi shell --run="echo toto" dorun
 
 DIFF <<EOF
 toto
