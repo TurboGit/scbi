@@ -1,0 +1,70 @@
+
+function libenv-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib2.bundle
+}
+
+function libenv-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    export C_INCLUDE_PATH=$PWD/include:$C_INCLUDE_PATH
+    export LIBRARY_PATH=.:$PWD/lib:$LIBRARY_PATH
+    export LD_LIBRARY_PATH=.:$PWD/lib:$LD_LIBRARY_PATH
+}
+
+function libenv-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    set-var    LIBENV_ROOT_DIR $PREFIX
+    set-var    LIBENV_NAME     libenv
+    add-to-var C_INCLUDE_PATH  $PREFIX/include
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib
+    add-to-var LIBRARY_PATH    $PREFIX/lib
+}
+
+function libenv-out-of-tree()
+{
+    echo false
+}
+
+function libenv-variant1-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo '#define VARIANT "variant1"' > config.h
+}
+
+function libenv-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+   echo '#define VARIANT "default"' > config.h
+}
+
+function libenv-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make
+}
+
+function libenv-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $PREFIX/include
+    mkdir -p $PREFIX/lib
+    cp liblib2.so $PREFIX/lib
+    cp lib2.h $PREFIX/include
+}

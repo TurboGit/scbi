@@ -1,5 +1,5 @@
 
-function mainlib-vcs()
+function usemetaagg-vcs()
 {
     echo default
     echo none
@@ -7,25 +7,17 @@ function mainlib-vcs()
     echo ${TESTREPOS}/mainlib.bundle
 }
 
-function mainlib-depends()
+function usemetaagg-depends()
 {
-    echo lib1
+    echo metaagg
 }
 
-function mainlib-out-of-tree()
+function usemetaagg-out-of-tree()
 {
     echo false
 }
 
-function mainlib-env()
-{
-    local PREFIX=$1
-    local TARGET=$2
-
-    add-to-var PATH $PREFIX/bin
-}
-
-function mainlib-build()
+function usemetaagg-build()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -34,7 +26,7 @@ function mainlib-build()
     make
 }
 
-function mainlib-install()
+function usemetaagg-install()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -43,7 +35,7 @@ function mainlib-install()
     cp mainlib $PREFIX/bin
 }
 
-function mainlib-tests()
+function usemetaagg-tests()
 {
     local PREFIX=$1
     local TARGET=$2

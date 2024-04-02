@@ -25,6 +25,9 @@ function internal-varB-depends()
 
 function run()
 {
+    export SCBI_PREFIX=prefix
+    export SCBI_TARGET=target
+
     echo "=== default"
     get-all-depends internal default depends
 

@@ -1,8 +1,13 @@
-# check for --run option
 
-RUNS ./scbi --deps mainmult
+REP=$PWD/.root/builds
+MDIR=$REP/metaagg3/x86_64-linux-gnu-agg/install
+
+RUNS ./scbi --deps metaagg3/agg
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Metamodule metaagg3 [agg] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metaagg3 [agg] setup
+
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
@@ -15,20 +20,7 @@ xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 
-xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
-xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : get sources from git
-xxxx/xx/xx xx:xx:xx : config starting
-xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : build starting
-xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : install starting
-xxxx/xx/xx xx:xx:xx : install completed
-xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
-xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
-
-xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -37,21 +29,31 @@ xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
-xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule metaagg3 [agg] wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule metaagg3 [agg] wrapup
 EOF
 
-RUNS ./scbi shell --run="mainmult" mainmult
+OK -d $REP/install
+OK -d $REP/lib1
+OK -d $REP/mainlib
+OK -d $REP/metaagg3
+OK -f $MDIR/bin/mainlib
+NOK -f $MDIR/include
+
+RUNS ./scbi shell --run="which mainlib ; mainlib" metaagg3/agg
 
 CLEAN-DIFF <<EOF
+<pwd>/.root/builds/metaagg3/x86_64-linux-gnu-agg/install/bin/mainlib
 main on master
 liba.C patched version
-libb.B master (default)
 EOF
 
-RUNS ./scbi shell --run mainmult
+RUNS ./scbi shell --run="which mainlib ; mainlib" metaagg3
 
 CLEAN-DIFF <<EOF
+<pwd>/.root/builds/mainlib/x86_64-linux-gnu-default/install/bin/mainlib
 main on master
 liba.C patched version
-libb.B master (default)
 EOF

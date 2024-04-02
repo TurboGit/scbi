@@ -1,0 +1,11 @@
+# This is an aggregate meta module
+
+function metaagg2-modules()
+{
+    echo dep1
+}
+
+function metaagg2-aggregate()
+{
+    echo yes
+}

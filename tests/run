@@ -95,7 +95,7 @@ sed -i 's,\(.*ini-load-file \$HOME/.scbi\),#\1,g' scbi
 # patch rsync to use safe mode (checksum) as the tests repositories are small,
 # and has some files with same time-stamp.
 
-sed -i 's/rsync -a/rsync -a -c/g' scripts.d/7_modgen
+sed -i 's/$OPT --exclude/$OPT -c --exclude/g' scripts.d/7_modgen
 sed -i 's/dlog/ilog/g' scripts.d/7_modgen
 
 mkdir -p .root/.patches
@@ -119,7 +119,7 @@ else
 fi
 cd ..
 
-PLAN 953
+PLAN 989
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR

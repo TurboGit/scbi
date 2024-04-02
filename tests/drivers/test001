@@ -1,5 +1,7 @@
 # simple check
 
+REP=$PWD/.root/builds/test1
+
 RUNS ./scbi -s -c test1
 
 CLEAN-DIFF <<EOF
@@ -11,3 +13,10 @@ xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building test1 [default] (master)
 EOF
+
+#  Check that the directory sync is properly done with hard links
+
+I1=( $(ls -i $REP/src/Makefile) )
+I2=( $(ls -i $REP/x86_64-linux-gnu-default/src/Makefile) )
+
+IS ${I1[0]} == ${I2[0]}

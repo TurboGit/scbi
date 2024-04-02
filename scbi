@@ -637,6 +637,7 @@ function handle-module-env()
     local FORMODULE=$1
     local MODREF=$2
     local ENV=$3
+    local MODE=${4:-default}
 
     #  Get module information
 
@@ -661,9 +662,24 @@ function handle-module-env()
         SCBI_MODULES_DIR["${module}@build"]="$TVDIR/build"
     fi
 
-    plugin-call-variant-hooks \
-        $module $ENV \
-        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $SCBI_TARGET $variant
+    #  If a module is aggregated we want its env to point to the
+    #  meta aggregate module.
+
+    if [[ $MODE == aggregated ]]; then
+        local fmodule_info=()
+        get-module-ref fmodule_info $FORMODULE "@root"
+
+        local fmodule=${fmodule_info[0]}
+        local fvariant=${fmodule_info[1]}
+
+        plugin-call-variant-hooks \
+            $module $ENV \
+            $SCBI_BDIR/$fmodule/$SCBI_TARGET-$fvariant/install \
+            $SCBI_TARGET $variant
+    else
+        plugin-call-variant-hooks \
+            $module $ENV $TVDIR/install $SCBI_TARGET $variant
+    fi
 }
 
 ############################## handle-env
@@ -678,13 +694,49 @@ function handle-env-callback()
     local DEPENDS_KIND=$4
     local IS_EXT=$5
     local IS_META=$6
+    local IS_AGGREGATED=$7
+
+    #  Nothing to do for aggregated module as the env has already been
+    #  set as part of the aggregate module.
+
+    [[ $IS_AGGREGATED == true ]] && return
+
+    #  If a meta module we want the environment of all modules
+
+    if [[ $IS_META == true ]]; then
+        local module_info=()
+        get-module-ref module_info $MODREF $FORMODULE
+
+        local module=${module_info[0]}
+        local variant=${module_info[1]}
+
+        #  For a meta aggregate module the env if the one from
+        #  all aggregated modules but using the aggregate
+        #  install prefix.
+
+        local MODE=""
+
+        is-meta-aggregate-module $MODREF > /dev/null
+
+        [[ $? == 0 ]] &&
+            local MODE=aggregated
+
+        for MOD in $(plugin-call-variant-hooks \
+                         $module modules \
+                         $SCBI_PREFIX $SCBI_TARGET $variant);
+        do
+            handle-module-env $MODREF $MOD env $MODE
+        done
+    fi
 
     #  Only the environment of the dependencies and not self. The env
     #  hook of a module is only used for clients and not for the module
     #  itself.
 
     [[ $LEVEL -ge 1 ]] || [[ $DEPENDS_KIND == tests ]] &&
-        handle-module-env $FORMODULE $MODREF env
+        {
+            handle-module-env $FORMODULE $MODREF env
+        }
 }
 
 function handle-env()
@@ -1220,6 +1272,9 @@ function handle-meta-module()
     local FCT_WRAPUP=""
     get-hook FCT_WRAPUP $METAMODULE $VARIANT wrapup
 
+    local ISAGG=false
+    is-hook-true $METAMODULE $variant aggregate false && ISAGG=true
+
     line-sep
     ilog $METAMODULE %BMetamodule %t$METAMODULE%c \[%g${VARIANT//./ }%c\] setup \
         | tee -a $log
@@ -1230,11 +1285,21 @@ function handle-meta-module()
     line-sep
 
     [[ $DEPS == yes ]] || ( [[ -z $FCT_SETUP ]] && [[ -z $FCT_WRAPUP ]] ) &&
-        for module in $(plugin-call-variant-hooks \
-                        $METAMODULE modules $SCBI_PREFIX $SCBI_TARGET $VARIANT);
-        do
-            handle-module $METAMODULE $module || exit 1
-        done
+        {
+            for module in $(plugin-call-variant-hooks \
+                                $METAMODULE modules \
+                                $SCBI_PREFIX $SCBI_TARGET $VARIANT);
+            do
+                handle-module $METAMODULE $module || exit 1
+
+                if [[ $ISAGG == true ]] &&
+                       [[ -d $SCBI_BDIR/$module/build/install ]];
+                then
+                    sync-dir $SCBI_BDIR/$module/build/install \
+                             $SCBI_BDIR/$METAMODULE/$SCBI_TARGET-$VARIANT/.
+                fi
+            done
+        }
 
     #  check for wrapup
 
@@ -1464,7 +1529,7 @@ function handle-module()
             target-env $SCBI_BDIR/install $SCBI_TARGET
         fi
 
-        ENVTMP="$(mktemp -p /dev/shm/)"
+        local ENVTMP="$(mktemp -p /dev/shm/)"
         SCBI_ENV_MODULE=$ENVTMP
         declare -A SCBI_MODULES_DIR=()
 
