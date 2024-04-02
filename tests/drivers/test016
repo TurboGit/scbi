@@ -19,4 +19,4 @@ xxxx/xx/xx xx:xx:xx : tests completed
 xxxx/xx/xx xx:xx:xx : End Building test4 [default] (default)
 EOF
 
-GREP "mercurial default revision e6a1a52e9fb5" $REP/source-ref
+GREP "test4 mercurial default revision e6a1a52e9fb5" $REP/source-ref

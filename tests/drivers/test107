@@ -47,7 +47,7 @@ xxxx/xx/xx xx:xx:xx : skip global install
 xxxx/xx/xx xx:xx:xx : End Building svnstd [default] (trunk)
 EOF
 
-GREP "subversion trunk revision r3" $REP/svnstd/source-ref
+GREP "svnstd subversion trunk revision r3" $REP/svnstd/source-ref
 
 RUNS ./scbi --tests svnstd:v1
 
@@ -85,7 +85,7 @@ xxxx/xx/xx xx:xx:xx : skip global install
 xxxx/xx/xx xx:xx:xx : End Building svnmlt [prj1] (v1.0)
 EOF
 
-GREP "subversion v1.0 revision r10" $REP/svnmlt/source-ref
+GREP "svnmlt subversion v1.0 revision r10" $REP/svnmlt/source-ref
 
 RUNS ./scbi --tests svnmlt/prj2:v1
 
@@ -105,6 +105,6 @@ xxxx/xx/xx xx:xx:xx : skip global install
 xxxx/xx/xx xx:xx:xx : End Building svnmlt [prj2] (v1)
 EOF
 
-GREP "subversion v1 revision r9" $REP/svnmlt/source-ref
+GREP "svnmlt subversion v1 revision r9" $REP/svnmlt/source-ref
 
 cd $TESTREPOS && rm -fr repostd repomlt

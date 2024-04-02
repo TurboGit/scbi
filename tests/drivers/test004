@@ -23,7 +23,7 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 EOF
 
-GREP "git master sha-1 eb90bc4f3553280d80aef0250dc37ad2fd174636" $REP/source-ref
+GREP "lib1 git master sha-1 eb90bc4f3553280d80aef0250dc37ad2fd174636" $REP/source-ref
 
 RUNS ./scbi --no-patch --tests --archive lib1:v1
 
@@ -44,7 +44,7 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
 EOF
 
-GREP "git v1 sha-1 494a8908b2a4b6cca336cf39e8f1fa4fd37b370a" $REP/source-ref
+GREP "lib1 git v1 sha-1 494a8908b2a4b6cca336cf39e8f1fa4fd37b370a" $REP/source-ref
 
 RUNS ./scbi --no-patch --tests --archive lib1:v2
 
@@ -65,7 +65,7 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v2)
 EOF
 
-GREP "git v2 sha-1 4f8776f351fb5eabdd62effe85958472477f371a" $REP/source-ref
+GREP "lib1 git v2 sha-1 4f8776f351fb5eabdd62effe85958472477f371a" $REP/source-ref
 
 NOK -h $REP/tar
 
@@ -88,7 +88,7 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1.2)
 EOF
 
-GREP "archive v1.2 sha-1 631429bf5f27d5aec4d7e41394e0d2eaa3a8da2d" $REP/source-ref
+GREP "lib1 archive v1.2 sha-1 631429bf5f27d5aec4d7e41394e0d2eaa3a8da2d" $REP/source-ref
 
 OK -h $REP/archive
 

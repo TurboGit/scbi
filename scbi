@@ -1014,7 +1014,7 @@ function handle-sources()
     [[ "$variant" = "native" ]] &&
         {
             echo -n "native-$ref" > source-id
-            echo "native $ref" > source-ref
+            echo "$module native $ref" > source-ref
             return 0;
         }
 
@@ -1089,7 +1089,8 @@ function handle-sources()
         [[ -e archive-sha1 ]] &&
             {
                 archive_sha1=$(cat archive-sha1)
-                echo "archive $ref sha-1 ${archive_sha1// */}" > source-ref
+                echo "$module archive $ref sha-1 ${archive_sha1// */}" \
+                     > source-ref
             }
 
         get-build-id $SCBI_PREFIX $SCBI_TARGET \
@@ -1214,7 +1215,8 @@ function handle-sources()
                 esac
             fi
 
-            get-vcs-ref $VCS_NAME $ref $(pwd)/vcs > source-ref
+            echo -n "$module " > source-ref
+            get-vcs-ref $VCS_NAME $ref $(pwd)/vcs >> source-ref
 
             return 0
 
@@ -1286,6 +1288,8 @@ function handle-meta-module()
 
     [[ $DEPS == yes ]] || ( [[ -z $FCT_SETUP ]] && [[ -z $FCT_WRAPUP ]] ) &&
         {
+            rm -f $SCBI_BDIR/$METAMODULE/source-ref
+
             for module in $(plugin-call-variant-hooks \
                                 $METAMODULE modules \
                                 $SCBI_PREFIX $SCBI_TARGET $VARIANT);
@@ -1297,6 +1301,9 @@ function handle-meta-module()
                 then
                     sync-dir $SCBI_BDIR/$module/build/install \
                              $SCBI_BDIR/$METAMODULE/$SCBI_TARGET-$VARIANT/.
+
+                    cat $SCBI_BDIR/$module/source-ref \
+                        >> $SCBI_BDIR/$METAMODULE/source-ref
                 fi
             done
         }

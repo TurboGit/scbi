@@ -78,3 +78,6 @@ EOF
 GREP "/builds/metaagg/" $LDIR/env.cmd
 NGREP "/builds/lib1/" $LDIR/env.cmd
 NGREP "/builds/libenv/" $LDIR/env.cmd
+
+GREP "lib1 git master sha-1 eb90bc4f3" $PWD/.root/builds/metaagg/source-ref
+GREP "libenv git master sha-1 5c345dd4bcb" $PWD/.root/builds/metaagg/source-ref
