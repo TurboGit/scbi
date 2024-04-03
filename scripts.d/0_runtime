@@ -656,8 +656,8 @@ function scbi-store-get-key()
     if [[ -f $STORE_FILE ]]; then
         #  check KEY in store
 
-        while read -r K V; do
-            if [[ "$K" = "$KEY" ]]; then
+        while IFS=" " read -r K V; do
+            if [[ "$K" == "$KEY" ]]; then
                 VALUE=$V
                 res=0
                 break;
@@ -689,7 +689,7 @@ function scbi-store-set-key()
 
     #  read store content, put it inside STORE
 
-    while read -r K V; do
+    while IFS=" " read -r K V; do
         STORE[$K]=$V
     done < $STORE_FILE
 
@@ -720,7 +720,7 @@ function scbi-store-list-keys()
     if [[ -f $STORE_FILE ]]; then
         #  check KEY in store
 
-        while read -r K V; do
+        while IFS=" " read -r K V; do
             echo $K
         done < $STORE_FILE
     fi
