@@ -151,7 +151,7 @@ _scbi_store_key()
     local IFS=$' '
 
     if [[ -f $HOME/.config/scbi/.store ]]; then
-        while read K V; do
+        while IFS=" " read K V; do
             echo $K
         done < $HOME/.config/scbi/.store
     fi
@@ -194,6 +194,21 @@ _scbicomp_1()
     done
 }
 
+_value_already_in()
+{
+    local NV=${1::-1}
+
+    NV=${NV%:*}
+
+    for CW in "${COMP_WORDS[@]}"; do
+        local CCW=${CW%:*}
+        if [[ $CCW == $NV ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 # generates completion reply with compgen
 _scbicomp()
 {
@@ -202,38 +217,59 @@ _scbicomp()
         cur="$3"
     fi
 
+    local REPLY=()
+
     case "$cur" in
         -*=)
-            COMPREPLY=()
+            REPLY=()
             ;;
         *)
             local IFS=$'\n'
-            COMPREPLY=($(compgen -P "${2-}" \
-                                 -W "$(_scbicomp_1 "${1-}" "${4-}")" \
-                                 -- "$cur"))
+            REPLY=($(compgen -P "${2-}" \
+                             -W "$(_scbicomp_1 "${1-}" "${4-}")" \
+                             -- "$cur"))
             ;;
     esac
+
+    # Remove from COMPREPLY already present options
+    local LR=""
+    [[ ${#REPLY[*]} != 0 ]] && LR=${REPLY[-1]}
+
+    for O in "${REPLY[@]}"; do
+        _value_already_in $O
+        if [[ $? == 1 ]] || [[ $O == $LR ]]; then
+           COMPREPLY+=( $O )
+        fi
+    done
 }
 
 _scbi()
 {
     COMPREPLY=()
     local cur=$(_get_cword =:)
+    local subc=${COMP_WORDS[1]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
 
-    if [[ $prev == source-archive ]]; then
-        _SCBI_MODE=arc
-    elif [[ $prev == lint ]]; then
-        _SCBI_MODE=lnt
-    elif [[ $prev == show ]]; then
-        _SCBI_MODE=sho
-    elif [[ $prev == shell ]]; then
-        _SCBI_MODE=shl
-    elif [[ $prev == store ]]; then
-        _SCBI_MODE=str
-   else
-        _SCBI_MODE=std
-    fi
+    case "$subc" in
+        source-archive)
+            _SCBI_MODE=arc
+            ;;
+        lint)
+            _SCBI_MODE=lnt
+            ;;
+        show)
+            _SCBI_MODE=sho
+            ;;
+        shell)
+            _SCBI_MODE=shl
+            ;;
+        store)
+            _SCBI_MODE=str
+            ;;
+        *)
+            _SCBI_MODE=std
+            ;;
+    esac
 
     case "$cur" in
         --ini=*)
@@ -314,10 +350,6 @@ _scbi()
             case "$prev" in
                 -t)
                     _scbicomp "$(_gnat_targets)" "" "${cur##--target=}"
-                    return 0
-                    ;;
-                --store)
-                    _scbicomp "$(_scbi_store_key)" "" "${cur##--store}"
                     return 0
                     ;;
                 *)
