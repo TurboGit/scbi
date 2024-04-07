@@ -44,8 +44,7 @@ function c-gpr2-tools-env()
     local TARGET=$2
     local VARIANT=$3
 
-    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
-    add-to-var PATH             $PREFIX/bin
+    add-to-var PATH $PREFIX/bin
 }
 
 function do-gpr2-tools-config()
