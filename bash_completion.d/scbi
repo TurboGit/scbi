@@ -353,7 +353,7 @@ _scbi()
                     return 0
                     ;;
                 *)
-                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*) source-archive lint"
+                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*) source-archive lint shell show store"
                     ;;
             esac
     esac
