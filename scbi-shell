@@ -69,6 +69,9 @@ function shl-run-shell()
     else
         handle-build-depends-env "@root" $MODREF
 
+        [[ $DOCD == yes-dev ]] &&
+            handle-module-env "@root" $MODREF build-env
+
         [[  $DOCD == yes-tests ]] &&
             handle-tests-depends-env "@root" $MODREF
 

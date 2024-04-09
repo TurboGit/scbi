@@ -798,6 +798,7 @@ function is-module-up-to-date()
 
         mver=$( handle-build-depends-env "@root" $MODREF
                 handle-module-env "@root" $MODREF env
+                handle-module-env "@root" $MODREF build-env
                 $FCT $SCBI_PREFIX $SCBI_TARGET
               )
 
