@@ -44,8 +44,19 @@ EOF
     fi
 }
 
+function c-gtkada-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/lib/gnat
+}
+
 function c-gtkada-build-depends()
 {
+    local PREFIX=$1
+    local TARGET=$2
+
     echo p-gnat
     echo c-gprbuild
 }
