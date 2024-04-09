@@ -15,6 +15,7 @@ function c-gpr2-tools-build-depends()
 
     echo p-gnat
     echo c-gprbuild
+    echo c-gprconfig-kb
 }
 
 function c-gpr2-tools-tests-depends()
@@ -60,7 +61,10 @@ function do-gpr2-tools-config()
     mkdir .build
     ln -s ${SCBI_MODULES_DIR["c-gpr2-lib@build"]}/.build/kb .build/kb
 
-    make $BUILD prefix=$PREFIX setup
+    make $BUILD \
+         GPR2KBDIR=${SCBI_MODULES_DIR["c-gprconfig-kb@src"]}/db \
+         prefix=$PREFIX \
+         setup
 }
 
 function c-gpr2-tools-out-of-tree()
