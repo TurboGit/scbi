@@ -78,6 +78,8 @@ function sar-handle-module()
 
         get-vcs PREFIX TARGET ROOT $MODREF
 
+        [[ $? != 0 ]] && exit 1
+
         #  Create the archive from the VCS reference
 
         cd $SCBI_BDIR/$module
