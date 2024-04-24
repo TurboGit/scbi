@@ -1,6 +1,6 @@
 
 # Add a dummy OS dependency in .pkgs-deb for testing purpose
-echo @os-mylualib liblua5.2-dev >> scripts.d/.pkgs-deb
+echo os@-mylualib liblua5.2-dev >> scripts.d/.pkgs-deb
 
 export SCBI_OS_NAME=deb
 export SCBI_OS_VERSION=9.3
@@ -26,11 +26,11 @@ sort-osht-output-but-first-line
 
 DIFF <<EOF
 There is 5 module(s) in the plan
-@os-mylualib:skip
 liblua5.2-dev:skip
 me:v2
 notfound:skip
 onlyfor10one:skip
+os@-mylualib:skip
 EOF
 
 RUNS ./scbi --plan=ondeps --deps ondeps
@@ -38,7 +38,7 @@ RUNS ./scbi --plan=ondeps --deps ondeps
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Dependency liblua5.2-dev marked to be skipped
 
-xxxx/xx/xx xx:xx:xx : Dependency @os-mylualib marked to be skipped
+xxxx/xx/xx xx:xx:xx : Dependency os@-mylualib marked to be skipped
 
 xxxx/xx/xx xx:xx:xx : Building ondeps [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -55,3 +55,6 @@ EOF
 unset SCBI_OS_NAME
 unset SCBI_OS_VERSION
 unset SCBI_OS_MAJOR_VERSION
+
+# Remove last line added for testing purpose above
+sed -i '$ d' scripts.d/.pkgs-deb

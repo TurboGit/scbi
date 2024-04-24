@@ -14,7 +14,7 @@ function ondeps-build-depends()
 
 function ondeps-depends()
 {
-    echo @os-mylualib
+    echo os@-mylualib
 }
 
 function ondeps-config()

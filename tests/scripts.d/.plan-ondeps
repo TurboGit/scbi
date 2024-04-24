@@ -9,6 +9,6 @@
 
 @on deb,10.1 use liblua5.2-dev:skip
 
-@on deb,10.1 use @os-mylualib:skip
+@on deb,10.1 use os@-mylualib:skip
 
 me:v2
