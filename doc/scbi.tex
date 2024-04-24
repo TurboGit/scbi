@@ -1537,15 +1537,17 @@ The hook \code{depends} list dependencies to other plug-ins or external librarie
 
 The \code{os@-<name>} is then search against a table to find the corresponding OS package name.
 
-A distribution acronym is represented by a 3 letters name (deb, ubt, rhl for example). See output of the \code{--stat} option for the currently supported distributions.
+A distribution acronym is represented by a 3 letters name (deb, ubt, rhl for example). See output of the \code{\ddash{}stat} option for the currently supported distributions.
 
 An alias table is searched into the following places and in this specific order:
 
 \begin{enumerate}
-	\item \code{.pkgs-<distrib>} into \$SCBI\_DEFS (default \file{~/.config/scbi})
-	\item \code{.scbi-pkgs-<distrib>} into \$SCBI\_BDIR (build directory)
-	\item \code{.scbi-pkgs-<distrib>} into \$PWD (current directory)
+	\item \code{.pkgs-<distrib>[-<id>]} into \$SCBI\_DEFS (default \file{~/.config/scbi})
+	\item \code{.scbi-pkgs-<distrib>[-<id>]} into \$SCBI\_BDIR (build directory)
+	\item \code{.scbi-pkgs-<distrib>[-<id>]} into \$PWD (current directory)
 \end{enumerate}
+
+Where \code{<id>} is an optional random string that can be added for project's specific aliases. Such a file is loaded after the default one (without the \code{<id>}) so can override some entries if needed.
 
 In complement to the files searched based on distribution acronym, the major and minor version of the OS is also used.
 

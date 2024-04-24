@@ -118,11 +118,9 @@ function init-alias()
 {
     local FILE="$1"
 
-    if [[ -f $FILE ]]; then
-        while read pkg a; do
-            SCBI_ALIAS["$pkg"]=$a
-        done < <( cat "$FILE" )
-    fi
+    while read pkg a; do
+        SCBI_ALIAS["$pkg"]=$a
+    done < <( for F in "${FILE}" "${FILE}"-*; do [[ -f $F ]] && cat $F; done )
 }
 
 ############################## init-distrib-alias

@@ -1,0 +1,11 @@
+# Add a dummy OS dependency in .pkgs-deb for testing purpose
+echo os@-mynotfound libmynotfound > scripts.d/.pkgs-deb-prj
+
+NRUNS ./scbi --deps ondeps/2
+
+CLEAN-DIFF <<EOF
+error: missing dependencies for building ondeps/2
+error: libmynotfound not found
+EOF
+
+rm -f scripts.d/.pkgs-deb-prj
