@@ -589,41 +589,41 @@ function usage()
     echo "   modulen  <name>:#<ver>    build from tarbal version <ver>"
     echo "   modulen  <name>:dev       build from user's repository current branch"
     echo ""
-    echo "   -h | --help             this help message"
-    echo "   -v | --version          display driver & plug-ins versions"
-    echo "   -q | --quiet            do not display information log"
-    echo "      | --color:[n]        use colored output (no, dark, light)"
-    echo "      | --ini=<section>    load ini file given section"
-    echo "   -t | --prefix=<dir>     the global install directory"
-    echo "      | --build-dir=<dir>  the root build directory."
-    echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
-    echo "      | --plan=<name>      a build plan for modules"
-    echo "      | --enable-<name>    enable feature name"
-    echo "   -t | --target=<name>    the target to build for ($SCBI_TARGET)"
-    echo "      | --plugins=<dir>    specify the modules/plugins directory"
-    echo "   -j | --jobs=<n>         max compilation jobs \$SCBI_JOBS"
-    echo "   -S | --no-setup         skip setup"
-    echo "   -I | --no-install       skip install"
-    echo "   -W | --no-wrapup        skip wrapup"
-    echo "   -u | --update           do update"
-    echo "   -s | --setup            do setup"
-    echo "   -c | --config           do config"
-    echo "   -b | --build            do build"
-    echo "   -i | --install          do install"
-    echo "   -w | --wrapup           do wrapup"
-    echo "      | --clean-install    clean installation directory"
-    echo "      | --tar              check for tar only if explicitly specified"
-    echo "      | --tests[:only][=O] run the testsuite, eventually build"
-    echo "   -d | --deps[:warning]   check/build dependencies"
-    echo "   -a | --archive          build binary archive"
-    echo "      | --standalone       create a standalone source archive"
-    echo "   -l | --log:n            log display control yes|no|on-failure"
-    echo "   -f | --force            force rebuild, do not check build id"
-    echo "   -p | --purge[:only]     remove build directory, build eventually"
-    echo "      | --safe             clean-up build directory before configure"
-    echo "      | --dry-run          only list modules handled"
-    echo "      | --stat[:full]      display some status of current setup"
-    echo "   -n | --no-patch         do not apply patches"
+    echo "   -h | --help              this help message"
+    echo "   -v | --version           display driver & plug-ins versions"
+    echo "   -q | --quiet             do not display information log"
+    echo "      | --color:[n]         use colored output (no, dark, light)"
+    echo "      | --ini=<section>     load ini file given section"
+    echo "   -t | --prefix=<dir>      the global install directory"
+    echo "      | --build-dir=<dir>   the root build directory."
+    echo "   -e | --env=<name>        environment file ~/.scbi-<name>"
+    echo "      | --plan=<name>       a build plan for modules"
+    echo "      | --enable-<name>     enable feature name"
+    echo "   -t | --target=<name>     the target to build for ($SCBI_TARGET)"
+    echo "      | --plugins=<dir>     specify the modules/plugins directory"
+    echo "   -j | --jobs=<n>          max compilation jobs \$SCBI_JOBS"
+    echo "   -S | --no-setup          skip setup"
+    echo "   -I | --no-install        skip install"
+    echo "   -W | --no-wrapup         skip wrapup"
+    echo "   -u | --update            do update"
+    echo "   -s | --setup             do setup"
+    echo "   -c | --config            do config"
+    echo "   -b | --build             do build"
+    echo "   -i | --install           do install"
+    echo "   -w | --wrapup            do wrapup"
+    echo "      | --clean-install     clean installation directory"
+    echo "      | --tar               check for tar only if explicitly specified"
+    echo "      | --tests[:only][=O]  run the testsuite, eventually build"
+    echo "   -d | --deps[:warning]    check/build dependencies"
+    echo "   -a | --archive           build binary archive"
+    echo "      | --standalone        create a standalone source archive"
+    echo "   -l | --log:n             log display control yes|no|on-failure"
+    echo "   -f | --force             force rebuild, do not check build id"
+    echo "   -p | --purge[:only]      remove build directory, build eventually"
+    echo "      | --safe              clean-up build directory before configure"
+    echo "      | --dry-run           only list modules handled"
+    echo "      | --stat[:short|full] display some status of current setup"
+    echo "   -n | --no-patch          do not apply patches"
 }
 
 ############################## handle-modue-env
@@ -1931,11 +1931,14 @@ function setup-generic-tool-env()
 
     [[ $DO_SUBCMD == no ]] &&
         {
-            [[ -z ${SCBI_MODULES[*]} ]] || [[ $DO_STAT == yes ]] &&
+            [[ -z ${SCBI_MODULES[*]} ]] && [[ $DO_STAT != short ]] &&
                 display-modules && display-plans
 
-            [[ $DO_STAT == yes ]] &&
+            if [[ $DO_STAT == full ]]; then
                 display-log-stat
+            elif [[ -z ${SCBI_MODULES[*]} ]] && [[ $DO_STAT == yes ]]; then
+                echo
+            fi
         }
 
     if [[ $DO_COLOR == dark ]]; then
@@ -2038,10 +2041,13 @@ while [[ $# -gt 0 ]]; do
             CMDLINE_OPTS+=([SCBI_PLAN]="${1#*=}")
             ;;
         --stat:full)
-            CMDLINE_OPTS+=([DO_STAT]=yes)
+            CMDLINE_OPTS+=([DO_STAT]=full)
+            ;;
+        --stat:short)
+            CMDLINE_OPTS+=([DO_STAT]=short)
             ;;
         --stat)
-            CMDLINE_OPTS+=([DO_STAT]=info-only)
+            CMDLINE_OPTS+=([DO_STAT]=yes)
             ;;
         --build-dir*)
             CMDLINE_OPTS+=([SCBI_BDIR]="${1#*=}")

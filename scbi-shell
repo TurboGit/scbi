@@ -214,7 +214,7 @@ if [[ $DO_HELP == yes ]]; then
     exit 0
 fi
 
-if [[ -z ${SCBI_MODULES[*]} ]] && [[ $DO_STAT == no ]]; then
+if [[ -z ${SCBI_MODULES[*]} ]]; then
     echo "error: shell/run commands need a plug-in, see scbi shell --help"
     exit 0
 fi

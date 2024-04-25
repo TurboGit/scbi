@@ -48,7 +48,7 @@ EOF
 
 cat <<EOF > $SCBI_INI_FILE
 
-stat = info-only
+stat = yes
 
 [sc]
    setup = yes
