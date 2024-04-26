@@ -9,6 +9,22 @@ function define-var()
     local VAR=$2
     local VALUE=$3
 
+    #  Separator of values in variable
+    local SEP=";"
+
+    function _delete_internal()
+    {
+        local _VAR=$1
+        local _VALUE=$2
+
+        if [[ "${!_VAR}" == "$_VALUE" ]]; then
+            export ${_VAR}=""
+        else
+            export ${_VAR}=${!_VAR/$SEP${_VALUE}}
+            export ${_VAR}=${!_VAR#${_VALUE}$SEP}
+        fi
+    }
+
     # If adding to PATH, do so only if DIR exists
 
     if [[ -d "$VALUE" ]] || [[ "${VAR}" != "PATH" ]]; then
@@ -19,13 +35,9 @@ function define-var()
 
         local VALUE_EXISTS=no
 
-        #  Separator of values in variable
-
         if [[ -n $SCBI_ENV_MODULE ]]; then
             echo define-var $ACTION $VAR \"$VALUE\" >> $SCBI_ENV_MODULE
         fi
-
-        local SEP=";"
 
         # With MSYS & Cygwin the PATH separator is ':'
 
@@ -54,19 +66,19 @@ function define-var()
             ;;
             APPEND|A)
                 [[ $VALUE_EXISTS == yes ]] &&
-                    {
-                        export $VAR=${!VAR/$SEP$VALUE}
-                        export $VAR=${!VAR#$VALUE$SEP}
-                    }
+                    _delete_internal $VAR $VALUE
+
                 export $VAR="${!VAR}${!VAR:+$SEP}${VALUE}"
             ;;
             PREPEND|P)
                 [[ $VALUE_EXISTS == yes ]] &&
-                    {
-                        export $VAR=${!VAR/$SEP$VALUE}
-                        export $VAR=${!VAR#$VALUE$SEP}
-                    }
+                    _delete_internal $VAR $VALUE
+
                 export $VAR="${VALUE}${!VAR:+$SEP}${!VAR}"
+            ;;
+            DELETE|D)
+                [[ $VALUE_EXISTS == yes ]] &&
+                    _delete_internal $VAR $VALUE
             ;;
         esac
     fi

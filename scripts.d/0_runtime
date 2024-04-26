@@ -770,6 +770,22 @@ function define-var()
     local VAR=$2
     local VALUE=$3
 
+    #  Separator of values in variable
+    local SEP=":"
+
+    function _delete_internal()
+    {
+        local _VAR=$1
+        local _VALUE=$2
+
+        if [[ "${!_VAR}" == "$_VALUE" ]]; then
+            export ${_VAR}=""
+        else
+            export ${_VAR}=${!_VAR/$SEP${_VALUE}}
+            export ${_VAR}=${!_VAR#${_VALUE}$SEP}
+        fi
+    }
+
     #  If adding to PATH, do so only if VALUE exists
 
     if [[ -d "$VALUE" ]] || [[ "${VAR}" != "PATH" ]]; then
@@ -779,9 +795,6 @@ function define-var()
         #  the commands manually.
 
         local VALUE_EXISTS=no
-
-        #  Separator of values in variable
-        local SEP=":"
 
         if [[ "${SEP}${!VAR}${SEP}" == *"${SEP}${VALUE}${SEP}"* ]]; then
             #  If the value already exists, make sure it is first removed
@@ -807,19 +820,19 @@ function define-var()
             ;;
             APPEND|A)
                 [[ $VALUE_EXISTS == yes ]] &&
-                    {
-                        export $VAR=${!VAR/$SEP$VALUE}
-                        export $VAR=${!VAR#$VALUE$SEP}
-                    }
+                    _delete_internal $VAR $VALUE
+
                 export $VAR="${!VAR}${!VAR:+$SEP}${VALUE}"
             ;;
             PREPEND|P)
                 [[ $VALUE_EXISTS == yes ]] &&
-                    {
-                        export $VAR=${!VAR/$SEP$VALUE}
-                        export $VAR=${!VAR#$VALUE$SEP}
-                    }
+                    _delete_internal $VAR $VALUE
+
                 export $VAR="${VALUE}${!VAR:+$SEP}${!VAR}"
+            ;;
+            DELETE|D)
+                [[ $VALUE_EXISTS == yes ]] &&
+                    _delete_internal $VAR $VALUE
             ;;
         esac
     fi
@@ -843,6 +856,14 @@ function append-to-var()
     local VALUE=$2
 
     define-var APPEND $VAR "$VALUE"
+}
+
+function delete-from-var()
+{
+    local VAR=$1
+    local VALUE=$2
+
+    define-var DELETE $VAR "$VALUE"
 }
 
 function add-to-var()
