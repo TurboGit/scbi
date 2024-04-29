@@ -49,15 +49,15 @@ add-to-var VDIR /d/three
 add-to-var VDIR /d/two
 add-to-var VDIR /d/one
 
-delete-from-var VDIR /d/one
+remove-from-var VDIR /d/one
 
 IS $VDIR == "/d/two:/d/three"
 
-delete-from-var VDIR /d/three
+remove-from-var VDIR /d/three
 
 IS $VDIR == "/d/two"
 
-delete-from-var VDIR /d/two
+remove-from-var VDIR /d/two
 
 IS "$VDIR" == ""
 
@@ -65,6 +65,6 @@ add-to-var VDIR /d/three
 add-to-var VDIR /d/two
 add-to-var VDIR /d/one
 
-delete-from-var VDIR /d/two
+remove-from-var VDIR /d/two
 
 IS "$VDIR" == "/d/one:/d/three"

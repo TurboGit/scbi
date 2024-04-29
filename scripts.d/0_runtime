@@ -830,7 +830,7 @@ function define-var()
 
                 export $VAR="${VALUE}${!VAR:+$SEP}${!VAR}"
             ;;
-            DELETE|D)
+            REMOVE|R)
                 [[ $VALUE_EXISTS == yes ]] &&
                     _delete_internal $VAR $VALUE
             ;;
@@ -858,12 +858,12 @@ function append-to-var()
     define-var APPEND $VAR "$VALUE"
 }
 
-function delete-from-var()
+function remove-from-var()
 {
     local VAR=$1
     local VALUE=$2
 
-    define-var DELETE $VAR "$VALUE"
+    define-var REMOVE $VAR "$VALUE"
 }
 
 function add-to-var()

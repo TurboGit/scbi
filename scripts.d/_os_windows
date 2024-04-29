@@ -76,7 +76,7 @@ function define-var()
 
                 export $VAR="${VALUE}${!VAR:+$SEP}${!VAR}"
             ;;
-            DELETE|D)
+            REMOVE|R)
                 [[ $VALUE_EXISTS == yes ]] &&
                     _delete_internal $VAR $VALUE
             ;;
