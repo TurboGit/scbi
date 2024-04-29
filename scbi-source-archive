@@ -86,6 +86,7 @@ function sar-handle-module()
 
         if [[ $DO_CLEAN_VERSION == yes ]]; then
             ref=$(echo $ref | sed 's/[A-Z]\|[a-z]//g;s/_/\./g')
+            ref=${ref%%-*}
         fi
 
         local tar=( $(get-archive-data $module $variant $ref) )
