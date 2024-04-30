@@ -15,11 +15,11 @@ _SCBI_ARGS="${_SCBI_COMMON} -t -S --no-setup -W --no-wrapup -I
 _SCBI_ARC_ARGS="${_SCBI_COMMON} -e --env= --plan=
 -c --clean-version -l --lower-case --sha1 --sha256 --md5"
 
-_SCBI_LNT_ARGS="${_SCBI_COMMON} --error"
+_SCBI_LNT_ARGS="${_SCBI_COMMON} --error  --stat"
 
-_SCBI_SHL_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --mode:use --mode:sandbox --mode:dev --mode:tests --run"
+_SCBI_SHL_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --mode:use --mode:sandbox --mode:dev --mode:tests --run --stat"
 
-_SCBI_SHO_ARGS="${_SCBI_COMMON} --env= -e --depends: --externals --externals:only --no-version --filter: --build-plan --module-ref --module-ref:version --module-ref:variant --module-ref:full"
+_SCBI_SHO_ARGS="${_SCBI_COMMON} --env= -e --depends: --externals --externals:only --no-version --filter: --build-plan --module-ref --module-ref:version --module-ref:variant --module-ref:full --stat"
 
 _SCBI_STR_ARGS="${_SCBI_COMMON} --env= -e --list-keys -l --list --list:full -d --delete"
 

@@ -27,6 +27,7 @@ function shw-usage()
     echo "      | --filter:n         filter depends/external for dev or runtime"
     echo "      | --build-plan       list current current plan"
     echo "      | --module-ref:n     display variant/version of specific module"
+    echo "      | --stat             display some status of current setup"
 }
 
 ############################## register-depends-callback

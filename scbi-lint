@@ -16,6 +16,7 @@ function usage()
     echo "   -v | --version          display driver & plug-ins versions"
     echo "      | --plugins=<dir>    specify the plugins' directory"
     echo "      | --error            report only errors"
+    echo "      | --stat             display some status of current setup"
 }
 
 if [[ $1 == "subcommand" ]]; then

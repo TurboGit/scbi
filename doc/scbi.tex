@@ -1609,6 +1609,8 @@ The following options are supported:
 	\item[\ddash{}build-plan] List the final build plan that will be used. This is after loading main plan, inheriting from other plan \code{@load} and resolving the command line modules specification.
 
 	\item[\ddash{}module-ref:{[}version|variant|full{]} ] Display module's variant, version or both given in the command line or in the build plan.
+
+	\item[\ddash{}stat] Display some statistics about of current setup.
 \end{description}
 
 \subsection{Shell}
@@ -1637,6 +1639,8 @@ The following options are supported:
 	\end{description}
 
 	\item[\ddash{}run{[}="command args..."{]}] \label{cmd!run}Run the given command with the module's environment variables set. This is meant to be used to run a command which is depending on some libraries or binaries that are in the sandbox. If optional \code{command args...} is not specified the hook \code{run} is used to get the command to run.
+
+	\item[\ddash{}stat] Display some statistics about of current setup.
 \end{description}
 
 \subsection{Private Store}
@@ -1660,7 +1664,7 @@ The following options are supported:
 
 	\item[-e | \ddash{}env=<name>] Use environment file \code{.env-<name>} instead of the default \code{.env}. (\seeref{build-env})
 
-	\item[\ddash{}stat:{[}full{]}] Display some statistics about of current setup. With sub-option full also gives stats about module's build time.
+	\item[\ddash{}stat] Display some statistics about of current setup.
 
 	\item[\ddash{}plugins=<directory>] Specify a non default location for the modules and plug-ins directory. This overrides the \code{SCBI\_DEFS} environment.
 

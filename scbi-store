@@ -23,6 +23,7 @@ function sto-usage()
     echo "      | --list-keys        list all stored keys"
     echo "   -l | --list[:full]      list stored keys possibly with values"
     echo "   -d | --delete           remove a key"
+    echo "      | --stat             display some status of current setup"
 }
 
 declare -A SCBI_STORE=()
