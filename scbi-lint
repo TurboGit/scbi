@@ -9,7 +9,7 @@ function usage()
     echo
     echo SCBI-LINT $SCBI_VERSION
     echo
-    echo $0 [options] plug-in1 [plug-in2...]
+    echo $0 lint [options] plug-in1 [plug-in2...]
 
     echo ""
     echo "   -h | --help             this help message"

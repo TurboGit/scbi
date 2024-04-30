@@ -7,9 +7,9 @@ DO_SHA=no
 function sar-usage()
 {
     echo
-    echo SCBI-SOURCE-ARCHIVCE $SCBI_VERSION
+    echo SCBI-SOURCE-ARCHIVE $SCBI_VERSION
     echo
-    echo $0 [options] plug-in1 [plug-in2...]
+    echo $0 source-archive [options] plug-in1 [plug-in2...]
 
     echo ""
     echo "   -h | --help             this help message"

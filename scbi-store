@@ -13,7 +13,7 @@ function sto-usage()
     echo
     echo SCBI-STORE $SCBI_VERSION
     echo
-    echo $0 [options] plug-in1 [plug-in2...]
+    echo $0 store [options]
 
     echo ""
     echo "   -h | --help             this help message"
