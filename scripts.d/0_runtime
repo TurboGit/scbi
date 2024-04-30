@@ -741,6 +741,7 @@ function scbi-store()
         scbi-store-set-key "$KEY" "$VALUE"
     fi
 }
+
 ############################## get-build-type
 
 function get-build-type()
@@ -758,6 +759,28 @@ function get-build-type()
     [[ -n ${!VAR_MODULE} ]] && DEFAULT=${!VAR_MODULE}
 
     echo -n $DEFAULT
+}
+
+############################## remove-from-string-sep
+#  Remove _VALUE from the current variable _VAR's value. The variable
+#  is expected to have multiple value separated by _SEP (like : for
+#  PATH on GNU/Linux).
+
+function remove-from-string-sep()
+{
+    local _VAR=$1
+    local _VALUE=$2
+    local _SEP=$3
+
+    #  If _VAR contains exactly _VALUE
+    if [[ "${!_VAR}" == "${_VALUE}" ]]; then
+        export ${_VAR}=""
+    else
+        #  Try to remove value as prefix, suffix and in the middle
+        export ${_VAR}=${!_VAR#${_VALUE}${_SEP}}
+        export ${_VAR}=${!_VAR%${_SEP}${_VALUE}}
+        export ${_VAR}=${!_VAR/${_SEP}${_VALUE}${_SEP}/${_SEP}}
+    fi
 }
 
 ############################## define-var
@@ -778,12 +801,7 @@ function define-var()
         local _VAR=$1
         local _VALUE=$2
 
-        if [[ "${!_VAR}" == "$_VALUE" ]]; then
-            export ${_VAR}=""
-        else
-            export ${_VAR}=${!_VAR/$SEP${_VALUE}}
-            export ${_VAR}=${!_VAR#${_VALUE}$SEP}
-        fi
+        remove-from-string-sep ${_VAR} ${_VALUE} $SEP
     }
 
     #  If adding to PATH, do so only if VALUE exists

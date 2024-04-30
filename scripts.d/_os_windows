@@ -17,12 +17,7 @@ function define-var()
         local _VAR=$1
         local _VALUE=$2
 
-        if [[ "${!_VAR}" == "$_VALUE" ]]; then
-            export ${_VAR}=""
-        else
-            export ${_VAR}=${!_VAR/$SEP${_VALUE}}
-            export ${_VAR}=${!_VAR#${_VALUE}$SEP}
-        fi
+        remove-from-string-sep ${_VAR} ${_VALUE} $SEP
     }
 
     # If adding to PATH, do so only if DIR exists
