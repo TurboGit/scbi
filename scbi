@@ -1403,7 +1403,7 @@ function handle-module()
         is-hook-true $module $variant only-explicit-build FALSE
 
         if [[ $? == 0 ]]; then
-            ilog $module Module $module built only if explitly specified
+            ilog $module Module %B%t$module%c built only if explitly specified
             return
         fi
     fi
