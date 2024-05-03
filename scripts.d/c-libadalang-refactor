@@ -35,7 +35,7 @@ function c-libadalang-refactor-env()
     local VARIANT=$3
 
     add-to-var PATH             $PREFIX/bin
-    add-to-var GPR_PROJECT_PATH $PREFIX/install/share/gpr
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
     add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
