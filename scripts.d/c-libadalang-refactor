@@ -44,7 +44,7 @@ function c-libadalang-refactor-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make BUILD_MODE=prod
+    make BUILD_MODE=prod lib bin
 }
 
 function c-libadalang-refactor-install()
