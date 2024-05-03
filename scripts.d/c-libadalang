@@ -133,7 +133,7 @@ function c-libadalang-install()
     local TARGET=$2
     local VARIANT=$3
 
-    BV="--build-var=LIBADALANG_BUILD --build-var=LIBRARY_TYPE"
+    BV="--build-var=LIBRARY_TYPE --build-var=LIBADALANG_BUILD"
     GOPTS="-p --prefix=$PREFIX --target=$TARGET $BV"
 
     for KIND in static relocatable static-pic; do
