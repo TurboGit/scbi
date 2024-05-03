@@ -44,7 +44,7 @@ function c-gnatdoc4-build-env()
     local TARGET=$2
     local VARIANT=$3
 
-    set-var LIBRARY_TYPE static-pic
+    set-var GPR2_LIBRARY_TYPE static
 }
 
 function c-gnatdoc4-env()
