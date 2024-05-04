@@ -117,19 +117,18 @@ function compute-log-stat-file()
 {
     local FILE="$1"
 
-    local module=""
     local start_time=0
     local end_time=0
     local duration=0
 
-    while read date time x action word; do
+    while read date time x action word mod dummy; do
         if [[ "$action" =~ "Building" ]]; then
-            module=$word
             start_time=$(date +"%s" --date="$date $time")
-        elif [[ "$action" == "End" ]] && [[ -n $module ]]; then
+        elif [[ "$action" == "End" ]] && [[ $start_time != 0 ]]; then
             end_time=$(date +"%s" --date="$date $time")
             duration=$((end_time - start_time))
-            SCBI_STATS[$module]+=" $duration"
+            start_time=0
+            echo "$mod" "$duration"
         fi
     done < $FILE
 }
@@ -164,34 +163,29 @@ function display-log-stat()
 {
     local MODULE=$1
 
-    for file in $(find $SCBI_LOGS -name "*$MODULE-report.log"); do
-        compute-log-stat-file $file
-    done
+    function _display-stat()
+    {
+        local KEY=$1
+
+        local values="${SCBI_STATS[$KEY]}"
+        local mam=( $(get-min-avr-max "$values") )
+
+        printf "%-55s : %s   %s   %s\n" $KEY \
+               $(display-time ${mam[0]}) \
+               $(display-time ${mam[1]}) \
+               $(display-time ${mam[2]})
+    }
+
+    while read module duration; do
+        SCBI_STATS[$module]+=" $duration"
+    done < <( parallel-do compute-log-stat-file $SCBI_JOBS \
+                          $(find $SCBI_LOGS -name "*$MODULE-report.log") )
 
     echo
     echo "build times (min, average, max):"
     echo
 
-    for key in "${!SCBI_STATS[@]}"; do
-        echo $key
-    done | sort |
-        while read key; do
-            local values="${SCBI_STATS[$key]}"
-            local mam=( $(get-min-avr-max "$values") )
-
-            echo -n $key
-            for (( s=${#key} ; s<=55 ; s++ )); do
-                echo -n ' '
-            done
-
-            echo -n ": "
-            display-time ${mam[0]}
-            echo -n "   "
-            display-time ${mam[1]}
-            echo -n "   "
-            display-time ${mam[2]}
-            echo
-        done
+    parallel-do _display-stat $SCBI_JOBS "${!SCBI_STATS[@]}" | sort
     echo
 }
 
