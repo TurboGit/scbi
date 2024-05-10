@@ -129,6 +129,6 @@ function c-aws-tests()
                              ../$TARGET/testsuite.tags &&
         ./testsuite.py --jobs=$SCBI_JOBS \
                        --temp-dir=$PWD/results  \
-                       --root-dir=../ \
+                       --target-dir=../$TARGET \
                        $OPTIONS
 }
