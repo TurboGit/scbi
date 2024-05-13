@@ -1358,6 +1358,52 @@ Two helper routines are provided for this:
 	\end{lstlisting}
 \end{description}
 
+\subsection{Checking dependency version}
+\index{helpers!get-module-version}\index{get-module-verson}
+\index{helpers!check-module-version}\index{check-module-verson}
+
+Those two helpers can be used to check a version of a dependency in a plug-in. This can be used for example to apply a patch for a specific version of a dependency.
+
+\begin{description}
+	\item[get-module-version] Take the name of a plug-in as parameter, returns the version for this plug-in as described in the build plan.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} plug-in
+		\item[return] \tabto{2cm} version
+	\end{description}
+
+	Example:
+	\begin{lstlisting}[basicstyle=\footnotesize]
+		if [[ $(get-module-version lib2) =~ "2.0" ]]; then
+		   ...
+		else
+		   ...
+		fi
+	\end{lstlisting}
+
+	or
+
+	\begin{lstlisting}[basicstyle=\footnotesize]
+		local VER=$(get-module-version lib2)
+	\end{lstlisting}
+
+	\item[check-module-version] Check a plug-in version. Take a plug-in name, an operator and a version, returns status code different than 0 if expression is true. The operator can be \code{=}, \code{!=}, \code{>}, \code{<}, \code{>=} or \code{<=}.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} plug-in operator version
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+		if check-module-version "lib2" ">" "1.9"; then
+		   ...
+		else
+		   ...
+		fi
+	\end{lstlisting}
+\end{description}
+
 \subsection{Inheritance}
 \label{inheritance}
 \index{inheritance}\index{inherit-plugin}\index{helpers!inherit-plugin}

@@ -1,0 +1,76 @@
+
+NRUNS ./scbi lib2:v2.0 multpatch
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (v2.0)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (v2.0)
+
+xxxx/xx/xx xx:xx:xx : Building multpatch [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch filename patch-for-v2 not found
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch filename patch-for-v2.2 not found
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch filename patch-for-v2.3 not found
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) generic module setup failed with error 1
+EOF
+
+NRUNS ./scbi --deps multpatch
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building multpatch [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch filename patch-for-v1 not found
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch filename patch-for-v1.2 not found
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch filename patch-for-v1.3 not found
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) generic module setup failed with error 1
+EOF
+
+NRUNS ./scbi --plan=multpatch --deps multpatch
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (v2.0)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (v2.0)
+
+xxxx/xx/xx xx:xx:xx : Building multpatch [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch filename patch-for-v2 not found
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch filename patch-for-v2.2 not found
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch filename patch-for-v2.3 not found
+xxxx/xx/xx xx:xx:xx : multpatch (FAILED) generic module setup failed with error 1
+EOF

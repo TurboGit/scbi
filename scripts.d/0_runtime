@@ -551,6 +551,43 @@ function get-module-name()
     echo $module
 }
 
+############################## get-module-version
+# Get module version according to the module plan
+
+function get-module-version()
+{
+    local MODREF=$1
+
+    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+
+    local module_info=()
+    get-module-ref module_info $MODREF $PLUGIN
+
+    local ref=${module_info[3]}
+
+    echo $ref
+}
+
+############################## check-module-version
+# Check module version against a specific version
+# The operator can be = < > >= <= !=
+
+function check-module-version()
+{
+    local MODREF=$1
+    local OP=$2
+    local VER=$3
+
+    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+
+    local module_info=()
+    get-module-ref module_info $MODREF $PLUGIN
+
+    local ref=${module_info[3]}
+
+    check-versions $ref $OP $VER
+}
+
 ############################## with-variant
 # parameters are the OS library for the native support
 
