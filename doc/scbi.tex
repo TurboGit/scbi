@@ -138,7 +138,7 @@ The goal is to automate the build procedures from sources. The main features are
 \begin{itemize}
 	\item Allow recursive build of dependencies
 	\item Building from a VCS (currently supported \emph{Git}, \emph{Subversion} and \emph{Mercurial})
-	\item Supports build variants
+	\item Supports build variants and auto-variants
 	\item Supports for cross compilation
 	\item Building a specific branch or tag
 	\item Building from an archive
@@ -1472,6 +1472,7 @@ Where \code{<variant>} is all possible values found in \code{\$VARIANT}.
 It is often needed to set configuration options based on the variant we want to build. This is for example to activate an external module.
 
 \begin{lstlisting}
+	local OPTIONS=()
 	get-config-options OPTIONS $PREFIX $TARGET $VARIANT
 \end{lstlisting}
 
@@ -1890,7 +1891,7 @@ As an example, the build command file for \code{c-cmake} plug-in looks like this
 (
 	cd <...>/c-cmake/build/build
 	source <...>/.scbi-runtime
-	[ -f ../logs/env.cmd ] && source ../logs/env.cmd
+	[[ -f ../logs/env.cmd ]] && source ../logs/env.cmd
 	[[ -f ../logs/build-plan ]] &&
 		load-runtime-module-plan ../logs/build-plan
 
