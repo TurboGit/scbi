@@ -1110,14 +1110,6 @@ function handle-sources()
 
         local nv=${#vcs[*]}
 
-        #  We request a specific version but there is no VCS hook defined
-        #  this is an error.
-
-        if [[ $kind == BRANCH ]] && [[ $nv == 0 ]]; then
-            echo "error: $module-vcs function not defined, cannot get vcs"
-            exit 1
-        fi
-
         if [[ $nv != 0 ]] && [[ $nv != 5 ]] && [[ $nv != 6 ]]; then
             local V=${vcs[0]}
             if [[ $V == default ]]; then
