@@ -17,6 +17,7 @@ function fn-exists()
 }
 
 ############################## copy-fonction
+# copy function $1 to $2
 
 function copy-function()
 {
@@ -354,9 +355,7 @@ function _inherit-plugin_internal()
                       | cut -d' ' -f3 \
                       | grep -E $REGEXP);
     do
-        H="function ${hook/$HPLUGIN/$PLUGIN}()"
-        H="$H { $hook \$1 \$2 \$3 \$4 \$5 \$6 \$7; }"
-        eval $H
+        copy-function $hook ${hook/$HPLUGIN/$PLUGIN}
     done
 }
 

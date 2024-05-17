@@ -6,57 +6,78 @@ CLEAN-DIFF <<EOF
 inv-test19-build is a function
 inv-test19-build ()
 {
-    test19-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 inv-test19-config is a function
 inv-test19-config ()
 {
-    test19-config \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ CONFIG " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 inv-test19-install is a function
 inv-test19-install ()
 {
-    test19-install \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ INSTALL " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 inv-test19-out-of-tree is a function
 inv-test19-out-of-tree ()
 {
-    test19-out-of-tree \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    echo false
 }
 inv-test19-post-build is a function
 inv-test19-post-build ()
 {
-    test19-post-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ POST-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 inv-test19-post-config is a function
 inv-test19-post-config ()
 {
-    test19-post-config \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ POST-CONFIG " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 inv-test19-pre-build is a function
 inv-test19-pre-build ()
 {
-    test19-pre-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ PRE-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 inv-test19-pre-install is a function
 inv-test19-pre-install ()
 {
-    test19-pre-install \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ PRE-INSTALL " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 inv-test19-pre-setup is a function
 inv-test19-pre-setup ()
 {
-    test19-pre-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    mkdir \$TARGET-default/src;
+    echo "@@@ PRE-SETUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 inv-test19-pre-wrapup is a function
 inv-test19-pre-wrapup ()
 {
-    test19-pre-wrapup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ PRE-WRAPUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 inv-test19-wrapup is a function
 inv-test19-wrapup ()
 {
-    test19-wrapup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ WRAPUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 xxxx/xx/xx xx:xx:xx : Building inv-test19 [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -93,27 +114,39 @@ CLEAN-DIFF <<EOF
 iset-test19-alt-pre-setup is a function
 iset-test19-alt-pre-setup ()
 {
-    test19-alt-pre-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    mkdir \$TARGET-alt/src;
+    echo "@@@ ALT/PRE-SETUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 iset-test19-build is a function
 iset-test19-build ()
 {
-    test19-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 iset-test19-post-build is a function
 iset-test19-post-build ()
 {
-    test19-post-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ POST-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 iset-test19-pre-build is a function
 iset-test19-pre-build ()
 {
-    test19-pre-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ PRE-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 iset-test19-pre-setup is a function
 iset-test19-pre-setup ()
 {
-    test19-pre-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    mkdir \$TARGET-default/src;
+    echo "@@@ PRE-SETUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 xxxx/xx/xx xx:xx:xx : Building iset-test19 [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -138,22 +171,31 @@ CLEAN-DIFF <<EOF
 invset-test19-build is a function
 invset-test19-build ()
 {
-    test19-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 invset-test19-post-build is a function
 invset-test19-post-build ()
 {
-    test19-post-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ POST-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 invset-test19-pre-build is a function
 invset-test19-pre-build ()
 {
-    test19-pre-build \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo "@@@ PRE-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 invset-test19-pre-setup is a function
 invset-test19-pre-setup ()
 {
-    test19-pre-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    mkdir \$TARGET-default/src;
+    echo "@@@ PRE-SETUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
 xxxx/xx/xx xx:xx:xx : Building invset-test19 [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu

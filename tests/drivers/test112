@@ -6,12 +6,17 @@ CLEAN-DIFF <<EOF
 iset-supermod-setup is a function
 iset-supermod-setup ()
 {
-    supermod-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    mkdir -p \$PREFIX;
+    echo do setup >> \$PREFIX/supermod
 }
 iset-supermod-wrapup is a function
 iset-supermod-wrapup ()
 {
-    supermod-wrapup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo do wrapup >> \$PREFIX/supermod
 }
 xxxx/xx/xx xx:xx:xx : Building iset-supermod [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
@@ -31,17 +36,23 @@ CLEAN-DIFF <<EOF
 i-supermod-modules is a function
 i-supermod-modules ()
 {
-    supermod-modules \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    echo lib1;
+    echo lib2
 }
 i-supermod-setup is a function
 i-supermod-setup ()
 {
-    supermod-setup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    mkdir -p \$PREFIX;
+    echo do setup >> \$PREFIX/supermod
 }
 i-supermod-wrapup is a function
 i-supermod-wrapup ()
 {
-    supermod-wrapup \$1 \$2 \$3 \$4 \$5 \$6 \$7
+    local PREFIX=\$1;
+    local TARGET=\$2;
+    echo do wrapup >> \$PREFIX/supermod
 }
 xxxx/xx/xx xx:xx:xx : Metamodule i-supermod [default] setup
 xxxx/xx/xx xx:xx:xx : setup starting
