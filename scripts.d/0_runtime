@@ -26,6 +26,29 @@ function copy-function()
     eval "${2}(${func#*\(}"
 }
 
+############################## get-caller
+
+function get-caller()
+{
+    local -n CRESULT=$1
+    local IDX=${2:-2}
+
+    local NAME=${FUNCNAME[$IDX]}
+
+    if [[ $NAME =~ -((pre|post)-)?(cross-)?(archive|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches) ]]; then
+        CRESULT=${NAME%-${BASH_REMATCH[4]}}
+
+        #  Check if last string after dash is a known variant, if so remove
+        #  the variant from the name.
+        local N=${CRESULT%-*}/${s##*-}
+        if [[ -z ${SCBI_MODVER[$CRESULT]} ]] && [[ -n ${N} ]]; then
+            CRESULT=${CRESULT%-*}
+        fi
+    else
+        CRESULT=$NAME
+    fi
+}
+
 ############################## get-config-options
 
 function get-config-options()
@@ -35,7 +58,8 @@ function get-config-options()
     local TARGET=$3
     local VARIANT=$4
 
-    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+    local PLUGIN=""
+    get-caller PLUGIN
 
     local IFS=$'\n'
     RESULT=( $(plugin-call-variant-hooks $PLUGIN config-options \
@@ -365,9 +389,9 @@ function inherit-plugin()
     local NOVARIANT=no
     local HOOKS=""
 
+    #  Get the caller plug-in name, this is called when sourcing a plug-in
+    #  we need to use Bash caller here and not get-caller.
     local CALLER=( $(caller) )
-
-    #  Get the caller plug-in name
     local PLUGIN=$(basename ${CALLER[1]})
 
     local options=$(getopt -l no-variant,hooks: -- dummy $*)
@@ -404,10 +428,9 @@ function inherit-plugin()
 
 function get-version()
 {
-    local CALLER=( $(caller) )
-
     #  Get the caller plug-in name
-    local PLUGIN=$(basename ${CALLER[1]})
+    local PLUGIN=""
+    get-caller PLUGIN
 
     local module_info=()
     get-module-ref module_info $PLUGIN
@@ -557,7 +580,8 @@ function get-module-version()
 {
     local MODREF=$1
 
-    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+    local PLUGIN=""
+    get-caller PLUGIN
 
     local module_info=()
     get-module-ref module_info $MODREF $PLUGIN
@@ -577,7 +601,8 @@ function check-module-version()
     local OP=$2
     local VER=$3
 
-    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+    local PLUGIN=""
+    get-caller PLUGIN
 
     local module_info=()
     get-module-ref module_info $MODREF $PLUGIN
@@ -595,7 +620,8 @@ function with-variant()
     local VNAME=$1
     shift
 
-    #  Get the caller plug-in name
+    #  Get the caller plug-in name, this is called when sourcing a plug-in
+    #  we need to use Bash caller here and not get-caller.
     local PLUGIN=$(basename $(caller | cut -d' ' -f2))
 
     local module_info=()
@@ -786,7 +812,8 @@ function get-build-type()
     local DEFAULT=$2
 
     #  Get the caller plug-in name
-    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+    local PLUGIN=""
+    get-caller PLUGIN
 
     VAR_GENERIC=SCBI_${KIND}_BUILD_TYPE
     VAR_MODULE=SCBI_${PLUGIN//-/_}_BUILD_TYPE
@@ -1044,7 +1071,8 @@ function call-variant-hooks()
 
     shift 4
 
-    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+    local PLUGIN=""
+    get-caller PLUGIN
 
     plugin-call-variant-hooks $PLUGIN $HOOK $PREFIX $TARGET $VARIANT $*
 }
