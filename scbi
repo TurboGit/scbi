@@ -1215,6 +1215,7 @@ function handle-sources()
 
         else
             echo -n "none-$ref" > source-id
+            echo $module $variant $ref >> source-ref
 
             #  No VCS, no TAR, just rebuild the sources if present
             if [[ ! -d src ]]; then
