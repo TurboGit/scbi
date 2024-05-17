@@ -77,7 +77,12 @@ function shl-run-shell()
             handle-tests-depends-env "@root" $MODREF
 
         if [[ $kind == DEV ]] || [[ $DOCD == yes-dev ]]; then
-            cd $(get-vcs-dir $module:dev)
+            local DIR=$(get-vcs-dir $module:dev)
+            if [[ -d $DIR ]]; then
+                cd $(get-vcs-dir $module:dev)
+            else
+                elog $module no user checkout directory $DIR
+            fi
         else
             cd $(get-build-dir $TARGET $MODREF)
         fi
