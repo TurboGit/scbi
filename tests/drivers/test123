@@ -1,0 +1,13 @@
+
+PDIR=.root/builds/parent/build/logs
+CDIR=.root/builds/child/build/logs
+
+RUNS ./scbi --plan=parchld parent
+
+GREP "OPTIONS: p:1.0" $PDIR/config.log
+NGREP "OPTIONS: p:1.5" $PDIR/config.log
+
+RUNS ./scbi --plan=parchld child
+
+NGREP "OPTIONS: p:1.0" $CDIR/config.log
+GREP "OPTIONS: p:1.5" $CDIR/config.log

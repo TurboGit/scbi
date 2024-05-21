@@ -1,0 +1,6 @@
+inherit-plugin parent
+
+function child-config-options()
+{
+    echo p:$(get-version)
+}

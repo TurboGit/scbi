@@ -1,0 +1,16 @@
+
+function parent-config-options()
+{
+    echo p:$(get-version)
+}
+
+function parent-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    echo OPTIONS: ${OPTIONS[@]}
+}
