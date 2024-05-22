@@ -40,9 +40,26 @@ function get-caller()
 
         #  Check if last string after dash is a known variant, if so remove
         #  the variant from the name.
-        local N=${CRESULT%-*}/${s##*-}
-        if [[ -z ${SCBI_MODVER[$CRESULT]} ]] && [[ -n ${N} ]]; then
-            CRESULT=${CRESULT%-*}
+
+        local P=${CRESULT%-*}
+        local S=${CRESULT##*-}
+        local N=$P/$S
+
+        local V=${SCBI_MODVER[$P]#*/}
+
+        local HASV=false
+        has-variant "$V" $S || [[ $S == "default" ]] || [[ $S == "common" ]] &&
+            HASV=true
+
+        # The three conditions are:
+        #  1. CRESULT is not a known module
+        #  2. The suffix (after last dash) is not empty
+        #  3. The suffix is a known variant for this module
+        if [[ -z ${SCBI_MODVER[$CRESULT]} ]] &&
+               [[ -n ${S} ]] &&
+               [[ $HASV == true ]]
+        then
+            CRESULT=$P
         fi
     else
         CRESULT=$NAME
