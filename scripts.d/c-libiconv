@@ -81,3 +81,12 @@ function c-libiconv-install()
 
     make install
 }
+
+function c-libiconv-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo NONE
+}
