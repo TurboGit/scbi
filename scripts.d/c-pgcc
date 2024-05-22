@@ -106,8 +106,10 @@ function c-pgcc-cross-config()
     local TARGET=$2
     local VARIANT=$3
 
-    CFLAGS="-O1" ../src/configure  \
-          $(get-config-options $PREFIX $TARGET $VARIANT)
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    CFLAGS="-O1" ../src/configure "${OPTIONS[@]}"
 }
 
 function c-pgcc-build()

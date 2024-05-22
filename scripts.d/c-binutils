@@ -95,7 +95,10 @@ function c-binutils-config()
     local TARGET=$2
     local VARIANT=$3
 
-    ../src/configure $(get-config-options $PREFIX $TARGET $VARIANT)
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    ../src/configure "${OPTIONS[@]}"
 }
 
 function c-binutils-build()

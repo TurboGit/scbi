@@ -31,9 +31,10 @@ function c-python3-modules-install()
     local TARGET=$2
     local VARIANT=$3
 
-    local MODULES_LIST="$(get-config-options $PREFIX $TARGET $VARIANT)"
+    local MODULES_LIST=()
+    get-config-options MODULES_LIST $PREFIX $TARGET $VARIANT
 
-    pip3 install $MODULES_LIST --prefix $PREFIX
+    pip3 install ${MODULES_LIST[@]} --prefix $PREFIX
 }
 
 function c-python3-modules-prefix()
