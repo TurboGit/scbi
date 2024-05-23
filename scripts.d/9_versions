@@ -394,6 +394,8 @@ function handle-plan-auto-variant()
     local variant=${module_info[1]}
     local ref=${module_info[3]}
 
+    [[ $ref == "skip" ]] && return
+
     if [[ $variant =~ ^auto(\.|$) ]]; then
         local PKVER=( $(check-auto-variant $mod $FORMODULE) )
 
