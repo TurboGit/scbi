@@ -1,0 +1,21 @@
+# check for common / default / variant (config & build hooks)
+
+LDIR=.root/builds/s-par-common/build/logs
+
+RUNS ./scbi s-par-common
+
+GREP "CONF-DEF opt-common opt-default opt-std" $LDIR/default-config.log
+
+GREP "BUILD-STD" $LDIR/build.log
+
+RUNS ./scbi s-par-common/var
+
+GREP "CONF-VAR opt-common opt-var" $LDIR/var-config.log
+
+GREP "BUILD-VAR" $LDIR/var-build.log
+
+RUNS ./scbi s-par-common/wxt
+
+GREP "CONF-STD opt-common opt-std" $LDIR/config.log
+
+GREP "BUILD-STD" $LDIR/build.log
