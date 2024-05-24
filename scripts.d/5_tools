@@ -439,7 +439,7 @@ function _internal_for-all-modules()
                 done || return 1
 
                 $CALLBACK $FORMODULE $MODREF $LEVEL \
-                          $DEPENDS_KIND false $IS_META false $@
+                          $DEPENDS_KIND false $IS_META $IS_AGGREGATED $@
 
                 pop-dependency-tree
                 return 0
