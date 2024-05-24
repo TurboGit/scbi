@@ -693,6 +693,7 @@ function get-build-id-callback()
     local DEPENDS_KIND=$4
     local IS_EXT=$5
     local IS_META=$6
+    local IS_AGGREGATED=$7
 
     local module_info=()
     get-module-ref module_info $MODREF $FORMODULE

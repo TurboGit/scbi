@@ -650,6 +650,29 @@ function handle-module-env()
 
     [[ $ref = "skip" ]] && return 0
 
+    #  If a meta module we want the environment of all modules
+
+    is-meta-module $MODREF > /dev/null
+
+    if [[ $? == 0 ]]; then
+        #  For a meta aggregate module the env if the one from
+        #  all aggregated modules but using the aggregate
+        #  install prefix.
+
+        is-meta-aggregate-module $MODREF > /dev/null
+
+        [[ $? == 0 ]] && MODE=aggregate
+
+#        echo MODE $MODREF $MODE >> /tmp/xx
+
+#        for MOD in $(plugin-call-variant-hooks \
+#                         $module modules \
+#                         $SCBI_PREFIX $SCBI_TARGET $variant);
+#        do
+#            handle-module-env $MODREF $MOD env $MODE
+#        done
+    fi
+
     #  Then setup the current module
 
     local TVDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant
@@ -676,7 +699,19 @@ function handle-module-env()
             $module $ENV \
             $SCBI_BDIR/$fmodule/$SCBI_TARGET-$fvariant/install \
             $SCBI_TARGET $variant
+    elif [[ $MODE == aggregate ]]; then
+        for MOD in $(plugin-call-variant-hooks \
+                         $module modules \
+                         $SCBI_PREFIX $SCBI_TARGET $variant);
+        do
+#            echo $MOD >> /tmp/xx
+
+            plugin-call-variant-hooks \
+                $MOD $ENV $TVDIR/install $SCBI_TARGET $variant
+        done
     else
+#        echo $module $ENV $TVDIR/install $SCBI_TARGET $variant >> /tmp/xx
+
         plugin-call-variant-hooks \
             $module $ENV $TVDIR/install $SCBI_TARGET $variant
     fi
@@ -699,41 +734,17 @@ function handle-env-callback()
     #  Nothing to do for aggregated module as the env has already been
     #  set as part of the aggregate module.
 
+#    echo IAGG $MODREF meta:$IS_META agg:$IS_AGGREGATED l:$LEVEL >> /tmp/xx
+
     [[ $IS_AGGREGATED == true ]] && return
-
-    #  If a meta module we want the environment of all modules
-
-    if [[ $IS_META == true ]]; then
-        local module_info=()
-        get-module-ref module_info $MODREF $FORMODULE
-
-        local module=${module_info[0]}
-        local variant=${module_info[1]}
-
-        #  For a meta aggregate module the env if the one from
-        #  all aggregated modules but using the aggregate
-        #  install prefix.
-
-        local MODE=""
-
-        is-meta-aggregate-module $MODREF > /dev/null
-
-        [[ $? == 0 ]] &&
-            local MODE=aggregated
-
-        for MOD in $(plugin-call-variant-hooks \
-                         $module modules \
-                         $SCBI_PREFIX $SCBI_TARGET $variant);
-        do
-            handle-module-env $MODREF $MOD env $MODE
-        done
-    fi
 
     #  Only the environment of the dependencies and not self. The env
     #  hook of a module is only used for clients and not for the module
     #  itself.
 
-    [[ $LEVEL -ge 1 ]] || [[ $DEPENDS_KIND == tests ]] &&
+    [[ $LEVEL -ge 1 ]] ||
+        [[ $DEPENDS_KIND == tests ]] ||
+        is-meta-module $FORMODULE > /dev/null &&
         {
             handle-module-env $FORMODULE $MODREF env
         }
