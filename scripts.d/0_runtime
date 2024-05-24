@@ -353,11 +353,11 @@ function load-module()
         else
             SCBI_LOADED[$key]=meta
 
-            is-hook-true $module $variant aggregate false
+            get-hook FCT $module $variant aggregate
 
-            if [[ $? == 0 ]]; then
-                SCBI_LOADED[${key}.agg]=yes
-            fi
+            [[ -n $FCT ]] &&
+                SCBI_LOADED[${key}.agg]=$($FCT $SCBI_PREFIX \
+                                               $SCBI_TARGET $variant)
         fi
     fi
 
@@ -1075,6 +1075,90 @@ function plugin-call-variant-hooks()
     for H in ${HOOKS[@]}; do
         $H $PREFIX $TARGET $VARIANT $*
     done
+}
+
+############################## plugin-call-env-hooks
+
+function plugin-call-env-hooks()
+{
+    local FORMODULE=$1
+    local MODREF=$2
+    local ENV=$3
+
+    local TVDIR=""
+
+    function do-set-env()
+    {
+        local FORMODULE=$1
+        local MODREF=$2
+        local LEVEL=$3
+        local DEPENDS_KIND=$4
+        local IS_EXT=$5
+        local IS_META=$6
+        local IS_AGGREGATED=$7
+
+        local emodule_info=()
+        get-module-ref emodule_info $MODREF $FORMODULE
+
+        local module=${emodule_info[0]}
+        local variant=${emodule_info[1]}
+
+        plugin-call-variant-hooks \
+            $module $ENV $TVDIR/install $SCBI_TARGET $variant
+    }
+
+    #  Get module information
+
+    local module_info=()
+    get-module-ref module_info $MODREF $FORMODULE
+
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+    local ref=${module_info[3]}
+
+    [[ $ref = "skip" ]] && return 0
+
+    #  If a meta aggregate module we want the environment of all
+    #  aggregated modules.
+
+    local MODE="default"
+
+    is-meta-module $MODREF > /dev/null
+
+    if [[ $? == 0 ]]; then
+        #  For a meta aggregate module the env if the one from
+        #  all aggregated modules but using the aggregate
+        #  install prefix.
+
+        is-meta-aggregate-module MODE $MODREF
+    fi
+
+    #  If a module is aggregated we want its env to point to the
+    #  meta aggregate module.
+
+    #  Then setup the current module
+
+    local TVDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant
+
+    if [[ $MODE == direct ]]; then
+        for MOD in $(plugin-call-variant-hooks \
+                         $module modules \
+                         $SCBI_PREFIX $SCBI_TARGET $variant);
+        do
+            plugin-call-variant-hooks \
+                $MOD $ENV $TVDIR/install $SCBI_TARGET $variant
+        done
+    elif [[ $MODE == recursive ]]; then
+        for MOD in $(plugin-call-variant-hooks \
+                         $module modules \
+                         $SCBI_PREFIX $SCBI_TARGET $variant);
+        do
+            for-all-modules-depends-with-meta do-set-env $MOD
+        done
+    else
+        plugin-call-variant-hooks \
+            $module $ENV $TVDIR/install $SCBI_TARGET $variant
+    fi
 }
 
 ############################## call-variant-hooks

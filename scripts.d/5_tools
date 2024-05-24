@@ -217,7 +217,8 @@ function is-meta-module()
 
 function is-meta-aggregate-module()
 {
-    local MODREF=$1
+    local -n RESULT=$1
+    local MODREF=$2
 
     local module_info=()
     get-module-ref module_info $MODREF
@@ -230,12 +231,12 @@ function is-meta-aggregate-module()
         load-module $MODREF
     fi
 
-    if [[ "${SCBI_LOADED[$key]}" == "yes" ]]; then
-        echo "yes"
-        return 0
-    else
-        echo "no"
+    if [[ -z "${SCBI_LOADED[$key]}" ]]; then
+        RESTUL="no"
         return 1
+    else
+        RESULT=${SCBI_LOADED[$key]}
+        return 0
     fi
 }
 
@@ -335,6 +336,16 @@ function _internal_for-all-modules()
     local IS_AGGREGATED=${10}
     shift 10
 
+    #  IS_AGG        : status of current module MODREF
+    #  IS_AGGREGATED : status of depends in recursive call
+    local IS_AGG=false
+    if [[ $IS_AGGREGATED == recursive ]]; then
+        local IS_AGG=true
+    elif [[ $IS_AGGREGATED == direct ]]; then
+        local IS_AGG=true
+        IS_AGGREGATED=false
+    fi
+
     #  Wether to handle the depends or build-depends or both
 
     local R_DEPS=yes
@@ -423,23 +434,18 @@ function _internal_for-all-modules()
 
                 #  check if aggregate module
 
-                is-meta-aggregate-module $MODREF > /dev/null
-
-                if [[ $? == 0 ]]; then
-                    local IS_AGGREGATE=true
-                else
-                    local IS_AGGREGATE=false
-                fi
+                local AMODE=""
+                is-meta-aggregate-module AMODE $MODREF
 
                 for dmodule in $MODS; do
                     _internal_for-all-modules $CALLBACK $WITH_META $WITH_DEPS \
                                               $WITH_EXT $DEPTH $NXL \
                                               $DEPENDS_KIND $dmodule $module \
-                                              $IS_AGGREGATE $@
+                                              $AMODE $@
                 done || return 1
 
                 $CALLBACK $FORMODULE $MODREF $LEVEL \
-                          $DEPENDS_KIND false $IS_META $IS_AGGREGATED $@
+                          $DEPENDS_KIND false $IS_META $IS_AGG $@
 
                 pop-dependency-tree
                 return 0
@@ -455,7 +461,7 @@ function _internal_for-all-modules()
                         _internal_for-all-modules \
                             $CALLBACK $WITH_META $WITH_DEPS \
                             $WITH_EXT $DEPTH $NEXTL \
-                            default $dmodule $module false $@
+                            default $dmodule $module $IS_AGGREGATED $@
                     done || return 1
                 }
 
@@ -471,7 +477,7 @@ function _internal_for-all-modules()
                         _internal_for-all-modules $CALLBACK $WITH_META $NEXTD \
                                                   $WITH_EXT $DEPTH $NEXTL \
                                                   build $dmodule $module \
-                                                  false $@
+                                                  $IS_AGGREGATED $@
                     done || return 1
                 }
 
@@ -485,12 +491,12 @@ function _internal_for-all-modules()
                         _internal_for-all-modules \
                             $CALLBACK $WITH_META $WITH_DEPS \
                             $WITH_EXT $DEPTH $NEXTL \
-                            tests $dmodule $module false $@
+                            tests $dmodule $module $IS_AGGREGATED $@
                     done || return 1
                 }
 
             $CALLBACK $FORMODULE $MODREF $LEVEL \
-                      $DEPENDS_KIND false $IS_META $IS_AGGREGATED $@
+                      $DEPENDS_KIND false $IS_META $IS_AGG $@
 
             pop-dependency-tree
 
@@ -502,7 +508,7 @@ function _internal_for-all-modules()
                 local PKGNAME=$(get-pkg-name $MODREF)
                 [[ -n $PKGNAME ]] &&
                     $CALLBACK $FORMODULE $PKGNAME $LEVEL \
-                              $DEPENDS_KIND true $IS_META $IS_AGGREGATED $@
+                              $DEPENDS_KIND true $IS_META $IS_AGG $@
             else
                 check-pkg $module:$ref
                 if [[ $? == 1 ]] && [[ $DO_WARNING_EXTERNAL == no ]]; then
