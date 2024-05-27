@@ -637,7 +637,6 @@ function handle-module-env()
     local FORMODULE=$1
     local MODREF=$2
     local ENV=$3
-    local MODE=${4:-default}
 
     #  Get module information
 
@@ -650,36 +649,20 @@ function handle-module-env()
 
     [[ $ref = "skip" ]] && return 0
 
-    #  Then setup the current module
-
     local TVDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant
 
     if [[ -n $SCBI_ENV_MODULE ]]; then
-        echo >> $SCBI_ENV_MODULE
-        echo "# $MODREF" >> $SCBI_ENV_MODULE
+        {
+            echo
+            echo "# $MODREF"
+        } >> $SCBI_ENV_MODULE
+
         SCBI_MODULES_DIR["$module"]="$TVDIR/install"
         SCBI_MODULES_DIR["${module}@src"]="$TVDIR/src"
         SCBI_MODULES_DIR["${module}@build"]="$TVDIR/build"
     fi
 
-    #  If a module is aggregated we want its env to point to the
-    #  meta aggregate module.
-
-    if [[ $MODE == aggregated ]]; then
-        local fmodule_info=()
-        get-module-ref fmodule_info $FORMODULE "@root"
-
-        local fmodule=${fmodule_info[0]}
-        local fvariant=${fmodule_info[1]}
-
-        plugin-call-variant-hooks \
-            $module $ENV \
-            $SCBI_BDIR/$fmodule/$SCBI_TARGET-$fvariant/install \
-            $SCBI_TARGET $variant
-    else
-        plugin-call-variant-hooks \
-            $module $ENV $TVDIR/install $SCBI_TARGET $variant
-    fi
+    plugin-call-env-hooks $FORMODULE $MODREF $ENV
 }
 
 ############################## handle-env
@@ -701,39 +684,13 @@ function handle-env-callback()
 
     [[ $IS_AGGREGATED == true ]] && return
 
-    #  If a meta module we want the environment of all modules
-
-    if [[ $IS_META == true ]]; then
-        local module_info=()
-        get-module-ref module_info $MODREF $FORMODULE
-
-        local module=${module_info[0]}
-        local variant=${module_info[1]}
-
-        #  For a meta aggregate module the env if the one from
-        #  all aggregated modules but using the aggregate
-        #  install prefix.
-
-        local MODE=""
-
-        is-meta-aggregate-module $MODREF > /dev/null
-
-        [[ $? == 0 ]] &&
-            local MODE=aggregated
-
-        for MOD in $(plugin-call-variant-hooks \
-                         $module modules \
-                         $SCBI_PREFIX $SCBI_TARGET $variant);
-        do
-            handle-module-env $MODREF $MOD env $MODE
-        done
-    fi
-
     #  Only the environment of the dependencies and not self. The env
     #  hook of a module is only used for clients and not for the module
     #  itself.
 
-    [[ $LEVEL -ge 1 ]] || [[ $DEPENDS_KIND == tests ]] &&
+    [[ $LEVEL -ge 1 ]] ||
+        [[ $DEPENDS_KIND == tests ]] ||
+        is-meta-module $FORMODULE > /dev/null &&
         {
             handle-module-env $FORMODULE $MODREF env
         }
@@ -1268,8 +1225,8 @@ function handle-meta-module()
     local FCT_WRAPUP=""
     get-hook FCT_WRAPUP $METAMODULE $VARIANT wrapup
 
-    local ISAGG=false
-    is-hook-true $METAMODULE $variant aggregate false && ISAGG=true
+    local FCT_AGG=""
+    get-hook FCT_AGG $METAMODULE $VARIANT aggregate
 
     line-sep
     ilog $METAMODULE %BMetamodule %t$METAMODULE%c \[%g${VARIANT//./ }%c\] setup \
@@ -1284,20 +1241,61 @@ function handle-meta-module()
         {
             rm -f $SCBI_BDIR/$METAMODULE/source-ref
 
+            function do-sync()
+            {
+                local FORMODULE=$1
+                local MODREF=$2
+                local LEVEL=$3
+                local DEPENDS_KIND=$4
+                local IS_EXT=$5
+                local IS_META=$6
+                local IS_AGGREGATED=$7
+
+                local smodule_info=()
+                get-module-ref smodule_info $MODREF $FORMODULE
+
+                local module=${smodule_info[0]}
+                local variant=${smodule_info[1]}
+
+                local IDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
+
+                [[ -d $IDIR ]] &&
+                    {
+                        sync-dir $IDIR \
+                                 $SCBI_BDIR/$METAMODULE/$SCBI_TARGET-$VARIANT/.
+
+                        cat $SCBI_BDIR/$module/source-ref \
+                            >> $SCBI_BDIR/$METAMODULE/source-ref
+                    }
+            }
+
             for module in $(plugin-call-variant-hooks \
                                 $METAMODULE modules \
                                 $SCBI_PREFIX $SCBI_TARGET $VARIANT);
             do
                 handle-module $METAMODULE $module || exit 1
 
-                if [[ $ISAGG == true ]] &&
-                       [[ -d $SCBI_BDIR/$module/build/install ]];
-                then
-                    sync-dir $SCBI_BDIR/$module/build/install \
-                             $SCBI_BDIR/$METAMODULE/$SCBI_TARGET-$VARIANT/.
+                local module_info=()
+                get-module-ref module_info $module $METAMODULE
 
-                    cat $SCBI_BDIR/$module/source-ref \
-                        >> $SCBI_BDIR/$METAMODULE/source-ref
+                local variant=${module_info[1]}
+
+                if [[ -n $FCT_AGG  ]]; then
+                    local AGG_MODE=$($FCT_AGG $SCBI_PREFIX $TARGET $VARIANT)
+                    local IDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
+                    local MDIR=$SCBI_BDIR/$METAMODULE
+
+                    if [[ $AGG_MODE != no ]] && [[ -d $IDIR ]]; then
+                        if [[ $AGG_MODE == recursive ]]; then
+                            for-all-modules-depends-with-meta do-sync $module
+                        else
+                            sync-dir $IDIR \
+                                     $MDIR/$SCBI_TARGET-$VARIANT/.
+
+                            cat $SCBI_BDIR/$module/source-ref \
+                                >> $MDIR/source-ref
+                        fi
+                    fi
                 fi
             done
         }
@@ -1409,7 +1407,9 @@ function handle-module()
 
     #  Check if meta-module, if so call handle-module for each one
 
-    if [[ $(is-meta-module $MODREF) == "yes" ]]; then
+    is-meta-module $MODREF > /dev/null
+
+    if [[ $? == 0 ]]; then
         (
             handle-meta-module $module $variant
         )

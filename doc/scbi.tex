@@ -1099,15 +1099,17 @@ A module defining the hook \code{modules} (possibly with variants) becomes a met
 					\item echo <module2>
 		\end{enumerate}
 	\end{description}
+
 	\item[<module>{[}-<variant>{]}-propagate-version] \index{hook!propagate-version}\label{propagate-version}Whether the meta-module version is to be propagated to aggregated modules. Default is \code{true}.
 		\begin{description}[font=\textit,style=standard]
 			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 			\item[return] \tabto{2cm} \code{\textbf{true} | false}
 		\end{description}
-	\item[<module>{[}-<variant>{]}-aggregate] \index{hook!aggregate}\label{aggregate}If set to \code{true} the meta-module becomes an aggregate meta-module. In this case artifacts of all modules listed in \code{modules} hook are copied into the aggregate meta-module and the environment of all aggregated modules is pointing to the aggregate module. With this option it is possible to group into a single place the artifacts of multiple modules. Default is \code{false}.
+
+	\item[<module>{[}-<variant>{]}-aggregate] \index{hook!aggregate}\label{aggregate}If set to \code{direct} or \code{recursive} the meta-module becomes an aggregate meta-module. In this case artifacts of all modules listed in \code{modules} hook are copied into the aggregate meta-module and the environment of all aggregated modules is pointing to the aggregate module. With this option it is possible to group into a single place the artifacts of multiple modules. When \code{direct} is used only the modules listed in the \code{modules} hook are aggregated, if \code{recursive} is used all dependencies are also aggregated. Default is \code{false}.
 	\begin{description}[font=\textit,style=standard]
 	\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
-	\item[return] \tabto{2cm} \code{true | \textbf{false}}
+	\item[return] \tabto{2cm} \code{direct | recursive | \textbf{false}}
 	\end{description}
 \end{description}
 

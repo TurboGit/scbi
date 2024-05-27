@@ -8,5 +8,5 @@ function metaagg-modules()
 
 function metaagg-aggregate()
 {
-    echo yes
+    echo direct
 }

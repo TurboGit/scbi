@@ -1,0 +1,11 @@
+# This is an aggregate meta module
+
+function metaagg4-modules()
+{
+    echo mainlib
+}
+
+function metaagg4-aggregate()
+{
+    echo recursive
+}

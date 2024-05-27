@@ -7,5 +7,5 @@ function metaagg3-modules()
 
 function metaagg3-agg-aggregate()
 {
-    echo true
+    echo direct
 }
