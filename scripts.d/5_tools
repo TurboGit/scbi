@@ -214,7 +214,7 @@ function is-meta-module()
 
 ############################## is-meta-aggregate-module
 #
-# return yes/0 if MODREF is a meta-module
+# return direct or recursive/0 if MODREF is a meta-module aggregate module
 
 function is-meta-aggregate-module()
 {
@@ -233,7 +233,7 @@ function is-meta-aggregate-module()
     fi
 
     if [[ -z "${SCBI_LOADED[$key]}" ]]; then
-        RESTUL="no"
+        RESTUL="false"
         return 1
     else
         RESULT=${SCBI_LOADED[$key]}
