@@ -677,8 +677,6 @@ function with-variant()
         local SCBI_HOOKS+=(default-cross-$H)
     done
 
-    local H=""
-
     for hook in ${SCBI_HOOKS[*]}; do
         H="function $PLUGIN-$VNAME-$hook()"
         H+="{ true; }"
@@ -703,7 +701,7 @@ function with-variant()
     local P="echo "
     while [[ -n "$1" ]]; do
         if [[ "$1" == "--env" ]]; then
-            H="$H true; }"
+            H+=" true; }"
             eval $H
             H="function $PLUGIN-$VNAME-env() { "
             P=""
@@ -711,14 +709,14 @@ function with-variant()
             mod=$1
 
             if [[ "${mod^^}" == "NONE" ]]; then
-                H="$H $P;"
+                H+=" $P;"
             else
-                H="$H $P$mod;"
+                H+=" $P$mod;"
             fi
         fi
         shift
     done
-    H="$H true; }"
+    H+=" true; }"
     eval $H
 }
 

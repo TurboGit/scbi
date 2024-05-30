@@ -365,9 +365,9 @@ function handle-plan-meta-module()
                     mref=/$s_variant
 
                 if [[ $s_ref == NONE ]]; then
-                    mref=$mref:$ref
+                    mref+=":$ref"
                 else
-                    mref=$mref:$s_ref
+                    mref+=":$s_ref"
                 fi
             fi
 

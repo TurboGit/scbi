@@ -806,7 +806,7 @@ function get-build-id()
                                         $PREFIX $TARGET $variant \
                                         $kind $ref);
         do
-            pid="$pid,$(get-patch-md5 $patch)"
+            pid+=",$(get-patch-md5 $patch)"
         done
     fi
 
