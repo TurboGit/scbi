@@ -131,17 +131,17 @@ function shl-run-command()
     shl-setup-env $MODREF "${MODULES[*]}" $DOCD
 
     if [[ -z $CMD ]]; then
-        local PREFIX=$SCBI_BDIR/$module/$TARGET-$variant/install
+        local PREFIX=$SCBI_BDIR/${SHL_MODULE}/$TARGET-${SHL_VARIANT}/install
         # CMD is not specified, try using the one defined in
         # the plug-in itself.
-        for C in $(plugin-call-variant-hooks $module run \
-                                             $PREFIX $TARGET $variant);
+        for C in $(plugin-call-variant-hooks ${SHL_MODULE} run \
+                                             $PREFIX $TARGET ${SHL_VARIANT});
         do
             CMD+="$C "
         done
 
         if [[ -z $CMD ]]; then
-            elog $module no command specified for run option
+            elog ${SHL_MODULE} no command specified for run option
         fi
     fi
 
