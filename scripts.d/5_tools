@@ -180,7 +180,8 @@ function display-file()
 
 function get-md5()
 {
-    md5sum | cut -d' ' -f1
+    local V=( $(md5sum) )
+    echo ${V[0]}
 }
 
 ############################## is-meta-module
