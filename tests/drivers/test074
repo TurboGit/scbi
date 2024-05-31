@@ -17,7 +17,7 @@ xxxx/xx/xx xx:xx:xx : skip global install
 xxxx/xx/xx xx:xx:xx : End Building mautov [native] ($GVER)
 EOF
 
-GREP "mautov native $GVER" $REP/source-ref
+GREP "mautov none native revision $GVER" $REP/source-ref
 
 RUNS ./scbi mautov/auto:99.99.09
 

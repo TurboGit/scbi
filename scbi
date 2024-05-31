@@ -972,7 +972,7 @@ function handle-sources()
     [[ "$variant" = "native" ]] &&
         {
             echo -n "native-$ref" > source-id
-            echo "$module native $ref" > source-ref
+            echo "$module none native revision $ref" > source-ref
             return 0;
         }
 
@@ -1186,7 +1186,7 @@ function handle-sources()
     [[ $HASSRC == no ]] &&
         {
             echo -n "none-$ref" > source-id
-            echo $module $variant $ref >> source-ref
+            echo $module none $variant revision $ref >> source-ref
 
             #  No VCS, no TAR, just rebuild the sources if present
             if [[ ! -d src ]]; then
