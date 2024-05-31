@@ -9,6 +9,7 @@ natv-native-archive ()
     echo NONE;
     echo NONE;
     echo NONE;
+    echo NONE;
     echo NONE
 }
 natv-native-build is a function

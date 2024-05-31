@@ -683,13 +683,14 @@ function with-variant()
     done
 
     #  Hooks with NONE body
-    local SCBI_HOOKS=( vcs archive )
 
-    for hook in ${SCBI_HOOKS[*]}; do
-        H="function $PLUGIN-$VNAME-$hook()"
-        H+="{ echo NONE; echo NONE; echo NONE; echo NONE; }"
-        eval $H
-    done
+    H="function $PLUGIN-$VNAME-vcs()"
+    H+="{ echo NONE; echo NONE; echo NONE; echo NONE; }"
+    eval $H
+
+    H="function $PLUGIN-$VNAME-archive()"
+    H+="{ echo NONE; echo NONE; echo NONE; echo NONE; echo NONE; }"
+    eval $H
 
     #  Hook prefix
     H="function $PLUGIN-$VNAME-prefix() { echo NONE; }"
