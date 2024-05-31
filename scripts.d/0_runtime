@@ -387,17 +387,15 @@ function _inherit-plugin_internal()
     #  For each known & existing hook name, create a wrapper with the
     #  name of the caller plug-in.
 
-    local REGEXP="$HPLUGIN-.*($SCBI_HOOKS)"
+    local REGEXP="$SCBI_HOOKS"
 
     [[ $NOVARIANT == yes ]] &&
         REGEXP="$HPLUGIN(-pre|-post|-cross)*-($SCBI_HOOKS)"
 
-    for hook in $(declare -F \
-                      | cut -d' ' -f3 \
-                      | grep -E $REGEXP);
-    do
-        copy-function $hook ${hook/$HPLUGIN/$PLUGIN}
-    done
+    while read hook; do
+        [[ $hook =~ $REGEXP ]] &&
+            copy-function $hook ${hook/$HPLUGIN/$PLUGIN}
+    done < <( compgen -A function "$HPLUGIN-" )
 }
 
 function inherit-plugin()
@@ -409,7 +407,7 @@ function inherit-plugin()
     #  Get the caller plug-in name, this is called when sourcing a plug-in
     #  we need to use Bash caller here and not get-caller.
     local CALLER=( $(caller) )
-    local PLUGIN=$(basename ${CALLER[1]})
+    local PLUGIN=${CALLER[1]##*/}
 
     local options=$(getopt -l no-variant,hooks: -- dummy $*)
 
@@ -639,7 +637,8 @@ function with-variant()
 
     #  Get the caller plug-in name, this is called when sourcing a plug-in
     #  we need to use Bash caller here and not get-caller.
-    local PLUGIN=$(basename $(caller | cut -d' ' -f2))
+    local CALLER=( $(caller) )
+    local PLUGIN=${CALLER[1]##*/}
 
     local module_info=()
     get-module-ref module_info $PLUGIN

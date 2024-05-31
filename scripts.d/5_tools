@@ -1171,7 +1171,7 @@ function display-modules()
     local linelen=0
 
     for module in $SCBI_PLUGINS/[^0-9_]*; do
-        bn=$(basename $module)
+        bn=${module##*/}
         linelen=$((linelen + ${#bn} + 1))
         if [[ $linelen -gt 70 ]]; then
             echo
@@ -1195,7 +1195,7 @@ function display-plans()
         echo " none"
     else
         for module in $SCBI_PLUGINS/.plan-*; do
-            bn=$(basename $module)
+            bn=${module##*/}
             linelen=$((linelen + ${#bn} + 1))
             if [[ $linelen -gt 70 ]]; then
                 echo
@@ -1255,11 +1255,11 @@ function copy-module-src-callback()
             #  two modules may share the same VCS or archive
             if [[ -h $SCBI_BDIR/$module/archive ]]; then
                 FILE=$(readlink -f $SCBI_BDIR/$module/archive)
-                [[ ! -f $DEST/.archives/$(basename $FILE) ]] &&
+                [[ ! -f $DEST/.archives/${FILE##*/} ]] &&
                     cp -p $FILE $DEST/builds/.archives
             elif [[ -h $SCBI_BDIR/$module/vcs ]]; then
                 DIR=$(readlink -f $SCBI_BDIR/$module/vcs)
-                [[ ! -d $DEST/.vcs/$(basename $DIR) ]] &&
+                [[ ! -d $DEST/.vcs/${DIR##*/} ]] &&
                     cp -rp $DIR $DEST/builds/.vcs/
             fi
         else
@@ -1286,7 +1286,7 @@ function copy-module-src-callback()
                         elif [[ -f "$SCBI_PLUGINS/patches/$PATCH_FILE" ]]; then
                             patch="$SCBI_PLUGINS/patches/$PATCH_FILE"
                         else
-                            elog $module patch filename $(basename $PATCH_FILE) not found
+                            elog $module patch filename ${PATCH_FILE##*/} not found
                             return 1
                         fi
 
@@ -1312,7 +1312,7 @@ function copy-module-src-callback()
 function create-standalone-package()
 {
     local STANDALONE_TMP=${SCBI_TMP:-/tmp}
-    local STANDALONE=$STANDALONE_TMP/sa-$(basename $SCBI_BDIR)
+    local STANDALONE=$STANDALONE_TMP/sa-${SCBI_BDIR##*/}
 
     rm -fr $STANDALONE
 
@@ -1372,7 +1372,7 @@ function create-standalone-package()
     )
 
     cd $STANDALONE_TMP
-    tar cfz $STANDALONE.tgz $(basename $STANDALONE) 2> /dev/null
+    tar cfz $STANDALONE.tgz ${STANDALONE##*/} 2> /dev/null
     rm -fr $STANDALONE
 
     ilog standalone End create source archive
@@ -1492,7 +1492,7 @@ function module-clean-install()
                 rmdir --ignore-fail-on-non-empty --parents \
                       ${_IDIR}/$dir > /dev/null 2>&1 ;
             done &&
-                if [[ $(basename $MPREFIX) = "install" ]] \
+                if [[ ${MPREFIX##*/} = "install" ]] \
                        && [[ $(basename $(dirname $MPREFIX)) = "$module" ]];
                 then
                     cd $MPREFIX && rm -fr .

@@ -19,7 +19,7 @@ function svn-co()
     local NAME=$4
     local DIR=$5
 
-    local REPO=${DIR:-$(basename $URL)}
+    local REPO=${DIR:-${URL##*/}}
 
     (
         set-proxy $PROXY
@@ -98,7 +98,7 @@ function hg-co()
     local NAME=$4
     local DIR=$5
 
-    local REPO=${DIR:-$(basename $URL)}
+    local REPO=${DIR:-${URL##*/}}
 
     (
         set-proxy $PROXY
