@@ -52,8 +52,18 @@ natv-native-common-cross-env ()
 {
     true
 }
+natv-native-common-cross-patches is a function
+natv-native-common-cross-patches ()
+{
+    true
+}
 natv-native-common-env is a function
 natv-native-common-env ()
+{
+    true
+}
+natv-native-common-patches is a function
+natv-native-common-patches ()
 {
     true
 }
@@ -89,6 +99,11 @@ natv-native-cross-env ()
 }
 natv-native-cross-install is a function
 natv-native-cross-install ()
+{
+    true
+}
+natv-native-cross-patches is a function
+natv-native-cross-patches ()
 {
     true
 }
@@ -147,8 +162,18 @@ natv-native-default-cross-env ()
 {
     true
 }
+natv-native-default-cross-patches is a function
+natv-native-default-cross-patches ()
+{
+    true
+}
 natv-native-default-env is a function
 natv-native-default-env ()
+{
+    true
+}
+natv-native-default-patches is a function
+natv-native-default-patches ()
 {
     true
 }
@@ -167,6 +192,11 @@ natv-native-env ()
 }
 natv-native-install is a function
 natv-native-install ()
+{
+    true
+}
+natv-native-patches is a function
+natv-native-patches ()
 {
     true
 }

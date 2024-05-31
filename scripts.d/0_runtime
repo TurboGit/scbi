@@ -667,7 +667,7 @@ function with-variant()
     #  Hooks with nop body & pre/post
     local SCBI_HOOKS=()
 
-    for H in env build-env build-depends; do
+    for H in env build-env build-depends patches; do
         local SCBI_HOOKS+=($H)
         local SCBI_HOOKS+=(common-$H)
         local SCBI_HOOKS+=(default-$H)
