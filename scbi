@@ -987,6 +987,8 @@ function handle-sources()
         [[ $? == 0 ]] && kind=VERSION
     fi
 
+    local HASSRC=yes
+
     #  If building from archive, extract it now
 
     if [[ $kind == VERSION ]]; then
@@ -1012,54 +1014,57 @@ function handle-sources()
 
         tarsrc=${tar[5]}
 
+        [[ ${tarsrc^^} == NONE ]] && HASSRC=no
+
         #  We need to extract the archive if the version does not match
         #  the one currently extracted.
 
         if [[ -f source-id ]]; then
             if [[ "$(cat source-id)" != "archive-$ref" ]] ||
-                   [[ ${tarsrc^^} = "NONE" ]];
+                   [[ $HASSRC == no ]];
             then
                 rm -fr archive-src
             fi
         fi
 
-        if [[ $DO_UPDATE = yes ]] || [[ ! -d archive-src ]] || [[ ! -f archive ]]; then
-            V=${tar[0]#default}
-            ilog $module get sources from archive ${V:+[$V]}
+        if [[ $HASSRC == yes ]]; then
+            if [[ $DO_UPDATE = yes ]] || [[ ! -d archive-src ]] || [[ ! -f archive ]]; then
+                V=${tar[0]#default}
+                ilog $module get sources from archive ${V:+[$V]}
 
-            get-archive $module $variant $ref >> $log 2>&1
+                get-archive $module $variant $ref >> $log 2>&1
 
-            if [[ $? != 0 ]]; then
-                #  In case of error display log from get-archive
-                grep ' : ' $log
-                ilog $module cannot get/find archive sources
-                exit 1
+                if [[ $? != 0 ]]; then
+                    #  In case of error display log from get-archive
+                    grep ' : ' $log
+                    ilog $module cannot get/find archive sources
+                    exit 1
+                fi
             fi
+
+            echo -n "archive-$ref" > source-id
+
+            #  Compute and store the version id of the sources. This includes the
+            #  tar sha1 if present to ensure a tar with the same name but different
+            #  content will trigger a build.
+
+            local archive_sha1=""
+            [[ -e archive-sha1 ]] &&
+                {
+                    archive_sha1=$(cat archive-sha1)
+                    echo "$module archive $ref sha-1 ${archive_sha1// */}" \
+                         > source-ref
+                }
+
+            get-build-id $SCBI_PREFIX $SCBI_TARGET \
+                         $FORMODULE $MODREF archive-$ref$archive_sha1 \
+                         > build-id-$variant
+
+            #  We set the link for the source so that no module will have to
+            #  do it.
+
+            ln -s archive-src src
         fi
-
-        echo -n "archive-$ref" > source-id
-
-        #  Compute and store the version id of the sources. This includes the
-        #  tar sha1 if present to ensure a tar with the same name but different
-        #  content will trigger a build.
-
-        local archive_sha1=""
-        [[ -e archive-sha1 ]] &&
-            {
-                archive_sha1=$(cat archive-sha1)
-                echo "$module archive $ref sha-1 ${archive_sha1// */}" \
-                     > source-ref
-            }
-
-        get-build-id $SCBI_PREFIX $SCBI_TARGET \
-                     $FORMODULE $MODREF archive-$ref$archive_sha1 \
-                     > build-id-$variant
-
-        #  We set the link for the source so that no module will have to
-        #  do it.
-
-        ln -s archive-src src
-
     else
         #  Get sources from repository
 
@@ -1171,6 +1176,15 @@ function handle-sources()
             return 0
 
         else
+            HASSRC=no
+        fi
+
+        #  If get-vcs is not defined then the $module-setup routine is in
+        #  charge of creating/populating the src directory.
+    fi
+
+    [[ $HASSRC == no ]] &&
+        {
             echo -n "none-$ref" > source-id
             echo $module $variant $ref >> source-ref
 
@@ -1186,11 +1200,7 @@ function handle-sources()
                              $FORMODULE $MODREF "$(date)" \
                              > build-id-$variant
             fi
-        fi
-
-        #  If get-vcs is not defined then the $module-setup routine is in
-        #  charge of creating/populating the src directory.
-    fi
+        } || true
 }
 
 ############################## handle-meta-module
