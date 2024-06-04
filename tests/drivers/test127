@@ -1,0 +1,53 @@
+
+RUNS ./scbi show --plan=meta-meta-2 --build-plan meta-meta:v1
+
+clean-up-osht-output
+sort-osht-output
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+depA/toto:v9
+dmod/x:v9
+meta-meta:v1
+oot:v9
+EOF
+
+RUNS ./scbi show --plan=meta-meta-2 --build-plan dmod/cl:123 meta-meta/variant:v1
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+oot:123
+depA/toto:123
+dmod/cl:123
+meta-meta/variant:v1
+EOF
+
+RUNS ./scbi show --plan=meta-meta-2 --build-plan dmod/variant.cl:123 meta-meta/variant:v1
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+oot/variant.cl
+depA/toto
+dmod/variant.cl:123
+meta-meta/variant:v1
+EOF
+
+RUNS ./scbi show --plan=meta-meta-2 --build-plan dmod/both.cl:123 meta-meta/both:v1
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+oot/both.cl:123
+depA/toto:123
+dmod/both.cl:123
+meta-meta/both:v1
+EOF
+
+RUNS ./scbi show --plan=meta-meta --build-plan meta-meta/both:v2
+
+DIFF <<EOF
+There is 4 module(s) in the plan
+oot/both:v2
+depA/both:v2
+dmod/both:v2
+meta-meta/both:v2
+EOF

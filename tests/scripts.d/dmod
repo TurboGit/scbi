@@ -4,3 +4,18 @@ function dmod-modules()
     echo depA
     echo oot
 }
+
+function dmod-none-propagate-version()
+{
+    echo false
+}
+
+function dmod-variant-propagate-version()
+{
+    echo variant
+}
+
+function dmod-both-propagate-version()
+{
+    echo both
+}

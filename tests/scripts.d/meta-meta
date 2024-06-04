@@ -3,3 +3,23 @@ function meta-meta-modules()
 {
     echo dmod
 }
+
+function meta-meta-none-propagate-version()
+{
+    echo false
+}
+
+function meta-meta-version-propagate-version()
+{
+    echo version
+}
+
+function meta-meta-variant-propagate-version()
+{
+    echo variant
+}
+
+function meta-meta-both-propagate-version()
+{
+    echo both
+}

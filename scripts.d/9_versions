@@ -345,7 +345,14 @@ function handle-plan-meta-module()
     then
         source $SCBI_PLUGINS/$module
 
-        is-hook-true $module $variant propagate-version TRUE || return
+        get-hook FCT $module $variant propagate-version
+
+        if [[ -z $FCT ]]; then
+            PROPAGATE_MODE=version
+        else
+            PROPAGATE_MODE=$($FCT $SCBI_PREFIX $SCBI_TARGET $variant)
+            [[ ${PROPAGATE_MODE} == false ]] && return
+        fi
 
         for mod in $(plugin-call-variant-hooks \
                          $module modules $SCBI_PREFIX $SCBI_TARGET $variant);
@@ -353,7 +360,17 @@ function handle-plan-meta-module()
             local mref=""
 
             if [[ -z ${SCBI_MODVER[$mod]} ]]; then
-                mref=:$ref
+                if [[ $variant != default ]] &&
+                       ( [[ ${PROPAGATE_MODE} == both ]] ||
+                             [[ ${PROPAGATE_MODE} == variant ]] );
+                then
+                    mref="/$variant"
+                fi
+                if [[ ${PROPAGATE_MODE} == both ]] ||
+                       [[ ${PROPAGATE_MODE} == version ]];
+                then
+                    mref+=":$ref"
+                fi
             else
                 local s=${SCBI_MODVER[$mod]}
                 local s_minfo=( $() )
@@ -361,13 +378,22 @@ function handle-plan-meta-module()
                 local s_variant=${s_minfo[1]}
                 local s_ref=${s_minfo[3]}
 
-                [[ $s_variant != default ]] &&
-                    mref=/$s_variant
+                if [[ $s_variant != default ]]; then
+                    mref="/$s_variant"
+                elif [[ ${PROPAGATE_MODE} == both ]] ||
+                         [[ ${PROPAGATE_MODE} == variant ]];
+                then
+                    [[ $variant != default ]] &&
+                        mref="/$variant"
+                fi
 
-                if [[ $s_ref == NONE ]]; then
-                    mref+=":$ref"
-                else
+                if [[ $s_ref != NONE ]]; then
                     mref+=":$s_ref"
+                elif [[ ${PROPAGATE_MODE} == both ]] ||
+                         [[ ${PROPAGATE_MODE} == version ]];
+                then
+                    [[ $s_ref == NONE ]] &&
+                        mref+=":$ref"
                 fi
             fi
 
