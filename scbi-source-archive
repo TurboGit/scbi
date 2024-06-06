@@ -52,6 +52,9 @@ function sar-handle-module()
         if [[ $variant == native ]]; then
             variant="default"
             MODREF=$module:$ref
+            #  Force reference to be able to get the vcs from
+            #  the default variant.
+            SCBI_MODVER=([$module]=$MODREF)
         fi
 
         mkdir -p $module
