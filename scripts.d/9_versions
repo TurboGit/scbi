@@ -699,8 +699,10 @@ function check-auto-variant()
                     #  to v (for example libtbb:[v]) we want this dependency
                     #  to be checking the module's version requested.
 
+                    local MMOD=""
+
                     if [[ ${dmodule#*:} == "[v]" ]]; then
-                        echo v
+                        MMOD="v"
                         dmodule=${dmodule%:*}
 
                         local module_info=()
@@ -711,12 +713,14 @@ function check-auto-variant()
                             dmodule=${dmodule}:$ref
                         fi
                     else
-                        echo n
+                        MMOD="n"
                     fi
 
                     # 5 items per line: v status module-version package-version package-name
                     # v = v | n (v means that it comes from an inherited version :[v]
-                    check-pkg-status $dmodule
+                    local PSTATS=( $(check-pkg-status $dmodule) )
+                    [[ -n $PSTATS ]] &&
+                        echo $MMOD ${PSTATS[*]}
                 fi
             done
         )
