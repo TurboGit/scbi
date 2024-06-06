@@ -39,7 +39,7 @@ function sar-handle-module()
         cd $WORKDIR
 
         local module_info=()
-        get-module-ref module_info $MODREF "root"
+        get-module-ref module_info $MODREF "@root"
         local module=${module_info[0]}
         local variant=${module_info[1]}
         local kind=${module_info[2]}
@@ -47,6 +47,11 @@ function sar-handle-module()
 
         if [[ $ref == NONE ]]; then
             ref=master
+        fi
+
+        if [[ $variant == native ]]; then
+            variant="default"
+            MODREF=$module:$ref
         fi
 
         mkdir -p $module

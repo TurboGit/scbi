@@ -428,19 +428,32 @@ function handle-plan-auto-variant()
         local cnt=${#PKVER[*]}
         local gstatus=$SCBI_STATUS_VERSION_OK
         local gosver=0
+        local gosverv=0
+        local gosvern=0
 
         local last=$(( cnt - 1 ))
 
-        for k in $(seq 0 4 $last); do
-            local status=${PKVER[$k]}
-            local osver=${PKVER[(( $k + 2 ))]}
+        for k in $(seq 0 5 $last); do
+            local v=${PKVER[$k]}
+            local status=${PKVER[(( k + 1))]}
+            local osver=${PKVER[(( k + 3 ))]}
             gstatus=$status
             if [[ $status != $SCBI_STATUS_VERSION_OK ]]; then
                 break
+            elif [[ $v == v ]]; then
+                gosverv=$osver
             else
-                gosver=$osver
+                gosvern=$osver
             fi
         done
+
+        #  Gives priority to module with a :[v] version as this is specified
+        #  as a module inheritance.
+        if [[ $gosverv != 0 ]]; then
+            gosver=$gosverv
+        else
+            gosver=$gosvern
+        fi
 
         SCBI_AUTO_FILE=$(mktemp -p /dev/shm)
 
@@ -476,11 +489,11 @@ function handle-plan-auto-variant()
 
             #  The explanation of the choice above
 
-            for k in $(seq 0 4 $last); do
-                local status=${PKVER[$k]}
-                local mver=${PKVER[(($k + 1))]}
-                local osver=${PKVER[(( $k + 2 ))]}
-                local pkg=${PKVER[(( $k + 3 ))]}
+            for k in $(seq 0 5 $last); do
+                local status=${PKVER[(( k + 1 ))]}
+                local mver=${PKVER[(( k + 2 ))]}
+                local osver=${PKVER[(( k + 3 ))]}
+                local pkg=${PKVER[(( k + 4 ))]}
 
                 if [[ $status == $SCBI_STATUS_PKG_NOT_INSTALLED ]]; then
                     if [[ $osver == 0 ]]; then
@@ -672,6 +685,7 @@ function check-auto-variant()
 
             if [[ $? != 0 ]]; then
                 #  Fatal error, stop now
+                echo n
                 echo $SCBI_ERROR_HOOK_NOT_FOUND
                 echo 0
                 echo 0
@@ -686,6 +700,7 @@ function check-auto-variant()
                     #  to be checking the module's version requested.
 
                     if [[ ${dmodule#*:} == "[v]" ]]; then
+                        echo v
                         dmodule=${dmodule%:*}
 
                         local module_info=()
@@ -695,9 +710,12 @@ function check-auto-variant()
                         if [[ $ref != NONE ]]; then
                             dmodule=${dmodule}:$ref
                         fi
+                    else
+                        echo n
                     fi
 
-                    # 4 items per line: status module-version package-version package-name
+                    # 5 items per line: v status module-version package-version package-name
+                    # v = v | n (v means that it comes from an inherited version :[v]
                     check-pkg-status $dmodule
                 fi
             done
@@ -706,6 +724,7 @@ function check-auto-variant()
     else
         #  No module definition, cannot have a native variant, error will
         #  be reported upward.
+        echo n
         echo $SCBI_ERROR_PLUGIN_NOT_FOUND
         echo 0
         echo 0
