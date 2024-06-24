@@ -1434,7 +1434,7 @@ function handle-module()
         #  First we check for build dependencies
         (
             for dmodule in $(get-all-depends $module $variant build-depends); do
-                handle-depends $MODREF $dmodule
+                handle-depends $MODREF $dmodule || exit 1
             done
         )
         [[ $? != 0 ]] && exit 1
@@ -1444,7 +1444,7 @@ function handle-module()
         #  And then we check for standard dependencies
         (
             for dmodule in $(get-all-depends $module $variant depends); do
-                handle-depends $MODREF $dmodule
+                handle-depends $MODREF $dmodule || exit 1
             done
         )
         [[ $? != 0 ]] && exit 1
@@ -1458,7 +1458,7 @@ function handle-module()
                     for dmodule in \
                         $(get-all-depends $module $variant tests-depends);
                     do
-                        handle-depends $MODREF $dmodule
+                        handle-depends $MODREF $dmodule || exit 1
                     done
                 )
                 [[ $? != 0 ]] && exit 1
