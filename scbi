@@ -940,7 +940,7 @@ function handle-depends()
                 false
                 return 0
             else
-                exit 1
+                return 1
             fi
 
         fi
