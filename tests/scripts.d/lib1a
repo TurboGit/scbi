@@ -1,0 +1,98 @@
+
+with-variant native @os-gcc:99999
+
+function lib1a-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function lib1a-archive()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo none
+    echo none
+    echo lib1-v1.2-src.tar.bz2
+}
+
+function lib1a-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo lib1a-0-fix.patch
+}
+
+function lib1a-variant-no-patch-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo
+}
+
+function lib1a-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    set-var C_INCLUDE_PATH  $PWD/include:$C_INCLUDE_PATH
+    set-var LIBRARY_PATH    .:$PWD/lib:$LIBRARY_PATH
+    set-var LD_LIBRARY_PATH .:$PWD/lib:$LD_LIBRARY_PATH
+}
+
+function lib1a-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var C_INCLUDE_PATH  $PREFIX/include
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib
+    add-to-var LIBRARY_PATH    $PREFIX/lib
+}
+
+function lib1a-out-of-tree()
+{
+    echo false
+}
+
+function lib1a-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f *.o
+    make
+}
+
+function lib1a-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $PREFIX/include
+    mkdir -p $PREFIX/lib
+    cp liblib1.so $PREFIX/lib
+    cp lib1.h $PREFIX/include
+}
+
+function lib1a-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./main
+
+    if [[ -f main ]]; then
+        return 0
+    else
+        return 1
+    fi
+}

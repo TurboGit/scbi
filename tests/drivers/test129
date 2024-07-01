@@ -1,0 +1,24 @@
+
+RUNS ./scbi --no-patch --plan=metaprop meta-propa-ver
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : lib1a using standard variant
+xxxx/xx/xx xx:xx:xx :   ↳ unknown dependency @os-gcc
+
+xxxx/xx/xx xx:xx:xx : Metamodule meta-propa-ver [default] setup
+xxxx/xx/xx xx:xx:xx : End metamodule meta-propa-ver [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1a [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from archive
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1a [default] (v1)
+
+xxxx/xx/xx xx:xx:xx : Metamodule meta-propa-ver [default] wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule meta-propa-ver [default] wrapup
+EOF

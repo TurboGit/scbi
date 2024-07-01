@@ -337,6 +337,7 @@ function handle-plan-meta-module()
 
     local module=${module_info[0]}
     local variant=${module_info[1]}
+    local kind=${module_info[2]}
     local ref=${module_info[3]}
 
     if [[ $ref != master ]] &&
@@ -366,14 +367,19 @@ function handle-plan-meta-module()
                 then
                     mref="/$variant"
                 fi
+
                 if [[ ${PROPAGATE_MODE} == both ]] ||
                        [[ ${PROPAGATE_MODE} == version ]];
                 then
-                    mref+=":$ref"
+                    if [[ $kind == VERSION ]]; then
+                        mref+=":#$ref"
+                    else
+                        mref+=":$ref"
+                    fi
                 fi
             else
                 local s=${SCBI_MODVER[$mod]}
-                local s_minfo=( $() )
+                local s_minfo=()
                 get-module-ref s_minfo $s $module
                 local s_variant=${s_minfo[1]}
                 local s_ref=${s_minfo[3]}
@@ -393,7 +399,11 @@ function handle-plan-meta-module()
                          [[ ${PROPAGATE_MODE} == version ]];
                 then
                     [[ $s_ref == NONE ]] &&
-                        mref+=":$ref"
+                        if [[ $kind == VERSION ]]; then
+                            mref+=":#$ref"
+                        else
+                            mref+=":$ref"
+                        fi
                 fi
             fi
 
