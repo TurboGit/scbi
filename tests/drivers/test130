@@ -1,0 +1,103 @@
+#  Check that changing an inherited plugin do force the recompilation
+
+#  First build
+
+RUNS ./scbi child
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building child [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building child [default] (n/a)
+EOF
+
+#  Should not build again
+
+RUNS ./scbi child
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building child [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building child [default] (n/a)
+EOF
+
+#  Change parent, should rebuild
+
+sed -i 's/OPTIONS/OOOPTIONS/g' scripts.d/parent
+
+RUNS ./scbi child
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building child [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building child [default] (n/a)
+EOF
+
+#  Should not build again
+
+RUNS ./scbi child
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building child [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building child [default] (n/a)
+EOF
+
+#  Change grandparent, should rebuild
+
+sed -i 's/REPLACEME/REPLACED/g' scripts.d/grandparent
+
+RUNS ./scbi child
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building child [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building child [default] (n/a)
+EOF
+
+#  Should not build again
+
+RUNS ./scbi child
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building child [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : End Building child [default] (n/a)
+EOF
+
+#  Back to initial version, should rebuild
+
+sed -i 's/REPLACED/REPLACEME/g' scripts.d/grandparent
+sed -i 's/OOOPTIONS/OPTIONS/g' scripts.d/parent
+
+RUNS ./scbi child
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building child [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building child [default] (n/a)
+EOF

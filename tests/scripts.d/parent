@@ -1,4 +1,6 @@
 
+inherit-plugin grandparent
+
 function parent-config-options()
 {
     echo p:$(get-version)

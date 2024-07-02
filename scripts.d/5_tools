@@ -778,9 +778,24 @@ function get-build-id()
     #  will get differentiated.
 
     local mid=$variant:$ref
+    local hid=""
 
     [[ -f $SCBI_PLUGINS/$module ]] &&
         mid+=",$(cat $SCBI_PLUGINS/$module | get-md5)"
+
+    #  Get hash of all inherited modules, recursively
+
+    function _inh_md5()
+    {
+        local _module=$1
+
+        for hmodule in ${SCBI_LOADED[${_module}.inh]}; do
+            hid+=",$(cat $SCBI_PLUGINS/$hmodule | get-md5)"
+            _inh_md5 $hmodule
+        done
+    }
+
+    _inh_md5 $module
 
     #  And add possible SCBI_<module>_BUILD_TYPE that is in the environment
 
@@ -829,7 +844,7 @@ function get-build-id()
 
     #  Now compute final id
 
-    echo -n "$vid,$mid,$pid,$did$eid" | get-md5
+    echo -n "$vid,$mid,$hid,$pid,$did$eid" | get-md5
 }
 
 ############################## check-archive-exists

@@ -436,6 +436,8 @@ function inherit-plugin()
         shift
     done
 
+    SCBI_LOADED[${PLUGIN}.inh]+="$HPLUGIN "
+
     _inherit-plugin_internal $NOVARIANT "${HOOKS//,/|}" $HPLUGIN $PLUGIN
 }
 
