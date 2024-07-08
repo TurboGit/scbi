@@ -1414,12 +1414,15 @@ It is possible to create a plug-in by inheriting from the definition
 of another plug-in. This can be done by adding one or multiple commands \code{inherit-plugin} into the plug-in definition:
 
 \begin{lstlisting}
-	inherit-plugin [--no-variant|--hooks=<name>] <name>
+	inherit-plugin [--no-variant
+	               |--hooks=<name>
+	               |--name=<name>] <name>
 \end{lstlisting}
 
 \begin{description}
 	\item[\ddash{}no-variant] This option is to not inherit from any hook's variant. Only the default variants will be inherited.
 	\item[\ddash{}hooks=<hook1,hook2>] Specify a set of hook separated with coma to inherit from. Multiple \code{\ddash{}hooks} options can also be used.
+	\item[\ddash{}name=<name>] Spefify the name to be used for the inherited plug-in instead of the default plug-in name. This makes it possible to inherit from multiple modules having the same hook and chain them manually.
 	\item[<name>] The name of an existing plug-in from which we want to inherit all the current hooks.
 \end{description}
 

@@ -409,7 +409,7 @@ function inherit-plugin()
     local CALLER=( $(caller) )
     local PLUGIN=${CALLER[1]##*/}
 
-    local options=$(getopt -l no-variant,hooks: -- dummy $*)
+    local options=$(getopt -l no-variant,hooks:,name: -- dummy $*)
 
     eval set -- "$options"
     while true; do
@@ -421,6 +421,10 @@ function inherit-plugin()
                 shift
                 [[ -n $HOOKS ]] && HOOKS+="|"
                 HOOKS+=$1
+                ;;
+            --name)
+                shift
+                PLUGIN=$1
                 ;;
             --)
                 shift
