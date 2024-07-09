@@ -8,6 +8,8 @@ declare -gA SCBI_LOADED
 
 declare -gA SCBI_MODVER
 
+declare -g SCBI_ALL_HOOKS="archive|aggregate|propagate-version|vcs|build-depends|depends|out-of-tree|build-env|env|tests-env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches|external-env|wrapup|setup|run|plan"
+
 ############################## fn-exists
 # check wether a function is defined
 
@@ -35,7 +37,7 @@ function get-caller()
 
     local NAME=${FUNCNAME[$IDX]}
 
-    if [[ $NAME =~ -((pre|post)-)?(cross-)?(archive|aggregate|propagate-version|vcs|build-depends|depends|out-of-tree|build-env|env|tests-env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches|external-env|wrapup|setup|run|plan) ]]; then
+    if [[ $NAME =~ -((pre|post)-)?(cross-)?(${SCBI_ALL_HOOKS}) ]]; then
         CRESULT=${NAME%-${BASH_REMATCH[4]}}
 
         #  Check if last string after dash is a known variant, if so remove
@@ -375,12 +377,7 @@ function _inherit-plugin_internal()
 
     #  All hooks if no filter
     [[ -z $SCBI_HOOKS ]] &&
-        {
-            local SCBI_HOOKS="vcs|archive|env|build-env"
-            local SCBI_HOOKS+="|depends|build-depends|modules"
-            local SCBI_HOOKS+="|out-of-tree|setup|wrapup|config|build"
-            local SCBI_HOOKS+="|install|tests|prefix"
-        }
+        local SCBI_HOOKS="${SCBI_ALL_HOOKS}"
 
     load-module $HPLUGIN
 

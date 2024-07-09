@@ -33,6 +33,11 @@ EOF
 RUNS ./scbi i-supermod
 
 CLEAN-DIFF <<EOF
+i-supermod-best-plan is a function
+i-supermod-best-plan ()
+{
+    echo var
+}
 i-supermod-modules is a function
 i-supermod-modules ()
 {
