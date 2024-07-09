@@ -1279,6 +1279,12 @@ function handle-meta-module()
                     }
             }
 
+            #  Clean aggregate meta module install. Do this unconditionally
+            #  to cover the case of an aggregate meta module being changed
+            #  to a standard meta module.
+            local MDIR=$SCBI_BDIR/$METAMODULE
+            rm -fr $MDIR/$SCBI_TARGET-$VARIANT/install
+
             for module in $(plugin-call-variant-hooks \
                                 $METAMODULE modules \
                                 $SCBI_PREFIX $SCBI_TARGET $VARIANT);
@@ -1293,7 +1299,6 @@ function handle-meta-module()
                 if [[ -n $FCT_AGG  ]]; then
                     local AGG_MODE=$($FCT_AGG $SCBI_PREFIX $TARGET $VARIANT)
                     local IDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
-                    local MDIR=$SCBI_BDIR/$METAMODULE
 
                     if [[ $AGG_MODE != no ]] && [[ -d $IDIR ]]; then
                         if [[ $AGG_MODE == recursive ]]; then
