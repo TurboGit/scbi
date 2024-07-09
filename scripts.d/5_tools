@@ -698,14 +698,14 @@ function get-build-id-callback()
     local IS_META=$6
     local IS_AGGREGATED=$7
 
-    local module_info=()
-    get-module-ref module_info $MODREF $FORMODULE
-    local module=${module_info[0]}
-    local variant=${module_info[1]}
-
-    #  Only compute for dependencies, not for the root module
-
     if [[ $LEVEL -gt 0 ]] && [[ $IS_META == false ]]; then
+        local module_info=()
+        get-module-ref module_info $MODREF $FORMODULE
+        local module=${module_info[0]}
+        local variant=${module_info[1]}
+
+        #  Only compute for dependencies, not for the root module
+
         if [[ $IS_EXT == true ]]; then
             echo ${SCBI_PKGS[$module]}
         elif [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
