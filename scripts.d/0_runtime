@@ -408,7 +408,7 @@ function inherit-plugin()
     #  we need to use Bash caller here and not get-caller.
     local CALLER=( $(caller) )
     local PLUGIN=${CALLER[1]##*/}
-
+    local P=$PLUGIN
     local options=$(getopt -l no-variant,hooks:,name: -- dummy $*)
 
     eval set -- "$options"
@@ -440,7 +440,7 @@ function inherit-plugin()
         shift
     done
 
-    SCBI_LOADED[${PLUGIN}.inh]+="$HPLUGIN "
+    SCBI_LOADED[${P}.inh]+="$HPLUGIN "
 
     _inherit-plugin_internal $NOVARIANT "${HOOKS//,/|}" $HPLUGIN $PLUGIN
 }
