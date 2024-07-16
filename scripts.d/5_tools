@@ -1073,7 +1073,7 @@ function get-archive()
 
     [[ $downloaded == 0 ]] && [[ -d $SCBI_BDIR/$MODULE/archive-src ]] && return 0
 
-    ilog build extract archive $tarsrc
+    ilog $MODULE extract archive $tarsrc
 
     [[ ! -d $SCBI_BDIR/$MODULE ]] &&
         mkdir -p $SCBI_BDIR/$MODULE > $log 2>&1
@@ -1104,9 +1104,9 @@ function get-archive()
                 elog $MODULE missing unzip tool to decompress this archive
                 return 1
             }
-        unzip $SCBI_ARCHIVES/$tarsrc
+        unzip $SCBI_ARCHIVES/$tarsrc 1>&2
     else
-        tar xf $SCBI_ARCHIVES/$tarsrc
+        tar xf $SCBI_ARCHIVES/$tarsrc 1>&2
     fi
 
     [[ $? != 0 ]] &&

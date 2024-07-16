@@ -13,6 +13,7 @@ CLEAN-DIFF <<EOF
 2022/01/04 19:22:11 : native x86_64-linux-gnu
 2022/01/04 19:22:11 : steps : setup config build install tests wrapup
 2022/01/04 19:22:11 : get sources from archive
+xxxx/xx/xx xx:xx:xx : extract archive dltar-src.tar.bz2
 2022/01/04 19:22:11 : install starting
 2022/01/04 19:22:11 : install completed
 2022/01/04 19:22:11 : tests starting
@@ -52,6 +53,7 @@ CLEAN-DIFF <<EOF
 2022/01/04 19:22:12 : native x86_64-linux-gnu
 2022/01/04 19:22:12 : steps : setup config build install tests wrapup
 2022/01/04 19:22:12 : get sources from archive
+xxxx/xx/xx xx:xx:xx : extract archive dltar-src.tar.bz2
 2022/01/04 19:22:12 : no build needed, versions match
 2022/01/04 19:22:12 : tests starting
 Script 1
@@ -62,7 +64,7 @@ EOF
 
 #  Check if it was downloaded again (even if identical to previous build and
 #  so it is expected above the see "no build needed".
-IS $(grep extract .root/builds/.logs/x86_64-linux-gnu-build-report.log | wc -l) == 2
+IS $(grep extract .root/builds/.logs/x86_64-linux-gnu-dltar-report.log | wc -l) == 2
 
 #  Update sha-1, same report should now be changed with new archive
 
@@ -75,6 +77,7 @@ CLEAN-DIFF <<EOF
 2022/01/04 19:22:12 : native x86_64-linux-gnu
 2022/01/04 19:22:12 : steps : setup config build install tests wrapup
 2022/01/04 19:22:12 : get sources from archive
+xxxx/xx/xx xx:xx:xx : extract archive dltar-src.tar.bz2
 2022/01/04 19:22:12 : install starting
 2022/01/04 19:22:12 : install completed
 2022/01/04 19:22:12 : tests starting

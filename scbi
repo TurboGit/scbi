@@ -1032,12 +1032,13 @@ function handle-sources()
                 V=${tar[0]#default}
                 ilog $module get sources from archive ${V:+[$V]}
 
-                get-archive $module $variant $ref >> $log 2>&1
+                get-archive $module $variant $ref 2>>$log | tee -a $log
+                res=${PIPESTATUS[0]}
 
-                if [[ $? != 0 ]]; then
+                if [[ $res != 0 ]]; then
                     #  In case of error display log from get-archive
-                    grep ' : ' $log
-                    ilog $module cannot get/find archive sources
+                    grep FAILED $log
+                    ilog $module cannot get/find/extract archive sources
                     exit 1
                 fi
             fi
