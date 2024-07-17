@@ -47,10 +47,10 @@ os@-hdf5-openmpi-dev
 os@-hdf5-tools
 os@-jpeg-dev                        libjpeg-turbo-devel
 os@-lapack-dev                      lapack-devel
-os@-libgmp-dev                      gmp-devel
-os@-libmpc-dev                      mpc-devel
-os@-libmpfr-dev                     mpfr-devel
-os@-libtirpc-dev                    libtirpc-devel
+os@-gmp-dev                         gmp-devel
+os@-mpc-dev                         mpc-devel
+os@-mpfr-dev                        mpfr-devel
+os@-tirpc-dev                       libtirpc-devel
 os@-libtool                         libtool
 os@-makeinfo                        makeinfo
 os@-make                            make
