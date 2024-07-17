@@ -2,7 +2,7 @@
 #    - vcs    : to build from Git sources
 #    - native : to use OS installed package
 
-with-variant native os@-libmpfr-dev:[v] \
+with-variant native os@-mpfr-dev:[v] \
              --env 'set-var MPFR_INCLUDE_DIR /usr/include' \
                    'set-var MPFR_LIBRARY_DIR /usr/lib/$SCBI_TARGET'
 

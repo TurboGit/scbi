@@ -26,9 +26,9 @@ function c-pgcc-version()
 
 function c-pgcc-build-depends()
 {
-    echo os@-libgmp-dev
-    echo os@-libmpc-dev
-    echo os@-libmpfr-dev
+    echo os@-gmp-dev
+    echo os@-mpc-dev
+    echo os@-mpfr-dev
 
     echo c-binutils
 }

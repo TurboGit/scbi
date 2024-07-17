@@ -39,6 +39,7 @@ os@-egl1-mesa-dev                   libegl1-mesa-dev
 os@-eigen3-dev                      libeigen3-dev
 os@-exiv2-dev                       libexiv2-dev
 os@-fftw3-dev                       libfftw3-dev
+os@-findbin                         libfindbin-libs-perl
 os@-flex                            flex
 os@-freeimage-dev                   libfreeimage-dev
 os@-freetype6-dev                   libfreetype6-dev
@@ -52,6 +53,7 @@ os@-glew-dev                        libglew-dev
 os@-glfw3-dev                       libglfw3-dev
 os@-glu1-mesa-dev                   libglu1-mesa-dev
 os@-gmic-dev                        libgmic-dev
+os@-gmp-dev                         libgmp-dev
 os@-gomp1                           libgomp1
 os@-gphoto2-dev                     libgphoto2-dev
 os@-graphicsmagick1-dev             libgraphicsmagick1-dev
@@ -68,17 +70,15 @@ os@-json-glib-dev                   libjson-glib-dev
 os@-lapack-dev                      liblapack-dev
 os@-lcms2-dev                       liblcms2-dev
 os@-lensfun-dev                     liblensfun-dev
-os@-libtirpc-dev
 os@-libtool                         libtool
-os@-libxcursor-dev                  libxcursor-dev
-os@-libxinerama-dev                 libxinerama-dev
-os@-libxrandr-dev                   libxrandr-dev
 os@-llvm10                          llvm-10
 os@-lua5.3-dev                      liblua5.3-dev
 os@-lua5.4-dev                      liblua5.4-dev
 os@-make                            make
 os@-makeinfo                        texinfo
 os@-metis-dev                       libmetis-dev
+os@-mpc-dev                         libmpc-dev
+os@-mpfr-dev                        libmpfr-dev
 os@-ncurses-dev                     libncurses-dev
 os@-nlopt0                          libnlopt0
 os@-omniidl                         omniidl
@@ -86,6 +86,11 @@ os@-omniorb                         omniorb
 os@-omniorb-dev                     libomniorb4-dev
 os@-omniorb-idl                     omniorb-idl
 os@-omniorb-nameserver              omniorb-nameserver
+os@-omp-11                          libomp-11-dev
+os@-omp-14                          libomp-14-dev
+os@-omp-15                          libomp-15-dev
+os@-omp-16                          libomp-16-dev
+os@-omp-17                          libomp-17-dev
 os@-opencv-dev                      libopencv-dev
 os@-openexr-dev                     libopenexr-dev
 os@-openjp2-dev                     libopenjp2-7-dev
@@ -139,20 +144,21 @@ os@-swig                            swig
 os@-tbb-dev                         libtbb-dev
 os@-tcl-dev                         tcl-dev
 os@-tiff-dev                        libtiff-dev
+os@-tirpc-dev
 os@-tk-dev                          tk-dev
 os@-uuid-dev                        uuid-dev
 os@-webp-dev                        libwebp-dev
 os@-x11-dev                         libx11-dev
+os@-xcursor-dev                     libxcursor-dev
 os@-xext-dev                        libxext-dev
 os@-xft-dev                         libxft-dev
 os@-xi-dev                          libxi-dev
+os@-xinerama-dev                    libxinerama-dev
 os@-xml2-dev                        libxml2-dev
 os@-xml2-utils                      libxml2-utils
 os@-xmu-dev                         libxmu-dev
 os@-xpm-dev                         libxpm-dev
+os@-xrandr-dev                      libxrandr-dev
 os@-xt-dev                          libxt-dev
+os@-yuv-dev                         libyuv-dev
 os@-zlib1g-dev                      zlib1g-dev
-os@-findbin                         libfindbin-libs-perl
-os@-libgmp-dev                      libgmp-dev
-os@-libmpc-dev                      libmpc-dev
-os@-libmpfr-dev                     libmpfr-dev
