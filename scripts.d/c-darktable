@@ -12,7 +12,7 @@ function c-darktable-out-of-tree()
     echo true
 }
 
-function c-darktable-build-depends()
+function c-darktable-common-build-depends()
 {
     echo os@-python3-jsonschema
     echo os@-intltool
@@ -25,42 +25,45 @@ function c-darktable-clang-build-depends()
 {
     echo os@-llvm-$SCBI_CLANG_VERSION
     echo os@-clang-$SCBI_CLANG_VERSION
-    echo os@-libomp-$SCBI_CLANG_VERSION
+    echo os@-omp-$SCBI_CLANG_VERSION
 }
 
 function c-darktable-common-depends()
 {
-    echo os@-sqlite3-dev
-    echo os@-png-dev
-    echo os@-jpeg-dev
-    echo os@-heif-dev
-    echo os@-openjp2-dev
-    echo os@-pugixml-dev
-    echo os@-xml2-dev
-    echo os@-lcms2-dev
-    echo os@-tiff-dev
-    echo os@-curl4
-    echo os@-curl4-openssl-dev
-    echo os@-gphoto2-dev
-    echo os@-openexr-dev
-    echo os@-soup2-dev
-    echo os@-lua5.4-dev
-    echo os@-osmgpsmap-1.0-dev
-    echo os@-graphicsmagick1-dev
+    echo os@-cairo-dev
     echo os@-colord-dev
     echo os@-colord-gtk-dev
-    echo os@-gomp1
-    echo os@-gmic-dev
     echo os@-cups2-dev
-    echo os@-secret-dev
-    echo os@-xml2-utils
-    echo os@-lensfun-dev
-    echo os@-rsvg2-dev
-    echo os@-json-glib-dev
-    echo os@-pod-parser-perl
-    echo os@-webp-dev
-    echo os@-cairo-dev
+    echo os@-curl4
+    echo os@-curl4-openssl-dev
+    echo os@-gmic-dev
+    echo os@-gomp1
+    echo os@-gphoto2-dev
+    echo os@-graphicsmagick1-dev
+    echo os@-heif-dev
     echo os@-image-exiftool-perl
+    echo os@-jpeg-dev
+    echo os@-json-glib-dev
+    echo os@-lcms2-dev
+    echo os@-lensfun-dev
+    echo os@-lua5.4-dev
+    echo os@-openexr-dev
+    echo os@-openjp2-dev
+    echo os@-osmgpsmap-1.0-dev
+    echo os@-png-dev
+    echo os@-pod-parser-perl
+    echo os@-pugixml-dev
+    echo os@-rav1e-dev
+    echo os@-rsvg2-dev
+    echo os@-secret-dev
+    echo os@-soup2-dev
+    echo os@-sqlite3-dev
+    echo os@-svtav1enc-dev
+    echo os@-tiff-dev
+    echo os@-webp-dev
+    echo os@-xml2-dev
+    echo os@-xml2-utils
+    echo os@-yuv-dev
 
     echo c-exiv2
     echo c-libavif
