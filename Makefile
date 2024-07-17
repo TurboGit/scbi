@@ -1,3 +1,25 @@
+######################################################################
+#
+#  Install tools and plug-ins:
+#
+#     $ make
+#
+#  Synchronize the OS packages for supported platforms:
+#
+#     $ make sync-os-deps
+#
+#  Sorting OS packages for supported platforms:
+#
+#     $ make sort-pkgs
+#
+#  Run the regression testsuite:
+#
+#     $ make test
+#
+#  Build the documentation PDF:
+#
+#     $ make doc
+#
 
 .SILENT: test sort-pkgs sync-os-deps
 
