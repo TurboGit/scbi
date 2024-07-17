@@ -1,5 +1,7 @@
 
-.SILENT: test
+.SILENT: test sort-pkgs sync-os-deps
+
+SHELL=/bin/bash
 
 SCRDIR=$(HOME)/.config/scbi
 INSTALL_DIR=$(HOME)/.local/bin
@@ -61,5 +63,39 @@ test-clean:
 
 doc: force
 	make CORE_VER=$(CORE_VER) -C doc
+
+#  All .pkgs files but debian one
+ALLPKGS := $(wildcard scripts.d/.pkgs-*)
+PKGS    := $(filter-out scripts.d/.pkgs-deb, $(ALLPKGS))
+
+#  Sort list of package entries in .pkgs-* files
+sort-pkgs:
+	for pkgs in $(ALLPKGS); do \
+		head -2 $$pkgs > tmp; \
+		tail +3 $$pkgs | sort >> tmp; \
+		mv tmp $$pkgs; \
+	done
+
+#  Sync deb pkgs from all other distribs
+to-deb:
+	for pkgs in $(PKGS); do \
+	   diff <( cat $$pkgs | grep -v '^#' | cut -d' ' -f1 | sort ) \
+	        <( cat scripts.d/.pkgs-deb | grep -v '^#' | cut -d' ' -f1 | sort ) \
+		| grep '^<' | cut -d' ' -f2 > tmp; \
+	   cat tmp >> scripts.d/.pkgs-deb; \
+	done
+
+#  Sync all distribs pkgs from deb one
+from-deb: to-deb
+	for pkgs in $(PKGS); do \
+	   diff <( cat scripts.d/.pkgs-deb | grep -v '^#' | cut -d' ' -f1 | sort ) \
+	        <( cat $$pkgs | grep -v '^#' | cut -d' ' -f1 | sort ) \
+		| grep '^<' | cut -d' ' -f2 > tmp; \
+	   cat tmp >> $$pkgs; \
+	done
+
+sync-os-deps: from-deb sort-pkgs
+
+.NOTPARALLEL: sync-os-deps
 
 force:
