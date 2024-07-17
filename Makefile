@@ -52,7 +52,7 @@ clean.install:
 	rm -f $(HOME)/.bash_completion.d/scbi
 
 lint:
-	./scbi-lint --error scripts.d/c-*
+	./scbi lint --error scripts.d/c-*
 	echo No problem detected
 
 test:
