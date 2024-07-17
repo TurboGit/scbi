@@ -32,32 +32,35 @@ os@-flex                            flex
 os@-freeimage-dev                   freeimage-devel
 os@-freetype6-dev                   freetype-devel
 os@-ftgl-dev                        ftgl-devel
-os@-g++                             gcc-c++
 os@-gcc                             gcc
 os@-gdal-dev                        gdal-devel
 os@-gfortran                        gcc-gfortran
+os@-g++                             gcc-c++
 os@-gl2ps-dev                       gl2ps-devel
 os@-glew-dev
 os@-glfw3-dev
 os@-glu1-mesa-dev                   mesa-libGLU-devel
-os@-graphviz                        graphviz
 os@-graphviz-dev                    graphviz-devel
+os@-graphviz                        graphviz
 os@-hdf5-dev                        hdf5-devel
 os@-hdf5-openmpi-dev
 os@-hdf5-tools
 os@-jpeg-dev                        libjpeg-turbo-devel
 os@-lapack-dev                      lapack-devel
+os@-libgmp-dev                      gmp-devel
+os@-libmpc-dev                      mpc-devel
+os@-libmpfr-dev                     mpfr-devel
 os@-libtirpc-dev                    libtirpc-devel
 os@-libtool                         libtool
-os@-make                            make
 os@-makeinfo                        makeinfo
+os@-make                            make
 os@-metis-dev                       metis-devel
 os@-ncurses-dev                     ncurses-devel
 os@-nlopt0
 os@-omniidl
 os@-omniorb
-os@-omniorb-idl
 os@-omniorb4-dev
+os@-omniorb-idl
 os@-opencv-dev                      opencv-devel
 os@-openmpi-dev                     openmpi-bull-gnu
 os@-osmesa6-dev
@@ -109,6 +112,3 @@ os@-xpm-dev                         libXpm-devel
 os@-xsltproc                        libxslt
 os@-xt-dev                          libXt-devel
 os@-zlib1g-dev                      zlib-devel
-os@-libgmp-dev                      gmp-devel
-os@-libmpc-dev                      mpc-devel
-os@-libmpfr-dev                     mpfr-devel
