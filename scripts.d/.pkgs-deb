@@ -93,6 +93,7 @@ os@-mpfr-dev                        libmpfr-dev
 os@-ncurses-dev                     libncurses-dev
 os@-nlopt0                          libnlopt0
 os@-omniidl                         omniidl
+os@-omniorb4-dev
 os@-omniorb-dev                     libomniorb4-dev
 os@-omniorb-idl                     omniorb-idl
 os@-omniorb-nameserver              omniorb-nameserver
@@ -104,8 +105,10 @@ os@-omp-16                          libomp-16-dev
 os@-omp-17                          libomp-17-dev
 os@-opencv-dev                      libopencv-dev
 os@-openexr-dev                     libopenexr-dev
+os@-openjp2-7-dev
 os@-openjp2-dev                     libopenjp2-7-dev
 os@-openmpi-dev                     libopenmpi-dev
+os@-osmesa6-dev
 os@-osmesa-dev                      libosmesa6-dev
 os@-osmgpsmap-1.0-dev               libosmgpsmap-1.0-dev
 os@-pcre3-dev                       libpcre3-dev
@@ -148,6 +151,7 @@ os@-scotch-dev                      libscotch-dev
 os@-secret-dev                      libsecret-1-dev
 os@-sip-dev                         sip-dev
 os@-soup2-dev                       libsoup2.4-dev
+os@-soup-dev
 os@-sphinx-common                   sphinx-common
 os@-sphinx-intl                     sphinx-intl
 os@-sqlite3-dev                     libsqlite3-dev

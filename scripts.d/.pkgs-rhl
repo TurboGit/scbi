@@ -1,7 +1,9 @@
 # OS name                           Red Hat packaages
 # ---------------------------------------------------
 os@-autoconf                        autoconf
+os@-automake
 os@-autotools-dev
+os@-avif-dev
 os@-bison                           bison
 os@-blas-dev                        blas-devel
 os@-boost-chrono-dev                boost-chrono
@@ -10,24 +12,39 @@ os@-boost-dev                       boost
 os@-boost-filesystem-dev            boost-filesystem
 os@-boost-graph-dev                 boost-graph
 os@-boost-locale-dev                boost-locale
+os@-boost-mpi-python-dev
+os@-boost-python-dev
 os@-boost-regex-dev                 boost-regexp
 os@-boost-signals-dev               boost-signals
 os@-boost-thread-dev                boost-thread
 os@-bz2-dev                         bzip2-devel
 os@-c6-dev
+os@-cairo-dev
 os@-cfitsio-dev                     cfitsio
 os@-cgal-dev
 os@-cgns-dev                        cgnslib-devel
+os@-clang10
+os@-clang-11
+os@-clang-14
+os@-clang-15
+os@-clang-16
+os@-clang-17
 os@-cmake                           cmake
 os@-cminpack-dev
+os@-colord-dev
+os@-colord-gtk-dev
 os@-cos4-dev
 os@-cppunit-dev                     cppunit-devel
+os@-cups2-dev
+os@-curl4
 os@-curl4-gnutls-dev                libcurl-devel
 os@-curl4-openssl-dev               libcurl-devel
 os@-doxygen                         doxygen
 os@-egl1-mesa-dev
 os@-eigen3-dev                      eigen3-devel
+os@-exiv2-dev
 os@-fftw3-dev                       fftw-devel
+os@-findbin
 os@-flex                            flex
 os@-freeimage-dev                   freeimage-devel
 os@-freetype6-dev                   freetype-devel
@@ -40,43 +57,79 @@ os@-gl2ps-dev                       gl2ps-devel
 os@-glew-dev
 os@-glfw3-dev
 os@-glu1-mesa-dev                   mesa-libGLU-devel
+os@-gmic-dev
+os@-gmp-dev                         gmp-devel
+os@-gomp1
+os@-gphoto2-dev
+os@-graphicsmagick1-dev
 os@-graphviz-dev                    graphviz-devel
 os@-graphviz                        graphviz
 os@-hdf5-dev                        hdf5-devel
 os@-hdf5-openmpi-dev
 os@-hdf5-tools
+os@-heif-dev
+os@-image-exiftool-perl
+os@-intltool
 os@-jpeg-dev                        libjpeg-turbo-devel
+os@-json-glib-dev
+os@-jxl-dev
 os@-lapack-dev                      lapack-devel
-os@-gmp-dev                         gmp-devel
-os@-mpc-dev                         mpc-devel
-os@-mpfr-dev                        mpfr-devel
-os@-tirpc-dev                       libtirpc-devel
+os@-lcms2-dev
+os@-lensfun-dev
 os@-libtool                         libtool
+os@-llvm10
+os@-llvm-11
+os@-llvm-14
+os@-llvm-15
+os@-llvm-16
+os@-llvm-17
+os@-lua5.3-dev
+os@-lua5.4-dev
 os@-makeinfo                        makeinfo
 os@-make                            make
 os@-metis-dev                       metis-devel
+os@-mpc-dev                         mpc-devel
+os@-mpfr-dev                        mpfr-devel
 os@-ncurses-dev                     ncurses-devel
 os@-nlopt0
 os@-omniidl
 os@-omniorb
 os@-omniorb4-dev
+os@-omniorb-dev
 os@-omniorb-idl
+os@-omniorb-nameserver
+os@-omp-11
+os@-omp-14
+os@-omp-15
+os@-omp-16
+os@-omp-17
 os@-opencv-dev                      opencv-devel
+os@-openexr-dev
+os@-openjp2-7-dev
+os@-openjp2-dev
 os@-openmpi-dev                     openmpi-bull-gnu
 os@-osmesa6-dev
+os@-osmesa-dev
+os@-osmgpsmap-1.0-dev
 os@-pcre3-dev                       pcre-devel
 os@-png-dev                         libpng-devel
+os@-po4a
+os@-pod-parser-perl
 os@-proj-dev                        proj
 os@-ptscotch-dev
+os@-pugixml-dev
 os@-pyqt5-dev                       python3-qt5-devel
 os@-pyqt5-dev-tools                 python3-qt5-base
 os@-python3
 os@-python3-dev
 os@-python3-docutils                python3-docutils
+os@-python3-jsonschema
 os@-python3-matplotlib              python3-matplotlib
 os@-python3-mpi4py
 os@-python3-psutil                  python3-psutil
+os@-python3-pytest-runner
 os@-python3-scipy                   python3-scipy
+os@-python3-setuptools
 os@-python3-sphinx                  python3-sphinx
 os@-python3-sphinx-rtd-theme        python3-sphinx_rtd_theme
 os@-python3-stemmer
@@ -92,23 +145,39 @@ os@-qtbase5-dev                     qt5-qtbase-devel
 os@-qttools5-dev                    qt5-qttools-devel
 os@-qtxmlpatterns5-dev-tools        qt5-qtxmlpatterns qt5-qtxmlpatterns-devel
 os@-qwt-qt5-dev                     qwt-qt5-devel
+os@-rav1e-dev
+os@-rsvg2-dev
 os@-scotch-dev                      scotch-devel
+os@-secret-dev
+os@-sip-dev
+os@-soup2-dev
+os@-soup-dev
 os@-sphinx-common                   python3-sphinx
 os@-sphinx-intl                     python-sphinx-locale
+os@-sqlite3-dev
+os@-ssl-dev
 os@-ssl-dev                         openssl-devel
+os@-svtav1enc-dev
 os@-swig                            swig
 os@-tbb-dev                         tbb-devel
 os@-tcl-dev                         tcl-devel
+os@-tiff-dev
+os@-tirpc-dev                       libtirpc-devel
 os@-tk-dev                          tk-devel
 os@-uuid-dev
+os@-webp-dev
 os@-x11-dev                         libX11-devel
+os@-xcursor-dev
 os@-xext-dev                        libXext-devel
 os@-xft-dev                         libXft-devel
 os@-xi-dev                          libXi-devel
+os@-xinerama-dev
 os@-xml2-dev                        libxml2-devel
 os@-xml2-utils
 os@-xmu-dev                         libXmu-devel
 os@-xpm-dev                         libXpm-devel
+os@-xrandr-dev
 os@-xsltproc                        libxslt
 os@-xt-dev                          libXt-devel
+os@-yuv-dev
 os@-zlib1g-dev                      zlib-devel

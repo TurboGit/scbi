@@ -24,6 +24,11 @@ os@-cfitsio-dev                     libcfitsio-dev
 os@-cgal-dev                        libcgal-dev
 os@-cgns-dev                        libcgns-dev
 os@-clang10                         clang-10
+os@-clang-11
+os@-clang-14
+os@-clang-15
+os@-clang-16
+os@-clang-17
 os@-cmake                           cmake
 os@-cminpack-dev                    libcminpack-dev
 os@-colord-dev                      libcolord-dev
@@ -67,11 +72,17 @@ os@-image-exiftool-perl             libimage-exiftool-perl
 os@-intltool                        intltool
 os@-jpeg-dev                        libjpeg-dev
 os@-json-glib-dev                   libjson-glib-dev
+os@-jxl-dev
 os@-lapack-dev                      liblapack-dev
 os@-lcms2-dev                       liblcms2-dev
 os@-lensfun-dev                     liblensfun-dev
 os@-libtool                         libtool
 os@-llvm10                          llvm-10
+os@-llvm-11
+os@-llvm-14
+os@-llvm-15
+os@-llvm-16
+os@-llvm-17
 os@-lua5.3-dev                      liblua5.3-dev
 os@-lua5.4-dev                      liblua5.4-dev
 os@-makeinfo                        texinfo
@@ -82,6 +93,7 @@ os@-mpfr-dev                        libmpfr-dev
 os@-ncurses-dev                     libncurses-dev
 os@-nlopt0                          libnlopt0
 os@-omniidl                         omniidl
+os@-omniorb4-dev
 os@-omniorb-dev                     libomniorb4-dev
 os@-omniorb-idl                     omniorb-idl
 os@-omniorb-nameserver              omniorb-nameserver
@@ -93,8 +105,10 @@ os@-omp-16                          libomp-16-dev
 os@-omp-17                          libomp-17-dev
 os@-opencv-dev                      libopencv-dev
 os@-openexr-dev                     libopenexr-dev
+os@-openjp2-7-dev
 os@-openjp2-dev                     libopenjp2-7-dev
 os@-openmpi-dev                     libopenmpi-dev
+os@-osmesa6-dev
 os@-osmesa-dev                      libosmesa6-dev
 os@-osmgpsmap-1.0-dev               libosmgpsmap-1.0-dev
 os@-pcre3-dev                       libpcre3-dev
@@ -112,6 +126,7 @@ os@-python3-jsonschema              python3-jsonschema
 os@-python3-matplotlib              python3-matplotlib
 os@-python3-mpi4py                  python3-mpi4py
 os@-python3-psutil                  python3-psutil
+os@-python3-pytest-runner
 os@-python3                         python3
 os@-python3-scipy                   python3-scipy
 os@-python3-setuptools              python3-setuptools
@@ -130,16 +145,19 @@ os@-qtbase5-dev                     qtbase5-dev
 os@-qttools5-dev                    qttools5-dev
 os@-qtxmlpatterns5-dev-tools        qtxmlpatterns5-dev-tools
 os@-qwt-qt5-dev                     libqwt-qt5-dev
+os@-rav1e-dev
 os@-rsvg2-dev                       librsvg2-dev
 os@-scotch-dev                      libscotch-dev
 os@-secret-dev                      libsecret-1-dev
 os@-sip-dev                         sip-dev
 os@-soup2-dev                       libsoup2.4-dev
+os@-soup-dev
 os@-sphinx-common                   sphinx-common
 os@-sphinx-intl                     sphinx-intl
 os@-sqlite3-dev                     libsqlite3-dev
 os@-ssl-dev                         libssl-dev
 os@-ssl-dev                         libssl-dev
+os@-svtav1enc-dev
 os@-swig                            swig
 os@-tbb-dev                         libtbb-dev
 os@-tcl-dev                         tcl-dev
@@ -159,6 +177,7 @@ os@-xml2-utils                      libxml2-utils
 os@-xmu-dev                         libxmu-dev
 os@-xpm-dev                         libxpm-dev
 os@-xrandr-dev                      libxrandr-dev
+os@-xsltproc
 os@-xt-dev                          libxt-dev
 os@-yuv-dev                         libyuv-dev
 os@-zlib1g-dev                      zlib1g-dev
