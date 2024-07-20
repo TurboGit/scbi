@@ -38,23 +38,49 @@ function c-gnatcoll-core-env()
     add-to-var LD_LIBRARY_PATH  $PREFIX/$TARGET/lib
 }
 
+function c-gnatcoll-core-common-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo prefix=$PREFIX
+    echo PROCESSORS=$SCBI_JOBS
+    echo INTEGRATED=yes
+    echo TARGET=$TARGET
+    echo NORMALIZED_TARGET=$TARGET
+}
+
+function c-gnatcoll-core-cross-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    #  Only cross Windows is supported
+
+    echo GNATCOLL_MMAP=no
+    echo GNATCOLL_OS=windows
+}
+
+function c-gnatcoll-core-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    #  Non cross case
+
+    echo GNATCOLL_MMAP=yes
+    echo GNATCOLL_OS=unix
+}
+
 function c-gnatcoll-core-build()
 {
     local PREFIX=$1
     local TARGET=$2
 
-    if [[ $SCBI_HOST == $TARGET ]]; then
-        MMAP=yes
-        GOS=unix
-    else
-        MMAP=no
-        GOS=windows
-    fi
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
 
-    make prefix=$PREFIX \
-         INTEGRATED=yes GNATCOLL_MMAP=$MMAP GNATCOLL_OS=$GOS \
-         TARGET=$TARGET NORMALIZED_TARGET=$TARGET \
-         PROCESSORS=$SCBI_JOBS
+    make "${OPTIONS[@]}"
 }
 
 function c-gnatcoll-core-install()
