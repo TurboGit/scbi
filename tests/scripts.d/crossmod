@@ -1,0 +1,35 @@
+
+function crossmod-common-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo prefix=/toto
+}
+
+function crossmod-cross-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo BUILD=cross
+}
+
+function crossmod-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo BUILD=native
+}
+
+function crossmod-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    echo @@@ make ${OPTIONS[@]}
+}

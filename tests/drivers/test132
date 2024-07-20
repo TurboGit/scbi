@@ -1,0 +1,17 @@
+#  Check config-options with cross support
+
+RUNS ./scbi crossmod
+
+RUNS grep -h '^@@@' .root/builds/.logs/*linux**crossmod*build*
+
+DIFF <<EOF
+@@@ make prefix=/toto BUILD=native
+EOF
+
+RUNS ./scbi --target=x86_64-mingw32 crossmod
+
+RUNS grep -h '^@@@' .root/builds/.logs/*mingw*crossmod*build*
+
+DIFF <<EOF
+@@@ make prefix=/toto BUILD=cross
+EOF
