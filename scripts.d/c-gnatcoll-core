@@ -38,7 +38,7 @@ function c-gnatcoll-core-env()
     add-to-var LD_LIBRARY_PATH  $PREFIX/$TARGET/lib
 }
 
-function c-gnatcoll-core-config()
+function c-gnatcoll-core-build()
 {
     local PREFIX=$1
     local TARGET=$2
@@ -51,16 +51,10 @@ function c-gnatcoll-core-config()
         GOS=windows
     fi
 
-    make INTEGRATED=yes prefix=$PREFIX GNATCOLL_MMAP=$MMAP GNATCOLL_OS=$GOS \
-         TARGET=$TARGET NORMALIZED_TARGET=$TARGET setup
-}
-
-function c-gnatcoll-core-build()
-{
-    local PREFIX=$1
-    local TARGET=$2
-
-    PROCESSORS=$SCBI_JOBS make NORMALIZED_TARGET=$TARGET
+    make prefix=$PREFIX \
+         INTEGRATED=yes GNATCOLL_MMAP=$MMAP GNATCOLL_OS=$GOS \
+         TARGET=$TARGET NORMALIZED_TARGET=$TARGET \
+         PROCESSORS=$SCBI_JOBS
 }
 
 function c-gnatcoll-core-install()
