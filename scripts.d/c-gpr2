@@ -4,3 +4,8 @@ function c-gpr2-modules()
     echo c-gpr2-lib
     echo c-gpr2-tools
 }
+
+function c-gpr2-propagate-version()
+{
+    echo both
+}

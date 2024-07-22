@@ -340,20 +340,30 @@ function handle-plan-meta-module()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    if [[ $ref != master ]] &&
-           [[ $ref != NONE ]] &&
-           [[ -f $SCBI_PLUGINS/$module ]];
-    then
+    if [[ -f $SCBI_PLUGINS/$module ]]; then
         source $SCBI_PLUGINS/$module
+
+        local PROPAGATE_MODE=version
 
         get-hook FCT $module $variant propagate-version
 
-        if [[ -z $FCT ]]; then
-            PROPAGATE_MODE=version
-        else
+        if [[ -n $FCT ]]; then
             PROPAGATE_MODE=$($FCT $SCBI_PREFIX $SCBI_TARGET $variant)
-            [[ ${PROPAGATE_MODE} == false ]] && return
         fi
+
+        #  Then set real propagate mode needed depending on module ref
+
+        if [[ $ref == master ]] || [[ $ref == NONE ]]; then
+            [[ ${PROPAGATE_MODE} == version ]] && PROPAGATE_MODE=false
+            [[ ${PROPAGATE_MODE} == both ]] && PROPAGATE_MODE=variant
+        fi
+
+        if [[ $variant == default ]]; then
+            [[ ${PROPAGATE_MODE} == variant ]] && PROPAGATE_MODE=false
+            [[ ${PROPAGATE_MODE} == both ]] && PROPAGATE_MODE=version
+        fi
+
+        [[ ${PROPAGATE_MODE} == false ]] && return
 
         for mod in $(plugin-call-variant-hooks \
                          $module modules $SCBI_PREFIX $SCBI_TARGET $variant);

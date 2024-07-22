@@ -37,7 +37,7 @@ function get-caller()
 
     local NAME=${FUNCNAME[$IDX]}
 
-    if [[ $NAME =~ -((pre|post)-)?(cross-)?(${SCBI_ALL_HOOKS}) ]]; then
+    if [[ $NAME =~ -((pre|post)-)?(cross-)?(${SCBI_ALL_HOOKS})$ ]]; then
         CRESULT=${NAME%-${BASH_REMATCH[4]}}
 
         #  Check if last string after dash is a known variant, if so remove
@@ -45,7 +45,6 @@ function get-caller()
 
         local P=${CRESULT%-*}
         local S=${CRESULT##*-}
-        local N=$P/$S
 
         local V=${SCBI_MODVER[$P]#*/}
 

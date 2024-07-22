@@ -19,7 +19,8 @@ function c-vss-env()
     local PREFIX=$1
     local TARGET=$2
 
-    add-to-var GPR_PROJECT_PATH $PREFIX/../build/gnat
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
 function c-vss-build-depends()
@@ -33,5 +34,13 @@ function c-vss-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j1 all
+    make -j1 build-all-libs
+}
+
+function c-vss-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j1 PREFIX=$PREFIX install-all-libs
 }

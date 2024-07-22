@@ -55,6 +55,7 @@ function c-xmlada-env()
     local TARGET=$2
 
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
 function c-xmlada-cross-config()

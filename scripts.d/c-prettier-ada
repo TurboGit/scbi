@@ -30,6 +30,7 @@ function c-prettier-ada-env()
     local TARGET=$2
 
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
 function c-prettier-ada-build()
@@ -45,7 +46,7 @@ function c-prettier-ada-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make PREFIX=$PREFIX install
+    make PREFIX=$PREFIX install-all
 }
 
 function c-prettier-ada-prefix()

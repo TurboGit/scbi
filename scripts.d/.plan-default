@@ -8,3 +8,4 @@ c-gmp:#6.2.1
 c-readline:#6.2
 c-cmake/auto:v3.18.4
 c-exiv2/auto:v0.27.5
+c-gpr2:next
