@@ -88,5 +88,5 @@ function c-gnatcoll-core-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make NORMALIZED_TARGET=$TARGET install
+    make NORMALIZED_TARGET=$TARGET prefix=$PREFIX install
 }
