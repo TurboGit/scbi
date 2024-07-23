@@ -34,5 +34,13 @@ function c-vss-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make -j1 all
+    make -j1 build-all-libs
+}
+
+function c-vss-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j1 PREFIX=$PREFIX install-all-libs
 }
