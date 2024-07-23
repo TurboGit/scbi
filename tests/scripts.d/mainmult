@@ -32,7 +32,7 @@ function mainmult-build()
     local TARGET=$2
 
     rm -f *.o
-    make
+    make --no-print-directory
 }
 
 function mainmult-install()
