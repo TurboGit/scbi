@@ -43,7 +43,7 @@ function c-langkit-build-env()
     local TARGET=$2
     local VARIANT=$3
 
-    add-to-var PYTHONPATH $PWD
+    add-to-var PYTHONPATH ${SCBI_MODULES_DIR["c-langkit@build"]}
 }
 
 function c-langkit-env()
@@ -52,7 +52,10 @@ function c-langkit-env()
     local TARGET=$2
     local VARIANT=$3
 
-    add-to-var PYTHONPATH       $SCBI_BDIR/c-langkit/$TARGET-$VARIANT/build
+    add-to-var PATH             $PREFIX/bin
+    add-to-var PYTHONPATH       $PREFIX/python
+    add-to-var PYTHONPATH       \
+               $(last-modified-directory $PREFIX/local/lib/python*/dist-packages)
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
     add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
@@ -74,8 +77,12 @@ function c-langkit-build()
     local TARGET=$2
     local VARIANT=$3
 
-    python3 manage.py build-langkit-support \
-            --library-types=static,static-pic,relocatable
+    #  The langkit python support
+
+    pip3 install --prefix $PREFIX .
+
+    python manage.py make --no-mypy \
+           --library-types=static,static-pic,relocatable
 }
 
 function c-langkit-cross-build()
@@ -100,6 +107,23 @@ function c-langkit-install()
 
     python3 manage.py install-langkit-support \
             $PREFIX --library-types=static,static-pic,relocatable
+
+    (
+        cd contrib/python &&
+            ./manage.py install $PREFIX \
+                        --library-types=static,static-pic,relocatable \
+                        --disable-all-mains
+    )
+
+    (
+        cd contrib/lkt &&
+            ./manage.py install $PREFIX \
+                        --library-types=static,static-pic,relocatable \
+                        --disable-all-mains
+    )
+
+    pip3 install --prefix $PREFIX contrib/python/build/python
+    pip3 install --prefix $PREFIX contrib/lkt/build/python
 }
 
 function c-langkit-cross-install()
