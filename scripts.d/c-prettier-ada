@@ -46,7 +46,7 @@ function c-prettier-ada-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make PREFIX=$PREFIX install
+    make PREFIX=$PREFIX install-all
 }
 
 function c-prettier-ada-prefix()
