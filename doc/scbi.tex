@@ -1603,19 +1603,21 @@ An alias table is searched into the following places and in this specific order:
 	\item \code{.scbi-pkgs-<distrib>[-<id>]} into \$PWD (current directory)
 \end{enumerate}
 
-Where \code{<id>} is an optional random string that can be added for project's specific aliases. Such a file is loaded after the default one (without the \code{<id>}) so can override some entries if needed.
+\begin{description}
+	\item [\code{<distrib>}] The acronym of one of the supported distribution. The \code{<distrib>} can also have appended the \emph{major} and \emph{minor} version of the distribution. The separator between the name and version is the tilde \textasciitilde{}.
 
-In complement to the files searched based on distribution acronym, the major and minor version of the OS is also used.
-
-For example on Debian 10.6 the searched files will be, and in that order:
+For example on \code{Debian 10.6} the searched files will be, and in that order:
 
 \begin{enumerate}
 	\item \code{.pkgs-deb}
-	\item \code{.pkgs-deb-10}
-	\item \code{.pkgs-deb-10-6}
+	\item \code{.pkgs-deb\textasciitilde{}10}
+	\item \code{.pkgs-deb\textasciitilde{}10.6}
 \end{enumerate}
 
-So \code{.pkgs-deb-10} can add new dependencies or override some dependencies that are set in \code{.pkgs-deb}.
+So \code{.pkgs-deb\textasciitilde{}10} can add new dependencies or override some dependencies that are set in \code{.pkgs-deb}.
+
+\item [\code{<id>}] An optional random string that can be added for project's specific aliases. Such a file is loaded after the default one (without the \code{<id>}) so can override some entries if needed.
+\end{description}
 
 \subsection{Private Store}
 \index{Private Store}

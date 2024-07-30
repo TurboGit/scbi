@@ -136,7 +136,7 @@ function init-distrib-alias()
         local MINOR=${BASH_REMATCH[3]}
     fi
 
-    for NAME in $DIST $DIST-$MAJOR ${MINOR:+$DIST-$MAJOR-$MINOR}; do
+    for NAME in $DIST ${MAJOR:+${DIST}~${MAJOR}} ${MINOR:+${DIST}~${MAJOR}.$MINOR}; do
         init-alias $SCBI_PLUGINS/.pkgs-$NAME
         init-alias $SCBI_BDIR/.scbi-pkgs-$NAME
         init-alias $PWD/.scbi-pkgs-$NAME
