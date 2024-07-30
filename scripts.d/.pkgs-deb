@@ -1,4 +1,4 @@
-# OS name (Debian 10)               Debian packages
+# OS name (Debian sid)              Debian packages
 # --------------------------------------------------
 os@-autoconf                        autoconf
 os@-automake                        automake

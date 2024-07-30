@@ -1,0 +1,3 @@
+# OS name (Debian 12)               Debian packages
+# --------------------------------------------------
+os@-curl4                           libcurl4
