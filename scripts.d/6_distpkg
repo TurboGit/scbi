@@ -60,19 +60,26 @@ function setup-discriminants()
         SCBI_OS_DISCRIMINANTS+=([windows]="yes")
         ##  ??? how to get architecture & version
     else
-        local VER=$(lsb_release -r | tr -d '[ \t]')
-        local OID=$(lsb_release -i | tr -d '[ \t]')
-        local CNM=$(lsb_release -c | tr -d '[ \t]')
+        local VER=$(lsb_release -r)
+        local OID=$(lsb_release -i)
+        local CNM=$(lsb_release -c)
         local DES=$(lsb_release -d)
-        local DES=${DES#*:}
+
+        local VER=${VER#*:+([[:blank:]])}
+        local OID=${OID#*:+([[:blank:]])}
+        local CNM=${CNM#*:+([[:blank:]])}
+        local DES=${DES#*:+([[:blank:]])}
+
+        local VER=${VER#n/a}
+
         local DES=${DES//\// }
         local DES=${DES//\(/ }
         local DES=${DES//\)/ }
 
-        SCBI_OS_VERSION=${VER#Release:}
-        SCBI_OS_CODENAME=${CNM#Codename:}
+        SCBI_OS_VERSION=$VER
+        SCBI_OS_CODENAME=$CNM
         SCBI_OS_MAJOR_VERSION=${SCBI_OS_VERSION%%.*}
-        SCBI_OS_ID=${OID#*:}
+        SCBI_OS_ID=$OID
 
         for D in ${DES,,}; do
             SCBI_OS_DISCRIMINANTS+=([$D]="yes")
@@ -81,10 +88,13 @@ function setup-discriminants()
         local HND=$(hostname --domain)
         SCBI_OS_DISCRIMINANTS+=([$(uname -m)]="yes")
         SCBI_OS_DISCRIMINANTS+=([$(hostname --short)]="yes")
-        [[ -n $HND ]] && SCBI_OS_DISCRIMINANTS+=([$HND]="yes")
+        [[ -n $HND ]] &&
+            SCBI_OS_DISCRIMINANTS+=([$HND]="yes")
         SCBI_OS_DISCRIMINANTS+=([${SCBI_OS_ID,,}]="yes")
-        SCBI_OS_DISCRIMINANTS+=([$SCBI_OS_VERSION]="yes")
-        SCBI_OS_DISCRIMINANTS+=([$SCBI_OS_MAJOR_VERSION]="yes")
+        [[ -n $SCBI_OS_VERSION ]] &&
+            SCBI_OS_DISCRIMINANTS+=([$SCBI_OS_VERSION]="yes")
+        [[ -n $SCBI_OS_MAJOR_VERSION ]] &&
+            SCBI_OS_DISCRIMINANTS+=([$SCBI_OS_MAJOR_VERSION]="yes")
         SCBI_OS_DISCRIMINANTS+=([${SCBI_OS_CODENAME,,}]="yes")
     fi
 
