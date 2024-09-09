@@ -5,6 +5,8 @@ RUNS ./scbi --log:yes --deps dephook2
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dephook2
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -28,6 +30,8 @@ RUNS ./scbi --log:yes --deps dephook2/vara
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dephook2/vara
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -49,6 +53,8 @@ RUNS ./scbi --log:yes --deps dephook2/varb
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building depB [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dephook2/varb
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -72,6 +78,8 @@ RUNS ./scbi --log:yes --deps dephook2/vara.varb
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building depB [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dephook2/vara.varb
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)

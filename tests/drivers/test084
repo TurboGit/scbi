@@ -5,6 +5,8 @@ RUNS ./scbi --deps testme
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building gentool [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ testme
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -31,6 +33,8 @@ RUNS ./scbi --deps --tests:only testme
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building gentool [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ testme
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : tests
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -38,6 +42,8 @@ xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : End Building gentool [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building test-driver [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ testme
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : tests
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -57,6 +63,8 @@ RUNS ./scbi --deps --tests testme
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building gentool [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ testme
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
@@ -65,6 +73,8 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/local-install
 xxxx/xx/xx xx:xx:xx : End Building gentool [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building test-driver [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ testme
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)

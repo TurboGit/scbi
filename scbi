@@ -1204,12 +1204,28 @@ function handle-sources()
         } || true
 }
 
+############################## needed-by
+
+function needed-by()
+{
+    local MODULE=$1
+
+    [[ ${#SCBI_MODULES_LIST[@]} -gt 1 ]] &&
+        {
+            ilog $MODULE "needed by:"
+            for (( i=${#SCBI_MODULES_LIST[@]}-2 ; i>=0 ; i-- )); do
+                ilog $MODULE "  ↳ ${SCBI_MODULES_LIST[$i]}"
+            done
+        }
+}
+
 ############################## handle-meta-module
 
 function handle-meta-module()
 {
-    local METAMODULE=$1
-    local VARIANT=$2
+    local FORMODULE=$1
+    local METAMODULE=$2
+    local VARIANT=$3
 
     #  check for plan
 
@@ -1242,6 +1258,10 @@ function handle-meta-module()
     line-sep
     ilog $METAMODULE %BMetamodule %t$METAMODULE%c \[%g${VARIANT//./ }%c\] setup \
         | tee -a $log
+
+    [[ $FORMODULE != "@root" ]] &&
+        needed-by $FORMODULE | tee -a $log
+
     _internal_module-variant-wrapper $SCBI_BDIR/install \
                                      $METAMODULE $VARIANT $FCT_SETUP || exit 1
     ilog $METAMODULE End metamodule $METAMODULE \[${VARIANT//./ }\] setup \
@@ -1321,6 +1341,10 @@ function handle-meta-module()
     line-sep
     ilog $METAMODULE %BMetamodule %t$METAMODULE%c \[%g${VARIANT//./ }%c\] wrapup \
         | tee -a $log
+
+    [[ $FORMODULE != "@root" ]] &&
+        needed-by $FORMODULE | tee -a $log
+
     _internal_module-variant-wrapper $SCBI_BDIR/install \
                                      $METAMODULE $VARIANT $FCT_WRAPUP || exit 1
     ilog $METAMODULE End metamodule $METAMODULE \[${VARIANT//./ }\] wrapup \
@@ -1417,7 +1441,11 @@ function handle-module()
 
     #  Create module build directory
 
-    SCBI_MODULES_LIST+=( "$MODREF" )
+    if [[ $variant == "default" ]]; then
+        SCBI_MODULES_LIST+=( "$module" )
+    else
+        SCBI_MODULES_LIST+=( "$module/$variant" )
+    fi
 
     mkdir -p $SCBI_BDIR/$module/$SCBI_TARGET-$variant/logs > $log 2>&1
 
@@ -1427,7 +1455,7 @@ function handle-module()
 
     if [[ $? == 0 ]]; then
         (
-            handle-meta-module $module $variant
+            handle-meta-module $FORMODULE $module $variant
         )
         res=$?
         unset SCBI_MODULES_LIST[-1]
@@ -1512,6 +1540,9 @@ function handle-module()
 
     line-sep
     ilog $module %BBuilding %t$module%c \[%g${variant//./ }%c\] \(%g$DISPREF%c\) | tee -a $log
+
+    [[ $FORMODULE != "@root" ]] &&
+        needed-by $module | tee -a $log
 
     if [[ $SCBI_HOST == $SCBI_TARGET ]]; then
         ilog $module native $SCBI_TARGET | tee -a $log

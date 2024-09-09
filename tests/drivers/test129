@@ -9,6 +9,8 @@ xxxx/xx/xx xx:xx:xx : Metamodule meta-propa-ver [default] setup
 xxxx/xx/xx xx:xx:xx : End metamodule meta-propa-ver [default] setup
 
 xxxx/xx/xx xx:xx:xx : Building lib1a [default] (v1)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ meta-propa-ver
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from archive

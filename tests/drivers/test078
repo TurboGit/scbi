@@ -38,6 +38,8 @@ xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 
 xxxx/xx/xx xx:xx:xx : Building mautov [mainav] (99.99)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ mainav
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -77,6 +79,8 @@ xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 
 xxxx/xx/xx xx:xx:xx : Building mautov [for2] (99.99)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ mainav2
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : config [for2] starting

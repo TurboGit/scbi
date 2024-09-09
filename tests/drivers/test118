@@ -8,6 +8,9 @@ xxxx/xx/xx xx:xx:xx : Metamodule metaagg2 [default] setup
 xxxx/xx/xx xx:xx:xx : End metamodule metaagg2 [default] setup
 
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dep1
+xxxx/xx/xx xx:xx:xx :   ↳ metaagg2
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
@@ -20,6 +23,8 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building dep1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metaagg2
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)

@@ -9,6 +9,8 @@ CLEAN-DIFF <<EOF
 2024/03/29 09:56:59 : End metamodule metaagg [default] setup
 
 2024/03/29 09:56:59 : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metaagg
 2024/03/29 09:56:59 : native x86_64-linux-gnu
 2024/03/29 09:56:59 : steps : setup config build install wrapup
 2024/03/29 09:56:59 : get sources from git
@@ -21,6 +23,8 @@ CLEAN-DIFF <<EOF
 2024/03/29 09:56:59 : End Building lib1 [default] (master)
 
 2024/03/29 09:56:59 : Building libenv [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metaagg
 2024/03/29 09:56:59 : native x86_64-linux-gnu
 2024/03/29 09:56:59 : steps : setup config build install wrapup
 2024/03/29 09:57:00 : get sources from git
