@@ -1270,7 +1270,8 @@ function handle-meta-module()
 
     [[ $DEPS == yes ]] || ( [[ -z $FCT_SETUP ]] && [[ -z $FCT_WRAPUP ]] ) &&
         {
-            rm -f $SCBI_BDIR/$METAMODULE/source-ref
+            local MDIR=$SCBI_BDIR/$METAMODULE
+            rm -f $MDIR/source-ref
 
             function do-sync()
             {
@@ -1294,16 +1295,16 @@ function handle-meta-module()
                     {
                         sync-dir $IDIR \
                                  $SCBI_BDIR/$METAMODULE/$SCBI_TARGET-$VARIANT/.
-
-                        cat $SCBI_BDIR/$module/source-ref \
-                            >> $SCBI_BDIR/$METAMODULE/source-ref
                     }
+
+                cat $SCBI_BDIR/$module/source-ref \
+                    >> $MDIR/source-ref
             }
 
             #  Clean aggregate meta module install. Do this unconditionally
             #  to cover the case of an aggregate meta module being changed
             #  to a standard meta module.
-            local MDIR=$SCBI_BDIR/$METAMODULE
+
             rm -fr $MDIR/$SCBI_TARGET-$VARIANT/install
 
             for module in $(plugin-call-variant-hooks \
@@ -1327,11 +1328,11 @@ function handle-meta-module()
                         else
                             sync-dir $IDIR \
                                      $MDIR/$SCBI_TARGET-$VARIANT/.
-
-                            cat $SCBI_BDIR/$module/source-ref \
-                                >> $MDIR/source-ref
                         fi
                     fi
+
+                    cat $SCBI_BDIR/$module/source-ref \
+                        >> $MDIR/source-ref
                 fi
             done
         }
