@@ -1310,3 +1310,107 @@ function load-runtime-module-plan()
         fi
     done < $PLAN
 }
+
+############################## set-compiler-paths
+
+function set-compiler-paths()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local VER=1
+
+    if [[ $SCBI_IS_WINDOWS == no ]]; then
+        VER=$(gcc -dumpversion)
+    fi
+
+    if [[ -z $TARGET ]]; then
+        I1=$PREFIX/include/$SCBI_HOST
+        I2=$PREFIX/include
+        I3=$PREFIX/lib/gcc/$SCBI_HOST/$VER/include
+        I4=$PREFIX/local/include
+
+        IP1=$PREFIX/include/c++/$VER
+
+        P=$PREFIX/$SCBI_HOST/share/gpr:$PREFIX/share/gpr
+        L=$PREFIX/lib/$SCBI_HOST:$PREFIX/lib
+    else
+        I1=$PREFIX/lib/gcc/$TARGET/$VER/include
+        I2=$PREFIX/include/$TARGET
+        I3=$PREFIX/include
+        I4=$PREFIX/local/include
+
+        IP1=$PREFIX/include/$TARGET/c++/$VER
+        IP2=$PREFIX/include/c++/$VER
+
+        P=$PREFIX/$TARGET/share/gpr
+        L=$PREFIX/lib/$TARGET
+
+        #  The cross-compiler needs libiconv shared library if it was
+        #  built against it.
+        IC=$SCBI_BDIR/c-libiconv/x86_64-linux-gnu-default/install/lib
+
+        [[ -d $IC ]] && L=$L:$IC
+    fi
+
+    export C_INCLUDE_PATH=$I1:$I2:$I3:$I4
+    export CPLUS_INCLUDE_PATH=$IP1:$IP2:$I1:$I2:$I3:$I4
+
+    export LIBRARY_PATH=$L:/usr/lib
+    export LD_LIBRARY_PATH=$L:/usr/lib
+    export ADA_PROJECT_PATH=$P
+}
+
+############################## target-env
+
+function target-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ -z $PREFIX ]]; then
+        PREFIX=$(dirname $(dirname $(command -v gcc)))
+    fi
+
+    if [[ -z $TARGET ]]; then
+        B=$PREFIX/bin
+    else
+        B=$PREFIX/$TARGET/bin
+    fi
+
+    export PATH=$B:$PATH
+
+    set-compiler-paths $PREFIX $TARGET
+}
+
+############################## no-target-env
+
+function no-target-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ -z $PREFIX ]]; then
+        PREFIX=$(dirname $(dirname $(command -v gcc)))
+
+        #  check if gcc is inside a target specific dir
+        #  <prefix>/<target>/bin
+
+        if [[ -x $PREFIX/../bin/gcc ]]; then
+            local DN=$(dirname $PREFIX)
+            if [[ $DN != "/" ]]; then
+                PREFIX=$DN
+            fi
+        fi
+    fi
+
+    if [[ -z $TARGET ]]; then
+        B=$PREFIX/bin
+    else
+        B=$PREFIX/$TARGET/bin
+    fi
+
+    export PATH=$B:$PATH
+
+    set-compiler-paths $PREFIX $SCBI_HOST
+}

@@ -43,6 +43,10 @@ function shl-setup-env()
     local MODULES=( $2 )
     local DOCD=$3
 
+    if [[ "$SCBI_HOST" != "$SCBI_TARGET" ]]; then
+        target-env $SCBI_BDIR/install $SCBI_TARGET
+    fi
+
     for M in ${MODULES[*]}; do
         handle-env "@root" $M
         handle-module-env "@root" $M env

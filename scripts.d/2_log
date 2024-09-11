@@ -254,6 +254,8 @@ function show-command()
 
     echo "   source $SCBI_BDIR/.scbi.runtime"
     echo "   [[ -f ../logs/env.cmd ]] && source ../logs/env.cmd"
+    [[ $SCBI_TARGET != $SCBI_HOST ]] &&
+        echo "   target-env \$SCBI_BDIR/install \$SCBI_TARGET"
     echo "   [[ -f ../logs/build-plan ]] &&"
     echo "      load-runtime-module-plan ../logs/build-plan"
     echo ""
