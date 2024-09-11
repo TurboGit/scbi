@@ -1,29 +1,4 @@
 
-
-############################## system-compiler
-
-function system-compiler()
-{
-    export PATH=/usr/local/bin:/usr/bin:/bin
-
-    unset C_INCLUDE_PATH
-    unset CPLUS_INCLUDE_PATH
-    unset LIBRARY_PATH
-    unset LD_LIBRARY_PATH
-    unset ADA_PROJECT_PATH
-}
-
-############################## built-compiler
-
-function built-compiler()
-{
-    local PREFIX=$SCBI_BDIR/install
-
-    export PATH=$PREFIX/bin:$PATH
-
-    set-compiler-paths $PREFIX
-}
-
 #  make an alias for x86_64-linux if necessary
 
 if [[ -e $PREFIX/x86_64-linux-gnu ]] && [[ ! -e $PREFIX/x86_64-linux ]]; then

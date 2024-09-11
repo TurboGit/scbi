@@ -1414,3 +1414,27 @@ function no-target-env()
 
     set-compiler-paths $PREFIX $SCBI_HOST
 }
+
+############################## system-compiler
+
+function system-compiler()
+{
+    export PATH=/usr/local/bin:/usr/bin:/bin
+
+    unset C_INCLUDE_PATH
+    unset CPLUS_INCLUDE_PATH
+    unset LIBRARY_PATH
+    unset LD_LIBRARY_PATH
+    unset ADA_PROJECT_PATH
+}
+
+############################## built-compiler
+
+function built-compiler()
+{
+    local PREFIX=$SCBI_BDIR/install
+
+    export PATH=$PREFIX/bin:$PATH
+
+    set-compiler-paths $PREFIX
+}
