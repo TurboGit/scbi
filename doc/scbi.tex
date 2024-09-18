@@ -693,7 +693,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[return] \tabto{2cm} array
 		\begin{enumerate}
 			\item proxy : name of a proxy, or \emph{default} to use default system one. (\seeref{proxy}).
-			\item options : comma separated list of options, possible values are \emph{none}, \emph{no-recursive}, \emph{lfs}
+			\item options : comma separated list of options, possible values are \emph{none}, \emph{no-recursive}, \emph{lfs}, \emph{submodule:PATH:URL}. The later option is to change the \code{URL} for a given submodule while cloning or updating the module repository. It is possible to specify multiple \emph{submodule} options.
 			\item protocol : \emph{git}, \emph{svn}, \emph{hg}
 			\item URL : repository location with protocol
 			\item DIR (optional): name of the directory if the repository is hosting multiple projects. This is mostly needed for Subversion non standard repository layout. If \code{URL} is pointing to the tree where \code{trunk}, \code{branches} and \code{tags} directories are found, then SCBI will check for the actual sources in:

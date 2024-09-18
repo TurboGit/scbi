@@ -40,6 +40,29 @@ function svn-co()
     )
 }
 
+############################## git-set-module-url
+
+function git-set-submodule-url()
+{
+    local OPTIONS=$1
+
+    local LOPTS=( ${OPTIONS//,/ } )
+
+    for O in ${LOPTS[*]}; do
+        local CMD=${O%%:*}
+        case $CMD in
+            submodule)
+                #  Remove submodule
+                local SO=${O#submodule:}
+                #  Get PATH & URL
+                local PTH=${SO%%:*}
+                local URL=${SO#*:}
+                git submodule set-url $PTH $URL
+                ;;
+        esac
+    done
+}
+
 ############################## git-co
 
 function git-co()
@@ -53,9 +76,23 @@ function git-co()
 
     local GOPTS1=""
     local GOPTS2=""
+    local HAS_LFS=no
+    local RECURSIVE=yes
 
-    local LOPTS=",$OPTIONS,"
-    if [[ "$LOPTS" == "${LOPTS/,no-recursive,}" ]]; then
+    local LOPTS=( ${OPTIONS//,/ } )
+
+    for O in ${LOPTS[*]}; do
+        case $O in
+            lfs)
+                HAS_LFS=true
+                ;;
+            no-recursive)
+                RECURSIVE=no
+                ;;
+        esac
+    done
+
+    if [[ $RECURSIVE == yes ]]; then
         GOPTS1="--recursive"
         GOPTS2="--recurse-submodules"
     fi
@@ -66,7 +103,17 @@ function git-co()
         mkdir -p $SCBI_BDIR/.vcs
         cd $SCBI_BDIR/.vcs &&
         if [[ ! -d $REPO ]]; then
-            git clone $GOPTS1 $URL $REPO
+            git clone $URL $REPO
+            [[ $? == 0 ]] &&
+                {
+                    cd $REPO &&
+                        [[ -f .gitmodules ]] &&
+                        {
+                            git-set-submodule-url $OPTIONS
+                            git submodule init
+                            git submodule update $GOPTS1
+                        } || true
+                }
         else
             cd $REPO
             [[ ! -d .git ]] &&
@@ -74,11 +121,12 @@ function git-co()
                 exit 1
             #  we set the URL in case the repo has been relocated
             git remote set-url origin $URL
+            [[ -f .gitmodules ]] && git-set-submodule-url $OPTIONS
             git fetch --force --tags $GOPTS2
         fi &&
         cd $SCBI_BDIR/$NAME &&
         ln -s ../.vcs/$REPO vcs &&
-        if [[ "$LOPTS" != "${LOPTS/,lfs,}" ]]; then
+        if [[ $HAS_LFS == yes ]]; then
             (
                 cd vcs &&
                     git lfs install &&
@@ -203,7 +251,10 @@ function git-branch()
 
         local LOPTS=",$OPTIONS,"
         [[ "$LOPTS" == "${LOPTS/,no-recursive,}" ]] && [[ -f .gitmodules ]] &&
-            git submodule update --init --recursive || true
+            {
+                git-set-submodule-url $OPTIONS
+                git submodule update --init --recursive
+            } || true
     )
 }
 
