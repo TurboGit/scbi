@@ -190,7 +190,7 @@ function git-branch()
 
         #  first, let's update the repository
 
-        git checkout master
+        git checkout --force master
         git fetch --tags
 
         #  if no branch specified use the default branch
