@@ -58,6 +58,9 @@ function git-set-submodule-url()
                 local PTH=${SO%%:*}
                 local URL=${SO#*:}
                 git submodule set-url $PTH $URL
+                #  Maybe too old version without set-url, fallback to multiline sed
+                [[ $? != 0 ]] &&
+                    sed -i -z "s,\(${PTH}.*url = \)\(.*\),\1${URL}\n,g" .gitmodules
                 ;;
         esac
     done
