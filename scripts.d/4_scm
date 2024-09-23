@@ -648,6 +648,8 @@ function get-vcs()
                     ilog build "error: tool git not installed"
                 fi
 
+                ilog build "error: see $log"
+
                 exit 1
             fi
             ;;
@@ -664,6 +666,8 @@ function get-vcs()
                     ilog build "error: tool hg not installed"
                 fi
 
+                ilog build "error: see $log"
+
                 exit 1
             fi
             ;;
@@ -679,6 +683,8 @@ function get-vcs()
                 else
                     ilog build "error: tool svn not installed"
                 fi
+
+                ilog build "error: see $log"
 
                 exit 1
             fi
