@@ -184,6 +184,10 @@ function ini-apply-values()
             if [[ -n ${KV[$var]} ]]; then
                 var=${KV[$var]}
                 val=$(ini-get-option "$SECTION" $K)
+                #  Record this ini setting only if not already set by
+                #  command line.
+                [[ -z ${CMDLINE_OPTS[$var]} ]] &&
+                    CMDLINE_OPTS[$var]="$val"
             else
                 #  A free variable, just assign
                 var=${var//-/_}
