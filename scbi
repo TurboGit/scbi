@@ -2037,13 +2037,12 @@ function setup-generic-tool-env()
 
 declare SCBIOPTS=()
 declare SCBIARGS=()
+declare -A CMDLINE_OPTS=()
 
 #  Load ini file
 ini-load-files
 #  Apply default global values
 ini-apply-values ""
-
-declare -A CMDLINE_OPTS=()
 
 while [[ $# -gt 0 ]]; do
     case $1 in
