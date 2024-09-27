@@ -257,7 +257,7 @@ function git-branch()
         [[ "$LOPTS" == "${LOPTS/,no-recursive,}" ]] && [[ -f .gitmodules ]] &&
             {
                 git-set-submodule-url $OPTIONS
-                git submodule update --init --recursive
+                git submodule update --force --init --recursive
             } || true
     )
 }
