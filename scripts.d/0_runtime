@@ -861,7 +861,7 @@ function remove-from-list()
     local -n LIST=$1
     local VALUE=$2
 
-    for i in ${!LIST[@]};do
+    for i in ${!LIST[@]}; do
         [[ ${LIST[$i]} == $VALUE ]] && unset LIST[$i]
     done
 
