@@ -75,6 +75,10 @@ function module-setup()
     local TARGET=$5
     local OOT=$6
 
+    local TVDIR=""
+    get-target-dir TVDIR $module $variant
+    TVDIR=$(realpath --relative-to=$PWD $TVDIR)
+
     #  if module-src soft link exists use it to copy the module sources into
     #  the pointed location. This is used when multiple modules are used
     #  together to create the set of source for the build. In this case we do
@@ -87,7 +91,7 @@ function module-setup()
         SRCDIR=module-src
         OPT=
     else
-        SRCDIR=$TARGET-$VARIANT/src
+        SRCDIR=$TVDIR/src
         OPT=--delete
     fi
 
@@ -117,21 +121,21 @@ function module-setup()
     fi
 
     rm -fr build
-    ln -s $TARGET-$VARIANT build
+    ln -s $TVDIR build
 
     if [[ "$OOT" = "yes" ]]; then
         #  build must be a dir, delete link if it exists
-        if [[ $SCBI_HOST == "x86_64-mingw64" ]]; then
+        if [[ $SCBI_HOST =~ mingw64 ]]; then
             #  There is no symlinks on MSYS
-            [[ -d $TARGET-$VARIANT/build ]] && rm -fr $TARGET-$VARIANT/build
+            [[ -d $TVDIR/build ]] && rm -fr $TVDIR/build
         else
-            [[ -h $TARGET-$VARIANT/build ]] && rm -f $TARGET-$VARIANT/build
+            [[ -h $TVDIR/build ]] && rm -f $TVDIR/build
         fi
-        mkdir -p $TARGET-$VARIANT/build
+        mkdir -p $TVDIR/build
     else
         #  build must be a link, delete dir if it exists
-        rm -fr $TARGET-$VARIANT/build
-        [[ $HASSRC == true ]] && ln -s src $TARGET-$VARIANT/build
+        rm -fr $TVDIR/build
+        [[ $HASSRC == true ]] && ln -s src $TVDIR/build
     fi
 
     return $res

@@ -124,9 +124,11 @@ function get-hook-value()
 
     RESULT=""
 
+    local TVDIR=""
+    get-target-dir TVDIR $MODULE $VARIANT
+
     if [[ -n $FCT ]]; then
-        RESULT=$($FCT $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/install \
-                      $SCBI_TARGET $VARIANT)
+        RESULT=$($FCT $TVDIR/install $SCBI_TARGET $VARIANT)
     fi
 }
 
@@ -1211,7 +1213,7 @@ function plugin-call-env-hooks()
 
     #  Then setup the current module
 
-    local TVDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant
+    get-target-dir TVDIR $module $variant
 
     if [[ $MODE == direct ]]; then
         for MOD in $(plugin-call-variant-hooks \

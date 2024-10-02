@@ -58,6 +58,18 @@ function check-tools-abort()
         exit 1
 }
 
+############################## get-target-dir
+
+function get-target-dir()
+{
+    local -n _REF=$1
+    local MODULE=$2
+    local VARIANT=$3
+    local FILE=$4
+
+    _REF=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT${FILE:+/$FILE}
+}
+
 ############################## ini-load-file
 
 function ini-load-file()
@@ -452,11 +464,14 @@ function module-wrapper()
     fi
 
     #  global logs
-    log=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-$VARIANT-$mstep.log
+    local log=$SCBI_LOGS/$TODAY/$SCBI_TARGET-$MODULE-$VARIANT-$mstep.log
+
+    local TVDIR=""
+    get-target-dir TVDIR $MODULE $VARIANT
 
     #  local log for last module command
-    mlog=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/logs/$mstep.log
-    clog=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/logs/$mstep.cmd
+    local mlog=$TVDIR/logs/$mstep.log
+    local clog=$TVDIR/logs/$mstep.cmd
 
     ilog $MODULE $mstep$dvariant starting
 
@@ -471,8 +486,8 @@ function module-wrapper()
 
         if [[ "$STEP" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
             cd $SCBI_BDIR/$MODULE
-        elif [[ -d $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/$BUILDDIR ]]; then
-            cd $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/$BUILDDIR
+        elif [[ -d $TVDIR/build ]]; then
+            cd $TVDIR/$BUILDDIR
         else
             #  a native module has no sources for example
             cd $SCBI_BDIR/$MODULE
@@ -520,7 +535,7 @@ function module-wrapper()
             fi
             elog $MODULE $mstep failed with error $res
 
-            RDIR=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/logs
+            RDIR=$TVDIR/logs
 
             case $STEP in
                 *config|*build|*install|*cross-config|*cross-build|*cross-install)
@@ -657,7 +672,8 @@ function handle-module-env()
 
     [[ $ref = "skip" ]] && return 0
 
-    local TVDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant
+    local TVDIR=""
+    get-target-dir TVDIR $module $variant
 
     if [[ -n $SCBI_ENV_MODULE ]]; then
         {
@@ -817,14 +833,17 @@ function is-module-up-to-date()
 
     local rbid=0
 
+    local TVDIR=""
+    get-target-dir TVDIR $module $variant
+
     if [[ $DO_FORCE = yes ]]; then
-        rm -f $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id
+        rm -f $TVDIR/build-id
         rbid=1
     else
         #  Check build id, only rebuild if mismatch
 
         diff -q $SCBI_BDIR/$module/build-id-$variant \
-             $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id > /dev/null 2>&1
+             $TVDIR/build-id > /dev/null 2>&1
         rbid=$?
     fi
 
@@ -1281,6 +1300,9 @@ function handle-meta-module()
             local MDIR=$SCBI_BDIR/$METAMODULE
             rm -f $MDIR/source-ref
 
+            local TVMDIR=""
+            get-target-dir TVMDIR $METAMODULE $VARIANT
+
             function do-sync()
             {
                 local FORMODULE=$1
@@ -1297,13 +1319,13 @@ function handle-meta-module()
                 local module=${smodule_info[0]}
                 local variant=${smodule_info[1]}
 
-                local IDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
+                local TVDIR=""
+                get-target-dir TVDIR $module $variant
+
+                local IDIR=$TVDIR/install
 
                 [[ -d $IDIR ]] &&
-                    {
-                        sync-dir $IDIR \
-                                 $SCBI_BDIR/$METAMODULE/$SCBI_TARGET-$VARIANT/.
-                    }
+                    sync-dir $IDIR $TVMDIR/.
 
                 cat $SCBI_BDIR/$module/source-ref \
                     >> $MDIR/source-ref
@@ -1313,7 +1335,7 @@ function handle-meta-module()
             #  to cover the case of an aggregate meta module being changed
             #  to a standard meta module.
 
-            rm -fr $MDIR/$SCBI_TARGET-$VARIANT/install
+            rm -fr $TVMDIR/install
 
             for module in $(plugin-call-variant-hooks \
                                 $METAMODULE modules \
@@ -1328,14 +1350,14 @@ function handle-meta-module()
 
                 if [[ -n $FCT_AGG  ]]; then
                     local AGG_MODE=$($FCT_AGG $SCBI_PREFIX $TARGET $VARIANT)
-                    local IDIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
+                    local IDIR=""
+                    get-target-dir IDIR $module $variant install
 
                     if [[ $AGG_MODE != no ]] && [[ -d $IDIR ]]; then
                         if [[ $AGG_MODE == recursive ]]; then
                             for-all-modules-depends-with-meta do-sync $module
                         else
-                            sync-dir $IDIR \
-                                     $MDIR/$SCBI_TARGET-$VARIANT/.
+                            sync-dir $IDIR $TVMDIR/.
                         fi
                     fi
 
@@ -1456,7 +1478,10 @@ function handle-module()
         SCBI_MODULES_LIST+=( "$module/$variant" )
     fi
 
-    mkdir -p $SCBI_BDIR/$module/$SCBI_TARGET-$variant/logs > $log 2>&1
+    local TVDIR=""
+    get-target-dir TVDIR $module $variant
+
+    mkdir -p $TVDIR/logs > $log 2>&1
 
     #  Check if meta-module, if so call handle-module for each one
 
@@ -1531,7 +1556,7 @@ function handle-module()
         ilog $module Clean $module install for $SCBI_TARGET/$variant
         [[ -d $SCBI_BDIR/$module ]] &&
             module-clean-install \
-                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                $TVDIR/install \
                 $FORMODULE $module $variant $SCBI_TARGET
         unset SCBI_MODULES_LIST[-1]
         return 0
@@ -1565,8 +1590,7 @@ function handle-module()
     #  even if already created when entering this routine. This is because
     #  in case of a purge the build directory could have been removed.
 
-    [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]] ||
-        mkdir $SCBI_BDIR/$module/$SCBI_TARGET-$variant
+    [[ -d $TVDIR ]] || mkdir $TVDIR
 
     #  Set module environment if defined
 
@@ -1610,7 +1634,7 @@ function handle-module()
 
         [[ -d build ]] && rm -fr build
         [[ -h build ]] && rm build
-        ln -s $SCBI_TARGET-$variant build
+        ln -s $(realpath --relative-to=$PWD $TVDIR) build
 
         #  Only rebuild if mismatch
 
@@ -1638,7 +1662,7 @@ function handle-module()
 
             #  Setup the build environment for the current module
 
-            local SCBI_LOGS_DIR=$SCBI_BDIR/$module/$SCBI_TARGET-$variant/logs
+            local SCBI_LOGS_DIR=$TVDIR/logs
             SCBI_ENV_MODULE=$SCBI_LOGS_DIR/env.cmd
             rm -f $SCBI_ENV_MODULE
 
@@ -1649,7 +1673,7 @@ function handle-module()
                     cat $SCBI_OS_MODULE_FILE
                 } >> $SCBI_ENV_MODULE
 
-            if [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant ]]; then
+            if [[ -d $TVDIR ]]; then
                 #  Exports all environment variables starting with SCBI_
                 echo                          >> $SCBI_ENV_MODULE
                 echo "# SCBI global settings" >> $SCBI_ENV_MODULE
@@ -1697,7 +1721,7 @@ function handle-module()
             #  into the same location.
 
             if [[ $DO_INSTALL != no ]]; then
-                rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install
+                rm -fr $TVDIR/install
                 rm -f  $SCBI_BDIR/$module/install-id
                 rm -f  $SCBI_BDIR/$module/install-${SCBI_TARGET}-id
             fi
@@ -1712,8 +1736,8 @@ function handle-module()
             #  location).
 
             if [[ $SAFE_MODE = yes ]] && [[ $ISOOT = yes ]]; then
-                rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build
-                rm -fr $SCBI_BDIR/$module/$SCBI_TARGET-$variant/build-id
+                rm -fr $TVDIR/build
+                rm -fr $TVDIR/build-id
             fi
         fi
 
@@ -1742,7 +1766,7 @@ function handle-module()
 
                 if [[ $SCBI_DLOG = yes ]]; then
                     module-pre-$step \
-                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $TVDIR/install \
                         $FORMODULE \
                         $module \
                         $variant $SCBI_TARGET $ISOOT 2>&1 \
@@ -1750,7 +1774,7 @@ function handle-module()
                     res=${PIPESTATUS[0]}
                 else
                     module-pre-$step \
-                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $TVDIR/install \
                         $FORMODULE \
                         $module \
                         $variant $SCBI_TARGET $ISOOT 2>&1 \
@@ -1767,13 +1791,13 @@ function handle-module()
             #  Apply module specific step if any
 
             module-variant-wrapper \
-                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $module \
+                $TVDIR/install $module \
                 $variant pre-$step || exit 1
 
             ########## module
 
             module-variant-wrapper \
-                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install $module \
+                $TVDIR/install $module \
                 $variant $step || exit 1
 
             #  Apply any generic step (module-setup, module-purge)
@@ -1787,13 +1811,13 @@ function handle-module()
 
                 if [[ $SCBI_DLOG = yes ]]; then
                     module-$step \
-                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $TVDIR/install \
                         $FORMODULE \
                         $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee $log
                     res=${PIPESTATUS[0]}
                 else
                     module-$step \
-                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $TVDIR/install \
                         $FORMODULE \
                         $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee -a $log
                     res=${PIPESTATUS[0]}
@@ -1808,7 +1832,7 @@ function handle-module()
             ########## POST module
 
             module-variant-wrapper \
-                $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                $TVDIR/install \
                 $module $variant post-$step || exit 1
 
             res=0
@@ -1820,14 +1844,14 @@ function handle-module()
 
                 if [[ $SCBI_DLOG = yes ]]; then
                     module-post-$step \
-                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $TVDIR/install \
                         $FORMODULE \
                         $module $variant $SCBI_TARGET $ISOOT \
                         2>&1 | tee $log
                     res=${PIPESTATUS[0]}
                 else
                     module-post-$step \
-                        $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
+                        $TVDIR/install \
                         $FORMODULE \
                         $module $variant $SCBI_TARGET $ISOOT \
                         2>&1 | tee -a $log
@@ -1856,8 +1880,7 @@ function handle-module()
     get-hook FCT $module $variant prefix
 
     if [[ -n $FCT ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
-        _IDIR=$($FCT $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install \
-                     $SCBI_TARGET $variant)
+        _IDIR=$($FCT $TVDIR/install $SCBI_TARGET $variant)
     else
         _IDIR=$SCBI_PREFIX
     fi
@@ -1866,7 +1889,7 @@ function handle-module()
         ilog $module skip global install
 
     elif [[ "$DO_INSTALL" != "no" ]] &&
-             [[ -d $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install ]];
+             [[ -d $TVDIR/install ]];
     then
         local IDEST=${_IDIR/$SCBI_BDIR/<sandbox>}
         IDEST=${IDEST/$HOME/\$HOME}
@@ -1891,7 +1914,7 @@ function handle-module()
 
         $SUDO mkdir -p ${_IDIR}/
         $SUDO rsync -a --force \
-              $SCBI_BDIR/$module/$SCBI_TARGET-$variant/install/. \
+              $TVDIR/install/. \
               ${_IDIR}/. > $log 2>&1
     fi || elog $module fail to copy to ${_IDIR}
 

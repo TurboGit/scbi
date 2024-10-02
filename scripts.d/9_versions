@@ -647,7 +647,10 @@ function record-build-plan()
     local MODULE=$1
     local VARIANT=$2
 
-    local PLAN=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/logs/build-plan
+    local TVDIR=""
+    get-target-dir TVDIR $MODULE $VARIANT
+
+    local PLAN=$TVDIR/logs/build-plan
 
     echo "# build plan"        > $PLAN
     _internal_list-build-plan >> $PLAN
