@@ -74,6 +74,7 @@ os@-jpeg-dev                        libjpeg-dev
 os@-json-glib-dev                   libjson-glib-dev
 os@-jxl-dev                         libjxl-dev
 os@-lapack-dev                      liblapack-dev
+os@-lapacke-dev                     liblapacke-dev
 os@-lcms2-dev                       liblcms2-dev
 os@-lensfun-dev                     liblensfun-dev
 os@-libtool                         libtool
