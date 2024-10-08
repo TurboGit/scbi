@@ -340,6 +340,8 @@ function handle-plan-meta-module()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
+    [[ $ref == "skip" ]] && return
+
     if [[ -f $SCBI_PLUGINS/$module ]]; then
         source $SCBI_PLUGINS/$module
 
