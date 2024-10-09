@@ -14,7 +14,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metaagg
 2024/03/29 09:56:59 : native x86_64-linux-gnu
 2024/03/29 09:56:59 : steps : setup config build install wrapup
 2024/03/29 09:56:59 : get sources from git
-2024/03/29 09:56:59 : apply-patch filename lib1-0-fix.patch
+2024/03/29 09:56:59 : apply-patch lib1-0-fix.patch
 2024/03/29 09:56:59 : build starting
 2024/03/29 09:56:59 : build completed
 2024/03/29 09:56:59 : install starting

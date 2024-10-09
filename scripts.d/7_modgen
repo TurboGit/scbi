@@ -18,7 +18,7 @@ function module-apply-patch()
         return 1
     fi
 
-    ilog $MODULE apply-patch filename ${patch##*/}
+    ilog $MODULE apply-patch ${patch##*/}
 
     check-tools-abort patch
 
