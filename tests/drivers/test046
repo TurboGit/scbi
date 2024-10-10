@@ -10,7 +10,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ mainlib
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
-xxxx/xx/xx xx:xx:xx : apply-patch lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
 xxxx/xx/xx xx:xx:xx : build [titi] starting
 xxxx/xx/xx xx:xx:xx : build [titi] completed
 xxxx/xx/xx xx:xx:xx : install [titi] starting
@@ -58,7 +58,7 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [newtiti] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : apply-patch lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
 xxxx/xx/xx xx:xx:xx : build [newtiti] starting
 xxxx/xx/xx xx:xx:xx : build [newtiti] completed
 xxxx/xx/xx xx:xx:xx : install [newtiti] starting
