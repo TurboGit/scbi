@@ -464,11 +464,15 @@ function module-wrapper()
         cd $SCBI_BDIR/$MODULE >> $log 2>&1
 
         #  Go to build directory
+        #  On Windows there is no symlink, if not out of tree build go to src
+
+        local BUILDDIR=build
+        [[ $SCBI_IS_WINDOWS == yes ]] && [[ $ISOOT == no ]] && BUILDDIR=src
 
         if [[ "$STEP" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
             cd $SCBI_BDIR/$MODULE
-        elif [[ -d $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/build ]]; then
-            cd $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/build
+        elif [[ -d $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/$BUILDDIR ]]; then
+            cd $SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/$BUILDDIR
         else
             #  a native module has no sources for example
             cd $SCBI_BDIR/$MODULE
@@ -519,7 +523,7 @@ function module-wrapper()
             RDIR=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/logs
 
             case $STEP in
-                config|build|install|cross-config|cross-build|cross-install)
+                *config|*build|*install|*cross-config|*cross-build|*cross-install)
                     elog $MODULE to reproduce:
                     elog $MODULE bash $RDIR/$mstep.cmd
                     elog $MODULE use bash -x option for debug
@@ -1904,15 +1908,19 @@ function handle-module()
 
 function setup-generic-tool-env()
 {
+    local offset=0
+
+    [[ $SCBI_IS_WINDOWS == yes ]] && offset=8
+
     if [[ $DO_COLOR == dark ]]; then
         tput setaf 7
 
         SCBI_CBOLD=$(tput bold)$(tput setaf 252)
         SCBI_CTEXT=$(tput setaf 15)
         SCBI_CCLEAR=$(tput sgr0)$(tput setaf 7)
-        SCBI_CRED=$SCBI_CBOLD$(tput setaf 9)
-        SCBI_CBLUE=$SCBI_CBOLD$(tput setaf 12)
-        SCBI_CGREEN=$SCBI_CBOLD$(tput setaf 10)
+        SCBI_CRED=$SCBI_CBOLD$(tput setaf $((9 - offset)))
+        SCBI_CBLUE=$SCBI_CBOLD$(tput setaf $((12 - offset)))
+        SCBI_CGREEN=$SCBI_CBOLD$(tput setaf $((10 - offset)))
     elif [[ $DO_COLOR == light ]]; then
         tput setaf 0
 

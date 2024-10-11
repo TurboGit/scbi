@@ -1,4 +1,12 @@
 
+function test19-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
 ####################################################### SETUP
 
 function test19-pre-setup()
