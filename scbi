@@ -1904,15 +1904,19 @@ function handle-module()
 
 function setup-generic-tool-env()
 {
+    local offset=0
+
+    [[ $SCBI_IS_WINDOWS == yes ]] && offset=8
+
     if [[ $DO_COLOR == dark ]]; then
         tput setaf 7
 
         SCBI_CBOLD=$(tput bold)$(tput setaf 252)
         SCBI_CTEXT=$(tput setaf 15)
         SCBI_CCLEAR=$(tput sgr0)$(tput setaf 7)
-        SCBI_CRED=$SCBI_CBOLD$(tput setaf 9)
-        SCBI_CBLUE=$SCBI_CBOLD$(tput setaf 12)
-        SCBI_CGREEN=$SCBI_CBOLD$(tput setaf 10)
+        SCBI_CRED=$SCBI_CBOLD$(tput setaf $((9 - offset)))
+        SCBI_CBLUE=$SCBI_CBOLD$(tput setaf $((12 - offset)))
+        SCBI_CGREEN=$SCBI_CBOLD$(tput setaf $((10 - offset)))
     elif [[ $DO_COLOR == light ]]; then
         tput setaf 0
 
