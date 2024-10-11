@@ -519,7 +519,7 @@ function module-wrapper()
             RDIR=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT/logs
 
             case $STEP in
-                config|build|install|cross-config|cross-build|cross-install)
+                *config|*build|*install|*cross-config|*cross-build|*cross-install)
                     elog $MODULE to reproduce:
                     elog $MODULE bash $RDIR/$mstep.cmd
                     elog $MODULE use bash -x option for debug

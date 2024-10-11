@@ -44,6 +44,9 @@ CLEAN-DIFF <<EOF
 2021/11/27 09:53:01 : no sources (vcs or tar)
 2021/11/27 09:53:01 : conferr-config starting
 2021/11/27 09:53:01 : failsteps (FAILED) conferr-config failed with error 1
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) bash <pwd>/.root/builds/failsteps/x86_64-linux-gnu-conferr/logs/conferr-config.cmd
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) use bash -x option for debug
 EOF
 
 NRUNS ./scbi --force --log:no failsteps/builderr
@@ -57,6 +60,9 @@ CLEAN-DIFF <<EOF
 2021/11/27 09:53:52 : config [builderr] completed
 2021/11/27 09:53:52 : builderr-build starting
 2021/11/27 09:53:52 : failsteps (FAILED) builderr-build failed with error 1
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) bash <pwd>/.root/builds/failsteps/x86_64-linux-gnu-builderr/logs/builderr-build.cmd
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) use bash -x option for debug
 EOF
 
 NRUNS ./scbi --force --log:no failsteps/installerr
@@ -72,6 +78,9 @@ CLEAN-DIFF <<EOF
 2021/11/27 09:54:19 : build [installerr] completed
 2021/11/27 09:54:19 : installerr-install starting
 2021/11/27 09:54:19 : failsteps (FAILED) installerr-install failed with error 1
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) bash <pwd>/.root/builds/failsteps/x86_64-linux-gnu-installerr/logs/installerr-install.cmd
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) use bash -x option for debug
 EOF
 
 NRUNS ./scbi --force --log:yes failsteps/conferr
@@ -84,6 +93,9 @@ CLEAN-DIFF <<EOF
 2021/11/27 09:55:05 : conferr-config starting
 config error
 2021/11/27 09:55:05 : failsteps (FAILED) conferr-config failed with error 1
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) bash <pwd>/.root/builds/failsteps/x86_64-linux-gnu-conferr/logs/conferr-config.cmd
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) use bash -x option for debug
 EOF
 
 NRUNS ./scbi --force --log:on-failure failsteps/installerr
@@ -100,4 +112,7 @@ CLEAN-DIFF <<EOF
 2021/11/27 09:55:40 : installerr-install starting
 install error
 2021/11/27 09:55:40 : failsteps (FAILED) installerr-install failed with error 1
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) bash <pwd>/.root/builds/failsteps/x86_64-linux-gnu-installerr/logs/installerr-install.cmd
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) use bash -x option for debug
 EOF
