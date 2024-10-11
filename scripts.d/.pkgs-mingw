@@ -1,0 +1,4 @@
+# OS name                           MSYS packages
+# --------------------------------------------------
+os@-swig                            swig
+os@-cmake                           cmake

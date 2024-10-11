@@ -15,7 +15,7 @@ declare -gA SCBI_PKGS
 #  OS dependent alias map
 declare -gA SCBI_ALIAS
 
-SCBI_OS_NAMES=( deb ubt cos rhl fed win )
+SCBI_OS_NAMES=( deb ubt cos rhl fed win mingw )
 
 if [[ $SCBI_IS_WINDOWS == no ]]; then
     check-tools-abort lsb_release
@@ -27,7 +27,11 @@ fi
 function get-distrib()
 {
     if [[ $SCBI_IS_WINDOWS == yes ]]; then
-        echo win
+        if [[ -n $MINGW_PREFIX ]]; then
+            echo mingw
+        else
+            echo win
+        fi
     else
         local DES=$(lsb_release -d)
 
@@ -139,12 +143,19 @@ function init-alias()
 function init-distrib-alias()
 {
     local DIST=$1
-    local VER=$(lsb_release -r -s)
 
-    if [[ $VER =~ ([0-9]+)(\.([0-9]+))? ]]; then
-        local MAJOR=${BASH_REMATCH[1]}
-        local MINOR=${BASH_REMATCH[3]}
-    fi
+    local MAJOB=""
+    local MINOR=""
+
+    [[ $SCBI_IS_WINDOWS == no ]] &&
+        {
+            local VER=$(lsb_release -r -s)
+
+            if [[ $VER =~ ([0-9]+)(\.([0-9]+))? ]]; then
+                local MAJOR=${BASH_REMATCH[1]}
+                local MINOR=${BASH_REMATCH[3]}
+            fi
+        }
 
     for NAME in $DIST ${MAJOR:+${DIST}~${MAJOR}} ${MINOR:+${DIST}~${MAJOR}.$MINOR}; do
         init-alias $SCBI_PLUGINS/.pkgs-$NAME
@@ -258,6 +269,20 @@ function init-rhl-pkg()
     init-distrib-alias rhl
 }
 
+function init-mingw-pkg()
+{
+    # format: mingw-w64-x86_64-cmake 3.30.4-1
+    #         rsync 3.3.0-1
+    #         [<arch>-]<name> <version>
+    while read pkg version; do
+        pkg=${pkg#mingw-w64-x86_64-}
+        clean-version-string version $version
+        SCBI_PKGS["$pkg"]=$version
+    done < <( pacman -Q )
+
+    init-distrib-alias mingw
+}
+
 function init-win-pkg()
 {
     true
@@ -278,6 +303,40 @@ function check-none-pkg()
 function check-win-pkg()
 {
     return 0
+}
+
+function check-mingw-pkg()
+{
+    local PCK=$1
+    local VERSION=""
+    get-version-number VERSION $2
+
+    local inst_ver=${SCBI_PKGS[$PCK]}
+
+    if [[ -z $inst_ver ]]; then
+        #  Package is not installed, check if it exists
+
+        local cand=( $(LANG=C pacman -Q | grep $PCK 2> /dev/null) )
+
+        if [[ -n ${cand[1]} ]]; then
+            clean-version-string version ${cand[1]}
+            SCBI_PKGS[$PCK]=$version
+            return $SCBI_STATUS_PKG_NOT_INSTALLED
+        else
+            return $SCBI_STATUS_PKG_NOT_FOUND
+        fi
+
+    else
+        #  Is the installed version ok?
+
+        check-versions $inst_ver ">=" $VERSION
+
+        if [[ $? == 0 ]]; then
+            return $SCBI_STATUS_VERSION_OK
+        else
+            return $SCBI_STATUS_VERSION_NOK
+        fi
+    fi
 }
 
 function check-deb-pkg()
