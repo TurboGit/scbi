@@ -72,6 +72,14 @@ inv-test19-pre-wrapup ()
     local TARGET=\$2;
     echo "@@@ PRE-WRAPUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
+inv-test19-vcs is a function
+inv-test19-vcs ()
+{
+    echo default;
+    echo none;
+    echo git;
+    echo \${TESTREPOS}/lib1.bundle
+}
 inv-test19-wrapup is a function
 inv-test19-wrapup ()
 {
@@ -79,10 +87,10 @@ inv-test19-wrapup ()
     local TARGET=\$2;
     echo "@@@ WRAPUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
 }
-xxxx/xx/xx xx:xx:xx : Building inv-test19 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : Building inv-test19 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : pre-setup starting
 xxxx/xx/xx xx:xx:xx : pre-setup completed
 xxxx/xx/xx xx:xx:xx : config starting
@@ -103,7 +111,7 @@ xxxx/xx/xx xx:xx:xx : pre-wrapup starting
 xxxx/xx/xx xx:xx:xx : pre-wrapup completed
 xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
-xxxx/xx/xx xx:xx:xx : End Building inv-test19 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : End Building inv-test19 [default] (master)
 EOF
 
 #  Test inherit of limited set of hook

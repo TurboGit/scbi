@@ -98,6 +98,8 @@ function module-setup()
     #  and sed -i are both unlinking hard links so changing only the sources in
     #  the target source directory.
 
+    local HASSRC=true
+
     if [[ -h src ]] || [[ -d src ]]; then
         sync-dir src/. $SRCDIR/ $OPT --exclude "gcc-interface"
 
@@ -110,6 +112,8 @@ function module-setup()
                 popd &> /dev/null
             }
         fi
+    else
+	HASSRC=false
     fi
 
     rm -fr build
@@ -117,7 +121,6 @@ function module-setup()
 
     if [[ "$OOT" = "yes" ]]; then
         #  build must be a dir, delete link if it exists
-        #  build must be a dir
         if [[ $SCBI_HOST == "x86_64-mingw64" ]]; then
             #  There is no symlinks on MSYS
             [[ -d $TARGET-$VARIANT/build ]] && rm -fr $TARGET-$VARIANT/build
@@ -128,7 +131,7 @@ function module-setup()
     else
         #  build must be a link, delete dir if it exists
         rm -fr $TARGET-$VARIANT/build
-        ln -s src $TARGET-$VARIANT/build
+        [[ $HASSRC == true ]] && ln -s src $TARGET-$VARIANT/build
     fi
 
     return $res

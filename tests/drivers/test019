@@ -4,10 +4,10 @@ rm -f .root/builds/.logs/*test19*
 RUNS ./scbi test19
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building test19 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : Building test19 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : pre-setup starting
 xxxx/xx/xx xx:xx:xx : pre-setup completed
 xxxx/xx/xx xx:xx:xx : config starting
@@ -28,17 +28,16 @@ xxxx/xx/xx xx:xx:xx : pre-wrapup starting
 xxxx/xx/xx xx:xx:xx : pre-wrapup completed
 xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
-xxxx/xx/xx xx:xx:xx : End Building test19 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : End Building test19 [default] (master)
 EOF
 
 # echo ====================== test19/alt
 RUNS ./scbi test19/alt
 
 CLEAN-DIFF <<EOF
-xxxx/xx/xx xx:xx:xx : Building test19 [alt] (n/a)
+xxxx/xx/xx xx:xx:xx : Building test19 [alt] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : alt-pre-setup starting
 xxxx/xx/xx xx:xx:xx : alt-pre-setup completed
 xxxx/xx/xx xx:xx:xx : alt-config starting
@@ -63,7 +62,7 @@ xxxx/xx/xx xx:xx:xx : alt-wrapup starting
 xxxx/xx/xx xx:xx:xx : alt-wrapup completed
 xxxx/xx/xx xx:xx:xx : alt-post-wrapup starting
 xxxx/xx/xx xx:xx:xx : alt-post-wrapup completed
-xxxx/xx/xx xx:xx:xx : End Building test19 [alt] (n/a)
+xxxx/xx/xx xx:xx:xx : End Building test19 [alt] (master)
 EOF
 
 RUNS grep -h '@@@' .root/builds/.logs/*test19*config*
