@@ -46,7 +46,9 @@ function get-caller()
         local P=${CRESULT%-*}
         local S=${CRESULT##*-}
 
+	#  keep only the variant, remove plug-in name and version
         local V=${SCBI_MODVER[$P]#*/}
+        local V=${V%:*}
 
         local HASV=false
         has-variant "$V" $S || [[ $S == "default" ]] || [[ $S == "common" ]] &&
