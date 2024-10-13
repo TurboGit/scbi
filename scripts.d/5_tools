@@ -1269,11 +1269,11 @@ function copy-module-src-callback()
 
             #  two modules may share the same VCS or archive
             if [[ -h $SCBI_BDIR/$module/archive ]]; then
-                FILE=$(readlink -f $SCBI_BDIR/$module/archive)
+                local FILE=$(readlink -f $SCBI_BDIR/$module/archive)
                 [[ ! -f $DEST/.archives/${FILE##*/} ]] &&
                     cp -p $FILE $DEST/builds/.archives
             elif [[ -h $SCBI_BDIR/$module/vcs ]]; then
-                DIR=$(readlink -f $SCBI_BDIR/$module/vcs)
+                local DIR=$(readlink -f $SCBI_BDIR/$module/vcs)
                 [[ ! -d $DEST/.vcs/${DIR##*/} ]] &&
                     cp -rp $DIR $DEST/builds/.vcs/
             fi
