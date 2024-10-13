@@ -7,6 +7,16 @@ function mainlib-vcs()
     echo ${TESTREPOS}/mainlib.bundle
 }
 
+function mainlib-depdir-post-setup()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo @@@LIB1-INS ${SCBI_MODULES_DIR["lib1"]}
+    echo @@@LIB1-SRC ${SCBI_MODULES_DIR["lib1@src"]}
+    echo @@@LIB1-BLD ${SCBI_MODULES_DIR["lib1@build"]}
+}
+
 function mainlib-depends()
 {
     echo lib1
