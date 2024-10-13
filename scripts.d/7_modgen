@@ -155,11 +155,14 @@ function module-purge()
     #  note that we keep the manifest to be sure that we can clean-up
     #  the final install destination.
 
-    if [[ -d $PREFIX/$TARGET-$VARIANT ]]; then
-        rm -fr $PREFIX/$TARGET-$VARIANT/build
-        rm -fr $PREFIX/$TARGET-$VARIANT/build-id
-        rm -fr $PREFIX/$TARGET-$VARIANT/install
-        rm -fr $PREFIX/$TARGET-$VARIANT/src
+    local TVDIR=""
+    get-target-dir TVDIR $MODULE $VARIANT
+
+    if [[ -d $TVDIR ]]; then
+        rm -fr $TVDIR/build
+        rm -fr $TVDIR/build-id
+        rm -fr $TVDIR/install
+        rm -fr $TVDIR/src
         rm -fr $PREFIX/build-id-$VARIANT
         rm -f $PREFIX/build
     fi
@@ -220,5 +223,8 @@ function module-install()
         }
     fi
 
-    cp build-id-$VARIANT $TARGET-$VARIANT/build-id
+    local TVDIR=""
+    get-target-dir TVDIR $MODULE $VARIANT
+
+    cp build-id-$VARIANT $TVDIR/build-id
 }

@@ -1590,7 +1590,7 @@ function handle-module()
     #  even if already created when entering this routine. This is because
     #  in case of a purge the build directory could have been removed.
 
-    [[ -d $TVDIR ]] || mkdir $TVDIR
+    [[ -d $TVDIR ]] || mkdir -p $TVDIR
 
     #  Set module environment if defined
 

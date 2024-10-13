@@ -1437,7 +1437,10 @@ function get-source-dir()
         fi
 
     else
-        DIR=$SCBI_BDIR/$module/$TARGET-$variant/src
+        local TVDIR=""
+        get-target-dir TVDIR $module $variant
+
+        DIR=$TVDIR/src
     fi
 
     echo $DIR
@@ -1456,7 +1459,10 @@ function get-build-dir()
     local module=${module_info[0]}
     local variant=${module_info[1]}
 
-    DIR=$SCBI_BDIR/$module/$TARGET-$variant/build
+    local TVDIR=""
+    get-target-dir TVDIR $module $variant
+
+    DIR=$TVDIR/build
 
     echo $DIR
 }
