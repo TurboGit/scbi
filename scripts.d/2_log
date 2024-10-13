@@ -260,7 +260,10 @@ function show-command()
     echo "      load-runtime-module-plan ../logs/build-plan"
     echo ""
 
-    _internal_copy-plugin $PLUGIN ../logs
+    local TVDIR=""
+    get-target-dir TVDIR $PLUGIN $VARIANT
+
+    _internal_copy-plugin $PLUGIN $TVDIR/logs
 
     echo "   source ../logs/$PLUGIN"
 
