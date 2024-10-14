@@ -76,7 +76,7 @@ function module-setup()
     local OOT=$6
 
     local TVDIR=""
-    get-target-dir TVDIR $module $variant
+    get-target-dir TVDIR $MODULE $VARIANT
     TVDIR=$(realpath --relative-to=$PWD $TVDIR)
 
     #  if module-src soft link exists use it to copy the module sources into
