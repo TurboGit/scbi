@@ -1743,6 +1743,9 @@ function handle-module()
 
         rm -f $ENVTMP
 
+        local TEEOPT="-a"
+        [[ $SCBI_DLOG = yes ]] && TEEOPT=""
+
         for step in $STEPS; do
             #  If test step (last step for a module) ensure that the
             #  module's env is loaded as tests are client of the module
@@ -1764,23 +1767,13 @@ function handle-module()
             if [[ $? = 0 ]]; then
                 cd $SCBI_BDIR/$module
 
-                if [[ $SCBI_DLOG = yes ]]; then
-                    module-pre-$step \
-                        $TVDIR/install \
-                        $FORMODULE \
-                        $module \
-                        $variant $SCBI_TARGET $ISOOT 2>&1 \
-                        | tee $log
-                    res=${PIPESTATUS[0]}
-                else
-                    module-pre-$step \
-                        $TVDIR/install \
-                        $FORMODULE \
-                        $module \
-                        $variant $SCBI_TARGET $ISOOT 2>&1 \
-                        | tee -a $log
-                    res=${PIPESTATUS[0]}
-                fi
+                module-pre-$step \
+                    $TVDIR/install \
+                    $FORMODULE \
+                    $module \
+                    $variant $SCBI_TARGET $ISOOT 2>&1 \
+                    | tee $TEEOPT $log
+                res=${PIPESTATUS[0]}
             fi
 
             if [[ $res != 0 ]]; then
@@ -1809,19 +1802,11 @@ function handle-module()
             if [[ $? = 0 ]]; then
                 cd $SCBI_BDIR/$module
 
-                if [[ $SCBI_DLOG = yes ]]; then
-                    module-$step \
-                        $TVDIR/install \
-                        $FORMODULE \
-                        $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee $log
-                    res=${PIPESTATUS[0]}
-                else
-                    module-$step \
-                        $TVDIR/install \
-                        $FORMODULE \
-                        $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee -a $log
-                    res=${PIPESTATUS[0]}
-                fi
+                module-$step \
+                    $TVDIR/install \
+                    $FORMODULE \
+                    $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee $TEEOPT $log
+                res=${PIPESTATUS[0]}
             fi
 
             if [[ $res -ne 0 ]]; then
@@ -1842,21 +1827,12 @@ function handle-module()
             if [[ $? = 0 ]]; then
                 cd $SCBI_BDIR/$module
 
-                if [[ $SCBI_DLOG = yes ]]; then
-                    module-post-$step \
-                        $TVDIR/install \
-                        $FORMODULE \
-                        $module $variant $SCBI_TARGET $ISOOT \
-                        2>&1 | tee $log
-                    res=${PIPESTATUS[0]}
-                else
-                    module-post-$step \
-                        $TVDIR/install \
-                        $FORMODULE \
-                        $module $variant $SCBI_TARGET $ISOOT \
-                        2>&1 | tee -a $log
-                    res=${PIPESTATUS[0]}
-                fi
+                module-post-$step \
+                    $TVDIR/install \
+                    $FORMODULE \
+                    $module $variant $SCBI_TARGET $ISOOT \
+                    2>&1 | tee $TEEOPT $log
+                res=${PIPESTATUS[0]}
             fi
 
             if [[ $res != 0 ]]; then
