@@ -345,6 +345,7 @@ SCBI_PLAN=
 ARCHIVE_CACHE=yes
 DRY_RUN=no
 SAFE_MODE=no
+SCBI_LNK=
 DO_STANDALONE=no
 DO_HELP=no
 DO_VERSION=no
@@ -795,7 +796,7 @@ function is-module-up-to-date()
     if [[ $variant == "native" ]]; then
         #  A native variant
         SID="native-$ref"
-    elif [[ -e $SCBI_BDIR/$module/src ]]; then
+    elif [[ -e $SCBI_BDIR/$module/src$SCBI_LNK ]]; then
         #  A VCS or TAR
         case "$kind" in
             NONE|BRANCH)
@@ -1055,7 +1056,7 @@ function handle-sources()
         fi
 
         if [[ $HASSRC == yes ]]; then
-            if [[ $DO_UPDATE = yes ]] || [[ ! -d archive-src ]] || [[ ! -f archive ]]; then
+            if [[ $DO_UPDATE = yes ]] || [[ ! -d archive-src ]] || [[ ! -e archive$SCBI_LNK ]]; then
                 V=${tar[0]#default}
                 ilog $module get sources from archive ${V:+[$V]}
 
@@ -1077,9 +1078,11 @@ function handle-sources()
             #  content will trigger a build.
 
             local archive_sha1=""
-            [[ -e archive-sha1 ]] &&
+            [[ -e archive-sha1$SCBI_LNK ]] &&
                 {
-                    archive_sha1=$(cat archive-sha1)
+                    get-ln sha1file archive-sha1
+                    archive_sha1=$(cat $sha1file)
+                    archive_sha1=${archive_sha1// */}
                     echo "$module archive $ref sha-1 ${archive_sha1// */}" \
                          > source-ref
                 }
@@ -1137,8 +1140,11 @@ function handle-sources()
 
                     echo -n "$ref" > source-id
 
+                    local VCSDIR=""
+                    get-ln VCSDIR vcs
+
                     vcs-build-id $SCBI_PREFIX $SCBI_TARGET \
-                                 $FORMODULE $MODREF $(pwd)/vcs \
+                                 $FORMODULE $MODREF $VCSDIR \
                                  > build-id-$variant
 
                 else
@@ -1178,12 +1184,15 @@ function handle-sources()
                 #  compiler. That is when the compiler is changed we
                 #  want to rebuild the software.
 
+                local VCSDIR=""
+                get-ln VCSDIR vcs
+
                 vcs-build-id $SCBI_PREFIX $SCBI_TARGET \
-                             $FORMODULE $MODREF $(pwd)/vcs \
+                             $FORMODULE $MODREF $VCSDIR \
                              > build-id-$variant
             fi
 
-            if [[ ! -h src ]]; then
+            if [[ ! -e src$SCBI_LNK ]]; then
                 #  Setting source reference, note that for Subversion this
                 #  need to properly set the link to the directory in the vcs.
                 #  This action is done by svn-branch that we call here.

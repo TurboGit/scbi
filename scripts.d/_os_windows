@@ -59,3 +59,38 @@ function define-var()
 
     true
 }
+
+# Add support for symlink on Windows MSYS
+
+[[ $SCBI_OS_NAME == mingw ]] &&
+    {
+        SCBI_LNK=.lnk
+
+        function ln()
+        {
+            [[ $1 == "-s" ]] && shift
+
+            local FROM=$1
+            local TO=$2
+
+            [[ -f ${FROM}${SCBI_LNK} ]] &&
+                FROM=$(cat ${FROM}${SCBI_LNK})
+
+            echo $FROM > ${TO}${SCBI_LNK}
+        }
+
+        function get-ln()
+        {
+            local -n _REF=$1
+            local LINK=$2
+            local LINK=${LINK%\.}
+            local LINK=${LINK%/}
+            local REM=${2#$LINK}
+
+            if [[ -f ${LINK}${SCBI_LNK} ]]; then
+                LINK=$(cat ${LINK}.lnk)${REM}
+            fi
+
+            _REF=$LINK
+        }
+    }

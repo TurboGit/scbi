@@ -104,7 +104,7 @@ function module-setup()
 
     local HASSRC=true
 
-    if [[ -h src ]] || [[ -d src ]]; then
+    if [[ -e src$SCBI_LNK ]] || [[ -d src ]]; then
         sync-dir src/. $SRCDIR/ $OPT --exclude "gcc-interface"
 
         #  If some patches are present, apply them now

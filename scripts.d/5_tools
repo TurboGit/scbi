@@ -23,6 +23,15 @@ function display-stacktrace()
     done
 }
 
+############################## soft link support
+
+function get-ln()
+{
+    local -n _REF=$1
+    local LINK=$2
+    _REF=$LINK
+}
+
 ############################## comment-out-block
 #
 # Comment out a block (using COMMENT_TOKEN) starting with PATTERN
@@ -1230,6 +1239,8 @@ function sync-dir()
     local FROM=$1
     local TO=$2
     shift 2
+
+    get-ln FROM $FROM
 
     local RELTO=$(realpath --relative-to=$TO $FROM)
 
