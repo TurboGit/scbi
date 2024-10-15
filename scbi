@@ -479,15 +479,14 @@ function module-wrapper()
     (
         cd $SCBI_BDIR/$MODULE >> $log 2>&1
 
-        #  Go to build directory
-        #  On Windows there is no symlink, if not out of tree build go to src
+        #  Go to build directory, if not out of tree build go to src
 
         local BUILDDIR=build
-        [[ $SCBI_IS_WINDOWS == yes ]] && [[ $ISOOT == no ]] && BUILDDIR=src
+        [[ $ISOOT == no ]] && BUILDDIR=src
 
         if [[ "$STEP" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
             cd $SCBI_BDIR/$MODULE
-        elif [[ -d $TVDIR/build ]]; then
+        elif [[ -d $TVDIR/$BUILDDIR ]]; then
             cd $TVDIR/$BUILDDIR
         else
             #  a native module has no sources for example
