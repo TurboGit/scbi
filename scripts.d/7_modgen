@@ -123,7 +123,7 @@ function module-setup()
     rm -fr build
     ln -s $TVDIR build
 
-    if [[ "$OOT" = "yes" ]]; then
+    if [[ "$OOT" = "true" ]]; then
         #  build must be a dir, delete link if it exists
         if [[ $SCBI_HOST =~ mingw64 ]]; then
             #  There is no symlinks on MSYS

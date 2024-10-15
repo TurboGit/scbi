@@ -337,7 +337,7 @@ DO_CLEAN_INSTALL=no
 DO_PLAN=no
 DO_SUBCMD=no
 DEPS=no
-SCBI_ISOOT=yes
+SCBI_ISOOT=true
 DO_PATCH=yes
 STEPS=""
 BUILD_SCBI_TARGET=
@@ -373,7 +373,7 @@ DO_WRAPUP=yes
 export SCBI_ROOT SCBI_BDIR SCBI_CLANG_VERSION SCBI_GTK_VERSION SCBI_PLAN
 export SCBI_HOST SCBI_TARGET SCBI_PLUGINS SCBI_JOBS SCBI_HALF_JOBS
 export SCBI_IS_WINDOWS SCBI_VERSION SCBI_BINARY SCBI_OS_NAME SCBI_OS_VERSION
-export SCBI_CURRENT_MODULE SCBI_ENV_DIR
+export SCBI_CURRENT_MODULE SCBI_ENV_DIR SCBI_ISOOT
 export SCBI_CBOLD SCBI_CRED SCBI_CGREEN SCBI_CBLUE SCBI_CCLEAR SCBI_CTEXT
 
 ############################## check-handled
@@ -482,7 +482,7 @@ function module-wrapper()
         #  Go to build directory, if not out of tree build go to src
 
         local BUILDDIR=build
-        [[ $SCBI_ISOOT == no ]] && BUILDDIR=src
+        [[ $SCBI_ISOOT == false ]] && BUILDDIR=src
 
         if [[ "$STEP" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
             cd $SCBI_BDIR/$MODULE
@@ -681,9 +681,12 @@ function handle-module-env()
             echo "# $MODREF"
         } >> $SCBI_ENV_MODULE
 
+        local BUILDDIR=build
+        [[ $SCBI_ISOOT == false ]] && BUILDDIR=src
+
         SCBI_MODULES_DIR["$module"]="$TVDIR/install"
         SCBI_MODULES_DIR["${module}@src"]="$TVDIR/src"
-        SCBI_MODULES_DIR["${module}@build"]="$TVDIR/build"
+        SCBI_MODULES_DIR["${module}@build"]="$TVDIR/$BUILDDIR"
     fi
 
     plugin-call-env-hooks $FORMODULE $MODREF $ENV
@@ -1467,6 +1470,11 @@ function handle-module()
 
     load-module $MODREF
 
+    #  Check if envrionment is to be done for out-of-tree build
+
+    SCBI_ISOOT=true
+    is-hook-true $module $variant out-of-tree TRUE || SCBI_ISOOT=false
+
     #  Check if module to be handled only if specificed on command line
 
     if [[ $FORMODULE != "@root" ]]; then
@@ -1632,10 +1640,6 @@ function handle-module()
 
         unset SCBI_ENV_MODULE
 
-        #  Check if envrionment is to be done for out-of-tree build
-
-        is-hook-true $module $variant out-of-tree TRUE || SCBI_ISOOT=no
-
         #  make sure the current build softlink is pointing to
         #  the variant. this is needed as the setup won't be
         #  done.
@@ -1743,7 +1747,7 @@ function handle-module()
             #  src directory (deleting all non existing files in source
             #  location).
 
-            if [[ $SAFE_MODE = yes ]] && [[ $SCBI_ISOOT = yes ]]; then
+            if [[ $SAFE_MODE = yes ]] && [[ $SCBI_ISOOT = true ]]; then
                 rm -fr $TVDIR/build
                 rm -fr $TVDIR/build-id
             fi
