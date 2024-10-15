@@ -337,7 +337,7 @@ DO_CLEAN_INSTALL=no
 DO_PLAN=no
 DO_SUBCMD=no
 DEPS=no
-ISOOT=yes
+SCBI_ISOOT=yes
 DO_PATCH=yes
 STEPS=""
 BUILD_SCBI_TARGET=
@@ -482,7 +482,7 @@ function module-wrapper()
         #  Go to build directory, if not out of tree build go to src
 
         local BUILDDIR=build
-        [[ $ISOOT == no ]] && BUILDDIR=src
+        [[ $SCBI_ISOOT == no ]] && BUILDDIR=src
 
         if [[ "$STEP" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
             cd $SCBI_BDIR/$MODULE
@@ -1634,7 +1634,7 @@ function handle-module()
 
         #  Check if envrionment is to be done for out-of-tree build
 
-        is-hook-true $module $variant out-of-tree TRUE || ISOOT=no
+        is-hook-true $module $variant out-of-tree TRUE || SCBI_ISOOT=no
 
         #  make sure the current build softlink is pointing to
         #  the variant. this is needed as the setup won't be
@@ -1743,7 +1743,7 @@ function handle-module()
             #  src directory (deleting all non existing files in source
             #  location).
 
-            if [[ $SAFE_MODE = yes ]] && [[ $ISOOT = yes ]]; then
+            if [[ $SAFE_MODE = yes ]] && [[ $SCBI_ISOOT = yes ]]; then
                 rm -fr $TVDIR/build
                 rm -fr $TVDIR/build-id
             fi
@@ -1779,7 +1779,7 @@ function handle-module()
                     $TVDIR/install \
                     $FORMODULE \
                     $module \
-                    $variant $SCBI_TARGET $ISOOT 2>&1 \
+                    $variant $SCBI_TARGET $SCBI_ISOOT 2>&1 \
                     | tee $TEEOPT $log
                 res=${PIPESTATUS[0]}
             fi
@@ -1813,7 +1813,7 @@ function handle-module()
                 module-$step \
                     $TVDIR/install \
                     $FORMODULE \
-                    $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee $TEEOPT $log
+                    $module $variant $SCBI_TARGET $SCBI_ISOOT 2>&1 | tee $TEEOPT $log
                 res=${PIPESTATUS[0]}
             fi
 
@@ -1838,7 +1838,7 @@ function handle-module()
                 module-post-$step \
                     $TVDIR/install \
                     $FORMODULE \
-                    $module $variant $SCBI_TARGET $ISOOT \
+                    $module $variant $SCBI_TARGET $SCBI_ISOOT \
                     2>&1 | tee $TEEOPT $log
                 res=${PIPESTATUS[0]}
             fi
