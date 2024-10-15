@@ -718,12 +718,7 @@ function get-build-id-callback()
         if [[ $IS_EXT == true ]]; then
             echo ${SCBI_PKGS[$module]}
         elif [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
-
-            if [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
-                cat $SCBI_BDIR/$module/build-id-$variant
-            else
-                printf "%(%c)T" -1
-            fi
+            cat $SCBI_BDIR/$module/build-id-$variant
         else
             printf "%(%c)T" -1
         fi
