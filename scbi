@@ -337,7 +337,7 @@ DO_CLEAN_INSTALL=no
 DO_PLAN=no
 DO_SUBCMD=no
 DEPS=no
-ISOOT=yes
+SCBI_ISOOT=true
 DO_PATCH=yes
 STEPS=""
 BUILD_SCBI_TARGET=
@@ -345,6 +345,7 @@ SCBI_PLAN=
 ARCHIVE_CACHE=yes
 DRY_RUN=no
 SAFE_MODE=no
+SCBI_LNK=
 DO_STANDALONE=no
 DO_HELP=no
 DO_VERSION=no
@@ -372,7 +373,7 @@ DO_WRAPUP=yes
 export SCBI_ROOT SCBI_BDIR SCBI_CLANG_VERSION SCBI_GTK_VERSION SCBI_PLAN
 export SCBI_HOST SCBI_TARGET SCBI_PLUGINS SCBI_JOBS SCBI_HALF_JOBS
 export SCBI_IS_WINDOWS SCBI_VERSION SCBI_BINARY SCBI_OS_NAME SCBI_OS_VERSION
-export SCBI_CURRENT_MODULE SCBI_ENV_DIR
+export SCBI_CURRENT_MODULE SCBI_ENV_DIR SCBI_ISOOT
 export SCBI_CBOLD SCBI_CRED SCBI_CGREEN SCBI_CBLUE SCBI_CCLEAR SCBI_CTEXT
 
 ############################## check-handled
@@ -478,15 +479,14 @@ function module-wrapper()
     (
         cd $SCBI_BDIR/$MODULE >> $log 2>&1
 
-        #  Go to build directory
-        #  On Windows there is no symlink, if not out of tree build go to src
+        #  Go to build directory, if not out of tree build go to src
 
         local BUILDDIR=build
-        [[ $SCBI_IS_WINDOWS == yes ]] && [[ $ISOOT == no ]] && BUILDDIR=src
+        [[ $SCBI_ISOOT == false ]] && BUILDDIR=src
 
         if [[ "$STEP" =~ (pre-|post-)*(setup|wrapup)$ ]]; then
             cd $SCBI_BDIR/$MODULE
-        elif [[ -d $TVDIR/build ]]; then
+        elif [[ -d $TVDIR/$BUILDDIR ]]; then
             cd $TVDIR/$BUILDDIR
         else
             #  a native module has no sources for example
@@ -681,9 +681,12 @@ function handle-module-env()
             echo "# $MODREF"
         } >> $SCBI_ENV_MODULE
 
+        local BUILDDIR=build
+        [[ $SCBI_ISOOT == false ]] && BUILDDIR=src
+
         SCBI_MODULES_DIR["$module"]="$TVDIR/install"
         SCBI_MODULES_DIR["${module}@src"]="$TVDIR/src"
-        SCBI_MODULES_DIR["${module}@build"]="$TVDIR/build"
+        SCBI_MODULES_DIR["${module}@build"]="$TVDIR/$BUILDDIR"
     fi
 
     plugin-call-env-hooks $FORMODULE $MODREF $ENV
@@ -795,7 +798,7 @@ function is-module-up-to-date()
     if [[ $variant == "native" ]]; then
         #  A native variant
         SID="native-$ref"
-    elif [[ -e $SCBI_BDIR/$module/src ]]; then
+    elif [[ -e $SCBI_BDIR/$module/src$SCBI_LNK ]]; then
         #  A VCS or TAR
         case "$kind" in
             NONE|BRANCH)
@@ -1055,7 +1058,7 @@ function handle-sources()
         fi
 
         if [[ $HASSRC == yes ]]; then
-            if [[ $DO_UPDATE = yes ]] || [[ ! -d archive-src ]] || [[ ! -f archive ]]; then
+            if [[ $DO_UPDATE = yes ]] || [[ ! -d archive-src ]] || [[ ! -e archive$SCBI_LNK ]]; then
                 V=${tar[0]#default}
                 ilog $module get sources from archive ${V:+[$V]}
 
@@ -1077,9 +1080,11 @@ function handle-sources()
             #  content will trigger a build.
 
             local archive_sha1=""
-            [[ -e archive-sha1 ]] &&
+            [[ -e archive-sha1$SCBI_LNK ]] &&
                 {
-                    archive_sha1=$(cat archive-sha1)
+                    get-ln sha1file archive-sha1
+                    archive_sha1=$(cat $sha1file)
+                    archive_sha1=${archive_sha1// */}
                     echo "$module archive $ref sha-1 ${archive_sha1// */}" \
                          > source-ref
                 }
@@ -1137,8 +1142,11 @@ function handle-sources()
 
                     echo -n "$ref" > source-id
 
+                    local VCSDIR=""
+                    get-ln VCSDIR vcs
+
                     vcs-build-id $SCBI_PREFIX $SCBI_TARGET \
-                                 $FORMODULE $MODREF $(pwd)/vcs \
+                                 $FORMODULE $MODREF $VCSDIR \
                                  > build-id-$variant
 
                 else
@@ -1178,12 +1186,15 @@ function handle-sources()
                 #  compiler. That is when the compiler is changed we
                 #  want to rebuild the software.
 
+                local VCSDIR=""
+                get-ln VCSDIR vcs
+
                 vcs-build-id $SCBI_PREFIX $SCBI_TARGET \
-                             $FORMODULE $MODREF $(pwd)/vcs \
+                             $FORMODULE $MODREF $VCSDIR \
                              > build-id-$variant
             fi
 
-            if [[ ! -h src ]]; then
+            if [[ ! -e src$SCBI_LNK ]]; then
                 #  Setting source reference, note that for Subversion this
                 #  need to properly set the link to the directory in the vcs.
                 #  This action is done by svn-branch that we call here.
@@ -1459,6 +1470,11 @@ function handle-module()
 
     load-module $MODREF
 
+    #  Check if envrionment is to be done for out-of-tree build
+
+    SCBI_ISOOT=true
+    is-hook-true $module $variant out-of-tree TRUE || SCBI_ISOOT=false
+
     #  Check if module to be handled only if specificed on command line
 
     if [[ $FORMODULE != "@root" ]]; then
@@ -1624,10 +1640,6 @@ function handle-module()
 
         unset SCBI_ENV_MODULE
 
-        #  Check if envrionment is to be done for out-of-tree build
-
-        is-hook-true $module $variant out-of-tree TRUE || ISOOT=no
-
         #  make sure the current build softlink is pointing to
         #  the variant. this is needed as the setup won't be
         #  done.
@@ -1735,7 +1747,7 @@ function handle-module()
             #  src directory (deleting all non existing files in source
             #  location).
 
-            if [[ $SAFE_MODE = yes ]] && [[ $ISOOT = yes ]]; then
+            if [[ $SAFE_MODE = yes ]] && [[ $SCBI_ISOOT = true ]]; then
                 rm -fr $TVDIR/build
                 rm -fr $TVDIR/build-id
             fi
@@ -1771,7 +1783,7 @@ function handle-module()
                     $TVDIR/install \
                     $FORMODULE \
                     $module \
-                    $variant $SCBI_TARGET $ISOOT 2>&1 \
+                    $variant $SCBI_TARGET $SCBI_ISOOT 2>&1 \
                     | tee $TEEOPT $log
                 res=${PIPESTATUS[0]}
             fi
@@ -1805,7 +1817,7 @@ function handle-module()
                 module-$step \
                     $TVDIR/install \
                     $FORMODULE \
-                    $module $variant $SCBI_TARGET $ISOOT 2>&1 | tee $TEEOPT $log
+                    $module $variant $SCBI_TARGET $SCBI_ISOOT 2>&1 | tee $TEEOPT $log
                 res=${PIPESTATUS[0]}
             fi
 
@@ -1830,7 +1842,7 @@ function handle-module()
                 module-post-$step \
                     $TVDIR/install \
                     $FORMODULE \
-                    $module $variant $SCBI_TARGET $ISOOT \
+                    $module $variant $SCBI_TARGET $SCBI_ISOOT \
                     2>&1 | tee $TEEOPT $log
                 res=${PIPESTATUS[0]}
             fi

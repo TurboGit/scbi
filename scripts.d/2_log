@@ -243,6 +243,9 @@ function show-command()
     local TARGET=$2
     local VARIANT=$3
 
+    local TVDIR=""
+    get-target-dir TVDIR $PLUGIN $VARIANT
+
     echo "# $CMD"
     echo '('
 
@@ -253,19 +256,18 @@ function show-command()
     #  then source env.cmd if present
 
     echo "   source $SCBI_BDIR/.scbi.runtime"
-    echo "   [[ -f ../logs/env.cmd ]] && source ../logs/env.cmd"
+
+    echo "   LOGDIR=$TVDIR/logs"
+    echo "   [[ -f \$LOGDIR/env.cmd ]] && source \$LOGDIR/env.cmd"
     [[ $SCBI_TARGET != $SCBI_HOST ]] &&
         echo "   target-env \$SCBI_BDIR/install \$SCBI_TARGET"
-    echo "   [[ -f ../logs/build-plan ]] &&"
-    echo "      load-runtime-module-plan ../logs/build-plan"
+    echo "   [[ -f \$LOGDIR/build-plan ]] &&"
+    echo "      load-runtime-module-plan \$LOGDIR/build-plan"
     echo ""
-
-    local TVDIR=""
-    get-target-dir TVDIR $PLUGIN $VARIANT
 
     _internal_copy-plugin $PLUGIN $TVDIR/logs
 
-    echo "   source ../logs/$PLUGIN"
+    echo "   source \$LOGDIR/$PLUGIN"
 
     echo ""
     echo "   $CMD $PREFIX $TARGET $VARIANT"

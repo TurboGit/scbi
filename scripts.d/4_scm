@@ -132,7 +132,10 @@ function git-co()
         ln -s ../.vcs/$REPO vcs &&
         if [[ $HAS_LFS == yes ]]; then
             (
-                cd vcs &&
+                local VCSDIR=""
+                get-ln VCSDIR vcs
+
+                cd $VCSDIR &&
                     git lfs install &&
                     git lfs fetch
             )
@@ -187,7 +190,9 @@ function git-branch()
     (
         set-proxy $PROXY
 
-        cd $SCBI_BDIR/$MODULE/vcs
+        local VCSDIR=""
+        get-ln VCSDIR $SCBI_BDIR/$MODULE/vcs
+        cd $VCSDIR
 
         #  first, let's update the repository
 
@@ -277,7 +282,9 @@ function hg-branch()
     (
         set-proxy $PROXY
 
-        cd $SCBI_BDIR/$MODULE/vcs
+        local VCSDIR=""
+        get-ln VCSDIR $SCBI_BDIR/$MODULE/vcs
+        cd $VCSDIR
 
         #  first, let's update the repository
 

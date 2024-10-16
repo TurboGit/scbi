@@ -1,0 +1,15 @@
+# Check SCBI_MODULES_DIRS for out-of-tree
+
+RUNS ./scbi lib3 oot
+
+LOG=.root/builds/lib3/build/logs/env.cmd
+
+GREP "lib3@src.*src" $LOG
+GREP "lib3@build.*src" $LOG
+GREP "lib3.*install" $LOG
+
+LOG=.root/builds/oot/build/logs/env.cmd
+
+GREP "oot@src.*src" $LOG
+GREP "oot@build.*build" $LOG
+GREP "oot.*install" $LOG

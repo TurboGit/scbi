@@ -23,6 +23,15 @@ function display-stacktrace()
     done
 }
 
+############################## soft link support
+
+function get-ln()
+{
+    local -n _REF=$1
+    local LINK=$2
+    _REF=$LINK
+}
+
 ############################## comment-out-block
 #
 # Comment out a block (using COMMENT_TOKEN) starting with PATTERN
@@ -709,12 +718,7 @@ function get-build-id-callback()
         if [[ $IS_EXT == true ]]; then
             echo ${SCBI_PKGS[$module]}
         elif [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
-
-            if [[ -f $SCBI_BDIR/$module/build-id-$variant ]]; then
-                cat $SCBI_BDIR/$module/build-id-$variant
-            else
-                printf "%(%c)T" -1
-            fi
+            cat $SCBI_BDIR/$module/build-id-$variant
         else
             printf "%(%c)T" -1
         fi
@@ -1230,6 +1234,8 @@ function sync-dir()
     local FROM=$1
     local TO=$2
     shift 2
+
+    get-ln FROM $FROM
 
     local RELTO=$(realpath --relative-to=$TO $FROM)
 
