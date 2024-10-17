@@ -88,7 +88,7 @@ function define-var()
             local REM=${2#$LINK}
 
             if [[ -f ${LINK}${SCBI_LNK} ]]; then
-                LINK=$(cat ${LINK}.lnk)${REM}
+                LINK=$(cat ${LINK}${SCBI_LNK})${REM}
             fi
 
             _REF=$LINK

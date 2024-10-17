@@ -1330,10 +1330,8 @@ function handle-meta-module()
                 local module=${smodule_info[0]}
                 local variant=${smodule_info[1]}
 
-                local TVDIR=""
-                get-target-dir TVDIR $module $variant
-
-                local IDIR=$TVDIR/install
+                local IDIR=""
+                get-target-dir IDIR $module $variant install
 
                 [[ -d $IDIR ]] &&
                     sync-dir $IDIR $TVMDIR/.
