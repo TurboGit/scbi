@@ -11,10 +11,11 @@ RUNS ./scbi show --plan=ondeps --build-plan ondeps
 sort-osht-output-but-first-line
 
 DIFF <<EOF
-There is 3 module(s) in the plan
+There is 4 module(s) in the plan
 forv9:skip
 me:v2
 notfound:skip
+thisisit:#12
 EOF
 
 export SCBI_OS_VERSION=10.1
@@ -25,12 +26,13 @@ RUNS ./scbi show --plan=ondeps --build-plan ondeps
 sort-osht-output-but-first-line
 
 DIFF <<EOF
-There is 5 module(s) in the plan
+There is 6 module(s) in the plan
 liblua5.2-dev:skip
 me:v2
 notfound:skip
 onlyfor10one:skip
 os@-mylualib:skip
+thisisit:#12
 EOF
 
 RUNS ./scbi --plan=ondeps --deps ondeps

@@ -558,6 +558,8 @@ The following options are supported:
 
 	\item[\ddash{}build-dir=<dir>] The root build directory to use instead of the default \file{\$SCBI\_BDIR}.
 
+	\item[\ddash{}flat] Use a flatter directory structure in the sandbox. The actual directory for building the module will be moved at the top of the build directory into the sandbox and will be named using a simple number. This option may come handy on Windows to avoid too long path-name due to OS limitation.
+
 	\item[-e | \ddash{}env=<name>] Use environment file \code{.env-<name>} instead of the default \code{.env}. (\seeref{build-env})
 
 	\item[\ddash{}plan=<name>{[}/variant{]}] Use build plan file \code{.plan-<name>}. (\seeref{build-plan}) with an optional \code{variant}.
@@ -1970,6 +1972,8 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 \dirtree{%
 	.1 \textbf{[\$SCBI\_BDIR]}.
 	.2 .scbi.runtime \des{scbi runtime}.
+	.2 \textbf{[n]}\des{optional, simple number used for flat option}.
+	.2 module-variant $\rightarrow$\des{optional, symlink to flat target directory}.
 	.2 \textbf{[.vcs]}.
 	.3 \textbf{[<module>]} \des{sources checkout}.
 	.2 \textbf{[.patches]}.
@@ -1996,6 +2000,10 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 	.4 manifest \des{list of all files in install above}.
 	.4 \textbf{[src]} \des{rsync of ../src}.
 }
+
+\begin{quote}
+	The symlinks are not available on Windows \code{MSYS}, in this environment they are replaced by a filename with \file{.lnk} extension. This file contains the actual location of the linked directory.
+\end{quote}
 
 \section{Complete example}
 

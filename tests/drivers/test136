@@ -1,0 +1,70 @@
+# Check for flat directory suppoer (--flat)
+
+RUNS ./scbi --flat --deps mainlib/depdir
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ mainlib/depdir
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building mainlib [depdir] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : depdir-post-setup starting
+xxxx/xx/xx xx:xx:xx : depdir-post-setup completed
+xxxx/xx/xx xx:xx:xx : build [depdir] starting
+xxxx/xx/xx xx:xx:xx : build [depdir] completed
+xxxx/xx/xx xx:xx:xx : install [depdir] starting
+xxxx/xx/xx xx:xx:xx : install [depdir] completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building mainlib [depdir] (master)
+EOF
+
+BDIR=.root/builds
+
+SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
+SCBI_TARGET=$SCBI_HOST
+
+NOK -d $BDIR/lib1/$SCBI_TARGET-default
+NOK -d $BDIR/mainlib/$SCBI_TARGET-depdir
+
+OK  -h $BDIR/mainlib-depdir
+OK  -d $BDIR/1/logs
+OK  -d $BDIR/1/install
+OK  -d $BDIR/1/src
+OK  -f $BDIR/1/manifest
+OK  -f $BDIR/mainlib/build/manifest
+GREP mainlib $BDIR/1/manifest
+
+LIB1DIR=$(realpath $BDIR/lib1-default)
+
+OK  -d $LIB1DIR
+OK  -d $BDIR/2/logs
+OK  -d $BDIR/2/install
+OK  -d $BDIR/2/src
+OK  -f $BDIR/2/manifest
+OK  -f $BDIR/lib1/build/manifest
+GREP lib1.h $BDIR/2/manifest
+
+LFILE=.root/builds/.logs/x*depdir-post-setup.log
+
+GREP "^@@@LIB1-INS ${LIB1DIR}/install" $LFILE
+GREP "^@@@LIB1-SRC ${LIB1DIR}/src" $LFILE
+GREP "^@@@LIB1-BLD ${LIB1DIR}/src" $LFILE
+
+OK  -d $BDIR/install/bin
+OK  -d $BDIR/install/include
+OK  -d $BDIR/install/lib
+OK  -f $BDIR/install/bin/mainlib
+OK  -f $BDIR/install/include/lib1.h

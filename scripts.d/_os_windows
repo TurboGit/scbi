@@ -76,7 +76,7 @@ function define-var()
             [[ -f ${FROM}${SCBI_LNK} ]] &&
                 FROM=$(cat ${FROM}${SCBI_LNK})
 
-            echo $FROM > ${TO}${SCBI_LNK}
+            echo -n $FROM > ${TO}${SCBI_LNK}
         }
 
         function get-ln()
@@ -88,7 +88,7 @@ function define-var()
             local REM=${2#$LINK}
 
             if [[ -f ${LINK}${SCBI_LNK} ]]; then
-                LINK=$(cat ${LINK}.lnk)${REM}
+                LINK=$(cat ${LINK}${SCBI_LNK})${REM}
             fi
 
             _REF=$LINK

@@ -60,6 +60,9 @@ function check-tools-abort()
 
 ############################## get-target-dir
 
+declare -A FLATDIR=()
+FTDIR=1
+
 function get-target-dir()
 {
     local -n _REF=$1
@@ -67,7 +70,33 @@ function get-target-dir()
     local VARIANT=$3
     local FILE=$4
 
-    _REF=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT${FILE:+/$FILE}
+    if [[ $DO_FLAT == yes ]]; then
+        local KEY=$MODULE-$VARIANT
+        local VAL=${FLATDIR[$KEY]}
+
+        if [[ -n $VAL ]]; then
+            true
+        elif [[ -h $SCBI_BDIR/$KEY ]]; then
+            VAL=$(realpath $SCBI_BDIR/$KEY)
+            FLATDIR+=( [$KEY]="${VAL}" )
+        elif [[ -f $SCBI_BDIR/$KEY$SCBI_LNK ]]; then
+            get-ln VAL $SCBI_BDIR/$KEY
+            VAL=$SCBI_BDIR/$VAL
+            FLATDIR+=( [$KEY]="${VAL}" )
+        else
+            while [[ -d $SCBI_BDIR/$FTDIR ]]; do
+                (( FTDIR++ ))
+            done
+            VAL=$SCBI_BDIR/$FTDIR
+            ln -s $FTDIR $SCBI_BDIR/$KEY
+            FLATDIR+=( [$KEY]="${VAL}" )
+        fi
+
+        _REF=${VAL}${FILE:+/$FILE}
+
+    else
+        _REF=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT${FILE:+/$FILE}
+    fi
 }
 
 ############################## ini-load-file
@@ -332,6 +361,7 @@ DO_UPDATE=no
 DO_ARCHIVE=no
 DO_FORCE=no
 DO_STAT=no
+DO_FLAT=no
 DO_DEPS=no
 DO_CLEAN_INSTALL=no
 DO_PLAN=no
@@ -619,6 +649,7 @@ function usage()
     echo "      | --ini=<section>     load ini file given section"
     echo "   -t | --prefix=<dir>      the global install directory"
     echo "      | --build-dir=<dir>   the root build directory."
+    echo "      | --flat              use a flatter directory structure"
     echo "   -e | --env=<name>        environment file ~/.scbi-<name>"
     echo "      | --plan=<name>       a build plan for modules"
     echo "      | --enable-<name>     enable feature name"
@@ -1330,10 +1361,8 @@ function handle-meta-module()
                 local module=${smodule_info[0]}
                 local variant=${smodule_info[1]}
 
-                local TVDIR=""
-                get-target-dir TVDIR $module $variant
-
-                local IDIR=$TVDIR/install
+                local IDIR=""
+                get-target-dir IDIR $module $variant install
 
                 [[ -d $IDIR ]] &&
                     sync-dir $IDIR $TVMDIR/.
@@ -1498,6 +1527,8 @@ function handle-module()
     get-target-dir TVDIR $module $variant
 
     mkdir -p $TVDIR/logs > $log 2>&1
+
+    [[ $DO_FLAT == yes ]] && mkdir -p $SCBI_BDIR/$module
 
     #  Check if meta-module, if so call handle-module for each one
 
@@ -1962,6 +1993,9 @@ function setup-generic-tool-env()
     [[ -n ${CMDLINE_OPTS[SCBI_BDIR]} ]] &&
         SCBI_BDIR=${CMDLINE_OPTS[SCBI_BDIR]}
 
+    [[ -n ${CMDLINE_OPTS[DO_FLAT]} ]] &&
+        DO_FLAT=${CMDLINE_OPTS[DO_FLAT]}
+
     #  Then load any global settings, not overriding user's ones
 
     for setup in $SCBI_PLUGINS/[0-9]*; do
@@ -2115,6 +2149,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         --stat)
             CMDLINE_OPTS+=([DO_STAT]=yes)
+            ;;
+        --flat)
+            CMDLINE_OPTS+=([DO_FLAT]=yes)
             ;;
         --build-dir*)
             CMDLINE_OPTS+=([SCBI_BDIR]="${1#*=}")

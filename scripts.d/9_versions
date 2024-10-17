@@ -158,7 +158,7 @@ function load-module-plan()
                     local minfo=()
                     parse-module-ref minfo $arg3
                     local module=${minfo[0]}
-                    SCBI_MODVER[$module]=${arg3/*=/}
+                    SCBI_MODVER[$module]=$(resolve-set ${arg3/*=/})
                 fi
             elif [[ "$modref" = "@alias" ]]; then
                 if [[ "$arg2" != "use" ]]; then
