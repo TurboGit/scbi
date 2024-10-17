@@ -1,3 +1,4 @@
+@set VER = 12
 
 @on deb use notfound:skip
 
@@ -12,3 +13,5 @@
 @on deb,10.1 use os@-mylualib:skip
 
 me:v2
+
+@on deb use thisisit:#$VER
