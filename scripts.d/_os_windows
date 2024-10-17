@@ -76,7 +76,7 @@ function define-var()
             [[ -f ${FROM}${SCBI_LNK} ]] &&
                 FROM=$(cat ${FROM}${SCBI_LNK})
 
-            echo $FROM > ${TO}${SCBI_LNK}
+            echo -n $FROM > ${TO}${SCBI_LNK}
         }
 
         function get-ln()
