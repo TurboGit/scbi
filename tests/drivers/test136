@@ -36,10 +36,10 @@ BDIR=.root/builds
 SCBI_HOST=$(gcc -dumpmachine | sed -e 's/-pc//;s/-unknown//')
 SCBI_TARGET=$SCBI_HOST
 
-NOK -d $BDIR/lib1/$SCBI_TARGET-default
-NOK -d $BDIR/mainlib/$SCBI_TARGET-depdir
+OK -h $BDIR/mainlib/$SCBI_TARGET-depdir
+OK -d $BDIR/mainlib/$SCBI_TARGET-depdir
+OK -h $BDIR/lib1/$SCBI_TARGET-default
 
-OK  -h $BDIR/mainlib-depdir
 OK  -d $BDIR/1/logs
 OK  -d $BDIR/1/install
 OK  -d $BDIR/1/src
@@ -47,7 +47,7 @@ OK  -f $BDIR/1/manifest
 OK  -f $BDIR/mainlib/build/manifest
 GREP mainlib $BDIR/1/manifest
 
-LIB1DIR=$(realpath $BDIR/lib1-default)
+LIB1DIR=$(realpath $BDIR/lib1/$SCBI_TARGET-default)
 
 OK  -d $LIB1DIR
 OK  -d $BDIR/2/logs

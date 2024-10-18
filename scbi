@@ -72,23 +72,25 @@ function get-target-dir()
 
     if [[ $DO_FLAT == yes ]]; then
         local KEY=$MODULE-$VARIANT
+        local FIL=$SCBI_TARGET-$VARIANT
         local VAL=${FLATDIR[$KEY]}
 
         if [[ -n $VAL ]]; then
             true
-        elif [[ -h $SCBI_BDIR/$KEY ]]; then
-            VAL=$(realpath $SCBI_BDIR/$KEY)
+        elif [[ -h $SCBI_BDIR/$MODULE/$FIL ]]; then
+            VAL=$(realpath $SCBI_BDIR/$MODULE/$FIL)
             FLATDIR+=( [$KEY]="${VAL}" )
-        elif [[ -f $SCBI_BDIR/$KEY$SCBI_LNK ]]; then
-            get-ln VAL $SCBI_BDIR/$KEY
-            VAL=$SCBI_BDIR/$VAL
+        elif [[ -f $SCBI_BDIR/$MODULE/$FIL$SCBI_LNK ]]; then
+            get-ln VAL $SCBI_BDIR/$MODULE/$FIL
+            VAL=$(realpath $SCBI_BDIR/$MODULE/$VAL)
             FLATDIR+=( [$KEY]="${VAL}" )
         else
             while [[ -d $SCBI_BDIR/$FTDIR ]]; do
                 (( FTDIR++ ))
             done
             VAL=$SCBI_BDIR/$FTDIR
-            ln -s $FTDIR $SCBI_BDIR/$KEY
+            mkdir -p $SCBI_BDIR/$MODULE
+            ln -s ../$FTDIR $SCBI_BDIR/$MODULE/$FIL
             FLATDIR+=( [$KEY]="${VAL}" )
         fi
 

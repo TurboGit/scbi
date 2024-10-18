@@ -93,7 +93,7 @@
 \renewcommand{\emph}[1]{\textit{#1}}
 \newcommand{\seeref}[1]{see section \ref{#1} p.\pageref{#1}}
 \newcommand{\file}[1]{'{\texttt{#1}}'}
-\newcommand{\des}[1]{\tabto{4.5cm}\scriptsize\textit{: #1}}
+\newcommand{\des}[1]{\tabto*{5cm}\scriptsize\textit{: #1}}
 \newcommand{\cmd}[1]{\tabto{1cm}\hspace{0.5cm}\texttt{\textbf{\$} #1}}
 
 \setitemize[0]{font=\bfseries, label=$\bullet$ }
@@ -1969,11 +1969,11 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 
 \vspace{1cm}
 
+{\scriptsize
 \dirtree{%
 	.1 \textbf{[\$SCBI\_BDIR]}.
 	.2 .scbi.runtime \des{scbi runtime}.
-	.2 \textbf{[n]}\des{optional, simple number used for flat option}.
-	.2 module-variant $\rightarrow$\des{optional, symlink to flat target directory}.
+	.2 \textbf{[n]}\des{optional, simple number used in flat mode}.
 	.2 \textbf{[.vcs]}.
 	.3 \textbf{[<module>]} \des{sources checkout}.
 	.2 \textbf{[.patches]}.
@@ -1992,13 +1992,14 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 	.3 source-ref \des{the full source reference for QA purpose}.
 	.3 install-<target>-id \des{version of the module installed globally}.
 	.3 vcs $\rightarrow$ \des{symlink to repository (.vcs or user's checkout)}.
-	.3 \textbf{[<target>-<variant>]}.
+	.3 \textbf{[<target>-<variant>]} \des{directory, or symlink in flat mode}.
 	.4 \textbf{[logs]} \des{commands \& output for each steps}.
 	.4 \textbf{[build]} \des{build directory}.
 	.4 build-id \des{sha1 to identify the build}.
 	.4 \textbf{[install]} \des{installation directory}.
 	.4 manifest \des{list of all files in install above}.
 	.4 \textbf{[src]} \des{rsync of ../src}.
+}
 }
 
 \begin{quote}
