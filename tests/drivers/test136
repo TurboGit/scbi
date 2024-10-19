@@ -68,3 +68,21 @@ OK  -d $BDIR/install/include
 OK  -d $BDIR/install/lib
 OK  -f $BDIR/install/bin/mainlib
 OK  -f $BDIR/install/include/lib1.h
+
+#  Check proper clean-up when switch to/from flat mode
+
+RUNS ./scbi --deps mainlib/depdir
+
+LIB1DIR=$BDIR/lib1/$SCBI_TARGET-default
+
+OK  -d $LIB1DIR
+NOK -h $LIB1DIR
+NOK -d $BDIR/1
+NOK -d $BDIR/2
+
+RUNS ./scbi --deps --flat mainlib/depdir
+
+OK  -d $LIB1DIR
+OK  -h $LIB1DIR
+OK  -d $BDIR/1
+OK  -d $BDIR/2

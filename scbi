@@ -70,18 +70,20 @@ function get-target-dir()
     local VARIANT=$3
     local FILE=$4
 
+    local VAL=""
+    local TDF=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT
+
     if [[ $DO_FLAT == yes ]]; then
         local KEY=$MODULE-$VARIANT
-        local FIL=$SCBI_TARGET-$VARIANT
-        local VAL=${FLATDIR[$KEY]}
+        VAL=${FLATDIR[$KEY]}
 
         if [[ -n $VAL ]]; then
             true
-        elif [[ -h $SCBI_BDIR/$MODULE/$FIL ]]; then
-            VAL=$(realpath $SCBI_BDIR/$MODULE/$FIL)
+        elif [[ -h $TDF ]]; then
+            VAL=$(realpath $TDF)
             FLATDIR+=( [$KEY]="${VAL}" )
-        elif [[ -f $SCBI_BDIR/$MODULE/$FIL$SCBI_LNK ]]; then
-            get-ln VAL $SCBI_BDIR/$MODULE/$FIL
+        elif [[ -f $TDF$SCBI_LNK ]]; then
+            get-ln VAL $TDF
             VAL=$(realpath $SCBI_BDIR/$MODULE/$VAL)
             FLATDIR+=( [$KEY]="${VAL}" )
         else
@@ -90,15 +92,25 @@ function get-target-dir()
             done
             VAL=$SCBI_BDIR/$FTDIR
             mkdir -p $SCBI_BDIR/$MODULE
-            ln -s ../$FTDIR $SCBI_BDIR/$MODULE/$FIL
+            rm -fr $TDF
+            ln -s ../$FTDIR $TDF
             FLATDIR+=( [$KEY]="${VAL}" )
         fi
 
-        _REF=${VAL}${FILE:+/$FILE}
-
     else
-        _REF=$SCBI_BDIR/$MODULE/$SCBI_TARGET-$VARIANT${FILE:+/$FILE}
+        VAL=$TDF
+
+        [[ -h $TDF ]] &&
+            rm -fr $(realpath $TDF) $TDF
+        [[ -f $TDF$SCBI_LNK ]] &&
+            {
+                local RDIR=""
+                get-ln RDIR $TDF
+                rm -fr $(realpath $SCBI_BDIR/$MODULE/$RDIR) $TDF$SCBI_LNK
+            }
     fi
+
+    _REF=${VAL}${FILE:+/$FILE}
 }
 
 ############################## ini-load-file
