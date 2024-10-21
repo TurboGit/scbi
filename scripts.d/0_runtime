@@ -91,9 +91,23 @@ function get-config-options()
 
 function is-enabled()
 {
-    local VAR=SCBI_${1/-/_}_SET
+    local FEAT=${1/-/_}
     local THEN=$2
     local ELSE=$3
+
+    local VAR=SCBI_${FEAT}_SET
+
+    if [[ -z ${!VAR} ]]; then
+        #  Get the caller plug-in name
+        local PLUGIN=""
+        get-caller PLUGIN
+
+        VAR_GENERIC=SCBI_${FEAT}_FEATURE
+        VAR_MODULE=SCBI_${PLUGIN//-/_}_${FEAT}_FEATURE
+
+        [[ -n ${!VAR_GENERIC} ]] && VAR=$VAR_GENERIC
+        [[ -n ${!VAR_MODULE} ]] && VAR=$VAR_MODULE
+    fi
 
     if [[ "${!VAR}" = "true" ]]; then
         if [[ -z $THEN ]]; then

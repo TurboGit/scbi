@@ -1,0 +1,97 @@
+# check for enable with then/else part
+
+# === not activated
+
+RUNS ./scbi -f test60
+
+RUNS grep -h '@@@' .root/builds/test60/build/logs/config.log
+
+CLEAN-DIFF <<EOF
+@@@OPT1=
+@@@OPT2=
+@@@OPT3=native
+@@@OPT4 : NOT ENABLED
+@@@OPT5 : UNKNOWN
+EOF
+
+# === activated generic
+
+export SCBI_safe_arch_FEATURE=true
+
+RUNS ./scbi -f test60
+
+RUNS grep -h '@@@' .root/builds/test60/build/logs/config.log
+
+CLEAN-DIFF <<EOF
+@@@OPT1=yes
+@@@OPT2=amd
+@@@OPT3=i686
+@@@OPT4 : ENABLED
+@@@OPT5 : UNKNOWN
+EOF
+
+# === activated plug-in
+
+export SCBI_test60_safe_arch_FEATURE=true
+unset SCBI_safe_arch_FEATURE
+
+RUNS ./scbi -f test60
+
+RUNS grep -h '@@@' .root/builds/test60/build/logs/config.log
+
+CLEAN-DIFF <<EOF
+@@@OPT1=yes
+@@@OPT2=amd
+@@@OPT3=i686
+@@@OPT4 : ENABLED
+@@@OPT5 : UNKNOWN
+EOF
+
+# === deactivated plug-in
+
+unset SCBI_test60_safe_arch_FEATURE
+
+RUNS ./scbi -f test60
+
+RUNS grep -h '@@@' .root/builds/test60/build/logs/config.log
+
+CLEAN-DIFF <<EOF
+@@@OPT1=
+@@@OPT2=
+@@@OPT3=native
+@@@OPT4 : NOT ENABLED
+@@@OPT5 : UNKNOWN
+EOF
+
+# === deactivated plug-in
+
+export SCBI_test60_safe_arch_FEATURE=false
+
+RUNS ./scbi -f test60
+
+RUNS grep -h '@@@' .root/builds/test60/build/logs/config.log
+
+CLEAN-DIFF <<EOF
+@@@OPT1=
+@@@OPT2=
+@@@OPT3=native
+@@@OPT4 : NOT ENABLED
+@@@OPT5 : UNKNOWN
+EOF
+
+# === deactivated plug-in even if activated commande line
+
+export SCBI_test60_safe_arch_FEATURE=false
+export SCBI_safe_arch_FEATURE=false
+
+RUNS ./scbi -f --enable-safe-arch test60
+
+RUNS grep -h '@@@' .root/builds/test60/build/logs/config.log
+
+CLEAN-DIFF <<EOF
+@@@OPT1=yes
+@@@OPT2=amd
+@@@OPT3=i686
+@@@OPT4 : ENABLED
+@@@OPT5 : UNKNOWN
+EOF

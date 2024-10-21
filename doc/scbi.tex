@@ -1245,15 +1245,30 @@ Also, note that this setting will be available only during the download of the a
 \label{enable-feature}
 \index{feature}\index{helpers!is-enabled}\index{is-enabled}
 
-It is possible to enable a feature that can be checked in the plug-ins using the command line \code{\ddash{}enable-<name>}. This option activate the feature named \code{name}. This is a convenience function and it is up to the user to decide about the semantic of the enabled feature. For SCBI driver this is only a flag set or not.
+It is possible to enable a feature using the command line \code{\ddash{}enable-<feature>} or some environment variables:
 
-In the module plug-ins the feature can be checked with \code{is-enabled} function:
+\begin{description}[style=nextline]
+	\item [SCBI\_<feature>\_FEATURE] The \emph{feature} is set for all plug-ins with the corresponding value (\code{true} or \code{false}).
+	\item [SCBI\_<plugin>\_<feature>\_FEATURE] The \emph{feature} is set for the given plug-in with the corresponding value (\code{true} or \code{false}).
+\end{description}
+
+This option activate the feature named \code{feature}. This is a convenience function and it is up to the user to decide about the semantic of the enabled feature. For \code{SCBI} driver this is only a flag set or not.
+
+In module's plug-ins the feature can be checked with \code{is-enabled} function:
 
 \code{is-enabled <name> [then-value] [else-value]}
 
 This function set the return code to 0 (true) if activated and returns \code{yes} by default or \code{then-value} if set. If the feature is not activated the function set the return code to 1 (as for errors) and returns the empty string by default or \code{else-value} if set.
 
-Some example, for a single feature check:
+Some example, setting the \emph{installer} feature:
+
+\cmd{scbi \ddash{}enable-installer ...}
+
+or
+
+\cmd{export SCBI\_installer\_FEATURE=true}
+
+And a single feature check:
 
 \begin{lstlisting}
  if [[ $(is-enabled installer) ]]; then
