@@ -286,10 +286,22 @@ function check-archive-params()
     check-exists $TMP USE_VERSION "\$VERSION"
     ensure "$HOOK" $HAS_VERSION $VAL_VERSION $USE_VERSION "VERSION" "1"
 
-    local n=$(grep -E " *echo " $TMP | wc -l)
+    local v=( $(IFS=';' grep -E " *echo " $TMP | sed 's/echo//g' ) )
 
-    if [[ "$n" != 5 ]]; then
+    if [[ "${#v[@]}" != 5 ]]; then
         echo "   error:   ($HOOK) should return 5 values"
+    fi
+
+    if [[ -z ${v[2]} ]] || [[ ${v[2]^^} == "NONE;" ]]; then
+        echo "   error:   ($HOOK) protocol should be set"
+    fi
+
+    if [[ -z ${v[3]} ]] || [[ ${v[3]^^} == "NONE;" ]]; then
+        echo "   error:   ($HOOK) URL should be set"
+    fi
+
+    if [[ -z ${v[4]} ]] || [[ ${v[4]^^} == "NONE;" ]]; then
+        echo "   error:   ($HOOK) filename should be set"
     fi
 
     rm -f $TMP
