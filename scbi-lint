@@ -95,6 +95,7 @@ function check-hooks()
     while read H; do
         elog $H defined multiple times
     done < <(cat $PLUGIN |
+                 grep -v '^ *#' |
                  grep "function" |
                  sed 's/()//g' |
                  sed 's/function /  /g' |
@@ -116,6 +117,7 @@ function check-hooks()
             [[ -z $(cat $TMP) ]] &&
                 wlog $H defined but empty
         done < <(cat $PLUGIN |
+                     grep -v '^ *#' |
                      grep "function" |
                      sed 's/()//g' |
                      sed 's/function /  /g' |
@@ -143,6 +145,7 @@ function check-hooks()
         [[ -n $NOTHOOK ]] && NOTHOOK+="|"
         NOTHOOK+=$H
     done < <(cat $PLUGIN |
+                 grep -v '^ *#' |
                  grep "function" |
                  sed 's/()//g' |
                  grep -v -E "function $PGNAME-([a-zA-Z0-9]*-)?$SCBI_HOOKS$" |
@@ -158,6 +161,7 @@ function list-variants()
     echo "Plug-in variants:"
 
     cat $PLUGIN |
+        grep -v '^ *#' |
         grep "function $PGNAME-" |
         grep -v -E "function ($NOTHOOK)" |
         grep -v -E "function $PGNAME-$SCBI_HOOKS" |
@@ -183,6 +187,7 @@ function get-hooks()
     local REGEXP="((pre|post)-)?(cross-)?($NAMES)\(\)"
 
     cat $PLUGIN |
+        grep -v '^ *#' |
         grep -E "function $PGNAME-([a-zA-Z0-9]*-)?${REGEXP}$" |
         sed 's/function //g;s/()//g'
 }
