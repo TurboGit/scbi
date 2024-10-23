@@ -1912,6 +1912,7 @@ function handle-module()
 
     if [[ $DO_ARCHIVE = yes ]]; then
         cd $TVDIR >> $log 2>&1
+        rm -f $module-bin.tar*
         tar cf $module-bin.tar --directory=install .
         bzip2 -9 $module-bin.tar
     fi
