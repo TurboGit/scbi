@@ -680,10 +680,10 @@ function usage()
     echo "   -i | --install           do install"
     echo "   -w | --wrapup            do wrapup"
     echo "      | --clean-install     clean installation directory"
-    echo "      | --tar               check for tar only if explicitly specified"
+    echo "      | --archive           check for tar only if explicitly specified"
     echo "      | --tests[:only][=O]  run the testsuite, eventually build"
     echo "   -d | --deps[:warning]    check/build dependencies"
-    echo "   -a | --archive           build binary archive"
+    echo "   -a | --create-archive    build binary archive"
     echo "      | --standalone        create a standalone source archive"
     echo "   -l | --log:n             log display control yes|no|on-failure"
     echo "   -f | --force             force rebuild, do not check build id"
@@ -2259,7 +2259,7 @@ OPTFILE=$(mktemp)
 
 ALLOPTS=$(getopt -u -o j:adefSIuscbilnpqvwWh \
                  -l no-setup,no-install,update,setup,config \
-                 -l build,build-target:,install,clean-install,tar \
+                 -l build,build-target:,install,clean-install,create-archive \
                  -l log,log:yes,log:no,log:on-failure,purge,purge:only \
                  -l prefix:,deps,deps:warning,archive,force,env:,no-patch \
                  -l no-wrapup,wrapup,safe,standalone \
