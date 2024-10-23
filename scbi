@@ -1659,7 +1659,11 @@ function handle-module()
         #  We need to remove the link/sources to ensure proper setting by
         #  the module.
 
-        [[ -d $SCBI_BDIR/$module ]] && cd $SCBI_BDIR/$module && rm -fr src vcs
+        [[ -d $SCBI_BDIR/$module ]] &&
+            {
+                cd $SCBI_BDIR/$module
+                rm -fr src$SCBI_LNK vcs$SCBI_LNK
+            }
 
         handle-sources $FORMODULE $MODREF
 
@@ -1689,8 +1693,13 @@ function handle-module()
         #  the variant. this is needed as the setup won't be
         #  done.
 
-        [[ -d build ]] && rm -fr build
-        [[ -h build ]] && rm build
+        if [[ -d build ]]; then
+            rm -fr build
+        elif [[ -h build ]]; then
+            rm build
+        elif [[ -f build$SCBI_LNK ]]; then
+            rm -f build$SCBI_LNK
+        fi
         ln -s $(realpath --relative-to=$PWD $TVDIR) build
 
         #  Only rebuild if mismatch
