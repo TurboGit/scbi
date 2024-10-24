@@ -275,7 +275,6 @@ function init-mingw-pkg()
     #         rsync 3.3.0-1
     #         [<arch>-]<name> <version>
     while read pkg version; do
-        pkg=${pkg#mingw-w64-x86_64-}
         clean-version-string version $version
         SCBI_PKGS["$pkg"]=$version
     done < <( pacman -Q )
@@ -316,7 +315,7 @@ function check-mingw-pkg()
     if [[ -z $inst_ver ]]; then
         #  Package is not installed, check if it exists
 
-        local cand=( $(LANG=C pacman -Q | grep $PCK 2> /dev/null) )
+        local cand=( $(LANG=C pacman --query $PCK 2> /dev/null) )
 
         if [[ -n ${cand[1]} ]]; then
             clean-version-string version ${cand[1]}
