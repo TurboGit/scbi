@@ -486,7 +486,9 @@ function handle-plan-auto-variant()
                 local ref=" $ref"
             fi
 
-            if [[ $gstatus == $SCBI_STATUS_VERSION_OK ]]; then
+            if [[ $gstatus == $SCBI_STATUS_VERSION_OK ]] ||
+                   [[ $gstatus == $SCBI_STATUS_PKG_OS_UNKNOWN ]];
+            then
                 #  replaces all variants by a single "native"
                 #  and use the new version for this module
                 value=${value/\/auto*([.a-zA-Z])/\/native}
@@ -533,6 +535,8 @@ function handle-plan-auto-variant()
                     fi
                 elif [[ $status == $SCBI_STATUS_VERSION_OK ]]; then
                     echo 1 $M "  ↳ $pkg $osver used"
+                elif [[ $status == $SCBI_STATUS_PKG_OS_UNKNOWN ]]; then
+                    echo 1 $M "  ↳ $pkg alias not set"
                 elif [[ $status == $SCBI_ERROR_HOOK_NOT_FOUND ]]; then
                     echo 2 $M "$M auto mode must define a native variant"
                 fi
@@ -724,6 +728,9 @@ function check-auto-variant()
                     #  to v (for example libtbb:[v]) we want this dependency
                     #  to be checking the module's version requested.
 
+                    local OSMOD=false
+                    [[ ${dmodule:0:4} == "os@-" ]] && OSMOD=true
+
                     local MMOD=""
 
                     if [[ ${dmodule#*:} == "[v]" ]]; then
@@ -744,6 +751,13 @@ function check-auto-variant()
                     # 5 items per line: v status module-version package-version package-name
                     # v = v | n (v means that it comes from an inherited version :[v]
                     local PSTATS=( $(check-pkg-status $dmodule) )
+
+                    # Special case an OS package not found, let's pretend it is installed
+                    # somehow.
+                    if [[ $OSMOD == true ]] && [[ ${PSTATS[0]} == $SCBI_STATUS_PKG_NOT_FOUND ]]; then
+                        PSTATS[0]=$SCBI_STATUS_PKG_OS_UNKNOWN
+                    fi
+
                     [[ -n $PSTATS ]] &&
                         echo $MMOD ${PSTATS[*]}
                 fi

@@ -462,8 +462,13 @@ function get-pkg-name()
     #     SCBI_ALIAS[PKG]
 
     if [[ "${PKG:0:4}" == "os@-" ]]; then
-        REF="SCBI_ALIAS["$PKG"]"
-        echo ${!REF}
+        local REF="SCBI_ALIAS["$PKG"]"
+        local APK=${!REF}
+        if [[ -z $APK ]]; then
+            echo $PKG
+        else
+            echo $APK
+        fi
     else
         echo $PKG
     fi
