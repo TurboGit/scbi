@@ -315,7 +315,7 @@ function check-mingw-pkg()
     if [[ -z $inst_ver ]]; then
         #  Package is not installed, check if it exists
 
-        local cand=( $(LANG=C pacman --query $PCK 2> /dev/null) )
+        local cand=( $(LANG=C pacman --sync --search $PCK 2> /dev/null) )
 
         if [[ -n ${cand[1]} ]]; then
             clean-version-string version ${cand[1]}
