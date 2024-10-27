@@ -60,7 +60,7 @@ function check-tools-abort()
 
     [[ -n $MISSING ]] &&
 	{
-            echo Required tools ${MISSING} missing, please install
+            echo Required tools${MISSING} missing, please install
             exit 1
 	}
 
