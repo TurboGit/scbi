@@ -49,13 +49,22 @@ function check-tools()
 
 function check-tools-abort()
 {
-    local TOOLS="$1"
+    local TOOLS="$*"
 
-    check-tools $TOOLS
+    local MISSING=""
 
-    [[ $? != 0 ]] &&
-        echo Required tools ${TOOLS} missing, please install &&
-        exit 1
+    for T in $TOOLS; do
+	check-tool $T
+	[[ $? != 0 ]] && MISSING+=" $T"
+    done
+
+    [[ -n $MISSING ]] &&
+	{
+            echo Required tools ${MISSING} missing, please install
+            exit 1
+	}
+
+    return 0
 }
 
 ############################## get-target-dir
