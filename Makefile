@@ -66,8 +66,8 @@ clean.install:
 	if [ -f $(SCRDIR)/.core.plugins ]; then            \
 		cat $(SCRDIR)/.core.plugins |              \
 			while read file; do                \
-				rm -f $(SCRDIR)/$$file;    \
-			done;                              \
+				echo $(SCRDIR)/$$file;     \
+			done | xargs -n 25 rm -f ;         \
 		rm -f $(SCRDIR)/.core.plugins;             \
 		rm -f $(SCRDIR)/.scbi_core_version.txt;    \
 	fi
