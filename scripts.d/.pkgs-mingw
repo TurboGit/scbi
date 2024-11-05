@@ -48,3 +48,6 @@ os@-theora-dev                      mingw-w64-x86_64-libtheora
 os@-boost-dev                       mingw-w64-x86_64-boost
 os@-haru-dev                        mingw-w64-x86_64-libharu
 os@-protobuf-dev                    mingw-w64-x86_64-protobuf
+os@-cppunit-dev                     mingw-w64-x86_64-cppunit
+os@-doxygen                         doxygen
+os@-graphviz                        mingw-w64-x86_64-graphviz
