@@ -1109,6 +1109,14 @@ function get-archive()
                 return 1
             }
         unzip $SCBI_ARCHIVES/$tarsrc 1>&2
+    elif [[ "$tarsrc" =~ ".7z" ]]; then
+        check-tools 7z
+        [[ $? == 1 ]] &&
+            {
+                elog $MODULE missing 7z tool to decompress this archive
+                return 1
+            }
+        7z x $SCBI_ARCHIVES/$tarsrc 1>&2
     else
         tar xf $SCBI_ARCHIVES/$tarsrc 1>&2
     fi
