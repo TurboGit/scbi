@@ -1119,20 +1119,24 @@ function get-archive()
             return 1
         }
 
-    topdir=$(ls -d *)
+    local list=( $(ls .) )
 
-    if [[ -d "$topdir" ]]; then
+    if [[ ${#list[*]} == 1 ]] && [[ -d ${list[0]} ]]; then
+        #  A single top dir
+        local topdir=${list[0]}
         mv $topdir ../archive-src
-        cd ..
-        rm -fr archivetmp
-        ln -s $(realpath --relative-to="$PWD" $SCBI_ARCHIVES/$tarsrc) archive
-        [[ -f $SCBI_ARCHIVES/$tarsrc.sha1 ]] &&
-            ln -s $(realpath --relative-to="$PWD" $SCBI_ARCHIVES/$tarsrc.sha1) \
-               archive-sha1
     else
-        elog $MODULE no top directory found
-        res=1
+        #  No top dir
+        mkdir ../archive-src
+        mv * ../archive-src
     fi
+
+    cd ..
+    rm -fr archivetmp
+    ln -s $(realpath --relative-to="$PWD" $SCBI_ARCHIVES/$tarsrc) archive
+    [[ -f $SCBI_ARCHIVES/$tarsrc.sha1 ]] &&
+        ln -s $(realpath --relative-to="$PWD" $SCBI_ARCHIVES/$tarsrc.sha1) \
+           archive-sha1
 
     return $res
 }
