@@ -1136,7 +1136,7 @@ function get-archive()
     else
         #  No top dir
         mkdir ../archive-src
-        mv * ../archive-src
+        mv * .* ../archive-src
     fi
 
     cd ..
