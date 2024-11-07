@@ -1,0 +1,8 @@
+
+RUNS ./scbi show --depends --externals:only cdb
+
+no-osht-output-version
+
+CLEAN-DIFF <<EOF
+make:x.x
+EOF

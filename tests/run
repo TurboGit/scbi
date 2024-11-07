@@ -9,6 +9,11 @@ function clean-up-osht-output()
     sed -i "s,$PWD,<pwd>,g" ${OSHT_STDIO}
 }
 
+function no-osht-output-version()
+{
+    sed -i 's,:[0-9]*\.[0-9]*,:x.x,g' ${OSHT_STDIO}
+}
+
 function sort-osht-output()
 {
     cat ${OSHT_STDIO} | sort > xout
@@ -119,7 +124,7 @@ else
 fi
 cd ..
 
-PLAN 1157
+PLAN 1159
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR

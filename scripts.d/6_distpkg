@@ -461,7 +461,7 @@ function get-pkg-name()
     #     SCBI_ALIAS[PKG]
 
     if [[ "${PKG:0:4}" == "os@-" ]]; then
-        REF="SCBI_ALIAS["$PKG"]"
+        local REF="SCBI_ALIAS["${PKG%:\[v\]}"]"
         echo ${!REF}
     else
         echo $PKG
