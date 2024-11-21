@@ -1,0 +1,6 @@
+inherit-plugin s-mod-std
+
+function e-mod-std-depends()
+{
+    echo e-mod
+}

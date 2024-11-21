@@ -408,7 +408,12 @@ function _inherit-plugin_internal()
 
     while read hook; do
         [[ $hook =~ $REGEXP ]] &&
-            copy-function $hook ${hook/$HPLUGIN/$PLUGIN}
+            {
+                local NHOOK=${hook/$HPLUGIN/$PLUGIN}
+                # Only copy of new function does not exists
+                declare -F "$NHOOK" > /dev/null ||
+                    copy-function $hook $NHOOK
+            }
     done < <( compgen -A function "$HPLUGIN-" )
 }
 
