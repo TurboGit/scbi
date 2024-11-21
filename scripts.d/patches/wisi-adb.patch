@@ -1,0 +1,21 @@
+*** a/wisi.adb.orig	2024-11-21 08:13:10.426816629 +0100
+--- b/wisi.adb	2024-11-21 08:13:28.474917361 +0100
+***************
+*** 1028,1034 ****
+                    Prev_Non_Grammar.Set_First_Last (Prev_Non_Grammar.First_Index, Prev_Non_Grammar.First_Index);
+  
+                 else
+!                   Token_Non_Grammar := Prev_Non_Grammar;
+  
+                    Prev_Non_Grammar := WisiToken.Lexer.Token_Arrays.Empty_Vector;
+                 end if;
+--- 1028,1036 ----
+                    Prev_Non_Grammar.Set_First_Last (Prev_Non_Grammar.First_Index, Prev_Non_Grammar.First_Index);
+  
+                 else
+! --                  Token_Non_Grammar := Prev_Non_Grammar;
+!                   Tree.Non_Grammar_Var (Inserted_Token) := WisiToken.Lexer.Token_Arrays.Empty_Vector;
+!                   Tree.Non_Grammar_Var (Inserted_Token).Merge (Prev_Non_Grammar);
+  
+                    Prev_Non_Grammar := WisiToken.Lexer.Token_Arrays.Empty_Vector;
+                 end if;

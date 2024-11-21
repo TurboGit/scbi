@@ -18,24 +18,18 @@ function c-ada-mode-build-depends()
     echo c-wisi-token
 }
 
-function c-ada-mode-config-options()
-{
-    echo -DHAVE_LIBADALANG=no
-    echo -DELPA=yes
-    echo -DHAVE_GNAT_UTIL=no
-}
-
-function c-ada-mode-config()
+function c-ada-mode-pre-build()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
 
-    local OPTIONS=()
-    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+    wisitoken-bnf-generate --output_bnf ada_annex_p.wy
 
-    gnatprep "${OPTIONS[@]}" \
-             ada_mode_wisi_parse.gpr.gp ada_mode_wisi_parse.gpr
+    re2c --no-generation-date --debug-output \
+         --input custom -W -Werror --utf-8 \
+         -o ../src/ada_annex_p_re2c.c \
+         ada_annex_p.re2c
 }
 
 function c-ada-mode-build()
@@ -44,13 +38,31 @@ function c-ada-mode-build()
     local TARGET=$2
     local VARIANT=$3
 
-    local WISI_DIR=${SCBI_MODULES_DIR["c-wisi-token"]}
-    local WISI_DIR=$(dirname $WISI_DIR)/src
+    gprbuild -p -j$SCBI_JOBS ada_mode_wisi_parse.gpr
+}
 
-    gprbuild -m -p -j$SCBI_JOBS ada_mode_wisi_parse.gpr
+function c-ada-mode-pre-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    #  Fix name of install txt file
+    sed -i 's/_p_lr1_parse_table.txt/_p_lr1_re2c_parse_table.txt/g' \
+        ada_mode_wisi_parse.gpr
+}
+
+function c-ada-mode-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    gprinstall -q -p --mode:usage --prefix=$PREFIX \
+               ada_mode_wisi_parse.gpr
 }
 
 function c-ada-mode-prefix()
 {
-    echo none
+    echo $HOME/.local
 }

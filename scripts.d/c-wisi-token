@@ -7,6 +7,11 @@ function c-wisi-token-vcs()
     echo https://github.com/emacsmirror/wisi.git
 }
 
+function c-wisi-token-patches()
+{
+    echo wisi-adb.patch
+}
+
 function c-wisi-token-out-of-tree()
 {
     echo false
@@ -23,8 +28,8 @@ function c-wisi-token-env()
     local TARGET=$2
     local VARIANT=$3
 
-    add-to-var PATH             $PREFIX
-    add-to-var GPR_PROJECT_PATH $PREFIX
+    add-to-var PATH             $PREFIX/bin
+    add-to-var GPR_PROJECT_PATH $PREFIX/include
 }
 
 function c-wisi-token-config()
@@ -52,10 +57,11 @@ function c-wisi-token-install()
     local TARGET=$2
     local VARIANT=$3
 
-    cd ..
+    mkdir -p ../install/bin
+    cp wisitoken-bnf-generate ../install/bin
 
-    rm -f $PREFIX
-    ln -s build $PREFIX
+    mkdir -p ../install/include
+    cp *.ad* *.gpr *.c ../install/include
 }
 
 function c-wisi-token-prefix()
