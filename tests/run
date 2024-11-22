@@ -82,7 +82,7 @@ rm -f scripts.d/.store
 
 # copy scripts
 cp ../scbi .
-for tools in lint source-archive store show shell; do
+for tools in lint source-archive store show shell format; do
     cp ../scbi-$tools .
 done
 
@@ -124,7 +124,7 @@ else
 fi
 cd ..
 
-PLAN 1162
+PLAN 1167
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR

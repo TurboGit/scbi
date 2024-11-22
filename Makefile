@@ -42,6 +42,7 @@ all: clean.install
 	mkdir -p $(INSTALL_DIR) $(HOME)/.bash_completion.d/
 	cat scbi | sed "s/@VERSION@/$(CORE_VER)/" > $(INSTALL_DIR)/scbi
 	cp scbi-lint $(INSTALL_DIR)/scbi-lint
+	cp scbi-format $(INSTALL_DIR)/scbi-format
 	cp scbi-store $(INSTALL_DIR)/scbi-store
 	cp scbi-source-archive $(INSTALL_DIR)/scbi-source-archive
 	cp scbi-show $(INSTALL_DIR)/scbi-show

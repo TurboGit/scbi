@@ -1791,6 +1791,19 @@ It will report:
 
 The option \code{\ddash{}error} will only report errors.
 
+\subsection{Formatter}
+\label{formatter}
+\index{formatted}
+\index{format}
+
+The tool \code{scbi-format} can be used to format plug-ins by reordering the hooks in a canonical order. It also removes the trailing white-spaces and the duplicate blank lines.
+
+For example:
+
+\cmd{scbi format lcms2}
+
+The option \code{\ddash{}replace} will replace the plug-in after formatting otherwise the formatted plug-in is displayed on the console.
+
 \subsection{Create Source Archive}
 \label{createsourcearchive}
 \index{source archive}

@@ -1,0 +1,244 @@
+#!/bin/bash
+
+DO_REPLACE=no
+
+SCBI_PLUGINS_LIST=()
+
+function usage()
+{
+    echo
+    echo SCBI-FORMAT $SCBI_VERSION
+    echo
+    echo $0 format [options] plug-in1 [plug-in2...]
+
+    echo ""
+    echo "   -h | --help             this help message"
+    echo "   -v | --version          display driver & plug-ins versions"
+    echo "      | --plugins=<dir>    specify the plugins' directory"
+    echo "      | --replace          report only errors"
+    echo "      | --stat             display some status of current setup"
+}
+
+if [[ $1 == "subcommand" ]]; then
+    shift
+else
+    echo "error: use scbi format [options]"
+    exit 1
+fi
+
+ALLOPTS=$(getopt -u -o ehv -l replace,help,version,plugins: -- $*)
+
+set -- $ALLOPTS
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --replace)
+            DO_REPLACE=yes
+            ;;
+        (--)
+            ;;
+        (*)
+            SCBI_PLUGINS_LIST+=( $1 )
+            ;;
+        (-*)
+            echo "$0: error - unrecognized option $1" 1>&2; exit 1
+            ;;
+    esac
+    shift
+done
+
+if [[ $DO_VERSION == "yes" ]]; then
+    echo "SCBI REPLACE : $SCBI_VERSION"
+    exit 0
+fi
+
+if [[ $DO_HELP == "yes" ]]; then
+    usage
+    exit 1
+fi
+
+function get-hooks-sorted()
+{
+    local TDIR=$1
+    local PLG=$2
+
+    declare -A HOOKS=()
+
+    function ls-sorted()
+    {
+        local PAT="$1"
+
+        ls $PAT 2> /dev/null | sort
+    }
+
+    while read N; do
+        BN=$(basename $N)
+        if [[ -z ${HOOKS[$BN]} ]]; then
+            echo $N
+            HOOKS[$BN]=yes
+        fi
+    done < <( for H in ${SCBI_ALL_HOOKS//\|/ }; do
+                  ls-sorted "$TDIR/$PLG-common-pre-$H"
+                  ls-sorted "$TDIR/$PLG-*-pre-$H"
+                  ls-sorted "$TDIR/$PLG-pre-$H"
+
+                  #  All variants, no post handled just after
+                  ls-sorted "$TDIR/$PLG-common-$H"
+                  ls-sorted "$TDIR/$PLG-*$H" |
+                      grep -v "\-post-$H"
+
+                  ls-sorted "$TDIR/$PLG-common-post-$H"
+                  ls-sorted "$TDIR/$PLG-*-post-$H"
+                  ls-sorted "$TDIR/$PLG-post-$H"
+              done )
+}
+
+function format-plugin()
+{
+    local PLUGIN=$1
+    local PGNAME=$(basename $PLUGIN)
+
+    TDIR=$(mktemp -d)
+
+    #  Split plug-in functions
+
+    local MATCH=no
+    local FNAME=""
+    local COMMENT=""
+    local FCTFOUND=no
+
+    local IFS=\$
+
+    while read -r line; do
+        if [[ $MATCH == no ]]; then
+            [[ $line =~ ^#-==================== ]] &&
+                continue
+
+            [[ $line =~ ^#[[:space:]] ]] && [[ $FCTFOUND == yes ]] &&
+                {
+                    COMMENT+="$line \n"
+                    continue
+                }
+
+            [[ $line =~ ^[[:space:]]*function ]] &&
+                {
+                    MATCH=yes
+                    FNAME=${line#function }
+                    FNAME=${FNAME%\(\)}
+
+                    FILE=$TDIR/$FNAME
+
+                    echo -e $COMMENT > $FILE
+                    COMMENT=""
+                    FCTFOUND=yes
+                }
+        fi
+
+        if [[ $MATCH == yes ]]; then
+            echo -e "$line" >> $FILE
+            [[ $line =~ ^[[:space:]]*\}[[:space:]]*$ ]] && MATCH=no
+            FNAME=""
+        else
+            {
+                echo -e "$line"
+                [[ $line =~ ^#[[:space:]] ]] && echo
+            } >> $TDIR/global
+        fi
+    done < $PLUGIN
+
+    unset IFS
+
+    #  Rebuild the plug-in
+
+    #  First step, gather the global & plug-in definitions
+    #  and the remaining are support routines.
+
+    NPLG=$TDIR/_$PGNAME_
+
+    TPLG=$(mktemp -d)
+
+    [[ -f $TDIR/global ]] &&
+        {
+            cat -s $TDIR/global
+            echo
+            rm -f $TDIR/global
+        } > $TPLG/global
+
+    for H in $(get-hooks-sorted $TDIR $PGNAME); do
+        {
+            cat -s $H
+            echo
+            rm -f $H
+        }
+    done >> $TPLG/plg
+
+    #  All the remainings are support routines (used in hooks)
+
+    ls $TDIR/* 2> /dev/null | sort |
+        while read file; do
+            cat -s $file
+            echo
+        done > $TPLG/support
+
+    #  Now build the new plug-in with proper format
+
+    {
+        [[ -f $TPLG/global ]] &&
+            cat -s $TPLG/global
+
+        [[ -n $(cat $TPLG/support) ]] &&
+            {
+                echo "#-==================== Support routines"
+                echo
+                cat -s $TPLG/support
+                echo
+                echo "#-==================== Plug-in hooks"
+                echo
+            }
+
+        [[ -f $TPLG/plg ]] &&
+            cat -s $TPLG/plg
+
+    } > $NPLG
+
+    rm -fr $TPLG
+
+    #  Remove trailing white-spaces
+    sed -i -e 's/[[:space:]]*$//' $NPLG
+
+    # Delete all leading blank lines at top of file (only).
+    sed -i '/./,$!d' $NPLG
+
+    # Delete all trailing blank lines at end of file (only).
+    sed -i -e :a -e '/^\n*$/{$d;N;};/\n$/ba' $NPLG
+
+    if [[ $DO_REPLACE == yes ]]; then
+        cat -s $NPLG > $PLUGIN
+    else
+        cat -s $NPLG
+    fi
+
+    rm -fr $TDIR
+}
+
+[[ ! -d "$SCBI_PLUGINS" ]] ||
+    [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]] &&
+        SCBI_PLUGINS=$HOME/.config/scbi
+
+[[ ! -d "$SCBI_PLUGINS" ]] &&
+    echo "$0: cannot find module definition files" && exit 1
+
+for PLUGIN in ${SCBI_PLUGINS_LIST[*]}; do
+    PLG=$PLUGIN
+    [[ ! -f $PLG ]] && PLG=$SCBI_PLUGINS/$PLG
+    if [[ -f $PLG ]]; then
+        [[ $DO_REPLACE == yes ]] &&
+            echo "========== Reformat $PLUGIN"
+    else
+        echo
+        echo "========== Skip $PLUGIN as not found"
+        continue
+    fi
+
+    format-plugin $PLG
+done

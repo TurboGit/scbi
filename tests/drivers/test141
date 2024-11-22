@@ -1,0 +1,207 @@
+
+RUNS ./scbi format fmt
+
+DIFF <<EOF
+# Header comment
+
+with-variant var1 os@-dep1
+
+# Global comment
+
+with-variant var2 os@-dep2 \\
+             --env 'set-var THIS one'
+
+#-==================== Support routines
+
+function support-one()
+{
+}
+
+function support-two()
+{
+}
+
+#-==================== Plug-in hooks
+
+function fmt-plan()
+{
+}
+
+function fmt-vcs()
+{
+}
+
+function fmt-a-archive()
+{
+}
+
+function fmt-archive()
+{
+}
+
+function fmt-z-archive()
+{
+}
+
+function fmt-patches()
+{
+}
+
+function fmt-propagate-version()
+{
+}
+
+function fmt-version()
+{
+}
+
+function fmt-only-explicit-build()
+{
+}
+
+function fmt-out-of-tree()
+{
+}
+
+# Comment for common-modules
+
+function fmt-common-modules()
+{
+}
+
+function fmt-a-modules()
+{
+}
+
+function fmt-modules()
+{
+}
+
+function fmt-z-modules()
+{
+}
+
+function fmt-aggregate()
+{
+}
+
+function fmt-build-depends()
+{
+}
+
+function fmt-tests-depends()
+{
+}
+
+function fmt-depends()
+{
+}
+
+function fmt-external-env()
+{
+}
+
+function fmt-build-env()
+{
+}
+
+function fmt-tests-env()
+{
+}
+
+function fmt-env()
+{
+}
+
+function fmt-setup()
+{
+}
+
+function fmt-config-options()
+{
+}
+
+function fmt-common-pre-config()
+{
+}
+
+function fmt-v1-pre-config()
+{
+}
+
+function fmt-v2-pre-config()
+{
+}
+
+function fmt-pre-config()
+{
+}
+
+function fmt-common-config()
+{
+}
+
+function fmt-a-config()
+{
+}
+
+function fmt-config()
+{
+}
+
+function fmt-common-post-config()
+{
+}
+
+function fmt-v1-post-config()
+{
+}
+
+function fmt-v2-post-config()
+{
+}
+
+function fmt-post-config()
+{
+}
+
+function fmt-build()
+{
+}
+
+function fmt-install()
+{
+}
+
+function fmt-wrapup()
+{
+}
+
+function fmt-prefix()
+{
+}
+
+function fmt-tests()
+{
+}
+
+function fmt-run()
+{
+}
+EOF
+
+#  And check that it is idempotent
+
+cp scripts.d/fmt _fmt
+
+RUNS ./scbi format --replace fmt
+
+cat scripts.d/fmt | sha1sum - > fmt-1.sha1
+
+RUNS ./scbi format --replace fmt
+
+cat scripts.d/fmt | sha1sum - > fmt-2.sha1
+
+RUNS diff -q fmt-1.sha1 fmt-2.sha1
+
+mv _fmt scripts.d/fmt

@@ -8,7 +8,9 @@ declare -gA SCBI_LOADED
 
 declare -gA SCBI_MODVER
 
-declare -g SCBI_ALL_HOOKS="archive|aggregate|propagate-version|vcs|build-depends|depends|out-of-tree|build-env|env|tests-env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches|external-env|wrapup|setup|run|plan"
+# Note that the hooks must use a canonical order, this order is used
+# by scbi-format sub-command.
+declare -g SCBI_ALL_HOOKS="plan|vcs|archive|patches|version|only-explicit-build|out-of-tree|modules|aggregate|propagate-version|build-depends|tests-depends|depends|external-env|build-env|tests-env|env|setup|config-options|config|build|install|wrapup|prefix|tests|run"
 
 ############################## fn-exists
 # check wether a function is defined
