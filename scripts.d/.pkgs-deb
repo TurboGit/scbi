@@ -49,6 +49,7 @@ os@-flex                            flex
 os@-fmt-dev                         libfmt-dev
 os@-freeimage-dev                   libfreeimage-dev
 os@-freetype6-dev                   libfreetype6-dev
+os@-freetype-dev                    libfreetype-dev
 os@-freexl-dev                      libfreexl-dev
 os@-ftgl-dev                        libftgl-dev
 os@-g++                             g++
