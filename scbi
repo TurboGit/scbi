@@ -1133,15 +1133,15 @@ function handle-sources()
             #  tar sha1 if present to ensure a tar with the same name but different
             #  content will trigger a build.
 
-            local archive_sha1=""
+            local archive_sha1="NONE"
             [[ -e archive-sha1$SCBI_LNK ]] &&
                 {
                     get-ln sha1file archive-sha1
                     archive_sha1=$(cat $sha1file)
                     archive_sha1=${archive_sha1// */}
-                    echo "$module archive $ref sha-1 ${archive_sha1// */}" \
-                         > source-ref
                 }
+            echo "$module archive $ref sha-1 ${archive_sha1// */}" \
+                 > source-ref
 
             get-build-id $SCBI_PREFIX $SCBI_TARGET \
                          $FORMODULE $MODREF archive-$ref$archive_sha1 \
