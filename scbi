@@ -2193,7 +2193,7 @@ while [[ $# -gt 0 ]]; do
             VAL=${1#*=}
             CMDLINE_OPTS+=([SCBI_PLUGINS]="$VAL")
             if [[ ! -d "$VAL" ]] || \
-                   [[ -z "$(ls $SCBI_PLUGINS/[0-9]* 2> /dev/null)" ]];
+                   [[ -z "$(ls $VAL/[0-9]* 2> /dev/null)" ]];
             then
                 echo "$0: no plugins found in $VAL"
                 exit 1
