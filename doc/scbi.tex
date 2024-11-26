@@ -765,7 +765,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[\code{SCBI\_ARCHIVE\_VARIANT}] Same as above for the all modules.
 	\end{description}
 
-	And finally the function \code{scbi-rewrite-archive} can be defined. This function takes the five values returned by the \code{tar} hook and must return the five values in the same order but possibly rewritten.
+	And finally the function \code{scbi-rewrite-archive} can be defined. This function takes the five values returned by the \code{archive} hook and must return the five values in the same order but possibly rewritten.
 
 	\item[<module>{[}-common|<variant>{]}-patches] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
 
