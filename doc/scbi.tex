@@ -28,8 +28,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SETTINGS
 
-\hyphenation{Raven-SPARK}
-
 \lstset{numbers=none,
 	numberstyle=\tiny,
 	stepnumber=1,
@@ -1846,6 +1844,21 @@ Note that for this to work, the bash completion package must be installed, on De
 
 \section{Use Cases}
 
+In this section we will use the hands-on demos plug-ins:
+
+\begin{description}
+	\item[h-handson-lib] A plug-in building a library.
+	\item[h-handson-app] A plug-in building an application depending on \code{h-handson-lib} library.
+\end{description}
+
+To install the hands-on plug-in locally:
+
+\begin{shellcommand}
+	\item git clone https://github.com/TurboGit/scbi-handson.git
+	\item cd scbi-handson
+	\item make
+\end{shellcommand}
+
 \subsection{User's checkout}
 \label{userco}
 \index{user's checkout}
@@ -1861,61 +1874,31 @@ This is certainly the most important use case. A complex software is built with 
 	\item Push, integrate the new changes (possibly in a new branch)
 \end{itemize}
 
-SCBI does support this scenario directly by allowing a user's checkout to be used instead of the sources in the sandbox. It is highly discouraged to modify the sources in the sandbox which should stay untouched by users. Beware, depending on the SCBI options, the modifications in the source may be overwritten, so lost.
+\code{SCBI} does support this scenario directly by allowing a user's checkout to be used instead of the sources in the sandbox. It is highly discouraged to modify the sources in the sandbox which should stay untouched by users. Beware, depending on the \code{SCBI} options, the modifications in the source may be overwritten, so lost.
 
 The recommended steps are (we assume the current VCS for the module is Git):
 
-\begin{description}[style=nextline]
-	\item[Checkout the module] The user need to manually checkout the module. This can be done in any directory usually used to do development:
+\subsubsection{Checkout modules}
 
-	\begin{shellcommand}
+All modules that will be worked on must be checked-out.
+
+\begin{shellcommand}
 	\item cd \$HOME/dev
-	\item git clone http://github.com/mm2/Little-CMS
-	\end{shellcommand}
+	\item git clone https://github.com/TurboGit/scbi-handson-lib.git
+\end{shellcommand}
 
-	\item[Setup SCBI enviroment] The variable SCBI\_GIT\_REPO must be modified to point to the directory containing the user's Git checkouts. This is done by creating a new environment file, for example \file{.env-debug} (\seeref{envfile}):
+Let's switch to the \code{broken} branch for the demo:
 
-	\begin{shellcommand}
+\begin{shellcommand}
+	\item cd scbi-handson-lib
+	\item git checkout broken
+\end{shellcommand}
+
+As the clone is not done into \code{\$HOME/dev/repositories/git} the variable \code{SCBI\_GIT\_REPO} must be set to point to the root checkout directory, \seeref{build-env}.
+
+\begin{shellcommand}
 	\item export SCBI\_GIT\_REPO=\$HOME/dev
-	\end{shellcommand}
-
-	If the default value is used this step is not needed.
-
-	\item[Create a build plan] The build plan will list all modules that must be compiled using a user's checkout. For example \file{.plan-debug}:
-
-	\begin{lstlisting}
-	lcms2:dev
-	\end{lstlisting}
-
-	Remember, \code{dev} is the special version referencing a user's checkout. (\seeref{dev}).
-
-	\item[Modify the module's sources] As a standard development step we modify the sources in the local checkout to fix the issue:
-
-	\begin{shellcommand}
-	\item cd \$HOME/dev/Little-CMS
-	\item emacs somefile.c
-	\end{shellcommand}
-
-\end{description}
-
-When this is setup, building the new software (\code{Little-CMS} in this example) with a development check-out, one can just do:
-
-\cmd{scbi \ddash{}env=debug \ddash{}plan=debug \ddash{}deps lcms2}
-
-We can further simplify by adding the build-plan reference in the environment file \file{.env-debug}:
-
-\begin{lstlisting}
-	export SCBI_GIT_REPO=$HOME/dev
-	SCBI_PLAN=debug
-\end{lstlisting}
-
-And then the new equivalent command line is:
-
-\cmd{scbi \ddash{}env=debug \ddash{}deps lcms2}
-
-If a single software with no dependencies are to be debugged it is possible to just call SCBI with a dev reference for the module. In this case there is no need to create an environment file nor a build-plan and we can simply call:
-
-\cmd{scbi lcms2:dev}
+\end{shellcommand}
 
 Mercurial and Subversion VCS are also supported, the variables for each are:
 
@@ -1925,29 +1908,130 @@ Mercurial and Subversion VCS are also supported, the variables for each are:
 	\item[Subversion] \tabto{3cm} SCBI\_SVN\_REPO\index{user's checkout!SCBI\_SVN\_REPO}
 \end{description}
 
+\subsubsection{Build using the sources from checkout}
+
+The version \code{dev} is used to tell \code{SCBI} to use the sources from the user's checkout instead of the sandbox one. Here we use the dev version for \code{scbi-handson-lib} that we have cloned above and we let \code{SCBI} use master branch of \code{h-handson-app} in the Git VCS.
+
+\cmd{scbi --deps h-handson-lib:dev h-handson-app}
+
+\begin{footnotesize}
+	\begin{verbatim}
+2024/10/07 15:40:42 : Building h-handson-lib [default] (dev)
+2024/10/07 15:40:42 : native x86_64-linux-gnu
+2024/10/07 15:40:42 : steps : setup config build install wrapup
+2024/10/07 15:40:42 : config starting
+2024/10/07 15:40:43 : config completed
+2024/10/07 15:40:43 : build starting
+[ 16%] Building CXX object CMakeFiles/hello.dir/hello/hello.cpp.o
+/<...>/hello.cpp: In function ‘const char* hello_message()’:
+/<...>/hello.cpp:4:5: error: ‘x’ was not declared in this scope
+4 |     x "hello";
+|     ^
+/<...>/hello.cpp:5:1: warning: no return statement in function returning non-void [-Wreturn-type]
+5 | }
+| ^
+make[2]: *** [CMakeFiles/hello.dir/build.make:76: CMakeFiles/hello.dir/hello/hello.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:87: CMakeFiles/hello.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2
+2024/10/07 15:40:43 : h-handson-lib (FAILED) build failed with error 2
+2024/10/07 15:40:43 : h-handson-lib (FAILED) to reproduce:
+2024/10/07 15:40:43 : h-handson-lib (FAILED) bash /<...>/<...>/logs/build.cmd
+2024/10/07 15:40:43 : h-handson-lib (FAILED) use bash -x option for debug
+\end{verbatim}
+\end{footnotesize}
+
+\subsubsection{Fix sources from checkout}
+
+Edit \file{hello/hello.cpp} and replace \code{x} by \code{return}. Restart build:
+
+\cmd{scbi --deps h-handson-lib:dev h-handson-app}
+
+\begin{verbatim}
+2024/10/07 15:44:05 : Building h-handson-lib [default] (dev)
+2024/10/07 15:44:05 : native x86_64-linux-gnu
+2024/10/07 15:44:05 : steps : setup config build install wrapup
+2024/10/07 15:44:05 : config starting
+2024/10/07 15:44:06 : config completed
+2024/10/07 15:44:06 : build starting
+2024/10/07 15:44:06 : build completed
+2024/10/07 15:44:06 : install starting
+2024/10/07 15:44:06 : install completed
+2024/10/07 15:44:06 : skip global install
+2024/10/07 15:44:06 : End Building h-handson-lib [default] (dev)
+
+2024/10/07 15:44:06 : Building h-handson-app [default] (master)
+2024/10/07 15:44:06 : native x86_64-linux-gnu
+2024/10/07 15:44:06 : steps : setup config build install wrapup
+2024/10/07 15:44:06 : config starting
+2024/10/07 15:44:07 : config completed
+2024/10/07 15:44:07 : build starting
+2024/10/07 15:44:07 : build completed
+2024/10/07 15:44:07 : install starting
+2024/10/07 15:44:07 : install completed
+2024/10/07 15:44:07 : skip global install
+2024/10/07 15:44:07 : End Building h-handson-app [default] (master)
+\end{verbatim}
+
+\subsubsection{Commit fixed sources in checkout}
+
+\begin{shellcommand}
+	\item git commit -m "..." ...
+\end{shellcommand}
+
+And eventually push the fixed sources upstream.
+
+\begin{shellcommand}
+	\item git push
+\end{shellcommand}
+
+\subsubsection{Copy artifacts into main application}
+
+If the changed module contains shared libraries used by an application. To test the fixed code one can simply copy the new installed module's artifacts into the proper location:
+
+\begin{shellcommand}
+	\item cp /<...>/h-handson-lib/install/.. /dir/for/testing
+\end{shellcommand}
+
 \subsection{Analyzing build failures}
 \label{debugging}
 
 When a build fails it may be needed to look at the full logs and the actual commands executed for the failing step (configure, build, install...).
 
-\subsubsection{Replay one specific step}
+The following command will expose a build failure that we will fix using three different methods.
 
-It is possible to replay a single command and display the full log to analyze what went wrong:
+\cmd{scbi --deps --plan=broken h-handson-app}
 
-\begin{description}
-	\item[configuration] \tabto{3cm}  \cmd{scbi \ddash{}config \ddash{}log:yes lcms2}
-	\item[build] \tabto{3cm} \cmd{scbi \ddash{}build \ddash{}log:yes lcms2}
-\end{description}
+\begin{footnotesize}
+\begin{verbatim}
+2024/09/19 13:23:30 : Building h-handson-lib [default] (broken)
+2024/09/19 13:23:30 : needed by:
+2024/09/19 13:23:30 :   - h-handson-app
+2024/09/19 13:23:30 : native x86_64-linux-gnu
+2024/09/19 13:23:30 : steps : build
+2024/09/19 13:23:30 : build starting
+[ 16%] Building CXX object CMakeFiles/hello.dir/hello/hello.cpp.o
+/<...>/hello.cpp: In function ‘const char* hello_message()’:
+/<...>/hello.cpp:4:5: error: ‘x’ was not declared in this scope
+4 |     x "hello";
+|     ^
+/<...>/hello.cpp:5:1: warning: no return statement in function returning non-void [-Wreturn-type]
+5 | }
+| ^
+make[2]: *** [CMakeFiles/hello.dir/build.make:76 : CMakeFiles/hello.dir/hello/hello.cpp.o] Erreur 1
+make[1]: *** [CMakeFiles/Makefile2:87 : CMakeFiles/hello.dir/all] Erreur 2
+make: *** [Makefile:136 : all] Erreur 2
+2024/09/19 13:23:30 : h-handson-lib (FAILED) build failed with error 2
+2024/09/19 13:23:30 : h-handson-lib (FAILED) to reproduce:
+2024/09/19 13:23:30 : h-handson-lib (FAILED) bash /<...>/h-handson-lib/<...>/logs/build.cmd
+2024/09/19 13:23:30 : h-handson-lib (FAILED) use bash -x option for debug
+\end{verbatim}
+\end{footnotesize}
 
-The files to be edited are in the sandbox module's directory:
+\begin{quote}
+	\emph{\textbf{WARNING}: When the fix is found it must be applied in the module's repository outside of the sandbox or it will be lost.}
 
-\file{\$SCBI\_BDIR/lcms2/build/src}
-
-Then one of the configuration commands above can be restarted. \emph{When the fix is found it must be applied in the module's repository outside of the sandbox or it will be lost.}
-
-Again, note that restarting an SCBI command without specifying a specific step (like \ddash{config} or \ddash{build}) will reset all sources from the reference repository in the sandbox.
-
-It is possible to replay the configure, build or install step just by running the corresponding \code{.cmd} file. Use the Bash \code{-x} option to display the commands as they are executed.
+	\emph{Restarting an SCBI command with a setup set (so without specifying a specific step like \ddash{config} or \ddash{build}) will reset all sources from the reference repository in the sandbox.}
+\end{quote}
 
 \subsubsection{Look at the sandbox status}
 
@@ -1957,37 +2041,149 @@ The files created in this directory are:
 
 \begin{description}[font=\file,style=standard]
 	\item[env.cmd] \tabto{3cm} The environment set to configure, build or install the module.
+	\item[build-plan] \tabto{3cm} The build plan with the variant and version of all modules.
 	\item[config.cmd] \tabto{3cm} The commands executed to configure.
 	\item[config.log] \tabto{3cm} The full log issued during the configuration.
 	\item[build.cmd] \tabto{3cm} The commands executed to build.
 	\item[build.log] \tabto{3cm} The full log issued during the build.
 	\item[install.cmd] \tabto{3cm} The commands executed to install.
 	\item[install.log] \tabto{3cm} The full log issued during the installation.
+	\item[<plug-ins>] \tabto{3cm} The plug-ins needed for the build.
 \end{description}
 
 In all the log files one can find a trace of every command executed. All trace line are prefixed with \code{\_TRACE:}. The \file{config.log} contains the full command used to configure the module and the \file{build.log} the full command used to build the module.
 
-As an example, the build command file for \code{c-cmake} plug-in looks like this:
+\subsubsection{Replay one specific step}
+
+It is possible to replay a single command and display the full log to analyze what went wrong:
+
+\begin{description}
+	\item[The configuration step] \tabto{3cm}  \cmd{scbi \ddash{}config \ddash{}log:yes h-handson-lib}
+	\item[The build step] \tabto{3cm} \cmd{scbi \ddash{}build \ddash{}log:yes h-handson-lib}
+\end{description}
+
+Let's reproduce the issue:
+
+\cmd{scbi --build --plan=broken h-handson-lib}
+
+\begin{footnotesize}
+	\begin{verbatim}
+		/<...>/h-handson-lib/<...>/src/hello/hello.cpp:4:5: error: ‘x’ was not declared in this scope
+		4 |     x "hello";
+		|     ^
+	\end{verbatim}
+\end{footnotesize}
+
+The failure is because a bug in \code{hello.cpp}.
+
+Edit \file{<...>/h-handson-lib/build/src/hello.cpp} and replace \code{x} by \code{return}. Then restart the build:
+
+\cmd{scbi --build --plan=broken h-handson-lib}
+
+\begin{verbatim}
+2024/09/19 14:40:42 : Building h-handson-lib [default] (broken)
+2024/09/19 14:40:42 : native x86_64-linux-gnu
+2024/09/19 14:40:42 : steps : build
+2024/09/19 14:40:43 : build starting
+2024/09/19 14:40:43 : build completed
+2024/09/19 14:40:43 : skip global install
+2024/09/19 14:40:43 : End Building h-handson-lib [default] (broken)
+\end{verbatim}
+
+The compilation is now fixed using sources in the sandbox, be sure to apply the changes into the repository hosting the sources. For testing purpose you can then simply copy the artifacts (shared libraries for example) where the application is looking for them.
+
+\subsubsection{Use generated scripts}
+
+It is possible to replay the configure, build or install step just by running the corresponding \code{.cmd} file. Use the Bash \code{-x} option to display the commands as they are executed.
+
+In case of failure \code{SCBI} output the command to use to replay:
+
+\begin{footnotesize}
+	\begin{verbatim}
+2024/09/19 13:23:30 : h-handson-lib (FAILED) bash /<...>/h-handson-lib/<...>/logs/build.cmd
+2024/09/19 13:23:30 : h-handson-lib (FAILED) use bash -x option for debug
+    \end{verbatim}
+\end{footnotesize}
+
+As an example, the build command file \code{build.cmd} for \code{h-handson-lib} plug-in looks like this:
 
 \begin{lstlisting}
-# c-cmake-build
+# h-handson-lib-build
 (
-	cd <...>/c-cmake/build/build
-	source <...>/.scbi-runtime
-	[[ -f ../logs/env.cmd ]] && source ../logs/env.cmd
-	[[ -f ../logs/build-plan ]] &&
-		load-runtime-module-plan ../logs/build-plan
+   cd <...>/h-handson-lib/x86_64-linux-gnu-default/build
+   source <...>/.scbi.runtime
+   [[ -f ../logs/env.cmd ]] && source ../logs/env.cmd
+   [[ -f ../logs/build-plan ]] &&
+   load-runtime-module-plan ../logs/build-plan
 
-	source ../logs/c-cmake
+   source ../logs/h-handson-lib
 
-	c-cmake-build <...>/c-cmake/build/install \
-	              x86_64-linux-gnu default
+   h-handson-lib-build <...>/h-handson-lib/<...>/install \
+                       x86_64-linux-gnu default
 )
 \end{lstlisting}
 
 Note that this script is executed in a sub-shell and so won't pollute the working shell environment.
 
-Note also that the sources in the sandbox can be overwritten at any time. So the sources should not be edited directly on the sandbox. When the issue is found the recommended solution is to use a user's checkout, \seeref{userco}.
+To replay just execute the script:
+
+\cmd{bash /.../logs/build.cmd}
+
+One can then edit the sources in the sandbox and launch the command above to build again.
+
+Here just fix the syntax error by changing \code{x} by \code{return}.
+
+\cmd{bash /.../logs/build.cmd}
+
+This time the compilation complete without issue:
+
+\begin{verbatim}
+	[ 16%] Building CXX object CMakeFiles/hello.dir/hello/hello.cpp.o
+	[ 33%] Linking CXX static library libhello.a
+	[ 33%] Built target hello
+	[ 66%] Built target hey
+	[100%] Built target goodbye
+\end{verbatim}
+
+The compilation is now fixed using sources in the sandbox, be sure to apply the changes into the repository hosting the sources. For testing purpose you can then simply copy the artifacts (shared libraries for example) where the application is looking for them.
+
+\subsubsection{Use scbi shell command}
+
+Another option is to enter into a shell set with the proper environment to run the configuration and build command manually directly from the sandbox.
+
+\cmd{scbi shell --mode:sandbox h-handson-lib}
+
+This will enter a sub-shell into the sandbox's build directory. The shell is setup with the proper environment for the plug-in and all the dependencies. So to reproduce the issue just restart the build command which is here \code{make} (see \code{h-handson-lib} plug-in's build hook):
+
+\cmd{make}
+
+\begin{footnotesize}
+	\begin{verbatim}
+		/<...>/h-handson-lib/<...>/src/hello/hello.cpp:4:5: error: ‘x’ was not declared in this scope
+		4 |     x "hello";
+		|     ^
+\end{verbatim}
+\end{footnotesize}
+
+Edit \file{../src/hello/hello.cpp} and replace \code{x} by \code{return}. Restart the build:
+
+\cmd{make}
+
+This time the compilation complete without issue:
+
+\begin{verbatim}
+[ 16%] Building CXX object CMakeFiles/hello.dir/hello/hello.cpp.o
+[ 33%] Linking CXX static library libhello.a
+[ 33%] Built target hello
+[ 66%] Built target hey
+[100%] Built target goodbye
+\end{verbatim}
+
+The compilation is now fixed using sources in the sandbox, be sure to apply the changes into the repository hosting the sources. For testing purpose you can then simply copy the artifacts (shared libraries for example) where the application is looking for them.
+
+When done you can exit the scbi's sub-shell:
+
+\cmd{exit}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
