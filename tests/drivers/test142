@@ -1,0 +1,31 @@
+# check that adding/appending/prepending to var do not create the var
+
+source scripts.d/0_runtime
+
+add-to-var TLIST ""
+append-to-var TLIST ""
+prepend-to-var TLIST ""
+
+IS "${TLIST+x}" == ""
+
+TLIST=toto
+
+add-to-var TLIST ""
+IS $TLIST == "toto"
+
+append-to-var TLIST ""
+IS $TLIST == "toto"
+
+prepend-to-var TLIST ""
+IS $TLIST == "toto"
+
+add-to-var TLIST titi
+IS $TLIST == "titi:toto"
+
+remove-from-var TLIST toto
+IS $TLIST == "titi"
+
+# check that removing last value from var will unset var
+remove-from-var TLIST titi
+IS "$TLIST" == ""
+IS "${TLIST+x}" == ""

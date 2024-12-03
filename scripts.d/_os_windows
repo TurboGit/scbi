@@ -39,20 +39,30 @@ function define-var()
                 unset $VAR
             ;;
             ADD)
-                add-to-var-sep ${VAR} "${VALUE}" $SEP
-                export $VAR
+                [[ -n "$VALUE" ]] &&
+                    {
+                        add-to-var-sep ${VAR} "${VALUE}" $SEP
+                        export $VAR
+                    }
             ;;
             APPEND|A)
-                append-to-var-sep ${VAR} "${VALUE}" $SEP
-                export $VAR
+                [[ -n "$VALUE" ]] &&
+                    {
+                        append-to-var-sep ${VAR} "${VALUE}" $SEP
+                        export $VAR
+                    }
             ;;
             PREPEND|P)
-                prepend-to-var-sep ${VAR} "${VALUE}" $SEP
-                export $VAR
+                [[ -n "$VALUE" ]] &&
+                    {
+                        prepend-to-var-sep ${VAR} "${VALUE}" $SEP
+                        export $VAR
+                    }
             ;;
             REMOVE|R)
                 remove-from-var-sep ${VAR} "${VALUE}" $SEP
                 export $VAR
+                [[ -z ${!VAR} ]] && unset $VAR
             ;;
         esac
     fi
