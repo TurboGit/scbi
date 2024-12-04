@@ -818,6 +818,9 @@ function is-module-up-to-date()
 
     load-module $MODREF
 
+    check-archive-exists $module $variant $ref
+    [[ $? == 0 ]] && kind=VERSION
+
     local mver=$VERSION_ERROR
 
     #  Get the version hook, if none present all versions are ok
