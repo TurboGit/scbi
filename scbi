@@ -876,7 +876,7 @@ function is-module-up-to-date()
 
     [[ -f $SCBI_BDIR/$module/source-id ]] &&
         [[ "$(cat $SCBI_BDIR/$module/source-id)" == $SID ]] &&
-            rsid=0;
+            rsid=0
 
     #  Clean-up the version number (only digits and a single dot)
 
