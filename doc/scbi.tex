@@ -586,7 +586,7 @@ The following options are supported:
 
 	\item[-w | \ddash{}wrapup] Do the wrapup step (default).
 
-	\item[\ddash{}archive] Check for archives only if explicitly specified in the module reference.
+	\item[\ddash{}archive] Check for archives only if explicitly specified in the module reference. If this option is not specified an archive for the plug-in will be search into the archive cache directory (\file{\$SCBI\_BDIR/.archives}).
 
 	\item[\ddash{}tests{[:only]}{[=OPTIONS]}] Do a standard build cycle and run the testsuite if any. If suboption \code{only} is specified only run the testsuite (no build is checked/done). The optional OPTIONS parameters is passed as 4th parameter of the tests hook (\seeref{tests-hook})
 
