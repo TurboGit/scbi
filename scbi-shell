@@ -146,10 +146,13 @@ function shl-run-command()
         local PREFIX=$SCBI_BDIR/${SHL_MODULE}/$TARGET-${SHL_VARIANT}/install
         # CMD is not specified, try using the one defined in
         # the plug-in itself.
-        for C in $(plugin-call-variant-hooks ${SHL_MODULE} run \
-                                             $PREFIX $TARGET ${SHL_VARIANT});
-        do
-            CMD+="$C "
+        local HOOKS=()
+        plugin-get-variant-hooks HOOKS ${SHL_MODULE} run \
+                                 $PREFIX $TARGET ${SHL_VARIANT}
+
+        for H in ${HOOKS[*]}; do
+            declare -fx $H
+            CMD+="$H; "
         done
 
         if [[ -z $CMD ]]; then

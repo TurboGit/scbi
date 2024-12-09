@@ -46,7 +46,7 @@ function mainmult-install()
 
 function mainmult-run()
 {
-    echo mainmult
+    mainmult
 }
 
 function mainmult-tests()

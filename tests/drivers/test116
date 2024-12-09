@@ -8,23 +8,29 @@ EOF
 RUNS ./scbi shell --run dorun
 
 DIFF <<EOF
-dorun default
+dorun
+default
 EOF
 
 RUNS ./scbi shell --run dorun/one
 
 DIFF <<EOF
-dorun one
+dorun
+one
 EOF
 
 RUNS ./scbi shell --run dorun/one.two
 
 DIFF <<EOF
-dorun one two
+dorun
+one
+two
 EOF
 
 RUNS ./scbi shell --run dorun/two.one
 
 DIFF <<EOF
-dorun two one
+dorun
+two
+one
 EOF

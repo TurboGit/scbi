@@ -1,7 +1,7 @@
 
 function dorun-common-run()
 {
-    echo echo dorun
+    echo dorun
 }
 
 function dorun-run()
