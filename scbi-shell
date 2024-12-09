@@ -91,6 +91,7 @@ function shl-run-shell()
     curcd=$(pwd)
 
     local MODREF=${MODULES[-1]}
+    local DIR=""
 
     shl-setup-env $MODREF "${MODULES[*]}" $DOCD
 
@@ -102,15 +103,21 @@ function shl-run-shell()
     if [[ $DOCD == no ]]; then
         cd $curcd
     elif [[ ${SHL_KIND} == DEV ]] || [[ $DOCD == yes-dev ]]; then
-        local DIR=$(get-vcs-dir ${SHL_MODULE}:dev)
-        if [[ -d $DIR ]]; then
-            cd $(get-vcs-dir ${SHL_MODULE}:dev)
-        else
+        DIR=$(get-vcs-dir ${SHL_MODULE}:dev)
+        if [[ ! -d $DIR ]]; then
+            DIR=""
             elog ${SHL_MODULE} no user checkout directory $DIR
         fi
     else
-        cd $(get-build-dir $TARGET $MODREF)
+        DIR=$(get-build-dir $TARGET $MODREF)
     fi
+
+    [[ -n $DIR ]] &&
+        {
+            local PFX=${curcd#$DIR}
+            [[ $PFX == $curcd ]] &&
+                cd $DIR
+        }
 
     #  Exports all functions into the bash sub-shell
     eval "$(declare -F | sed -e 's/-f /-fx /')"
