@@ -1577,35 +1577,31 @@ function handle-module()
             for dmodule in $(get-all-depends $module $variant build-depends); do
                 handle-depends $MODREF $dmodule || exit 1
             done
-        )
-        [[ $? != 0 ]] && exit 1
 
-        [[ $DRY_RUN == no ]] && line-sep
+            [[ $DRY_RUN == no ]] && line-sep
 
-        #  And then we check for standard dependencies
-        (
+            #  And then we check for standard dependencies
             for dmodule in $(get-all-depends $module $variant depends); do
                 handle-depends $MODREF $dmodule || exit 1
             done
-        )
-        [[ $? != 0 ]] && exit 1
 
-        [[ $DRY_RUN == no ]] && line-sep
+            [[ $DRY_RUN == no ]] && line-sep
 
-        #  Finaly check for tests dependencies if needed
-        [[ $DO_TEST != no ]] &&
-            {
-                (
+            #  Finaly check for tests dependencies if needed
+            [[ $DO_TEST != no ]] &&
+                {
                     for dmodule in \
                         $(get-all-depends $module $variant tests-depends);
                     do
                         handle-depends $MODREF $dmodule || exit 1
                     done
-                )
-                [[ $? != 0 ]] && exit 1
 
-                [[ $DRY_RUN == no ]] && line-sep
-            }
+                    [[ $DRY_RUN == no ]] && line-sep
+                }
+
+            return 0
+        )
+        [[ $? != 0 ]] && exit 1
     fi
 
     if [[ $DRY_RUN == yes ]]; then
