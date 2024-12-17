@@ -8,7 +8,7 @@ export SCBI_OS_MAJOR_VERSION=9.3
 # ========================= A
 RUNS ./scbi show --plan=group5 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 5 module(s) in the plan
@@ -22,7 +22,7 @@ EOF
 # ========================= B
 RUNS ./scbi show --plan=group5/mpi --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 5 module(s) in the plan
@@ -40,7 +40,7 @@ export SCBI_OS_MAJOR_VERSION=11.1
 # ========================= C
 RUNS ./scbi show --plan=group5/fast --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 5 module(s) in the plan

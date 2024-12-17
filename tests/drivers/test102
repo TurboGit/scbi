@@ -1,7 +1,7 @@
 
 RUNS ./scbi show --target=i686-pc-mingw32 --plan=cross --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 4 module(s) in the plan
@@ -13,7 +13,7 @@ EOF
 
 RUNS ./scbi show --target=x86_64-pc-mingw32 --plan=cross --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 4 module(s) in the plan

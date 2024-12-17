@@ -2,7 +2,7 @@
 
 RUNS ./scbi show --plan=plgv1 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 4 module(s) in the plan
@@ -14,7 +14,7 @@ EOF
 
 RUNS ./scbi show --plan=plgv2 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 4 module(s) in the plan
@@ -26,7 +26,7 @@ EOF
 
 RUNS ./scbi show --plan=plgv3 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 4 module(s) in the plan
@@ -38,7 +38,7 @@ EOF
 
 RUNS ./scbi show --plan=plgv4 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 8 module(s) in the plan
@@ -54,7 +54,7 @@ EOF
 
 RUNS ./scbi show --plan=plgv5 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 8 module(s) in the plan
@@ -70,7 +70,7 @@ EOF
 
 RUNS ./scbi show --plan=plgv6 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 8 module(s) in the plan
@@ -86,7 +86,7 @@ EOF
 
 RUNS ./scbi show --plan=plgv7 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 9 module(s) in the plan
@@ -103,7 +103,7 @@ EOF
 
 RUNS ./scbi show --plan=plgv8 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 9 module(s) in the plan
@@ -120,7 +120,7 @@ EOF
 
 RUNS ./scbi show --plan=plgv9 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 9 module(s) in the plan
@@ -137,7 +137,7 @@ EOF
 
 RUNS ./scbi show --plan=plgv10 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 1 module(s) in the plan
@@ -146,7 +146,7 @@ EOF
 
 RUNS ./scbi show --plan=plgv11 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 2 module(s) in the plan

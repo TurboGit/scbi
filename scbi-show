@@ -25,7 +25,7 @@ function shw-usage()
     echo "      | --externals:n      list module's external dependencies"
     echo "      | --no-version       do not display modules/externals version"
     echo "      | --filter:n         filter depends/external for dev or runtime"
-    echo "      | --build-plan       list current current plan"
+    echo "      | --build-plan:n     list current current plan"
     echo "      | --module-ref:n     display variant/version of specific module"
     echo "      | --stat             display some status of current setup"
 }
@@ -153,8 +153,8 @@ fi
 OPTFILE=$(mktemp)
 
 ALLOPTS=$(getopt -u -o kld \
-                 -l depends:direct,depends:full,depends,build-plan \
-                 -l externals,externals:only,no-version \
+                 -l depends:direct,depends:full,depends,build-plan:: \
+                 -l build-plan:history::,externals,externals:only,no-version \
                  -l filter:all,filter:dev,filter:runtime,module-ref \
                  -l module-ref:version,module-ref:variant,module-ref:full \
                  -- $* 2> $OPTFILE)
@@ -202,8 +202,13 @@ while [[ $# -gt 0 ]]; do
         --filter:runtime)
             SCBI_FILTER=runtime
             ;;
+        --build-plan:history)
+            DO_PLAN=history
+            [[ $2 != "--" ]] && PLAN_FILTER="$2"
+            ;;
         --build-plan)
             DO_PLAN=yes
+            [[ $2 != "--" ]] && PLAN_FILTER="$2"
             ;;
         --module-ref)
             DO_MOD_VER=full
@@ -269,8 +274,12 @@ if [[ $DO_MOD_VER != no ]]; then
     exit 0
 fi
 
-if [[ $DO_PLAN == yes ]]; then
-    display-build-plan
+if [[ $DO_PLAN != no ]]; then
+    REGEX=""
+    if [[ -n $PLAN_FILTER ]]; then
+        REGEX="(${PLAN_FILTER//,/|})"
+    fi
+    display-build-plan $DO_PLAN "$REGEX"
     exit 0
 fi
 

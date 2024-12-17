@@ -5,6 +5,7 @@ RUNS ./scbi show --plan=autov --build-plan mautov
 
 clean-up-osht-output
 sort-osht-output
+trim-osht-output
 
 DIFF <<EOF
 
@@ -24,6 +25,7 @@ RUNS ./scbi show --plan=autov --build-plan mainav=mautov/new mautov
 
 clean-up-osht-output
 sort-osht-output
+trim-osht-output
 
 DIFF <<EOF
 
@@ -41,6 +43,7 @@ RUNS ./scbi show --plan=autov --build-plan mautov/new mautov
 
 clean-up-osht-output
 sort-osht-output
+trim-osht-output
 
 DIFF <<EOF
 

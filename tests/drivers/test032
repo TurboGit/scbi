@@ -2,8 +2,10 @@
 # of the final output.
 RUNS ./scbi show --plan=inherit --build-plan lib1
 
+trim-osht-output
+
 DIFF <<EOF
 There is 2 module(s) in the plan
-lib2/variant1:v2.0
 lib1:v2
+lib2/variant1:v2.0
 EOF

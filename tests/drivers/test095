@@ -1,7 +1,7 @@
 RUNS ./scbi show --plan=meta --build-plan meta:v5
 
 clean-up-osht-output
-sort-osht-output
+trim-osht-output
 
 DIFF <<EOF
 There is 3 module(s) in the plan
@@ -13,7 +13,7 @@ EOF
 RUNS ./scbi show --plan=meta --build-plan meta
 
 clean-up-osht-output
-sort-osht-output
+trim-osht-output
 
 DIFF <<EOF
 There is 3 module(s) in the plan
@@ -25,7 +25,7 @@ EOF
 RUNS ./scbi show --plan=meta-meta --build-plan meta-meta
 
 clean-up-osht-output
-sort-osht-output
+trim-osht-output
 
 DIFF <<EOF
 There is 4 module(s) in the plan
@@ -38,7 +38,7 @@ EOF
 RUNS ./scbi show --plan=meta-meta --build-plan depA:9 meta-meta
 
 clean-up-osht-output
-sort-osht-output
+trim-osht-output
 
 DIFF <<EOF
 There is 4 module(s) in the plan
@@ -51,7 +51,7 @@ EOF
 RUNS ./scbi show --plan=meta-meta-2 --build-plan meta-meta
 
 clean-up-osht-output
-sort-osht-output
+trim-osht-output
 
 DIFF <<EOF
 There is 4 module(s) in the plan
@@ -64,7 +64,7 @@ EOF
 RUNS ./scbi show --plan=meta-meta-3 --build-plan meta-meta-2
 
 clean-up-osht-output
-sort-osht-output
+trim-osht-output
 
 DIFF <<EOF
 There is 1 module(s) in the plan

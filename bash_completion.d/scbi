@@ -21,7 +21,7 @@ _SCBI_FMT_ARGS="${_SCBI_COMMON} --format  --stat"
 
 _SCBI_SHL_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --mode:use --mode:sandbox --mode:dev --mode:tests --run --stat"
 
-_SCBI_SHO_ARGS="${_SCBI_COMMON} --env= -e --depends: --externals --externals:only --no-version --filter: --build-plan --module-ref --module-ref:version --module-ref:variant --module-ref:full --stat"
+_SCBI_SHO_ARGS="${_SCBI_COMMON} --env= -e --depends: --externals --externals:only --no-version --filter: --build-plan --build-plan:history --module-ref --module-ref:version --module-ref:variant --module-ref:full --stat"
 
 _SCBI_STR_ARGS="${_SCBI_COMMON} --env= -e --list-keys -l --list --list:full -d --delete"
 

@@ -2,7 +2,7 @@
 
 RUNS ./scbi show --plan=grouptar --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 10 module(s) in the plan

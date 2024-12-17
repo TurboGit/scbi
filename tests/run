@@ -20,6 +20,11 @@ function sort-osht-output()
     mv xout ${OSHT_STDIO}
 }
 
+function trim-osht-output()
+{
+    sed -i 's/  *$//' ${OSHT_STDIO}
+}
+
 function sort-osht-output-n-first-lines()
 {
     local N=$1
@@ -124,7 +129,7 @@ else
 fi
 cd ..
 
-PLAN 1183
+PLAN 1191
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR

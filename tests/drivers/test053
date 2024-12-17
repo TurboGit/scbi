@@ -4,7 +4,7 @@
 # ========================= A
 RUNS ./scbi show --plan=group4 --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 5 module(s) in the plan
@@ -18,7 +18,7 @@ EOF
 # ========================= B
 RUNS ./scbi show --plan=group4/mpi --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 5 module(s) in the plan
@@ -32,7 +32,7 @@ EOF
 # ========================= C
 RUNS ./scbi --plan=group4/mpi.fast show --build-plan lib1
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 5 module(s) in the plan

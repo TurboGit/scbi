@@ -8,7 +8,7 @@ export SCBI_OS_MAJOR_VERSION=9
 
 RUNS ./scbi show --plan=ondeps --build-plan ondeps
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 4 module(s) in the plan
@@ -23,7 +23,7 @@ export SCBI_OS_MAJOR_VERSION=10
 
 RUNS ./scbi show --plan=ondeps --build-plan ondeps
 
-sort-osht-output-but-first-line
+trim-osht-output
 
 DIFF <<EOF
 There is 6 module(s) in the plan

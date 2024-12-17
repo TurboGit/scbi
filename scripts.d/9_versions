@@ -94,12 +94,24 @@ function _internal_merge_variant()
 }
 
 declare -gA SCBI_PLAN_LOADED
+declare -gA SCBI_PLAN_HIST
+
+function register-module-plan()
+{
+    local FROM=$1
+    local MOD=$2
+    local REF=$3
+
+    SCBI_MODVER[$MOD]=$REF
+    SCBI_PLAN_HIST[$MOD]+=";${FROM},${REF}"
+}
 
 function load-module-plan()
 {
     local NAMEREF=$1
 
     local VARIANT=${NAMEREF#*/}
+    local NAME=""
 
     function resolve-set()
     {
@@ -160,7 +172,7 @@ function load-module-plan()
                     local minfo=()
                     parse-module-ref minfo $arg3
                     local module=${minfo[0]}
-                    SCBI_MODVER[$module]=$(resolve-set ${arg3/*=/})
+                    register-module-plan $NAME $module $(resolve-set ${arg3/*=/})
                 fi
             elif [[ "$modref" = "@alias" ]]; then
                 if [[ "$arg2" != "use" ]]; then
@@ -178,7 +190,7 @@ function load-module-plan()
                 local minfo=()
                 parse-module-ref minfo "$arg1=$arg3"
                 local module=${minfo[0]}
-                SCBI_MODVER[$module]=$(resolve-set $arg3)
+                register-module-plan $NAME $module $(resolve-set $arg3)
 
             elif [[ "$modref" = "@set" ]]; then
                 if [[ "$arg2" != "=" ]]; then
@@ -250,7 +262,7 @@ function load-module-plan()
                         fi
                     fi
 
-                    SCBI_MODVER[$module]=$(resolve-set "${module}${FREF}")
+                    register-module-plan $NAME $module $(resolve-set "${module}${FREF}")
                 done
                 GROUP=no
                 GMOD=""
@@ -303,7 +315,7 @@ function load-module-plan()
                 parse-module-ref minfo $modref
                 local module=${minfo[0]}
 
-                SCBI_MODVER[$module]=$(resolve-set "${modref/*=/}")
+                register-module-plan $NAME $module $(resolve-set "${modref/*=/}")
             fi
         done < $PLAN
     else
@@ -574,7 +586,7 @@ function rewrite-module-plan()
 
     while read E K V; do
         if [[ $E == 0 ]]; then
-            SCBI_MODVER[$K]=$V
+            register-module-plan auto $K $V
         elif [[ $E == 1 ]]; then
             ilog $K "$V"
         else
@@ -594,7 +606,7 @@ function rewrite-module-plan()
 
         while read E K V; do
             if [[ $E == 0 ]]; then
-                SCBI_MODVER[$K]=$V
+                register-module-plan auto $K $V
                 _NEWMOD+=($K)
             elif [[ $E == 1 ]]; then
                 ilog $K "$V"
@@ -622,22 +634,69 @@ function rewrite-module-plan()
 
 function _internal_list-build-plan()
 {
+    local KIND=$1
+    local REGEX=$2
+
     local module=""
 
+    local RESULT=()
+    local LEN=0
+
     for module in ${!SCBI_MODVER[*]}; do
+        [[ -n $REGEX ]] && [[ ! $module =~ $REGEX ]] && continue
+
         local FM=${module%=*}
+        local MSG=""
+
         if [[ "$FM" != "$module" ]]; then
-            echo "@for $FM use ${SCBI_MODVER[$module]}"
+            MSG="@for $FM use ${SCBI_MODVER[$module]}"
         else
-            echo "${SCBI_MODVER[$module]}"
+            MSG="${SCBI_MODVER[$module]}"
         fi
+
+        L=${#MSG}
+        [[ $L -gt $LEN ]] && LEN=$L
+
+        local HIST=""
+        [[ $KIND == history ]] &&
+            {
+                local FIRST=yes
+                local H=${SCBI_PLAN_HIST[$module]}
+                for M in $(echo ${H} | tr ';' '\n' | tac); do
+                    local DATA=( ${M//,/ } )
+
+                    if [[ $FIRST == yes ]]; then
+                        # For the first we skip the module ref as already
+                        # in MSG above.
+                        HIST+="${DATA[0]} "
+                        FIRST=no
+                    else
+                        local M=${DATA[1]}
+                        M=${M#*/}
+                        [[ $M == ${DATA[1]} ]] && M=${M#*:}
+
+                        HIST+="[${DATA[0]} | $M] "
+                    fi
+                done
+            }
+
+        RESULT+=( "$MSG" "$HIST" )
     done
+
+    local ITEM=${#RESULT[@]}
+
+    for((k=0; k<$ITEM; k+=2)); do
+        printf "%-*s %s\n" $LEN "${RESULT[$k]}" "${RESULT[((k+1))]}"
+    done | sort
 }
 
 function display-build-plan()
 {
+    local KIND=$1
+    local REGEX=$2
+
     echo "There is ${#SCBI_MODVER[*]} module(s) in the plan"
-    _internal_list-build-plan
+    _internal_list-build-plan $KIND "$REGEX"
 }
 
 ############################## record-build-plan
@@ -681,9 +740,9 @@ function set-module-ref()
          || [[ "${ref^^}" != "NONE" ]];
     then
         if [[ "$ref" == "force" ]]; then
-            SCBI_MODVER[$module]=$module/$variant
+            register-module-plan set $module $module/$variant
         else
-            SCBI_MODVER[$module]=${MODREF/*=/}
+            register-module-plan set $module ${MODREF/*=/}
         fi
     fi
 }

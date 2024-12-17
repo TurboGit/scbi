@@ -1,0 +1,51 @@
+
+RUNS ./scbi show --build-plan --plan=plgv4
+
+trim-osht-output
+
+DIFF <<EOF
+There is 8 module(s) in the plan
+plg1/ng
+plg2/ng
+plg3/ng:vx
+plg4/ng:v1
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+EOF
+
+RUNS ./scbi show --build-plan=plg8 --plan=plgv4
+
+trim-osht-output
+
+DIFF <<EOF
+There is 8 module(s) in the plan
+plg8/new:v1
+EOF
+
+RUNS ./scbi show --build-plan:history --plan=plgv4
+
+trim-osht-output
+
+DIFF <<EOF
+There is 8 module(s) in the plan
+plg1/ng     plgv4 [plgv1 | plg1]
+plg2/ng     plgv4 [plgv1 | exp]
+plg3/ng:vx  plgv4 [plgv1 | v1]
+plg4/ng:v1  plgv4 [plgv1 | new:v1]
+plg5        plgv3
+plg6/exp    plgv3
+plg7:v1     plgv3
+plg8/new:v1 plgv3
+EOF
+
+RUNS ./scbi show --build-plan:history=plg1,plg5 --plan=plgv4
+
+trim-osht-output
+
+DIFF <<EOF
+There is 8 module(s) in the plan
+plg1/ng plgv4 [plgv1 | plg1]
+plg5    plgv3
+EOF
