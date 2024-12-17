@@ -1,0 +1,9 @@
+
+inherit-plugin lib1
+
+function dyn-dep2-env()
+{
+    local PREFIX=$1
+
+    set-var DEP2 two
+}

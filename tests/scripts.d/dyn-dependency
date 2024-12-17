@@ -1,0 +1,14 @@
+
+function dyn-dependency-dyndep2-depends()
+{
+    #  Check if dyn-dep1 sources contains a specific file
+    #  if not add dependency to dyn-dep2
+    local TDIR=""
+    get-target-dir TDIR dyn-dep1 default
+
+    [[ -f $TDIR/src/Makefile ]] &&
+        echo dyn-dep2
+
+    [[ -f $TDIR/src/notthere ]] &&
+        echo should-not-be-run
+}
