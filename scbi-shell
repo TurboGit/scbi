@@ -3,8 +3,8 @@
 DO_EXT=no
 DO_LIST_VER=yes-nocd
 DO_MOD_VER=no
-DO_SHELL=yes
-DO_MODE=s
+DO_SHELL=yes-nocd
+DO_MODE=u
 DO_WARNING_EXTERNAL=yes
 SCBI_FILTER=all
 
