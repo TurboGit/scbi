@@ -146,7 +146,9 @@ function load-module-plan()
 
     if [[ -f $PLAN ]]; then
         while read modref arg1 arg2 arg3; do
-            if [[ "$modref" = "@load" ]]; then
+            if [[ "$modref" =~ ^[[:space:]]*# ]]; then
+                continue;
+            elif [[ "$modref" = "@load" ]]; then
                 load-module-plan $arg1
             elif [[ "$modref" = "@on" ]]; then
                 if [[ "$arg2" != "use" ]]; then
