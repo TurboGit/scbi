@@ -582,6 +582,17 @@ function rewrite-module-plan()
 {
     local eres=0
 
+    local RJOBS=$(( $SCBI_JOBS + $SCBI_HALF_JOBS ))
+
+    #  Get only the auto plug-in
+
+    declare _MOREMOD=()
+
+    for M in ${!SCBI_MODVER[@]}; do
+        [[ ${SCBI_MODVER[$M]} =~ auto(\.|:|$) ]] &&
+            _MOREMOD+=( $M )
+    done
+
     #  Rewrite plan for auto-variant
 
     while read E K V; do
@@ -593,29 +604,40 @@ function rewrite-module-plan()
             elog $K "$V"
             eres=1
         fi
-    done < <( parallel-do handle-plan-auto-variant \
-                          $(( $SCBI_JOBS + $SCBI_HALF_JOBS )) ${!SCBI_MODVER[@]} )
+    done < <( parallel-do handle-plan-auto-variant $RJOBS ${_MOREMOD[@]} )
 
     #  Rewrite plan for meta-module (this is done recursively until there
     #  is no new module plan entry rewritten.
+    #  For this step we need only the meta modules.
 
-    declare _MOREMOD=( ${!SCBI_MODVER[@]} )
+    _MOREMOD=()
+
+    function select-meta-module()
+    {
+        egrep -sq "function $1.*modules" $SCBI_PLUGINS/$1
+        [[ $? == 0 ]] && echo $1
+    }
+
+    while read M; do
+        _MOREMOD+=( $M )
+    done < <( parallel-do select-meta-module $RJOBS ${!SCBI_MODVER[@]} )
 
     while [[ ${#_MOREMOD[@]} > 0 ]]; do
         declare _NEWMOD=()
 
         while read E K V; do
             if [[ $E == 0 ]]; then
-                register-module-plan auto $K $V
-                _NEWMOD+=($K)
+                register-module-plan meta $K $V
+                egrep -sq "function $K.*modules" $SCBI_PLUGINS/$K
+                [[ $? == 0 ]] &&
+                    _NEWMOD+=($K)
             elif [[ $E == 1 ]]; then
                 ilog $K "$V"
             else
                 elog $K "$V"
                 eres=1
             fi
-        done < <( parallel-do handle-plan-meta-module \
-                              $(( $SCBI_JOBS + $SCBI_HALF_JOBS )) ${_MOREMOD[@]} )
+        done < <( parallel-do handle-plan-meta-module $RJOBS ${_MOREMOD[@]} )
 
         _MOREMOD=( ${_NEWMOD[@]} )
     done
@@ -764,52 +786,51 @@ function check-auto-variant()
     if [[ -f $SCBI_PLUGINS/$MODULE ]]; then
         #  Check external dependencies for native-depends
 
-        (
-            source $SCBI_PLUGINS/$MODULE
+        source $SCBI_PLUGINS/$MODULE
 
-            fn-exists $MODULE-native-depends
+        fn-exists $MODULE-native-depends
 
-            if [[ $? != 0 ]]; then
-                #  Fatal error, stop now
-                echo n
-                echo $SCBI_ERROR_HOOK_NOT_FOUND
-                echo 0
-                echo 0
-                echo NONE
-                exit 2
-            fi
+        if [[ $? != 0 ]]; then
+            #  Fatal error, stop now
+            echo n
+            echo $SCBI_ERROR_HOOK_NOT_FOUND
+            echo 0
+            echo 0
+            echo NONE
+            exit 2
+        fi
 
-            for dmodule in $(get-all-depends $MODULE native depends); do
-                if [[ ! -f $SCBI_PLUGINS/$dmodule ]]; then
-                    #  If OS dependency on a native variant has version set
-                    #  to v (for example libtbb:[v]) we want this dependency
-                    #  to be checking the module's version requested.
+        for dmodule in $(get-all-depends $MODULE native depends); do
+            if [[ ! -f $SCBI_PLUGINS/$dmodule ]]; then
+                #  If OS dependency on a native variant has version set
+                #  to v (for example libtbb:[v]) we want this dependency
+                #  to be checking the module's version requested.
 
-                    local MMOD=""
+                local MMOD=""
 
-                    if [[ ${dmodule#*:} == "[v]" ]]; then
-                        MMOD="v"
-                        dmodule=${dmodule%:*}
+                if [[ ${dmodule#*:} == "[v]" ]]; then
+                    MMOD="v"
+                    dmodule=${dmodule%:*}
 
-                        local module_info=()
-                        get-module-ref module_info $MODULE $FORMODULE
-                        local ref=${module_info[3]}
+                    local module_info=()
+                    get-module-ref module_info $MODULE $FORMODULE
+                    local ref=${module_info[3]}
 
-                        if [[ $ref != NONE ]]; then
-                            dmodule=${dmodule}:$ref
-                        fi
-                    else
-                        MMOD="n"
+                    if [[ $ref != NONE ]]; then
+                        dmodule=${dmodule}:$ref
                     fi
-
-                    # 5 items per line: v status module-version package-version package-name
-                    # v = v | n (v means that it comes from an inherited version :[v]
-                    local PSTATS=( $(check-pkg-status $dmodule) )
-                    [[ -n $PSTATS ]] &&
-                        echo $MMOD ${PSTATS[*]}
+                else
+                    MMOD="n"
                 fi
-            done
-        )
+
+                # 5 items per line: v status module-version package-version package-name
+                # v = v | n (v means that it comes from an inherited version :[v]
+                local PSTATS=()
+                check-pkg-status PSTATS $dmodule
+                [[ -n $PSTATS ]] &&
+                    echo $MMOD ${PSTATS[*]}
+            fi
+        done
 
     else
         #  No module definition, cannot have a native variant, error will

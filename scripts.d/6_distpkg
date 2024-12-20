@@ -499,16 +499,15 @@ function get-lib-for-dev()
 
 function check-pkg-status()
 {
-    local name_ver=( ${1/:/ } )
+    local -n _RESULT=$1
+
+    local name_ver=( ${2/:/ } )
     local pkg=${name_ver[0]}
     local version=${name_ver[1]}
 
     for distname in $(get-pkg-name "$pkg"); do
         check-${SCBI_OS_NAME}-pkg $distname ${version:-0}
-        echo $?
-        echo ${version:-0}
-        echo ${SCBI_PKGS[$distname]:-0}
-        echo $distname
+        _RESULT+=( $? ${version:-0} ${SCBI_PKGS[$distname]:-0} $distname )
     done
 }
 
