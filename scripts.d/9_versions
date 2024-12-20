@@ -340,6 +340,12 @@ function handle-plan-meta-module()
 {
     local M=$1
 
+    #  Fast check for a meta-module. A false positive is not a problem
+    #  as it will slow down a bit the process but we must avoid false
+    #  negative.
+    egrep -sq "function $M.*modules" $SCBI_PLUGINS/$M
+    [[ $? != 0 ]] && return
+
     local value=${SCBI_MODVER[$M]}
 
     local mod=${M/*=/}
@@ -608,19 +614,8 @@ function rewrite-module-plan()
 
     #  Rewrite plan for meta-module (this is done recursively until there
     #  is no new module plan entry rewritten.
-    #  For this step we need only the meta modules.
 
-    _MOREMOD=()
-
-    function select-meta-module()
-    {
-        egrep -sq "function $1.*modules" $SCBI_PLUGINS/$1
-        [[ $? == 0 ]] && echo $1
-    }
-
-    while read M; do
-        _MOREMOD+=( $M )
-    done < <( parallel-do select-meta-module $RJOBS ${!SCBI_MODVER[@]} )
+    _MOREMOD=( ${!SCBI_MODVER[@]} )
 
     while [[ ${#_MOREMOD[@]} > 0 ]]; do
         declare _NEWMOD=()
