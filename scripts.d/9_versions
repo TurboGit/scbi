@@ -465,7 +465,8 @@ function handle-plan-auto-variant()
     [[ $ref == "skip" ]] && return
 
     if [[ $variant =~ ^auto(\.|$) ]]; then
-        local PKVER=( $(check-auto-variant $mod $FORMODULE) )
+        local PKVER=()
+        check-auto-variant PKVER $mod $FORMODULE
 
         local cnt=${#PKVER[*]}
         local gstatus=$SCBI_STATUS_VERSION_OK
@@ -775,8 +776,9 @@ function set-module-ref()
 
 function check-auto-variant()
 {
-    local MODULE=$1
-    local FORMODULE=${2:-"@root"}
+    local -n _RESULT=$1
+    local MODULE=$2
+    local FORMODULE=${3:-"@root"}
 
     if [[ -f $SCBI_PLUGINS/$MODULE ]]; then
         #  Check external dependencies for native-depends
@@ -787,12 +789,8 @@ function check-auto-variant()
 
         if [[ $? != 0 ]]; then
             #  Fatal error, stop now
-            echo n
-            echo $SCBI_ERROR_HOOK_NOT_FOUND
-            echo 0
-            echo 0
-            echo NONE
-            exit 2
+            _RESULT=( n $SCBI_ERROR_HOOK_NOT_FOUND 0 0 NONE )
+            return 2
         fi
 
         for dmodule in $(get-all-depends $MODULE native depends); do
@@ -823,18 +821,14 @@ function check-auto-variant()
                 local PSTATS=()
                 check-pkg-status PSTATS $dmodule
                 [[ -n $PSTATS ]] &&
-                    echo $MMOD ${PSTATS[*]}
+                    _RESULT+=( $MMOD ${PSTATS[*]} )
             fi
         done
 
     else
         #  No module definition, cannot have a native variant, error will
         #  be reported upward.
-        echo n
-        echo $SCBI_ERROR_PLUGIN_NOT_FOUND
-        echo 0
-        echo 0
-        echo NONE
+        _RESULT=( n $SCBI_ERROR_PLUGIN_NOT_FOUND 0 0 NONE )
         return 1
     fi
 }
