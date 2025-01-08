@@ -195,7 +195,8 @@ A module is described in an SCBI plug-in script (one plug-in in one file). It ca
 	\begin{description}[font=\texttt]
 		\item[<ID>] A reference to a VCS version (branch or a Git SHA-1 for example), or an archive version when starting with \#.
 		\item[dev] \index{version!dev}To take the source from a user's checkout.
-		\item[skip] \index{version!skip}To specify that the module must be ignored.
+		\item[keep] \index{version!keep}To specify that the module sources should not be updated. So the \emph{setup, }\emph{configure}, \emph{build}, \emph{install} and \emph{wrapup} steps are not conducted and the module's will keep its current status as it was built last time.
+		\item[skip] \index{version!skip}To specify that the module must be completely ignored. It is as if the plug-in was not present in the dependencies.
 		\item[force] \index{version!force}To enable an otherwise skip module (possibly set to skip in a build plan).
 	\end{description}
 

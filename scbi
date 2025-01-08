@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  SCBI - (C) Pascal Obry - 2007-2023
+#  SCBI - (C) Pascal Obry - 2007-2025
 #
 
 shopt -s extglob
@@ -724,7 +724,7 @@ function handle-module-env()
     local variant=${module_info[1]}
     local ref=${module_info[3]}
 
-    [[ $ref = "skip" ]] && return 0
+    [[ "$ref" == "skip" ]] && return 0
 
     local TVDIR=""
     get-target-dir TVDIR $module $variant
@@ -1499,6 +1499,8 @@ function handle-module()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
+    local KEEP=${SCBI_MODVER[${module}.keep]:-no}
+
     SCBI_CURRENT_MODULE=$module
 
     #  If already handled, nothing more to do
@@ -1653,8 +1655,6 @@ function handle-module()
         ilog $module cross $SCBI_TARGET | tee -a $log
     fi
 
-    ilog $module steps : $STEPS | tee -a $log
-
     #  Create the build root directory if needed, note that we do check here
     #  even if already created when entering this routine. This is because
     #  in case of a purge the build directory could have been removed.
@@ -1667,15 +1667,36 @@ function handle-module()
         #  We need to remove the link/sources to ensure proper setting by
         #  the module.
 
-        [[ -d $SCBI_BDIR/$module ]] &&
+        [[ "$KEEP" == "yes" ]] &&
             {
-                cd $SCBI_BDIR/$module
-                rm -fr src src$SCBI_LNK vcs$SCBI_LNK
+                #  Remove config/build/install steps
+                for s in setup config build install wrapup; do
+                    STEPS="${STEPS/$s/}"
+                done
+
+                DO_SETUP=no
+                DO_CONFIG=no
+                DO_BUILD=no
+                DO_INSTALL=no
+                DO_WRAPUP=no
             }
 
-        handle-sources $FORMODULE $MODREF
+        ilog $module steps : $STEPS | tee -a $log
 
-        [[ $? != 0 ]] && exit 1
+
+        if [[ "$KEEP" == "yes" ]]; then
+            ilog $module no update, keep current build
+        else
+            [[ -d $SCBI_BDIR/$module ]] &&
+                {
+                    cd $SCBI_BDIR/$module
+                    rm -fr src src$SCBI_LNK vcs$SCBI_LNK
+                    }
+
+            handle-sources $FORMODULE $MODREF
+
+            [[ $? != 0 ]] && exit 1
+        fi
 
         #  Set cross-env if needed
 
@@ -1809,7 +1830,10 @@ function handle-module()
             #  src directory (deleting all non existing files in source
             #  location).
 
-            if [[ $SAFE_MODE = yes ]] && [[ $SCBI_ISOOT = true ]]; then
+            if [[ $SAFE_MODE = yes ]] &&
+                   [[ $SCBI_ISOOT = true ]] &&
+                   [[ $DO_BUILD == yes ]];
+            then
                 rm -fr $TVDIR/build$SCBI_LNK
                 rm -f $TVDIR/build-id
             fi
@@ -1939,7 +1963,8 @@ function handle-module()
     if [[ ${_IDIR^^} == NONE ]]; then
         ilog $module skip global install
 
-    elif [[ "$DO_INSTALL" != "no" ]] &&
+    elif [[ "$KEEP" == "no" ]] &&
+             [[ "$DO_INSTALL" != "no" ]] &&
              [[ -d $TVDIR/install ]];
     then
         local IDEST=${_IDIR/$SCBI_BDIR/<sandbox>}

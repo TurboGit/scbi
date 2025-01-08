@@ -1,0 +1,105 @@
+
+cp .root/repos/lib1.bundle backup.bundle
+
+RUNS ./scbi --plan=keep --deps --tests --update mainlib
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ mainlib
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build [variant-no-patch] starting
+xxxx/xx/xx xx:xx:xx : build [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : install [variant-no-patch] starting
+xxxx/xx/xx xx:xx:xx : install [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : tests [variant-no-patch] starting
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [variant-no-patch] (master)
+
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main on master
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
+EOF
+
+cp .root/repos/lib1-changed.bundle .root/repos/lib1.bundle
+
+RUNS ./scbi --plan=keep --deps --update --tests lib1:keep mainlib
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : no update, keep current build
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests [variant-no-patch] starting
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : End Building lib1 [variant-no-patch] (master)
+
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : tests starting
+main on master
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
+EOF
+
+RUNS ./scbi --plan=keep --deps --update --tests mainlib
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ mainlib
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build [variant-no-patch] starting
+xxxx/xx/xx xx:xx:xx : build [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : install [variant-no-patch] starting
+xxxx/xx/xx xx:xx:xx : install [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : tests [variant-no-patch] starting
+main
+liba.C changed
+xxxx/xx/xx xx:xx:xx : tests [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [variant-no-patch] (master)
+
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main on master
+liba.C changed
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
+EOF
+
+mv backup.bundle .root/repos/lib1.bundle

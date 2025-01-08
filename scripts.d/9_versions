@@ -753,14 +753,18 @@ function set-module-ref()
     local kind=${sminfo[2]}
     local ref=${sminfo[3]}
 
-    if [[ "$variant" != "default" ]]   \
-         || [[ "${kind^^}" != "NONE" ]]   \
-         || [[ "${ref^^}" != "NONE" ]];
-    then
-        if [[ "$ref" == "force" ]]; then
-            register-module-plan set $module $module/$variant
-        else
-            register-module-plan set $module ${MODREF/*=/}
+    if [[ "$ref" == "keep" ]]; then
+        SCBI_MODVER+=( [${module}.keep]=yes )
+    else
+        if [[ "$variant" != "default" ]]   \
+               || [[ "${kind^^}" != "NONE" ]]   \
+               || [[ "${ref^^}" != "NONE" ]];
+        then
+            if [[ "$ref" == "force" ]]; then
+                register-module-plan set $module $module/$variant
+            else
+                register-module-plan set $module ${MODREF/*=/}
+            fi
         fi
     fi
 }
