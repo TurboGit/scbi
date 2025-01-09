@@ -581,9 +581,8 @@ function get-module-ref()
     if [[ -z $modplan ]]; then
         local modplan=${SCBI_MODVER[$module]}
 
-        if [[ -n $modplan ]]; then
+        [[ -n $modplan ]] &&
             parse-module-ref gminfo $modplan
-        fi
     else
         parse-module-ref gminfo $modplan
     fi
@@ -1222,7 +1221,7 @@ function plugin-call-env-hooks()
     local variant=${module_info[1]}
     local ref=${module_info[3]}
 
-    [[ $ref = "skip" ]] && return 0
+    [[ "$ref" == "skip" ]] && return 0
 
     #  If a meta aggregate module we want the environment of all
     #  aggregated modules.

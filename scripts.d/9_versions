@@ -148,7 +148,7 @@ function load-module-plan()
     local PLAN=$PWD/.scbi-plan-$NAME
 
     local GROUP=no
-    local GMOD=""
+    local GMOD=()
 
     #  If not found in definitions install dir, look in current directory
 
@@ -209,7 +209,7 @@ function load-module-plan()
                     REF=${modref:1}
                 fi
                 #  set REF to all module's group in GMOD
-                for mod in $GMOD; do
+                for mod in ${GMOD[*]}; do
                     local minfo=()
                     parse-module-ref minfo $mod
                     local module=${minfo[0]}
@@ -265,10 +265,10 @@ function load-module-plan()
                     register-module-plan $NAME $module $(resolve-set "${module}${FREF}")
                 done
                 GROUP=no
-                GMOD=""
+                GMOD=()
             elif [[ $GROUP != no ]]; then
                 #  store all module's group in GMOD
-                [[ $GROUP == yes ]] && GMOD="$GMOD $modref"
+                [[ $GROUP == yes ]] && GMOD+=( "$modref" )
             elif [[ "$modref" = "[" ]]; then
                 if [[ -n $arg1 ]]; then
                     if [[ $arg1 = "=" ]]; then
@@ -360,7 +360,7 @@ function handle-plan-meta-module()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    [[ $ref == "skip" ]] && return
+    [[ "$ref" == "skip" ]] && return
 
     if [[ -f $SCBI_PLUGINS/$module ]]; then
         source $SCBI_PLUGINS/$module
@@ -462,7 +462,7 @@ function handle-plan-auto-variant()
     local variant=${module_info[1]}
     local ref=${module_info[3]}
 
-    [[ $ref == "skip" ]] && return
+    [[ "$ref" == "skip" ]] && return
 
     if [[ $variant =~ ^auto(\.|$) ]]; then
         local PKVER=()

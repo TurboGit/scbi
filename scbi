@@ -588,7 +588,7 @@ function module-wrapper()
             fi
             elog $MODULE $mstep failed with error $res
 
-            RDIR=$TVDIR/logs
+            local RDIR=$TVDIR/logs
 
             case $STEP in
                 *config|*build|*install|*cross-config|*cross-build|*cross-install)
