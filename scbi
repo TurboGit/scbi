@@ -1499,8 +1499,6 @@ function handle-module()
     local kind=${module_info[2]}
     local ref=${module_info[3]}
 
-    local KEEP=${SCBI_MODVER[${module}.keep]:-no}
-
     SCBI_CURRENT_MODULE=$module
 
     #  If already handled, nothing more to do
@@ -1667,7 +1665,7 @@ function handle-module()
         #  We need to remove the link/sources to ensure proper setting by
         #  the module.
 
-        [[ "$KEEP" == "yes" ]] &&
+        [[ "${ref%:*}" == "keep" ]] &&
             {
                 #  Remove config/build/install steps
                 for s in setup config build install wrapup; do
@@ -1684,7 +1682,7 @@ function handle-module()
         ilog $module steps : $STEPS | tee -a $log
 
 
-        if [[ "$KEEP" == "yes" ]]; then
+        if [[ "${ref%:*}" == "keep" ]]; then
             ilog $module no update, keep current build
         else
             [[ -d $SCBI_BDIR/$module ]] &&
@@ -1733,7 +1731,7 @@ function handle-module()
 
         #  Only rebuild if mismatch
 
-        is-module-up-to-date $MODREF $FORMODULE
+        is-module-up-to-date $MODREF $FORMODULE || [[ "${ref%:*}" == "keep" ]]
 
         if [[ $? = 0 ]]; then
             ilog $module no build needed, versions match
@@ -1963,7 +1961,7 @@ function handle-module()
     if [[ ${_IDIR^^} == NONE ]]; then
         ilog $module skip global install
 
-    elif [[ "$KEEP" == "no" ]] &&
+    elif [[ "${ref%:*}" != "keep" ]] &&
              [[ "$DO_INSTALL" != "no" ]] &&
              [[ -d $TVDIR/install ]];
     then

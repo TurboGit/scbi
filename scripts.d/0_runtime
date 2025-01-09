@@ -589,8 +589,11 @@ function get-module-ref()
         module=$fmodule
     fi
 
-    [[ "${SCBI_MODVER[${module}.skip]}" == "yes" ]] &&
+    if [[ "${SCBI_MODVER[${module}.skip]}" == "yes" ]]; then
         gminfo[3]="skip"
+    elif  [[ "${SCBI_MODVER[${module}.keep]}" == "yes" ]]; then
+        gminfo[3]="keep:${gminfo[3]}"
+    fi
 
     RESULT=(${gminfo[0]})
     RESULT+=(${gminfo[1]})
