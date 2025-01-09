@@ -101,8 +101,22 @@ function register-module-plan()
     local FROM=$1
     local MOD=$2
     local REF=$3
+    local KIND=$4
 
-    SCBI_MODVER[$MOD]=$REF
+    if [[ "$KIND" == "skip" ]]; then
+        SCBI_MODVER[${MOD}.skip]=yes
+        [[ -z ${SCBI_MODVER[${MOD}]} ]] &&
+            SCBI_MODVER[${MOD}]=$MOD
+    elif [[ "$KIND" == "force" ]]; then
+        unset SCBI_MODVER[${MOD}.skip]
+        [[ -z ${SCBI_MODVER[${MOD}]} ]] &&
+            SCBI_MODVER[${MOD}]=$MOD
+    elif [[ "$KIND" == "keep" ]]; then
+        SCBI_MODVER[${MOD}.keep]=yes
+    else
+        SCBI_MODVER[$MOD]=$REF
+    fi
+
     SCBI_PLAN_HIST[$MOD]+=";${FROM},${REF}"
 }
 
@@ -172,7 +186,8 @@ function load-module-plan()
                     local minfo=()
                     parse-module-ref minfo $arg3
                     local module=${minfo[0]}
-                    register-module-plan $NAME $module $(resolve-set ${arg3/*=/})
+                    local version=${minfo[3]}
+                    register-module-plan $NAME $module $(resolve-set ${arg3/*=/}) $version
                 fi
             elif [[ "$modref" = "@alias" ]]; then
                 if [[ "$arg2" != "use" ]]; then
@@ -190,7 +205,9 @@ function load-module-plan()
                 local minfo=()
                 parse-module-ref minfo "$arg1=$arg3"
                 local module=${minfo[0]}
-                register-module-plan $NAME $module $(resolve-set $arg3)
+                local version=${minfo[3]}
+
+                register-module-plan $NAME $module $(resolve-set $arg3) $version
 
             elif [[ "$modref" = "@set" ]]; then
                 if [[ "$arg2" != "=" ]]; then
@@ -262,7 +279,7 @@ function load-module-plan()
                         fi
                     fi
 
-                    register-module-plan $NAME $module $(resolve-set "${module}${FREF}")
+                    register-module-plan $NAME $module $(resolve-set "${module}${FREF}") $rversion
                 done
                 GROUP=no
                 GMOD=()
@@ -314,8 +331,9 @@ function load-module-plan()
                 local minfo=()
                 parse-module-ref minfo $modref
                 local module=${minfo[0]}
+                local ref=${minfo[3]}
 
-                register-module-plan $NAME $module $(resolve-set "${modref/*=/}")
+                register-module-plan $NAME $module $(resolve-set "${modref/*=/}") $ref
             fi
         done < $PLAN
     else
@@ -661,15 +679,23 @@ function _internal_list-build-plan()
     local LEN=0
 
     for module in ${!SCBI_MODVER[*]}; do
+        [[ "$module" == *.skip ]] || [[ "$module" == *.keep ]] && continue
         [[ -n $REGEX ]] && [[ ! $module =~ $REGEX ]] && continue
 
         local FM=${module%=*}
         local MSG=""
+        local ref=${SCBI_MODVER[$module]}
+
+        [[ ${SCBI_MODVER[${module}.skip]} == yes ]] &&
+            {
+                ref=${ref%:*}
+                ref+=":skip"
+            }
 
         if [[ "$FM" != "$module" ]]; then
-            MSG="@for $FM use ${SCBI_MODVER[$module]}"
+            MSG="@for $FM use $ref"
         else
-            MSG="${SCBI_MODVER[$module]}"
+            MSG="$ref"
         fi
 
         L=${#MSG}
@@ -712,8 +738,14 @@ function display-build-plan()
 {
     local KIND=$1
     local REGEX=$2
+    local count=0
 
-    echo "There is ${#SCBI_MODVER[*]} module(s) in the plan"
+    for module in ${!SCBI_MODVER[*]}; do
+        [[ "$module" == *.skip ]] || [[ "$module" == *.keep ]] && continue
+        ((count++))
+    done
+
+    echo "There is ${count} module(s) in the plan"
     _internal_list-build-plan $KIND "$REGEX"
 }
 
@@ -753,19 +785,11 @@ function set-module-ref()
     local kind=${sminfo[2]}
     local ref=${sminfo[3]}
 
-    if [[ "$ref" == "keep" ]]; then
-        SCBI_MODVER+=( [${module}.keep]=yes )
-    else
-        if [[ "$variant" != "default" ]]   \
-               || [[ "${kind^^}" != "NONE" ]]   \
-               || [[ "${ref^^}" != "NONE" ]];
-        then
-            if [[ "$ref" == "force" ]]; then
-                register-module-plan set $module $module/$variant
-            else
-                register-module-plan set $module ${MODREF/*=/}
-            fi
-        fi
+    if [[ "$variant" != "default" ]]   ||
+           [[ "${kind^^}" != "NONE" ]] ||
+           [[ "${ref^^}" != "NONE" ]];
+    then
+        register-module-plan set $module ${MODREF/*=/} $ref
     fi
 }
 

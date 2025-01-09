@@ -575,8 +575,9 @@ function get-module-ref()
     parse-module-ref gminfo $MODREF
 
     local module=${gminfo[0]}
+    local fmodule=$FORMODULE"="$module
 
-    local modplan=${SCBI_MODVER[$FORMODULE"="$module]}
+    local modplan=${SCBI_MODVER[$fmodule]}
 
     if [[ -z $modplan ]]; then
         local modplan=${SCBI_MODVER[$module]}
@@ -585,7 +586,11 @@ function get-module-ref()
             parse-module-ref gminfo $modplan
     else
         parse-module-ref gminfo $modplan
+        module=$fmodule
     fi
+
+    [[ "${SCBI_MODVER[${module}.skip]}" == "yes" ]] &&
+        gminfo[3]="skip"
 
     RESULT=(${gminfo[0]})
     RESULT+=(${gminfo[1]})

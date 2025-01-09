@@ -1,0 +1,4 @@
+
+@for mainlib use lib1/variant-no-patch:v1
+
+@for mainlib use lib1:skip
