@@ -527,10 +527,7 @@ function parse-module-ref()
         module=${module%/*}
     fi
 
-    RESULT=($module)
-    RESULT+=($variant)
-    RESULT+=($KIND)
-    RESULT+=($version)
+    RESULT=( $module $variant $KIND $version )
 }
 
 ############################## get-module-display-ref
@@ -591,14 +588,11 @@ function get-module-ref()
 
     if [[ "${SCBI_MODVER[${module}.skip]}" == "yes" ]]; then
         gminfo[3]="skip"
-    elif  [[ "${SCBI_MODVER[${module}.keep]}" == "yes" ]]; then
+    elif [[ "${SCBI_MODVER[${module}.keep]}" == "yes" ]]; then
         gminfo[3]="keep:${gminfo[3]}"
     fi
 
-    RESULT=(${gminfo[0]})
-    RESULT+=(${gminfo[1]})
-    RESULT+=(${gminfo[2]})
-    RESULT+=(${gminfo[3]})
+    RESULT=( ${gminfo[0]} ${gminfo[1]} ${gminfo[2]} ${gminfo[3]} )
 }
 
 ############################## get-module-name
