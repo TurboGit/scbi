@@ -112,7 +112,25 @@ function register-module-plan()
         [[ -z ${SCBI_MODVER[${MOD}]} ]] &&
             SCBI_MODVER[${MOD}]=$MOD
     elif [[ "$KIND" == "keep" ]]; then
-        SCBI_MODVER[${MOD}.keep]=yes
+        local MREF=${SCBI_MODVER[$MOD]}
+
+        local TVDIR=""
+
+        [[ -n $MREF ]] &&
+            {
+                local gminfo=()
+                parse-module-ref gminfo $MREF
+
+                local module=${gminfo[0]}
+                local variant=${gminfo[1]}
+
+                local TVDIR=""
+                get-target-dir TVDIR $module $variant install
+            }
+
+        #  Keep module only if already built
+        [[ -d $TVDIR ]] &&
+            SCBI_MODVER[${MOD}.keep]=yes
     else
         SCBI_MODVER[$MOD]=$REF
     fi
