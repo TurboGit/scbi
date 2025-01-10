@@ -527,10 +527,7 @@ function parse-module-ref()
         module=${module%/*}
     fi
 
-    RESULT=($module)
-    RESULT+=($variant)
-    RESULT+=($KIND)
-    RESULT+=($version)
+    RESULT=( $module $variant $KIND $version )
 }
 
 ############################## get-module-display-ref
@@ -575,23 +572,27 @@ function get-module-ref()
     parse-module-ref gminfo $MODREF
 
     local module=${gminfo[0]}
+    local fmodule=$FORMODULE"="$module
 
-    local modplan=${SCBI_MODVER[$FORMODULE"="$module]}
+    local modplan=${SCBI_MODVER[$fmodule]}
 
     if [[ -z $modplan ]]; then
         local modplan=${SCBI_MODVER[$module]}
 
-        if [[ -n $modplan ]]; then
+        [[ -n $modplan ]] &&
             parse-module-ref gminfo $modplan
-        fi
     else
         parse-module-ref gminfo $modplan
+        module=$fmodule
     fi
 
-    RESULT=(${gminfo[0]})
-    RESULT+=(${gminfo[1]})
-    RESULT+=(${gminfo[2]})
-    RESULT+=(${gminfo[3]})
+    if [[ "${SCBI_MODVER[${module}.skip]}" == "yes" ]]; then
+        gminfo[3]="skip"
+    elif [[ "${SCBI_MODVER[${module}.keep]}" == "yes" ]]; then
+        gminfo[3]="keep:${gminfo[3]}"
+    fi
+
+    RESULT=( ${gminfo[0]} ${gminfo[1]} ${gminfo[2]} ${gminfo[3]} )
 }
 
 ############################## get-module-name
@@ -1222,7 +1223,7 @@ function plugin-call-env-hooks()
     local variant=${module_info[1]}
     local ref=${module_info[3]}
 
-    [[ $ref = "skip" ]] && return 0
+    [[ "$ref" == "skip" ]] && return 0
 
     #  If a meta aggregate module we want the environment of all
     #  aggregated modules.

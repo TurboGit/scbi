@@ -1,0 +1,4 @@
+
+@on deb use lib1/variant-no-patch:v1
+
+@on deb use lib1:skip

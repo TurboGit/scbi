@@ -166,24 +166,24 @@ We'll see how to achieve that in this document.
 \label{modref}
 \index{module reference}
 
-A module is described in an SCBI plug-in script (one plug-in in one file). It can be referenced in different places (in other plug-ins, build plan, etc...) with the following format which is called a \emph{module reference}:
+A module is described in an SCBI plug-in script (one plug-in in one file). It can be referenced in different places (as dependency in other plug-ins, build plan, etc...) with the following format which is called a \emph{module reference}:
 
 \code{[for\_module=]name[/variant][:version]}
 \label{dev}
 
 \begin{description}[style=nextline]
-	\item[for\_module] The name of the module depending on this module reference. This is optional and can be used to select a specific variant or version when the module \code{name} is used a a dependency on \code{for\_module}. When specified on a build plan it is possible to use an alternative syntax, see \code{@for} \seeref{formodule}.
+	\item[for\_module] The name of the plug-in depending on this plug-in reference. This is optional and can be used to select a specific variant or version when the plug-in \code{name} is used as a dependency on \code{for\_module}. When specified on a build plan it is possible to use an alternative syntax, see \code{@for} \seeref{formodule}.
 
-	\item[name] The name of the module. This is the main reference for the module. The corresponding module script must be named identically and located in \code{\$SCBI\_DEFS}.
+	\item[name] The name of the plug-in. This is the main reference for the plug-in. The corresponding plug-in script must be named identically and located in \code{\$SCBI\_PLUGINS}.
 
 	\item[variant] \label{variant}This is a name to identify a build variant for the module. For example an application can be built with different configuration and or dependencies.
 
 	\begin{description}[font=\texttt]
-		\item[<ID>] The variant name. This will trigger specific hook routines from the module scripts.
+		\item[<ID>] The variant name. This will trigger specific hook routines from the plug-in scripts.
 
 		\item[native] \index{variant!native}A variant name that can be defined to use the distribution package. This name \code{native} is mandatory in this case and requited when using the \code{auto} mode (see below). When a \code{native} variant is referenced the \code{build-depends} hook is not used (\seeref{native variant}).
 
-		\item[auto] \index{variant!auto}A specific variant name which checks the dependencies of the defined \code{native} variant and use it if all dependencies are available (not necessary installed). The \code{auto} variant should not be defined in a plug-in script but only used in references. The \code{native} and \code{auto} variant can be used together to build a package or use the native one depending on the availability of the dependencies on the running OS. If used together with other variants, the \code{auto} variant must be the first one, that is just after the slash. For example:
+		\item[auto] \index{variant!auto}A specific variant name which checks the dependencies of the defined \code{native} variant and use it if all dependencies are available (not necessary installed). The \code{auto} variant should not be defined in a plug-in script but only used in references. The \code{native} and \code{auto} variant can be used together to build a package or use the native one depending on the availability of the dependencies on the running OS. If used together with other variants, the \code{auto} variant must be the first one in the module reference, that is just after the slash. For example:
 
 		\code{module/auto.fast:v1.3}
 
@@ -195,13 +195,14 @@ A module is described in an SCBI plug-in script (one plug-in in one file). It ca
 	\begin{description}[font=\texttt]
 		\item[<ID>] A reference to a VCS version (branch or a Git SHA-1 for example), or an archive version when starting with \#.
 		\item[dev] \index{version!dev}To take the source from a user's checkout.
-		\item[skip] \index{version!skip}To specify that the module must be ignored.
-		\item[force] \index{version!force}To enable an otherwise skip module (possibly set to skip in a build plan).
+		\item[keep] \index{version!keep}To specify that the module sources should not be updated. So the \emph{setup, }\emph{configure}, \emph{build}, \emph{install} and \emph{wrapup} steps are not conducted and the module's will keep its current status as it was built last time. If the module didn't get built yet the \emph{keep} status is ignored.
+		\item[skip] \index{version!skip}To specify that the module must be completely ignored. It is as if the plug-in was not present in the dependencies.
+		\item[force] \index{version!force}To enable an otherwise skip module (possibly set to \emph{skip} in a build plan).
 	\end{description}
 
-	The version can be set to \code{force} on the command line to tell that the module should not be skipped. On the command line it is always possible to force a build of a module to a specific variant or version. But if one need to build the default variant or version it is required to pass the \code{force} as version.
+	The version can be set to \code{force} on the command line to tell that the plug-in should not be skipped. On the command line it is always possible to force a build of a module to a specific variant and/or version. But if one need to build the default variant or version it is required to pass the \code{force} as version.
 
-	That is, the following command will never overwrite a build plan as it is a default reference to a module:
+	That is, the following command will never overwrite a build plan as it is a default reference to a plug-in:
 
 	\cmd{scbi --plan=xyz mod}
 
@@ -229,7 +230,7 @@ The following are examples of module references:
 
 	\item[lcms2:dev] Build \code{lcms2} using sources from user's repository checkout found in \code{\$SCBI\_GIT\_REPO} (assuming \code{lcms2} is using Git). For a discussion about user's check-out \seeref{userco}.
 
-	\item[lcms2:skip] Skip \code{lcms2} from the build. This is especially useful when set on a build plan or the command line to specify that the module is to be ignored.
+	\item[lcms2:skip] Skip \code{lcms2} from the build. This is especially useful when set on a build plan or the command line to specify that the plug-in is to be ignored.
 \end{description}
 
 \subsection{Environment}

@@ -29,3 +29,4 @@ tests/scbi-source-archive
 tests/scbi-store
 tests/scbi-shell
 tests/scbi-show
+tests/scbi-format
