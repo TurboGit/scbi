@@ -23,10 +23,10 @@ function c-e3-core-env()
     local TARGET=$2
     local VARIANT=$3
 
-    local PYDIR=$(last-modified-directory $PREFIX/lib/python*)
+    local PYDIR=$(last-modified-directory $PREFIX/local/lib/python*)
 
     add-to-var PATH       $PREFIX/local/bin
-    add-to-var PYTHONPATH $PYDIR/site-packages
+    add-to-var PYTHONPATH $PYDIR/dist-packages
 }
 
 function c-e3-core-install()
@@ -35,7 +35,7 @@ function c-e3-core-install()
     local TARGET=$2
     local VARIANT=$3
 
-    python3 setup.py install --prefix $PREFIX
+    pip3 install . --prefix $PREFIX
 }
 
 function c-e3-core-prefix()

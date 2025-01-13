@@ -27,7 +27,7 @@ function c-e3-testsuite-env()
 
     prepend-to-var PATH $PREFIX/bin
     add-to-var PYTHONPATH \
-               $(last-modified-directory $PREFIX/lib/python*/site-packages)
+               $(last-modified-directory $PREFIX/local/lib/python*/dist-packages)
 }
 
 function c-e3-testsuite-install()
@@ -36,7 +36,7 @@ function c-e3-testsuite-install()
     local TARGET=$2
     local VARIANT=$3
 
-    python3 setup.py install --prefix $PREFIX
+    pip3 install . --prefix $PREFIX
 }
 
 function c-e3-testsuite-prefix()
