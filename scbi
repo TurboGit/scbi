@@ -252,6 +252,8 @@ function ini-apply-values()
                 #  command line.
                 [[ -z ${CMDLINE_OPTS[$var]} ]] &&
                     CMDLINE_OPTS[$var]="$val"
+                [[ $var == SCBI_PREFIX ]] &&
+                    SCBI_DEFAULT_PREFIX=no
             else
                 #  A free variable, just assign
                 var=${var//-/_}
@@ -1952,7 +1954,7 @@ function handle-module()
     local FCT=""
     get-hook FCT $module $variant prefix
 
-    if [[ -n $FCT ]] && [[ "$SCBI_DEFAULT_PREFIX" = "yes" ]]; then
+    if [[ -n $FCT ]] && [[ "$SCBI_DEFAULT_PREFIX" == "yes" ]]; then
         _IDIR=$($FCT $TVDIR/install $SCBI_TARGET $variant)
     else
         _IDIR=$SCBI_PREFIX

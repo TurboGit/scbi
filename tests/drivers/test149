@@ -1,0 +1,26 @@
+#  Check that prefix is working on .ini
+
+export SCBI_INI_FILE=$ROOTDIR/.scbiini
+
+cat <<EOF > $SCBI_INI_FILE
+[std]
+        modules = gentool
+        prefix = $ROOTDIR/.root/builds/pints
+EOF
+
+# Using plan as defined in environment
+RUNS ./scbi --ini=std
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building gentool [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/pints
+xxxx/xx/xx xx:xx:xx : End Building gentool [default] (n/a)
+EOF
+
+rm -f $SCBI_INI_FILE
+unset SCBI_INI_FILE
