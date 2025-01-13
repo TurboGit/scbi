@@ -23,4 +23,5 @@ xxxx/xx/xx xx:xx:xx : End Building gentool [default] (n/a)
 EOF
 
 rm -f $SCBI_INI_FILE
+rm -fr $ROOTDIR/.root/builds/pints
 unset SCBI_INI_FILE
