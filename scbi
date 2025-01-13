@@ -1667,7 +1667,7 @@ function handle-module()
         #  We need to remove the link/sources to ensure proper setting by
         #  the module.
 
-        [[ "${ref%:*}" == "keep" ]] &&
+        [[ "${ref%%:*}" == "keep" ]] &&
             {
                 #  Remove config/build/install steps
                 for s in setup config build install wrapup; do
@@ -1684,7 +1684,7 @@ function handle-module()
         ilog $module steps : $STEPS | tee -a $log
 
 
-        if [[ "${ref%:*}" == "keep" ]]; then
+        if [[ "${ref%%:*}" == "keep" ]]; then
             ilog $module no update, keep current build
         else
             [[ -d $SCBI_BDIR/$module ]] &&
@@ -1733,7 +1733,7 @@ function handle-module()
 
         #  Only rebuild if mismatch
 
-        is-module-up-to-date $MODREF $FORMODULE || [[ "${ref%:*}" == "keep" ]]
+        is-module-up-to-date $MODREF $FORMODULE || [[ "${ref%%:*}" == "keep" ]]
 
         if [[ $? = 0 ]]; then
             ilog $module no build needed, versions match
@@ -1963,7 +1963,7 @@ function handle-module()
     if [[ ${_IDIR^^} == NONE ]]; then
         ilog $module skip global install
 
-    elif [[ "${ref%:*}" != "keep" ]] &&
+    elif [[ "${ref%%:*}" != "keep" ]] &&
              [[ "$DO_INSTALL" != "no" ]] &&
              [[ -d $TVDIR/install ]];
     then
