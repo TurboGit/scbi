@@ -69,6 +69,8 @@ NRUNS ./scbi --plan=skipforceuse --deps mainlib
 RUNS ./scbi --plan=skipforceuse lib1:force --deps mainlib
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (v1)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup

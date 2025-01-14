@@ -589,6 +589,9 @@ function get-module-ref()
     if [[ "${SCBI_MODVER[${module}.skip]}" == "yes" ]]; then
         gminfo[3]="skip"
     elif [[ "${SCBI_MODVER[${module}.keep]}" == "yes" ]]; then
+        #local TVDIR=""
+        #get-target-dir TVDIR ${gminfo[0]} ${gminfo[1]} install
+        #[[ -d $TVDIR ]] &&
         gminfo[3]="keep:${gminfo[3]}"
     fi
 

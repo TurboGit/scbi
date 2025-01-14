@@ -367,6 +367,40 @@ function load-module-plan()
     unset _SETS
 }
 
+function module-plan-md5()
+{
+    local -n _SIG=$1
+    local NAMEREF=$2
+
+    local VARIANT=${NAMEREF#*/}
+    local NAME=""
+
+    if [[ $VARIANT == $NAMEREF ]]; then
+        NAME=${NAMEREF}
+    else
+        NAME=${NAMEREF%/*}
+    fi
+
+    local PLAN=$PWD/.scbi-plan-$NAME
+
+    if [[ ! -f $PLAN ]]; then
+        PLAN=$SCBI_PLUGINS/.plan-$NAME
+    fi
+
+    if [[ -f $PLAN ]]; then
+        _SIG+=$(cat $PLAN)
+        while read modref arg1 arg2 arg3; do
+            if [[ "$modref" == "@load" ]]; then
+                local _PSIG=""
+                module-plan-md5 _PSIG $arg1
+                _SIG+=${_PSIG}
+            fi
+        done < $PLAN
+    fi
+
+    _SIG=$(echo $NAMEREF $_SIG | get-md5)
+}
+
 ############################## load-module-plan
 #
 # Checks all auto variant and use the native one or the default variant
@@ -783,6 +817,22 @@ function record-build-plan()
 
     echo "# build plan"        > $PLAN
     _internal_list-build-plan >> $PLAN
+}
+
+############################## store-cached-plan
+#
+#
+
+function store-cached-plan()
+{
+    local CPLAN=$1
+
+    {
+        declare -p SCBI_MODVER
+        declare -p SCBI_PLAN_HIST
+    } > $CPLAN
+
+    sed -i 's/declare -A /declare -gA /g' $CPLAN
 }
 
 ############################## set-module-ref

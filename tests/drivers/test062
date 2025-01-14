@@ -16,8 +16,15 @@ function check-test-pkg()
     check-deb-pkg $1 $2
 }
 
+function get-test-install-md5()
+{
+    local -n _SIG=$1
+    _SIG=toto
+}
+
 declare -fx init-test-pkg
 declare -fx check-test-pkg
+declare -fx get-test-install-md5
 
 RUNS ./scbi osdeps
 

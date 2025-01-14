@@ -1,0 +1,69 @@
+#  Check --clear-cache option
+
+GVER=$(gcc --version | grep gcc | awk '{print $4}')
+
+RUNS ./scbi --plan=autov lib1
+
+sort-osht-output-n-first-lines 6
+trim-osht-output
+
+DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
+xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
+xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+EOF
+
+#  No plan rewrite, cache used
+
+RUNS ./scbi --plan=autov lib1
+
+trim-osht-output
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+EOF
+
+#  Clear the cache, rewrite is done a first call
+
+RUNS ./scbi --clear-cache --plan=autov lib1
+
+sort-osht-output-n-first-lines 6
+trim-osht-output
+
+DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
+xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
+xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
+xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+EOF

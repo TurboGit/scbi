@@ -22,6 +22,8 @@ EOF
 RUNS ./scbi modver:v1
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 2021/12/21 14:05:45 : Building modver [default] (v1)
 2021/12/21 14:05:45 : native x86_64-linux-gnu
 2021/12/21 14:05:45 : steps : setup config build install wrapup
@@ -70,6 +72,8 @@ EOF
 RUNS ./scbi modver/var:v2
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 2021/12/21 14:05:46 : Building modver [var] (v2)
 2021/12/21 14:05:46 : native x86_64-linux-gnu
 2021/12/21 14:05:46 : steps : setup config build install wrapup

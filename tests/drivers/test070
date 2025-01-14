@@ -38,6 +38,8 @@ EOF
 RUNS ./scbi --plan=ondeps --deps ondeps
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 xxxx/xx/xx xx:xx:xx : Dependency liblua5.2-dev marked to be skipped
 
 xxxx/xx/xx xx:xx:xx : Dependency os@-mylualib marked to be skipped
