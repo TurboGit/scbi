@@ -23,6 +23,8 @@ EOF
 RUNS ./scbi --no-patch lib1:v1.2
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1.2)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup

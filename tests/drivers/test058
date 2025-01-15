@@ -86,6 +86,8 @@ EOF
 NRUNS ./scbi --force --log:yes failsteps/conferr
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 2021/11/27 09:55:05 : Building failsteps [conferr] (n/a)
 2021/11/27 09:55:05 : native x86_64-linux-gnu
 2021/11/27 09:55:05 : steps : setup config build install wrapup
@@ -101,6 +103,8 @@ EOF
 NRUNS ./scbi --force --log:on-failure failsteps/installerr
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 2021/11/27 09:55:40 : Building failsteps [installerr] (n/a)
 2021/11/27 09:55:40 : native x86_64-linux-gnu
 2021/11/27 09:55:40 : steps : setup config build install wrapup

@@ -6,6 +6,7 @@
 #     - implement init-<distrib>-pkg
 #     - implement check-<distrib>-pkg
 #     - implement get-<distrib>-lib-for-dev (optional)
+#     - implement get-<distrib>-install-md5
 
 declare -gA SCBI_OS_DISCRIMINANTS
 
@@ -487,6 +488,56 @@ function get-lib-for-dev()
     local PKG=$(get-pkg-name "$1")
 
     get-${SCBI_OS_NAME}-lib-for-dev $PKG
+}
+
+############################## get-install-md5
+
+function get-deb-install-md5()
+{
+    local -n _RESd=$1
+    _RESd=$(cat /var/log/apt/history.log | get-md5)
+}
+
+function get-ubt-install-md5()
+{
+    local -n _RESd=$1
+    _RESd=$(cat /var/log/apt/history.log | get-md5)
+}
+
+function get-cos-install-md5()
+{
+    local -n _RESd=$1
+    _RESd=$(cat /var/log/dnf.log | get-md5)
+}
+
+function get-rhl-install-md5()
+{
+    local -n _RESd=$1
+    _RESd=$(cat /var/log/dnf.log | get-md5)
+}
+
+function get-fed-install-md5()
+{
+    local -n _RESd=$1
+    _RESd=$(cat /var/log/dnf.log | get-md5)
+}
+
+function get-win-install-md5()
+{
+    local -n _RESd=$1
+    _RES=x
+}
+
+function get-mingw-install-md5()
+{
+    local -n _RESd=$1
+    _RESd=$(cat /var/log/pacman.log | get-md5)
+}
+
+function get-install-md5()
+{
+    local -n _RES=$1
+    get-${SCBI_OS_NAME}-install-md5 _RES
 }
 
 ############################## check-pkg-status

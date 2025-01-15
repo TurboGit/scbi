@@ -121,6 +121,8 @@ EOF
 RUNS ./scbi --no-patch --tests --plan=var --deps mainmult
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainmult
@@ -164,6 +166,8 @@ EOF
 RUNS ./scbi --no-patch --tests:only --plan=var --deps mainmult
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainmult

@@ -34,6 +34,8 @@ truncate -s 100 .root/.store/dltar-src.tar.bz2
 NRUNS ./scbi --tests --update dltar:#0
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 xxxx/xx/xx xx:xx:xx : Building dltar [default] (0)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup

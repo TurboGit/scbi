@@ -29,6 +29,8 @@ EOF
 RUNS ./scbi --deps lib3:#v1.2
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 xxxx/xx/xx xx:xx:xx : Building inhnat [native] (os)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ lib3

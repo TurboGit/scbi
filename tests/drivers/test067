@@ -30,6 +30,8 @@ cp .root/.store/dltar-2-src.tar.bz2 .root/.store/dltar-src.tar.bz2
 RUNS ./scbi --tests --update dltar:#0
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 2022/01/04 19:22:12 : Building dltar [default] (0)
 2022/01/04 19:22:12 : native x86_64-linux-gnu
 2022/01/04 19:22:12 : steps : setup config build install tests wrapup
@@ -49,6 +51,8 @@ rm -f .root/.archives/dltar-src.tar.bz2
 RUNS ./scbi --tests --update dltar:#0
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 2022/01/04 19:22:12 : Building dltar [default] (0)
 2022/01/04 19:22:12 : native x86_64-linux-gnu
 2022/01/04 19:22:12 : steps : setup config build install tests wrapup
@@ -73,6 +77,8 @@ cp .root/.store/dltar-2-src.tar.bz2.sha1 .root/.store/dltar-src.tar.bz2.sha1
 RUNS ./scbi --tests --update dltar:#0
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 2022/01/04 19:22:12 : Building dltar [default] (0)
 2022/01/04 19:22:12 : native x86_64-linux-gnu
 2022/01/04 19:22:12 : steps : setup config build install tests wrapup

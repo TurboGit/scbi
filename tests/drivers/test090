@@ -8,17 +8,10 @@ sort-osht-output
 trim-osht-output
 
 DIFF <<EOF
-
 @for mainav use mautov/mainav:99.99
 @for mainav2 use mautov/for2:99.99
 There is 3 module(s) in the plan
 mautov/native:$GVER
-xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
-xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
-xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 EOF
 
 RUNS ./scbi show --plan=autov --build-plan mainav=mautov/new mautov
@@ -28,15 +21,10 @@ sort-osht-output
 trim-osht-output
 
 DIFF <<EOF
-
 @for mainav use mautov/new
 @for mainav2 use mautov/for2:99.99
 There is 3 module(s) in the plan
 mautov/native:$GVER
-xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
-xxxx/xx/xx xx:xx:xx : mautov 5 using native variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 EOF
 
 RUNS ./scbi show --plan=autov --build-plan mautov/new mautov
@@ -46,13 +34,8 @@ sort-osht-output
 trim-osht-output
 
 DIFF <<EOF
-
 @for mainav use mautov/mainav:99.99
 @for mainav2 use mautov/for2:99.99
 There is 3 module(s) in the plan
 mautov/new
-xxxx/xx/xx xx:xx:xx : mainav2=mautov 99.99 using standard variant
-xxxx/xx/xx xx:xx:xx : mainav=mautov 99.99 using standard variant
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
-xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 EOF

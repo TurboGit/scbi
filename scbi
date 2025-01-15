@@ -293,7 +293,7 @@ function ini-apply-values()
 
     #  Set other options
 
-    for OPTS in safe tar no-patch; do
+    for OPTS in safe tar no-patch clear-cache; do
         local O=$(ini-get-option "$SECTION" $OPTS)
         [[ ${O^^} == YES ]] &&
             SCBI_INI_OPTIONS+=( --$OPTS )
@@ -391,6 +391,7 @@ DO_DEPS=no
 DO_CLEAN_INSTALL=no
 DO_PLAN=no
 DO_SUBCMD=no
+DO_CLEAR_CACHE=no
 DEPS=no
 SCBI_ISOOT=true
 DO_PATCH=yes
@@ -703,6 +704,7 @@ function usage()
     echo "      | --dry-run           only list modules handled"
     echo "      | --stat[:short|full] display some status of current setup"
     echo "   -n | --no-patch          do not apply patches"
+    echo "      | --clear-cache       remove cached module's versions"
 }
 
 ############################## handle-modue-env
@@ -2083,9 +2085,54 @@ function setup-generic-tool-env()
     [[ -n ${CMDLINE_OPTS[SCBI_PLAN]} ]] &&
         SCBI_PLAN=${CMDLINE_OPTS[SCBI_PLAN]}
 
+    #  Clear cache is needed
+
+    [[ $DO_CLEAR_CACHE == yes ]] &&
+        rm -fr $SCBI_BDIR/.cache
+
+    #  Check if cache for the plan is available and is still up-to-date
+    #  by getting :
+    #     - Signature of the plan
+    #     - Signature of the OS installation log
+    #     - OS discriminants
+    #     - Signature of the modules on command line
+    #     - The build target
+
+    local PLANMD5=""
+    module-plan-md5 PLANMD5 "$SCBI_PLAN"
+
+    local OSMD5=""
+    get-install-md5 OSMD5
+
+    local MSIG=""
+    for M in ${SCBI_MODULES[*]}; do
+        local minfo=()
+        get-module-ref minfo $M
+        local module=${minfo[0]}
+        local variant=${minfo[1]}
+        local ref=${minfo[3]}
+        [[ $variant != default ]] || [[ $ref != NONE ]] &&
+            MSIG+="($M/$variant/$ref)"
+        [[ -f $SCBI_PLUGINS/$module ]] &&
+            MSIG+=$(cat $SCBI_PLUGINS/$module)
+    done
+
+    local PLANMD5=$(echo $PLANMD5 $OSMD5 $SCBI_TARGET $SCBI_OS_ID \
+                         $SCBI_OS_NAME $SCBI_OS_VERSION $SCBI_OS_MAJOR_VERSION \
+                         ${SCBI_OS_DISCRIMINANTS[*]} $MSIG | get-md5)
+
+    mkdir -p $SCBI_BDIR/.cache
+
+    local PLAN_CACHED=no
+    local CACHED_PLAN=$SCBI_BDIR/.cache/plan-$PLANMD5
+
     #  Load build plan if any
 
-    if [[ -n $SCBI_PLAN ]]; then
+    if [[ -f $CACHED_PLAN ]]; then
+        local PLAN_CACHED=yes
+        source $CACHED_PLAN
+
+    elif [[ -n $SCBI_PLAN ]]; then
         load-module-plan $SCBI_PLAN
         [[ $? -ne 0 ]] &&
             echo "error: cannot load module plan $SCBI_PLAN" &&
@@ -2116,24 +2163,40 @@ function setup-generic-tool-env()
             fi
         }
 
-    #  Setup module reference specified on the command line. The module
-    #  reference on the command line must overwrite the actual build plan.
+    #  We still need to set the module's ref passed on the command line
+    #  for proper handling of the :keep special ref.
 
     for module in ${SCBI_MODULES[*]}; do
         set-module-ref $module
     done
 
-    local res=0
+    if [[ $PLAN_CACHED == yes ]]; then
+        if [[ $DO_SUBCMD == no ]] || [[ $DO_STAT != no ]]; then
+            [[ ${#SCBI_MODVER[*]} > 0 ]] &&
+                {
+                    ilog build "Using cached module plan (${PLANMD5:0:20})"
+                    line-sep
+                }
+        fi
 
-    if [[ $DO_SUBCMD == no ]] || [[ $SCBI_SUBCMD == show ]]; then
-        rewrite-module-plan
-        res=$?
-        line-sep
     else
-        rewrite-module-plan > /dev/null
-        res=$?
+        #  Setup module reference specified on the command line. The module
+        #  reference on the command line must overwrite the actual build plan.
+
+        local res=0
+
+        if [[ $DO_SUBCMD == no ]] || [[ $DO_STAT != no ]]; then
+            rewrite-module-plan
+            res=$?
+            line-sep
+        else
+            rewrite-module-plan > /dev/null
+            res=$?
+        fi
+        [[ $res == 1 ]] && exit 1
+
+        store-cached-plan $CACHED_PLAN
     fi
-    [[ $res == 1 ]] && exit 1
 }
 
 ############################## body
@@ -2166,6 +2229,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         -f|--force)
             CMDLINE_OPTS+=([DO_FORCE]=yes)
+            ;;
+        --clear-cache)
+            CMDLINE_OPTS+=([DO_CLEAR_CACHE]=yes)
             ;;
         -q|--quiet)
             CMDLINE_OPTS+=([DO_QUIET]=yes)

@@ -4,7 +4,7 @@ export LANG=C
 
 function clean-up-osht-output()
 {
-    sed -i 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;};s/squid-cgi [0-9\.]*/squid-cgi v.vv/g' \
+    sed -i 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;};s/squid-cgi [0-9\.]*/squid-cgi v.vv/g;s,(....................),(xxxxxxxxxxxxxxxxxxxx),g' \
         ${OSHT_STDIO}
     sed -i "s,$PWD,<pwd>,g" ${OSHT_STDIO}
 }
@@ -129,7 +129,7 @@ else
 fi
 cd ..
 
-PLAN 1217
+PLAN 1223
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR

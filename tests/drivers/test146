@@ -69,6 +69,8 @@ EOF
 RUNS ./scbi --plan=keep --deps --update --tests mainlib
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (master)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainlib

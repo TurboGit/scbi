@@ -27,6 +27,8 @@ sed -i 's/master/master mod/' .root/git/lib1.bundle/lib1.c
 RUNS ./scbi --build --install lib1:dev
 
 CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (dev)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : build install
