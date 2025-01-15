@@ -1,4 +1,6 @@
 
+inherit-plugin c-python-post-install-dist-packages
+
 # e3-testsuite needed to pass some testsuite (templates-parser, gpr...)
 
 function c-e3-testsuite-vcs()
@@ -25,9 +27,10 @@ function c-e3-testsuite-env()
     local TARGET=$2
     local VARIANT=$3
 
-    prepend-to-var PATH $PREFIX/bin
-    add-to-var PYTHONPATH \
-               $(last-modified-directory $PREFIX/local/lib/python*/dist-packages)
+    local PYDIR=$(last-modified-directory $PREFIX/lib/python*)
+
+    prepend-to-var PATH   $PREFIX/bin
+    add-to-var PYTHONPATH $PYDIR/site-packages
 }
 
 function c-e3-testsuite-install()

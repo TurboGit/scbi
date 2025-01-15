@@ -1,4 +1,6 @@
 
+inherit-plugin c-python-post-install-dist-packages
+
 function c-e3-core-vcs()
 {
     echo default
@@ -23,10 +25,10 @@ function c-e3-core-env()
     local TARGET=$2
     local VARIANT=$3
 
-    local PYDIR=$(last-modified-directory $PREFIX/local/lib/python*)
+    local PYDIR=$(last-modified-directory $PREFIX/lib/python*)
 
-    add-to-var PATH       $PREFIX/local/bin
-    add-to-var PYTHONPATH $PYDIR/dist-packages
+    add-to-var PATH       $PREFIX/bin
+    add-to-var PYTHONPATH $PYDIR/site-packages
 }
 
 function c-e3-core-install()

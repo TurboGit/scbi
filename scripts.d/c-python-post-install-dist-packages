@@ -1,0 +1,22 @@
+#  This plugin is used to change the install of Python modules
+#  from <PREFIX>/local/lib/python-<VER>/dist-packages
+#    to <PREFIX>/lib/python-<VER>/site-packages
+
+function c-python-post-install-dist-packages-post-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    if [[ -d $PREFIX/local/lib ]]; then
+        cp -r $PREFIX/local/* $PREFIX/
+        rm -fr $PREFIX/local
+    fi
+
+    local LDIR=$(last-modified-directory $PREFIX/lib/python*)
+
+    if [[ -d $LDIR/dist-packages ]]; then
+        mkdir -p $LDIR/site-packages
+        cp -r $LDIR/dist-packages/* $LDIR/site-packages/.
+        rm -fr $LDIR/dist-packages
+    fi
+}
