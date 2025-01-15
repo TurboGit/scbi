@@ -1,50 +1,18 @@
 
 # This plug-in creates a unique installation for all e3 components
 
-function c-e3-depends()
+function c-e3-modules()
 {
     echo c-e3-core
     echo c-e3-testsuite
 }
 
+function c-e3-aggregate()
+{
+    echo direct
+}
+
 function c-e3-only-explicit-build()
 {
     echo true
-}
-
-function c-e3-env()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
-
-    add-to-var     PATH       $PREFIX/bin
-    prepend-to-var PYTHONPATH $PREFIX/lib
-}
-
-function c-e3-install()
-{
-    local PREFIX=$1
-    local TARGET=$2
-    local VARIANT=$3
-
-    local E3C=${SCBI_MODULES_DIR["c-e3-core"]}
-    local E3T=${SCBI_MODULES_DIR["c-e3-testsuite"]}
-
-    local PDC=$(last-modified-directory $E3C/local/lib/python*/dist-packages)
-    local PDT=$(last-modified-directory $E3T/local/lib/python*/dist-packages)
-
-    mkdir -p $PREFIX/bin
-    mkdir -p $PREFIX/lib
-
-    cp -r $E3C/local/bin/* $PREFIX/bin/.
-    cp -r $E3T/local/bin/* $PREFIX/bin/.
-
-    for D in $(ls -d $PDC/*); do
-        [[ -d $D ]] && cp -r $D $PREFIX/lib/.
-    done
-
-    for D in $(ls -d $PDT/*); do
-        [[ -d $D ]] && cp -r $D $PREFIX/lib/.
-    done
 }
