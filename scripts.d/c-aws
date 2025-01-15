@@ -12,9 +12,16 @@ function c-aws-out-of-tree()
     echo false
 }
 
-function c-aws-cross-build-depends()
+function c-aws-common-build-depends()
 {
+    echo p-gnat
     echo c-sandbox
+}
+
+function c-aws-build-depends()
+{
+    echo c-gprbuild
+    echo c-libadalang-tools
 }
 
 function c-aws-tests-depends()
@@ -24,15 +31,8 @@ function c-aws-tests-depends()
     echo c-python3-modules/net
 }
 
-function c-aws-build-depends()
-{
-    echo c-gprbuild
-    echo c-libadalang-tools
-}
-
 function c-aws-depends()
 {
-    echo p-gnat
     echo c-xmlada
     echo c-libadalang
 }
