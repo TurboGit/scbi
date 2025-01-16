@@ -1703,19 +1703,26 @@ function handle-module()
             target-env $SCBI_BDIR/install $SCBI_TARGET
         fi
 
-        local ENVTMP="$(mktemp -p /dev/shm/)"
-        SCBI_ENV_MODULE=$ENVTMP
         declare -A SCBI_MODULES_DIR=()
 
-        handle-build-depends-env $FORMODULE $MODREF
+        local IS_UPTODATE=no
+        is-module-up-to-date $MODREF $FORMODULE ||
+            [[ "${ref%%:*}" == "keep" ]] && IS_UPTODATE=yes
 
-        handle-module-env $FORMODULE $MODREF build-env >> $SCBI_ENV_MODULE
+        if [[ $IS_UPTODATE == no ]] || [[ $DO_TEST =~ yes ]]; then
+            local ENVTMP="$(mktemp -p /dev/shm/)"
+            SCBI_ENV_MODULE=$ENVTMP
 
-        #  And then setup recursively the environment to use dependencies
+            handle-build-depends-env $FORMODULE $MODREF
 
-        handle-env $FORMODULE $MODREF
+            handle-module-env $FORMODULE $MODREF build-env >> $SCBI_ENV_MODULE
 
-        unset SCBI_ENV_MODULE
+            #  And then setup recursively the environment to use dependencies
+
+            handle-env $FORMODULE $MODREF
+
+            unset SCBI_ENV_MODULE
+        fi
 
         #  make sure the current build softlink is pointing to
         #  the variant. this is needed as the setup won't be
@@ -1732,9 +1739,7 @@ function handle-module()
 
         #  Only rebuild if mismatch
 
-        is-module-up-to-date $MODREF $FORMODULE || [[ "${ref%%:*}" == "keep" ]]
-
-        if [[ $? = 0 ]]; then
+        if [[ $IS_UPTODATE == yes ]]; then
             ilog $module no build needed, versions match
 
             STEPS=""
