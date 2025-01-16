@@ -1689,11 +1689,8 @@ function handle-module()
         if [[ "${ref%%:*}" == "keep" ]]; then
             ilog $module no update, keep current build
         else
-            [[ -d $SCBI_BDIR/$module ]] &&
-                {
-                    cd $SCBI_BDIR/$module
-                    rm -fr src src$SCBI_LNK vcs$SCBI_LNK
-                    }
+            cd $SCBI_BDIR/$module
+            rm -fr src src$SCBI_LNK vcs$SCBI_LNK
 
             handle-sources $FORMODULE $MODREF
 
