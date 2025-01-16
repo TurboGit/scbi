@@ -1217,7 +1217,7 @@ function handle-sources()
                 fi
 
             else
-                if [[ ! $DO_TEST =~ "yes-only" ]]; then
+                if [[ $DO_TEST != "yes-only" ]]; then
                     if [[ -f source-id ]]; then
                         if [[ "$(cat source-id)" != "vcs-$ref" ]]; then
                             # a different version is needed
@@ -1709,7 +1709,7 @@ function handle-module()
         is-module-up-to-date $MODREF $FORMODULE ||
             [[ "${ref%%:*}" == "keep" ]] && IS_UPTODATE=yes
 
-        if [[ $IS_UPTODATE == no ]] || [[ $DO_TEST =~ yes ]]; then
+        if [[ $IS_UPTODATE == no ]] || [[ $DO_TEST != no ]]; then
             local ENVTMP="$(mktemp -p /dev/shm/)"
             SCBI_ENV_MODULE=$ENVTMP
 
@@ -1746,9 +1746,7 @@ function handle-module()
 
             # if testing is expected, at least do that
 
-            if [[ $DO_TEST =~ "yes" ]]; then
-                STEPS="tests"
-            fi
+            [[ $DO_TEST != "no" ]] && STEPS="tests"
 
         else
             #  Record the build-plan
