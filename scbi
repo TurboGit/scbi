@@ -730,14 +730,14 @@ function handle-module-env()
 
     [[ "$ref" == "skip" ]] && return 0
 
-    local TVDIR=""
-    get-target-dir TVDIR $module $variant
-
     if [[ -n $SCBI_ENV_MODULE ]]; then
         {
             echo
             echo "# $MODREF"
         } >> $SCBI_ENV_MODULE
+
+        local TVDIR=""
+        get-target-dir TVDIR $module $variant
 
         local BUILDDIR=build
         [[ $SCBI_ISOOT == false ]] && BUILDDIR=src
