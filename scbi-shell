@@ -69,6 +69,8 @@ function shl-setup-env()
         {
             handle-build-depends-env "@root" $MODREF
             handle-module-env "@root" $MODREF build-env
+            handle-env "@root" $MODREF
+            handle-module-env "@root" $MODREF env
         }
 
     [[  $DOCD == yes-tests ]] &&
@@ -93,7 +95,7 @@ function shl-run-shell()
     local MODREF=${MODULES[-1]}
     local DIR=""
 
-    shl-setup-env $MODREF "${MODULES[*]}" $DOCD
+    shl-setup-env $MODREF "${MODULES[*]:0:${#MODULES[*]}-1}" $DOCD
 
     #  If docd set (no cwd sub-option specified), we are moving into
     #  the module's build directory. In this mode we not only want the
