@@ -69,6 +69,10 @@ function shl-setup-env()
         {
             handle-build-depends-env "@root" $MODREF
             handle-module-env "@root" $MODREF build-env
+        }
+
+    [[ $DOCD =~ yes ]] &&
+        {
             handle-env "@root" $MODREF
             handle-module-env "@root" $MODREF env
         }
