@@ -65,7 +65,7 @@ function shl-setup-env()
     #  environment of all dependencies to be set but we also want the
     #  build environment of the root module to be set.
 
-    [[ $DOCD == yes-dev ]] &&
+    [[ $DOCD == yes ]] || [[ $DOCD == yes-dev ]] &&
         {
             handle-build-depends-env "@root" $MODREF
             handle-module-env "@root" $MODREF build-env
