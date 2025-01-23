@@ -142,7 +142,7 @@ function shl-run-command()
 
     local MODREF=${MODULES[-1]}
 
-    shl-setup-env $MODREF "${MODULES[*]}" $DOCD
+    shl-setup-env $MODREF "${MODULES[*]:0:${#MODULES[*]}-1}" $DOCD
 
     if [[ -z $CMD ]]; then
         local PREFIX=$SCBI_BDIR/${SHL_MODULE}/$TARGET-${SHL_VARIANT}/install
