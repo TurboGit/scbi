@@ -33,9 +33,9 @@ function shl-usage()
     echo "      | --run=\"cmd arg\"    run command in module's environment"
     echo "      | --stat             display some status of current setup"
 }
-#  setup for SCBI shell & command spawn
 
 ############################## shl-setup-env
+#  setup for SCBI shell & command spawn
 
 function shl-setup-env()
 {
@@ -60,7 +60,7 @@ function shl-setup-env()
 
     export SCBI_SHELL=$DO_MODE:$SHL_MODULE
 
-    #  If docd set (no cwd sub-option specified), we are moving into
+    #  If DOCD set (no cwd sub-option specified), we are moving into
     #  the module's build directory. In this mode we not only want the
     #  environment of all dependencies to be set but we also want the
     #  build environment of the root module to be set.
