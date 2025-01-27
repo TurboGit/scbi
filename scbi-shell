@@ -65,20 +65,26 @@ function shl-setup-env()
     #  environment of all dependencies to be set but we also want the
     #  build environment of the root module to be set.
 
+    #  For mode "dev" & "sandbox"
     [[ $DOCD == yes ]] || [[ $DOCD == yes-dev ]] &&
         {
             handle-build-depends-env "@root" $MODREF
             handle-module-env "@root" $MODREF build-env
         }
 
+    #  For mode "test"
+    [[  $DOCD == yes-tests ]] &&
+        {
+            handle-tests-depends-env "@root" $MODREF
+            handle-module-env "@root" $MODREF tests-env
+        }
+
+    #  For mode "dev" & "sandbox" & "use"
     [[ $DOCD =~ yes ]] &&
         {
             handle-env "@root" $MODREF
             handle-module-env "@root" $MODREF env
         }
-
-    [[  $DOCD == yes-tests ]] &&
-        handle-tests-depends-env "@root" $MODREF
 }
 
 ############################## shl-run-shell

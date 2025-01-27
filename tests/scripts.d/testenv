@@ -1,0 +1,52 @@
+
+function testenv-build()
+{
+    local PREFIX=$1
+    local VARIANT=$2
+
+    cat <<EOF > bscript.sh
+echo BUILD \$1
+EOF
+
+    cat <<EOF > tescript.sh
+bscript.sh "TEST \$1"
+EOF
+}
+
+function testenv-env()
+{
+    local PREFIX=$1
+    local VARIANT=$2
+
+    add-to-var PATH $PREFIX/bin
+}
+
+function testenv-tests-env()
+{
+    local PREFIX=$1
+    local VARIANT=$2
+
+    add-to-var PATH $PREFIX/tbin
+}
+
+function testenv-install()
+{
+    local PREFIX=$1
+    local VARIANT=$2
+
+    mkdir -p $PREFIX/bin
+    cp bscript.sh $PREFIX/bin
+    chmod u+x $PREFIX/bin/bscript.sh
+
+    mkdir -p $PREFIX/tbin
+    cp tescript.sh $PREFIX/tbin
+    chmod u+x $PREFIX/tbin/tescript.sh
+}
+
+function testenv-tests()
+{
+    local PREFIX=$1
+    local VARIANT=$2
+
+    tescript.sh "ok"
+}

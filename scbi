@@ -1853,6 +1853,7 @@ function handle-module()
 
             if [[ $step == "tests" ]]; then
                 handle-tests-depends-env $FORMODULE $MODREF
+                handle-module-env $FORMODULE $MODREF tests-env
                 handle-module-env $FORMODULE $MODREF env
             fi
 
