@@ -32,6 +32,7 @@ function c-templates-parser-build-depends()
 function c-templates-parser-tests-depends()
 {
     echo c-e3
+    echo c-sandbox
 }
 
 function c-templates-parser-env()
@@ -41,6 +42,15 @@ function c-templates-parser-env()
 
     add-to-var PATH             $PREFIX/bin
     add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
+function c-templates-parser-tests-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var PATH .
+    add-to-var PATH $PREFIX/../build/.build/rbin/$TARGET/release/static
 }
 
 function c-templates-parser-cross-config()
@@ -85,9 +95,6 @@ function c-templates-parser-tests()
     local OPTIONS="$4"
 
     cd regtests && make build
-
-    add-to-var PATH .
-    add-to-var PATH $PREFIX/../build/.build/rbin/$TARGET/release/static
 
     python3 ./testsuite.py --jobs=4 $OPTIONS
 }
