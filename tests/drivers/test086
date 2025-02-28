@@ -4,6 +4,7 @@
 (
     mkdir -p .root/git
     cd .root/git
+    rm -fr lib1.bundle
     git clone ../repos/lib1.bundle lib1.bundle &> /dev/null
 )
 

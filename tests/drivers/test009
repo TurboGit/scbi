@@ -5,6 +5,7 @@ RUNS ./scbi --purge:only lib1 lib2
 (
     mkdir -p .root/git
     cd .root/git
+    rm -fr lib2.bundle mainmult.bundle
     git clone ../repos/mainmult.bundle mainmult.bundle &> /dev/null
     sed -i 's/main on master/better main in dev/g' ./mainmult.bundle/main.c
     git clone ../repos/lib2.bundle lib2.bundle &> /dev/null

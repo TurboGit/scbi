@@ -7,10 +7,9 @@ RUNS ./scbi --purge:only lib2
 (
     mkdir -p .root/git
     cd .root/git
-    if [ ! -d lib2.bundle ]; then
-        git clone ../repos/lib2.bundle lib2.bundle &> /dev/null
-        sed -i 's/libb.B master/libb.B next version/g' ./lib2.bundle/lib2.c
-    fi
+    rm -fr lib2.bundle
+    git clone ../repos/lib2.bundle lib2.bundle &> /dev/null
+    sed -i 's/libb.B master/libb.B next version/g' ./lib2.bundle/lib2.c
 )
 
 # echo ========== build supermod
