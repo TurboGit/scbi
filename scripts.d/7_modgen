@@ -223,8 +223,11 @@ function module-install()
         }
     fi
 
-    local TVDIR=""
-    get-target-dir TVDIR $MODULE $VARIANT
+    [[ $DO_CONFIG == yes ]] && [[ $DO_BUILD == yes ]] &&
+        {
+            local TVDIR=""
+            get-target-dir TVDIR $MODULE $VARIANT
 
-    cp build-id-$VARIANT $TVDIR/build-id
+            cp build-id-$VARIANT $TVDIR/build-id
+        } || true
 }
