@@ -67,6 +67,7 @@ function c-darktable-common-depends()
 
     echo c-exiv2
     echo c-libavif
+    echo c-libopenjpeg
 }
 
 function c-darktable-im-depends()
