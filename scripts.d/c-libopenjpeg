@@ -1,0 +1,93 @@
+
+with-variant native libopenjp2-7-dev:[v]
+
+function c-libopenjpeg-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/uclouvain/openjpeg
+}
+
+function c-libopenjpeg-archive()
+{
+    local VERSION=$1
+
+    echo default
+    echo none
+    echo curl
+    echo https://github.com/uclouvain/openjpeg/releases/tag/$VERSION
+    echo $VERSION.tar.gz
+}
+
+function c-libopenjpeg-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local INCD=$(last-modified-directory $PREFIX/include/open*)
+    local CMKD=$(last-modified-directory $PREFIX/lib/cmake/open*)
+
+    add-to-var PATH              $PREFIX/bin
+    add-to-var CMAKE_PREFIX_PATH $CMKD
+    add-to-var C_INCLUDE_PATH    $INCD
+    add-to-var CXX_INCLUDE_PATH  $INCD
+    add-to-var LD_LIBRARY_PATH   $PREFIX/lib
+    add-to-var LIBRARY_PATH      $PREFIX/lib
+}
+
+function c-libopenjpeg-pre-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    # We do not build 2.5.3 but master or above (needed to support ICC profile)
+    # So if the actual version is 2.5.3 bump it to 2.5.4 for proper detection
+    # on darktable.
+    #
+    # TODO: This hook is to be removed when OpenJPEG 2.5.4 is officially out.
+    sed -i 's/set(OPENJPEG_VERSION_BUILD 3)/set(OPENJPEG_VERSION_BUILD 4)/' \
+        ../src/CMakeLists.txt
+
+    true
+}
+
+function c-libopenjpeg-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX \
+          -DCMAKE_BUILD_TYPE=$(get-build-type CMAKE Release) \
+          ../src
+}
+
+function c-libopenjpeg-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make -j$JOBS
+}
+
+function c-libopenjpeg-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    make install
+}
+
+function c-libopenjpeg-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo NONE
+}
