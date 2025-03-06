@@ -361,6 +361,22 @@ Some specific actions are supported with the following syntax:
 \begin{description}
 	\item[\code{\#}] To start a comment line.
 
+	\item[\code{m2 as m1}] To propagate a variant/version from another module.
+
+	\begin{lstlisting}
+    module1/var:1.2
+    module2 as module1
+    \end{lstlisting}
+
+    Here \code{module2} will use the variant and version of \code{module1}. The above plan is equivalent to:
+
+	\begin{lstlisting}
+	module1/var:1.2
+	module2/var:1.2
+    \end{lstlisting}
+
+    But this may come handy when inheriting of a plan to set reference of a plug-in inheriting from another one.
+
 	\item[\code{@load <name>}] To load another build-plan as a base for the new plan. Every descriptions after this will overwrite the loaded build plan.
 
 	This is a simple way to derive a build plan from another one.
@@ -393,7 +409,7 @@ Some specific actions are supported with the following syntax:
 	@on fed use lcms2:v2
 	\end{lstlisting}
 
-	\item[\code{@for <plug-in> use <modref>}] To specify a specific variant and/or version of a plug-in when used as dependencies.
+	\item[\code{@for <plug-in> use <modref>}] To specify a specific variant and/or version of a plug-in when used as dependencies of a specific module.
 	\label{formodule}
 
     \begin{lstlisting}
