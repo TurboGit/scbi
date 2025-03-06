@@ -303,6 +303,23 @@ function load-module-plan()
                 GMOD=()
             elif [[ $GROUP != no ]]; then
                 #  store all module's group in GMOD
+                if [[ $arg1 == "as" ]] && [[ $GROUP == yes ]]; then
+                    local ASR=${SCBI_MODVER[$arg2]}
+                    [[ -z $ASR ]]  &&
+                        {
+                            elog build $arg2 has no reference in build plan
+                            exit 1
+                        }
+                    local ainfo=()
+                    parse-module-ref ainfo ${SCBI_MODVER[$arg2]}
+                    local var=${ainfo[1]}
+                    local ref=${ainfo[3]}
+
+                    modref=$module
+                    [[ $var != "default" ]] && modref+="/$var"
+                    [[ $ref != "NONE" ]] && modref+=":$ref"
+                fi
+
                 [[ $GROUP == yes ]] && GMOD+=( "$modref" )
             elif [[ "$modref" = "[" ]]; then
                 if [[ -n $arg1 ]]; then
@@ -351,7 +368,26 @@ function load-module-plan()
                 local module=${minfo[0]}
                 local ref=${minfo[3]}
 
-                register-module-plan $NAME $module $(resolve-set "${modref/*=/}") $ref
+                if [[ $arg1 == "as" ]]; then
+                    local ASR=${SCBI_MODVER[$arg2]}
+                    [[ -z $ASR ]] &&
+                        {
+                            elog build $arg2 has no reference in build plan
+                            exit 1
+                        }
+                    local ainfo=()
+                    parse-module-ref ainfo ${SCBI_MODVER[$arg2]}
+                    local var=${ainfo[1]}
+                    local ref=${ainfo[3]}
+
+                    local mref=$module
+                    [[ $var != "default" ]] && mref+="/$var"
+                    [[ $ref != "NONE" ]] && mref+=":$ref"
+
+                    register-module-plan $NAME $module $(resolve-set "${mref}") $ref
+                else
+                    register-module-plan $NAME $module $(resolve-set "${modref/*=/}") $ref
+                fi
             fi
         done < $PLAN
     else
