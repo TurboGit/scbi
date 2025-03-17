@@ -160,6 +160,34 @@ function load-module-plan()
         echo $REF
     }
 
+    function resolve-as()
+    {
+        local -n _RES=$1
+        local PLG1=$2
+        local PLG2=$3
+
+        local minfo=()
+        parse-module-ref minfo $PLG1
+        local module=${minfo[0]}
+        local ref=${minfo[3]}
+
+        local ASR=${SCBI_MODVER[$PLG2]}
+        [[ -z $ASR ]] &&
+            {
+                elog build $PLG2 has no reference in build plan
+                exit 1
+            }
+
+        local ainfo=()
+        parse-module-ref ainfo $ASR
+        local var=${ainfo[1]}
+        local ref=${ainfo[3]}
+
+        _RES=$module
+        [[ $var != "default" ]] && _RES+="/$var"
+        [[ $ref != "NONE" ]] && _RES+=":$ref"
+    }
+
     if [[ $VARIANT == $NAMEREF ]]; then
         VARIANT=""
         NAME=${NAMEREF}
@@ -226,6 +254,16 @@ function load-module-plan()
                 local version=${minfo[3]}
 
                 register-module-plan $NAME $module $(resolve-set $arg3) $version
+            elif [[ "$modref" = "@ref" ]] && [[ $GROUP == no ]]; then
+                local mref=""
+                resolve-as mref $arg1 $arg3
+
+                local minfo=()
+                parse-module-ref minfo $arg1
+                local module=${minfo[0]}
+                local ref=${minfo[3]}
+
+                register-module-plan $NAME $module $(resolve-set "${mref}") $ref
 
             elif [[ "$modref" = "@set" ]]; then
                 if [[ "$arg2" != "=" ]]; then
@@ -303,21 +341,11 @@ function load-module-plan()
                 GMOD=()
             elif [[ $GROUP != no ]]; then
                 #  store all module's group in GMOD
-                if [[ $arg1 == "as" ]] && [[ $GROUP == yes ]]; then
-                    local ASR=${SCBI_MODVER[$arg2]}
-                    [[ -z $ASR ]]  &&
-                        {
-                            elog build $arg2 has no reference in build plan
-                            exit 1
-                        }
-                    local ainfo=()
-                    parse-module-ref ainfo ${SCBI_MODVER[$arg2]}
-                    local var=${ainfo[1]}
-                    local ref=${ainfo[3]}
-
-                    modref=$module
-                    [[ $var != "default" ]] && modref+="/$var"
-                    [[ $ref != "NONE" ]] && modref+=":$ref"
+                if [[ $modref == "@ref" ]] &&
+                       [[ $arg2 == "as" ]] &&
+                       [[ $GROUP == yes ]];
+                then
+                    resolve-as modref $arg1 $arg3
                 fi
 
                 [[ $GROUP == yes ]] && GMOD+=( "$modref" )
@@ -368,26 +396,7 @@ function load-module-plan()
                 local module=${minfo[0]}
                 local ref=${minfo[3]}
 
-                if [[ $arg1 == "as" ]]; then
-                    local ASR=${SCBI_MODVER[$arg2]}
-                    [[ -z $ASR ]] &&
-                        {
-                            elog build $arg2 has no reference in build plan
-                            exit 1
-                        }
-                    local ainfo=()
-                    parse-module-ref ainfo ${SCBI_MODVER[$arg2]}
-                    local var=${ainfo[1]}
-                    local ref=${ainfo[3]}
-
-                    local mref=$module
-                    [[ $var != "default" ]] && mref+="/$var"
-                    [[ $ref != "NONE" ]] && mref+=":$ref"
-
-                    register-module-plan $NAME $module $(resolve-set "${mref}") $ref
-                else
-                    register-module-plan $NAME $module $(resolve-set "${modref/*=/}") $ref
-                fi
+                register-module-plan $NAME $module $(resolve-set "${modref/*=/}") $ref
             fi
         done < $PLAN
     else
