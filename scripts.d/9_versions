@@ -372,33 +372,51 @@ function module-plan-md5()
     local -n _SIG=$1
     local NAMEREF=$2
 
-    local VARIANT=${NAMEREF#*/}
-    local NAME=""
+    declare -gA RPLAN=()
 
-    if [[ $VARIANT == $NAMEREF ]]; then
-        NAME=${NAMEREF}
-    else
-        NAME=${NAMEREF%/*}
-    fi
+    function _internal_module-plan-md5()
+    {
+	local -n _LSIG=$1
+	local NAMEREF=$2
 
-    local PLAN=$PWD/.scbi-plan-$NAME
+	local VARIANT=${NAMEREF#*/}
+	local NAME=""
 
-    if [[ ! -f $PLAN ]]; then
-        PLAN=$SCBI_PLUGINS/.plan-$NAME
-    fi
+	if [[ $VARIANT == $NAMEREF ]]; then
+            NAME=${NAMEREF}
+	else
+            NAME=${NAMEREF%/*}
+	fi
 
-    if [[ -f $PLAN ]]; then
-        _SIG+=$(cat $PLAN)
-        while read modref arg1 arg2 arg3; do
-            if [[ "$modref" == "@load" ]]; then
-                local _PSIG=""
-                module-plan-md5 _PSIG $arg1
-                _SIG+=${_PSIG}
-            fi
-        done < $PLAN
-    fi
+	if [[ -n ${RPLAN["$NAME"]} ]]; then
+	    return 0
+	else
+	    RPLAN+=( ["$NAME"]=yes )
+	fi
 
-    _SIG=$(echo $NAMEREF $_SIG | get-md5)
+	local PLAN=$PWD/.scbi-plan-$NAME
+
+	if [[ ! -f $PLAN ]]; then
+            PLAN=$SCBI_PLUGINS/.plan-$NAME
+	fi
+
+	if [[ -f $PLAN ]]; then
+            _LSIG+=$(cat $PLAN)
+            while read modref arg1 arg2 arg3; do
+		if [[ "$modref" == "@load" ]] && [[ -n $arg1 ]]; then
+                    local _PSIG=""
+                    _internal_module-plan-md5 _PSIG $arg1
+                    _LSIG+=${_PSIG}
+		fi
+            done < $PLAN
+	fi
+
+	_LSIG=$(echo $NAMEREF $_LSIG | get-md5)
+	return 0
+    }
+
+    [[ -n $NAMEREF ]] &&
+        _internal_module-plan-md5 _SIG $NAMEREF
 }
 
 ############################## load-module-plan
