@@ -56,7 +56,7 @@ function c-darktable-common-depends()
     echo os@-rav1e-dev
     echo os@-rsvg2-dev
     echo os@-secret-dev
-    echo os@-soup2-dev
+    echo os@-soup3-dev
     echo os@-sqlite3-dev
     echo os@-svtav1enc-dev
     echo os@-tiff-dev

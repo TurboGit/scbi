@@ -159,6 +159,7 @@ os@-sfcgal-dev                      libsfcgal-dev
 os@-sip-dev                         sip-dev
 os@-soup-dev
 os@-soup2-dev                       libsoup2.4-dev
+os@-soup3-dev                       libsoup-3.0-dev
 os@-sphinx-common                   sphinx-common
 os@-sphinx-intl                     sphinx-intl
 os@-sqlite3-dev                     libsqlite3-dev

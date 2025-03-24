@@ -151,6 +151,7 @@ os@-scotch-dev                      libscotch-dev
 os@-secret-dev                      libsecret-1-dev
 os@-sip-dev                         sip-dev
 os@-soup2-dev                       libsoup2.4-dev
+os@-soup3-dev                       libsoup-3.0-dev
 os@-soup-dev
 os@-sphinx-common                   sphinx-common
 os@-sphinx-intl                     sphinx-intl
