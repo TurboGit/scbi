@@ -46,17 +46,29 @@ function c-win32ada-cross-build-depends()
     echo c-sandbox
 }
 
+function c-win32ada-cross-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make PROCESSORS=$SCBI_JOBS prefix=$PREFIX \
+         TARGET=$TARGET DEBUG=false build
+}
+
 function c-win32ada-build()
 {
     local PREFIX=$1
     local TARGET=$2
 
-    if [[ "$SCBI_HOST" = "$TARGET" ]]; then
-        make PROCESSORS=$SCBI_JOBS
-    else
-        make PROCESSORS=$SCBI_JOBS prefix=$PREFIX \
-             TARGET=$TARGET DEBUG=false build
-    fi
+    make PROCESSORS=$SCBI_JOBS prefix=$PREFIX build
+}
+
+function c-win32ada-cross-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make prefix=$PREFIX TARGET=$TARGET DEBUG=false install
 }
 
 function c-win32ada-install()
@@ -64,9 +76,5 @@ function c-win32ada-install()
     local PREFIX=$1
     local TARGET=$2
 
-    if [[ "$SCBI_HOST" = "$TARGET" ]]; then
-        make install
-    else
-        make prefix=$PREFIX TARGET=$TARGET DEBUG=false install
-    fi
+    make prefix=$PREFIX install
 }
