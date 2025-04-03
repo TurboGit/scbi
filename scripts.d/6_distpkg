@@ -134,7 +134,8 @@ function init-alias()
     local FILE="$1"
 
     while read pkg a; do
-        SCBI_ALIAS["$pkg"]=$a
+        [[ -n $pkg ]] &&
+            SCBI_ALIAS["$pkg"]=$a
     done < <( for F in "${FILE}" "${FILE}"-*; do [[ -f $F ]] && cat $F; done )
 }
 
