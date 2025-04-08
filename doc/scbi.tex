@@ -384,6 +384,22 @@ Some specific actions are supported with the following syntax:
 		module2:$VERSION
 	\end{lstlisting}
 
+	\item[\code{@ref m2 as m1}] To propagate a variant/version from another module.
+
+	\begin{lstlisting}
+		module1/var:1.2
+		@ref module2 as module1
+	\end{lstlisting}
+
+	Here \code{module2} will use the variant and version of \code{module1}. The above plan is equivalent to:
+
+	\begin{lstlisting}
+		module1/var:1.2
+		module2/var:1.2
+	\end{lstlisting}
+
+	But this may come handy when inheriting of a plan to set reference of a plug-in inheriting from another one.
+
 	\item[\code{@on <discriminants> use <module-reference>}] To set a module reference only if the running OS is matching the discriminants (\seeref{discriminants}). If all discriminant are matching the module reference will overwrite previous definitions.
 
 	\begin{lstlisting}
@@ -393,7 +409,7 @@ Some specific actions are supported with the following syntax:
 	@on fed use lcms2:v2
 	\end{lstlisting}
 
-	\item[\code{@for <plug-in> use <modref>}] To specify a specific variant and/or version of a plug-in when used as dependencies.
+	\item[\code{@for <plug-in> use <modref>}] To specify a specific variant and/or version of a plug-in when used as dependencies of a specific module.
 	\label{formodule}
 
     \begin{lstlisting}

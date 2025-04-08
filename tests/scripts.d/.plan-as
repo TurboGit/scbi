@@ -1,0 +1,18 @@
+
+libVR/variant-no-patch:v1
+libV/variant-no-patch
+libR:v1
+
+@ref lib1:v2 as libVR
+
+[ = a
+  @ref lib1/unused as libV
+]
+
+[ = b
+  @ref lib1 as libR
+]
+
+[ = wrong
+  @ref lib1 as donotexist
+]
