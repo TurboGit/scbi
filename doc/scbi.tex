@@ -422,15 +422,18 @@ Some specific actions are supported with the following syntax:
 
 		All of them must be set for the barrier to be true.
 
-		Finally the barrier can have two groups of values, for a \code{=} condition only one of the group can match (OR) for the barrier to evaluate to TRUE., for a \code{/=} condition all both groups must match (AND) for the barrier to evaluate to TRUE.
+		Finally the barrier can have two groups of values. For a \code{=} condition only one of the group can match (OR) for the barrier to evaluate to TRUE. For a \code{/=} condition all groups must match (AND) for the barrier to evaluate to TRUE. Examples:
 
-		\code{= deb,9 deb,11}
+		\begin{itemize}
+		\item {[} = deb,9 deb,11
 
 		Will be true on GNU/Debian 9 and 11.
 
-		\code{/= deb,9 deb,11}
+		\item {[} /= deb,9 deb,11
 
 		Will be true on all versions of GNU/Debian except version 9 and 11.
+
+		\end{itemize}
 
 		The group will be evaluated only if the barrier evaluate to true otherwise it will be skipped. If the barrier is not specified the group will always be evaluated (i.e. the barrier is by default TRUE).
 

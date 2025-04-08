@@ -12,15 +12,16 @@ function has-discriminant()
     fi
 }
 
-# ############################## check-discriminants
-# return 1 if all discriminants match
+# ############################## check-barrier
+# return 1 if all discriminants/variants match
 
-function check-discriminants()
+function check-barrier()
 {
-    local discs="$1"
+    local VARIANT="$1"
+    local DISCS="$2"
 
-    for d in ${discs/,/ }; do
-        has-discriminant "$d"
+    for d in ${DISCS//,/ }; do
+        has-discriminant "$d" || has-variant "$VARIANT" "$d"
         [[ $? == 1 ]] && return 1
     done
 
@@ -189,7 +190,7 @@ function load-module-plan()
     fi
 
     if [[ -f $PLAN ]]; then
-        while read modref arg1 arg2 arg3; do
+        while read modref arg1 arg2 arg3 arg4; do
             if [[ "$modref" =~ ^[[:space:]]*# ]]; then
                 continue;
             elif [[ "$modref" = "@load" ]]; then
@@ -200,7 +201,7 @@ function load-module-plan()
                     exit 1
                 fi
 
-                if check-discriminants "$arg1"; then
+                if check-barrier "$VARIANT" "$arg1"; then
                     local minfo=()
                     parse-module-ref minfo $arg3
                     local module=${minfo[0]}
@@ -307,15 +308,17 @@ function load-module-plan()
             elif [[ "$modref" = "[" ]]; then
                 if [[ -n $arg1 ]]; then
                     if [[ $arg1 = "=" ]]; then
-                        if has-variant "$VARIANT" "$arg2" \
-                            || check-discriminants "$arg2";
-                        then
+                        if check-barrier "$VARIANT" "$arg2"; then
                             GROUP=yes
                         elif [[ -n $arg3 ]]; then
-                            if has-variant "$VARIANT" "$arg3" \
-                                    || check-discriminants "$arg3";
-                            then
+                            if check-barrier "$VARIANT" "$arg3"; then
                                 GROUP=yes
+                            elif [[ -n $arg4 ]]; then
+                                if check-barrier "$VARIANT" "$arg4"; then
+                                    GROUP=yes
+                                else
+                                    GROUP=closed
+                                fi
                             else
                                 GROUP=closed
                             fi
@@ -323,15 +326,17 @@ function load-module-plan()
                             GROUP=closed
                         fi
                     elif [[ $arg1 = "/=" ]]; then
-                        if has-variant "$VARIANT" "$arg2" \
-                                || check-discriminants "$arg2";
-                        then
+                        if check-barrier "$VARIANT" "$arg2"; then
                             GROUP=closed
                         elif [[ -n $arg3 ]]; then
-                            if has-variant "$VARIANT" "$arg3" \
-                                    || check-discriminants "$arg3";
-                            then
+                            if check-barrier "$VARIANT" "$arg3"; then
                                 GROUP=closed
+                            elif [[ -n $arg4 ]]; then
+                                if check-barrier "$VARIANT" "$arg4"; then
+                                    GROUP=closed
+                                else
+                                    GROUP=yes
+                                fi
                             else
                                 GROUP=yes
                             fi
