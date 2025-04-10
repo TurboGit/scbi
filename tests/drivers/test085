@@ -25,6 +25,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-common1 [default] (n/a)
@@ -35,6 +36,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-common2 [default] (n/a)
@@ -45,6 +47,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-default-ex1 [default] (n/a)
@@ -55,6 +58,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-default-ex2 [default] (n/a)
@@ -65,6 +69,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-default1 [default] (n/a)
@@ -75,6 +80,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-default2 [default] (n/a)
@@ -95,7 +101,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-common1 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-common2 [default] (n/a)
@@ -104,7 +110,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-common2 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-var1 [default] (n/a)
@@ -113,6 +119,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-var1 [default] (n/a)
@@ -123,6 +130,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-var2 [default] (n/a)
@@ -143,7 +151,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-common1 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-common2 [default] (n/a)
@@ -152,7 +160,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-common2 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-var1 [default] (n/a)
@@ -161,7 +169,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-var1 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-var2 [default] (n/a)
@@ -170,7 +178,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-var2 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-new1 [default] (n/a)
@@ -179,6 +187,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-new1 [default] (n/a)
@@ -189,6 +198,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-new2 [default] (n/a)
@@ -199,6 +209,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-new3 [default] (n/a)
@@ -219,7 +230,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-common1 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-common2 [default] (n/a)
@@ -228,7 +239,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-common2 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-new1 [default] (n/a)
@@ -237,7 +248,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-new1 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-new2 [default] (n/a)
@@ -246,7 +257,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-new2 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-new3 [default] (n/a)
@@ -255,7 +266,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar/new
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-new3 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Metamodule metavar [new] wrapup
@@ -274,7 +285,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-common1 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-common2 [default] (n/a)
@@ -283,7 +294,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-common2 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-default-ex1 [default] (n/a)
@@ -292,7 +303,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-default-ex1 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-default-ex2 [default] (n/a)
@@ -301,7 +312,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-default-ex2 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-default1 [default] (n/a)
@@ -310,7 +321,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-default1 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Building mv-default2 [default] (n/a)
@@ -319,7 +330,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metavar
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-default2 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Metamodule metavar [default] wrapup

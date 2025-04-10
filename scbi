@@ -419,6 +419,17 @@ SCBI_CRED=""
 SCBI_CGREEN=""
 SCBI_CBLUE=""
 
+readonly SCBI_STATUS_V_MATCHING=0
+readonly SCBI_STATUS_SRC_CHANGED=1
+readonly SCBI_STATUS_V_NOT_MATCHING=2
+readonly SCBI_STATUS_V_CANNOT_GET=3
+readonly SCBI_STATUS_V_ERROR=4
+readonly SCBI_STATUS_B_FORCED=5
+readonly SCBI_STATUS_B_NOTYET=6
+readonly SCBI_STATUS_B_NOT_UPTODATE=7
+readonly SCBI_STATUS_V_NATIVE=8
+readonly SCBI_STATUS_V_NATIVE_MATCHING=9
+
 DO_SETUP=yes
 DO_CONFIG=yes
 DO_BUILD=yes
@@ -811,6 +822,7 @@ function is-module-up-to-date()
 {
     local MODREF=$1
     local FORMODULE=$2
+    local PREV_SID=$3
 
     local module_info=()
     get-module-ref module_info $MODREF $FORMODULE
@@ -881,9 +893,7 @@ function is-module-up-to-date()
 
     #  If we have a source-id check if the content corresponds to SID
 
-    [[ -f $SCBI_BDIR/$module/source-id ]] &&
-        [[ "$(cat $SCBI_BDIR/$module/source-id)" == $SID ]] &&
-            rsid=0
+    [[ "$PREV_SID" == $SID ]] && rsid=0
 
     #  Clean-up the version number (only digits and a single dot)
 
@@ -896,6 +906,7 @@ function is-module-up-to-date()
     fi
 
     local rbid=0
+    local ebid=0
 
     local TVDIR=""
     get-target-dir TVDIR $module $variant
@@ -903,8 +914,11 @@ function is-module-up-to-date()
     if [[ $DO_FORCE = yes ]]; then
         rm -f $TVDIR/build-id
         rbid=1
+        ebid=1
     else
         #  Check build id, only rebuild if mismatch
+
+        [[ ! -f $TVDIR/build-id ]] && ebid=1
 
         diff -q $SCBI_BDIR/$module/build-id-$variant \
              $TVDIR/build-id > /dev/null 2>&1
@@ -914,17 +928,31 @@ function is-module-up-to-date()
     check-versions "$ref" ">" "$mver"
     local cver=$?
 
-    if [[ $rbid -gt 0 ]]                  ||
-           [[ $rsid -gt 0 ]]              ||
-           [[ -z $mver ]]                 ||
-           [[ "$mver" = $VERSION_ERROR ]] ||
-           [[ $cver == 0 ]];
-    then
-        # Rebuild needed, $? = 1
-        false
+    if [[ ${SID:0:6} == "native" ]]; then
+        if [[ $ebid == 1 ]]; then
+            return $SCBI_STATUS_V_NATIVE
+        else
+            return $SCBI_STATUS_V_NATIVE_MATCHING
+        fi
+    elif [[ $rsid -gt 0 ]] && [[ $ebid == 0 ]]; then
+        return $SCBI_STATUS_SRC_CHANGED
+    elif [[ $cver == 0 ]]; then
+        return $SCBI_STATUS_V_NOT_MATCHING
+    elif [[ -z $mver ]]; then
+        return $SCBI_STATUS_V_CANNOT_GET
+    elif [[ "$mver" = $VERSION_ERROR ]]; then
+        return $SCBI_STATUS_V_ERROR
+    elif [[ $rbid -gt 0 ]]; then
+        if [[ $DO_FORCE = yes ]]; then
+            return $SCBI_STATUS_B_FORCED
+        elif [[ $ebid == 1 ]]; then
+            return $SCBI_STATUS_B_NOTYET
+        else
+            return $SCBI_STATUS_B_NOT_UPTODATE
+        fi
     else
         # Rebuild not needed, $? = 0
-        true
+        return $SCBI_STATUS_V_MATCHING
     fi
 }
 
@@ -1685,6 +1713,9 @@ function handle-module()
 
         ilog $module steps : $STEPS | tee -a $log
 
+        local PREV_SID="@"
+        [[ -f $SCBI_BDIR/$module/source-id ]] &&
+            PREV_SID="$(cat $SCBI_BDIR/$module/source-id)"
 
         if [[ "${ref%%:*}" == "keep" ]]; then
             ilog $module no update, keep current build
@@ -1706,8 +1737,55 @@ function handle-module()
         declare -A SCBI_MODULES_DIR=()
 
         local IS_UPTODATE=no
-        is-module-up-to-date $MODREF $FORMODULE ||
-            [[ "${ref%%:*}" == "keep" ]] && IS_UPTODATE=yes
+        local UPTODATE_MSG=""
+
+        is-module-up-to-date $MODREF "$FORMODULE" "$PREV_SID"
+        UPTODATE_RES=$?
+
+        if [[ "${ref%%:*}" == "keep" ]]; then
+            IS_UPTODATE=yes
+            UPTODATE_MSG="no build needed: keep module"
+        elif [[ $DO_TEST == "yes-only" ]]; then
+            IS_UPTODATE=yes
+            UPTODATE_MSG=""
+        else
+            case $UPTODATE_RES in
+                $SCBI_STATUS_V_MATCHING)
+                    IS_UPTODATE=yes
+                    UPTODATE_MSG="no build needed: versions matching"
+                    ;;
+                $SCBI_STATUS_V_NATIVE)
+                    #  We still want to setup the build-id
+                    ;;
+                $SCBI_STATUS_V_NATIVE_MATCHING)
+                    IS_UPTODATE=yes
+                    ;;
+                $SCBI_STATUS_SRC_CHANGED)
+                    UPTODATE_MSG="trigger: sources changed"
+                    ;;
+                $SCBI_STATUS_V_NOT_MATCHING)
+                    UPTODATE_MSG="trigger: versions not matching"
+                    ;;
+                $SCBI_STATUS_V_CANNOT_GET)
+                    UPTODATE_MSG="trigger: cannot get version"
+                    ;;
+                $SCBI_STATUS_V_ERROR)
+                    UPTODATE_MSG="trigger: version error"
+                    ;;
+                $SCBI_STATUS_B_FORCED)
+                    UPTODATE_MSG="trigger: forced"
+                    ;;
+                $SCBI_STATUS_B_NOTYET)
+                    UPTODATE_MSG="trigger: not yet built"
+                    ;;
+                $SCBI_STATUS_B_NOT_UPTODATE)
+                    UPTODATE_MSG="trigger: build not up-to-date"
+                    ;;
+                *)
+                    UPTODATE_MSG="unknown status $UPTODATE_RES"
+                    ;;
+            esac
+        fi
 
         if [[ $IS_UPTODATE == no ]] || [[ $DO_TEST != no ]]; then
             local ENVTMP="$(mktemp -p /dev/shm/)"
@@ -1740,7 +1818,8 @@ function handle-module()
         #  Only rebuild if mismatch
 
         if [[ $IS_UPTODATE == yes ]]; then
-            ilog $module no build needed, versions match
+            [[ -n $UPTODATE_MSG ]] &&
+                ilog $module $UPTODATE_MSG
 
             STEPS=""
 
@@ -1749,6 +1828,9 @@ function handle-module()
             [[ $DO_TEST != "no" ]] && STEPS="tests"
 
         else
+            [[ -n $UPTODATE_MSG ]] &&
+                ilog $module $UPTODATE_MSG
+
             #  Record the build-plan
 
             record-build-plan $module $variant

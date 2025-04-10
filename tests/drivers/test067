@@ -14,6 +14,7 @@ CLEAN-DIFF <<EOF
 2022/01/04 19:22:11 : steps : setup config build install tests wrapup
 2022/01/04 19:22:11 : get sources from archive
 xxxx/xx/xx xx:xx:xx : extract archive dltar-src.tar.bz2
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 2022/01/04 19:22:11 : install starting
 2022/01/04 19:22:11 : install completed
 2022/01/04 19:22:11 : tests starting
@@ -36,7 +37,7 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 2022/01/04 19:22:12 : native x86_64-linux-gnu
 2022/01/04 19:22:12 : steps : setup config build install tests wrapup
 2022/01/04 19:22:12 : get sources from archive
-2022/01/04 19:22:12 : no build needed, versions match
+2022/01/04 19:22:12 : no build needed: versions matching
 2022/01/04 19:22:12 : tests starting
 Script 1
 2022/01/04 19:22:12 : tests completed
@@ -58,7 +59,7 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 2022/01/04 19:22:12 : steps : setup config build install tests wrapup
 2022/01/04 19:22:12 : get sources from archive
 xxxx/xx/xx xx:xx:xx : extract archive dltar-src.tar.bz2
-2022/01/04 19:22:12 : no build needed, versions match
+2022/01/04 19:22:12 : no build needed: versions matching
 2022/01/04 19:22:12 : tests starting
 Script 1
 2022/01/04 19:22:12 : tests completed
@@ -84,6 +85,7 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 2022/01/04 19:22:12 : steps : setup config build install tests wrapup
 2022/01/04 19:22:12 : get sources from archive
 xxxx/xx/xx xx:xx:xx : extract archive dltar-src.tar.bz2
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 2022/01/04 19:22:12 : install starting
 2022/01/04 19:22:12 : install completed
 2022/01/04 19:22:12 : tests starting

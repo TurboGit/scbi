@@ -10,6 +10,7 @@ xxxx/xx/xx xx:xx:xx : Building mspace [opta] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : opta-config starting
 xxxx/xx/xx xx:xx:xx : opta-config completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [opta] (n/a)
@@ -31,6 +32,7 @@ xxxx/xx/xx xx:xx:xx : Building mspace [optb] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : optb-config starting
 xxxx/xx/xx xx:xx:xx : optb-config completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [optb] (n/a)
@@ -52,6 +54,7 @@ xxxx/xx/xx xx:xx:xx : Building mspace [opta optb] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : opta-config [opta optb] starting
 xxxx/xx/xx xx:xx:xx : opta-config [opta optb] completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [opta optb] (n/a)
@@ -74,6 +77,7 @@ xxxx/xx/xx xx:xx:xx : Building mspace [optb opta] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : optb-config [optb opta] starting
 xxxx/xx/xx xx:xx:xx : optb-config [optb opta] completed
 xxxx/xx/xx xx:xx:xx : End Building mspace [optb opta] (n/a)

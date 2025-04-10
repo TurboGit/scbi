@@ -14,6 +14,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metaagg
 2024/03/29 09:56:59 : native x86_64-linux-gnu
 2024/03/29 09:56:59 : steps : setup config build install wrapup
 2024/03/29 09:56:59 : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 2024/03/29 09:56:59 : apply patch lib1-0-fix.patch
 2024/03/29 09:56:59 : build starting
 2024/03/29 09:56:59 : build completed
@@ -28,6 +29,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ metaagg
 2024/03/29 09:56:59 : native x86_64-linux-gnu
 2024/03/29 09:56:59 : steps : setup config build install wrapup
 2024/03/29 09:57:00 : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 2024/03/29 09:57:00 : config starting
 2024/03/29 09:57:00 : config completed
 2024/03/29 09:57:00 : build starting
@@ -55,6 +57,7 @@ xxxx/xx/xx xx:xx:xx : Building usemetaagg [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
@@ -69,7 +72,6 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building usemetaagg [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : tests
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
 xxxx/xx/xx xx:xx:xx : tests starting
 main on master
 liba.C patched version

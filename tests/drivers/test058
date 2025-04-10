@@ -7,6 +7,7 @@ CLEAN-DIFF <<EOF
 2021/11/27 09:50:05 : native x86_64-linux-gnu
 2021/11/27 09:50:05 : steps : setup config build install wrapup
 2021/11/27 09:50:05 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:50:05 : config starting
 2021/11/27 09:50:05 : config completed
 2021/11/27 09:50:05 : build starting
@@ -23,6 +24,7 @@ CLEAN-DIFF <<EOF
 2021/11/27 09:50:19 : native x86_64-linux-gnu
 2021/11/27 09:50:19 : steps : setup config build install wrapup
 2021/11/27 09:50:19 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:50:19 : config starting
 config
 2021/11/27 09:50:19 : config completed
@@ -42,6 +44,7 @@ CLEAN-DIFF <<EOF
 2021/11/27 09:53:01 : native x86_64-linux-gnu
 2021/11/27 09:53:01 : steps : setup config build install wrapup
 2021/11/27 09:53:01 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:53:01 : conferr-config starting
 2021/11/27 09:53:01 : failsteps (FAILED) conferr-config failed with error 1
 xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
@@ -56,6 +59,7 @@ CLEAN-DIFF <<EOF
 2021/11/27 09:53:52 : native x86_64-linux-gnu
 2021/11/27 09:53:52 : steps : setup config build install wrapup
 2021/11/27 09:53:52 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:53:52 : config [builderr] starting
 2021/11/27 09:53:52 : config [builderr] completed
 2021/11/27 09:53:52 : builderr-build starting
@@ -72,6 +76,7 @@ CLEAN-DIFF <<EOF
 2021/11/27 09:54:19 : native x86_64-linux-gnu
 2021/11/27 09:54:19 : steps : setup config build install wrapup
 2021/11/27 09:54:19 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:54:19 : config [installerr] starting
 2021/11/27 09:54:19 : config [installerr] completed
 2021/11/27 09:54:19 : build [installerr] starting
@@ -92,6 +97,7 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 2021/11/27 09:55:05 : native x86_64-linux-gnu
 2021/11/27 09:55:05 : steps : setup config build install wrapup
 2021/11/27 09:55:05 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:55:05 : conferr-config starting
 config error
 2021/11/27 09:55:05 : failsteps (FAILED) conferr-config failed with error 1
@@ -109,6 +115,7 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 2021/11/27 09:55:40 : native x86_64-linux-gnu
 2021/11/27 09:55:40 : steps : setup config build install wrapup
 2021/11/27 09:55:40 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:55:40 : config [installerr] starting
 2021/11/27 09:55:40 : config [installerr] completed
 2021/11/27 09:55:40 : build [installerr] starting

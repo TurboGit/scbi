@@ -12,6 +12,7 @@ xxxx/xx/xx xx:xx:xx : Building oot2 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
@@ -30,6 +31,7 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building oot2 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : trigger: forced
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
@@ -48,6 +50,7 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building oot2 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : trigger: forced
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
@@ -66,6 +69,7 @@ CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building oot2 [no] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : trigger: forced
 xxxx/xx/xx xx:xx:xx : build [no] starting
 xxxx/xx/xx xx:xx:xx : build [no] completed
 xxxx/xx/xx xx:xx:xx : install [no] starting

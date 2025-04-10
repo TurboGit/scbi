@@ -24,6 +24,7 @@ CLEAN-DIFF <<EOF
 2023/07/27 11:18:07 : native x86_64-linux-gnu
 2023/07/27 11:18:07 : steps : setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
