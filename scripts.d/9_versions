@@ -170,7 +170,6 @@ function load-module-plan()
         local minfo=()
         parse-module-ref minfo $PLG1
         local module=${minfo[0]}
-        local ref=${minfo[3]}
 
         local ASR=${SCBI_MODVER[$PLG2]}
         [[ -z $ASR ]] &&
