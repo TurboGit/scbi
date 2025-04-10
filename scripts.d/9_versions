@@ -172,6 +172,7 @@ function load-module-plan()
         local module=${minfo[0]}
 
         local ASR=${SCBI_MODVER[$PLG2]}
+        local SKP=${SCBI_MODVER[$PLG2.skip]}
         [[ -z $ASR ]] &&
             {
                 elog build $PLG2 has no reference in build plan
@@ -182,6 +183,7 @@ function load-module-plan()
         parse-module-ref ainfo $ASR
         local var=${ainfo[1]}
         local ref=${ainfo[3]}
+        [[ $SKP == "yes" ]] && ref=skip
 
         _RES=$module
         [[ $var != "default" ]] && _RES+="/$var"

@@ -49,3 +49,9 @@ NRUNS ./scbi --plan=as/wrong lib1
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : build (FAILED) donotexist has no reference in build plan
 EOF
+
+RUNS ./scbi --plan=as/skip lib1
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Module lib1 marked to be skipped
+EOF

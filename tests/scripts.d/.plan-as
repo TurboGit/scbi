@@ -2,6 +2,7 @@
 libVR/variant-no-patch:v1
 libV/variant-no-patch
 libR:v1
+skipme:skip
 
 @ref lib1:v2 as libVR
 
@@ -15,4 +16,8 @@ libR:v1
 
 [ = wrong
   @ref lib1 as donotexist
+]
+
+[ = skip
+  @ref lib1 as skipme
 ]
