@@ -182,12 +182,16 @@ function load-module-plan()
         local ainfo=()
         parse-module-ref ainfo $ASR
         local var=${ainfo[1]}
+        local knd=${ainfo[2]}
         local ref=${ainfo[3]}
+        local a=""
+
         [[ $SKP == "yes" ]] && ref=skip
+        [[ $knd == "VERSION" ]] && a="#"
 
         _RES=$module
         [[ $var != "default" ]] && _RES+="/$var"
-        [[ $ref != "NONE" ]] && _RES+=":$ref"
+        [[ $ref != "NONE" ]] && _RES+=":$a$ref"
     }
 
     if [[ $VARIANT == $NAMEREF ]]; then
