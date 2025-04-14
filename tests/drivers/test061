@@ -7,7 +7,7 @@ RUNS ./scbi btype
 CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
-2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : steps: setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 2021/12/09 18:48:32 : config starting
@@ -26,7 +26,7 @@ RUNS ./scbi btype
 CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
-2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : steps: setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 2021/12/09 18:48:32 : no build needed: versions matching
 2021/12/09 18:48:32 : End Building btype [default] (n/a)
@@ -41,7 +41,7 @@ RUNS ./scbi btype
 CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
-2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : steps: setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 2021/12/09 18:48:32 : config starting
@@ -60,7 +60,7 @@ RUNS ./scbi btype
 CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
-2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : steps: setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 2021/12/09 18:48:32 : no build needed: versions matching
 2021/12/09 18:48:32 : End Building btype [default] (n/a)
@@ -73,7 +73,7 @@ RUNS ./scbi btype
 CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
-2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : steps: setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 2021/12/09 18:48:32 : no build needed: versions matching
 2021/12/09 18:48:32 : End Building btype [default] (n/a)
@@ -86,7 +86,7 @@ RUNS ./scbi btype
 CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
-2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : steps: setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 2021/12/09 18:48:32 : config starting
@@ -107,7 +107,7 @@ RUNS ./scbi btype
 CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
-2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : steps: setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 2021/12/09 18:48:32 : no build needed: versions matching
 2021/12/09 18:48:32 : End Building btype [default] (n/a)
@@ -120,7 +120,7 @@ RUNS ./scbi btype
 CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
-2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : steps: setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 2021/12/09 18:48:32 : config starting
@@ -139,7 +139,7 @@ RUNS ./scbi btype
 CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
-2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : steps: setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 2021/12/09 18:48:32 : no build needed: versions matching
 2021/12/09 18:48:32 : End Building btype [default] (n/a)
@@ -152,7 +152,7 @@ RUNS ./scbi btype
 CLEAN-DIFF <<EOF
 2021/12/09 18:48:32 : Building btype [default] (n/a)
 2021/12/09 18:48:32 : native x86_64-linux-gnu
-2021/12/09 18:48:32 : steps : setup config build install wrapup
+2021/12/09 18:48:32 : steps: setup config build install wrapup
 2021/12/09 18:48:32 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 2021/12/09 18:48:32 : config starting

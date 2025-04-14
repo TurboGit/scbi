@@ -6,7 +6,7 @@ NRUNS ./scbi --setup --tests:only checkvcs
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building checkvcs [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup tests
+xxxx/xx/xx xx:xx:xx : steps: setup tests
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : error: cannot get sources from /this.is.path/some/dir
 xxxx/xx/xx xx:xx:xx : error: see <pwd>/.root/builds/.logs//x86_64-linux-gnu-checkvcs-default-report.log
@@ -43,7 +43,7 @@ RUNS ./scbi --setup --tests:only checkvcs
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building checkvcs [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup tests
+xxxx/xx/xx xx:xx:xx : steps: setup tests
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : End Building checkvcs [default] (master)
 EOF

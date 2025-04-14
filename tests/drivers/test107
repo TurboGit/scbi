@@ -34,7 +34,7 @@ RUNS ./scbi --tests svnstd
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building svnstd [default] (trunk)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from subversion
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build starting
@@ -55,7 +55,7 @@ RUNS ./scbi --tests svnstd:v1
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building svnstd [default] (v1)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from subversion
 xxxx/xx/xx xx:xx:xx : trigger: sources changed
 xxxx/xx/xx xx:xx:xx : build starting
@@ -74,7 +74,7 @@ RUNS ./scbi --tests svnmlt/prj1:v1.0
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building svnmlt [prj1] (v1.0)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from svn [prj1]
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build [prj1] starting
@@ -95,7 +95,7 @@ RUNS ./scbi --tests svnmlt/prj2:v1
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building svnmlt [prj2] (v1)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from subversion [prj2]
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build [prj2] starting

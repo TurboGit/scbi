@@ -6,7 +6,7 @@ RUNS ./scbi --log:yes confopts
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building confopts [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
@@ -21,7 +21,7 @@ RUNS ./scbi --log:yes confopts/vara
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building confopts [vara] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config [vara] starting
@@ -36,7 +36,7 @@ RUNS ./scbi --log:yes confopts/varb
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building confopts [varb] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config [varb] starting
@@ -51,7 +51,7 @@ RUNS ./scbi --log:yes confopts/vara.varb
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building confopts [vara varb] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config [vara varb] starting

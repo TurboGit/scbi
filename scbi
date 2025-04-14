@@ -1711,7 +1711,7 @@ function handle-module()
                 DO_WRAPUP=no
             }
 
-        ilog $module steps : $STEPS | tee -a $log
+        ilog $module steps: $STEPS | tee -a $log
 
         local PREV_SID="@"
         [[ -f $SCBI_BDIR/$module/source-id ]] &&

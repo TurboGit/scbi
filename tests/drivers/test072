@@ -10,7 +10,7 @@ RUNS ./scbi --tests --update dltar:#0
 CLEAN-DIFF <<EOF
 2022/01/04 19:22:11 : Building dltar [default] (0)
 2022/01/04 19:22:11 : native x86_64-linux-gnu
-2022/01/04 19:22:11 : steps : setup config build install tests wrapup
+2022/01/04 19:22:11 : steps: setup config build install tests wrapup
 2022/01/04 19:22:11 : get sources from archive
 xxxx/xx/xx xx:xx:xx : extract archive dltar-src.tar.bz2
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
@@ -39,7 +39,7 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 
 xxxx/xx/xx xx:xx:xx : Building dltar [default] (0)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from archive
 xxxx/xx/xx xx:xx:xx : extract archive dltar-src.tar.bz2
 xxxx/xx/xx xx:xx:xx : dltar (FAILED) archive dltar-src.tar.bz2 is corrupted

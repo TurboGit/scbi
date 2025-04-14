@@ -5,7 +5,7 @@ RUNS ./scbi --force failsteps
 CLEAN-DIFF <<EOF
 2021/11/27 09:50:05 : Building failsteps [default] (n/a)
 2021/11/27 09:50:05 : native x86_64-linux-gnu
-2021/11/27 09:50:05 : steps : setup config build install wrapup
+2021/11/27 09:50:05 : steps: setup config build install wrapup
 2021/11/27 09:50:05 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:50:05 : config starting
@@ -22,7 +22,7 @@ RUNS ./scbi --force --log failsteps
 CLEAN-DIFF <<EOF
 2021/11/27 09:50:19 : Building failsteps [default] (n/a)
 2021/11/27 09:50:19 : native x86_64-linux-gnu
-2021/11/27 09:50:19 : steps : setup config build install wrapup
+2021/11/27 09:50:19 : steps: setup config build install wrapup
 2021/11/27 09:50:19 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:50:19 : config starting
@@ -42,7 +42,7 @@ NRUNS ./scbi --force --log:no failsteps/conferr
 CLEAN-DIFF <<EOF
 2021/11/27 09:53:01 : Building failsteps [conferr] (n/a)
 2021/11/27 09:53:01 : native x86_64-linux-gnu
-2021/11/27 09:53:01 : steps : setup config build install wrapup
+2021/11/27 09:53:01 : steps: setup config build install wrapup
 2021/11/27 09:53:01 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:53:01 : conferr-config starting
@@ -57,7 +57,7 @@ NRUNS ./scbi --force --log:no failsteps/builderr
 CLEAN-DIFF <<EOF
 2021/11/27 09:53:52 : Building failsteps [builderr] (n/a)
 2021/11/27 09:53:52 : native x86_64-linux-gnu
-2021/11/27 09:53:52 : steps : setup config build install wrapup
+2021/11/27 09:53:52 : steps: setup config build install wrapup
 2021/11/27 09:53:52 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:53:52 : config [builderr] starting
@@ -74,7 +74,7 @@ NRUNS ./scbi --force --log:no failsteps/installerr
 CLEAN-DIFF <<EOF
 2021/11/27 09:54:19 : Building failsteps [installerr] (n/a)
 2021/11/27 09:54:19 : native x86_64-linux-gnu
-2021/11/27 09:54:19 : steps : setup config build install wrapup
+2021/11/27 09:54:19 : steps: setup config build install wrapup
 2021/11/27 09:54:19 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:54:19 : config [installerr] starting
@@ -95,7 +95,7 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 
 2021/11/27 09:55:05 : Building failsteps [conferr] (n/a)
 2021/11/27 09:55:05 : native x86_64-linux-gnu
-2021/11/27 09:55:05 : steps : setup config build install wrapup
+2021/11/27 09:55:05 : steps: setup config build install wrapup
 2021/11/27 09:55:05 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:55:05 : conferr-config starting
@@ -113,7 +113,7 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 
 2021/11/27 09:55:40 : Building failsteps [installerr] (n/a)
 2021/11/27 09:55:40 : native x86_64-linux-gnu
-2021/11/27 09:55:40 : steps : setup config build install wrapup
+2021/11/27 09:55:40 : steps: setup config build install wrapup
 2021/11/27 09:55:40 : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: forced
 2021/11/27 09:55:40 : config [installerr] starting

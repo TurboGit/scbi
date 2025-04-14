@@ -13,7 +13,7 @@ RUNS ./scbi lib1:dev
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (dev)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
 xxxx/xx/xx xx:xx:xx : build starting
@@ -33,7 +33,7 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (dev)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : build install
+xxxx/xx/xx xx:xx:xx : steps: build install
 xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed

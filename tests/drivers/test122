@@ -4,7 +4,7 @@ NRUNS ./scbi lib2:v2.0 multpatch
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib2 [default] (v2.0)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
@@ -18,7 +18,7 @@ xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (v2.0)
 
 xxxx/xx/xx xx:xx:xx : Building multpatch [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch patch-for-v2 not found
@@ -34,7 +34,7 @@ xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ multpatch
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: sources changed
 xxxx/xx/xx xx:xx:xx : config starting
@@ -48,7 +48,7 @@ xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building multpatch [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch patch-for-v1 not found
 xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch patch-for-v1.2 not found
@@ -63,7 +63,7 @@ xxxx/xx/xx xx:xx:xx : Building lib2 [default] (v2.0)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ multpatch
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: sources changed
 xxxx/xx/xx xx:xx:xx : config starting
@@ -77,7 +77,7 @@ xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (v2.0)
 
 xxxx/xx/xx xx:xx:xx : Building multpatch [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch patch-for-v2 not found
 xxxx/xx/xx xx:xx:xx : multpatch (FAILED) patch patch-for-v2.2 not found

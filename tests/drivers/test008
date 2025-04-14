@@ -12,7 +12,7 @@ xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v2)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainmult
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build starting
@@ -30,7 +30,7 @@ xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainmult
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
@@ -48,7 +48,7 @@ xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build starting
@@ -72,7 +72,7 @@ xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainmult
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: sources changed
 xxxx/xx/xx xx:xx:xx : build starting
@@ -90,7 +90,7 @@ xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainmult
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : variant1-config starting
@@ -108,7 +108,7 @@ xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
@@ -133,7 +133,7 @@ xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainmult
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : tests starting
 main
@@ -146,7 +146,7 @@ xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainmult
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
@@ -157,7 +157,7 @@ xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : tests starting
 main on master
@@ -178,7 +178,7 @@ xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainmult
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : steps: tests
 xxxx/xx/xx xx:xx:xx : tests starting
 main
 liba.A br_a
@@ -189,7 +189,7 @@ xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainmult
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : steps: tests
 xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
 libb.B v2 (variant1)
@@ -198,7 +198,7 @@ xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
 
 xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : steps: tests
 xxxx/xx/xx xx:xx:xx : tests starting
 main on master
 liba.A br_a
@@ -236,7 +236,7 @@ NRUNS ./scbi --tests:only --plan=var --deps lib2/wrong:bad
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib2 [wrong] (bad)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : steps: tests
 xxxx/xx/xx xx:xx:xx : tests [wrong] starting
 <pwd>/scripts.d/lib2: line 75: ./main2: No such file or directory
 xxxx/xx/xx xx:xx:xx : lib2 (FAILED) tests failed with error 1

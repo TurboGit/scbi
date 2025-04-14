@@ -22,7 +22,7 @@ RUNS ./scbi --ini=sc
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building test2 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config
+xxxx/xx/xx xx:xx:xx : steps: setup config
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
@@ -35,7 +35,7 @@ RUNS ./scbi --ini=full
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building test2 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: forced
 xxxx/xx/xx xx:xx:xx : config starting
@@ -96,7 +96,7 @@ e-mail notification   : no
 
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch

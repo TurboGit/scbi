@@ -12,7 +12,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER used
 
 xxxx/xx/xx xx:xx:xx : Building mautov [native] ($GVER)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : skip global install
 xxxx/xx/xx xx:xx:xx : End Building mautov [native] ($GVER)
 EOF
@@ -27,7 +27,7 @@ xxxx/xx/xx xx:xx:xx :   ↳ gcc $GVER installed
 
 xxxx/xx/xx xx:xx:xx : Building mautov [default] (99.99.09)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting

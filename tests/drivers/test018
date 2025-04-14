@@ -3,7 +3,7 @@ RUNS ./scbi test18
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building test18 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
@@ -21,7 +21,7 @@ RUNS ./scbi test18/alt
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building test18 [alt] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config [alt] starting
 xxxx/xx/xx xx:xx:xx : config [alt] completed
