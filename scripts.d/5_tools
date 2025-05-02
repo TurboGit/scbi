@@ -1,13 +1,13 @@
 
 declare -gA SCBI_MODULE_ALIAS
 
-SCBI_STATUS_VERSION_OK=0
-SCBI_STATUS_VERSION_NOK=1
-SCBI_STATUS_PKG_NOT_INSTALLED=2
-SCBI_STATUS_PKG_NOT_FOUND=3
+readonly SCBI_STATUS_VERSION_OK=0
+readonly SCBI_STATUS_VERSION_NOK=1
+readonly SCBI_STATUS_PKG_NOT_INSTALLED=2
+readonly SCBI_STATUS_PKG_NOT_FOUND=3
 
-SCBI_ERROR_HOOK_NOT_FOUND=4
-SCBI_ERROR_PLUGIN_NOT_FOUND=5
+readonly SCBI_ERROR_HOOK_NOT_FOUND=4
+readonly SCBI_ERROR_PLUGIN_NOT_FOUND=5
 
 declare -g SCBI_RECTREE=()
 
@@ -136,8 +136,8 @@ function get-hook()
 ############################## get-version-number
 # return a 3 digits version number for $1
 
-VERSION_OK=99999999
-VERSION_ERROR=-1
+readonly VERSION_OK=99999999
+readonly VERSION_ERROR=-1
 
 function get-version-number()
 {

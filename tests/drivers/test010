@@ -6,8 +6,9 @@ RUNS ./scbi --tests lib1
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
@@ -27,7 +28,8 @@ RUNS ./scbi --tests --no-patch lib1
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
@@ -46,7 +48,8 @@ RUNS ./scbi --tests lib1
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
@@ -66,7 +69,8 @@ RUNS ./scbi --tests lib1/variant-no-patch
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build [variant-no-patch] starting
 xxxx/xx/xx xx:xx:xx : build [variant-no-patch] completed
 xxxx/xx/xx xx:xx:xx : install [variant-no-patch] starting

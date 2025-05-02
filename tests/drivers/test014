@@ -17,8 +17,9 @@ xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ supermod
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
@@ -34,8 +35,9 @@ xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ supermod
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : build starting
@@ -68,8 +70,9 @@ xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ supermod
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: sources changed
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
@@ -85,8 +88,8 @@ xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ supermod
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : tests starting
 main
 libb.B master (default)
@@ -113,8 +116,8 @@ xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ supermod/best
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : tests starting
 main
 liba.A br_a
@@ -126,8 +129,9 @@ xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ supermod/best
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : variant1-config starting
 xxxx/xx/xx xx:xx:xx : variant1-config completed
 xxxx/xx/xx xx:xx:xx : build [variant1] starting

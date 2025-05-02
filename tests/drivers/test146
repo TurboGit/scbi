@@ -8,8 +8,9 @@ xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (master)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainlib
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build [variant-no-patch] starting
 xxxx/xx/xx xx:xx:xx : build [variant-no-patch] completed
 xxxx/xx/xx xx:xx:xx : install [variant-no-patch] starting
@@ -23,8 +24,9 @@ xxxx/xx/xx xx:xx:xx : End Building lib1 [variant-no-patch] (master)
 
 xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
@@ -44,9 +46,9 @@ RUNS ./scbi --plan=keep --deps --update --tests lib1:keep mainlib
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (keep:master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : tests
+xxxx/xx/xx xx:xx:xx : steps: tests
 xxxx/xx/xx xx:xx:xx : no update, keep current build
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: keep module
 xxxx/xx/xx xx:xx:xx : tests [variant-no-patch] starting
 main
 liba.C master
@@ -55,9 +57,9 @@ xxxx/xx/xx xx:xx:xx : End Building lib1 [variant-no-patch] (keep:master)
 
 xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : tests starting
 main on master
 liba.C master
@@ -75,8 +77,9 @@ xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (master)
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ mainlib
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 xxxx/xx/xx xx:xx:xx : build [variant-no-patch] starting
 xxxx/xx/xx xx:xx:xx : build [variant-no-patch] completed
 xxxx/xx/xx xx:xx:xx : install [variant-no-patch] starting
@@ -90,8 +93,9 @@ xxxx/xx/xx xx:xx:xx : End Building lib1 [variant-no-patch] (master)
 
 xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
 xxxx/xx/xx xx:xx:xx : build starting
 xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting

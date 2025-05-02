@@ -11,8 +11,9 @@ RUNS ./scbi var
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building var [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : build starting
@@ -28,8 +29,9 @@ RUNS ./scbi var/one
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building var [one] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config [one] starting
 xxxx/xx/xx xx:xx:xx : config [one] completed
 xxxx/xx/xx xx:xx:xx : build [one] starting
@@ -45,8 +47,9 @@ RUNS ./scbi var/two
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building var [two] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config [two] starting
 xxxx/xx/xx xx:xx:xx : config [two] completed
 xxxx/xx/xx xx:xx:xx : build [two] starting
@@ -62,8 +65,9 @@ RUNS ./scbi var/one.two
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building var [one two] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config [one two] starting
 xxxx/xx/xx xx:xx:xx : config [one two] completed
 xxxx/xx/xx xx:xx:xx : build [one two] starting
@@ -79,8 +83,9 @@ RUNS ./scbi var/two.one
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building var [two one] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config [two one] starting
 xxxx/xx/xx xx:xx:xx : config [two one] completed
 xxxx/xx/xx xx:xx:xx : build [two one] starting
@@ -96,8 +101,9 @@ RUNS ./scbi var/one.two.three.four
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building var [one two three four] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config [one two three four] starting
 xxxx/xx/xx xx:xx:xx : config [one two three four] completed
 xxxx/xx/xx xx:xx:xx : build [one two three four] starting

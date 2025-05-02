@@ -10,8 +10,9 @@ RUNS ./scbi --tests lib2
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : config starting
 xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : build starting
@@ -38,7 +39,8 @@ RUNS ./scbi --tests lib2/variant1
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : variant1-config starting
 xxxx/xx/xx xx:xx:xx : variant1-config completed
 xxxx/xx/xx xx:xx:xx : build [variant1] starting
@@ -59,8 +61,8 @@ RUNS ./scbi --tests lib2
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : tests starting
 main
 libb.B master (default)
@@ -75,8 +77,9 @@ RUNS ./scbi --tests lib2/variant1:v2.0
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: sources changed
 xxxx/xx/xx xx:xx:xx : variant1-config starting
 xxxx/xx/xx xx:xx:xx : variant1-config completed
 xxxx/xx/xx xx:xx:xx : build [variant1] starting
@@ -97,8 +100,9 @@ RUNS ./scbi --tests lib2/variant1:v1.0.0
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v1.0.0)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: sources changed
 xxxx/xx/xx xx:xx:xx : variant1-config starting
 xxxx/xx/xx xx:xx:xx : variant1-config completed
 xxxx/xx/xx xx:xx:xx : build [variant1] starting
@@ -121,8 +125,8 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 
 xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v1.0.0)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps : setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : no build needed, versions match
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : tests [variant1] starting
 main
 libb.A master (variant1)

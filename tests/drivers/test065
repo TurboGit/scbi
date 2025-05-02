@@ -6,8 +6,9 @@ RUNS ./scbi modver:v1
 CLEAN-DIFF <<EOF
 2021/12/21 14:05:45 : Building modver [default] (v1)
 2021/12/21 14:05:45 : native x86_64-linux-gnu
-2021/12/21 14:05:45 : steps : setup config build install wrapup
+2021/12/21 14:05:45 : steps: setup config build install wrapup
 2021/12/21 14:05:45 : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 2021/12/21 14:05:45 : config starting
 2021/12/21 14:05:45 : config completed
 2021/12/21 14:05:45 : build starting
@@ -26,8 +27,8 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 
 2021/12/21 14:05:45 : Building modver [default] (v1)
 2021/12/21 14:05:45 : native x86_64-linux-gnu
-2021/12/21 14:05:45 : steps : setup config build install wrapup
-2021/12/21 14:05:45 : no build needed, versions match
+2021/12/21 14:05:45 : steps: setup config build install wrapup
+2021/12/21 14:05:45 : no build needed: versions matching
 2021/12/21 14:05:45 : End Building modver [default] (v1)
 EOF
 
@@ -38,8 +39,9 @@ RUNS ./scbi modver:v2
 CLEAN-DIFF <<EOF
 2021/12/21 14:05:45 : Building modver [default] (v2)
 2021/12/21 14:05:45 : native x86_64-linux-gnu
-2021/12/21 14:05:45 : steps : setup config build install wrapup
+2021/12/21 14:05:45 : steps: setup config build install wrapup
 2021/12/21 14:05:46 : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: sources changed
 2021/12/21 14:05:46 : config starting
 2021/12/21 14:05:46 : config completed
 2021/12/21 14:05:46 : build starting
@@ -56,7 +58,8 @@ RUNS ./scbi modver/var:v2
 CLEAN-DIFF <<EOF
 2021/12/21 14:05:46 : Building modver [var] (v2)
 2021/12/21 14:05:46 : native x86_64-linux-gnu
-2021/12/21 14:05:46 : steps : setup config build install wrapup
+2021/12/21 14:05:46 : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : trigger: versions not matching
 2021/12/21 14:05:46 : config [var] starting
 2021/12/21 14:05:46 : config [var] completed
 2021/12/21 14:05:46 : build [var] starting
@@ -76,7 +79,8 @@ xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
 
 2021/12/21 14:05:46 : Building modver [var] (v2)
 2021/12/21 14:05:46 : native x86_64-linux-gnu
-2021/12/21 14:05:46 : steps : setup config build install wrapup
+2021/12/21 14:05:46 : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : trigger: versions not matching
 2021/12/21 14:05:47 : config [var] starting
 2021/12/21 14:05:47 : config [var] completed
 2021/12/21 14:05:47 : build [var] starting
