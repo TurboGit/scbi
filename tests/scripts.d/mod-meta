@@ -1,0 +1,25 @@
+
+function mod-meta-depends()
+{
+    echo supermod
+}
+
+function mod-meta-config()
+{
+    echo "@@@ CONFIG"
+}
+
+function mod-meta-build()
+{
+    echo "@@@ BUILD"
+}
+
+function mod-meta-install()
+{
+    echo "@@@ INSTALL"
+}
+
+function mod-meta-wrapup()
+{
+    echo "@@@ WRAPUP"
+}

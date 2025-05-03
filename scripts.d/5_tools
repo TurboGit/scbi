@@ -697,7 +697,7 @@ function for-final-modules()
 
 ############################## get-depends-build-id
 
-function get-build-id-callback()
+function get-generic-build-id-callback()
 {
     local FORMODULE=$1
     local MODREF=$2
@@ -706,8 +706,9 @@ function get-build-id-callback()
     local IS_EXT=$5
     local IS_META=$6
     local IS_AGGREGATED=$7
+    local MAX_LEVEL=$8
 
-    if [[ $LEVEL -gt 0 ]] && [[ $IS_META == false ]]; then
+    if [[ $LEVEL -ge $MAX_LEVEL ]] && [[ $IS_META == false ]]; then
         local module_info=()
         get-module-ref module_info $MODREF $FORMODULE
         local module=${module_info[0]}
@@ -725,14 +726,31 @@ function get-build-id-callback()
     fi
 }
 
+function get-build-id-callback()
+{
+    get-generic-build-id-callback $1 $2 $3 $4 $5 $6 $7 1
+}
+
+function get-meta-build-id-callback()
+{
+    get-generic-build-id-callback $1 $2 $3 $4 $5 $6 $7 0
+}
+
 function get-depends-build-id()
 {
     local MODREF=$1
 
     (
-        for-all-direct-modules-with-meta-ext \
-            get-build-id-callback $MODREF | get-md5
-    )
+        is-meta-module $MODREF > /dev/null
+
+        if [[ $? == 0 ]]; then
+            for-all-direct-modules-with-meta-ext \
+                get-meta-build-id-callback $MODREF
+        else
+            for-all-direct-modules-with-meta-ext \
+                get-build-id-callback $MODREF
+        fi
+    ) | get-md5
 }
 
 ############################## get-patch-md5

@@ -1354,6 +1354,8 @@ function handle-meta-module()
     local METAMODULE=$2
     local VARIANT=$3
 
+    local MDIR=$SCBI_BDIR/$METAMODULE
+
     #  check for plan
 
     local FCT=""
@@ -1397,7 +1399,6 @@ function handle-meta-module()
 
     [[ $DEPS == yes ]] || ( [[ -z $FCT_SETUP ]] && [[ -z $FCT_WRAPUP ]] ) &&
         {
-            local MDIR=$SCBI_BDIR/$METAMODULE
             rm -f $MDIR/source-ref
 
             local TVMDIR=""
@@ -1465,7 +1466,24 @@ function handle-meta-module()
             done
         }
 
-    #  check for wrapup
+    #  check for wrapup, if up-to-date
+
+    local ISUTD=no
+
+    local TVDIR=""
+    get-target-dir TVDIR $METAMODULE $VARIANT
+
+    cd $MDIR
+    get-build-id $SCBI_PREFIX $SCBI_TARGET \
+                 $FORMODULE $METAMODULE "$VARIANT" \
+                 > build-id-$VARIANT
+
+    diff -q build-id-$VARIANT $TVDIR/build-id > /dev/null 2>&1
+
+    [[ $? == 0 ]] && [[ $DO_FORCE == no ]] &&
+        ISUTD=yes
+
+    cp build-id-$VARIANT $TVDIR/build-id
 
     line-sep
     ilog $METAMODULE %BMetamodule %t$METAMODULE%c \[%g${VARIANT//./ }%c\] wrapup \
@@ -1474,8 +1492,13 @@ function handle-meta-module()
     [[ $FORMODULE != "@root" ]] &&
         needed-by $FORMODULE | tee -a $log
 
-    _internal_module-variant-wrapper $SCBI_BDIR/install \
-                                     $METAMODULE $VARIANT $FCT_WRAPUP || exit 1
+    [[ $ISUTD == no ]] &&
+        {
+            _internal_module-variant-wrapper \
+                $SCBI_BDIR/install \
+                $METAMODULE $VARIANT $FCT_WRAPUP || exit 1
+        }
+
     ilog $METAMODULE End metamodule $METAMODULE \[${VARIANT//./ }\] wrapup \
         | tee -a $log
     line-sep
