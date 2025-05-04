@@ -122,13 +122,23 @@ function c-langkit-install()
             $PREFIX --library-types=static,static-pic,relocatable
 }
 
-function c-langkit-cross-install()
+function c-langkit-cross-pre-install()
 {
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
 
     gprinstall --target=$TARGET --prefix=$PREFIX --uninstall langkit
+
+    #  Never fail, langkit may not yet be installed
+    true
+}
+
+function c-langkit-cross-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
 
     BV="--build-var=LANGKIT_BUILD --build-var=LIBRARY_TYPE"
     GOPTS="-p --prefix=$PREFIX --target=$TARGET $BV"
