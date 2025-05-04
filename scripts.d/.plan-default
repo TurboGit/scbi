@@ -8,7 +8,7 @@ c-gmp:#6.2.1
 c-readline:#6.2
 c-cmake/auto:v3.18.4
 c-exiv2/auto:v0.27.5
-c-gpr2:next
+c-libadalang=c-gpr2-lib/next:next
 # ICC on JP2 broken up to 2.5.3, we need at least 2.5.4
 # c-libopenjpeg/auto:v2.5.4
 c-libopenjpeg:master
