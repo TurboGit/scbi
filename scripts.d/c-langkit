@@ -122,6 +122,21 @@ function c-langkit-install()
             $PREFIX --library-types=static,static-pic,relocatable
 }
 
+function c-langkit-post-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    # Install the Liblktlang support library
+
+    python3 -m langkit.scripts.lkm install -c lkt/langkit.yaml $PREFIX \
+            --library-types=static,static-pic,relocatable --disable-all-mains ||
+        exit 1
+
+    pip3 install --prefix $PREFIX lkt/build/python
+}
+
 function c-langkit-cross-pre-install()
 {
     local PREFIX=$1
