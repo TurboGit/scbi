@@ -108,23 +108,6 @@ function c-langkit-install()
 
     python3 manage.py install-langkit-support \
             $PREFIX --library-types=static,static-pic,relocatable
-
-    (
-        cd contrib/python &&
-            ./manage.py install $PREFIX \
-                        --library-types=static,static-pic,relocatable \
-                        --disable-all-mains
-    )
-
-    (
-        cd contrib/lkt &&
-            ./manage.py install $PREFIX \
-                        --library-types=static,static-pic,relocatable \
-                        --disable-all-mains
-    )
-
-    pip3 install --prefix $PREFIX contrib/python/build/python
-    pip3 install --prefix $PREFIX contrib/lkt/build/python
 }
 
 function c-langkit-cross-install()
