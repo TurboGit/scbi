@@ -80,7 +80,7 @@ function c-langkit-build()
 
     #  The langkit python support
 
-    pip3 install --prefix $PREFIX .
+    pip3 install --prefix $PREFIX . || exit 1
 
     python manage.py make --no-mypy \
            --library-types=static,static-pic,relocatable
