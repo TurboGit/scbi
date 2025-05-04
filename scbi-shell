@@ -12,6 +12,8 @@ SHL_MODULE=""
 SHL_VARIANT=""
 SHL_KIND=""
 
+declare -A SCBI_MODULES_DIR=()
+
 ############################################## shl-usage
 #
 #  Display script usage
