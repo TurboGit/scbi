@@ -53,7 +53,7 @@ function c-langkit-env()
     local TARGET=$2
     local VARIANT=$3
 
-    add-to-var PATH             $PREFIX/bin
+    add-to-var PATH             $PREFIX/local/bin
     add-to-var PYTHONPATH       $PREFIX/python
     add-to-var PYTHONPATH       \
                $(last-modified-directory $PREFIX/local/lib/python*/dist-packages)
