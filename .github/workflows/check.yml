@@ -13,3 +13,4 @@ jobs:
       - name: check commit
         run: |
           echo checked
+          false
