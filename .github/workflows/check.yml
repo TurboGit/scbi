@@ -1,0 +1,13 @@
+name: Check Commits
+
+on:
+  push:
+    branch:
+      - update-hook
+
+jobs:
+  build:
+    steps:
+      - name: check commit
+        run: |
+          echo checked
