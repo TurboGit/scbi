@@ -1,3 +1,4 @@
 #!/bin/bash
 echo checked
-true
+false
+exit 1
