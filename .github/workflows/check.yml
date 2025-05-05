@@ -10,6 +10,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: check commit
-        run: |
-          echo checked
-          false
+        run: bash check-commit.sh
