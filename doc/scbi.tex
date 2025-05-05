@@ -1174,6 +1174,7 @@ A module listed in a meta-module can itself be a meta-module. A meta-module can 
 \begin{itemize}[font=\texttt]
 	\item {[variant]-setup}
 	\item {[variant]-propagate-version}
+	\item {[variant]-external-env}
 	\item {[variant]-build-depends}
 	\item {[variant]-plan}
 	\item {[variant]-modules}
@@ -1182,6 +1183,8 @@ A module listed in a meta-module can itself be a meta-module. A meta-module can 
 \end{itemize}
 
 It is possible to specify a version for a meta-module even if there is no sources as this version will be propagated to all aggregated modules and recursively for all meta-modules. To disable this feature it is necessary to define the hook \code{propagate-version} and returns \code{false}.
+
+The \code{external-env} hook can be used to ensure that the \code{wrapup} hook is run consistently. That is, if the \code{wrapup} hook use some environment variables or enabled options (\seeref{enable-feature}) to generate a package or take any action when a change is made on aggregated modules one need to add in the \code{external-env} hook the used environment.
 
 \subsection{Setting environment}
 \label{set-env}
