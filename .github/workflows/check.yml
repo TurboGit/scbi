@@ -10,4 +10,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: check commit
-        run: bash check-commit.sh
+        run: bash .github/workflows/check-commit.sh
