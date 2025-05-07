@@ -822,7 +822,6 @@ function is-module-up-to-date()
 {
     local MODREF=$1
     local FORMODULE=$2
-    local PREV_SID=$3
 
     local module_info=()
     get-module-ref module_info $MODREF $FORMODULE
@@ -866,34 +865,23 @@ function is-module-up-to-date()
         mver=$VERSION_OK
     fi
 
-    local SID=""
+    local TVDIR=""
+    get-target-dir TVDIR $module $variant
 
-    if [[ $variant == "native" ]]; then
-        #  A native variant
-        SID="native-$ref"
-    elif [[ -e $SCBI_BDIR/$module/src$SCBI_LNK ]]; then
-        #  A VCS or TAR
-        case "$kind" in
-            NONE|BRANCH)
-                SID="vcs-$ref"
-                ;;
-            VERSION)
-                SID="archive-$ref"
-                ;;
-            DEV)
-                SID="$ref"
-                ;;
-        esac
+    #  Check source-id
+
+    local rsid=0
+
+    if [[ -f $SCBI_BDIR/$module/source-id ]] &&
+           [[ ! -f $TVDIR/source-id ]];
+    then
+        diff -q $SCBI_BDIR/$module/source-id-$variant \
+             $SCBI_BDIR/$module/source-id > /dev/null 2>&1
     else
-        #  No sources
-        SID="none-$ref"
+        diff -q $SCBI_BDIR/$module/source-id-$variant \
+             $TVDIR/source-id > /dev/null 2>&1
     fi
-
-    local rsid=1
-
-    #  If we have a source-id check if the content corresponds to SID
-
-    [[ "$PREV_SID" == $SID ]] && rsid=0
+    rsid=$?
 
     #  Clean-up the version number (only digits and a single dot)
 
@@ -907,9 +895,6 @@ function is-module-up-to-date()
 
     local rbid=0
     local ebid=0
-
-    local TVDIR=""
-    get-target-dir TVDIR $module $variant
 
     if [[ $DO_FORCE = yes ]]; then
         rm -f $TVDIR/build-id
@@ -928,7 +913,7 @@ function is-module-up-to-date()
     check-versions "$ref" ">" "$mver"
     local cver=$?
 
-    if [[ ${SID:0:6} == "native" ]]; then
+    if [[ ${variant} == "native" ]]; then
         if [[ $ebid == 1 ]]; then
             return $SCBI_STATUS_V_NATIVE
         else
@@ -1090,7 +1075,7 @@ function handle-sources()
 
     [[ "$variant" = "native" ]] &&
         {
-            echo -n "native-$ref" > source-id
+            echo -n "native-$ref" > source-id-$variant
             echo "$module none native revision $ref" > source-ref
             return 0;
         }
@@ -1138,8 +1123,8 @@ function handle-sources()
         #  We need to extract the archive if the version does not match
         #  the one currently extracted.
 
-        if [[ -f source-id ]]; then
-            if [[ "$(cat source-id)" != "archive-$ref" ]] ||
+        if [[ -f source-id-$variant ]]; then
+            if [[ "$(cat source-id-$variant)" != "archive-$ref" ]] ||
                    [[ $HASSRC == no ]];
             then
                 rm -fr archive-src
@@ -1162,7 +1147,7 @@ function handle-sources()
                 fi
             fi
 
-            echo -n "archive-$ref" > source-id
+            echo -n "archive-$ref" > source-id-$variant
 
             #  Compute and store the version id of the sources. This includes the
             #  tar sha1 if present to ensure a tar with the same name but different
@@ -1229,7 +1214,7 @@ function handle-sources()
                     #  compiler. That is when the compiler is changed we
                     #  want to rebuild the software.
 
-                    echo -n "$ref" > source-id
+                    echo -n "$ref" > source-id-$variant
 
                     local VCSDIR=""
                     get-ln VCSDIR vcs
@@ -1269,7 +1254,7 @@ function handle-sources()
                     ln -s ../.vcs/$REPO vcs
                 fi
 
-                echo -n "vcs-$ref" > source-id
+                echo -n "vcs-$ref" > source-id-$variant
 
                 #  Compute and store the version id of the sources +
                 #  compiler. That is when the compiler is changed we
@@ -1313,7 +1298,7 @@ function handle-sources()
 
     [[ $HASSRC == no ]] &&
         {
-            echo -n "none-$ref" > source-id
+            echo -n "none-$ref" > source-id-$variant
             echo $module none $variant revision $ref >> source-ref
 
             #  No VCS, no TAR, just rebuild the sources if present
@@ -1736,10 +1721,6 @@ function handle-module()
 
         ilog $module steps: $STEPS | tee -a $log
 
-        local PREV_SID="@"
-        [[ -f $SCBI_BDIR/$module/source-id ]] &&
-            PREV_SID="$(cat $SCBI_BDIR/$module/source-id)"
-
         if [[ "${ref%%:*}" == "keep" ]]; then
             ilog $module no update, keep current build
         else
@@ -1762,7 +1743,7 @@ function handle-module()
         local IS_UPTODATE=no
         local UPTODATE_MSG=""
 
-        is-module-up-to-date $MODREF "$FORMODULE" "$PREV_SID"
+        is-module-up-to-date $MODREF "$FORMODULE"
         UPTODATE_RES=$?
 
         if [[ "${ref%%:*}" == "keep" ]]; then
