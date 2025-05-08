@@ -107,6 +107,9 @@ function module-setup()
     if [[ -e src$SCBI_LNK ]] || [[ -d src ]]; then
         sync-dir src/. $SRCDIR/ $OPT --exclude "gcc-interface"
 
+        #  Sync OK, set last source-id
+        [[ $? == 0 ]] && cp source-id-$VARIANT source-id
+
         #  If some patches are present, apply them now
         if [[ $DO_PATCH == yes ]]; then
             {
@@ -161,6 +164,7 @@ function module-purge()
     if [[ -d $TVDIR ]]; then
         rm -fr $TVDIR/build
         rm -fr $TVDIR/build-id
+        rm -fr $TVDIR/source-id
         rm -fr $TVDIR/install
         rm -fr $TVDIR/src
         rm -fr $PREFIX/build-id-$VARIANT
@@ -229,5 +233,6 @@ function module-install()
             get-target-dir TVDIR $MODULE $VARIANT
 
             cp build-id-$VARIANT $TVDIR/build-id
+            cp source-id-$VARIANT $TVDIR/source-id
         } || true
 }
