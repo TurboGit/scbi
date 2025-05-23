@@ -67,24 +67,26 @@ function shl-setup-env()
     #  environment of all dependencies to be set but we also want the
     #  build environment of the root module to be set.
 
-    #  For mode "dev" & "sandbox"
+    #  build-env: for mode "dev" & "sandbox"
     [[ $DOCD == yes ]] || [[ $DOCD == yes-dev ]] &&
         {
             handle-build-depends-env "@root" $MODREF
             handle-module-env "@root" $MODREF build-env
         }
 
-    #  For mode "test"
+    #  test-env: for mode "test"
     [[  $DOCD == yes-tests ]] &&
         {
             handle-tests-depends-env "@root" $MODREF
             handle-module-env "@root" $MODREF tests-env
         }
 
-    #  For mode "dev" & "sandbox" & "use"
-    [[ $DOCD =~ yes ]] &&
+    # env: for all modes
+    handle-env "@root" $MODREF
+
+    #  module's own env: for mode "use" & "tests"
+    [[ $DOCD == yes-nocd ]] || [[ $DOCD == yes-tests ]] &&
         {
-            handle-env "@root" $MODREF
             handle-module-env "@root" $MODREF env
         }
 }
@@ -114,7 +116,7 @@ function shl-run-shell()
     #  environment of all dependencies to be set but we also want the
     #  build environment of the root module to be set.
 
-    if [[ $DOCD == no ]]; then
+    if [[ $DOCD == yes-nocd ]]; then
         cd $curcd
     elif [[ ${SHL_KIND} == DEV ]] || [[ $DOCD == yes-dev ]]; then
         is-meta-module $MODREF > /dev/null
@@ -274,21 +276,12 @@ if [[ -z ${SCBI_MODULES[*]} ]]; then
     exit 0
 fi
 
-#  If a run is requested
+#  If a run or shell is requested
 
 if [[ $DO_RUN == yes ]]; then
     shl-run-command $SCBI_TARGET "${SCBI_MODULES[*]}" "$DO_RUN_CMD" $DO_SHELL
     exit 0
-fi
-
-#  If a shell is requested
-
-if [[ $DO_SHELL == yes-nocd ]]; then
-    shl-run-shell $SCBI_TARGET "${SCBI_MODULES[*]}" no
-    exit 0
-fi
-
-if [[ $DO_SHELL =~ yes ]]; then
+else
     shl-run-shell $SCBI_TARGET "${SCBI_MODULES[*]}" $DO_SHELL
     exit 0
 fi
