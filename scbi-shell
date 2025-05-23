@@ -117,10 +117,16 @@ function shl-run-shell()
     if [[ $DOCD == no ]]; then
         cd $curcd
     elif [[ ${SHL_KIND} == DEV ]] || [[ $DOCD == yes-dev ]]; then
-        DIR=$(get-vcs-dir ${SHL_MODULE}:dev)
-        if [[ ! -d $DIR ]]; then
-            DIR=""
-            elog ${SHL_MODULE} no user checkout directory $DIR
+        is-meta-module $MODREF > /dev/null
+
+        if [[ $? == 0 ]]; then
+            DIR=$PWD
+        else
+            DIR=$(get-vcs-dir ${SHL_MODULE}:dev)
+            if [[ ! -d $DIR ]]; then
+                DIR=""
+                elog ${SHL_MODULE} no user checkout directory $DIR
+            fi
         fi
     else
         DIR=$(get-build-dir $TARGET $MODREF)
