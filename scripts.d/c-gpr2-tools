@@ -35,8 +35,6 @@ function c-gpr2-tools-depends()
     local VARIANT=$3
 
     echo c-gpr2-lib
-    echo c-libadalang
-    echo c-langkit
 }
 
 function c-gpr2-tools-env()

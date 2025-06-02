@@ -29,7 +29,6 @@ function c-gpr2-lib-depends()
     echo c-gnatcoll-core
     echo c-gnatcoll-bindings-iconv
     echo c-gnatcoll-bindings-gmp
-    echo c-langkit
 }
 
 function c-gpr2-lib-env()
