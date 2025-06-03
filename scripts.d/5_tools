@@ -1555,5 +1555,5 @@ function module-clean-install()
                     cd $MPREFIX && rm -fr .
                 fi
         fi
-    fi
+    fi || true
 }
