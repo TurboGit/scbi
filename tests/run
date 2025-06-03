@@ -4,9 +4,10 @@ export LANG=C
 
 function clean-up-osht-output()
 {
+    local PWD2=${PWD//$HOME/\~}
     sed -i 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;};s/squid-cgi [0-9\.]*/squid-cgi v.vv/g;s,(....................),(xxxxxxxxxxxxxxxxxxxx),g' \
         ${OSHT_STDIO}
-    sed -i "s,$PWD,<pwd>,g" ${OSHT_STDIO}
+    sed -i "s,$PWD,<pwd>,g;s,$PWD2,<pwd>,g;" ${OSHT_STDIO}
 }
 
 function no-osht-output-version()

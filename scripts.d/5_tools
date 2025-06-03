@@ -1171,6 +1171,11 @@ function get-archive()
 
 function display-stat()
 {
+    function d()
+    {
+        echo ${1//$HOME/\~}
+    }
+
     echo "SCBI : $SCBI_VERSION"
     echo
     echo stats
@@ -1184,13 +1189,14 @@ function display-stat()
     if [[ $SCBI_HOST != $SCBI_TARGET ]]; then
         printf "%-21s : %s\n" "target"            "$SCBI_TARGET"
     fi
-    printf "%-21s : %s\n" "build dir"             "$SCBI_BDIR"
-    printf "%-21s : %s\n" "install prefix"        "$SCBI_PREFIX"
-    printf "%-21s : %s\n" "archive dir"           "$SCBI_ARCHIVES"
-    printf "%-21s : %s\n" "patches dir"           "$SCBI_PATCH"
-    printf "%-21s : %s\n" "user's Git repository" "$SCBI_GIT_REPO"
-    printf "%-21s : %s\n" "user's SVN repository" "$SCBI_SVN_REPO"
-    printf "%-21s : %s\n" "plan"                  "${SCBI_PLAN:-no}"
+    printf "%-21s : %s\n" "build dir"             $(d "$SCBI_BDIR")
+    printf "%-21s : %s\n" "install prefix"        $(d "$SCBI_PREFIX")
+    printf "%-21s : %s\n" "archive dir"           $(d "$SCBI_ARCHIVES")
+    printf "%-21s : %s\n" "patches dir"           $(d "$SCBI_PATCH")
+    printf "%-21s : %s\n" "user's Git repository" $(d "$SCBI_GIT_REPO")
+    printf "%-21s : %s\n" "user's SVN repository" $(d "$SCBI_SVN_REPO")
+    printf "%-21s : %s\n" "plug-ins dir"          $(d "${SCBI_PLUGINS}")
+    printf "%-21s : %s\n" "plan"                  $(d "${SCBI_PLAN:-no}")
     printf "%-21s : "     "e-mail notification"
 
     if [[ $SCBI_EMAIL_NOTIFICATION == no ]]; then
