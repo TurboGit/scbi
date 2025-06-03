@@ -2544,6 +2544,8 @@ while [[ $# -gt 0 ]]; do
             SCBI_JOBS=$2
             shift
             SCBI_HALF_JOBS=$SCBI_JOBS
+            [[ $SCBI_JOBS -gt 1 ]] &&
+                SCBI_HALF_JOBS=$((SCBI_JOBS / 2))
             ;;
         --dry-run)
             DRY_RUN=yes
