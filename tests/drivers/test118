@@ -33,6 +33,7 @@ xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End Building dep1 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Metamodule metaagg2 [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule metaagg2 [default] wrapup
 EOF
 

@@ -2241,17 +2241,21 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 	.2 \textbf{[<module>]}.
 	.3 build $\rightarrow$ \des{symlink to current/latest target build dir}.
 	.3 build-id-<variant> \des{build id to check for changes}.
+	.3 build-deps-<variant> \des{build id of all dependencies}.
 	.3 src $\rightarrow$ \des{symlink to sources (vcs or archive)}.
 	.3 archive $\rightarrow$ \des{symlink to extracted archive}.
 	.3 \textbf{[archive-src]} \des{extract of archive}.
-	.3 source-id \des{version of the source (archive or vcs)}.
+	.3 source-id \des{latest source-id (corresponding to build symlink)}.
+	.3 source-id<variant> \des{version of the source (archive or vcs)}.
 	.3 source-ref \des{the full source reference for QA purpose}.
 	.3 install-<target>-id \des{version of the module installed globally}.
 	.3 vcs $\rightarrow$ \des{symlink to repository (.vcs or user's checkout)}.
 	.3 \textbf{[<target>-<variant>]} \des{directory, or symlink in flat mode}.
 	.4 \textbf{[logs]} \des{commands \& output for each steps}.
 	.4 \textbf{[build]} \des{build directory}.
+	.4 source-id \des{sha1 to identify the sources}.
 	.4 build-id \des{sha1 to identify the build}.
+	.4 build-deps \des{build-id of all dependencies}.
 	.4 \textbf{[install]} \des{installation directory}.
 	.4 manifest \des{list of all files in install above}.
 	.4 \textbf{[src]} \des{rsync of ../src}.

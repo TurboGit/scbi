@@ -168,6 +168,7 @@ function module-purge()
         rm -fr $TVDIR/install
         rm -fr $TVDIR/src
         rm -fr $PREFIX/build-id-$VARIANT
+        rm -fr $PREFIX/build-deps-$VARIANT
         rm -f $PREFIX/build
     fi
 }
@@ -234,5 +235,7 @@ function module-install()
 
             cp build-id-$VARIANT $TVDIR/build-id
             cp source-id-$VARIANT $TVDIR/source-id
+            [[ -f build-deps-$VARIANT ]] &&
+                cp build-deps-$VARIANT $TVDIR/build-deps
         } || true
 }

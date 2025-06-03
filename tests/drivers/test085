@@ -86,6 +86,7 @@ xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-default2 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Metamodule metavar [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule metavar [default] wrapup
 EOF
 
@@ -136,6 +137,7 @@ xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-var2 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Metamodule metavar [var] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule metavar [var] wrapup
 EOF
 
@@ -215,6 +217,7 @@ xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building mv-new3 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Metamodule metavar [var new] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule metavar [var new] wrapup
 EOF
 
@@ -270,6 +273,7 @@ xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building mv-new3 [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Metamodule metavar [new] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule metavar [new] wrapup
 EOF
 

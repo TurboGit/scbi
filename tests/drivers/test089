@@ -37,6 +37,7 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Metamodule intmod [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule intmod [default] wrapup
 EOF
 
@@ -67,6 +68,7 @@ xxxx/xx/xx xx:xx:xx : config completed
 xxxx/xx/xx xx:xx:xx : End Building two [default] (n/a)
 
 xxxx/xx/xx xx:xx:xx : Metamodule intmod2 [varA] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule intmod2 [varA] wrapup
 EOF
 
@@ -117,8 +119,10 @@ xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
 xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
 xxxx/xx/xx xx:xx:xx : needed by:
 xxxx/xx/xx xx:xx:xx :   ↳ intmod2/varB
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
 
 xxxx/xx/xx xx:xx:xx : Metamodule intmod2 [varB] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule intmod2 [varB] wrapup
 EOF

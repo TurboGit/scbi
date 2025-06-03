@@ -24,5 +24,6 @@ xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1a [default] (v1)
 
 xxxx/xx/xx xx:xx:xx : Metamodule meta-propa-ver [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule meta-propa-ver [default] wrapup
 EOF

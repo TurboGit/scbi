@@ -41,5 +41,6 @@ xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
 
 xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
 EOF

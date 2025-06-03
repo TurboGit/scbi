@@ -986,17 +986,21 @@ function handle-depends()
 
     #  If we want latest version, just handle this module
 
-    if [[ "$kind" = "DEV" ]]; then
-        handle-module $FORMODULE $MODREF
-        return
-    fi
-
-    cd $SCBI_ROOT
-
     local formodule_info=()
     get-module-ref formodule_info $FORMODULE
     fmodule=${formodule_info[0]}
     fvariant=${formodule_info[1]}
+
+    local DREFS=$SCBI_BDIR/$fmodule/build-deps-$fvariant
+
+    if [[ "$kind" = "DEV" ]]; then
+        handle-module $FORMODULE $MODREF || return 1
+
+        record-dref $module $variant $DREFS
+        return
+    fi
+
+    cd $SCBI_ROOT
 
     #  If module not found, check for a possible distrib package
 
@@ -1050,7 +1054,9 @@ function handle-depends()
         fi
     fi
 
-    handle-module $fmodule $MODREF
+    handle-module $fmodule $MODREF || return 1
+
+    record-dref $module $variant $DREFS
 }
 
 ############################## handle-sources
@@ -1331,6 +1337,30 @@ function needed-by()
         }
 }
 
+############################## triggered-by
+
+function triggered-by()
+{
+    join -v1 --nocheck-order <(sort -k1 $1) <(sort -k1 $2) |
+        while read sha1 md dummy; do
+            ilog $module "  ↳ $md changed"
+        done
+}
+
+############################## record-dref
+
+function record-dref()
+{
+    local MODULE=$1
+    local VARIANT=$2
+    local FILE=$3
+
+    [[ -f $SCBI_BDIR/$MODULE/build-id-$VARIANT ]] &&
+        echo "$(cat $SCBI_BDIR/$MODULE/build-id-$VARIANT) $MODULE" >> $FILE
+    true
+}
+
+
 ############################## handle-meta-module
 
 function handle-meta-module()
@@ -1419,7 +1449,9 @@ function handle-meta-module()
             #  to cover the case of an aggregate meta module being changed
             #  to a standard meta module.
 
-            rm -fr $TVMDIR/install
+            local DREFS=$SCBI_BDIR/$METAMODULE/build-deps-$VARIANT
+
+            rm -fr $TVMDIR/install $DREFS
 
             for module in $(plugin-call-variant-hooks \
                                 $METAMODULE modules \
@@ -1431,6 +1463,8 @@ function handle-meta-module()
                 get-module-ref module_info $module $METAMODULE
 
                 local variant=${module_info[1]}
+
+                record-dref $module $variant $DREFS
 
                 if [[ -n $FCT_AGG  ]]; then
                     local AGG_MODE=$($FCT_AGG $SCBI_PREFIX $TARGET $VARIANT)
@@ -1479,10 +1513,22 @@ function handle-meta-module()
 
     [[ $ISUTD == no ]] &&
         {
+            if [[ $DO_FORCE == yes ]]; then
+                ilog $module "trigger: forced"
+            elif [[ -f $TVDIR/build-deps ]]; then
+                ilog $module "trigger: build not up-to-date"
+                triggered-by build-deps-$VARIANT $TVDIR/build-deps
+            elif [[ -f build-deps-$VARIANT ]]; then
+                ilog $module "trigger: not yet built"
+            fi
+
             _internal_module-variant-wrapper \
                 $SCBI_BDIR/install \
                 $METAMODULE $VARIANT $FCT_WRAPUP || exit 1
         }
+
+    [[ -f build-deps-$VARIANT ]] &&
+        cp build-deps-$VARIANT $TVDIR/build-deps
 
     ilog $METAMODULE End metamodule $METAMODULE \[${VARIANT//./ }\] wrapup \
         | tee -a $log
@@ -1608,6 +1654,9 @@ function handle-module()
         unset SCBI_MODULES_LIST[-1]
         return $res
     fi
+
+    local DREFS=$SCBI_BDIR/$module/build-deps-$variant
+    rm -f $DREFS
 
     #  Check for depends, and handle them if any
 
@@ -1834,6 +1883,12 @@ function handle-module()
         else
             [[ -n $UPTODATE_MSG ]] &&
                 ilog $module $UPTODATE_MSG
+
+            if [[ $UPTODATE_RES == $SCBI_STATUS_B_NOT_UPTODATE ]] &&
+                   [[ -f $TVDIR/build-deps ]];
+            then
+                triggered-by $DREFS $TVDIR/build-deps
+            fi
 
             #  Record the build-plan
 
