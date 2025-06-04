@@ -1216,9 +1216,7 @@ function handle-sources()
                 if [[ -d $SCBI_VCS_REPO/$REPO ]]; then
                     ln -s $SCBI_VCS_REPO/$REPO vcs
 
-                    #  Compute and store the version id of the sources +
-                    #  compiler. That is when the compiler is changed we
-                    #  want to rebuild the software.
+                    #  Compute and store the version id of the sources
 
                     echo -n "$ref" > source-id-$variant
 
