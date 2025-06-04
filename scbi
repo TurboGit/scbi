@@ -1218,10 +1218,14 @@ function handle-sources()
 
                     #  Compute and store the version id of the sources
 
-                    echo -n "$ref" > source-id-$variant
-
                     local VCSDIR=""
                     get-ln VCSDIR vcs
+
+                    local rdev=""
+                    [[ $ref == "dev" ]] &&
+                        rdev="-$(get-vcs-commit-id true $VCS_NAME $VCSDIR)"
+
+                    echo -n "$ref$rdev" > source-id-$variant
 
                     vcs-build-id $SCBI_PREFIX $SCBI_TARGET \
                                  $FORMODULE $MODREF $VCSDIR \
