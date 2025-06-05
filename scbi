@@ -1735,6 +1735,8 @@ function handle-module()
     line-sep
     ilog $module %BBuilding %t$module%c \[%g${variant//./ }%c\] \(%g$DISPREF%c\) | tee -a $log
 
+    SECONDS=0
+
     [[ $FORMODULE != "@root" ]] &&
         needed-by $module | tee -a $log
 
@@ -2139,6 +2141,15 @@ function handle-module()
               $TVDIR/install/. \
               ${_IDIR}/. > $log 2>&1
     fi || elog $module fail to copy to ${_IDIR}
+
+    local DURATION=""
+    [[ $SECONDS -ge 5 ]] &&
+        {
+            TZ=UTC0 printf -v DURATION '%(%H:%M:%S)T\n' $SECONDS
+
+            ilog $module timing: ${DURATION} \
+                | tee -a $log
+        }
 
     ilog $module End Building $module \[${variant//./ }\] \($DISPREF\) \
         | tee -a $log
