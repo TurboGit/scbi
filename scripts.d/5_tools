@@ -23,6 +23,41 @@ function display-stacktrace()
     done
 }
 
+############################## timing
+#
+
+function set-timer()
+{
+    local -n V=$1
+
+    V=$SECONDS
+}
+
+function get-timer()
+{
+    local -n DURATION=$1
+    local START=$2
+
+    DURATION=$(( SECONDS - START ))
+}
+
+function display-timing()
+{
+    local MODULE=$1
+    local START=$2
+
+    local SECS=0
+    get-timer SECS $START
+
+    [[ $SECS -ge 5 ]] &&
+        {
+            local DURATION=""
+            TZ=UTC0 printf -v DURATION '%(%H:%M:%S)T' $SECS
+
+            ilog $MODULE timing: ${DURATION}
+        }
+}
+
 ############################## soft link support
 
 function get-ln()

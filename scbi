@@ -1401,6 +1401,9 @@ function handle-meta-module()
     local FCT_AGG=""
     get-hook FCT_AGG $METAMODULE $VARIANT aggregate
 
+    local MMSTART=0
+    set-timer MMSTART
+
     line-sep
     ilog $METAMODULE %BMetamodule %t$METAMODULE%c \[%g${VARIANT//./ }%c\] setup \
         | tee -a $log
@@ -1531,6 +1534,8 @@ function handle-meta-module()
 
     [[ -f build-deps-$VARIANT ]] &&
         cp build-deps-$VARIANT $TVDIR/build-deps
+
+    display-timing $METAMODULE $MMSTART | tee -a $log
 
     ilog $METAMODULE End metamodule $METAMODULE \[${VARIANT//./ }\] wrapup \
         | tee -a $log
@@ -1735,7 +1740,8 @@ function handle-module()
     line-sep
     ilog $module %BBuilding %t$module%c \[%g${variant//./ }%c\] \(%g$DISPREF%c\) | tee -a $log
 
-    SECONDS=0
+    local MSTART=0
+    set-timer MSTART
 
     [[ $FORMODULE != "@root" ]] &&
         needed-by $module | tee -a $log
@@ -2142,14 +2148,7 @@ function handle-module()
               ${_IDIR}/. > $log 2>&1
     fi || elog $module fail to copy to ${_IDIR}
 
-    [[ $SECONDS -ge 5 ]] &&
-        {
-            local DURATION=""
-            TZ=UTC0 printf -v DURATION '%(%H:%M:%S)T\n' $SECONDS
-
-            ilog $module timing: ${DURATION} \
-                | tee -a $log
-        }
+    display-timing $module $MSTART | tee -a $log
 
     ilog $module End Building $module \[${variant//./ }\] \($DISPREF\) \
         | tee -a $log
