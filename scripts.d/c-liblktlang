@@ -1,0 +1,79 @@
+
+function c-liblktlang-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/langkit
+}
+
+function c-liblktlang-build-depends()
+{
+    echo p-gnat
+    echo c-sandbox
+    echo c-gprbuild
+    echo c-e3
+    echo c-langkit-support
+}
+
+function c-liblktlang-depends()
+{
+    echo c-langkit-support
+}
+
+function c-liblktlang-out-of-tree()
+{
+    echo false
+}
+
+function c-liblktlang-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PYTHONPATH       $PREFIX/python
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
+}
+
+function c-liblktlang-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    cd lkt
+    rm -f build
+    ln -s bootstrap build
+}
+
+function c-liblktlang-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    python3 -m langkit.scripts.lkm build \
+            -c lkt/langkit.yaml \
+            --library-types=static,static-pic,relocatable \
+            --disable-all-mains
+}
+
+function c-liblktlang-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    python3 -m langkit.scripts.lkm install \
+            -c lkt/langkit.yaml \
+            --library-types=static,static-pic,relocatable \
+            --disable-all-mains \
+            $PREFIX
+}
+
+function c-liblktlang-prefix()
+{
+    echo NONE
+}
