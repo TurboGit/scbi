@@ -35,7 +35,7 @@ function c-libadalang-tools-build-env()
     local PREFIX=$1
     local TARGET=$2
 
-    export LIBRARY_TYPE=relocatable
+    export LIBRARY_TYPE=static
 }
 
 function c-libadalang-tools-env()
@@ -62,6 +62,6 @@ function c-libadalang-tools-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make install-bin-strip DESTDIR=$PREFIX
-    make install-lib DESTDIR=$PREFIX
+    make install-bin-strip ALL_LIBRARY_TYPES="static" DESTDIR=$PREFIX
+    make install-lib ALL_LIBRARY_TYPES="static" DESTDIR=$PREFIX
 }
