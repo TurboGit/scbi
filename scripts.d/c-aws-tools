@@ -1,0 +1,151 @@
+
+function c-aws-tools-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/aws
+}
+
+function c-aws-tools-out-of-tree()
+{
+    echo false
+}
+
+function c-aws-tools-common-build-depends()
+{
+    echo p-gnat
+    echo c-sandbox
+}
+
+function c-aws-tools-build-depends()
+{
+    echo c-gprbuild
+    echo c-libadalang-tools
+}
+
+function c-aws-tools-tests-depends()
+{
+    echo c-sandbox
+    echo c-e3
+    echo c-python3-modules/net
+}
+
+function c-aws-tools-depends()
+{
+    echo c-xmlada
+    echo c-aws-lib
+    echo c-libadalang
+}
+
+function c-aws-tools-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var PATH             $PREFIX/bin
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
+function c-aws-tools-common-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo prefix=$PREFIX
+    echo DEBUG=$(get-build-type AWS_TOOLS true)
+}
+
+function c-aws-tools-openssl-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo SOCKET=openssl
+}
+
+function c-aws-tools-gnutls-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo SOCKET=gnutls
+}
+
+function c-aws-tools-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    rm -f makefile.setup &&
+        make LAL=false ZLIB=false TARGET=$TARGET "${OPTIONS[@]}" setup
+}
+
+function c-aws-tools-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    rm -f makefile.setup && make "${OPTIONS[@]}" setup
+}
+
+function c-aws-tools-cross-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make build-tools-cross
+}
+
+function c-aws-tools-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make build-tools-native
+}
+
+function c-aws-tools-cross-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install-tools-cross
+}
+
+function c-aws-tools-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install-tools-native
+}
+
+function c-aws-tools-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+    local OPTIONS="$4"
+
+    cd regtests &&
+        rm -fr results &&
+        mkdir results &&
+        ./gen_system_tags.py ../$TARGET/makefile.setup \
+                             ../$TARGET/testsuite.tags &&
+        ./testsuite.py --jobs=$SCBI_JOBS \
+                       --temp-dir=$PWD/results  \
+                       --target-dir=../$TARGET \
+                       $OPTIONS
+}
