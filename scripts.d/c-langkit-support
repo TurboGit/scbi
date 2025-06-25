@@ -1,0 +1,86 @@
+
+function c-langkit-support-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/langkit
+}
+
+function c-langkit-support-build-depends()
+{
+    echo p-gnat
+    echo c-sandbox
+    echo c-gprbuild
+    echo c-e3
+}
+
+function c-langkit-support-depends()
+{
+    echo c-gnatcoll-core
+    echo c-gnatcoll-bindings
+    echo c-adasat
+    echo c-prettier-ada
+}
+
+function c-langkit-support-out-of-tree()
+{
+    echo false
+}
+
+function c-langkit-support-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PYTHONPATH ${SCBI_MODULES_DIR["c-langkit-support@build"]}
+}
+
+function c-langkit-support-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH             $PREFIX/local/bin
+    add-to-var PYTHONPATH       \
+               $(last-modified-directory $PREFIX/local/lib/python*/dist-packages)
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
+}
+
+function c-langkit-support-pre-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    pip3 install . --prefix=$PREFIX
+}
+
+function c-langkit-support-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    python3 manage.py build-langkit-support \
+            --library-types=static,static-pic,relocatable
+}
+
+function c-langkit-support-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    python3 manage.py install-langkit-support \
+            --library-types=static,static-pic,relocatable \
+            $PREFIX
+}
+
+function c-langkit-support-prefix()
+{
+    echo NONE
+}

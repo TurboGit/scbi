@@ -1,0 +1,124 @@
+
+function c-aws-lib-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/aws
+}
+
+function c-aws-lib-out-of-tree()
+{
+    echo false
+}
+
+function c-aws-lib-common-build-depends()
+{
+    echo p-gnat
+    echo c-sandbox
+}
+
+function c-aws-lib-build-depends()
+{
+    echo c-gprbuild
+}
+
+function c-aws-lib-depends()
+{
+    echo c-xmlada
+    echo c-langkit
+}
+
+function c-aws-lib-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var PATH             $PREFIX/bin
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
+function c-aws-lib-common-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo prefix=$PREFIX
+    echo DEBUG=$(get-build-type AWS_LIB true)
+}
+
+function c-aws-lib-openssl-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo SOCKET=openssl
+}
+
+function c-aws-lib-gnutls-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo SOCKET=gnutls
+}
+
+function c-aws-lib-cross-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    rm -f makefile.setup &&
+        make LAL=false ZLIB=false TARGET=$TARGET "${OPTIONS[@]}" setup
+}
+
+function c-aws-lib-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    rm -f makefile.setup && make "${OPTIONS[@]}" setup
+}
+
+function c-aws-lib-cross-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make build-lib-cross
+}
+
+function c-aws-lib-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make build-lib-native
+}
+
+function c-aws-lib-cross-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install-lib-cross
+}
+
+function c-aws-lib-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make install-lib-native
+}
