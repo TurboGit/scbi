@@ -224,8 +224,16 @@ function display-file()
 
 function get-md5()
 {
+    local -n VARM5=$1
     local V=( $(md5sum) )
-    echo ${V[0]}
+    VARM5=${V[0]}
+}
+
+function get-content-md5()
+{
+    local -n VAR=$1
+
+    get-md5 VAR < $2
 }
 
 ############################## is-meta-module

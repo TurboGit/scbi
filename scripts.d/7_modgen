@@ -233,7 +233,7 @@ function module-install()
         #  been triggered.
 
         if [[ -d src ]]; then
-            vid=$(cat src/* | md5sum | cut -d' ' -f1)
+            vid=$(cat src/* | get-md5)
             get-build-id $PREFIX $TARGET \
                          $FORMODULE $MODULE $vid > build-id-$VARIANT
         else
