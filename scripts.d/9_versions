@@ -463,7 +463,7 @@ function module-plan-md5()
             done < $PLAN
 	fi
 
-	_SIG=$(echo ${_SIG} $NAMEREF | get-md5)
+        get-string-md5 _SIG "$NAMEREF $_SIG"
 	return 0
     }
 

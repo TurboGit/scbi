@@ -224,16 +224,36 @@ function display-file()
 
 function get-md5()
 {
+    local V=( $(md5sum) )
+    echo ${V[0]}
+}
+
+function get-var-md5()
+{
     local -n VARM5=$1
     local V=( $(md5sum) )
     VARM5=${V[0]}
+}
+
+function get-string-md5()
+{
+    local -n VAR=$1
+
+    get-var-md5 VAR < <( echo $2 )
+}
+
+function output-string-md5()
+{
+    local VAR=""
+    get-var-md5 VAR < <( echo $1 )
+    echo -n $VAR
 }
 
 function get-content-md5()
 {
     local -n VAR=$1
 
-    get-md5 VAR < $2
+    get-var-md5 VAR < $2
 }
 
 ############################## is-meta-module
@@ -811,7 +831,8 @@ function get-patch-md5()
     fi
 
     if [[ -f "$patch" ]]; then
-        cat $patch | get-md5
+        get-content-md5 MD5 $patch
+        echo $MD5
     else
         echo not-found
     fi
@@ -909,7 +930,7 @@ function get-build-id()
 
     #  Now compute final id
 
-    echo -n "$vid,$mid,$hid,$pid,$did$eid" | get-md5
+    output-string-md5 "$vid,$mid,$hid,$pid,$did$eid"
 }
 
 ############################## check-archive-exists

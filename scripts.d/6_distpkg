@@ -500,7 +500,7 @@ function get-install-log()
     if [[ -r $FILE ]]; then
         get-content-md5 GIL $FILE
     else
-        get-md5 GIL < <( echo $(date) )
+        get-string-md5 GIL $EPOCHSECONDS
     fi
 }
 

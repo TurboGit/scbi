@@ -1414,7 +1414,7 @@ function handle-sources()
                              > build-id-$variant
             else
                 get-build-id $SCBI_PREFIX $SCBI_TARGET \
-                             $FORMODULE $MODREF "$(date)" \
+                             $FORMODULE $MODREF "$EPOCHSECONDS" \
                              > build-id-$variant
             fi
         } || true
@@ -2388,9 +2388,7 @@ function setup-generic-tool-env()
             MSIG+=$(cat $SCBI_PLUGINS/$module)
     done
 
-    local PLANMD5=$(echo $PLANMD5 $OSMD5 $SCBI_TARGET $SCBI_OS_ID \
-                         $SCBI_OS_NAME $SCBI_OS_VERSION $SCBI_OS_MAJOR_VERSION \
-                         ${SCBI_OS_DISCRIMINANTS[*]} $MSIG | get-md5)
+    get-string-md5 PLANMD5 "$PLANMD5 $OSMD5 $SCBI_TARGET $SCBI_OS_ID $SCBI_OS_NAME $SCBI_OS_VERSION $SCBI_OS_MAJOR_VERSION ${SCBI_OS_DISCRIMINANTS[*]} $MSIG"
 
     mkdir -p $SCBI_BDIR/.cache
 
