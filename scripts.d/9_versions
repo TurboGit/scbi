@@ -431,8 +431,7 @@ function module-plan-md5()
 
     function _internal_module-plan-md5()
     {
-	local -n _LSIG=$1
-	local NAMEREF=$2
+	local NAMEREF=$1
 
 	local VARIANT=${NAMEREF#*/}
 	local NAME=""
@@ -456,22 +455,20 @@ function module-plan-md5()
 	fi
 
 	if [[ -f $PLAN ]]; then
-            _LSIG+=$(cat $PLAN)
+            _SIG+="$(cat $PLAN)"
             while read modref arg1 arg2 arg3; do
 		if [[ "$modref" == "@load" ]] && [[ -n $arg1 ]]; then
-                    local _PSIG=""
-                    _internal_module-plan-md5 _PSIG $arg1
-                    _LSIG+=${_PSIG}
+                    _internal_module-plan-md5 $arg1
 		fi
             done < $PLAN
 	fi
 
-	_LSIG=$(echo $NAMEREF $_LSIG | get-md5)
+	_SIG=$(echo ${_SIG} $NAMEREF | get-md5)
 	return 0
     }
 
     [[ -n $NAMEREF ]] &&
-        _internal_module-plan-md5 _SIG $NAMEREF
+        _internal_module-plan-md5 $NAMEREF
 }
 
 ############################## load-module-plan
