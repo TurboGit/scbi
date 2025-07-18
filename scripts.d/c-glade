@@ -1,0 +1,11 @@
+
+function c-glade-modules()
+{
+    echo c-garlic
+    echo c-gnatdist
+}
+
+function c-glade-aggregate()
+{
+    echo direct
+}

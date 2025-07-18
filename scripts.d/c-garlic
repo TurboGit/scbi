@@ -1,0 +1,53 @@
+
+function c-garlic-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/reznikmm/garlic.git
+}
+
+function c-garlic-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-garlic-out-of-tree()
+{
+    echo false
+}
+
+function c-garlic-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/gnat
+}
+
+function c-garlic-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    gprbuild -v -j$SCBI_JOBS -p gnat/garlic.gpr
+}
+
+function c-garlic-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    gprinstall --prefix=$PREFIX -p \
+               --sources-subdir=lib/garlic \
+               gnat/garlic.gpr
+}
+
+function c-garlic-prefix()
+{
+    echo NONE
+}
