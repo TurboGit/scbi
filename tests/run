@@ -130,7 +130,9 @@ else
 fi
 cd ..
 
-PLAN 1276
+PLAN 1297
+
+export SCBI_CACHE_DIR="no"
 
 for file in ${TESTS[*]}; do
     cd $ROOTDIR
@@ -141,9 +143,22 @@ for file in ${TESTS[*]}; do
     cp .root/repos/*.patch .root/.patches/
 
     # clean build directory to ensure each run are independent
-    rm -fr .root/builds
+    rm -fr .root/builds* $SCBI_CACHE_DIR
+
+    export SCBI_CACHE_DIR="no"
 
     bfile=$(basename $file)
+
+    # set cache for modules using it
+    case $bfile in
+        test158|test159|test160)
+            export SCBI_CACHE_DIR=$ROOTDIR/.root/.cache
+            rm -fr $SCBI_CACHE_DIR
+            ;;
+        *)
+            ;;
+    esac
+
     echo "========== $bfile"
     run-test $bfile expected/$bfile.exp
 done
