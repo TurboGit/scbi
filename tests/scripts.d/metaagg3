@@ -9,3 +9,8 @@ function metaagg3-agg-aggregate()
 {
     echo direct
 }
+
+function metaagg3-agg-prefix()
+{
+    echo NONE
+}

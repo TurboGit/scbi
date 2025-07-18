@@ -1140,6 +1140,18 @@ A module defining the hook \code{modules} (possibly with variants) becomes a met
 	\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 	\item[return] \tabto{2cm} \code{direct | recursive | \textbf{false}}
 	\end{description}
+
+	\item[<module>{[}-<variant>{]}-prefix] \index{hook!prefix}\label{prefix}The directory for the installation of the meta-aggregate module. This hook is not used for standard meta modules. The returned value can be set to NONE to skip the installation step. If this hook is not defined the module will be installed into \code{\$SCBI\_PREFIX}.
+	\label{global-install}
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} string
+		\begin{enumerate}
+			\item echo <install\_dir>
+			\\ or
+			\item echo NONE
+		\end{enumerate}
+    \end{description}
 \end{description}
 
 And can list a build-plan to use for building all listed modules:

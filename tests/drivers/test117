@@ -41,6 +41,7 @@ xxxx/xx/xx xx:xx:xx : trigger: not yet built
 
 2024/03/29 09:57:00 : Metamodule metaagg [default] wrapup
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 2024/03/29 09:57:00 : End metamodule metaagg [default] wrapup
 EOF
 

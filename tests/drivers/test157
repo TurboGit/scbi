@@ -1,0 +1,19 @@
+
+AINST=$PWD/.root/builds/ahere
+export AINST
+
+RUNS ./scbi metaagg-inst/noinst
+
+NOK -d $AINST
+NOK -f $AINST/include/lib1.h
+NOK -f $AINST/include/lib2.h
+NOK -f $AINST/lib/liblib1.so
+NOK -f $AINST/lib/liblib2.so
+
+RUNS ./scbi metaagg-inst
+
+OK -d $AINST
+OK -f $AINST/include/lib1.h
+OK -f $AINST/include/lib2.h
+OK -f $AINST/lib/liblib1.so
+OK -f $AINST/lib/liblib2.so
