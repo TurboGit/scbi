@@ -495,38 +495,43 @@ function get-lib-for-dev()
 
 function get-install-log()
 {
-    local FILE=$1
-    [[ -r $FILE ]] && cat $FILE || date
+    local -n GIL=$1
+    local FILE=$2
+    if [[ -r $FILE ]]; then
+        get-content-md5 GIL $FILE
+    else
+        get-string-md5 GIL $EPOCHSECONDS
+    fi
 }
 
 function get-deb-install-md5()
 {
     local -n _RESd=$1
-    _RESd=$(get-install-log /var/log/apt/history.log | get-md5)
+    get-install-log _RESd /var/log/apt/history.log
 }
 
 function get-ubt-install-md5()
 {
     local -n _RESd=$1
-    _RESd=$(get-install-log /var/log/apt/history.log | get-md5)
+    get-install-log _RESd /var/log/apt/history.log
 }
 
 function get-cos-install-md5()
 {
     local -n _RESd=$1
-    _RESd=$(get-install-log /var/log/dnf.log | get-md5)
+    get-install-log _RESd /var/log/dnf.log
 }
 
 function get-rhl-install-md5()
 {
     local -n _RESd=$1
-    _RESd=$(get-install-log /var/log/dnf.log | get-md5)
+    get-install-log _RESd /var/log/dnf.log
 }
 
 function get-fed-install-md5()
 {
     local -n _RESd=$1
-    _RESd=$(get-install-log /var/log/dnf.log | get-md5)
+    get-install-log _RESd /var/log/dnf.log
 }
 
 function get-win-install-md5()
@@ -538,7 +543,7 @@ function get-win-install-md5()
 function get-mingw-install-md5()
 {
     local -n _RESd=$1
-    _RESd=$(get-install-log /var/log/pacman.log | get-md5)
+    get-install-log _RESd /var/log/pacman.log
 }
 
 function get-install-md5()

@@ -262,6 +262,8 @@ An environment is a set of shell variables used to control the build environment
 
 	\item[SCBI\_MODULES\_DIR{[<module-name>[@src|@build]]}] An associative array giving the \emph{install}, \emph{source} or \emph{build} directories for a given module name and variant. It is possible to get the \emph{source} and \emph{build} directories by adding respectively \code{@src} and \code{@build} at the end of the \code{<module-name>}. For example \code{SCBI\_MODULES\_DIR{[<module-name>@src]}} points to the source directory and \code{SCBI\_MODULES\_DIR{[<module-name>@build]}} point to the build directory. This associative array can be used in hooks \code{config}, \code{build} and \code{install}.
 
+	\item[SCBI\_CACHE\_DIR] A variable pointing to the build's cache dir. Setting this variable to \emph{no} disables the cache. The cache makes it possible to reuse a previous build instead of rebuilding a module. Default is \file{\$HOME/.cache/scbi}.
+
 	\item[SCBI\_PREFIX] The default global install directory. Each module after being installed into the sandbox are copied into this global installation directory. \\Default is \file{\$SCBI\_BDIR/install}. Each module can disable global installation (\seeref{global-install}).
 
 	\item[SCBI\_GIT\_REPO] The directories where the user's Git checkouts are to be found. \\ Default is \file{\$SCBI\_ROOT/repositories/git}.

@@ -726,7 +726,7 @@ function vcs-build-id()
     local MODREF=$4
     local vcs=$5
 
-    [[ ! -d $vcs ]] && echo $MODREF | get-md5 && return 0
+    [[ ! -d $vcs ]] && output-string-md5 $MODREF && return 0
 
     local vid=""
     local res=0
@@ -735,7 +735,7 @@ function vcs-build-id()
 
     if [[ $DO_UPDATE = no ]]; then
         get-branch $PREFIX $TARGET $FORMODULE $MODREF &> /dev/null
-        [[ $? == 1 ]] && vid=$(date | get-md5)
+        [[ $? == 1 ]] && get-string-md5 vid $EPOCHSECONDS
     fi
 
     if [[ -d .git ]]; then

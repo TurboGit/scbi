@@ -84,7 +84,7 @@ function define-var()
             local TO=$2
 
             [[ -f ${FROM}${SCBI_LNK} ]] &&
-                FROM=$(cat ${FROM}${SCBI_LNK})
+                read-content FROM ${FROM}${SCBI_LNK}
 
             echo -n $FROM > ${TO}${SCBI_LNK}
         }
@@ -98,7 +98,8 @@ function define-var()
             local REM=${2#$LINK}
 
             if [[ -f ${LINK}${SCBI_LNK} ]]; then
-                LINK=$(cat ${LINK}${SCBI_LNK})${REM}
+                read-content LINK ${LINK}${SCBI_LNK}
+                LINK+=${REM}
             fi
 
             _REF=$LINK

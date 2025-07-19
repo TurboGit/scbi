@@ -75,25 +75,11 @@ function module-setup()
     local TARGET=$5
     local OOT=$6
 
+    fn-exists $MODULE-cached && IS_CACHED=yes || IS_CACHED=no
+
     local TVDIR=""
     get-target-dir TVDIR $MODULE $VARIANT
     TVDIR=$(realpath --relative-to=$PWD $TVDIR)
-
-    #  if module-src soft link exists use it to copy the module sources into
-    #  the pointed location. This is used when multiple modules are used
-    #  together to create the set of source for the build. In this case we do
-    #  not want to delete sources in rsync.
-    #
-    #  Note: we do exclude gcc-interface directory here to avoid overwriting
-    #        the gcc-interface sources from GNAT.
-
-    if [[ -h module-src ]]; then
-        SRCDIR=module-src
-        OPT=
-    else
-        SRCDIR=$TVDIR/src
-        OPT=--delete
-    fi
 
     local res=0
 
@@ -105,26 +91,46 @@ function module-setup()
     local HASSRC=true
 
     if [[ -e src$SCBI_LNK ]] || [[ -d src ]]; then
-        sync-dir src/. $SRCDIR/ $OPT --exclude "gcc-interface"
+        #  if module-src soft link exists use it to copy the module
+        #  sources into the pointed location. This is used when
+        #  multiple modules are used together to create the set of
+        #  source for the build. In this case we do not want to delete
+        #  sources in rsync.
+        #
+        #  Note: we do exclude gcc-interface directory here to avoid overwriting
+        #        the gcc-interface sources from GNAT.
 
-        #  Sync OK, set last source-id
-        [[ $? == 0 ]] && cp source-id-$VARIANT source-id
-
-        #  If some patches are present, apply them now
-        if [[ $DO_PATCH == yes ]]; then
-            {
-                pushd $SRCDIR &> /dev/null
-                module-patch $PREFIX $TARGET $MODULE
-                res=$?
-                popd &> /dev/null
-            }
+        if [[ -h module-src ]]; then
+            SRCDIR=module-src
+            OPT=
+        else
+            SRCDIR=$TVDIR/src
+            OPT=--delete
         fi
+
+        [[ $IS_CACHED == no ]] &&
+            {
+                sync-dir src/. $SRCDIR/ $OPT --exclude "gcc-interface"
+
+                #  Sync OK, set last source-id
+                [[ $? == 0 ]] && cp source-id-$VARIANT source-id
+
+                #  If some patches are present, apply them now
+                [[ $DO_PATCH == yes ]] &&
+                    {
+                        pushd $SRCDIR &> /dev/null
+                        module-patch $PREFIX $TARGET $MODULE
+                        res=$?
+                        popd &> /dev/null
+                    }
+            }
     else
 	HASSRC=false
     fi
 
     rm -fr build
     ln -s $TVDIR build
+    [[ $IS_CACHED == yes ]] && return 0
 
     if [[ "$OOT" = "true" ]]; then
         #  build must be a dir, delete link if it exists
@@ -144,6 +150,31 @@ function module-setup()
     return $res
 }
 
+############################## module-purge-build-id
+# Clean-up target-dir build directory and ensure that the corresponding
+# build-id cache is cleaned-up.
+
+function module-purge-tvdir()
+{
+    local TVDIR=$1
+
+    [[ -n $SCBI_CACHE_DIR ]] &&
+        {
+            read-content CBDIR $TVDIR/build-id
+            rm -f $SCBI_CACHE_DIR/$CBDIR
+        }
+
+    #  note that we keep the manifest to be sure that we can clean-up
+    #  the final install destination.
+
+    rm -f  $TVDIR/build-id
+    rm -fr $TVDIR/build
+    rm -f  $TVDIR/source-id
+    rm -fr $TVDIR/install
+    rm -fr $TVDIR/src
+    rm -f  $TVDIR/build-deps
+}
+
 ############################## module-purge
 
 function module-purge()
@@ -155,21 +186,15 @@ function module-purge()
     local TARGET=$5
     local OOT=$6
 
-    #  note that we keep the manifest to be sure that we can clean-up
-    #  the final install destination.
-
     local TVDIR=""
     get-target-dir TVDIR $MODULE $VARIANT
 
     if [[ -d $TVDIR ]]; then
-        rm -fr $TVDIR/build
-        rm -fr $TVDIR/build-id
-        rm -fr $TVDIR/source-id
-        rm -fr $TVDIR/install
-        rm -fr $TVDIR/src
+        module-purge-tvdir $TVDIR
+
         rm -fr $PREFIX/build-id-$VARIANT
         rm -fr $PREFIX/build-deps-$VARIANT
-        rm -f $PREFIX/build
+        rm -f  $PREFIX/build
     fi
 }
 
@@ -208,7 +233,7 @@ function module-install()
         #  been triggered.
 
         if [[ -d src ]]; then
-            vid=$(cat src/* | md5sum | cut -d' ' -f1)
+            vid=$(cat src/* | get-md5)
             get-build-id $PREFIX $TARGET \
                          $FORMODULE $MODULE $vid > build-id-$VARIANT
         else

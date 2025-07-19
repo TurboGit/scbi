@@ -67,6 +67,21 @@ function check-tools-abort()
     return 0
 }
 
+############################## read/append-content
+
+function read-content()
+{
+    local -n VAR=$1
+    read VAR < $2
+}
+
+function append-content()
+{
+    local -n VAR=$1
+    read LV < $2
+    VAR+=$LV
+}
+
 ############################## get-target-dir
 
 declare -A FLATDIR=()
@@ -101,6 +116,7 @@ function get-target-dir()
             done
             VAL=$SCBI_BDIR/$FTDIR
             mkdir -p $SCBI_BDIR/$MODULE
+            module-purge-tvdir $TDF
             rm -fr $TDF
             ln -s ../$FTDIR $TDF
             FLATDIR+=( [$KEY]="${VAL}" )
@@ -376,6 +392,14 @@ SCBI_HALF_JOBS=${SCBI_HALF_JOBS:-$((SCBI_JOBS / 2))}
 SCBI_MODULES=()
 SCBI_HANDLED="$(mktemp -p /dev/shm/)"
 SCBI_CURRENT_MODULE=
+SCBI_CHECK_BUILD_CACHE=no
+
+if [[ $SCBI_CACHE_DIR == no ]]; then
+    SCBI_CACHE_DIR=""
+else
+    SCBI_CACHE_DIR=${SCBI_CACHE_DIR:-$HOME/.cache/scbi}
+    mkdir -p $SCBI_CACHE_DIR
+fi
 
 #  Actions setup
 DO_PURGE=no
@@ -541,7 +565,14 @@ function module-wrapper()
     local mlog=$TVDIR/logs/$mstep.log
     local clog=$TVDIR/logs/$mstep.cmd
 
-    ilog $MODULE $mstep$dvariant starting
+    fn-exists $MODULE-cached
+    local IS_CACHED=$?
+
+    if [[ $IS_CACHED == 0 ]] && [[ $mstep != tests ]]; then
+        ilog $MODULE $mstep$dvariant cached
+    else
+        ilog $MODULE $mstep$dvariant starting
+    fi
 
     (
         cd $SCBI_BDIR/$MODULE >> $log 2>&1
@@ -576,6 +607,8 @@ function module-wrapper()
             IS_TESTS=yes
             TESTS_OPTS="$SCBI_TESTS_OPTIONS"
         fi
+
+        [[ $IS_TESTS == no ]] && [[ $IS_CACHED == 0 ]] && return 0
 
         if [[ $SCBI_DLOG = yes ]] || [[ "$IS_TESTS" = "yes" ]]; then
             $MODULE-$mstep $PREFIX $SCBI_TARGET $VARIANT "$TESTS_OPTS" 2>&1 \
@@ -961,6 +994,14 @@ function is-module-up-to-date()
         diff -q $SCBI_BDIR/$module/build-id-$variant \
              $TVDIR/build-id > /dev/null 2>&1
         rbid=$?
+
+        #  If not up-to-date, make sure we remove the current ref in
+        #  the cache as we don't want to keep an obsolete ref.
+        [[ $ebid -eq 0 ]] && [[ $rbid -gt 0 ]] && [[ -n $SCBI_CACHE_DIR ]] &&
+            {
+                read-content CF $TVDIR/build-id
+                rm -f $SCBI_CACHE_DIR/$CF
+            }
     fi
 
     check-versions "$ref" ">" "$mver"
@@ -1183,7 +1224,8 @@ function handle-sources()
         #  the one currently extracted.
 
         if [[ -f source-id-$variant ]]; then
-            if [[ "$(cat source-id-$variant)" != "archive-$ref" ]] ||
+            read-content SIV source-id-$variant
+            if [[ "$SIV" != "archive-$ref" ]] ||
                    [[ $HASSRC == no ]];
             then
                 rm -fr archive-src
@@ -1216,7 +1258,7 @@ function handle-sources()
             [[ -e archive-sha1$SCBI_LNK ]] &&
                 {
                     get-ln sha1file archive-sha1
-                    archive_sha1=$(cat $sha1file)
+                    read-content archive_sha1 $sha1file
                     archive_sha1=${archive_sha1// */}
                 }
             echo "$module archive $ref sha-1 ${archive_sha1// */}" \
@@ -1293,7 +1335,8 @@ function handle-sources()
             else
                 if [[ $DO_TEST != "yes-only" ]]; then
                     if [[ -f source-id ]]; then
-                        if [[ "$(cat source-id)" != "vcs-$ref" ]]; then
+                        read-content SID source-id
+                        if [[ "$SID" != "vcs-$ref" ]]; then
                             # a different version is needed
                             DO_UPDATE=yes
                         fi
@@ -1371,7 +1414,7 @@ function handle-sources()
                              > build-id-$variant
             else
                 get-build-id $SCBI_PREFIX $SCBI_TARGET \
-                             $FORMODULE $MODREF "$(date)" \
+                             $FORMODULE $MODREF "$EPOCHSECONDS" \
                              > build-id-$variant
             fi
         } || true
@@ -1411,7 +1454,10 @@ function record-dref()
     local FILE=$3
 
     [[ -f $SCBI_BDIR/$MODULE/build-id-$VARIANT ]] &&
-        echo "$(cat $SCBI_BDIR/$MODULE/build-id-$VARIANT) $MODULE" >> $FILE
+        {
+            read-content BIV $SCBI_BDIR/$MODULE/build-id-$VARIANT
+            echo "$BIV $MODULE" >> $FILE
+        }
     true
 }
 
@@ -1868,6 +1914,7 @@ function handle-module()
 
         is-module-up-to-date $MODREF "$FORMODULE"
         UPTODATE_RES=$?
+        SCBI_CHECK_BUILD_CACHE=no
 
         if [[ "${ref%%:*}" == "keep" ]]; then
             IS_UPTODATE=yes
@@ -1889,29 +1936,71 @@ function handle-module()
                     ;;
                 $SCBI_STATUS_SRC_CHANGED)
                     UPTODATE_MSG="trigger: sources changed"
+                    SCBI_CHECK_BUILD_CACHE=yes
                     ;;
                 $SCBI_STATUS_V_NOT_MATCHING)
                     UPTODATE_MSG="trigger: versions not matching"
+                    SCBI_CHECK_BUILD_CACHE=yes
                     ;;
                 $SCBI_STATUS_V_CANNOT_GET)
                     UPTODATE_MSG="trigger: cannot get version"
+                    SCBI_CHECK_BUILD_CACHE=yes
                     ;;
                 $SCBI_STATUS_V_ERROR)
                     UPTODATE_MSG="trigger: version error"
+                    SCBI_CHECK_BUILD_CACHE=yes
                     ;;
                 $SCBI_STATUS_B_FORCED)
                     UPTODATE_MSG="trigger: forced"
                     ;;
                 $SCBI_STATUS_B_NOTYET)
                     UPTODATE_MSG="trigger: not yet built"
+                    SCBI_CHECK_BUILD_CACHE=yes
                     ;;
                 $SCBI_STATUS_B_NOT_UPTODATE)
                     UPTODATE_MSG="trigger: build not up-to-date"
+                    SCBI_CHECK_BUILD_CACHE=yes
                     ;;
                 *)
                     UPTODATE_MSG="unknown status $UPTODATE_RES"
                     ;;
             esac
+        fi
+
+        SCBI_IS_FROM_CACHE=no
+
+        if [[ -n $SCBI_CACHE_DIR ]]; then
+            read-content CBDIR $SCBI_BDIR/$module/build-id-$variant
+
+            if [[ -f $SCBI_CACHE_DIR/$CBDIR ]]; then
+                if [[ $SCBI_CHECK_BUILD_CACHE == yes ]]; then
+                    {
+                        #  Copy from cache only if not current build dir
+                        read-content CACHED_DIR $SCBI_CACHE_DIR/$CBDIR
+
+                        [[ "$CACHED_DIR" != "$TVDIR" ]] &&
+                            {
+                                local BID=""
+                                [[ -f $CACHED_DIR/build-id ]] &&
+                                    read-content BID $CACHED_DIR/build-id
+
+                                #  Double check that the cached build is
+                                #  still valid.
+                                if [[ $BID == $CBDIR ]]; then
+                                    sync-dir $CACHED_DIR $SCBI_BDIR/$module
+                                    cp $CACHED_DIR/source-id $SCBI_BDIR/$module
+                                    UPTODATE_MSG="trigger: copy from cache"
+                                    SCBI_IS_FROM_CACHE=yes
+                                    eval "function $module-cached(){ true; }"
+                                else
+                                    rm -f $SCBI_CACHE_DIR/$CBDIR
+                                fi
+                            }
+                    }
+                fi
+            else
+                echo $TVDIR > $SCBI_CACHE_DIR/$CBDIR
+            fi
         fi
 
         if [[ $IS_UPTODATE == no ]] || [[ $DO_TEST != no ]]; then
@@ -2032,7 +2121,7 @@ function handle-module()
             #  directory, clean it to ensure no old versions are installed
             #  into the same location.
 
-            if [[ $DO_INSTALL != no ]]; then
+            if [[ $DO_INSTALL != no ]] && [[ $SCBI_IS_FROM_CACHE == no ]]; then
                 rm -fr $TVDIR/install
                 rm -f  $SCBI_BDIR/$module/install-id
                 rm -f  $SCBI_BDIR/$module/install-${SCBI_TARGET}-id
@@ -2266,7 +2355,11 @@ function setup-generic-tool-env()
     #  Clear cache is needed
 
     [[ $DO_CLEAR_CACHE == yes ]] &&
-        rm -fr $SCBI_BDIR/.cache
+        {
+            rm -fr $SCBI_BDIR/.cache
+            [[ -n $SCBI_CACHE_DIR ]] &&
+                rm -fr $SCBI_CACHE_DIR/*
+        }
 
     #  Check if cache for the plan is available and is still up-to-date
     #  by getting :
@@ -2295,9 +2388,7 @@ function setup-generic-tool-env()
             MSIG+=$(cat $SCBI_PLUGINS/$module)
     done
 
-    local PLANMD5=$(echo $PLANMD5 $OSMD5 $SCBI_TARGET $SCBI_OS_ID \
-                         $SCBI_OS_NAME $SCBI_OS_VERSION $SCBI_OS_MAJOR_VERSION \
-                         ${SCBI_OS_DISCRIMINANTS[*]} $MSIG | get-md5)
+    get-string-md5 PLANMD5 "$PLANMD5 $OSMD5 $SCBI_TARGET $SCBI_OS_ID $SCBI_OS_NAME $SCBI_OS_VERSION $SCBI_OS_MAJOR_VERSION ${SCBI_OS_DISCRIMINANTS[*]} $MSIG"
 
     mkdir -p $SCBI_BDIR/.cache
 
@@ -2677,8 +2768,7 @@ setup-generic-tool-env
 
 #  Prepare log dir and archive dir
 
-mkdir -p $SCBI_LOGS/$TODAY
-mkdir -p $SCBI_ARCHIVES
+mkdir -p $SCBI_LOGS/$TODAY $SCBI_ARCHIVES
 
 if [[ $DRY_RUN == yes ]]; then
     DO_PURGE=no
