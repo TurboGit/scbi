@@ -1439,10 +1439,11 @@ function needed-by()
 
 function triggered-by()
 {
-    join -v1 --nocheck-order <(sort -k1 $1) <(sort -k1 $2) |
-        while read sha1 md dummy; do
-            ilog $module "  ↳ $md changed"
-        done
+    [[ -f $1 ]] && [[ -f $2 ]] &&
+        join -v1 --nocheck-order <(sort -k1 $1) <(sort -k1 $2) |
+            while read sha1 md dummy; do
+                ilog $module "  ↳ $md changed"
+            done
 }
 
 ############################## record-dref
