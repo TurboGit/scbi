@@ -96,9 +96,6 @@ function module-setup()
         #  multiple modules are used together to create the set of
         #  source for the build. In this case we do not want to delete
         #  sources in rsync.
-        #
-        #  Note: we do exclude gcc-interface directory here to avoid overwriting
-        #        the gcc-interface sources from GNAT.
 
         if [[ -h module-src ]]; then
             SRCDIR=module-src
@@ -110,7 +107,7 @@ function module-setup()
 
         [[ $IS_CACHED == no ]] &&
             {
-                sync-dir src/. $SRCDIR/ $OPT --exclude "gcc-interface"
+                sync-dir src/. $SRCDIR/ $OPT
 
                 #  Sync OK, set last source-id
                 [[ $? == 0 ]] && cp source-id-$VARIANT source-id
