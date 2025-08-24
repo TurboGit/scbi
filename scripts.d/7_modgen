@@ -155,7 +155,7 @@ function module-purge-tvdir()
 {
     local TVDIR=$1
 
-    [[ -n $SCBI_CACHE_DIR ]] &&
+    [[ -n $SCBI_CACHE_DIR ]] && [[ -f $TVDIR/build-id ]] &&
         {
             read-content CBDIR $TVDIR/build-id
             rm -f $SCBI_CACHE_DIR/$CBDIR
