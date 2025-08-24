@@ -29,6 +29,11 @@ function c-vss-build-depends()
     echo c-gprbuild
 }
 
+function c-vss-depends()
+{
+    echo c-vss-text
+}
+
 function c-vss-build()
 {
     local PREFIX=$1
