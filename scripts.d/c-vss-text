@@ -1,0 +1,46 @@
+function c-vss-text-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/vss-text
+}
+
+function c-vss-text-out-of-tree()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo false
+}
+
+function c-vss-text-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+    add-to-var LD_LIBRARY_PATH  $PREFIX/lib
+}
+
+function c-vss-text-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-vss-text-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j1 build-all-libs
+}
+
+function c-vss-text-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make -j1 PREFIX=$PREFIX install-all-libs
+}
