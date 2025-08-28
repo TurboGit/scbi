@@ -33,7 +33,7 @@ function c-gnatdist-build()
     local TARGET=$2
     local VARIANT=$3
 
-    gprbuild -v -j$SCBI_JOBS -p gnat/gnatdist.gpr
+    gprbuild -v -j$SCBI_JOBS -p Dist/gnatdist.gpr
 }
 
 function c-gnatdist-install()
@@ -42,7 +42,7 @@ function c-gnatdist-install()
     local TARGET=$2
     local VARIANT=$3
 
-    gprinstall --prefix=$PREFIX -p --mode=usage gnat/gnatdist.gpr
+    gprinstall --prefix=$PREFIX -p --mode=usage Dist/gnatdist.gpr
 }
 
 function c-gnatdist-prefix()
