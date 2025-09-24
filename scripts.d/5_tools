@@ -863,7 +863,7 @@ function get-build-id()
     #  withou build, nor install hook for native libraries (see with-variant)
     #  will get differentiated.
 
-    local mid=$variant:$ref
+    local mid="$variant:$ref,$TARGET"
     local hid=""
 
     [[ -f $SCBI_PLUGINS/$module ]] &&

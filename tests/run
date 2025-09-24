@@ -130,7 +130,7 @@ else
 fi
 cd ..
 
-PLAN 1297
+PLAN 1301
 
 export SCBI_CACHE_DIR="no"
 
@@ -151,7 +151,7 @@ for file in ${TESTS[*]}; do
 
     # set cache for modules using it
     case $bfile in
-        test158|test159|test160)
+        test158|test159|test160|test161)
             export SCBI_CACHE_DIR=$ROOTDIR/.root/.cache
             rm -fr $SCBI_CACHE_DIR
             ;;
