@@ -96,7 +96,7 @@ function c-aws-lib-cross-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make build-lib-cross
+    make TARGET=$TARGET build-lib-cross
 }
 
 function c-aws-lib-build()
@@ -112,7 +112,7 @@ function c-aws-lib-cross-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make install-lib-cross
+    make TARGET=$TARGET install-lib-cross
 }
 
 function c-aws-lib-install()

@@ -105,7 +105,7 @@ function c-aws-tools-cross-build()
     local PREFIX=$1
     local TARGET=$2
 
-    make build-tools-cross
+    make TARGET=$TARGET build-tools-cross
 }
 
 function c-aws-tools-build()
@@ -121,7 +121,7 @@ function c-aws-tools-cross-install()
     local PREFIX=$1
     local TARGET=$2
 
-    make install-tools-cross
+    make TARGET=$TARGET install-tools-cross
 }
 
 function c-aws-tools-install()
