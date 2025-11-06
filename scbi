@@ -1220,6 +1220,14 @@ function handle-sources()
 
         [[ ${tarsrc^^} == NONE ]] && HASSRC=no
 
+        [[ -d archive-src ]] &&
+            {
+                get-ln archivefile archive
+                local ABN=$(basename $(realpath $archivefile))
+                [[ ${tarsrc} != $ABN ]] &&
+                    rm -fr archive-sha1$SCBI_LNK archive$SCBI_LNK archive-src
+            }
+
         #  We need to extract the archive if the version does not match
         #  the one currently extracted.
 
