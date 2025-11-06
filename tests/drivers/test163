@@ -1,0 +1,9 @@
+LDIR=.root/builds/dltar2/build/logs
+
+RUNS ./scbi --plan=pv dltar2
+
+GREP "VERSION 1" $LDIR/install.log
+
+RUNS ./scbi --plan=pv --deps libppv
+
+GREP "VERSION 2" $LDIR/install.log

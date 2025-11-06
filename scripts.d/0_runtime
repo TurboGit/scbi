@@ -474,8 +474,12 @@ function get-version()
     local PLUGIN=""
     get-caller PLUGIN
 
+    local FOR_MODULE=""
+    [[ ${#SCBI_MODULES_LIST[*]} > 0 ]] &&
+        FOR_MODULE=${SCBI_MODULES_LIST[-2]}
+
     local module_info=()
-    get-module-ref module_info $PLUGIN
+    get-module-ref module_info $PLUGIN $FOR_MODULE
     echo ${module_info[3]}
 }
 
