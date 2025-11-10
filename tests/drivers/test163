@@ -1,9 +1,11 @@
-LDIR=.root/builds/dltar2/build/logs
+LDIRD=.root/builds/dltar2/build/logs
+LDIRL=.root/builds/libppv/build/logs
 
 RUNS ./scbi --plan=pv dltar2
 
-GREP "VERSION 1" $LDIR/install.log
+GREP "I_VERSION 1" $LDIRD/install.log
+NGREP "E_VERSION \"1\"" $LDIRD/env.cmd
 
 RUNS ./scbi --plan=pv --deps libppv
 
-GREP "VERSION 2" $LDIR/install.log
+GREP "E_VERSION \"2\"" $LDIRL/env.cmd

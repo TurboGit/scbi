@@ -14,12 +14,20 @@ function dltar2-out-of-tree()
     echo false
 }
 
+function dltar2-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    set-var E_VERSION $(get-version)
+}
+
 function dltar2-install()
 {
     local PREFIX=$1
     local TARGET=$2
 
-    echo VERSION $(get-version)
+    echo I_VERSION $(get-version)
 
     mkdir -p $PREFIX/bin
     cp script $PREFIX/bin

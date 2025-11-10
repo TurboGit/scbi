@@ -474,9 +474,20 @@ function get-version()
     local PLUGIN=""
     get-caller PLUGIN
 
+    #  Get direct caller, if this is called in env hook the for-module
+    #  is in the last position in SCBI_MODULES_LIST otherwise it is in
+    #  the previous to the last position.
+    #  Indeed, <hook>-env is called by for-module (the module using it)
+    #  whereas all other hooks are called while handling self.
+
+    local HOOK=${FUNCNAME[1]}
+    local IDX=-2
+    [[ $HOOK =~ -((pre|post)-)?(cross-)?(env)$ ]] &&
+        local IDX=-1
+
     local FOR_MODULE=""
     [[ ${#SCBI_MODULES_LIST[*]} > 0 ]] &&
-        FOR_MODULE=${SCBI_MODULES_LIST[-2]}
+        FOR_MODULE=${SCBI_MODULES_LIST[$IDX]}
 
     local module_info=()
     get-module-ref module_info $PLUGIN $FOR_MODULE
