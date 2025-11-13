@@ -320,7 +320,7 @@ Or using an environment variable:
 \index{discriminants}
 \index{plan|discriminants}
 
-A list of discriminants are generated for each build. Those discriminants can be used in barrier (\see{planbarrier}). The discriminants are host and target specific and can be used to tune build plans.
+A list of discriminants are generated for each build. Those discriminants can be used in barrier (\seeref{plan-barrier}). The discriminants are host and target specific and can be used to tune build plans.
 
 The discriminant list contains:
 
@@ -429,7 +429,7 @@ Some specific actions are supported with the following syntax:
 	A group can be used in a build plan to group together all modules with the same version and/or variant. To define a group:
 
 	\begin{description}
-		\label{plan|barrier}
+		\label{plan-barrier}
 		\item[ {[} <barrier>] Start with a square bracket and an optional barrier. The barrier is a condition starting with \code{=} or \code{/=} and the name of a \code{variant} or \code{discriminant} (\seeref{discriminants}).
 
 		\code{\ddash{}plan=name/variant1.variant2}
