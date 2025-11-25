@@ -412,7 +412,7 @@ function _inherit-plugin_internal()
         [[ $hook =~ $REGEXP ]] &&
             {
                 local NHOOK=${hook/$HPLUGIN/$PLUGIN}
-                # Only copy of new function does not exists
+                # Only copy if new function does not exists
                 declare -F "$NHOOK" > /dev/null ||
                     copy-function $hook $NHOOK
             }
