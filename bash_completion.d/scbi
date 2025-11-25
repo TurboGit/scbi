@@ -10,7 +10,7 @@ _SCBI_ARGS="${_SCBI_COMMON} -t -S --no-setup -W --no-wrapup -I
 --archive --deps:warning --dry-run -w --wrapup --force --enable-
 --safe --build-dir --version --clean-install --log:yes
 --log:no --log:on-failure --stat --stat: --prefix=
---color:dark --color:light --color:no"
+--color:dark --color:light --color:no --clear-cache"
 
 _SCBI_ARC_ARGS="${_SCBI_COMMON} -e --env= --plan=
 -c --clean-version -l --lower-case --sha1 --sha256 --md5"
