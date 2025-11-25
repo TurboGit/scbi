@@ -86,7 +86,24 @@ function sar-handle-module()
 
         get-vcs PREFIX TARGET ROOT $MODREF
 
-        [[ $? != 0 ]] && exit 1
+        if [[ $? != 0 ]]; then
+            cd $SCBI_BDIR/$module/vcs
+
+            case $VCS_NAME in
+                git)
+                    echo Possible tags found
+                    git tag | grep $(echo $ref | sed 's/[A-Z]\|[a-z]//g')
+                    ;;
+                svn|subversion)
+                    ;;
+                hg)
+                    ;;
+                *)
+                    ;;
+            esac
+
+            exit 1
+        fi
 
         #  Create the archive from the VCS reference
 
