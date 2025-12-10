@@ -22,7 +22,7 @@ function c-gnatcoll-bindings-iconv-depends()
 {
     echo c-gnatcoll-core
     echo c-xmlada
-    echo c-libiconv:#1.15
+    echo c-libiconv
 }
 
 function c-gnatcoll-bindings-iconv-archive()

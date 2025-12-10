@@ -3,7 +3,7 @@
 @for c-darktable use c-libavif/auto:v0.10.1
 p-gdb:gdb-head
 c-libavif/auto
-c-libiconv:#1.15
+c-libiconv:#1.18
 c-gmp:#6.2.1
 c-readline:#6.2
 c-cmake/auto:v3.18.4
