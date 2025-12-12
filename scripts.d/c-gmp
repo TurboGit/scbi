@@ -73,7 +73,7 @@ function c-gmp-vcs-cross-config()
     local VARIANT=$3
 
     ./configure --enable-maintainer-mode --prefix=$PREFIX/$TARGET \
-                --build=$HOST --host=$TARGET
+                --build=$SCBI_HOST --host=$TARGET
 }
 
 function c-gmp-cross-config()
@@ -82,7 +82,7 @@ function c-gmp-cross-config()
     local TARGET=$2
     local VARIANT=$3
 
-    ./configure --prefix=$PREFIX/$TARGET --build=$HOST --host=$TARGET
+    ./configure --prefix=$PREFIX/$TARGET --build=$SCBI_HOST --host=$TARGET
 }
 
 function c-gmp-vcs-config()
