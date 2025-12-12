@@ -796,7 +796,7 @@ function get-vcs-dir()
             svn|subversion)
                 echo $SCBI_SVN_REPO/$REPO
                 ;;
-            hg)
+            hg|mercurial)
                 echo $SCBI_HG_REPO/$REPO
                 ;;
             *)
