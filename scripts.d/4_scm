@@ -14,12 +14,12 @@
 function svn-co()
 {
     local PROXY=$1
-    local URL=$2
+    local URL=${2%/}
     local OPTIONS=$3
     local NAME=$4
     local DIR=$5
 
-    local REPO=${DIR:-$(basename $URL)}
+    local REPO=${DIR:-${URL##*/}}
 
     (
         set-proxy $PROXY
@@ -148,12 +148,12 @@ function git-co()
 function hg-co()
 {
     local PROXY=$1
-    local URL=$2
+    local URL=${2%/}
     local OPTIONS=$3
     local NAME=$4
     local DIR=$5
 
-    local REPO=${DIR:-$(basename $URL)}
+    local REPO=${DIR:-${URL##*/}}
 
     (
         set-proxy $PROXY
