@@ -1307,6 +1307,7 @@ function call-variant-hooks()
 #
 # Compare a and b as version strings. Rules:
 # R1: a and b : dot-separated sequence of items. Items are numeric.
+#     The first character can be a v or V, i.e. v1.2 or V3.4
 #     The last item can optionally end with letters, i.e., 2.5 or 2.5a.
 # R2: Zeros are automatically inserted to compare the same number
 #     of items, i.e., 1.0 < 1.0.1 means 1.0.0 < 1.0.1 => yes.
@@ -1317,12 +1318,14 @@ function call-variant-hooks()
 
 function check-versions()
 {
-    local a=$1
+    local a=${1#v}
     local op="$2"
-    local b=$3
+    local b=${3#v}
 
-    local al=${1##*.}
-    local bl=${3##*.}
+    local a=${a#V}
+    local b=${b#V}
+    local al=${a##*.}
+    local bl=${b##*.}
 
     while [[ $al =~ ^[[:digit:]] ]]; do al=${al:1}; done
     while [[ $bl =~ ^[[:digit:]] ]]; do bl=${bl:1}; done
