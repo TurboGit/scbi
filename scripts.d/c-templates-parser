@@ -49,6 +49,9 @@ function c-templates-parser-tests-env()
     local PREFIX=$1
     local TARGET=$2
 
+    #  Ensure that path exists otherwise it won't be added
+    mkdir -p $PREFIX/../build/.build/rbin/$TARGET/release/static
+
     add-to-var PATH .
     add-to-var PATH $PREFIX/../build/.build/rbin/$TARGET/release/static
 }
