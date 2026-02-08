@@ -52,6 +52,7 @@ function c-darktable-common-depends()
     echo os@-osmgpsmap-1.0-dev
     echo os@-png-dev
     echo os@-pod-parser-perl
+    echo os@-potrace-dev
     echo os@-pugixml-dev
     echo os@-rav1e-dev
     echo os@-rsvg2-dev

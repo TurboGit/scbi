@@ -30,6 +30,7 @@ os@-ninja                           mingw-w64-x86_64-ninja
 os@-ogg-dev                         mingw-w64-x86_64-libogg
 os@-postgresql                      mingw-w64-x86_64-postgresql
 os@-proj-dev                        mingw-w64-x86_64-proj
+os@-potrace-dev                     mingw-w64-x86_64-potrace
 os@-protobuf-dev                    mingw-w64-x86_64-protobuf
 os@-ptscotch-dev                    mingw-w64-x86_64-scotch-int64
 os@-pugixml-dev                     mingw-w64-x86_64-pugixml

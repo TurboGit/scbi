@@ -115,6 +115,7 @@ os@-pcre3-dev                       pcre-devel
 os@-png-dev                         libpng-devel
 os@-po4a
 os@-pod-parser-perl
+os@-potrace-dev                     potrace-devel
 os@-proj-dev                        proj
 os@-ptscotch-dev
 os@-pugixml-dev
