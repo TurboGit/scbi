@@ -81,6 +81,12 @@ function c-darktable-jxl-depends()
     echo os@-jxl-dev
 }
 
+function c-darktable-ai-depends()
+{
+    echo os@-archive-dev
+    echo os@-onnxruntime-dev
+}
+
 function c-darktable-clang-build-env()
 {
     set-var CMAKE_C_COMPILER   clang-$SCBI_CLANG_VERSION
@@ -175,6 +181,15 @@ function c-darktable-im-config-options()
 
     echo -DUSE_GRAPHICSMAGICK=OFF
     echo -DUSE_IMAGEMAGICK=ON
+}
+
+function c-darktable-ai-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo -DUSE_AI=ON
 }
 
 function c-darktable-config()

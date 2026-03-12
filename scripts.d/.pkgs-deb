@@ -1,5 +1,6 @@
 # OS name (Debian sid)              Debian packages
 # --------------------------------------------------
+os@-archive-dev                     libarchive-dev
 os@-autoconf                        autoconf
 os@-automake                        automake
 os@-autotools-dev                   autotools-dev
@@ -108,6 +109,7 @@ os@-omp-14                          libomp-14-dev
 os@-omp-15                          libomp-15-dev
 os@-omp-16                          libomp-16-dev
 os@-omp-17                          libomp-17-dev
+os@-onnxruntime-dev                 libonnxruntime-dev
 os@-opencv-dev                      libopencv-dev
 os@-openexr-dev                     libopenexr-dev
 os@-openjp2-7-dev
