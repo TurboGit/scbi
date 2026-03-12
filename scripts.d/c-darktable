@@ -165,7 +165,6 @@ function c-darktable-common-config-options()
     echo -DCMAKE_INSTALL_PREFIX=$PREFIX
     echo -DCMAKE_C_COMPILER=$CMAKE_C_COMPILER
     echo -DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER
-    echo -DUSE_GAME=OFF
 }
 
 function c-darktable-im-config-options()
