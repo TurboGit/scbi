@@ -49,6 +49,7 @@ function c-darktable-common-depends()
     echo os@-lua5.4-dev
     echo os@-openexr-dev
     echo os@-openjp2-dev
+    echo os@-openjph-dev
     echo os@-osmgpsmap-1.0-dev
     echo os@-png-dev
     echo os@-pod-parser-perl
