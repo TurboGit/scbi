@@ -1110,6 +1110,33 @@ For all other hooks there is no \code{common} variant. Again if a variant hook i
 	\item <module>-<step>
 \end{enumerate}
 
+\subsubsection{Final synchronization}
+\index{hook!module-sync}
+
+As a final step it is possible to define the hook module-sync to do a synchronization of each built modules.
+
+
+\begin{description}
+
+\item[module-sync] Called after each module's build if defined.
+
+\begin{description}[font=\textit,style=standard]
+	\item[parameter] \tabto{2cm} \code{\$PREFIX \$MODULE \$TARGET \$VARIANT \$WORK\_DIR \$SRC\_DIR \$BUILD\_DIR}
+
+	\begin{description}[font=\textit,style=standard]
+		\item [PREFIX] \tabto{2cm} The sandbox module's \code{install} directory.
+		\item [MODULE] \tabto{2cm} The module's name.
+		\item [TARGET] \tabto{2cm} The module's build target.
+		\item [VARIANT] \tabto{2cm} The module's variant.
+		\item [WORK\_DIR] \tabto{2cm} The sandbox module's work directory under which the \code{src (\$SRC\_DIR)}, \code{build (\$BUILD\_DIR)} and \code{install (\$PREFIX)} directories are.
+		\item [SRC\_DIR] \tabto{2cm} The sandbox module's \code{source} directory.
+		\item [BUILD\_DIR] \tabto{2cm} The sandbox module's \code{build} directory.
+	\end{description}
+
+	\item[return] \tabto{2cm} NONE
+\end{description}
+\end{description}
+
 \subsection{Meta-module}
 \label{meta-module}
 \index{meta-module}

@@ -1,0 +1,108 @@
+
+RUNS ./scbi --plan=metav metavar2
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Metamodule metavar2 [var] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar2 [var] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (v1.2)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar2/var
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from archive
+xxxx/xx/xx xx:xx:xx : extract archive lib1-v1.2-src.tar.bz2
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build [variant-no-patch] starting
+xxxx/xx/xx xx:xx:xx : build [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : install [variant-no-patch] starting
+xxxx/xx/xx xx:xx:xx : install [variant-no-patch] completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [variant-no-patch] (v1.2)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar2/var
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : variant1-config starting
+xxxx/xx/xx xx:xx:xx : variant1-config completed
+xxxx/xx/xx xx:xx:xx : build [variant1] starting
+xxxx/xx/xx xx:xx:xx : build [variant1] completed
+xxxx/xx/xx xx:xx:xx : install [variant1] starting
+xxxx/xx/xx xx:xx:xx : install [variant1] completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
+
+xxxx/xx/xx xx:xx:xx : Metamodule metavar2 [var] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : End metamodule metavar2 [var] wrapup
+EOF
+
+function module-sync()
+{
+    local PREFIX=$1
+    local MODULE=$2
+    local TARGET=$3
+    local VARIANT=$4
+    local WORK_DIR=$5
+    local SRC_DIR=$6
+    local BUILD_DIR=$7
+
+    echo p:$PREFIX
+    echo m:$MODULE
+    echo v:$VARIANT
+    echo t:$TARGET
+    echo w:$WORK_DIR
+    echo s:$SRC_DIR
+    echo b:$BUILD_DIR
+
+    #  let's sync into the meta module metavar2
+
+    local module_info=()
+    get-module-ref module_info metavar2
+    local module=${module_info[0]}
+    local variant=${module_info[1]}
+
+    #  get target/variant build dir
+    local TVDIR=""
+    get-target-dir TVDIR $module $variant
+
+    echo T:$TVDIR
+}
+
+declare -fx module-sync
+
+RUNS ./scbi --plan=metav --build lib1
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (v1.2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: build
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building lib1 [variant-no-patch] (v1.2)
+EOF
+
+RUNS ./scbi --plan=metav --force --build lib1
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [variant-no-patch] (v1.2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: build
+xxxx/xx/xx xx:xx:xx : trigger: forced
+xxxx/xx/xx xx:xx:xx : build [variant-no-patch] starting
+xxxx/xx/xx xx:xx:xx : build [variant-no-patch] completed
+p:<pwd>/.root/builds/lib1/x86_64-linux-gnu-variant-no-patch/install
+m:lib1
+v:variant-no-patch
+t:x86_64-linux-gnu
+w:<pwd>/.root/builds/lib1/x86_64-linux-gnu-variant-no-patch
+s:<pwd>/.root/builds/lib1/x86_64-linux-gnu-variant-no-patch/src
+b:<pwd>/.root/builds/lib1/x86_64-linux-gnu-variant-no-patch/build
+T:<pwd>/.root/builds/metavar2/x86_64-linux-gnu-var
+xxxx/xx/xx xx:xx:xx : End Building lib1 [variant-no-patch] (v1.2)
+EOF

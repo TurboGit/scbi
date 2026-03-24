@@ -1,0 +1,12 @@
+
+function metavar2-default-modules()
+{
+    echo mv-default1
+    echo mv-default2
+}
+
+function metavar2-var-modules()
+{
+    echo lib1
+    echo lib2
+}

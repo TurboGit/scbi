@@ -2254,6 +2254,28 @@ function handle-module()
                 return $res
             fi
         done
+
+        res=$?
+
+        #  Handle generic final sync if defined
+
+        [[ $IS_UPTODATE == no ]] &&
+            {
+                fn-exists module-sync
+
+                if [[ $? = 0 ]]; then
+                    module-sync $TVDIR/install $module $SCBI_TARGET $variant  \
+                                $TVDIR $TVDIR/src $TVDIR/build
+                    res=$?
+                    [[ $res != 0 ]] &&
+                        {
+                            elog $module generic module module-sync failed with error $?
+                            return $res
+                        }
+                fi
+            }
+
+        return $res
     ) || exit 1
 
     #  Create binary archive if needed
