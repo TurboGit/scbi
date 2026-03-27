@@ -72,7 +72,9 @@ function check-tools-abort()
 function read-content()
 {
     local -n VAR=$1
-    read VAR < $2
+    VAR=""
+    [[ -f $2 ]] &&
+        read VAR < $2
 }
 
 function append-content()
@@ -2007,7 +2009,7 @@ function handle-module()
                             }
                     }
                 fi
-            else
+            elif [[ -n $CBDIR ]]; then
                 echo $TVDIR > $SCBI_CACHE_DIR/$CBDIR
             fi
         fi
