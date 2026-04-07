@@ -1,0 +1,56 @@
+
+function c-stable-sloc-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/stable_sloc.git
+}
+
+function c-stable-sloc-out-of-tree()
+{
+    echo false
+}
+
+function c-stable-sloc-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-stable-sloc-depends()
+{
+    echo c-gnatcoll-core
+    echo c-libadalang
+    echo c-langkit-support
+    echo c-ada-toml
+}
+
+function c-stable-sloc-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
+function c-stable-sloc-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make C_SUPPORT=False build
+}
+
+function c-stable-sloc-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make PREFIX=$PREFIX C_SUPPORT=False install
+}
+
+function c-stable-sloc-prefix()
+{
+    echo NONE
+}
