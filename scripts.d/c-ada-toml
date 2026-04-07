@@ -1,0 +1,55 @@
+
+function c-ada-toml-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/pmderodat/ada-toml.git
+}
+
+function c-ada-toml-out-of-tree()
+{
+    echo false
+}
+
+function c-ada-toml-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-ada-toml-depends()
+{
+    echo c-gnatcoll-core
+    echo c-libadalang
+    echo c-langkit-support
+}
+
+function c-ada-toml-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
+function c-ada-toml-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make build
+}
+
+function c-ada-toml-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make prefix=$PREFIX install
+}
+
+function c-ada-toml-prefix()
+{
+    echo NONE
+}
