@@ -1,0 +1,64 @@
+
+function c-gnatcov-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/gnatcoverage.git
+}
+
+function c-gnatcov-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-gnatcov-depends()
+{
+    echo p-gnat-util
+    echo c-binutils
+    echo c-gnatcoll-core
+    echo c-libadalang
+    echo c-gpr2-lib
+    echo c-templates-parser
+    echo c-stable-sloc
+}
+
+function c-gnatcov-out-of-tree()
+{
+    echo FALSE
+}
+
+function c-gnatcov-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    add-to-var PATH $PREFIX/bin
+}
+
+function c-gnatcov-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    cd tools/gnatcov &&
+        make LIBRARY_TYPE=static C_SUPPORT=False LD_FLAGS="-lzstd" bin
+}
+
+function c-gnatcov-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    cd tools/gnatcov &&
+        make PREFIX=$PREFIX LIBRARY_TYPE=static C_SUPPORT=False install
+}
+
+function c-gnatcov-prefix()
+{
+    echo NONE
+}
