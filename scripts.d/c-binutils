@@ -40,7 +40,7 @@ function c-binutils-version()
     local PREFIX=$1
     local TARGET=$2
 
-    TOOL=ld
+    local TOOL=ld
 
     if [[ $SCBI_HOST != $TARGET ]]; then
         TOOL=${TARGET}-ld
@@ -49,7 +49,8 @@ function c-binutils-version()
     if [[ "$(command -v $TOOL)" = "" ]]; then
         echo $VERSION_ERROR
     else
-        echo $($TOOL --version | head -1 | cut -d' ' -f7)
+        local V=$($TOOL --version | head -1)
+        echo ${V##* }
     fi
 }
 
