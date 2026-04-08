@@ -29,7 +29,10 @@ function c-binutils-env()
     local PREFIX=$1
     local TARGET=$2
 
-    add-to-var PATH $PREFIX/bin
+    add-to-var PATH            $PREFIX/bin
+    add-to-var C_INCLUDE_PATH  $PREFIX/include
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib
+    add-to-var LIBRARY_PATH    $PREFIX/lib
 }
 
 function c-binutils-version()
@@ -46,7 +49,7 @@ function c-binutils-version()
     if [[ "$(command -v $TOOL)" = "" ]]; then
         echo $VERSION_ERROR
     else
-        echo $($TOOL --version | head -1 | cut -d' ' -f5)
+        echo $($TOOL --version | head -1 | cut -d' ' -f7)
     fi
 }
 
@@ -59,7 +62,6 @@ function c-binutils-common-config-options()
     echo --prefix=$PREFIX
     echo --disable-nls
     echo --disable-werror
-    echo --with-zlib
     echo --disable-compressed-debug-sections
     echo --disable-separate-code
     echo --disable-gdb
@@ -67,6 +69,8 @@ function c-binutils-common-config-options()
     echo --disable-sim
     echo --disable-libquadmath
     echo --disable-readline
+    echo --disable-ld
+    echo --enable-install-libiberty
 }
 
 function c-binutils-config-options()
