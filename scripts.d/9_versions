@@ -554,6 +554,7 @@ function handle-plan-meta-module()
                 local s_minfo=()
                 get-module-ref s_minfo $s $module
                 local s_variant=${s_minfo[1]}
+                local s_kind=${s_minfo[2]}
                 local s_ref=${s_minfo[3]}
 
                 if [[ $s_variant != default ]]; then
@@ -566,7 +567,11 @@ function handle-plan-meta-module()
                 fi
 
                 if [[ $s_ref != NONE ]]; then
-                    mref+=":$s_ref"
+                    if [[ $s_kind == VERSION ]]; then
+                        mref+=":#$s_ref"
+                    else
+                        mref+=":$s_ref"
+                    fi
                 elif [[ ${PROPAGATE_MODE} == both ]] ||
                          [[ ${PROPAGATE_MODE} == version ]];
                 then

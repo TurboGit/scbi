@@ -1,0 +1,11 @@
+
+function meta-mod-ver-modules()
+{
+    echo liba
+    echo libb
+}
+
+function meta-mod-ver-propagate-version()
+{
+    echo version
+}

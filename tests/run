@@ -63,6 +63,7 @@ function clean-up-osht-input()
 function CLEAN-DIFF()
 {
     clean-up-osht-output
+    trim-osht-output
     cat - | clean-up-osht-input | \
 DIFF
 }
@@ -130,7 +131,7 @@ else
 fi
 cd ..
 
-PLAN 1316
+PLAN 1320
 
 export SCBI_CACHE_DIR="no"
 

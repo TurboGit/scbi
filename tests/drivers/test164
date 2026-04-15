@@ -1,0 +1,18 @@
+
+RUNS ./scbi show --plan=modver/meta --build-plan
+
+CLEAN-DIFF <<EOF
+There is 3 module(s) in the plan
+liba:#12
+libb:#12
+meta-mod-ver:#12
+EOF
+
+RUNS ./scbi show --plan=modver/la --build-plan
+
+CLEAN-DIFF <<EOF
+There is 3 module(s) in the plan
+liba:#17
+libb:#12
+meta-mod-ver:#12
+EOF
