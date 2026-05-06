@@ -1555,6 +1555,11 @@ function handle-meta-module()
 
                 local module=${smodule_info[0]}
                 local variant=${smodule_info[1]}
+                local ref=${smodule_info[3]}
+
+                #  Nothing to be done for skip modules
+                [[ "$ref" == "skip" ]] &&
+                    return
 
                 local IDIR=""
                 get-target-dir IDIR $module $variant install
@@ -1584,8 +1589,13 @@ function handle-meta-module()
                 get-module-ref module_info $module $METAMODULE
 
                 local variant=${module_info[1]}
+                local ref=${module_info[3]}
 
                 record-dref $module $variant $DREFS
+
+                #  Nothing to be done for skip modules
+                [[ "$ref" == "skip" ]] &&
+                    continue
 
                 if [[ -n $FCT_AGG  ]]; then
                     local IDIR=""
