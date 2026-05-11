@@ -1,0 +1,7 @@
+name: c-no-variant-inherit
+inherit: c-parent
+inherit-mapping:
+  - no-variant: true
+hooks:
+  config:
+    - ./configure --prefix=$PREFIX --enable-foo

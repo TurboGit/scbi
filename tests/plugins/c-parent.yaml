@@ -1,0 +1,12 @@
+name: c-parent
+hooks:
+  vcs: "default none git https://example.com/parent.git"
+  out-of-tree: true
+  config:
+    - ./configure --prefix=$PREFIX
+  build:
+    - make
+  install:
+    - make install
+  env:
+    - add-to-var LD_LIBRARY_PATH $PREFIX/lib

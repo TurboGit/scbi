@@ -1,0 +1,33 @@
+name: c-with-variants
+hooks:
+  vcs:
+    - "default"
+    - "none"
+    - "git"
+    - "https://example.com/variants.git"
+  out-of-tree: true
+  common-build-depends:
+    - os@-python3
+    - c-cmake
+  release-config-options:
+    - -DCMAKE_BUILD_TYPE=Release
+  debug-config-options:
+    - -DCMAKE_BUILD_TYPE=Debug
+  default-config-options:
+    - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+  common-config-options:
+    - -DCMAKE_INSTALL_PREFIX=$PREFIX
+  clang-build-env:
+    - set-var CMAKE_C_COMPILER clang-16
+  build-env:
+    - set-var CMAKE_C_COMPILER gcc
+  env:
+    - add-to-var PATH $PREFIX/bin
+  config:
+    - cmake ../
+  build:
+    - make -j$JOBS
+  install:
+    - make install
+  release-depends:
+    - c-release-helper

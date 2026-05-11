@@ -1,0 +1,5 @@
+name: c-grandchild
+inherit: c-child
+hooks:
+  build:
+    - ninja

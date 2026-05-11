@@ -90,6 +90,35 @@ class Plan:
     load_order: list[str] = field(default_factory=list)
 
 
+@dataclass
+class ParsedHookKey:
+    variant: str = ""
+    modifier: str = ""      # pre, post, or empty
+    cross: bool = False
+    base_hook: str = ""
+
+
+@dataclass
+class InheritMapping:
+    no_variant: bool = False
+    hooks: list[str] | None = None     # filter: only inherit these hooks
+    name: str | None = None            # rename destination plugin
+
+
+@dataclass
+class Plugin:
+    name: str
+    hooks: dict[str, list[str]] = field(default_factory=dict)
+    variants: set[str] = field(default_factory=set)
+    inherit: str | list[str] | None = None
+    inherit_mappings: list[InheritMapping] | None = None
+    modules: list[str] | None = None
+    vcs: dict | None = None
+    out_of_tree: bool | None = None
+    prefix: str | None = None
+    aliases: dict[str, str] = field(default_factory=dict)
+
+
 class PlanError(Exception):
     pass
 
@@ -99,4 +128,16 @@ class PlanSyntaxError(PlanError):
 
 
 class PlanNotFoundError(PlanError):
+    pass
+
+
+class PluginError(Exception):
+    pass
+
+
+class PluginNotFoundError(PluginError):
+    pass
+
+
+class PluginSyntaxError(PluginError):
     pass

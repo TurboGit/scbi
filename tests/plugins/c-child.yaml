@@ -1,0 +1,7 @@
+name: c-child
+inherit: c-parent
+hooks:
+  config:
+    - cmake -DCMAKE_INSTALL_PREFIX=$PREFIX ..
+  install:
+    - make install DESTDIR=$PREFIX

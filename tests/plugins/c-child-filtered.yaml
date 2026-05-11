@@ -1,0 +1,10 @@
+name: c-child-filtered
+inherit: c-parent
+inherit-mapping:
+  - no-variant: false
+    hooks:
+      - config
+      - build
+hooks:
+  config:
+    - cmake --build .
