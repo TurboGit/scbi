@@ -1,0 +1,11 @@
+name: c-noop
+hooks:
+  out-of-tree: false
+  config:
+    - "true"
+  build:
+    - "true"
+  install:
+    - "true"
+  setup:
+    - "true"
