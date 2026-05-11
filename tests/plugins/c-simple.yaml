@@ -1,6 +1,10 @@
 name: c-simple
 hooks:
-  vcs: "default none git https://example.com/simple.git"
+  vcs:
+    - "default"
+    - "none"
+    - "git"
+    - "https://example.com/simple.git"
   out-of-tree: true
   config:
     - ./configure --prefix=$PREFIX

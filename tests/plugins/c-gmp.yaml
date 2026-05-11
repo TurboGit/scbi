@@ -1,7 +1,16 @@
 name: c-gmp
 hooks:
-  vcs: "default none mercurial https://gmplib.org/repo/gmp/"
-  archive: "default none curl https://gmplib.org/download/gmp gmp-$VERSION.tar.xz"
+  vcs:
+    - "default"
+    - "none"
+    - "mercurial"
+    - "https://gmplib.org/repo/gmp/"
+  archive:
+    - "default"
+    - "none"
+    - "curl"
+    - "https://gmplib.org/download/gmp"
+    - "gmp-$VERSION.tar.xz"
   out-of-tree: false
   build-depends:
     - c-sandbox

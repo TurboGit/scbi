@@ -6,4 +6,4 @@ hooks:
   env:
     - add-to-var PATH $PREFIX/bin
   aggregate:
-    - echo aggregated
+    - aggregated

@@ -1,6 +1,10 @@
 name: c-parent
 hooks:
-  vcs: "default none git https://example.com/parent.git"
+  vcs:
+    - "default"
+    - "none"
+    - "git"
+    - "https://example.com/parent.git"
   out-of-tree: true
   config:
     - ./configure --prefix=$PREFIX
