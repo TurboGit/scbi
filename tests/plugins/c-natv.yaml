@@ -1,0 +1,23 @@
+name: c-natv
+with-variant:
+  native:
+    depends:
+      - libA
+      - libB
+    env:
+      add-to-var:
+        - ROOT_DIR
+        - /usr
+hooks:
+  vcs:
+    - default
+    - none
+  build-env:
+    set-var:
+      - SCBI_TEST
+      - env
+  build:
+    - echo build
+  install:
+    - echo install
+  out-of-tree: true

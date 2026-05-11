@@ -1,6 +1,8 @@
 name: c-auto
+with-variant:
+  - native
 hooks:
-  native-depends:
+  build-depends:
     - "os@-dpkg"
   vcs:
     - "default"

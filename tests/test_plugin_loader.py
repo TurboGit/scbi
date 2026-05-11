@@ -284,6 +284,79 @@ def test_variants_extracted(ld):
 
 
 # -----------------------------------------------------------------------
+# with-variant
+# -----------------------------------------------------------------------
+
+def test_with_variant_generates_empty_hooks(ld):
+    p = ld.load("c-auto")
+    assert "native" in p.variants
+    assert "native-config" in p.hooks
+    assert p.hooks["native-config"] == []
+    assert "native-build" in p.hooks
+    assert p.hooks["native-build"] == []
+    assert "native-install" in p.hooks
+    assert p.hooks["native-install"] == []
+    assert "native-vcs" in p.hooks
+    assert p.hooks["native-vcs"] == ["none"]
+    assert "native-archive" in p.hooks
+    assert p.hooks["native-archive"] == ["none"]
+    assert "native-prefix" in p.hooks
+    assert p.hooks["native-prefix"] == ["NONE"]
+
+
+def test_with_variant_pre_post_cross_hooks(ld):
+    p = ld.load("c-auto")
+    for base in ("config", "build", "install"):
+        for suffix in ("", "pre-", "post-", "cross-", "cross-pre-", "cross-post-"):
+            key = f"native-{suffix}{base}" if suffix else f"native-{base}"
+            assert key in p.hooks, f"Missing hook: {key}"
+            assert p.hooks[key] == []
+
+
+def test_with_variant_env_and_build_depends_hooks(ld):
+    p = ld.load("c-auto")
+    for base in ("env", "build-env"):
+        for prefix in ("", "common-", "default-", "cross-", "common-cross-", "default-cross-"):
+            key = f"native-{prefix}{base}" if prefix else f"native-{base}"
+            assert key in p.hooks, f"Missing hook: {key}"
+            assert p.hooks[key] == {}
+
+
+def test_with_variant_build_depends_and_patches(ld):
+    p = ld.load("c-auto")
+    for base in ("build-depends", "patches"):
+        for prefix in ("", "common-", "default-", "cross-", "common-cross-", "default-cross-"):
+            key = f"native-{prefix}{base}" if prefix else f"native-{base}"
+            assert key in p.hooks, f"Missing hook: {key}"
+            assert p.hooks[key] == []
+
+
+def test_with_variant_does_not_override_explicit_hooks(ld):
+    p = ld.load("c-auto")
+    assert p.hooks["native-vcs"] == ["none"]
+    assert p.hooks["config"] == ["./configure --prefix=$PREFIX"]
+    assert p.hooks["build"] == ["make -j$JOBS"]
+
+
+def test_with_variant_resolve_native_returns_empty(ld):
+    p = ld.load("c-auto")
+    r = ld.resolve_hook(p, "native", "config")
+    assert r is not None
+    assert r == []
+    r = ld.resolve_hook(p, "native", "build")
+    assert r == []
+    r = ld.resolve_hook(p, "native", "install")
+    assert r == []
+
+
+def test_with_variant_resolve_auto_falls_to_base(ld):
+    p = ld.load("c-auto")
+    r = ld.resolve_hook(p, "auto", "build-depends")
+    assert r is not None
+    assert "os@-dpkg" in r
+
+
+# -----------------------------------------------------------------------
 # All fixture files parse
 # -----------------------------------------------------------------------
 

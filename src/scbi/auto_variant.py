@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import platform
-import re
 import subprocess
 from pathlib import Path
 
@@ -64,6 +63,27 @@ def check_os_package(name: str) -> tuple[bool, str]:
     return (False, "0")
 
 
+DEP_HOOK_NAMES = ["build-depends", "depends", "tests-depends"]
+
+
+def _get_os_deps_from_hooks(
+    loader: PluginLoader,
+    plugin: Plugin,
+    variant: str,
+) -> list[str]:
+    os_deps: list[str] = []
+    for hook_name in DEP_HOOK_NAMES:
+        resolved = loader.resolve_all_hooks(plugin, variant, hook_name)
+        for item_list in resolved:
+            if isinstance(item_list, list):
+                for item in item_list:
+                    item_str = str(item).strip()
+                    dep = item_str.split(":")[0].strip()
+                    if dep.startswith("os@-"):
+                        os_deps.append(dep)
+    return os_deps
+
+
 def resolve_auto_variant(
     loader: PluginLoader,
     plugin: Plugin,
@@ -77,33 +97,17 @@ def resolve_auto_variant(
     if rest.startswith("."):
         rest = rest[1:]
 
-    native_depends_key = "native-depends"
-    dep_list = plugin.hooks.get(native_depends_key)
-    if dep_list is None:
-        return (variant, None)
+    os_deps = _get_os_deps_from_hooks(loader, plugin, variant)
 
-    deps: list[str] = []
-    if isinstance(dep_list, list):
-        deps = [str(d).strip() for d in dep_list if str(d).strip()]
-    elif isinstance(dep_list, str):
-        deps = [dep_list.strip()]
-
-    if not deps:
+    if not os_deps:
         return (variant, None)
 
     all_found = True
-    for dep in deps:
-        dep_clean = dep.split(":")[0].strip()
-        if dep_clean.startswith("os@-"):
-            found, _ = check_os_package(dep_clean)
-            if not found:
-                all_found = False
-                break
-        else:
-            mod_path = plugins_dir / dep_clean
-            if not mod_path.exists():
-                all_found = False
-                break
+    for dep in os_deps:
+        found, _ = check_os_package(dep)
+        if not found:
+            all_found = False
+            break
 
     if all_found:
         new_variant = f"native{'.' + rest if rest else ''}"

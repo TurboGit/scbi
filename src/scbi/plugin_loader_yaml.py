@@ -152,6 +152,13 @@ class PluginLoader:
 
         hooks: dict[str, list[str] | dict] = {}
         variants: set[str] = set()
+
+        # Process with-variant first to generate empty hook entries.
+        # Explicit hooks defined later override generated ones.
+        with_variant_raw = data.get("with-variant")
+        if with_variant_raw is not None:
+            self._generate_with_variant_hooks(name, with_variant_raw, hooks, variants)
+
         raw_hooks = data.get("hooks", {})
         if not isinstance(raw_hooks, dict):
             raise PluginSyntaxError(
@@ -368,6 +375,72 @@ class PluginLoader:
             return direct
 
         return None
+
+    def _generate_with_variant_hooks(
+        self,
+        module_name: str,
+        with_variant_raw: Any,
+        hooks: dict[str, list[str] | dict],
+        variants: set[str],
+    ) -> None:
+        if isinstance(with_variant_raw, list):
+            variant_names = [str(v) for v in with_variant_raw]
+            variant_details: dict[str, dict] = {}
+        elif isinstance(with_variant_raw, dict):
+            variant_names = list(with_variant_raw.keys())
+            variant_details = {
+                str(k): v if isinstance(v, dict) else {}
+                for k, v in with_variant_raw.items()
+            }
+        else:
+            raise PluginSyntaxError(
+                f"with-variant must be a list or dict in plugin {module_name}"
+            )
+
+        for vname in variant_names:
+            variants.add(vname)
+            detail = variant_details.get(vname, {})
+
+            # Process dict detail hooks FIRST so they take precedence
+            dep_list = detail.get("depends")
+            if dep_list is not None:
+                dep_key = f"{vname}-depends"
+                if dep_key not in hooks:
+                    hooks[dep_key] = [str(d) for d in dep_list]
+
+            env_data = detail.get("env")
+            if env_data is not None and isinstance(env_data, dict):
+                env_key = f"{vname}-env"
+                if env_key not in hooks:
+                    hooks[env_key] = env_data
+
+            # Hooks with empty body for config/build/install (+ pre/post/cross)
+            for base in ("config", "build", "install"):
+                for suffix in ("", "pre-", "post-", "cross-", "cross-pre-", "cross-post-"):
+                    key = f"{vname}-{suffix}{base}" if suffix else f"{vname}-{base}"
+                    if key not in hooks:
+                        hooks[key] = []
+
+            # Hooks with empty body for env/build-env/build-depends/patches (+ common/default/cross)
+            for base in ("env", "build-env", "build-depends", "patches"):
+                for prefix in ("", "common-", "default-", "cross-", "common-cross-", "default-cross-"):
+                    key = f"{vname}-{prefix}{base}" if prefix else f"{vname}-{base}"
+                    if key not in hooks:
+                        if base in ("env", "build-env"):
+                            hooks[key] = {}
+                        else:
+                            hooks[key] = []
+
+            # vcs and archive → NONE
+            vcs_key = f"{vname}-vcs"
+            if vcs_key not in hooks:
+                hooks[vcs_key] = ["none"]
+            archive_key = f"{vname}-archive"
+            if archive_key not in hooks:
+                hooks[archive_key] = ["none"]
+            prefix_key = f"{vname}-prefix"
+            if prefix_key not in hooks:
+                hooks[prefix_key] = ["NONE"]
 
     def get_hook_names(self, plugin: Plugin) -> list[str]:
         return list(plugin.hooks.keys())
