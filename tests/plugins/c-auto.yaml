@@ -1,0 +1,16 @@
+name: c-auto
+hooks:
+  native-depends:
+    - "os@-dpkg"
+  vcs:
+    - "default"
+    - "none"
+    - "git"
+    - "https://example.com/auto.git"
+  out-of-tree: true
+  config:
+    - ./configure --prefix=$PREFIX
+  build:
+    - make -j$JOBS
+  install:
+    - make install

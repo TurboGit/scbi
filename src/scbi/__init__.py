@@ -1,3 +1,4 @@
+from .auto_variant import resolve_auto_variant, check_os_package
 from .models import (
     InheritMapping,
     ModuleRef,

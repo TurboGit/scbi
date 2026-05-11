@@ -121,6 +121,88 @@ def test_scbi_build_inherits_features_to_env():
     assert not be.is_enabled("non-existent")
 
 
+def test_main_version():
+    code = main(["--version"])
+    assert code == 0
+
+
+def test_main_dry_run(tmp_path):
+    sb = ScbiBuild(
+        plugins_dir=Path("tests/plugins"),
+        bdir=tmp_path,
+    )
+    sb.dry_run = True
+    code = sb.build("c-noop")
+    assert code == 0
+
+
+def test_main_force(tmp_path):
+    sb = ScbiBuild(
+        plugins_dir=Path("tests/plugins"),
+        bdir=tmp_path,
+    )
+    sb.do_force = True
+    code = sb.build("c-noop")
+    assert code == 0
+
+
+def test_main_force_skips_build_cache(tmp_path):
+    """--force should rebuild even if build-id matches."""
+    sb = ScbiBuild(plugins_dir=Path("tests/plugins"), bdir=tmp_path)
+    sb.do_force = True
+    assert sb.build("c-noop") == 0
+
+
+def test_main_purge(tmp_path):
+    sb = ScbiBuild(plugins_dir=Path("tests/plugins"), bdir=tmp_path)
+    assert sb.build("c-noop") == 0
+    sb.do_purge = True
+    assert sb.build("c-noop") == 0
+
+
+def test_main_purge_only(tmp_path):
+    sb = ScbiBuild(plugins_dir=Path("tests/plugins"), bdir=tmp_path)
+    sb.do_purge_only = True
+    code = sb.build("c-noop")
+    assert code == 0
+
+
+def test_main_stat(tmp_path):
+    sb = ScbiBuild(plugins_dir=Path("tests/plugins"), bdir=tmp_path)
+    sb.build("c-noop")
+    sb.stat_mode = "full"
+    code = sb.build("c-noop")
+    assert code == 0
+
+
+def test_step_control_setup_only(tmp_path):
+    sb = ScbiBuild(plugins_dir=Path("tests/plugins"), bdir=tmp_path)
+    sb.steps = ["setup"]
+    assert sb.build("c-noop") == 0
+
+
+def test_step_control_no_install(tmp_path):
+    sb = ScbiBuild(plugins_dir=Path("tests/plugins"), bdir=tmp_path)
+    sb.steps = [s for s in CANONICAL_STEPS if s != "install"]
+    assert sb.build("c-noop") == 0
+
+
+def test_step_control_no_setup(tmp_path):
+    sb = ScbiBuild(plugins_dir=Path("tests/plugins"), bdir=tmp_path)
+    sb.steps = [s for s in sb.steps if s != "setup"]
+    assert sb.build("c-noop") == 0
+
+
+def test_main_plugins_flag():
+    code = main(["--plugins=tests/plugins", "c-noop"])
+    assert code == 0
+
+
+def test_main_enable_flag_cli():
+    code = main(["--enable-my-feature", "--plugins=tests/plugins", "c-noop"])
+    assert code == 0
+
+
 def test_cross_compilation_hooks_resolved():
     """c-gmp has cross-config which should be resolved when host != target."""
     from src.scbi.plugin_loader_yaml import PluginLoader

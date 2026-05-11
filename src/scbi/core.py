@@ -7,6 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from .auto_variant import resolve_auto_variant
 from .build_env import BuildEnv
 from .dependency_resolver import DependencyResolver
 from .hook_executor import HookExecutor
@@ -14,6 +15,8 @@ from .models import ModuleRef, Plugin, RefKind
 from .plan_reader import PlanReader
 from .plugin_loader_yaml import PluginLoader
 from .source_manager import SourceManager
+
+SCBI_VERSION = "12.1"
 
 CANONICAL_STEPS = [
     "setup",
@@ -53,6 +56,22 @@ class ScbiBuild:
         self.dependency_resolver: DependencyResolver | None = None
         self.do_deps: bool = False
 
+        self.do_purge: bool = False
+        self.do_purge_only: bool = False
+        self.do_force: bool = False
+        self.do_update: bool = False
+        self.dry_run: bool = False
+        self.stat_mode: str | None = None
+        self.plan_name: str | None = None
+        self.env_name: str | None = None
+        self.ini_section: str | None = None
+        self.no_patch: bool = False
+        self.safe: bool = False
+        self.clean_install: bool = False
+        self.quiet: bool = False
+        self.archive_mode: bool = False
+        self.steps: list[str] = list(CANONICAL_STEPS)
+
     def _ensure_loaders(self) -> None:
         if self.plan_reader is None:
             self.plan_reader = PlanReader(self.plans_dir)
@@ -60,14 +79,29 @@ class ScbiBuild:
             self.plugin_loader = PluginLoader(self.plugins_dir)
 
     def _ilog(self, module: str, msg: str) -> None:
-        print(f"[{module}] {msg}", file=sys.stderr)
+        import datetime as dt
+        ts = dt.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+        if self.quiet:
+            return
+        print(f"{ts} : {msg}", file=sys.stderr)
 
     def build(self, module_ref: str) -> int:
         self._ensure_loaders()
 
         ref = ModuleRef.parse(module_ref)
 
+        if self.dry_run:
+            self._ilog(ref.module, f"would build {ref}")
+            return 0
+
         plugin = self.plugin_loader.load(ref.module)
+
+        resolved_variant, auto_msg = resolve_auto_variant(
+            self.plugin_loader, plugin, ref.variant, self.plugins_dir
+        )
+        if auto_msg:
+            self._ilog(ref.module, f"  {auto_msg}")
+        ref.variant = resolved_variant
 
         be = BuildEnv(
             module=ref.module,
@@ -83,15 +117,31 @@ class ScbiBuild:
             scbi_enabled_features=self.enabled_features,
         )
 
+        if self.stat_mode:
+            self._do_stat(be, plugin)
+            return 0
+
+        if self.do_purge_only:
+            self._do_purge(be)
+            return 0
+
+        if self.do_purge:
+            self._do_purge(be)
+
         be.ensure_dirs()
 
         executor = HookExecutor(be)
 
-        self._ilog(ref.module, f"building {ref}")
-        self._ilog(ref.module, f"  variant = {be.variant}")
-        self._ilog(ref.module, f"  target  = {be.scbi_target}")
-        self._ilog(ref.module, f"  prefix  = {be.scbi_prefix}")
-        self._ilog(ref.module, f"  TVDIR   = {be.tvdv_dir}")
+        disp_ref = ref.version if ref.version and ref.version != "NONE" else "master"
+        variant_display = " ".join(be.variant.replace("default", "").split(".")).strip() or "default"
+        self._ilog(ref.module, f"Building {ref.module} [{variant_display}] ({disp_ref})")
+        if be.is_cross:
+            self._ilog(ref.module, f"cross {be.scbi_target}")
+        else:
+            self._ilog(ref.module, f"native {be.scbi_target}")
+
+        step_names = " ".join(self.steps) if self.steps != CANONICAL_STEPS else "setup config build install wrapup"
+        self._ilog(ref.module, f"steps: {step_names}")
 
         modules_list = self._get_modules(plugin, be)
         if modules_list is not None:
@@ -115,16 +165,42 @@ class ScbiBuild:
             )
             return code
 
-        for step in CANONICAL_STEPS:
+        self._ilog(ref.module, "trigger: not yet built")
+
+        if ref.variant.startswith("native"):
+            self._ilog(ref.module, f"End Building {ref.module} [{variant_display}] ({disp_ref})")
+            return 0
+
+        for step in self.steps:
+            if step not in CANONICAL_STEPS:
+                continue
             code = self._run_step(executor, plugin, be, step)
             if code != 0:
-                print(
-                    f"scbi: step '{step}' failed with code {code}",
-                    file=sys.stderr,
-                )
+                elog_msg = f"scbi: step '{step}' failed with code {code}"
+                print(elog_msg, file=sys.stderr)
                 return code
 
+        self._ilog(ref.module, f"End Building {ref.module} [{variant_display}] ({disp_ref})")
         return 0
+
+    def _do_purge(self, be: BuildEnv) -> None:
+        self._ilog(be.module, "  purging build directory")
+        tvdv = be.tvdv_dir
+        if tvdv.exists():
+            shutil.rmtree(str(tvdv), ignore_errors=True)
+
+    def _do_stat(self, be: BuildEnv, plugin: Plugin) -> None:
+        self._ilog(be.module, "  status:")
+        source_id = be.module_root / f"source-id-{be.variant}"
+        if source_id.exists():
+            self._ilog(be.module, f"    source: {source_id.read_text().strip()}")
+        build_id = be.module_root / f"build-id-{be.variant}"
+        if build_id.exists():
+            self._ilog(be.module, f"    build:  {build_id.read_text().strip()}")
+        install_dir = be.install_dir
+        if install_dir.exists():
+            items = len(list(install_dir.rglob("*")))
+            self._ilog(be.module, f"    install: {items} files")
 
     def _get_modules(
         self, plugin: Plugin, be: BuildEnv
@@ -315,7 +391,7 @@ class ScbiBuild:
                 self._setup_build_dir(plugin, be, oot)
                 return 0
 
-            self._ilog(be.module, f"  step '{step}' starting")
+            self._ilog(be.module, f"{step} starting")
 
             if pre_hook is not None and isinstance(pre_hook, list):
                 code = executor.run_commands_logged(
@@ -346,7 +422,7 @@ class ScbiBuild:
         if pre_hook is None and main_hook is None and post_hook is None:
             return 0
 
-        self._ilog(be.module, f"  step '{step}' starting")
+        self._ilog(be.module, f"{step} starting")
 
         if pre_hook is not None and isinstance(pre_hook, list):
             code = executor.run_commands_logged(
@@ -359,8 +435,8 @@ class ScbiBuild:
             commands = main_hook
             if isinstance(commands, list):
                 if step == "config":
-                    if self._is_source_unchanged(be):
-                        self._ilog(be.module, "  config skipped (source unchanged)")
+                    if not self.do_force and self._is_source_unchanged(be):
+                        self._ilog(be.module, "config skipped (source unchanged)")
                         return 0
                     config_opts = self._resolve_config_options(plugin, be)
                     commands = [
@@ -368,8 +444,8 @@ class ScbiBuild:
                         for cmd in commands
                     ]
                 elif step in ("build", "install"):
-                    if self._is_build_cached(be):
-                        self._ilog(be.module, f"  {step} skipped (build cached)")
+                    if not self.do_force and self._is_build_cached(be):
+                        self._ilog(be.module, f"{step} skipped (build cached)")
                         return 0
 
                 cwd = be.build_dir if step in ("config", "build") else be.src_dir
@@ -390,6 +466,7 @@ class ScbiBuild:
             if code != 0:
                 return code
 
+        self._ilog(be.module, f"{step} completed")
         return 0
 
 
@@ -408,89 +485,234 @@ def _parse_enable_flag(arg: str) -> tuple[str, str] | None:
     return None
 
 
+def _parse_ini_flag(arg: str) -> str | None:
+    if arg.startswith("--ini="):
+        return arg[len("--ini="):]
+    if arg.startswith("--ini"):
+        return ""
+    return None
+
+
+def _parse_eq_flag(arg: str, prefix: str) -> str | None:
+    if arg.startswith(prefix + "="):
+        return arg[len(prefix + "="):]
+    return None
+
+
+def _usage() -> None:
+    print(
+        "Usage: scbi [options] <module>[/<variant>][:<version>]",
+        file=sys.stderr,
+    )
+    print("Options:", file=sys.stderr)
+    print("  -h | --help              This help message", file=sys.stderr)
+    print("  -v | --version           Display driver version", file=sys.stderr)
+    print("  -q | --quiet             Do not display information log", file=sys.stderr)
+    print("  -t | --prefix=<dir>      Install prefix", file=sys.stderr)
+    print("  -b | --build-dir=<dir>   Build root directory", file=sys.stderr)
+    print("  -j | --jobs=<n>          Parallel jobs", file=sys.stderr)
+    print("  -S | --no-setup          Skip setup", file=sys.stderr)
+    print("  -I | --no-install        Skip install", file=sys.stderr)
+    print("  -W | --no-wrapup         Skip wrapup", file=sys.stderr)
+    print("  -s | --setup             Do setup (reset steps)", file=sys.stderr)
+    print("  -c | --config            Do config (reset steps)", file=sys.stderr)
+    print("  -b | --build             Do build (reset steps)", file=sys.stderr)
+    print("  -i | --install           Do install (reset steps)", file=sys.stderr)
+    print("  -w | --wrapup            Do wrapup (reset steps)", file=sys.stderr)
+    print("  -p | --purge[:only]      Remove build dir", file=sys.stderr)
+    print("  -f | --force             Force rebuild", file=sys.stderr)
+    print("  -u | --update            Update sources and rebuild", file=sys.stderr)
+    print("  -d | --deps              Build dependencies first", file=sys.stderr)
+    print("  -n | --no-patch          Do not apply patches", file=sys.stderr)
+    print("  -e | --env=<name>        Environment file", file=sys.stderr)
+    print("  -a | --create-archive    Build binary archive", file=sys.stderr)
+    print("       --plan=<name>       Use a build plan", file=sys.stderr)
+    print("       --target=<triple>   Target triplet", file=sys.stderr)
+    print("       --host=<triple>     Host triplet", file=sys.stderr)
+    print("       --plugins=<dir>     Plugins directory", file=sys.stderr)
+    print("       --enable-<name>     Enable feature name", file=sys.stderr)
+    print("       --flat              Flatter directory structure", file=sys.stderr)
+    print("       --dry-run           Only list modules handled", file=sys.stderr)
+    print("       --stat[:short|full] Display build status", file=sys.stderr)
+    print("       --ini=<section>     Load ini file section", file=sys.stderr)
+    print("       --safe              Clean build dir before configure", file=sys.stderr)
+    print("       --clean-install     Clean install directory", file=sys.stderr)
+    print("       --standalone        Standalone source archive", file=sys.stderr)
+    print("       --clear-cache       Remove cached versions", file=sys.stderr)
+
+
 def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
     args = list(argv)
 
-    do_deps = False
-    enabled_features: dict[str, str] = {}
+    sb = ScbiBuild()
+    step_specific = False
 
     i = 0
     while i < len(args):
         a = args[i]
+
         if a in ("--help", "-h"):
-            print(
-                "Usage: scbi <module>[/<variant>][:<version>] [options]",
-                file=sys.stderr,
-            )
-            print("Options:", file=sys.stderr)
-            print("  --build-dir DIR     Build root directory", file=sys.stderr)
-            print("  --prefix DIR        Install prefix", file=sys.stderr)
-            print("  --target TRIPLE     Target triplet", file=sys.stderr)
-            print("  --host TRIPLE       Host triplet", file=sys.stderr)
-            print("  --deps              Build dependencies first", file=sys.stderr)
-            print("  --enable-<name>     Enable feature name", file=sys.stderr)
-            print("  --jobs N            Parallel jobs", file=sys.stderr)
-            print("  --flat              Flatter directory structure", file=sys.stderr)
+            _usage()
             return 0
-        elif a == "--deps":
-            do_deps = True
+        elif a in ("--version", "-v"):
+            print(f"SCBI {SCBI_VERSION}", file=sys.stderr)
+            return 0
+        elif a in ("--quiet", "-q"):
+            sb.quiet = True
+            args.pop(i)
+            continue
+        elif a in ("--deps", "-d"):
+            sb.do_deps = True
+            args.pop(i)
+            continue
+        elif a in ("--force", "-f"):
+            sb.do_force = True
+            args.pop(i)
+            continue
+        elif a in ("--update", "-u"):
+            sb.do_update = True
+            args.pop(i)
+            continue
+        elif a in ("--dry-run",):
+            sb.dry_run = True
+            args.pop(i)
+            continue
+        elif a in ("--flat",):
+            sb.flat = True
+            args.pop(i)
+            continue
+        elif a in ("--no-patch", "-n"):
+            sb.no_patch = True
+            args.pop(i)
+            continue
+        elif a in ("--safe",):
+            sb.safe = True
+            args.pop(i)
+            continue
+        elif a in ("--clean-install",):
+            sb.clean_install = True
+            args.pop(i)
+            continue
+        elif a in ("--archive",):
+            sb.archive_mode = True
+            args.pop(i)
+            continue
+        elif a in ("--standalone",):
+            sb.standalone = True
             args.pop(i)
             continue
         elif a.startswith("--enable-"):
             feat = _parse_enable_flag(a)
             if feat:
-                enabled_features[feat[0]] = feat[1]
+                sb.enabled_features[feat[0]] = feat[1]
             args.pop(i)
             continue
+        elif a in ("--purge", "-p"):
+            sb.do_purge = True
+            args.pop(i)
+            continue
+        elif a == "--purge:only":
+            sb.do_purge = False
+            sb.do_purge_only = True
+            args.pop(i)
+            continue
+        elif a.startswith("--stat"):
+            rest = a[len("--stat"):]
+            if rest.startswith(":"):
+                sb.stat_mode = rest[1:] or "full"
+            else:
+                sb.stat_mode = "full"
+            args.pop(i)
+            continue
+        elif a.startswith("--plan="):
+            sb.plan_name = a[len("--plan="):]
+            args.pop(i)
+            continue
+        elif a.startswith("--env="):
+            sb.env_name = a[len("--env="):]
+            args.pop(i)
+            continue
+        elif a.startswith("--ini"):
+            val = _parse_ini_flag(a)
+            if val is not None:
+                sb.ini_section = val
+            args.pop(i)
+            continue
+        elif a.startswith("--plugins="):
+            sb.plugins_dir = Path(a[len("--plugins="):])
+            args.pop(i)
+            continue
+        elif a.startswith("--build-dir="):
+            sb.bdir = Path(a[len("--build-dir="):])
+            args.pop(i)
+            continue
+        elif a.startswith("--prefix="):
+            sb.prefix = Path(a[len("--prefix="):])
+            args.pop(i)
+            continue
+        elif a.startswith("--target="):
+            sb.target = a[len("--target="):]
+            args.pop(i)
+            continue
+        elif a.startswith("--host="):
+            sb.host = a[len("--host="):]
+            args.pop(i)
+            continue
+        elif a.startswith("--jobs="):
+            sb.jobs = int(a[len("--jobs="):])
+            args.pop(i)
+            continue
+        elif a in ("--setup", "-s"):
+            step_specific = True
+            sb.steps.append("setup")
+            args.pop(i)
+            continue
+        elif a in ("--config", "-c"):
+            step_specific = True
+            sb.steps.append("config")
+            args.pop(i)
+            continue
+        elif a in ("--build", "-b"):
+            step_specific = True
+            sb.steps.append("build")
+            args.pop(i)
+            continue
+        elif a in ("--install", "-i"):
+            step_specific = True
+            sb.steps.append("install")
+            args.pop(i)
+            continue
+        elif a in ("--wrapup", "-w"):
+            step_specific = True
+            sb.steps.append("wrapup")
+            args.pop(i)
+            continue
+        elif a in ("--no-setup", "-S"):
+            sb.steps = [s for s in sb.steps if s != "setup"]
+            args.pop(i)
+            continue
+        elif a in ("--no-install", "-I"):
+            sb.steps = [s for s in sb.steps if s != "install"]
+            args.pop(i)
+            continue
+        elif a in ("--no-wrapup", "-W"):
+            sb.steps = [s for s in sb.steps if s != "wrapup"]
+            args.pop(i)
+            continue
+
         i += 1
 
+    if step_specific:
+        keep = set(sb.steps)
+        sb.steps = [s for s in CANONICAL_STEPS if s in keep]
+
     if not args:
-        print("Usage: scbi <module>[/<variant>][:<version>]", file=sys.stderr)
+        _usage()
         return 1
 
     module_ref = args[0]
-
-    bdir = None
-    prefix = None
-    target = None
-    host = None
-    jobs = 0
-    flat = False
-
-    i = 1
-    while i < len(args):
-        a = args[i]
-        if a == "--build-dir" and i + 1 < len(args):
-            bdir = args[i + 1]
-            i += 1
-        elif a == "--prefix" and i + 1 < len(args):
-            prefix = args[i + 1]
-            i += 1
-        elif a == "--target" and i + 1 < len(args):
-            target = args[i + 1]
-            i += 1
-        elif a == "--host" and i + 1 < len(args):
-            host = args[i + 1]
-            i += 1
-        elif a == "--jobs" and i + 1 < len(args):
-            jobs = int(args[i + 1])
-            i += 1
-        elif a == "--flat":
-            flat = True
-        i += 1
-
-    sb = ScbiBuild(
-        bdir=bdir,
-        prefix=prefix,
-        target=target,
-        host=host,
-        jobs=jobs,
-        flat=flat,
-        enabled_features=enabled_features,
-    )
-    sb.do_deps = do_deps
 
     return sb.build(module_ref)

@@ -1,5 +1,5 @@
 # scbi replay: setup
-# date: 2026-05-11 19:20:08.166358
+# date: 2026-05-11 19:35:33.712864
 # prefix: /home/obry/dev/git/scbi-opencode/.scbi-build/install
 # target: x86_64-unknown-linux-gnu
 # variant: default

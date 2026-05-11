@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import datetime as dt
 import hashlib
 import os
+import platform
+import re
 import shutil
 import subprocess
 import sys
-import tarfile
-import zipfile
 from pathlib import Path
 
 from .build_env import BuildEnv
@@ -57,6 +58,10 @@ class SourceManager:
         self.archives_dir = build_env.scbi_bdir / ".archives"
         self.vcs_dir = build_env.scbi_bdir / ".vcs"
 
+    def _log_msg(self, msg: str) -> None:
+        ts = dt.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+        print(f"{ts} : {msg}", file=sys.stderr)
+
     def handle_sources(self, plugin, ref: ModuleRef) -> int:
         variant = ref.variant or "default"
 
@@ -68,8 +73,13 @@ class SourceManager:
             return 0
 
         if ref.kind == RefKind.VERSION:
+            ver_tag = f" [{ref.version}]" if ref.version else ""
+            self._log_msg(f"get sources from archive{ver_tag}")
             return self._handle_archive(plugin, ref)
         elif ref.kind in (RefKind.DEV, RefKind.BRANCH, RefKind.NONE):
+            vcs_name = "git"
+            ver_tag = f" [{ref.version}]" if ref.version and ref.version != "NONE" else ""
+            self._log_msg(f"get sources from {vcs_name}{ver_tag}")
             return self._handle_vcs(plugin, ref)
         else:
             return self._handle_none(plugin, ref)

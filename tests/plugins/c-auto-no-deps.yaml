@@ -1,0 +1,12 @@
+name: c-auto-no-deps
+hooks:
+  vcs:
+    - "default"
+    - "none"
+  out-of-tree: true
+  config:
+    - ./configure --prefix=$PREFIX
+  build:
+    - make -j$JOBS
+  install:
+    - make install
