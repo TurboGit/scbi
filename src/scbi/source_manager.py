@@ -52,9 +52,15 @@ class SourceManager:
         self,
         plugin_loader: PluginLoader,
         build_env: BuildEnv,
+        do_update: bool = False,
+        do_patch: bool = True,
+        no_archive_cache: bool = False,
     ):
         self.loader = plugin_loader
         self.be = build_env
+        self.do_update = do_update
+        self.do_patch = do_patch
+        self.no_archive_cache = no_archive_cache
         self.archives_dir = build_env.scbi_bdir / ".archives"
         self.vcs_dir = build_env.scbi_bdir / ".vcs"
 
@@ -267,7 +273,7 @@ class SourceManager:
         self.archives_dir.mkdir(parents=True, exist_ok=True)
         dest = self.archives_dir / filename
 
-        if dest.exists():
+        if dest.exists() and not self.no_archive_cache:
             return 0
 
         full_url = f"{url}/{filename}"

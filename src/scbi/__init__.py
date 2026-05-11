@@ -1,4 +1,8 @@
 from .auto_variant import resolve_auto_variant, check_os_package
+from .build_env import BuildEnv
+from .core import ScbiBuild, main, CANONICAL_STEPS
+from .hook_executor import HookExecutor, apply_env_operation, merge_env_dict
+from .ini_config import IniConfig, load_module_env, parse_env_file
 from .models import (
     InheritMapping,
     ModuleRef,
@@ -16,14 +20,13 @@ from .models import (
 )
 from .plan_reader import PlanReader
 from .plugin_loader_yaml import PluginLoader, parse_hook_key, SCBI_BASE_HOOKS, ENV_HOOKS
-from .build_env import BuildEnv
-from .hook_executor import HookExecutor, apply_env_operation, merge_env_dict
-from .core import ScbiBuild, main, CANONICAL_STEPS
+from .store import Store
 
 __all__ = [
     "BuildEnv",
     "CANONICAL_STEPS",
     "HookExecutor",
+    "IniConfig",
     "InheritMapping",
     "ModuleRef",
     "ParsedHookKey",
@@ -36,6 +39,7 @@ __all__ = [
     "SCBI_BASE_HOOKS",
     "ENV_HOOKS",
     "ScbiBuild",
+    "Store",
     "PlanError",
     "PlanNotFoundError",
     "PlanSyntaxError",
@@ -43,6 +47,8 @@ __all__ = [
     "PluginNotFoundError",
     "PluginSyntaxError",
     "apply_env_operation",
+    "load_module_env",
+    "parse_env_file",
     "merge_env_dict",
     "main",
     "parse_hook_key",

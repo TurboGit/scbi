@@ -89,6 +89,10 @@ class Plan:
     aliases: dict[str, str] = field(default_factory=dict)
     load_order: list[str] = field(default_factory=list)
 
+    @property
+    def entries(self) -> list[PlanEntry]:
+        return list(self.modules.values())
+
 
 @dataclass
 class ParsedHookKey:

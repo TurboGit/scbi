@@ -5,16 +5,20 @@ import os
 import shutil
 import subprocess
 import sys
+import tarfile
+import tempfile
 from pathlib import Path
 
 from .auto_variant import resolve_auto_variant
 from .build_env import BuildEnv
 from .dependency_resolver import DependencyResolver
 from .hook_executor import HookExecutor
+from .ini_config import IniConfig, load_module_env, parse_env_file
 from .models import ModuleRef, Plugin, RefKind
 from .plan_reader import PlanReader
 from .plugin_loader_yaml import PluginLoader
 from .source_manager import SourceManager
+from .store import Store
 
 SCBI_VERSION = "12.1"
 
@@ -70,7 +74,11 @@ class ScbiBuild:
         self.clean_install: bool = False
         self.quiet: bool = False
         self.archive_mode: bool = False
+        self.no_archive_cache: bool = False
+        self.standalone: bool = False
         self.steps: list[str] = list(CANONICAL_STEPS)
+        self.store: Store | None = None
+        self.ini_config: IniConfig | None = None
 
     def _ensure_loaders(self) -> None:
         if self.plan_reader is None:
@@ -154,9 +162,20 @@ class ScbiBuild:
             if code != 0:
                 return code
 
+        if self.clean_install:
+            code = self._clean_install(be, plugin, ref)
+            if code != 0:
+                return code
+            return 0
+
         self._run_env_phase(executor, plugin, be)
 
-        sm = SourceManager(self.plugin_loader, be)
+        sm = SourceManager(
+            self.plugin_loader, be,
+            do_update=self.do_update,
+            do_patch=not self.no_patch,
+            no_archive_cache=self.no_archive_cache,
+        )
         code = sm.handle_sources(plugin, ref)
         if code != 0:
             print(
@@ -180,6 +199,9 @@ class ScbiBuild:
                 print(elog_msg, file=sys.stderr)
                 return code
 
+        if self.archive_mode:
+            self._create_archive(be, plugin)
+
         self._ilog(ref.module, f"End Building {ref.module} [{variant_display}] ({disp_ref})")
         return 0
 
@@ -188,6 +210,37 @@ class ScbiBuild:
         tvdv = be.tvdv_dir
         if tvdv.exists():
             shutil.rmtree(str(tvdv), ignore_errors=True)
+
+    def _clean_install(self, be: BuildEnv, plugin: Plugin, ref: ModuleRef) -> int:
+        prefix_hook = self.plugin_loader.resolve_hook(plugin, be.variant, "prefix")
+        if prefix_hook is not None and isinstance(prefix_hook, list) and prefix_hook:
+            install_prefix = Path(prefix_hook[0])
+        else:
+            install_prefix = self.prefix
+
+        self._ilog(be.module, f"clean install {be.module} for {be.scbi_target}/{be.variant}")
+        manifest = be.install_dir / ".." / "manifest"
+        if manifest.exists():
+            with open(str(manifest)) as mf:
+                for line in mf:
+                    f = line.strip()
+                    if f:
+                        target = install_prefix / f
+                        if target.exists():
+                            target.unlink()
+        if be.install_dir.exists():
+            shutil.rmtree(str(be.install_dir), ignore_errors=True)
+        return 0
+
+    def _create_archive(self, be: BuildEnv, plugin: Plugin) -> None:
+        install_dir = be.install_dir
+        if not install_dir.exists():
+            return
+        archive_name = f"{be.module}-bin.tar.bz2"
+        archive_path = be.tvdv_dir / archive_name
+        with tarfile.open(str(archive_path), "w:bz2") as tar:
+            tar.add(str(install_dir), arcname=".")
+        self._ilog(be.module, f"  archive: {archive_path}")
 
     def _do_stat(self, be: BuildEnv, plugin: Plugin) -> None:
         self._ilog(be.module, "  status:")
@@ -248,22 +301,52 @@ class ScbiBuild:
         hooks = plugin.hooks
         use_cross = be.is_cross
 
+        all_env_ops: list[tuple[str, str, str]] = []
+
+        def _accum(name: str) -> None:
+            nonlocal all_env_ops
+            resolved = self.plugin_loader.resolve_hook(
+                plugin, be.variant, name, use_cross=use_cross
+            )
+            if resolved is not None and isinstance(resolved, dict):
+                for op, data in resolved.items():
+                    if not isinstance(data, list):
+                        continue
+                    i = 0
+                    while i < len(data):
+                        var = str(data[i])
+                        value = str(data[i + 1]) if i + 1 < len(data) else None
+                        if value is not None:
+                            value = be.substitute(value)
+                        all_env_ops.append((op, var, value or ""))
+                        i += 2
+                executor.accumulate_env(resolved)
+
         if "external-env" in hooks:
             env_dict = hooks["external-env"]
             if isinstance(env_dict, dict):
+                for op, data in env_dict.items():
+                    if not isinstance(data, list):
+                        continue
+                    i = 0
+                    while i < len(data):
+                        var = str(data[i])
+                        value = str(data[i + 1]) if i + 1 < len(data) else None
+                        if value is not None:
+                            value = be.substitute(value)
+                        all_env_ops.append((op, var, value or ""))
+                        i += 2
                 executor.accumulate_env(env_dict)
 
-        resolved = self.plugin_loader.resolve_hook(
-            plugin, be.variant, "env", use_cross=use_cross
-        )
-        if resolved is not None and isinstance(resolved, dict):
-            executor.accumulate_env(resolved)
+        _accum("env")
+        _accum("build-env")
 
-        resolved_be = self.plugin_loader.resolve_hook(
-            plugin, be.variant, "build-env", use_cross=use_cross
-        )
-        if resolved_be is not None and isinstance(resolved_be, dict):
-            executor.accumulate_env(resolved_be)
+        logs_dir = be.tvdv_dir / "logs"
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        env_cmd_path = logs_dir / "env.cmd"
+        with open(str(env_cmd_path), "w") as f:
+            for op, var, value in all_env_ops:
+                f.write(f"define-var {op} {var} \"{value}\"\n")
 
     def _resolve_config_options(
         self, plugin: Plugin, be: BuildEnv
@@ -435,6 +518,13 @@ class ScbiBuild:
             commands = main_hook
             if isinstance(commands, list):
                 if step == "config":
+                    if self.safe and self._is_out_of_tree(plugin, be):
+                        if be.build_dir.exists():
+                            shutil.rmtree(str(be.build_dir), ignore_errors=True)
+                        tvdv_bid = be.tvdv_dir / "build-id"
+                        if tvdv_bid.exists():
+                            tvdv_bid.unlink()
+
                     if not self.do_force and self._is_source_unchanged(be):
                         self._ilog(be.module, "config skipped (source unchanged)")
                         return 0
@@ -475,6 +565,40 @@ def _file_eq(a: Path, b: Path) -> bool:
         return a.read_text() == b.read_text()
     except OSError:
         return False
+
+
+def _create_standalone(sb: ScbiBuild) -> None:
+    tmp = Path(tempfile.mkdtemp(prefix="sa-"))
+    dest = tmp / sb.bdir.name
+    dest.mkdir(parents=True)
+    (dest / "bin").mkdir()
+    (dest / "scripts.d").mkdir()
+    (dest / "builds/.vcs").mkdir(parents=True)
+    (dest / "builds/.archives").mkdir(parents=True)
+    (dest / "builds/.patches").mkdir(parents=True)
+
+    # Create env file
+    env_file = dest / ".scbi-env-std"
+    env_file.write_text(
+        f"SCBI_ROOT=$PWD\n"
+        f"SCBI_BDIR=$SCBI_ROOT/builds\n"
+        f"SCBI_PREFIX=$SCBI_BDIR/install\n"
+        f"SCBI_ARCHIVES=$SCBI_BDIR/.archives\n"
+        f"SCBI_PATCH=$SCBI_BDIR/.patches\n"
+        f"SCBI_LOGS=$SCBI_BDIR/.logs\n"
+        f"SCBI_PLAN={sb.plan_name or ''}\n"
+    )
+
+    # Create build script
+    build_script = dest / "build"
+    build_script.write_text(
+        "#!/bin/bash\n"
+        "export PATH=$PWD/bin:$PATH\n"
+        f"./scbi --env=std --deps $@\n"
+    )
+    build_script.chmod(0o755)
+
+    print(f"Standalone archive created at {tmp}.tgz", file=sys.stderr)
 
 
 def _parse_enable_flag(arg: str) -> tuple[str, str] | None:
@@ -526,6 +650,7 @@ def _usage() -> None:
     print("  -n | --no-patch          Do not apply patches", file=sys.stderr)
     print("  -e | --env=<name>        Environment file", file=sys.stderr)
     print("  -a | --create-archive    Build binary archive", file=sys.stderr)
+    print("       --archive           Disable archive cache", file=sys.stderr)
     print("       --plan=<name>       Use a build plan", file=sys.stderr)
     print("       --target=<triple>   Target triplet", file=sys.stderr)
     print("       --host=<triple>     Host triplet", file=sys.stderr)
@@ -596,8 +721,12 @@ def main(argv: list[str] | None = None) -> int:
             sb.clean_install = True
             args.pop(i)
             continue
-        elif a in ("--archive",):
+        elif a in ("--create-archive", "-a"):
             sb.archive_mode = True
+            args.pop(i)
+            continue
+        elif a in ("--archive",):
+            sb.no_archive_cache = True
             args.pop(i)
             continue
         elif a in ("--standalone",):
@@ -709,10 +838,111 @@ def main(argv: list[str] | None = None) -> int:
         keep = set(sb.steps)
         sb.steps = [s for s in CANONICAL_STEPS if s in keep]
 
+    # Load INI files
+    ini_config = IniConfig()
+    ini_config.load_files()
+    if sb.ini_section is not None:
+        ini_vals = ini_config.apply_values(sb.ini_section)
+    else:
+        ini_vals = ini_config.apply_values(None)
+    sb.ini_config = ini_config
+
+    # Apply INI values to ScbiBuild attributes
+    for key, val in ini_vals.items():
+        if key == "SCBI_BDIR" and not any("--build-dir" in a for a in argv if a):
+            sb.bdir = Path(str(val))
+        elif key == "SCBI_PREFIX" and not any("--prefix" in a for a in argv if a):
+            sb.prefix = Path(str(val))
+        elif key == "SCBI_PLUGINS" and not any("--plugins" in a for a in argv if a):
+            sb.plugins_dir = Path(str(val))
+        elif key == "SCBI_TARGET" and not any("--target" in a for a in argv if a):
+            sb.target = str(val)
+        elif key == "SCBI_JOBS" and not any("--jobs" in a for a in argv if a):
+            sb.jobs = int(val)
+        elif key == "SCBI_GIT_REPO":
+            os.environ.setdefault("SCBI_GIT_REPO", str(val))
+        elif key == "SCBI_HG_REPO":
+            os.environ.setdefault("SCBI_HG_REPO", str(val))
+        elif key == "SCBI_ROOT":
+            os.environ.setdefault("SCBI_ROOT", str(val))
+        elif key == "ENV_NAME" and not sb.env_name:
+            sb.env_name = str(val)
+        elif key == "SCBI_PLAN" and not sb.plan_name:
+            sb.plan_name = str(val)
+        elif key.startswith("SCBI_") and key.endswith("_SET"):
+            feat_name = key[5:-4].lower()
+            sb.enabled_features[feat_name] = "true"
+        elif key == "SCBI_INI_MODULES":
+            pass  # used below
+        elif key.startswith("DO_"):
+            opt_name = key[3:].lower()
+            if opt_name == "quiet":
+                sb.quiet = val and str(val).lower() in ("yes", "true")
+            elif opt_name == "force":
+                sb.do_force = val and str(val).lower() in ("yes", "true")
+            elif opt_name == "update":
+                sb.do_update = val and str(val).lower() in ("yes", "true")
+            elif opt_name == "purge":
+                sb.do_purge = val and str(val).lower() in ("yes", "true")
+            elif opt_name == "archive":
+                sb.archive_mode = val and str(val).lower() in ("yes", "true")
+        elif key == "SCBI_INI_OPTIONS" and isinstance(val, list):
+            for opt in val:
+                if opt == "--safe":
+                    sb.safe = True
+                elif opt == "--no-patch":
+                    sb.no_patch = True
+
+    # Load environment file
+    env_dir = None
+    if sb.env_name:
+        env_dir, env_path = load_module_env(sb.env_name, sb.plugins_dir)
+        if env_path and env_dir:
+            env_vars = parse_env_file(env_path)
+            for k, v in env_vars.items():
+                os.environ.setdefault(k, v)
+                if k == "SCBI_BDIR":
+                    sb.bdir = Path(v)
+                elif k == "SCBI_PREFIX":
+                    sb.prefix = Path(v)
+
+    # Load plan if specified
+    if sb.plan_name:
+        sb._ensure_loaders()
+        plan = sb.plan_reader.load(sb.plan_name)
+        if plan and plan.entries:
+            # Plans augment module references via module-version mapping
+            plan_refs = {}
+            for e in plan.entries:
+                if e.module:
+                    m = ModuleRef.parse(e.ref_str)
+                    plan_refs[m.module] = e.ref_str
+            for mod_name, mod_ref in plan_refs.items():
+                os.environ[f"SCBI_MODVER_{mod_name}"] = mod_ref
+
     if not args:
         _usage()
         return 1
 
     module_ref = args[0]
 
-    return sb.build(module_ref)
+    # If plan is loaded and has entries, build all modules in plan
+    if sb.plan_name and sb.plan_reader:
+        plan = sb.plan_reader.load(sb.plan_name)
+        if plan and plan.entries:
+            for entry in plan.entries:
+                ref = entry.ref_str if entry.ref_str else entry.module
+                code = sb.build(ref)
+                if code != 0:
+                    return code
+
+            if sb.standalone:
+                _create_standalone(sb)
+            return 0
+
+    code = sb.build(module_ref)
+
+    if sb.standalone:
+        _create_standalone(sb)
+
+    return code

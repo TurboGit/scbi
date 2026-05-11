@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import pytest
 
@@ -240,3 +241,103 @@ def test_cross_with_use_cross_false():
     assert resolved is not None
     config_text = " ".join(resolved)
     assert "--build=" not in config_text
+
+
+def test_main_update_flag():
+    code = main(["--update", "--dry-run", "c-noop"])
+    assert code == 0
+
+
+def test_main_safe_flag():
+    code = main(["--safe", "--dry-run", "c-noop"])
+    assert code == 0
+
+
+def test_main_clean_install_flag():
+    code = main(["--clean-install", "--dry-run", "c-noop"])
+    assert code == 0
+
+
+def test_main_no_patch_flag():
+    sb = ScbiBuild()
+    sb.no_patch = True
+    assert sb.no_patch is True
+
+
+def test_main_standalone_flag():
+    code = main(["--standalone", "--dry-run", "c-noop"])
+    assert code == 0
+
+
+def test_main_create_archive_flag():
+    code = main(["--create-archive", "--dry-run", "c-noop"])
+    assert code == 0
+
+def test_main_create_archive_flag_short():
+    code = main(["-a", "--dry-run", "c-noop"])
+    assert code == 0
+
+def test_main_archive_cache_flag():
+    code = main(["--archive", "--dry-run", "c-noop"])
+    assert code == 0
+
+
+def test_main_ini_section_flag():
+    code = main(["--ini=test", "--dry-run", "c-noop"])
+    assert code == 0
+
+
+def test_main_plan_flag():
+    code = main(["--plan=default", "--dry-run", "c-noop"])
+    assert code == 0
+
+
+def test_main_env_flag(tmp_path):
+    env_file = tmp_path / ".scbi-env-test"
+    env_file.write_text("SCBI_ROOT=/test/root\n")
+    orig_cwd = Path.cwd()
+    try:
+        os.chdir(str(tmp_path))
+        code = main(["--env=test", "--dry-run", "c-noop"])
+        assert code == 0
+    finally:
+        os.chdir(str(orig_cwd))
+
+
+def test_ini_config_integration(tmp_path):
+    """INI config with build-dir should affect build output location (via main)."""
+    ini = tmp_path / ".scbi"
+    plugins_dir = Path.cwd() / "tests/plugins"
+    ini.write_text(
+        "[build]\n"
+        f"build-dir={tmp_path / 'mybuild'}\n"
+        f"plugins={plugins_dir}\n"
+        "jobs=2\n"
+    )
+    orig_cwd = Path.cwd()
+    try:
+        os.chdir(str(tmp_path))
+        code = main(["--ini=build", "c-noop"])
+        assert code == 0
+        assert (tmp_path / "mybuild").exists()
+    finally:
+        os.chdir(str(orig_cwd))
+
+
+
+
+
+def test_main_build_with_env_no_dry_run(tmp_path):
+    """Full build with env file (no --dry-run)."""
+    env_file = tmp_path / ".scbi-env-build"
+    env_file.write_text("SCBI_TEST_VAR=from_env\n")
+    plugins_dir = Path.cwd() / "tests/plugins"
+    orig_cwd = Path.cwd()
+    try:
+        os.chdir(str(tmp_path))
+        code = main([f"--plugins={plugins_dir}", "--env=build", "c-noop"])
+        assert code == 0
+        assert os.environ.get("SCBI_TEST_VAR") == "from_env"
+    finally:
+        os.environ.pop("SCBI_TEST_VAR", None)
+        os.chdir(str(orig_cwd))
