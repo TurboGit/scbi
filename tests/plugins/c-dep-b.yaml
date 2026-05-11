@@ -1,0 +1,10 @@
+name: c-dep-b
+hooks:
+  config:
+    - "true"
+  build:
+    - "true"
+  install:
+    - "true"
+  setup:
+    - "true"

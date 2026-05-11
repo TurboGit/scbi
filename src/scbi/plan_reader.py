@@ -342,6 +342,8 @@ class PlanReader:
                 continue
             if d in self.discriminants:
                 continue
+            if variant and d in variant.split("."):
+                continue
             return False
         return True
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import platform
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -19,6 +20,7 @@ class BuildEnv:
     scbi_plugins: Path | None = None
     scbi_jobs: int = 0
     scbi_flat: bool = False
+    scbi_enabled_features: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.scbi_host:
@@ -71,6 +73,44 @@ class BuildEnv:
         self.build_dir.mkdir(parents=True, exist_ok=True)
         self.install_dir.mkdir(parents=True, exist_ok=True)
         self.logs_dir.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def is_cross(self) -> bool:
+        return self.scbi_host != self.scbi_target
+
+    def is_enabled(self, name: str) -> bool:
+        key = name.replace("-", "_")
+        val = self.scbi_enabled_features.get(key)
+        if val is not None:
+            return val == "true"
+        return False
+
+    def has_variant(self, variant_dot: str, target: str) -> bool:
+        return target in variant_dot.split(".")
+
+    def system_compiler(self) -> dict[str, str]:
+        return {
+            "PATH": "/usr/local/bin:/usr/bin:/bin",
+            "C_INCLUDE_PATH": "",
+            "CPLUS_INCLUDE_PATH": "",
+            "LIBRARY_PATH": "",
+            "LD_LIBRARY_PATH": "",
+            "ADA_PROJECT_PATH": "",
+        }
+
+    @staticmethod
+    def get_version_number(value: str) -> str:
+        normalized = value.replace("_", ".")
+        m = re.match(
+            r"[^0-9-]*(-?\d*(\.\d*)?(\.\d*)?).*", normalized
+        )
+        if m:
+            num_str = m.group(1)
+            letters = len(value) - len(num_str)
+            if letters > 5 or num_str.endswith("."):
+                return "0"
+            return num_str if num_str else "0"
+        return "0"
 
     def substitute(self, text: str) -> str:
         return (

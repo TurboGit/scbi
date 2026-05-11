@@ -1,0 +1,13 @@
+name: c-dep-multi
+hooks:
+  build-depends:
+    - c-dep-a
+    - c-noop
+  config:
+    - "true"
+  build:
+    - "true"
+  install:
+    - "true"
+  setup:
+    - "true"

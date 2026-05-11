@@ -68,3 +68,93 @@ def test_cli_args_parsing():
         assert r.module == module, f"{ref_str}: module={r.module}"
         assert r.variant == variant, f"{ref_str}: variant={r.variant}"
         assert r.kind == kind, f"{ref_str}: kind={r.kind}"
+
+
+def test_main_enable_flag():
+    sb = ScbiBuild(
+        plugins_dir=Path("tests/plugins"),
+        enabled_features={"feature_one": "true"},
+    )
+    code = sb.build("c-noop")
+    assert code == 0
+
+
+def test_main_multiple_enable_flags():
+    sb = ScbiBuild(
+        plugins_dir=Path("tests/plugins"),
+        enabled_features={"feature_one": "true", "feature_two": "true"},
+    )
+    code = sb.build("c-noop")
+    assert code == 0
+
+
+def test_main_enable_and_deps():
+    sb = ScbiBuild(
+        plugins_dir=Path("tests/plugins"),
+        enabled_features={"feature": "true"},
+    )
+    sb.do_deps = True
+    code = sb.build("c-noop")
+    assert code == 0
+
+
+def test_scbi_build_with_enabled_features():
+    sb = ScbiBuild(
+        plugins_dir=Path("tests/plugins"),
+        enabled_features={"test_feature": "true"},
+    )
+    assert sb.enabled_features == {"test_feature": "true"}
+
+
+def test_scbi_build_inherits_features_to_env():
+    """Enabled features are passed to BuildEnv and accessible via is_enabled."""
+    from src.scbi.build_env import BuildEnv
+    sb = ScbiBuild(
+        plugins_dir=Path("tests/plugins"),
+        enabled_features={"my_feature": "true"},
+    )
+    be = BuildEnv(
+        module="c-test",
+        scbi_enabled_features=sb.enabled_features,
+    )
+    assert be.is_enabled("my-feature")
+    assert not be.is_enabled("non-existent")
+
+
+def test_cross_compilation_hooks_resolved():
+    """c-gmp has cross-config which should be resolved when host != target."""
+    from src.scbi.plugin_loader_yaml import PluginLoader
+    from src.scbi.models import ModuleRef
+    from src.scbi.build_env import BuildEnv
+    loader = PluginLoader(Path("tests/plugins"))
+    ref = ModuleRef.parse("c-gmp")
+    plugin = loader.load(ref.module)
+    be = BuildEnv(
+        module=ref.module,
+        variant=ref.variant,
+        scbi_host="x86_64-linux-gnu",
+        scbi_target="aarch64-linux-gnu",
+        scbi_plugins=Path("tests/plugins"),
+    )
+    assert be.is_cross
+    resolved = loader.resolve_hook(
+        plugin, be.variant, "config", use_cross=True
+    )
+    assert resolved is not None
+    config_text = " ".join(resolved)
+    assert "--build=" in config_text
+
+
+def test_cross_with_use_cross_false():
+    """When host == target, cross hooks should not be resolved."""
+    from src.scbi.plugin_loader_yaml import PluginLoader
+    from src.scbi.models import ModuleRef
+    loader = PluginLoader(Path("tests/plugins"))
+    ref = ModuleRef.parse("c-gmp")
+    plugin = loader.load(ref.module)
+    resolved = loader.resolve_hook(
+        plugin, ref.variant, "config", use_cross=False
+    )
+    assert resolved is not None
+    config_text = " ".join(resolved)
+    assert "--build=" not in config_text

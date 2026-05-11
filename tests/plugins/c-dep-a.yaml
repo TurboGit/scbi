@@ -1,0 +1,12 @@
+name: c-dep-a
+hooks:
+  build-depends:
+    - c-dep-b
+  config:
+    - "true"
+  build:
+    - "true"
+  install:
+    - "true"
+  setup:
+    - "true"

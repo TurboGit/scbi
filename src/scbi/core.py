@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 from .build_env import BuildEnv
+from .dependency_resolver import DependencyResolver
 from .hook_executor import HookExecutor
 from .models import ModuleRef, Plugin, RefKind
 from .plan_reader import PlanReader
@@ -34,6 +35,7 @@ class ScbiBuild:
         host: str | None = None,
         jobs: int = 0,
         flat: bool = False,
+        enabled_features: dict[str, str] | None = None,
     ):
         cwd = Path.cwd()
         self.plugins_dir = Path(plugins_dir) if plugins_dir else cwd / "scripts.d"
@@ -44,9 +46,12 @@ class ScbiBuild:
         self.host = host or ""
         self.jobs = jobs
         self.flat = flat
+        self.enabled_features = enabled_features or {}
 
         self.plan_reader: PlanReader | None = None
         self.plugin_loader: PluginLoader | None = None
+        self.dependency_resolver: DependencyResolver | None = None
+        self.do_deps: bool = False
 
     def _ensure_loaders(self) -> None:
         if self.plan_reader is None:
@@ -75,6 +80,7 @@ class ScbiBuild:
             scbi_plugins=self.plugins_dir,
             scbi_jobs=self.jobs,
             scbi_flat=self.flat,
+            scbi_enabled_features=self.enabled_features,
         )
 
         be.ensure_dirs()
@@ -90,6 +96,13 @@ class ScbiBuild:
         modules_list = self._get_modules(plugin, be)
         if modules_list is not None:
             return self._build_meta(plugin, be, executor, modules_list, ref)
+
+        if self.do_deps:
+            if self.dependency_resolver is None:
+                self.dependency_resolver = DependencyResolver(self)
+            code = self.dependency_resolver.resolve(ref)
+            if code != 0:
+                return code
 
         self._run_env_phase(executor, plugin, be)
 
@@ -117,7 +130,7 @@ class ScbiBuild:
         self, plugin: Plugin, be: BuildEnv
     ) -> list[str] | None:
         resolved = self.plugin_loader.resolve_hook(
-            plugin, be.variant, "modules"
+            plugin, be.variant, "modules", use_cross=be.is_cross
         )
         if resolved is not None and isinstance(resolved, list):
             return [be.substitute(m.strip()) for m in resolved if m.strip()]
@@ -134,7 +147,7 @@ class ScbiBuild:
         self._ilog(be.module, f"  meta-module: {modules_list}")
 
         resolved_agg = self.plugin_loader.resolve_hook(
-            plugin, be.variant, "aggregate"
+            plugin, be.variant, "aggregate", use_cross=be.is_cross
         )
 
         self._run_env_phase(executor, plugin, be)
@@ -157,18 +170,21 @@ class ScbiBuild:
         self, executor: HookExecutor, plugin: Plugin, be: BuildEnv
     ) -> None:
         hooks = plugin.hooks
+        use_cross = be.is_cross
 
         if "external-env" in hooks:
             env_dict = hooks["external-env"]
             if isinstance(env_dict, dict):
                 executor.accumulate_env(env_dict)
 
-        resolved = self.plugin_loader.resolve_hook(plugin, be.variant, "env")
+        resolved = self.plugin_loader.resolve_hook(
+            plugin, be.variant, "env", use_cross=use_cross
+        )
         if resolved is not None and isinstance(resolved, dict):
             executor.accumulate_env(resolved)
 
         resolved_be = self.plugin_loader.resolve_hook(
-            plugin, be.variant, "build-env"
+            plugin, be.variant, "build-env", use_cross=use_cross
         )
         if resolved_be is not None and isinstance(resolved_be, dict):
             executor.accumulate_env(resolved_be)
@@ -177,7 +193,7 @@ class ScbiBuild:
         self, plugin: Plugin, be: BuildEnv
     ) -> str:
         results = self.plugin_loader.resolve_all_hooks(
-            plugin, be.variant, "config-options"
+            plugin, be.variant, "config-options", use_cross=be.is_cross
         )
         if not results:
             return ""
@@ -192,7 +208,7 @@ class ScbiBuild:
 
     def _is_out_of_tree(self, plugin: Plugin, be: BuildEnv) -> bool:
         resolved = self.plugin_loader.resolve_hook(
-            plugin, be.variant, "out-of-tree"
+            plugin, be.variant, "out-of-tree", use_cross=be.is_cross
         )
         if resolved is not None:
             if isinstance(resolved, list) and resolved:
@@ -279,13 +295,14 @@ class ScbiBuild:
         step: str,
     ) -> int:
         ld = self.plugin_loader
+        use_cross = be.is_cross
 
         pre_key = f"pre-{step}"
         post_key = f"post-{step}"
 
-        pre_hook = ld.resolve_hook(plugin, be.variant, pre_key)
-        main_hook = ld.resolve_hook(plugin, be.variant, step)
-        post_hook = ld.resolve_hook(plugin, be.variant, post_key)
+        pre_hook = ld.resolve_hook(plugin, be.variant, pre_key, use_cross=use_cross)
+        main_hook = ld.resolve_hook(plugin, be.variant, step, use_cross=use_cross)
+        post_hook = ld.resolve_hook(plugin, be.variant, post_key, use_cross=use_cross)
 
         log_path = be.logs_dir / f"{step}.log"
         cmd_path = be.logs_dir / f"{step}.cmd"
@@ -383,25 +400,52 @@ def _file_eq(a: Path, b: Path) -> bool:
         return False
 
 
+def _parse_enable_flag(arg: str) -> tuple[str, str] | None:
+    if arg.startswith("--enable-"):
+        name = arg[len("--enable-"):]
+        key = name.replace("-", "_")
+        return (key, "true")
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
     args = list(argv)
 
-    for a in args:
+    do_deps = False
+    enabled_features: dict[str, str] = {}
+
+    i = 0
+    while i < len(args):
+        a = args[i]
         if a in ("--help", "-h"):
             print(
                 "Usage: scbi <module>[/<variant>][:<version>] [options]",
                 file=sys.stderr,
             )
             print("Options:", file=sys.stderr)
-            print("  --build-dir DIR   Build root directory", file=sys.stderr)
-            print("  --prefix DIR      Install prefix", file=sys.stderr)
-            print("  --target TRIPLE   Target triplet", file=sys.stderr)
-            print("  --jobs N          Parallel jobs", file=sys.stderr)
-            print("  --flat            Flatter directory structure", file=sys.stderr)
+            print("  --build-dir DIR     Build root directory", file=sys.stderr)
+            print("  --prefix DIR        Install prefix", file=sys.stderr)
+            print("  --target TRIPLE     Target triplet", file=sys.stderr)
+            print("  --host TRIPLE       Host triplet", file=sys.stderr)
+            print("  --deps              Build dependencies first", file=sys.stderr)
+            print("  --enable-<name>     Enable feature name", file=sys.stderr)
+            print("  --jobs N            Parallel jobs", file=sys.stderr)
+            print("  --flat              Flatter directory structure", file=sys.stderr)
             return 0
+        elif a == "--deps":
+            do_deps = True
+            args.pop(i)
+            continue
+        elif a.startswith("--enable-"):
+            feat = _parse_enable_flag(a)
+            if feat:
+                enabled_features[feat[0]] = feat[1]
+            args.pop(i)
+            continue
+        i += 1
 
     if not args:
         print("Usage: scbi <module>[/<variant>][:<version>]", file=sys.stderr)
@@ -445,6 +489,8 @@ def main(argv: list[str] | None = None) -> int:
         host=host,
         jobs=jobs,
         flat=flat,
+        enabled_features=enabled_features,
     )
+    sb.do_deps = do_deps
 
     return sb.build(module_ref)
