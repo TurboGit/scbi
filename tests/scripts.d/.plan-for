@@ -1,0 +1,3 @@
+@set GLOBAL = 87
+
+@for main use module7:${GLOBAL}

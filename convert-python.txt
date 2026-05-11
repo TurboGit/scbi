@@ -1,0 +1,41 @@
+The project SCBI is used to configure, build and install large projects where many dependencies are needed.
+
+The code is in Bash script.
+
+A large testsuite is present in the tests directory.
+
+A full documentation in Latex can be found in the doc directory. This is the most important source of information to get a full understand of the project usage. All commands are described here, all hooks and the order they are called are also described here.
+
+As a complement the design can be summarized as:
+- The core is fully independant from the plug-in. We call it the driver in the rest of this document.
+- A plug-in is used to build a single library or application and found in a single file.
+- A plug-in is a set of Bash function (hooks) that are called when needed by the main driver.
+- A plug-in is very independant on the actual variant/version to build. That is the same plug-in can be used to build multiple versions if needed.
+- A plug-in should be written without any control structure like conditionals. Those are just bad for the readability. This has been a key point in the design. That is ensure that those controls are not needed (multiple variants).
+- The versions of all modules for a specific build are declared in a plan.
+- A plan is a text file describing the plug-in variants and version to build. The form is plugin-name/variant:version. Also one can specify mulitple variants each spearated by a dot.
+- A plan have some specific grammar like barrier using quare brakets and some other specific keywords (@for, @load).
+- A plug-in can inherit from another one and refine some of the hooks.
+- There is some specific plug-in called meta-plugin that list a set of plug-in to build. One can use the meta-plugin to reference as dependencies all the modules listed. Also a meta-plugin can propagate versions to all listed modules and if necessary aggregate them (aggregate meta-plugin).
+
+All this has proved to be quite effective and today lot of softwares are built using it (see scripts.d/ directory for some examples).
+
+The goal is to convert this project from Bash to Python and having the testsuite pass.
+
+The scbi driver and tools have quite some options, all should be kept.
+
+For the migration it is important to have plug-in described in YAML. But you may propose some other better alternative if you feel so.
+
+Each plug-in when handled must be done in an environment where only the necessary variables are defined. This was done in Bash by handling each plug-in in a separate sub-shell.
+
+Also there are many tools like scbi-lint, scbi-shell, scbi-show, scbi-store, scbi-source-archive, scbi-dormat that I'd like to migrate.
+
+There is support for ini style files ($HOME/.scbi) where it is possible specific tasks under a simple name (kind of alias for scbi command with all arguments).
+
+To be done:
+1. Create a plan reader keeping the plan text format.
+2. Migrate the scbi driver to Python, this means that the runtimes files are all to be converted (scripts.d/[0-9]*). You need to keep the same output as the Bash version. That is all messages displayed on the console, so the actual code must be followed as closely as possible.
+3. Migrate the scbi tools shell, show, store first as the most important.
+4. Migrate the testsuite to use the new Python drivers but keep the testsuite in Bash for now.
+
+Do you think you can help with such task?
