@@ -1,0 +1,15 @@
+name: test3
+hooks:
+  out-of-tree: false
+  vcs:
+    - default
+    - none
+    - git
+    - ${TESTREPOS}/test1.bundle
+  config:
+    - ./configure
+  build:
+    - make
+  install:
+    - mkdir -p $PREFIX/bin
+    - cp main $PREFIX/bin

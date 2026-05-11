@@ -1,0 +1,43 @@
+name: lib1
+hooks:
+  out-of-tree: false
+  vcs:
+    - default
+    - none
+    - git
+    - ${TESTREPOS}/lib1.bundle
+  archive:
+    - default
+    - none
+    - none
+    - none
+    - lib1-$VERSION-src.tar.bz2
+  patches:
+    - lib1-0-fix.patch
+  variant-no-patch-patches: []
+  build-env:
+    set-var:
+      - C_INCLUDE_PATH
+      - $PWD/include:$C_INCLUDE_PATH
+      - LIBRARY_PATH
+      - .:$PWD/lib:$LIBRARY_PATH
+      - LD_LIBRARY_PATH
+      - .:$PWD/lib:$LD_LIBRARY_PATH
+  env:
+    add-to-var:
+      - C_INCLUDE_PATH
+      - $PREFIX/include
+      - LD_LIBRARY_PATH
+      - $PREFIX/lib
+      - LIBRARY_PATH
+      - $PREFIX/lib
+  build:
+    - rm -f *.o
+    - make --no-print-directory
+  install:
+    - mkdir -p $PREFIX/include $PREFIX/lib $PREFIX/bin
+    - cp liblib1.so $PREFIX/lib
+    - cp lib1.h $PREFIX/include
+    - cp main $PREFIX/bin
+  tests:
+    - ./main

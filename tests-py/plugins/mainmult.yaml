@@ -1,0 +1,23 @@
+name: mainmult
+hooks:
+  out-of-tree: false
+  vcs:
+    - default
+    - none
+    - git
+    - ${TESTREPOS}/mainmult.bundle
+  depends:
+    - lib1
+    - lib2
+  env:
+    prepend-to-var:
+      - PATH
+      - $PREFIX/bin
+  build:
+    - rm -f *.o
+    - make --no-print-directory
+  install:
+    - mkdir -p $PREFIX/bin
+    - cp mainmult $PREFIX/bin
+  tests:
+    - ./mainmult

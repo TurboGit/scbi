@@ -149,6 +149,7 @@ class HookExecutor:
         cmd_path: Path,
         step: str,
         cwd: Path | None = None,
+        show_stdout: bool = False,
     ) -> int:
         if isinstance(commands, dict):
             return self._run_env_dict(commands)
@@ -188,13 +189,16 @@ class HookExecutor:
 
                 if result.stdout:
                     lf.write(result.stdout)
-                    sys.stderr.write(result.stdout)
+                    if show_stdout:
+                        sys.stderr.write(result.stdout)
                 if result.stderr:
                     lf.write(result.stderr)
                     sys.stderr.write(result.stderr)
                 lf.flush()
 
                 if result.returncode != 0:
+                    if result.stdout and not show_stdout:
+                        sys.stderr.write(result.stdout)
                     return result.returncode
 
         return 0

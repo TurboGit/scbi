@@ -1,0 +1,10 @@
+name: test1
+hooks:
+  out-of-tree: false
+  vcs:
+    - default
+    - none
+    - git
+    - ${TESTREPOS}/test1.bundle
+  config:
+    - ./configure

@@ -1,0 +1,22 @@
+name: mainlib
+hooks:
+  out-of-tree: false
+  vcs:
+    - default
+    - none
+    - git
+    - ${TESTREPOS}/mainlib.bundle
+  depends:
+    - lib1
+  env:
+    add-to-var:
+      - PATH
+      - $PREFIX/bin
+  build:
+    - rm -f *.o
+    - make
+  install:
+    - mkdir -p $PREFIX/bin
+    - cp mainlib $PREFIX/bin
+  tests:
+    - ./mainlib

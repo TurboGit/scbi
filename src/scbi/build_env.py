@@ -24,7 +24,7 @@ class BuildEnv:
 
     def __post_init__(self):
         if not self.scbi_host:
-            self.scbi_host = platform.machine() + "-unknown-linux-gnu"
+            self.scbi_host = platform.machine() + "-linux-gnu"
         if not self.scbi_target:
             self.scbi_target = self.scbi_host
         if self.scbi_jobs <= 0:
@@ -113,7 +113,7 @@ class BuildEnv:
         return "0"
 
     def substitute(self, text: str) -> str:
-        return (
+        result = (
             text.replace("$PREFIX", str(self.scbi_prefix))
             .replace("$TARGET", self.scbi_target)
             .replace("$HOST", self.scbi_host)
@@ -123,3 +123,9 @@ class BuildEnv:
             .replace("$SCBI_BDIR", str(self.scbi_bdir))
             .replace("$TVDIR", str(self.tvdv_dir))
         )
+        result = re.sub(
+            r'\$\{(\w+)\}|\$(\w+)',
+            lambda m: os.environ.get(m.group(1) or m.group(2), m.group(0)),
+            result,
+        )
+        return result

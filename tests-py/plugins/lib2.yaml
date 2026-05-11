@@ -1,0 +1,36 @@
+name: lib2
+hooks:
+  out-of-tree: false
+  vcs:
+    - default
+    - none
+    - git
+    - ${TESTREPOS}/lib2.bundle
+  build-env:
+    set-var:
+      - C_INCLUDE_PATH
+      - $PWD/include:$C_INCLUDE_PATH
+      - LIBRARY_PATH
+      - .:$PWD/lib:$LIBRARY_PATH
+      - LD_LIBRARY_PATH
+      - .:$PWD/lib:$LD_LIBRARY_PATH
+  env:
+    add-to-var:
+      - C_INCLUDE_PATH
+      - $PREFIX/include
+      - LD_LIBRARY_PATH
+      - $PREFIX/lib
+      - LIBRARY_PATH
+      - $PREFIX/lib
+  config:
+    - echo '#define VARIANT "default"' > config.h
+  variant1-config:
+    - echo '#define VARIANT "variant1"' > config.h
+  build:
+    - make
+  install:
+    - mkdir -p $PREFIX/include $PREFIX/lib
+    - cp liblib2.so $PREFIX/lib
+    - cp lib2.h $PREFIX/include
+  tests:
+    - ./main2

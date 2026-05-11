@@ -285,10 +285,6 @@ class SourceManager:
             else:
                 cmd = ["wget", "-q", full_url, "-O", str(dest)]
 
-            print(
-                f"scbi: {module} get sources from archive",
-                file=sys.stderr,
-            )
             result = subprocess.run(
                 cmd, capture_output=True, text=True
             )
@@ -424,10 +420,6 @@ class SourceManager:
 
         if vcs_kind == "git":
             if not repo_dir.exists():
-                print(
-                    f"scbi: {module} get sources from git",
-                    file=sys.stderr,
-                )
                 result = subprocess.run(
                     ["git", "clone", "--recursive", url, str(repo_dir)],
                     capture_output=True, text=True,
@@ -459,10 +451,6 @@ class SourceManager:
 
         elif vcs_kind in ("mercurial", "hg"):
             if not repo_dir.exists():
-                print(
-                    f"scbi: {module} get sources from mercurial",
-                    file=sys.stderr,
-                )
                 result = subprocess.run(
                     ["hg", "clone", url, str(repo_dir)],
                     capture_output=True, text=True,
@@ -482,10 +470,6 @@ class SourceManager:
 
         elif vcs_kind in ("subversion", "svn"):
             if not repo_dir.exists():
-                print(
-                    f"scbi: {module} get sources from subversion",
-                    file=sys.stderr,
-                )
                 result = subprocess.run(
                     ["svn", "co", url, str(repo_dir)],
                     capture_output=True, text=True,

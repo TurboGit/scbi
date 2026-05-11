@@ -30,6 +30,8 @@ CANONICAL_STEPS = [
     "wrapup",
 ]
 
+TEST_STEP = "tests"
+
 
 class ScbiBuild:
     def __init__(
@@ -184,7 +186,16 @@ class ScbiBuild:
             )
             return code
 
-        self._ilog(ref.module, "trigger: not yet built")
+        source_unchanged = not self.do_force and self._is_source_unchanged(be)
+        build_cached = not self.do_force and self._is_build_cached(be)
+
+        if self.do_force:
+            self._ilog(ref.module, "trigger: forced")
+        elif source_unchanged and build_cached:
+            self._ilog(ref.module, "no build needed: versions matching")
+            self.steps = [s for s in self.steps if s == "wrapup"]
+        else:
+            self._ilog(ref.module, "trigger: not yet built")
 
         if ref.variant.startswith("native"):
             self._ilog(ref.module, f"End Building {ref.module} [{variant_display}] ({disp_ref})")
@@ -386,6 +397,7 @@ class ScbiBuild:
             subprocess.run(
                 [
                     "rsync", "-a", "--delete",
+                    f"--link-dest={shared_src}/",
                     str(shared_src) + "/",
                     str(variant_src) + "/",
                 ],
@@ -412,9 +424,23 @@ class ScbiBuild:
                 rel = os.path.relpath(src_dir, build_dir.parent)
                 os.symlink(rel, str(build_dir))
 
+    def _wrapup_install(self, be: BuildEnv) -> None:
+        install_dir = be.install_dir
+        if install_dir.exists() and self.prefix != install_dir:
+            self.prefix.mkdir(parents=True, exist_ok=True)
+            subprocess.run(
+                [
+                    "rsync", "-a",
+                    str(install_dir) + "/",
+                    str(self.prefix) + "/",
+                ],
+                capture_output=True,
+            )
+            sandbox_path = str(self.prefix).replace(str(self.bdir), "<sandbox>")
+            self._ilog(be.module, f"copy install into {sandbox_path}")
+
     def _is_source_unchanged(self, be: BuildEnv) -> bool:
         var_sid = be.module_root / f"source-id-{be.variant}"
-        latest_sid = be.module_root / "source-id"
         tvdv_sid = be.tvdv_dir / "source-id"
 
         if not var_sid.exists():
@@ -422,8 +448,6 @@ class ScbiBuild:
 
         if tvdv_sid.exists():
             return _file_eq(var_sid, tvdv_sid)
-        elif latest_sid.exists():
-            return _file_eq(var_sid, latest_sid)
         return False
 
     def _is_build_cached(self, be: BuildEnv) -> bool:
@@ -438,6 +462,10 @@ class ScbiBuild:
         tvdv_bid = be.tvdv_dir / "build-id"
         if var_bid.exists():
             shutil.copy2(str(var_bid), str(tvdv_bid))
+        var_sid = be.module_root / f"source-id-{be.variant}"
+        tvdv_sid = be.tvdv_dir / "source-id"
+        if var_sid.exists():
+            shutil.copy2(str(var_sid), str(tvdv_sid))
 
     def _write_build_id(self, be: BuildEnv, vid: str) -> None:
         raw = f"{be.scbi_prefix}:{be.scbi_target}:{be.module}:{vid}"
@@ -502,6 +530,10 @@ class ScbiBuild:
                     return code
             return 0
 
+        if step == "wrapup":
+            self._wrapup_install(be)
+            return 0
+
         if pre_hook is None and main_hook is None and post_hook is None:
             return 0
 
@@ -525,19 +557,11 @@ class ScbiBuild:
                         if tvdv_bid.exists():
                             tvdv_bid.unlink()
 
-                    if not self.do_force and self._is_source_unchanged(be):
-                        self._ilog(be.module, "config skipped (source unchanged)")
-                        return 0
                     config_opts = self._resolve_config_options(plugin, be)
                     commands = [
                         cmd.replace("$CONFIG_OPTIONS", config_opts)
                         for cmd in commands
                     ]
-                elif step in ("build", "install"):
-                    if not self.do_force and self._is_build_cached(be):
-                        self._ilog(be.module, f"{step} skipped (build cached)")
-                        return 0
-
                 cwd = be.build_dir if step in ("config", "build") else be.src_dir
                 code = executor.run_commands_logged(
                     commands, log_path, cmd_path, step,
@@ -795,27 +819,37 @@ def main(argv: list[str] | None = None) -> int:
             args.pop(i)
             continue
         elif a in ("--setup", "-s"):
-            step_specific = True
+            if not step_specific:
+                step_specific = True
+                sb.steps = []
             sb.steps.append("setup")
             args.pop(i)
             continue
         elif a in ("--config", "-c"):
-            step_specific = True
+            if not step_specific:
+                step_specific = True
+                sb.steps = []
             sb.steps.append("config")
             args.pop(i)
             continue
         elif a in ("--build", "-b"):
-            step_specific = True
+            if not step_specific:
+                step_specific = True
+                sb.steps = []
             sb.steps.append("build")
             args.pop(i)
             continue
         elif a in ("--install", "-i"):
-            step_specific = True
+            if not step_specific:
+                step_specific = True
+                sb.steps = []
             sb.steps.append("install")
             args.pop(i)
             continue
         elif a in ("--wrapup", "-w"):
-            step_specific = True
+            if not step_specific:
+                step_specific = True
+                sb.steps = []
             sb.steps.append("wrapup")
             args.pop(i)
             continue
@@ -834,9 +868,8 @@ def main(argv: list[str] | None = None) -> int:
 
         i += 1
 
-    if step_specific:
-        keep = set(sb.steps)
-        sb.steps = [s for s in CANONICAL_STEPS if s in keep]
+    if not step_specific:
+        sb.steps = list(CANONICAL_STEPS)
 
     # Load INI files
     ini_config = IniConfig()
