@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -8,6 +11,7 @@ from .hook_executor import HookExecutor
 from .models import ModuleRef, Plugin, RefKind
 from .plan_reader import PlanReader
 from .plugin_loader_yaml import PluginLoader
+from .source_manager import SourceManager
 
 CANONICAL_STEPS = [
     "setup",
@@ -79,13 +83,74 @@ class ScbiBuild:
         print(f"scbi:   prefix  = {be.scbi_prefix}", file=sys.stderr)
         print(f"scbi:   TVDIR   = {be.tvdv_dir}", file=sys.stderr)
 
+        # Check for meta-module first
+        modules_list = self._get_modules(plugin, be)
+        if modules_list is not None:
+            return self._build_meta(plugin, be, executor, modules_list, ref)
+
         self._run_env_phase(executor, plugin, be)
+
+        # Source handling before build loop
+        sm = SourceManager(self.plugin_loader, be)
+        code = sm.handle_sources(plugin, ref)
+        if code != 0:
+            print(
+                f"scbi: error: source handling failed for {ref}",
+                file=sys.stderr,
+            )
+            return code
 
         for step in CANONICAL_STEPS:
             code = self._run_step(executor, plugin, be, step)
             if code != 0:
-                print(f"scbi: step '{step}' failed with code {code}", file=sys.stderr)
+                print(
+                    f"scbi: step '{step}' failed with code {code}",
+                    file=sys.stderr,
+                )
                 return code
+
+        return 0
+
+    def _get_modules(
+        self, plugin: Plugin, be: BuildEnv
+    ) -> list[str] | None:
+        resolved = self.plugin_loader.resolve_hook(
+            plugin, be.variant, "modules"
+        )
+        if resolved is not None and isinstance(resolved, list):
+            return [be.substitute(m.strip()) for m in resolved if m.strip()]
+        return None
+
+    def _build_meta(
+        self,
+        plugin: Plugin,
+        be: BuildEnv,
+        executor: HookExecutor,
+        modules_list: list[str],
+        ref: ModuleRef,
+    ) -> int:
+        print(f"scbi:   meta-module: {modules_list}", file=sys.stderr)
+
+        resolved_agg = self.plugin_loader.resolve_hook(
+            plugin, be.variant, "aggregate"
+        )
+
+        self._run_env_phase(executor, plugin, be)
+
+        for child_ref in modules_list:
+            code = self.build(child_ref)
+            if code != 0:
+                return code
+
+        if resolved_agg is not None:
+            agg_text = resolved_agg
+            if isinstance(agg_text, list):
+                agg_text = " ".join(agg_text)
+            agg_text = be.substitute(str(agg_text))
+            print(
+                f"scbi:   aggregate: {agg_text}",
+                file=sys.stderr,
+            )
 
         return 0
 
@@ -99,14 +164,77 @@ class ScbiBuild:
             if isinstance(env_dict, dict):
                 executor.accumulate_env(env_dict)
 
-        env_key = be.variant if be.variant != "default" else ""
         resolved = self.plugin_loader.resolve_hook(plugin, be.variant, "env")
         if resolved is not None and isinstance(resolved, dict):
             executor.accumulate_env(resolved)
 
-        resolved_be = self.plugin_loader.resolve_hook(plugin, be.variant, "build-env")
+        resolved_be = self.plugin_loader.resolve_hook(
+            plugin, be.variant, "build-env"
+        )
         if resolved_be is not None and isinstance(resolved_be, dict):
             executor.accumulate_env(resolved_be)
+
+    def _resolve_config_options(
+        self, plugin: Plugin, be: BuildEnv
+    ) -> str:
+        results = self.plugin_loader.resolve_all_hooks(
+            plugin, be.variant, "config-options"
+        )
+        if not results:
+            return ""
+
+        tokens: list[str] = []
+        for r in results:
+            if isinstance(r, list):
+                for item in r:
+                    substituted = be.substitute(item)
+                    tokens.append(substituted)
+        return " ".join(tokens)
+
+    def _is_out_of_tree(self, plugin: Plugin, be: BuildEnv) -> bool:
+        resolved = self.plugin_loader.resolve_hook(
+            plugin, be.variant, "out-of-tree"
+        )
+        if resolved is not None:
+            if isinstance(resolved, list) and resolved:
+                val = resolved[0].strip().lower()
+                return val in ("true", "yes")
+        return True
+
+    def _setup_source_dir(
+        self, plugin: Plugin, be: BuildEnv
+    ) -> None:
+        shared_src = be.module_root / "src"
+        variant_src = be.src_dir
+
+        if shared_src.exists() or shared_src.is_symlink():
+            variant_src.mkdir(parents=True, exist_ok=True)
+            subprocess.run(
+                [
+                    "rsync", "-a", "--delete",
+                    str(shared_src) + "/",
+                    str(variant_src) + "/",
+                ],
+                capture_output=True,
+            )
+
+    def _setup_build_dir(
+        self, plugin: Plugin, be: BuildEnv, oot: bool
+    ) -> None:
+        build_dir = be.build_dir
+        src_dir = be.src_dir
+
+        if oot:
+            build_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            if build_dir.exists() or build_dir.is_symlink():
+                if build_dir.is_symlink() or build_dir.is_dir():
+                    shutil.rmtree(str(build_dir), ignore_errors=True)
+                else:
+                    build_dir.unlink()
+            if src_dir.exists():
+                rel = os.path.relpath(src_dir, build_dir.parent)
+                os.symlink(rel, str(build_dir))
 
     def _run_step(
         self,
@@ -124,6 +252,35 @@ class ScbiBuild:
         main_hook = ld.resolve_hook(plugin, be.variant, step)
         post_hook = ld.resolve_hook(plugin, be.variant, post_key)
 
+        if step == "setup":
+            oot = self._is_out_of_tree(plugin, be)
+
+            if not pre_hook and not main_hook and not post_hook:
+                self._setup_source_dir(plugin, be)
+                self._setup_build_dir(plugin, be, oot)
+                return 0
+
+            print(f"scbi:   step '{step}'", file=sys.stderr)
+
+            if pre_hook is not None and isinstance(pre_hook, list):
+                code = executor.run_commands(pre_hook)
+                if code != 0:
+                    return code
+
+            self._setup_source_dir(plugin, be)
+            self._setup_build_dir(plugin, be, oot)
+
+            if main_hook is not None and isinstance(main_hook, list):
+                code = executor.run_commands(main_hook, cwd=be.src_dir)
+                if code != 0:
+                    return code
+
+            if post_hook is not None and isinstance(post_hook, list):
+                code = executor.run_commands(post_hook)
+                if code != 0:
+                    return code
+            return 0
+
         if pre_hook is None and main_hook is None and post_hook is None:
             return 0
 
@@ -135,9 +292,16 @@ class ScbiBuild:
                 return code
 
         if main_hook is not None:
-            cwd = be.build_dir if step in ("config", "build") else be.src_dir
-            if isinstance(main_hook, list):
-                code = executor.run_commands(main_hook, cwd=cwd)
+            commands = main_hook
+            if isinstance(commands, list):
+                if step == "config":
+                    config_opts = self._resolve_config_options(plugin, be)
+                    commands = [
+                        cmd.replace("$CONFIG_OPTIONS", config_opts)
+                        for cmd in commands
+                    ]
+                cwd = be.build_dir if step in ("config", "build") else be.src_dir
+                code = executor.run_commands(commands, cwd=cwd)
                 if code != 0:
                     return code
 
@@ -157,7 +321,10 @@ def main(argv: list[str] | None = None) -> int:
 
     for a in args:
         if a in ("--help", "-h"):
-            print("Usage: scbi <module>[/<variant>][:<version>] [options]", file=sys.stderr)
+            print(
+                "Usage: scbi <module>[/<variant>][:<version>] [options]",
+                file=sys.stderr,
+            )
             print("Options:", file=sys.stderr)
             print("  --build-dir DIR   Build root directory", file=sys.stderr)
             print("  --prefix DIR      Install prefix", file=sys.stderr)

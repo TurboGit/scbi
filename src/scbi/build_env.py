@@ -45,6 +45,10 @@ class BuildEnv:
         return self.module_root / self.tvdv
 
     @property
+    def shared_src_dir(self) -> Path:
+        return self.module_root / "src"
+
+    @property
     def src_dir(self) -> Path:
         return self.tvdv_dir / "src"
 
@@ -74,6 +78,7 @@ class BuildEnv:
             .replace("$TARGET", self.scbi_target)
             .replace("$HOST", self.scbi_host)
             .replace("$VARIANT", self.variant)
+            .replace("$VERSION", self.version)
             .replace("$JOBS", str(self.scbi_jobs))
             .replace("$SCBI_BDIR", str(self.scbi_bdir))
             .replace("$TVDIR", str(self.tvdv_dir))

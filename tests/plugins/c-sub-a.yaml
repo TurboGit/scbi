@@ -1,0 +1,6 @@
+name: c-sub-a
+hooks:
+  env:
+    add-to-var:
+      - PATH
+      - $PREFIX/sub-a/bin
