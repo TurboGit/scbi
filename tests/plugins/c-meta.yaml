@@ -4,6 +4,8 @@ hooks:
     - c-sub-a
     - c-sub-b
   env:
-    - add-to-var PATH $PREFIX/bin
+    add-to-var:
+      - PATH
+      - $PREFIX/bin
   aggregate:
     - aggregated

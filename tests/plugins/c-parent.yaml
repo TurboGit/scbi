@@ -13,4 +13,6 @@ hooks:
   install:
     - make install
   env:
-    - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+    add-to-var:
+      - LD_LIBRARY_PATH
+      - $PREFIX/lib

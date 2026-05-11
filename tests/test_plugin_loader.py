@@ -180,20 +180,21 @@ def test_inherit_simple(ld):
     assert p.hooks["config"] == ["cmake -DCMAKE_INSTALL_PREFIX=$PREFIX .."]
     assert p.hooks["install"] == ["make install DESTDIR=$PREFIX"]
     assert p.hooks["build"] == ["make"]
+    assert isinstance(p.hooks.get("env"), dict)
 
 
 def test_inherit_chain(ld):
     p = ld.load("c-grandchild")
     assert p.hooks["build"] == ["ninja"]
     assert p.hooks["config"] == ["cmake -DCMAKE_INSTALL_PREFIX=$PREFIX .."]
-    assert "env" in p.hooks
+    assert isinstance(p.hooks.get("env"), dict)
 
 
 def test_inherit_no_variant(ld):
     p = ld.load("c-no-variant-inherit")
     assert p.hooks["config"] == ["./configure --prefix=$PREFIX --enable-foo"]
     assert p.hooks["build"] == ["make"]
-    assert "env" in p.hooks
+    assert isinstance(p.hooks.get("env"), dict)
 
 
 # -----------------------------------------------------------------------
@@ -220,7 +221,24 @@ def test_resolve_falls_back_to_base(ld):
     p = ld.load("c-with-variants")
     r = ld.resolve_hook(p, "release", "build-env")
     assert r is not None
-    assert r[0] == "set-var CMAKE_C_COMPILER gcc"
+    assert isinstance(r, dict)
+    assert "set-var" in r
+    assert r["set-var"] == ["CMAKE_C_COMPILER", "gcc"]
+
+
+def test_env_hook_structured(ld):
+    p = ld.load("c-meta")
+    env = p.hooks.get("env")
+    assert isinstance(env, dict)
+    assert "add-to-var" in env
+    assert env["add-to-var"] == ["PATH", "$PREFIX/bin"]
+
+
+def test_build_env_structured(ld):
+    p = ld.load("c-with-variants")
+    r = ld.resolve_hook(p, "clang", "build-env")
+    assert isinstance(r, dict)
+    assert r == {"set-var": ["CMAKE_C_COMPILER", "clang-16"]}
 
 
 def test_resolve_clang_config_options_none(ld):

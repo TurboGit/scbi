@@ -108,7 +108,7 @@ class InheritMapping:
 @dataclass
 class Plugin:
     name: str
-    hooks: dict[str, list[str]] = field(default_factory=dict)
+    hooks: dict[str, list[str] | dict] = field(default_factory=dict)
     variants: set[str] = field(default_factory=set)
     inherit: str | list[str] | None = None
     inherit_mappings: list[InheritMapping] | None = None

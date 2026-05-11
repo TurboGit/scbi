@@ -18,11 +18,17 @@ hooks:
   common-config-options:
     - -DCMAKE_INSTALL_PREFIX=$PREFIX
   clang-build-env:
-    - set-var CMAKE_C_COMPILER clang-16
+    set-var:
+      - CMAKE_C_COMPILER
+      - clang-16
   build-env:
-    - set-var CMAKE_C_COMPILER gcc
+    set-var:
+      - CMAKE_C_COMPILER
+      - gcc
   env:
-    - add-to-var PATH $PREFIX/bin
+    add-to-var:
+      - PATH
+      - $PREFIX/bin
   config:
     - cmake ../
   build:

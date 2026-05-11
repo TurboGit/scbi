@@ -14,6 +14,8 @@ from .models import (
     PluginSyntaxError,
 )
 
+ENV_HOOKS = {"env", "build-env", "tests-env", "external-env"}
+
 SCBI_BASE_HOOKS: list[str] = [
     "build-depends",
     "tests-depends",
@@ -88,7 +90,17 @@ def parse_hook_key(key: str) -> ParsedHookKey:
     )
 
 
-def _normalize_hook_value(key: str, value: Any) -> list[str]:
+def _is_env_hook(key: str) -> bool:
+    try:
+        parsed = parse_hook_key(key)
+    except PluginSyntaxError:
+        return False
+    return parsed.base_hook in ENV_HOOKS
+
+
+def _normalize_hook_value(key: str, value: Any) -> list[str] | dict:
+    if _is_env_hook(key) and isinstance(value, dict):
+        return value
     if isinstance(value, list):
         return [str(item) for item in value]
     if isinstance(value, bool):
@@ -138,7 +150,7 @@ class PluginLoader:
         if not name:
             name = path.stem
 
-        hooks: dict[str, list[str]] = {}
+        hooks: dict[str, list[str] | dict] = {}
         variants: set[str] = set()
         raw_hooks = data.get("hooks", {})
         if not isinstance(raw_hooks, dict):
@@ -276,7 +288,7 @@ class PluginLoader:
         variant: str,
         hook_name: str,
         use_cross: bool = False,
-    ) -> list[str] | None:
+    ) -> list[str] | dict | None:
         var_parts: list[str] = []
         if variant not in ("default", ""):
             var_parts = variant.split(".")
@@ -300,12 +312,12 @@ class PluginLoader:
         variant: str,
         hook_name: str,
         use_cross: bool = False,
-    ) -> list[list[str]]:
+    ) -> list[list[str] | dict]:
         var_parts: list[str] = []
         if variant not in ("default", ""):
             var_parts = variant.split(".")
 
-        results: list[list[str]] = []
+        results: list[list[str] | dict] = []
         var_found = False
 
         search_order: list[str] = ["common"]
