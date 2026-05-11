@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import datetime
 import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -71,6 +73,32 @@ class HookExecutor:
         self.build_env = build_env
         self.env: dict[str, str] = os.environ.copy()
 
+    def write_cmd_file(
+        self, path: Path, commands: list[str], step: str
+    ) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        be = self.build_env
+        with open(str(path), "w") as f:
+            f.write(f"# scbi replay: {step}\n")
+            f.write(f"# date: {datetime.datetime.now()}\n")
+            f.write(f"# prefix: {be.scbi_prefix}\n")
+            f.write(f"# target: {be.scbi_target}\n")
+            f.write(f"# variant: {be.variant}\n")
+            f.write(f"# TVDIR: {be.tvdv_dir}\n")
+            f.write("(\n")
+            f.write(f"  cd {shlex.quote(str(Path.cwd()))}\n")
+            for key, val in sorted(self.env.items()):
+                if key in (
+                    "PATH", "LD_LIBRARY_PATH", "PKG_CONFIG_PATH",
+                    "C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH",
+                    "LIBRARY_PATH", "ADA_PROJECT_PATH",
+                ):
+                    f.write(f"  export {key}={shlex.quote(val)}\n")
+            f.write("\n")
+            for cmd in commands:
+                f.write(f"  {cmd}\n")
+            f.write(")\n")
+
     def run_commands(
         self,
         commands: list[str] | dict,
@@ -111,6 +139,63 @@ class HookExecutor:
                     log_file.write(result.stderr)
                     log_file.flush()
                 return result.returncode
+
+        return 0
+
+    def run_commands_logged(
+        self,
+        commands: list[str] | dict,
+        log_path: Path,
+        cmd_path: Path,
+        step: str,
+        cwd: Path | None = None,
+    ) -> int:
+        if isinstance(commands, dict):
+            return self._run_env_dict(commands)
+        if not commands:
+            return 0
+
+        if cwd is None:
+            cwd = self.build_env.build_dir
+            if not cwd.exists():
+                cwd = self.build_env.src_dir
+                if not cwd.exists():
+                    cwd = Path.cwd()
+
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        be = self.build_env
+        substituted = [be.substitute(cmd) for cmd in commands]
+
+        self.write_cmd_file(cmd_path, substituted, step)
+
+        with open(str(log_path), "w") as lf:
+            lf.write(f"# step: {step}\n")
+            lf.write(f"# date: {datetime.datetime.now()}\n")
+            lf.write(f"# cwd: {cwd}\n\n")
+
+            for cmd in substituted:
+                lf.write(f"$ {cmd}\n")
+                lf.flush()
+
+                result = subprocess.run(
+                    cmd,
+                    shell=True,
+                    cwd=str(cwd),
+                    env=self.env,
+                    capture_output=True,
+                    text=True,
+                )
+
+                if result.stdout:
+                    lf.write(result.stdout)
+                    sys.stderr.write(result.stdout)
+                if result.stderr:
+                    lf.write(result.stderr)
+                    sys.stderr.write(result.stderr)
+                lf.flush()
+
+                if result.returncode != 0:
+                    return result.returncode
 
         return 0
 

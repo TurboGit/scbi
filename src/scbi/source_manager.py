@@ -75,9 +75,12 @@ class SourceManager:
             return self._handle_none(plugin, ref)
 
     def _write_source_id(self, content: str) -> None:
-        path = self.be.module_root / f"source-id-{self.be.variant}"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content)
+        root = self.be.module_root
+        root.mkdir(parents=True, exist_ok=True)
+        var_path = root / f"source-id-{self.be.variant}"
+        var_path.write_text(content)
+        latest = root / "source-id"
+        latest.write_text(content)
 
     def _write_source_ref(self, content: str) -> None:
         path = self.be.module_root / "source-ref"

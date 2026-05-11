@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import os
 import shutil
 import subprocess
@@ -53,6 +54,9 @@ class ScbiBuild:
         if self.plugin_loader is None:
             self.plugin_loader = PluginLoader(self.plugins_dir)
 
+    def _ilog(self, module: str, msg: str) -> None:
+        print(f"[{module}] {msg}", file=sys.stderr)
+
     def build(self, module_ref: str) -> int:
         self._ensure_loaders()
 
@@ -77,20 +81,18 @@ class ScbiBuild:
 
         executor = HookExecutor(be)
 
-        print(f"scbi: building {ref}", file=sys.stderr)
-        print(f"scbi:   variant = {be.variant}", file=sys.stderr)
-        print(f"scbi:   target  = {be.scbi_target}", file=sys.stderr)
-        print(f"scbi:   prefix  = {be.scbi_prefix}", file=sys.stderr)
-        print(f"scbi:   TVDIR   = {be.tvdv_dir}", file=sys.stderr)
+        self._ilog(ref.module, f"building {ref}")
+        self._ilog(ref.module, f"  variant = {be.variant}")
+        self._ilog(ref.module, f"  target  = {be.scbi_target}")
+        self._ilog(ref.module, f"  prefix  = {be.scbi_prefix}")
+        self._ilog(ref.module, f"  TVDIR   = {be.tvdv_dir}")
 
-        # Check for meta-module first
         modules_list = self._get_modules(plugin, be)
         if modules_list is not None:
             return self._build_meta(plugin, be, executor, modules_list, ref)
 
         self._run_env_phase(executor, plugin, be)
 
-        # Source handling before build loop
         sm = SourceManager(self.plugin_loader, be)
         code = sm.handle_sources(plugin, ref)
         if code != 0:
@@ -129,7 +131,7 @@ class ScbiBuild:
         modules_list: list[str],
         ref: ModuleRef,
     ) -> int:
-        print(f"scbi:   meta-module: {modules_list}", file=sys.stderr)
+        self._ilog(be.module, f"  meta-module: {modules_list}")
 
         resolved_agg = self.plugin_loader.resolve_hook(
             plugin, be.variant, "aggregate"
@@ -147,10 +149,7 @@ class ScbiBuild:
             if isinstance(agg_text, list):
                 agg_text = " ".join(agg_text)
             agg_text = be.substitute(str(agg_text))
-            print(
-                f"scbi:   aggregate: {agg_text}",
-                file=sys.stderr,
-            )
+            self._ilog(be.module, f"  aggregate: {agg_text}")
 
         return 0
 
@@ -227,14 +226,50 @@ class ScbiBuild:
         if oot:
             build_dir.mkdir(parents=True, exist_ok=True)
         else:
-            if build_dir.exists() or build_dir.is_symlink():
-                if build_dir.is_symlink() or build_dir.is_dir():
+            if build_dir.is_symlink():
+                build_dir.unlink()
+            elif build_dir.exists():
+                if build_dir.is_dir():
                     shutil.rmtree(str(build_dir), ignore_errors=True)
                 else:
                     build_dir.unlink()
             if src_dir.exists():
                 rel = os.path.relpath(src_dir, build_dir.parent)
                 os.symlink(rel, str(build_dir))
+
+    def _is_source_unchanged(self, be: BuildEnv) -> bool:
+        var_sid = be.module_root / f"source-id-{be.variant}"
+        latest_sid = be.module_root / "source-id"
+        tvdv_sid = be.tvdv_dir / "source-id"
+
+        if not var_sid.exists():
+            return False
+
+        if tvdv_sid.exists():
+            return _file_eq(var_sid, tvdv_sid)
+        elif latest_sid.exists():
+            return _file_eq(var_sid, latest_sid)
+        return False
+
+    def _is_build_cached(self, be: BuildEnv) -> bool:
+        var_bid = be.module_root / f"build-id-{be.variant}"
+        tvdv_bid = be.tvdv_dir / "build-id"
+        if var_bid.exists() and tvdv_bid.exists():
+            return _file_eq(var_bid, tvdv_bid)
+        return False
+
+    def _update_build_cache(self, be: BuildEnv) -> None:
+        var_bid = be.module_root / f"build-id-{be.variant}"
+        tvdv_bid = be.tvdv_dir / "build-id"
+        if var_bid.exists():
+            shutil.copy2(str(var_bid), str(tvdv_bid))
+
+    def _write_build_id(self, be: BuildEnv, vid: str) -> None:
+        raw = f"{be.scbi_prefix}:{be.scbi_target}:{be.module}:{vid}"
+        bid = hashlib.md5(raw.encode()).hexdigest()
+        path = be.module_root / f"build-id-{be.variant}"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(bid)
 
     def _run_step(
         self,
@@ -252,6 +287,9 @@ class ScbiBuild:
         main_hook = ld.resolve_hook(plugin, be.variant, step)
         post_hook = ld.resolve_hook(plugin, be.variant, post_key)
 
+        log_path = be.logs_dir / f"{step}.log"
+        cmd_path = be.logs_dir / f"{step}.cmd"
+
         if step == "setup":
             oot = self._is_out_of_tree(plugin, be)
 
@@ -260,10 +298,12 @@ class ScbiBuild:
                 self._setup_build_dir(plugin, be, oot)
                 return 0
 
-            print(f"scbi:   step '{step}'", file=sys.stderr)
+            self._ilog(be.module, f"  step '{step}' starting")
 
             if pre_hook is not None and isinstance(pre_hook, list):
-                code = executor.run_commands(pre_hook)
+                code = executor.run_commands_logged(
+                    pre_hook, log_path, cmd_path, f"pre-{step}"
+                )
                 if code != 0:
                     return code
 
@@ -271,12 +311,17 @@ class ScbiBuild:
             self._setup_build_dir(plugin, be, oot)
 
             if main_hook is not None and isinstance(main_hook, list):
-                code = executor.run_commands(main_hook, cwd=be.src_dir)
+                code = executor.run_commands_logged(
+                    main_hook, log_path, cmd_path, step,
+                    cwd=be.src_dir,
+                )
                 if code != 0:
                     return code
 
             if post_hook is not None and isinstance(post_hook, list):
-                code = executor.run_commands(post_hook)
+                code = executor.run_commands_logged(
+                    post_hook, log_path, cmd_path, f"post-{step}"
+                )
                 if code != 0:
                     return code
             return 0
@@ -284,10 +329,12 @@ class ScbiBuild:
         if pre_hook is None and main_hook is None and post_hook is None:
             return 0
 
-        print(f"scbi:   step '{step}'", file=sys.stderr)
+        self._ilog(be.module, f"  step '{step}' starting")
 
         if pre_hook is not None and isinstance(pre_hook, list):
-            code = executor.run_commands(pre_hook)
+            code = executor.run_commands_logged(
+                pre_hook, log_path, cmd_path, f"pre-{step}"
+            )
             if code != 0:
                 return code
 
@@ -295,22 +342,45 @@ class ScbiBuild:
             commands = main_hook
             if isinstance(commands, list):
                 if step == "config":
+                    if self._is_source_unchanged(be):
+                        self._ilog(be.module, "  config skipped (source unchanged)")
+                        return 0
                     config_opts = self._resolve_config_options(plugin, be)
                     commands = [
                         cmd.replace("$CONFIG_OPTIONS", config_opts)
                         for cmd in commands
                     ]
+                elif step in ("build", "install"):
+                    if self._is_build_cached(be):
+                        self._ilog(be.module, f"  {step} skipped (build cached)")
+                        return 0
+
                 cwd = be.build_dir if step in ("config", "build") else be.src_dir
-                code = executor.run_commands(commands, cwd=cwd)
+                code = executor.run_commands_logged(
+                    commands, log_path, cmd_path, step,
+                    cwd=cwd,
+                )
                 if code != 0:
                     return code
 
+                if step == "install":
+                    self._update_build_cache(be)
+
         if post_hook is not None and isinstance(post_hook, list):
-            code = executor.run_commands(post_hook)
+            code = executor.run_commands_logged(
+                post_hook, log_path, cmd_path, f"post-{step}"
+            )
             if code != 0:
                 return code
 
         return 0
+
+
+def _file_eq(a: Path, b: Path) -> bool:
+    try:
+        return a.read_text() == b.read_text()
+    except OSError:
+        return False
 
 
 def main(argv: list[str] | None = None) -> int:
