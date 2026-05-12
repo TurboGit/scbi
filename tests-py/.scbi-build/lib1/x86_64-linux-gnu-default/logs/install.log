@@ -1,0 +1,8 @@
+# step: install
+# date: 2026-05-12 07:30:37.764102
+# cwd: /home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/lib1/x86_64-linux-gnu-default/src
+
+$ mkdir -p /home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/install/include /home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/install/lib /home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/install/bin
+$ cp liblib1.so /home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/install/lib
+$ cp lib1.h /home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/install/include
+$ cp main /home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/install/bin

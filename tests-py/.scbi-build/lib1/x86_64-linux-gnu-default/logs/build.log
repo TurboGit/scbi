@@ -1,0 +1,11 @@
+# step: build
+# date: 2026-05-12 07:30:37.608479
+# cwd: /home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/lib1/x86_64-linux-gnu-default/build
+
+$ rm -f *.o
+$ make --no-print-directory
+cc    -c -o lib1.o lib1.c
+ar cr liblib1.a lib1.o
+gcc -shared -o liblib1.so lib1.o
+cc    -c -o main.o main.c
+gcc -o main main.o -llib1

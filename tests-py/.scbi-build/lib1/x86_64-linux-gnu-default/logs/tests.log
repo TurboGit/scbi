@@ -1,0 +1,7 @@
+# step: tests
+# date: 2026-05-12 07:30:37.777830
+# cwd: /home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/lib1/x86_64-linux-gnu-default/src
+
+$ ./main; test -f main
+main
+lib from tar

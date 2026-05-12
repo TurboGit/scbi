@@ -27,10 +27,17 @@ CANONICAL_STEPS = [
     "config",
     "build",
     "install",
+    "tests",
     "wrapup",
 ]
 
-TEST_STEP = "tests"
+DEFAULT_STEPS_NO_TESTS = [
+    "setup",
+    "config",
+    "build",
+    "install",
+    "wrapup",
+]
 
 
 class ScbiBuild:
@@ -78,7 +85,7 @@ class ScbiBuild:
         self.archive_mode: bool = False
         self.no_archive_cache: bool = False
         self.standalone: bool = False
-        self.steps: list[str] = list(CANONICAL_STEPS)
+        self.steps: list[str] = list(DEFAULT_STEPS_NO_TESTS)
         self.store: Store | None = None
         self.ini_config: IniConfig | None = None
 
@@ -150,8 +157,7 @@ class ScbiBuild:
         else:
             self._ilog(ref.module, f"native {be.scbi_target}")
 
-        step_names = " ".join(self.steps) if self.steps != CANONICAL_STEPS else "setup config build install wrapup"
-        self._ilog(ref.module, f"steps: {step_names}")
+        self._ilog(ref.module, f"steps: {' '.join(self.steps)}")
 
         modules_list = self._get_modules(plugin, be)
         if modules_list is not None:
@@ -186,6 +192,8 @@ class ScbiBuild:
             )
             return code
 
+        tvdv_sid = be.tvdv_dir / "source-id"
+        tvdv_exists = tvdv_sid.exists()
         source_unchanged = not self.do_force and self._is_source_unchanged(be)
         build_cached = not self.do_force and self._is_build_cached(be)
 
@@ -194,6 +202,8 @@ class ScbiBuild:
         elif source_unchanged and build_cached:
             self._ilog(ref.module, "no build needed: versions matching")
             self.steps = [s for s in self.steps if s == "wrapup"]
+        elif tvdv_exists:
+            self._ilog(ref.module, "trigger: sources changed")
         else:
             self._ilog(ref.module, "trigger: not yet built")
 
@@ -563,9 +573,10 @@ class ScbiBuild:
                         for cmd in commands
                     ]
                 cwd = be.build_dir if step in ("config", "build") else be.src_dir
+                show_out = step == "tests"
                 code = executor.run_commands_logged(
                     commands, log_path, cmd_path, step,
-                    cwd=cwd,
+                    cwd=cwd, show_stdout=show_out,
                 )
                 if code != 0:
                     return code
@@ -755,6 +766,17 @@ def main(argv: list[str] | None = None) -> int:
             continue
         elif a in ("--standalone",):
             sb.standalone = True
+            args.pop(i)
+            continue
+        elif a.startswith("--tests"):
+            if a.startswith("--tests:only"):
+                sb.steps = ["tests"]
+            else:
+                if "tests" not in sb.steps:
+                    widx = len(sb.steps)
+                    if "wrapup" in sb.steps:
+                        widx = sb.steps.index("wrapup")
+                    sb.steps.insert(widx, "tests")
             args.pop(i)
             continue
         elif a.startswith("--enable-"):

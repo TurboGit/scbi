@@ -40,4 +40,4 @@ hooks:
     - cp lib1.h $PREFIX/include
     - cp main $PREFIX/bin
   tests:
-    - ./main
+    - ./main; test -f main

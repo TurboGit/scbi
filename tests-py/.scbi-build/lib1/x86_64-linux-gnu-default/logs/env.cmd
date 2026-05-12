@@ -1,0 +1,6 @@
+define-var add-to-var C_INCLUDE_PATH "/home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/install/include"
+define-var add-to-var LD_LIBRARY_PATH "/home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/install/lib"
+define-var add-to-var LIBRARY_PATH "/home/obry/dev/git/scbi-opencode/tests-py/.scbi-build/install/lib"
+define-var set-var C_INCLUDE_PATH "/home/obry/dev/git/scbi-opencode/tests-py/include:/home/obry/dev/builds/c-libiconv/x86_64-linux-gnu-default/install/include"
+define-var set-var LIBRARY_PATH ".:/home/obry/dev/git/scbi-opencode/tests-py/lib:/home/obry/dev/builds/c-libiconv/x86_64-linux-gnu-default/install/lib"
+define-var set-var LD_LIBRARY_PATH ".:/home/obry/dev/git/scbi-opencode/tests-py/lib:/home/obry/dev/builds/c-gnatcoll-bindings-gmp/x86_64-linux-gnu-default/install/lib:/home/obry/dev/builds/c-gnatcoll-bindings-iconv/x86_64-linux-gnu-default/install/lib:/home/obry/dev/builds/c-libiconv/x86_64-linux-gnu-default/install/lib:/home/obry/dev/builds/c-gnatcoll-core/x86_64-linux-gnu-default/install/lib:/home/obry/dev/builds/c-gpr2-lib/x86_64-linux-gnu-default/install/lib:/home/obry/dev/builds/c-adasat/x86_64-linux-gnu-default/install/lib:/home/obry/dev/builds/c-libgpr/x86_64-linux-gnu-default/install/lib:/home/obry/dev/builds/c-xmlada/x86_64-linux-gnu-default/install/lib"

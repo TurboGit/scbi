@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
 from pathlib import Path
 
 from .build_env import BuildEnv
@@ -79,13 +80,11 @@ class SourceManager:
             return 0
 
         if ref.kind == RefKind.VERSION:
-            ver_tag = f" [{ref.version}]" if ref.version else ""
-            self._log_msg(f"get sources from archive{ver_tag}")
+            self._log_msg("get sources from archive")
             return self._handle_archive(plugin, ref)
         elif ref.kind in (RefKind.DEV, RefKind.BRANCH, RefKind.NONE):
             vcs_name = "git"
-            ver_tag = f" [{ref.version}]" if ref.version and ref.version != "NONE" else ""
-            self._log_msg(f"get sources from {vcs_name}{ver_tag}")
+            self._log_msg(f"get sources from {vcs_name}")
             return self._handle_vcs(plugin, ref)
         else:
             return self._handle_none(plugin, ref)
@@ -130,7 +129,7 @@ class SourceManager:
         data["filename"] = self.be.substitute(data["filename"])
         data["url"] = self.be.substitute(data["url"])
 
-        if data["kind"].upper() in ("NONE",):
+        if data["filename"].upper() in ("NONE", ""):
             self._write_source_id(f"none-{ref.version or 'NONE'}")
             self._write_source_ref(
                 f"{plugin.name} none {self.be.variant} revision {ref.version or 'NONE'}"
@@ -240,6 +239,11 @@ class SourceManager:
             bid_vid = self._get_vcs_build_id(vcs_kind, vcs_link)
             bid = self._get_build_id("", str(ref), bid_vid)
             self._write_build_id(bid)
+            commit_id = self._get_vcs_commit_id(False, vcs_kind, vcs_link)
+            disp_ref = ref.version if ref.version and ref.version != "NONE" else "master"
+            self._write_source_ref(
+                f"{plugin.name} {vcs_kind} {disp_ref} sha-1 {commit_id}"
+            )
 
         src_target = vcs_link if ref.kind == RefKind.DEV else repo_dir
         if not src_link.exists() and not src_link.is_symlink() and src_target.exists():
@@ -348,10 +352,7 @@ class SourceManager:
         archive_link.unlink(missing_ok=True)
         sha1_link.unlink(missing_ok=True)
 
-        print(
-            f"scbi: {module} extract archive {filename}",
-            file=sys.stderr,
-        )
+        self._log_msg(f"extract archive {filename}")
 
         tmpdir = module_root / "archivetmp"
         tmpdir.mkdir(parents=True, exist_ok=True)
