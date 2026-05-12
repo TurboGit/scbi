@@ -115,6 +115,14 @@ mkdir -p .root/.patches
 # kill mail for testing
 export SCBI_EMAIL_NOTIFICATION=no
 
+# unset environment variables that would override test-local setup
+unset SCBI_ROOT
+unset SCBI_BDIR
+unset SCBI_PREFIX
+unset SCBI_GIT_REPO
+unset SCBI_SVN_REPO
+unset SCBI_HG_REPO
+
 # be sure the global install directory exists
 mkdir -p $PWD/.root/builds/install
 
