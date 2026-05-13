@@ -20,7 +20,7 @@ function c-prettier-ada-build-depends()
 
 function c-prettier-ada-depends()
 {
-    echo c-vss
+    echo c-vss-text
     echo c-gnatcoll-core
 }
 
