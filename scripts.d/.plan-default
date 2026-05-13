@@ -1,6 +1,8 @@
 @alias p-gnat use c-sandbox
 @alias p-gnatmem use c-sandbox
 @for c-darktable use c-libavif/auto:v0.10.1
+# On GNU/Linux we use the iconv from libc
+@on linux use c-libiconv:skip
 c-darktable/ai
 p-gdb:gdb-head
 c-libavif/auto
