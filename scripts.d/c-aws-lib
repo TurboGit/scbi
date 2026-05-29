@@ -26,7 +26,6 @@ function c-aws-lib-build-depends()
 function c-aws-lib-depends()
 {
     echo c-xmlada
-    echo c-langkit
 }
 
 function c-aws-lib-env()
