@@ -108,6 +108,7 @@ function module-setup()
         [[ $IS_CACHED == no ]] &&
             {
                 sync-dir src/. $SRCDIR/ $OPT
+                cp source-id-$variant $TVDIR/source-id
 
                 #  Sync OK, set last source-id
                 [[ $? == 0 ]] && cp source-id-$VARIANT source-id
