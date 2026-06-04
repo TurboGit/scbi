@@ -120,6 +120,7 @@ os@-osmesa-dev                      libosmesa6-dev
 os@-osmesa6-dev
 os@-osmgpsmap-1.0-dev               libosmgpsmap-1.0-dev
 os@-pcre3-dev                       libpcre3-dev
+os@-pcre2-dev                       libpcre2-dev
 os@-png-dev                         libpng-dev
 os@-po4a                            po4a
 os@-pod-parser-perl                 libpod-parser-perl

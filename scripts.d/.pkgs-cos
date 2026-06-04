@@ -112,6 +112,7 @@ os@-osmesa6-dev                     mesa-libOSMesa-devel
 os@-osmesa-dev
 os@-osmgpsmap-1.0-dev               osm-gps-map-devel
 os@-pcre3-dev                       pcre-devel
+os@-pcre2-dev                       pcre-devel
 os@-png-dev                         libpng-devel
 os@-po4a                            po4a
 os@-pod-parser-perl                 perl-Pod-Parser
