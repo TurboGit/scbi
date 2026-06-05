@@ -1046,6 +1046,8 @@ function handle-depends()
 {
     local FORMODULE=$1
     local MODREF=$2
+    local DEPENDS_KIND=$3
+    local IS_AGGREGATED=$4
 
     local module_info=()
     get-module-ref module_info $MODREF $FORMODULE
@@ -1090,7 +1092,8 @@ function handle-depends()
     local DREFS=$SCBI_BDIR/$fmodule/build-deps-$fvariant
 
     if [[ "$kind" = "DEV" ]]; then
-        handle-module $FORMODULE $MODREF || return 1
+        handle-module $FORMODULE $MODREF $DEPENDS_KIND $IS_AGGREGATED \
+            || return 1
 
         record-dref $module $variant $DREFS
         return
@@ -1150,7 +1153,7 @@ function handle-depends()
         fi
     fi
 
-    handle-module $fmodule $MODREF || return 1
+    handle-module $fmodule $MODREF $DEPENDS_KIND  $IS_AGGREGATED || return 1
 
     record-dref $module $variant $DREFS
 }
@@ -1481,6 +1484,8 @@ function handle-meta-module()
     local METAMODULE=$2
     local VARIANT=$3
     local REF=$4
+    local DEPENDS_KIND=$5
+    local IS_AGGREGATED=$6
 
     local MDIR=$SCBI_BDIR/$METAMODULE
 
@@ -1494,14 +1499,7 @@ function handle-meta-module()
 
     record-build-plan $METAMODULE $VARIANT
 
-    #  check for dependencies
-
-    [[ $DEPS == yes ]] &&
-        for dmodule in $(get-all-depends $METAMODULE $VARIANT build-depends); do
-            handle-depends $METAMODULE $dmodule || exit 1
-        done
-
-    #  check for setup
+    #  check for setup/wrappup/aggregate
 
     local FCT_SETUP=""
     get-hook FCT_SETUP $METAMODULE $VARIANT setup
@@ -1512,8 +1510,23 @@ function handle-meta-module()
     local FCT_AGG=""
     get-hook FCT_AGG $METAMODULE $VARIANT aggregate
 
+    local AGG_MODE=no
     [[ -n $FCT_AGG ]] &&
         local AGG_MODE=$($FCT_AGG $SCBI_PREFIX $TARGET $VARIANT)
+
+    #  check for dependencies
+
+    [[ $DEPS == yes ]] &&
+        {
+            local AMODE=$IS_AGGREDATED
+            [[ $AGG_MODE != no ]] && AMODE=$AGG_MODE
+
+            for dmodule in $(get-all-depends \
+                                 $METAMODULE $VARIANT build-depends);
+            do
+                handle-depends $METAMODULE $dmodule build $AMODE || exit 1
+            done
+        }
 
     local MMSTART=0
     set-timer MMSTART
@@ -1583,7 +1596,7 @@ function handle-meta-module()
                                 $METAMODULE modules \
                                 $SCBI_PREFIX $SCBI_TARGET $VARIANT);
             do
-                handle-module $METAMODULE $module || exit 1
+                handle-module $METAMODULE $module default $AGG_MODE || exit 1
 
                 local module_info=()
                 get-module-ref module_info $module $METAMODULE
@@ -1666,6 +1679,18 @@ function handle-meta-module()
     [[ $AGG_MODE != no ]] && [[ $DO_AGG_PREFIX == yes ]] &&
         handle-prefix $METAMODULE $VARIANT $REF
 
+    fn-exists scbi-module-final-step &&
+        {
+            local MMODE=yes
+            [[ $AGG_MODE != no ]] && MMODE=aggregate
+
+            ilog $METAMODULE final step starting | tee -a $log
+            scbi-module-final-step \
+                $TVMDIR/install $SCBI_TARGET $VARIANT $METAMODULE \
+                $DEPENDS_KIND $MMODE $IS_AGGREGATED $ISUTD
+            ilog $METAMODULE final step completed | tee -a $log
+        }
+
     display-timing $METAMODULE $MMSTART | tee -a $log
 
     ilog $METAMODULE End metamodule $METAMODULE \[${VARIANT//./ }\] wrapup \
@@ -1704,6 +1729,8 @@ function handle-module()
 {
     local FORMODULE=$1
     local MODREF=$2
+    local DEPENDS_KIND=$3
+    local IS_AGGREGATED=$4
 
     #  Get module information
 
@@ -1786,7 +1813,8 @@ function handle-module()
 
     if [[ $? == 0 ]]; then
         (
-            handle-meta-module $FORMODULE $module $variant $ref
+            handle-meta-module $FORMODULE $module $variant \
+                               $ref $DEPENDS_KIND $IS_AGGREGATED
         )
         res=$?
         unset SCBI_MODULES_LIST[-1]
@@ -1802,14 +1830,16 @@ function handle-module()
         #  First we check for build dependencies
         (
             for dmodule in $(get-all-depends $module $variant build-depends); do
-                handle-depends $MODREF $dmodule || exit 1
+                handle-depends $MODREF $dmodule \
+                               build $IS_AGGREGATED || exit 1
             done
 
             [[ $DRY_RUN == no ]] && line-sep
 
             #  And then we check for standard dependencies
             for dmodule in $(get-all-depends $module $variant depends); do
-                handle-depends $MODREF $dmodule || exit 1
+                handle-depends $MODREF $dmodule \
+                               default $IS_AGGREGATED || exit 1
             done
 
             [[ $DRY_RUN == no ]] && line-sep
@@ -1820,7 +1850,8 @@ function handle-module()
                     for dmodule in \
                         $(get-all-depends $module $variant tests-depends);
                     do
-                        handle-depends $MODREF $dmodule || exit 1
+                        handle-depends $MODREF $dmodule \
+                                       tests $IS_AGGREGATED || exit 1
                     done
 
                     [[ $DRY_RUN == no ]] && line-sep
@@ -2266,6 +2297,18 @@ function handle-module()
                 return $res
             fi
         done
+        res=$?
+
+        #  Call global packaging if defined
+
+        fn-exists scbi-module-final-step &&
+            {
+                ilog $module final step starting | tee -a $log
+                scbi-module-final-step \
+                    $TVDIR/install $SCBI_TARGET $variant $module \
+                    $DEPENDS_KIND no $IS_AGGREGATED $IS_UPTODATE
+                ilog $module final step completed | tee -a $log
+            } || return $res
     ) || exit 1
 
     #  Create binary archive if needed
@@ -2820,7 +2863,7 @@ cp $SCBI_PLUGINS/0_runtime $SCBI_BDIR/.scbi.runtime
 #  Run script for all modules
 
 for module in ${SCBI_MODULES[*]}; do
-    handle-module "@root" $module || exit 1
+    handle-module "@root" $module default no || exit 1
 done
 
 if [[ $DO_STANDALONE == yes ]]; then

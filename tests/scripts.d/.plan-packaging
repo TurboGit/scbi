@@ -1,0 +1,19 @@
+
+[ = one
+  metaagg
+  metapoly
+]
+
+[ = two
+  metaagg/toto
+  metapoly/agg
+]
+
+[ = three
+  metaagg/toto
+  metapoly/noagg
+]
+
+[ = four
+  metapoly/bd
+]

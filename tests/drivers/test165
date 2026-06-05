@@ -1,0 +1,182 @@
+
+RUNS ./scbi --env=packaging --plan=packaging/one lib1
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:lib1 v:default d:default m:no a:no i:no
+Copy <pwd>/.root/builds/lib1/x86_64-linux-gnu-default/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-default/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+EOF
+
+RUNS ./scbi --env=packaging --plan=packaging/two lib1
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:lib1 v:default d:default m:no a:no i:yes
+Copy <pwd>/.root/builds/lib1/x86_64-linux-gnu-default/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+EOF
+
+RUNS ./scbi --env=packaging --plan=packaging/two metapoly
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Metamodule metapoly [agg] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metapoly [agg] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metapoly/agg
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:lib1 v:default d:default m:no a:direct i:yes
+Copy <pwd>/.root/builds/lib1/x86_64-linux-gnu-default/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule metapoly [agg] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:metapoly v:agg d:default m:aggregate a:no i:no
+Copy <pwd>/.root/builds/metapoly/x86_64-linux-gnu-agg/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : End metamodule metapoly [agg] wrapup
+EOF
+
+RUNS ./scbi --env=packaging --plan=packaging/three metapoly
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Metamodule metapoly [noagg] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metapoly [noagg] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metapoly/noagg
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:lib1 v:default d:default m:no a:no i:yes
+Copy <pwd>/.root/builds/lib1/x86_64-linux-gnu-default/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule metapoly [noagg] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:metapoly v:noagg d:default m:yes a:no i:no
+Copy <pwd>/.root/builds/metapoly/x86_64-linux-gnu-noagg/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : End metamodule metapoly [noagg] wrapup
+EOF
+
+RUNS ./scbi --env=packaging --deps --plan=packaging/three metapoly/bd
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Metamodule metapoly [bd] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metapoly [bd] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ bdepslib1
+xxxx/xx/xx xx:xx:xx :   ↳ metapoly/bd
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:lib1 v:default d:build m:no a:direct i:yes
+Copy <pwd>/.root/builds/lib1/x86_64-linux-gnu-default/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ bdepslib1
+xxxx/xx/xx xx:xx:xx :   ↳ metapoly/bd
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:lib2 v:default d:default m:no a:direct i:no
+Copy <pwd>/.root/builds/lib2/x86_64-linux-gnu-default/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building bdepslib1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metapoly/bd
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:bdepslib1 v:default d:default m:no a:direct i:no
+Copy <pwd>/.root/builds/bdepslib1/x86_64-linux-gnu-default/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : End Building bdepslib1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Metamodule metapoly [bd] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:metapoly v:bd d:default m:aggregate a:no i:no
+Copy <pwd>/.root/builds/metapoly/x86_64-linux-gnu-bd/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : End metamodule metapoly [bd] wrapup
+EOF
+
+RUNS ./scbi --env=packaging --deps --plan=packaging/four lib1
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : final step starting
+R m:lib1 v:default d:default m:no a:no i:yes
+Copy <pwd>/.root/builds/lib1/x86_64-linux-gnu-default/install
+To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-default/app
+xxxx/xx/xx xx:xx:xx : final step completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+EOF

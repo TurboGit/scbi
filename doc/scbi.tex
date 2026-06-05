@@ -1200,6 +1200,58 @@ It is possible to specify a version for a meta-module even if there is no source
 
 The \code{external-env} hook can be used to ensure that the \code{wrapup} hook is run consistently. That is, if the \code{wrapup} hook use some environment variables or enabled options (\seeref{enable-feature}) to generate a package or take any action when a change is made on aggregated modules one need to add in the \code{external-env} hook the used environment.
 
+\subsection{User's defined final step}
+\label{scbi-module-final-step}
+\index{hook!scbi-module-final-step}
+
+After a successful build of a module or aggregate meta-module a specific hook named \code{scbi-module-final-step} is called.
+
+\begin{description}
+	\item[scbi-module-final-step] Called after a successful build. Can be used to update an application packaging for example.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT \$MODULE}
+		\par \tabto{2cm} \code{\$DEPENDS\_KIND \$IS\_META \$IS\_AGGREGATED \$IS\_UP\_TO\_DATE}
+		\begin{description}
+		\item [\$PREFIX] The installation directory for the module.
+		\item [\$TARGET] The build target for the module.
+		\item [\$VARIANT] The variants for the module.
+		\item [\$DEPENDS\_KIND] The kind of dependency for the module, values are \code{default}, \code{build} or \code{tests}
+		\item [\$IS\_META] Wether the module is standard meta or aggregate meta, values are \code{yes}, \code{no} or \code{aggregate}
+		\item [\$IS\_AGGREGATED] Wether the module is aggregated into a meta-module, values are \code{yes} or \code{no}.
+		\item [\$IS\_UP\_TO\_DATE] Wether the module is up-to-date or not, values are \code{yes} or \code{no}. A module may be up-to-date but not yet handled as the dependency kind was rejected.
+		\end{description}
+		\item[return] \tabto{2cm} NONE
+\end{description}
+\end{description}
+
+Example:
+
+\begin{lstlisting}
+	function scbi-module-final-step()
+	{
+		local PREFIX=$1
+		local TARGET=$2
+		local VARIANT=$3
+		local MODULE=$4
+		local DEPENDS_KIND=$5
+		local IS_META=$6
+		local IS_AGGREGATED=$7
+		local IS_UP_TO_DATE=$8
+
+		#  Hande only standard dependencies
+		#  (skip build & tests dependencies)
+
+		[[ $DEPENDS_KIND != default ]] && return
+
+		local APP="/some/dir/$MODULE"
+
+		#  Copy if not up-to-date or not yet copied
+
+		[[ $IS_UP_TO_DATE == no ]] || [[ ! -d $APP ]] &&
+		   rsync -a $PREFIX/. $APP
+	}
+\end{lstlisting}
+
 \subsection{Setting environment}
 \label{set-env}
 \index{variable!add}
