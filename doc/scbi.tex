@@ -1201,13 +1201,13 @@ It is possible to specify a version for a meta-module even if there is no source
 The \code{external-env} hook can be used to ensure that the \code{wrapup} hook is run consistently. That is, if the \code{wrapup} hook use some environment variables or enabled options (\seeref{enable-feature}) to generate a package or take any action when a change is made on aggregated modules one need to add in the \code{external-env} hook the used environment.
 
 \subsection{User's defined final step}
-\label{scbi-module-final-step}
-\index{hook!scbi-module-final-step}
+\label{module-final-step}
+\index{hook!module-final-step}
 
-After a successful build of a module or aggregate meta-module a specific hook named \code{scbi-module-final-step} is called.
+After a successful build of a module or aggregate meta-module a specific hook named \code{module-final-step} is called.
 
 \begin{description}
-	\item[scbi-module-final-step] Called after a successful build. Can be used to update an application packaging for example.
+	\item[module-final-step] Called after a successful build. Can be used to update an application packaging for example.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT \$MODULE}
 		\par \tabto{2cm} \code{\$DEPENDS\_KIND \$IS\_META \$IS\_AGGREGATED \$IS\_UP\_TO\_DATE}
@@ -1227,7 +1227,7 @@ After a successful build of a module or aggregate meta-module a specific hook na
 Example:
 
 \begin{lstlisting}
-	function scbi-module-final-step()
+	function module-final-step()
 	{
 		local PREFIX=$1
 		local TARGET=$2

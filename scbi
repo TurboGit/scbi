@@ -1679,13 +1679,13 @@ function handle-meta-module()
     [[ $AGG_MODE != no ]] && [[ $DO_AGG_PREFIX == yes ]] &&
         handle-prefix $METAMODULE $VARIANT $REF
 
-    fn-exists scbi-module-final-step &&
+    fn-exists module-final-step &&
         {
             local MMODE=yes
             [[ $AGG_MODE != no ]] && MMODE=aggregate
 
             ilog $METAMODULE final step starting | tee -a $log
-            scbi-module-final-step \
+            module-final-step \
                 $TVMDIR/install $SCBI_TARGET $VARIANT $METAMODULE \
                 $DEPENDS_KIND $MMODE $IS_AGGREGATED $ISUTD
             ilog $METAMODULE final step completed | tee -a $log
@@ -2301,10 +2301,10 @@ function handle-module()
 
         #  Call global packaging if defined
 
-        fn-exists scbi-module-final-step &&
+        fn-exists module-final-step &&
             {
                 ilog $module final step starting | tee -a $log
-                scbi-module-final-step \
+                module-final-step \
                     $TVDIR/install $SCBI_TARGET $variant $module \
                     $DEPENDS_KIND no $IS_AGGREGATED $IS_UPTODATE
                 ilog $module final step completed | tee -a $log
