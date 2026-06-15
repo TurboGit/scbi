@@ -1262,6 +1262,7 @@ function handle-sources()
             fi
 
             echo -n "archive-$ref" > source-id-$variant
+            cp source-id-$variant source-id
 
             #  Compute and store the version id of the sources. This includes the
             #  tar sha1 if present to ensure a tar with the same name but different
@@ -1334,6 +1335,7 @@ function handle-sources()
                         rdev="-$(get-vcs-commit-id true $VCS_NAME $VCSDIR)"
 
                     echo -n "$ref$rdev" > source-id-$variant
+                    cp source-id-$variant source-id
 
                     vcs-build-id $SCBI_PREFIX $SCBI_TARGET \
                                  $FORMODULE $MODREF $VCSDIR \
@@ -1402,6 +1404,7 @@ function handle-sources()
 
             echo -n "$module " > source-ref
             get-vcs-ref $VCS_NAME $ref $(pwd)/vcs >> source-ref
+            cp source-id-$variant source-id
 
             return 0
 
@@ -1416,6 +1419,7 @@ function handle-sources()
     [[ $HASSRC == no ]] &&
         {
             echo -n "none-$ref" > source-id-$variant
+            cp source-id-$variant source-id
             echo $module none $variant revision $ref >> source-ref
 
             #  No VCS, no TAR, just rebuild the sources if present
