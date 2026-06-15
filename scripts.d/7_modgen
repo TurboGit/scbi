@@ -250,7 +250,7 @@ function module-install()
             popd &> /dev/null
         }
 
-    [[ $DO_CONFIG == yes ]] && [[ $DO_BUILD == yes ]] &&
+    [[ $DO_BUILD != no ]] &&
         {
             local TVDIR=""
             get-target-dir TVDIR $MODULE $VARIANT
