@@ -128,16 +128,14 @@ function _internal_get-hook()
         if [[ $? = 0 ]]; then
             _HOOK=$MODULE-$VARIANT-cross-$STEP
         else
-            fn-exists $MODULE-cross-$STEP
-            [[ $? = 0 ]] && _HOOK=$MODULE-cross-$STEP
+            fn-exists $MODULE-cross-$STEP &&
+                _HOOK=$MODULE-cross-$STEP
         fi
     fi
 
     if [[ -z $_HOOK ]]; then
-        fn-exists $MODULE-$VARIANT-$STEP
-        if [[ $? = 0 ]]; then
+        fn-exists $MODULE-$VARIANT-$STEP &&
             _HOOK=$MODULE-$VARIANT-$STEP
-        fi
     fi
 
     RESULT=$_HOOK
@@ -161,8 +159,8 @@ function get-hook()
     done
 
     if [[ -z $HOOK ]]; then
-        fn-exists $MODULE-$STEP
-        [[ $? = 0 ]] && HOOK=$MODULE-$STEP
+        fn-exists $MODULE-$STEP &&
+            HOOK=$MODULE-$STEP
     fi
 
     RESULT=$HOOK
@@ -458,22 +456,21 @@ function _internal_for-all-modules()
 
     #  Check dependency graph to ensure there is no circularities
 
-    check-dependency-tree $module
+    check-dependency-tree $module &&
+        {
+            elog $module recursive dependencies detected
 
-    if [[ $? = 0 ]]; then
-        elog $module recursive dependencies detected
+            local N=${#SCBI_RECTREE[*]}
+            ((N-=2))
 
-        local N=${#SCBI_RECTREE[*]}
-        ((N-=2))
+            for (( i=0 ; i<=$N ; i++ )); do
+                local j=$((i + 1))
+                elog $module " ⦁ ${SCBI_RECTREE[$i]}" '%B%t→%c' ${SCBI_RECTREE[$j]}
+            done
 
-        for (( i=0 ; i<=$N ; i++ )); do
-            local j=$((i + 1))
-            elog $module " ⦁ ${SCBI_RECTREE[$i]}" '%B%t→%c' ${SCBI_RECTREE[$j]}
-        done
-
-        elog $module " ⦁ ${SCBI_RECTREE[-1]}" '%B%t→%c' $module
-        exit 1
-    fi
+            elog $module " ⦁ ${SCBI_RECTREE[-1]}" '%B%t→%c' $module
+            exit 1
+        }
 
     #  Then load module
 
@@ -968,9 +965,7 @@ function set-proxy()
 {
     local NAME=$1
 
-    fn-exists proxy-$NAME
-
-    [[ $? = 0 ]] && proxy-$NAME
+    fn-exists proxy-$NAME && proxy-$NAME
 }
 
 ############################## get-archive-data
@@ -1017,11 +1012,11 @@ function get-archive-data()
                 exit 1
             fi
         elif [[ -n ${SCBI_ARCHIVE_VARIANT} ]]; then
-            fn-exists $module-${SCBI_ARCHIVE_VARIANT}-archive
-            if [[ $? = 0 ]]; then
-                ARCHIVE_VARIANT=${SCBI_ARCHIVE_VARIANT}
-                ARCHIVE_FUNCTION=$MODULE-${ARCHIVE_VARIANT}-archive
-            fi
+            fn-exists $module-${SCBI_ARCHIVE_VARIANT}-archive &&
+                {
+                    ARCHIVE_VARIANT=${SCBI_ARCHIVE_VARIANT}
+                    ARCHIVE_FUNCTION=$MODULE-${ARCHIVE_VARIANT}-archive
+                }
         fi
     fi
 
@@ -1078,11 +1073,11 @@ function get-archive()
     if [[ "${tarcp^^}" != "NONE" ]]  \
            && [[ "${tarurl^^}" != "NONE" ]];
     then
-        check-tool $tarcp
-        if [[ $? != 0 ]]; then
-            elog $MODULE Required tool $tarcp missing
-            return 1
-        fi
+        check-tool $tarcp ||
+            {
+                elog $MODULE Required tool $tarcp missing
+                return 1
+            }
 
         (
             set-proxy $proxy
@@ -1175,8 +1170,7 @@ function get-archive()
     cd archivetmp
 
     if [[ "$tarsrc" =~ "tar.zst" ]]; then
-        check-tools unzstd
-        [[ $? == 1 ]] &&
+        check-tools unzstd ||
             {
                 elog $MODULE missing zst tool to decompress this archive
                 return 1
@@ -1184,16 +1178,14 @@ function get-archive()
     fi
 
     if [[ "$tarsrc" =~ ".zip" ]]; then
-        check-tools unzip
-        [[ $? == 1 ]] &&
+        check-tools unzip ||
             {
                 elog $MODULE missing unzip tool to decompress this archive
                 return 1
             }
         unzip $SCBI_ARCHIVES/$tarsrc 1>&2
     elif [[ "$tarsrc" =~ ".7z" ]]; then
-        check-tools 7z
-        [[ $? == 1 ]] &&
+        check-tools 7z ||
             {
                 elog $MODULE missing 7z tool to decompress this archive
                 return 1
@@ -1201,9 +1193,7 @@ function get-archive()
         7z x $SCBI_ARCHIVES/$tarsrc 1>&2
     else
         tar xf $SCBI_ARCHIVES/$tarsrc 1>&2
-    fi
-
-    [[ $? != 0 ]] &&
+    fi ||
         {
             elog $MODULE archive $tarsrc is corrupted
             return 1

@@ -57,11 +57,14 @@ function git-set-submodule-url()
                 #  Get PATH & URL
                 local PTH=${SO%%:*}
                 local URL=${SO#*:}
-                git submodule set-url $PTH $URL
-                #  Maybe too old version without set-url, fallback to multiline sed
-                [[ $? != 0 ]] &&
-                    sed -i -z "s,\(${PTH}.*url = \)\(.*\),\1${URL}\n,g" \
-                        .gitmodules .git/config
+
+                git submodule set-url $PTH $URL ||
+                    {
+                        #  Maybe too old version without set-url,
+                        #  fallback to multiline sed
+                        sed -i -z "s,\(${PTH}.*url = \)\(.*\),\1${URL}\n,g" \
+                            .gitmodules .git/config
+                    }
                 ;;
         esac
     done
@@ -107,8 +110,7 @@ function git-co()
         mkdir -p $SCBI_BDIR/.vcs
         cd $SCBI_BDIR/.vcs &&
         if [[ ! -d $REPO ]]; then
-            git clone $URL $REPO
-            [[ $? == 0 ]] &&
+            git clone $URL $REPO &&
                 {
                     cd $REPO &&
                         [[ -f .gitmodules ]] &&
@@ -296,12 +298,11 @@ function hg-branch()
             BRANCH=default
         fi
 
-        hg branch -f $BRANCH
-
-        if [[ $? != 0 ]]; then
-            ilog build "error: switching mercurial branch"
-            return 1
-        fi
+        hg branch -f $BRANCH ||
+            {
+                ilog build "error: switching mercurial branch"
+                return 1
+            }
     )
 }
 
@@ -501,11 +502,11 @@ function get-vcs-data()
             exit 1
         fi
     elif [[ -n ${SCBI_VCS_VARIANT} ]]; then
-        fn-exists $MODULE-${SCBI_VCS_VARIANT}-vcs
-        if [[ $? = 0 ]]; then
-            VCS_VARIANT=${SCBI_VCS_VARIANT}
-            VCS_FUNCTION=$MODULE-${VCS_VARIANT}-vcs
-        fi
+        fn-exists $MODULE-${SCBI_VCS_VARIANT}-vcs &&
+            {
+                VCS_VARIANT=${SCBI_VCS_VARIANT}
+                VCS_FUNCTION=$MODULE-${VCS_VARIANT}-vcs
+            }
     fi
 
     fn-exists $VCS_FUNCTION
@@ -542,36 +543,33 @@ function _internal_get-branch()
         git)
             if [[ $KIND != DEV ]]; then
                 git-branch $VCS_PROXY $VCS_OPTIONS \
-                    $MODULE $REF "$VCS_DIR" >> $log 2>&1
-
-                if [[ $? != 0 ]]; then
-                    ilog build "error: cannot switch to branch $REF"
-                    return 1
-                fi
+                    $MODULE $REF "$VCS_DIR" >> $log 2>&1 ||
+                    {
+                        ilog build "error: cannot switch to branch $REF"
+                        return 1
+                    }
             fi
             ;;
 
         hg|mercurial)
             if [[ $KIND != DEV ]]; then
                 hg-branch $VCS_PROXY $VCS_OPTIONS \
-                    $MODULE $REF "$VCS_DIR" >> $log 2>&1
-
-                if [[ $? != 0 ]]; then
-                    ilog build "error: cannot switch to branch $REF"
-                    return 1
-                fi
+                    $MODULE $REF "$VCS_DIR" >> $log 2>&1 ||
+                    {
+                        ilog build "error: cannot switch to branch $REF"
+                        return 1
+                    }
             fi
             ;;
 
         svn|subversion)
             if [[ $KIND != DEV ]]; then
                 svn-branch $VCS_PROXY $VCS_OPTIONS \
-                    $MODULE $REF "$VCS_DIR" >> $log 2>&1
-
-                if [[ $? != 0 ]]; then
-                    ilog build "error: cannot switch to branch $REF"
-                    return 1
-                fi
+                    $MODULE $REF "$VCS_DIR" >> $log 2>&1 ||
+                    {
+                        ilog build "error: cannot switch to branch $REF"
+                        return 1
+                    }
             fi
             ;;
 
@@ -649,56 +647,53 @@ function get-vcs()
     case $VCS_NAME in
         git)
             git-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
-                   $module "$VCS_DIR" >> $log 2>&1
+                   $module "$VCS_DIR" >> $log 2>&1 ||
+                {
+                    check-tool git
+                    if [[ $? == 0 ]]; then
+                        ilog build "error: cannot get sources from $VCS_URL"
+                    else
+                        ilog build "error: tool git not installed"
+                    fi
 
-            if [[ $? != 0 ]]; then
-                check-tool git
-                if [[ $? == 0 ]]; then
-                    ilog build "error: cannot get sources from $VCS_URL"
-                else
-                    ilog build "error: tool git not installed"
-                fi
+                    ilog build "error: see $log"
 
-                ilog build "error: see $log"
-
-                exit 1
-            fi
+                    exit 1
+                }
             ;;
 
         hg|mercurial)
             hg-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
-                  $module "$VCS_DIR" >> $log 2>&1
+                  $module "$VCS_DIR" >> $log 2>&1 ||
+                {
+                    check-tool hg
+                    if [[ $? == 0 ]]; then
+                        ilog build "error: cannot get sources from $VCS_URL"
+                    else
+                        ilog build "error: tool hg not installed"
+                    fi
 
-            if [[ $? != 0 ]]; then
-                check-tool hg
-                if [[ $? == 0 ]]; then
-                    ilog build "error: cannot get sources from $VCS_URL"
-                else
-                    ilog build "error: tool hg not installed"
-                fi
+                    ilog build "error: see $log"
 
-                ilog build "error: see $log"
-
-                exit 1
-            fi
+                    exit 1
+                }
             ;;
 
         svn|subversion)
             svn-co $VCS_PROXY $VCS_URL $VCS_OPTIONS \
-                   $module "$VCS_DIR" >> $log 2>&1
+                   $module "$VCS_DIR" >> $log 2>&1 ||
+                {
+                    check-tool svn
+                    if [[ $? == 0 ]]; then
+                        ilog build "error: cannot get sources from $VCS_URL"
+                    else
+                        ilog build "error: tool svn not installed"
+                    fi
 
-            if [[ $? != 0 ]]; then
-                check-tool svn
-                if [[ $? == 0 ]]; then
-                    ilog build "error: cannot get sources from $VCS_URL"
-                else
-                    ilog build "error: tool svn not installed"
-                fi
+                    ilog build "error: see $log"
 
-                ilog build "error: see $log"
-
-                exit 1
-            fi
+                    exit 1
+                }
             ;;
 
         *)

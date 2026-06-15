@@ -56,8 +56,7 @@ function module-patch()
 
     if [[ -n $PATCHES ]]; then
         for patch in $PATCHES; do
-            module-apply-patch $module "$patch"
-            [[ $? != 0 ]] && res=1
+            module-apply-patch $module "$patch" || res=1
         done
     fi
 
@@ -107,11 +106,9 @@ function module-setup()
 
         [[ $IS_CACHED == no ]] &&
             {
-                sync-dir src/. $SRCDIR/ $OPT
-                cp source-id-$variant $TVDIR/source-id
-
                 #  Sync OK, set last source-id
-                [[ $? == 0 ]] && cp source-id-$VARIANT source-id
+                sync-dir src/. $SRCDIR/ $OPT &&
+                    cp source-id-$VARIANT $TVDIR/source-id
 
                 #  If some patches are present, apply them now
                 [[ $DO_PATCH == yes ]] &&

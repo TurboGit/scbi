@@ -54,8 +54,7 @@ function check-tools-abort()
     local MISSING=""
 
     for T in $TOOLS; do
-	check-tool $T
-	[[ $? != 0 ]] && MISSING+=" $T"
+	check-tool $T || MISSING+=" $T"
     done
 
     [[ -n $MISSING ]] &&
@@ -481,9 +480,9 @@ function check-handled()
 
     if [[ $? = 1 ]]; then
         echo "$KEY" >> $SCBI_HANDLED
-        return 0
-    else
         return 1
+    else
+        return 0
     fi
 }
 
@@ -889,8 +888,7 @@ function handle-prefix()
         local SUDO=""
 
         if [[ ! -d ${_IDIR} ]]; then
-            mkdir -p ${_IDIR} &> /dev/null
-            [[ $? != 0 ]] && SUDO=sudo
+            mkdir -p ${_IDIR} &> /dev/null || SUDO=sudo
         fi
 
         if [[ ! -w ${_IDIR} ]]; then
@@ -921,8 +919,8 @@ function is-module-up-to-date()
 
     load-module $MODREF
 
-    check-archive-exists $module $variant $ref
-    [[ $? == 0 ]] && kind=VERSION
+    check-archive-exists $module $variant $ref &&
+        kind=VERSION
 
     local mver=$VERSION_ERROR
 
@@ -932,11 +930,11 @@ function is-module-up-to-date()
     get-hook FCT $module $variant version
 
     if [[ -n $FCT ]]; then
-        TDIR=$(mktemp -d)
-
-        [[ $? != 0 ]] &&
-            echo cannnot create a temp directory &&
-            exit 1
+        TDIR=$(mktemp -d) ||
+            {
+                echo cannnot create a temp directory
+                exit 1
+            }
 
         pushd $TDIR > /dev/null 2>&1
 
@@ -1192,8 +1190,7 @@ function handle-sources()
     #  instead of a repository branch.
 
     if [[ $kind == BRANCH ]] && [[ "$ARCHIVE_CACHE" == "yes" ]]; then
-        check-archive-exists $module $variant $ref
-        [[ $? == 0 ]] && kind=VERSION
+        check-archive-exists $module $variant $ref && kind=VERSION
     fi
 
     local HASSRC=yes
@@ -1364,11 +1361,8 @@ function handle-sources()
                     V=${vcs[0]#default}
                     ilog $module get sources from $VCS_NAME ${V:+[$V]}
 
-                    get-vcs $SCBI_PREFIX $SCBI_TARGET $FORMODULE $MODREF
-
-                    if [[ $? != 0 ]]; then
+                    get-vcs $SCBI_PREFIX $SCBI_TARGET $FORMODULE $MODREF ||
                         exit 1
-                    fi
                 else
                     ln -s ../.vcs/$REPO vcs
                 fi
@@ -1758,8 +1752,7 @@ function handle-module()
 
     #  If already handled, nothing more to do
 
-    check-handled "$module+$variant+$ref"
-    [[ $? = 1 ]] && return
+    check-handled "$module+$variant+$ref" && return
 
     #  If this module is marked as to be skipped
 
@@ -1788,12 +1781,11 @@ function handle-module()
     #  Check if module to be handled only if specificed on command line
 
     if [[ $FORMODULE != "@root" ]]; then
-        is-hook-true $module $variant only-explicit-build FALSE
-
-        if [[ $? == 0 ]]; then
-            ilog $module %BModule %t$module%c built only if explitly specified
-            return
-        fi
+        is-hook-true $module $variant only-explicit-build FALSE &&
+            {
+                ilog $module %BModule %t$module%c built only if explitly specified
+                return
+            }
     fi
 
     #  Create module build directory
@@ -1813,17 +1805,16 @@ function handle-module()
 
     #  Check if meta-module, if so call handle-module for each one
 
-    is-meta-module $MODREF > /dev/null
-
-    if [[ $? == 0 ]]; then
-        (
-            handle-meta-module $FORMODULE $module $variant \
-                               $ref $DEPENDS_KIND $IS_AGGREGATED
-        )
-        res=$?
-        unset SCBI_MODULES_LIST[-1]
-        return $res
-    fi
+    is-meta-module $MODREF > /dev/null &&
+        {
+            (
+                handle-meta-module $FORMODULE $module $variant \
+                                   $ref $DEPENDS_KIND $IS_AGGREGATED
+            )
+            res=$?
+            unset SCBI_MODULES_LIST[-1]
+            return $res
+        }
 
     local DREFS=$SCBI_BDIR/$module/build-deps-$variant
     rm -f $DREFS
@@ -1862,8 +1853,7 @@ function handle-module()
                 }
 
             return 0
-        )
-        [[ $? != 0 ]] && exit 1
+        ) || exit 1
     fi
 
     if [[ $DRY_RUN == yes ]]; then
@@ -1952,9 +1942,7 @@ function handle-module()
             cd $SCBI_BDIR/$module
             rm -fr src src$SCBI_LNK vcs$SCBI_LNK
 
-            handle-sources $FORMODULE $MODREF
-
-            [[ $? != 0 ]] && exit 1
+            handle-sources $FORMODULE $MODREF || exit 1
         fi
 
         #  Set cross-env if needed
@@ -2223,19 +2211,18 @@ function handle-module()
 
             local res=0
 
-            fn-exists module-pre-$step
+            fn-exists module-pre-$step &&
+                {
+                    cd $SCBI_BDIR/$module
 
-            if [[ $? = 0 ]]; then
-                cd $SCBI_BDIR/$module
-
-                module-pre-$step \
-                    $TVDIR/install \
-                    $FORMODULE \
-                    $module \
-                    $variant $SCBI_TARGET $SCBI_ISOOT 2>&1 \
-                    | tee $TEEOPT $log
-                res=${PIPESTATUS[0]}
-            fi
+                    module-pre-$step \
+                        $TVDIR/install \
+                        $FORMODULE \
+                        $module \
+                        $variant $SCBI_TARGET $SCBI_ISOOT 2>&1 \
+                        | tee $TEEOPT $log
+                    res=${PIPESTATUS[0]}
+                }
 
             if [[ $res != 0 ]]; then
                 elog $module generic module pre-$step failed with error $res
@@ -2258,17 +2245,16 @@ function handle-module()
 
             res=0
 
-            fn-exists module-$step
+            fn-exists module-$step &&
+                {
+                    cd $SCBI_BDIR/$module
 
-            if [[ $? = 0 ]]; then
-                cd $SCBI_BDIR/$module
-
-                module-$step \
-                    $TVDIR/install \
-                    $FORMODULE \
-                    $module $variant $SCBI_TARGET $SCBI_ISOOT 2>&1 | tee $TEEOPT $log
-                res=${PIPESTATUS[0]}
-            fi
+                    module-$step \
+                        $TVDIR/install \
+                        $FORMODULE \
+                        $module $variant $SCBI_TARGET $SCBI_ISOOT 2>&1 | tee $TEEOPT $log
+                    res=${PIPESTATUS[0]}
+                }
 
             if [[ $res -ne 0 ]]; then
                 elog $module generic module $step failed with error $res
@@ -2283,18 +2269,17 @@ function handle-module()
 
             res=0
 
-            fn-exists module-post-$step
+            fn-exists module-post-$step &&
+                {
+                    cd $SCBI_BDIR/$module
 
-            if [[ $? = 0 ]]; then
-                cd $SCBI_BDIR/$module
-
-                module-post-$step \
-                    $TVDIR/install \
-                    $FORMODULE \
-                    $module $variant $SCBI_TARGET $SCBI_ISOOT \
-                    2>&1 | tee $TEEOPT $log
-                res=${PIPESTATUS[0]}
-            fi
+                    module-post-$step \
+                        $TVDIR/install \
+                        $FORMODULE \
+                        $module $variant $SCBI_TARGET $SCBI_ISOOT \
+                        2>&1 | tee $TEEOPT $log
+                    res=${PIPESTATUS[0]}
+                }
 
             if [[ $res != 0 ]]; then
                 elog $module generic module post-$step failed with error $res
@@ -2470,10 +2455,11 @@ function setup-generic-tool-env()
         source $CACHED_PLAN
 
     elif [[ -n $SCBI_PLAN ]]; then
-        load-module-plan $SCBI_PLAN
-        [[ $? -ne 0 ]] &&
-            echo "error: cannot load module plan $SCBI_PLAN" &&
-            exit 1
+        load-module-plan $SCBI_PLAN ||
+            {
+                echo "error: cannot load module plan $SCBI_PLAN"
+                exit 1
+            }
     fi
 
     [[ $DO_SUBCMD == no ]] &&

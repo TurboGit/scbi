@@ -483,8 +483,7 @@ function handle-plan-meta-module()
     #  Fast check for a meta-module. A false positive is not a problem
     #  as it will slow down a bit the process but we must avoid false
     #  negative.
-    egrep -sq "function $M.*modules" $SCBI_PLUGINS/$M
-    [[ $? != 0 ]] && return
+    egrep -sq "function $M.*modules" $SCBI_PLUGINS/$M || return
 
     local value=${SCBI_MODVER[$M]}
 
@@ -769,8 +768,7 @@ function rewrite-module-plan()
         while read E K V; do
             if [[ $E == 0 ]]; then
                 register-module-plan meta $K $V
-                egrep -sq "function $K.*modules" $SCBI_PLUGINS/$K
-                [[ $? == 0 ]] &&
+                egrep -sq "function $K.*modules" $SCBI_PLUGINS/$K &&
                     _NEWMOD+=($K)
             elif [[ $E == 1 ]]; then
                 ilog $K "$V"
@@ -956,13 +954,12 @@ function check-auto-variant()
 
         source $SCBI_PLUGINS/$MODULE
 
-        fn-exists $MODULE-native-depends
-
-        if [[ $? != 0 ]]; then
-            #  Fatal error, stop now
-            _RESULT=( n $SCBI_ERROR_HOOK_NOT_FOUND 0 0 NONE )
-            return 2
-        fi
+        fn-exists $MODULE-native-depends ||
+            {
+                #  Fatal error, stop now
+                _RESULT=( n $SCBI_ERROR_HOOK_NOT_FOUND 0 0 NONE )
+                return 2
+            }
 
         for dmodule in $(get-all-depends $MODULE native depends); do
             if [[ ! -f $SCBI_PLUGINS/$dmodule ]]; then
