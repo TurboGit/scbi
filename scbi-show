@@ -3,6 +3,7 @@
 DO_EXT=no
 DO_LIST_VER=yes
 DO_MOD_VER=no
+DO_RDEPS=true
 SCBI_FILTER=all
 
 ############################################## shw-usage
@@ -22,6 +23,7 @@ function shw-usage()
     echo "      | --plugins=<dir>    specify the plugins' directory"
     echo "   -e | --env=<name>       environment file ~/.scbi-<name>"
     echo "      | --depends:n        list module's dependencies (direct, full)"
+    echo "   -r | --rdepends         list module's reverse dependencies"
     echo "      | --externals:n      list module's external dependencies"
     echo "      | --no-version       do not display modules/externals version"
     echo "      | --filter:n         filter depends/external for dev or runtime"
@@ -30,7 +32,7 @@ function shw-usage()
     echo "      | --stat             display some status of current setup"
 }
 
-############################## register-depends-callback
+############################## shw-register-depends-callback
 # used for --list-depends and --list-external
 
 declare -a MODULE_LIST
@@ -109,6 +111,100 @@ function shw-register-depends-callback()
     fi
 }
 
+############################## get-rdepends
+# used for --rdepends
+
+function get-name-with-variants()
+{
+    local -n CH=$1
+    local PLG=$2
+    local M=$3
+    local FOR=$4
+
+    local TAG=""
+    if [[ $M =~ -cross[[:space:]]*$ ]]; then
+        TAG+="cross"
+        M=${M%-cross}
+    fi
+
+    M=${M#${PLG}}
+    M=${M#-}
+    local V=${M//-/.}
+    V=${V//.common/}
+    V=${V//common./}
+    V=${V//common/}
+
+    [[ -n $V ]] &&
+        {
+            [[ -n $TAG ]] && TAG+="/"
+            TAG+="$V"
+        }
+
+    [[ -n $TAG ]] && TAG=" [$TAG]"
+
+    [[ -n $FOR ]] && FOR=" ($FOR)"
+
+    CH="${PLG}${TAG}${FOR}"
+}
+
+function get-deps-hooks()
+{
+    local MODULE=$1
+    local PLUGIN=$2
+
+    local PGNAME=$(basename $PLUGIN)
+
+    local REGEXP="((pre|post)-)?(cross-)?(modules|depends)\(\)"
+
+    local CHECK=off
+    local CURRENT_HOOK=""
+
+    while read line; do
+        if [[ $CHECK == on ]]; then
+            if [[ "$line" =~ echo[[:space:]]+?${MODULE}[[:space:]]*$ ]]; then
+                MODULE_LIST+=("${CURRENT_HOOK}")
+            elif [[ "$line" =~ [[:space:]]*}[[:space:]]* ]]; then
+                CHECK=off
+            fi
+        fi
+
+        if [[ $CHECK == off ]] && [[ "$line" =~ $REGEXP ]]; then
+            v=${line#function }
+            v=${v%()}
+
+            if [[ $line =~ modules[[:space:]]*() ]]; then
+                v=${v%-modules}
+                get-name-with-variants CURRENT_HOOK $PGNAME $v modules
+            elif [[ $line =~ build-depends[[:space:]]*() ]]; then
+                v=${v%-build-depends}
+                get-name-with-variants CURRENT_HOOK $PGNAME $v build
+            elif [[ $line =~ test-depends[[:space:]]*() ]]; then
+                v=${v%-test-depends}
+                get-name-with-variants CURRENT_HOOK $PGNAME $v test
+            else
+                v=${v%-depends}
+                get-name-with-variants CURRENT_HOOK $PGNAME $v
+            fi
+
+            CHECK=on
+        fi
+    done < <( cat $PLUGIN )
+}
+
+function get-rdepends()
+{
+    local MODREF=$1
+
+    local module_info=()
+    get-module-ref module_info $MODREF
+
+    local module=${module_info[0]}
+
+    while read plugin; do
+        get-deps-hooks $module ${plugin%:*}
+    done < <( grep -sE "echo *${module} *$" $SCBI_PLUGINS/* )
+}
+
 ############################## display-module-ref
 
 function shw-display-module-ref()
@@ -153,7 +249,7 @@ fi
 OPTFILE=$(mktemp)
 
 ALLOPTS=$(getopt -u -o kld \
-                 -l depends:direct,depends:full,depends,build-plan:: \
+                 -l depends:direct,depends:full,depends,rdepends,build-plan:: \
                  -l build-plan:history::,externals,externals:only,no-version \
                  -l filter:all,filter:dev,filter:runtime,module-ref \
                  -l module-ref:version,module-ref:variant,module-ref:full \
@@ -180,6 +276,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --depends)
             DO_DEPS=yes
+            DO_QUIET=yes
+            ;;
+        --rdepends)
+            DO_RDEPS=yes
             DO_QUIET=yes
             ;;
         --externals:only)
@@ -250,6 +350,24 @@ fi
 if [[ $DO_DEPS != no ]]; then
     for module in ${SCBI_MODULES[*]}; do
         for-all-modules-with-meta-ext shw-register-depends-callback $module
+    done
+
+    if [[ $? = 0 ]]; then
+        {
+            for MOD in "${MODULE_LIST[@]}"; do
+                echo "${MOD}"
+            done
+        } | sort | uniq
+
+        exit 0
+    fi
+
+    exit 1
+fi
+
+if [[ $DO_RDEPS == yes ]]; then
+    for module in ${SCBI_MODULES[*]}; do
+        get-rdepends $module
     done
 
     if [[ $? = 0 ]]; then

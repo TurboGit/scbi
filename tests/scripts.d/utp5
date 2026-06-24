@@ -1,0 +1,9 @@
+function utp5-depends()
+{
+    echo usethisplgx
+}
+
+function utp5-utp-depends()
+{
+    echo usethisplg
+}

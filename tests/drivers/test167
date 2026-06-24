@@ -1,0 +1,10 @@
+RUNS ./scbi show --rdepends usethisplg
+
+CLEAN-DIFF <<EOF
+utp1
+utp2 (build)
+utp3 (test)
+utp4
+utp5 [utp]
+utp6 (modules)
+EOF
