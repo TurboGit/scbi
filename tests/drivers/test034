@@ -48,3 +48,12 @@ echo >> ${OSHT_STDIO}
 DIFF <<EOF
 /variant1:dev
 EOF
+
+# =================== module ref (default & variant1)
+RUNS ./scbi show --plan=dev --module-ref:variant lib1 lib2
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+default
+variant1
+EOF

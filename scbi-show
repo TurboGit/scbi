@@ -386,8 +386,10 @@ fi
 #  If we want to display a module version from a module plan, do it now
 
 if [[ $DO_MOD_VER != no ]]; then
+    MLAST=${SCBI_MODULES[-1]}
     for module in ${SCBI_MODULES[*]}; do
         shw-display-module-ref $module $DO_MOD_VER
+        [[ ${#SCBI_MODULES[*]} -gt 1 ]] && [[ $module != $MLAST ]] && echo
     done
     exit 0
 fi
