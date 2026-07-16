@@ -7,13 +7,18 @@ function c-gnatcov-vcs()
     echo https://github.com/AdaCore/gnatcoverage.git
 }
 
+function c-gnatcov-out-of-tree()
+{
+    echo false
+}
+
 function c-gnatcov-build-depends()
 {
     echo p-gnat
     echo c-gprbuild
 }
 
-function c-gnatcov-depends()
+function c-gnatcov-common-depends()
 {
     echo p-gnat-util
     echo c-binutils
@@ -24,9 +29,9 @@ function c-gnatcov-depends()
     echo c-stable-sloc
 }
 
-function c-gnatcov-out-of-tree()
+function c-gnatcov-c-depends()
 {
-    echo FALSE
+    echo c-llvm-bindings
 }
 
 function c-gnatcov-env()
@@ -38,6 +43,17 @@ function c-gnatcov-env()
     add-to-var PATH $PREFIX/bin
 }
 
+function c-gnatcov-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    #  Make sure the g++ compiler is first on the PATH as we don't
+    #  want the clang++ (from c-libclang) to be used.
+    prepend-to-var PATH $SCBI_PREFIX/bin
+}
+
 function c-gnatcov-build()
 {
     local PREFIX=$1
@@ -45,7 +61,8 @@ function c-gnatcov-build()
     local VARIANT=$3
 
     cd tools/gnatcov &&
-        make LIBRARY_TYPE=static C_SUPPORT=False LD_FLAGS="-lzstd" bin
+        make LIBRARY_TYPE=static C_SUPPORT=True \
+             PROCESSORS=$SCBI_JOBS bin
 }
 
 function c-gnatcov-install()
@@ -55,10 +72,5 @@ function c-gnatcov-install()
     local VARIANT=$3
 
     cd tools/gnatcov &&
-        make PREFIX=$PREFIX LIBRARY_TYPE=static C_SUPPORT=False install
-}
-
-function c-gnatcov-prefix()
-{
-    echo NONE
+        make PREFIX=$PREFIX LIBRARY_TYPE=static C_SUPPORT=True install
 }

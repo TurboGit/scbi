@@ -7,6 +7,7 @@ p-gdb:gdb-head
 c-libclang:llvmorg-21.1.8
 c-gpr2:main
 c-readline:#6.2
+c-gnatcov/c
 
 @for c-darktable use c-libavif/auto:v0.10.1
 c-darktable/ai
