@@ -2053,11 +2053,11 @@ function handle-module()
 
             handle-build-depends-env $FORMODULE $MODREF
 
-            handle-module-env $FORMODULE $MODREF build-env >> $SCBI_ENV_MODULE
-
             #  And then setup recursively the environment to use dependencies
 
             handle-env $FORMODULE $MODREF
+
+            handle-module-env $FORMODULE $MODREF build-env >> $SCBI_ENV_MODULE
 
             unset SCBI_ENV_MODULE
         fi

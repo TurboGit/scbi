@@ -71,7 +71,6 @@ function shl-setup-env()
     [[ $DOCD == yes ]] || [[ $DOCD == yes-dev ]] &&
         {
             handle-build-depends-env "@root" $MODREF
-            handle-module-env "@root" $MODREF build-env
         }
 
     #  test-env: for mode "test"
@@ -83,6 +82,12 @@ function shl-setup-env()
 
     # env: for all modes
     handle-env "@root" $MODREF
+
+    #  build-env: for mode "dev" & "sandbox"
+    [[ $DOCD == yes ]] || [[ $DOCD == yes-dev ]] &&
+        {
+            handle-module-env "@root" $MODREF build-env
+        }
 
     #  module's own env: for mode "use" & "tests"
     [[ $DOCD == yes-nocd ]] || [[ $DOCD == yes-tests ]] &&
