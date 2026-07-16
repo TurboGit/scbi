@@ -1,18 +1,18 @@
 @alias p-gnat use c-sandbox
 @alias p-gnatmem use c-sandbox
-@for c-darktable use c-libavif/auto:v0.10.1
 # On GNU/Linux we use the iconv from libc
 @on linux use c-libiconv:skip
-c-darktable/ai
 p-gdb:gdb-head
+c-gpr2:main
+c-readline:#6.2
+
+@for c-darktable use c-libavif/auto:v0.10.1
+c-darktable/ai
 c-libavif/auto
 c-libiconv:#1.18
 c-gmp:#6.2.1
-c-readline:#6.2
 c-cmake/auto:v3.18.4
 c-exiv2/auto:v0.27.5
-# c-libadalang=c-gpr2-lib/stable:master
-c-gpr2:main
 # ICC on JP2 broken up to 2.5.3, we need at least 2.5.4
 # c-libopenjpeg/auto:v2.5.4
 c-libopenjpeg:master
