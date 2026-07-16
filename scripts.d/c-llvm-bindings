@@ -1,0 +1,81 @@
+
+function c-llvm-bindings-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/AdaCore/llvm-bindings
+}
+
+function c-llvm-bindings-out-of-tree()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo false
+}
+
+function c-llvm-bindings-build-depends()
+{
+    echo p-gnat
+    echo c-gprbuild
+}
+
+function c-llvm-bindings-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo c-libclang
+}
+
+function c-llvm-bindings-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+}
+
+function c-llvm-bindings-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo prefix=$PREFIX
+    echo PROCESSORS=$SCBI_JOBS
+    echo ENABLE_SHARED=no
+}
+
+function c-llvm-bindings-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    cd clang-bindings &&
+        make "${OPTIONS[@]}" setup
+}
+
+function c-llvm-bindings-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd clang-bindings && make
+}
+
+function c-llvm-bindings-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cd clang-bindings && make install
+}
+
+function c-llvm-bindings-prefix()
+{
+    echo NONE
+}
