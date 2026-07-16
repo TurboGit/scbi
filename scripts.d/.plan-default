@@ -3,6 +3,8 @@
 # On GNU/Linux we use the iconv from libc
 @on linux use c-libiconv:skip
 p-gdb:gdb-head
+# Use 21 as this is the version compatible with c-llvm-bindings
+c-libclang:llvmorg-21.1.8
 c-gpr2:main
 c-readline:#6.2
 

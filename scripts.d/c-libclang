@@ -1,0 +1,97 @@
+
+function c-libclang-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo https://github.com/llvm/llvm-project.git
+}
+
+function c-libclang-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo os@-ninja
+}
+
+function c-libclang-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var PATH            $PREFIX/bin
+    add-to-var LD_LIBRARY_PATH $PREFIX/lib
+}
+
+function c-libclang-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local BUILD_TYPE=$(get-build-type LIBCLANG Release)
+    local DEBUG=OFF
+
+    [[ $BUILD_TYPE == Debug ]] && DEBUG=ON
+
+    echo -GNinja
+    echo -DCMAKE_INSTALL_PREFIX=$PREFIX
+    echo -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    echo -DCMAKE_C_COMPILER=gcc
+    echo -DCMAKE_CXX_COMPILER=g++
+    echo -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++"
+    echo -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld"
+    echo -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind"
+    echo -DLLVM_ENABLE_BINDINGS=FALSE
+    echo -DLLVM_INCLUDE_TESTS=OFF
+    echo -DLLVM_INCLUDE_BENCHMARKS=OFF
+    echo -DLLVM_INCLUDE_EXAMPLES=OFF
+    echo -DLLVM_INSTALL_UTILS=ON
+    echo -DLLVM_ENABLE_ASSERTIONS=$DEBUG
+    echo -DCLANG_DEFAULT_LINKER=lld
+    echo -DCLANG_DEFAULT_UNWINDLIB=libunwind
+    echo -DCLANG_DEFAULT_CXX_STDLIB=libc++
+    echo -DLIBCLANG_FULL=ON
+    echo -DLIBCLANG_BUILD_STATIC=ON
+    echo -DLLVM_ENABLE_LIBXML2=OFF
+}
+
+function c-libclang-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    cmake "${OPTIONS[@]}" ../src/llvm
+}
+
+function c-libclang-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ninja -j$SCBI_JOBS
+}
+
+function c-libclang-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cmake --install . --strip
+}
+
+function c-libclang-post-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cp -r ../src/clang/tools/libclang $PREFIX/include/.
+}
+
+function c-libclang-prefix()
+{
+    echo NONE
+}
