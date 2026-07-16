@@ -92,6 +92,7 @@ os@-metis-dev                       libmetis-dev
 os@-mpc-dev                         libmpc-dev
 os@-mpfr-dev                        libmpfr-dev
 os@-ncurses-dev                     libncurses-dev
+os@-ninja                           ninja-build
 os@-nlopt0                          libnlopt0
 os@-omniidl                         omniidl
 os@-omniorb4-dev
