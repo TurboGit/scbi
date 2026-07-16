@@ -40,7 +40,8 @@ function c-gprbuild-config()
     local TARGET=$2
 
     if [[ ! -e ../src/share/gprconfig ]]; then
-        ln -s $SCBI_BDIR/c-gprconfig-kb/build/src/db ../src/share/gprconfig
+        ln -s ${SCBI_MODULES_DIR["c-gprconfig-kb@src"]}/db \
+           ../src/share/gprconfig
     fi
 
     make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$SCBI_JOBS setup
