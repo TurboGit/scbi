@@ -261,6 +261,9 @@ _scbi()
     local subc=${COMP_WORDS[1]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
 
+    # ${COMP_WORDS[1]} is '--env', [2] is '=', [3] is name of env, so use [4]
+    [[ "$subc" == "--env" ]] && local subc=${COMP_WORDS[4]}
+
     case "$subc" in
         source-archive)
             _SCBI_MODE=arc
