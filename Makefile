@@ -30,7 +30,7 @@ INSTALL_DIR=$(HOME)/.local/bin
 
 #  Get SHA-1 of last commit in core SCBI
 CORE_SHA1=$(shell git log -1 --format="%h" -- scbi scbi-* scripts.d/[0-9]* \
-	scripts.d/_os_*)
+	scripts.d/_os_* bash_completion.d/*)
 CORE_VER=$(shell git describe $(CORE_SHA1))
 
 PLG_SHA1=$(shell git log -1 --format="%h" -- scripts.d/c-* scripts.d/patches)
