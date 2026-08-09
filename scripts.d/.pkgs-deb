@@ -111,7 +111,11 @@ os@-omp-15                          libomp-15-dev
 os@-omp-16                          libomp-16-dev
 os@-omp-17                          libomp-17-dev
 os@-onnxruntime-dev                 libonnxruntime-dev
+os@-opencv-core-dev                 libopencv-core-dev
 os@-opencv-dev                      libopencv-dev
+os@-opencv-features2d-dev           libopencv-features2d-dev
+os@-opencv-flann-dev                libopencv-flann-dev
+os@-opencv-imgproc-dev              libopencv-imgproc-dev
 os@-openexr-dev                     libopenexr-dev
 os@-openjp2-7-dev
 os@-openjp2-dev                     libopenjp2-7-dev
@@ -120,8 +124,8 @@ os@-openmpi-dev                     libopenmpi-dev
 os@-osmesa-dev                      libosmesa6-dev
 os@-osmesa6-dev
 os@-osmgpsmap-1.0-dev               libosmgpsmap-1.0-dev
-os@-pcre3-dev                       libpcre3-dev
 os@-pcre2-dev                       libpcre2-dev
+os@-pcre3-dev                       libpcre3-dev
 os@-png-dev                         libpng-dev
 os@-po4a                            po4a
 os@-pod-parser-perl                 libpod-parser-perl
