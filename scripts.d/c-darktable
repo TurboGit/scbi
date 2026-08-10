@@ -88,6 +88,21 @@ function c-darktable-ai-depends()
     echo os@-onnxruntime-dev
 }
 
+function c-darktable-hdr-depends()
+{
+    echo os@-opencv-core-dev
+    echo os@-opencv-features2d-dev
+    echo os@-opencv-flann-dev
+    echo os@-opencv-imgproc-dev
+}
+
+function c-darktable-all-depends()
+{
+    c-darktable-ai-depends
+    c-darktable-hdr-depends
+    c-darktable-jxl-depends
+}
+
 function c-darktable-clang-build-env()
 {
     set-var CMAKE_C_COMPILER   clang-$SCBI_CLANG_VERSION
@@ -191,6 +206,15 @@ function c-darktable-ai-config-options()
     local VARIANT=$3
 
     echo -DUSE_AI=ON
+}
+
+function c-darktable-all-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    c-darktable-ai-config-options
 }
 
 function c-darktable-config()

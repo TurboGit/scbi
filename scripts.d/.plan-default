@@ -10,7 +10,7 @@ c-readline:#6.2
 c-gnatcov/c
 
 @for c-darktable use c-libavif/auto:v0.10.1
-c-darktable/ai
+c-darktable/all
 c-libavif/auto
 c-libiconv:#1.18
 c-gmp:#6.2.1
