@@ -399,10 +399,10 @@ function _inherit-plugin_internal()
     #  For each known & existing hook name, create a wrapper with the
     #  name of the caller plug-in.
 
-    local REGEXP="$SCBI_HOOKS"
+    local REGEXP="^$HPLUGIN-($SCBI_HOOKS)$"
 
     [[ $NOVARIANT == yes ]] &&
-        REGEXP="$HPLUGIN(-pre|-post|-cross)*-($SCBI_HOOKS)"
+        REGEXP="^$HPLUGIN(-pre|-post|-cross)*-($SCBI_HOOKS)$"
 
     while read hook; do
         [[ $hook =~ $REGEXP ]] &&
