@@ -1,0 +1,25 @@
+
+function inh-specific-generic()
+{
+    echo @@@ GENERIC-inh-specific
+}
+
+function inh-specific-shared()
+{
+    echo @@@ SHARED-inh-specific
+}
+
+function inh-specific-whatever()
+{
+    echo @@@ WHATEVER-inh-specific
+}
+
+function inh-specific-config()
+{
+    echo @@@ CONFIG-inh-specific
+}
+
+function inh-specific-install()
+{
+    echo @@@ INSTALL-inh-specific
+}

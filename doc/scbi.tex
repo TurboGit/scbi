@@ -434,7 +434,7 @@ Some specific actions are supported with the following syntax:
 
 		\code{\ddash{}plan=name/variant1.variant2}
 
-		The barrier can have multiple variants or discriminants separated with a coma:
+		The barrier can have multiple variants or discriminants separated with a comma:
 
 		\code{= deb,9}
 
@@ -1529,14 +1529,16 @@ of another plug-in. This can be done by adding one or multiple commands \code{in
 
 \begin{lstlisting}
 	inherit-plugin [--no-variant
-	               |--hooks=<name>
+	               |--hooks=<hook1,hook2>
+	               |--custom-hooks=<hook1,hook2>
 	               |--name=<name>] <name>
 \end{lstlisting}
 
 \begin{description}
 	\item[\ddash{}no-variant] This option is to not inherit from any hook's variant. Only the default variants will be inherited.
-	\item[\ddash{}hooks=<hook1,hook2>] Specify a set of hook separated with coma to inherit from. Multiple \code{\ddash{}hooks} options can also be used.
-	\item[\ddash{}name=<name>] Spefify the name to be used for the inherited plug-in instead of the default plug-in name. This makes it possible to inherit from multiple modules having the same hook and chain them manually.
+	\item[\ddash{}hooks=<hook1,hook2>] Specify a set of hooks separated with comma to inherit from. Multiple \code{\ddash{}hooks} options can also be used. If not specified all SCBI supported hooks are inherited.
+	\item[\ddash{}custom-hooks=<hook1,hook2>] Specify a set of custom hooks separated with comma to inherit from. Multiple \code{\ddash{}custom-hooks} options can also be used.
+	\item[\ddash{}name=<name>] Specify the name to be used for the inherited plug-in instead of the default plug-in name. This makes it possible to inherit from multiple modules having the same hook and chain them manually.
 	\item[<name>] The name of an existing plug-in from which we want to inherit all the current hooks.
 \end{description}
 

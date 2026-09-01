@@ -207,16 +207,19 @@ function _internal_copy-plugin()
             [[ $kw == "inherit-plugin" ]] &&
                 {
                     local HPLUGIN=""
-                    local options=$(getopt -l no-variant,hooks: -- $kw $line)
+                    local options=$(getopt -l no-variant,hooks:,custom-hooks:,name: -- $kw $line)
 
                     eval set -- "$options"
                     while true; do
                         case "$1" in
                             --no-variant)
                             ;;
+                            --name)
+                            ;;
                             --hooks)
-                                shift
-                                ;;
+                            ;;
+                            --custom-hooks)
+                            ;;
                             --)
                                 shift
                                 HPLUGIN=$1

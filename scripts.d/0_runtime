@@ -356,7 +356,7 @@ function load-module()
             local MA=${SCBI_MODULE_ALIAS[$module]}
 
             if [[ -f $SCBI_PLUGINS/$MA ]]; then
-                _inherit-plugin_internal no "" $MA $module
+                _inherit-plugin_internal no "${SCBI_ALL_HOOKS}" $MA $module
             else
                 return 1
             fi
@@ -394,10 +394,6 @@ function _inherit-plugin_internal()
     local HPLUGIN=$3
     local PLUGIN=$4
 
-    #  All hooks if no filter
-    [[ -z $SCBI_HOOKS ]] &&
-        local SCBI_HOOKS="${SCBI_ALL_HOOKS}"
-
     load-module $HPLUGIN
 
     #  For each known & existing hook name, create a wrapper with the
@@ -424,13 +420,14 @@ function inherit-plugin()
     local HPLUGIN=""
     local NOVARIANT=no
     local HOOKS=""
+    local CHOOKS=""
 
     #  Get the caller plug-in name, this is called when sourcing a plug-in
     #  we need to use Bash caller here and not get-caller.
     local CALLER=( $(caller) )
     local PLUGIN=${CALLER[1]##*/}
     local P=$PLUGIN
-    local options=$(getopt -l no-variant,hooks:,name: -- dummy $*)
+    local options=$(getopt -l no-variant,hooks:,custom-hooks:,name: -- dummy "$@")
 
     eval set -- "$options"
     while true; do
@@ -442,6 +439,11 @@ function inherit-plugin()
                 shift
                 [[ -n $HOOKS ]] && HOOKS+="|"
                 HOOKS+=$1
+                ;;
+            --custom-hooks)
+                shift
+                [[ -n $CHOOKS ]] && CHOOKS+="|"
+                CHOOKS+=$1
                 ;;
             --name)
                 shift
@@ -460,6 +462,12 @@ function inherit-plugin()
         esac
         shift
     done
+
+    #  All hooks if no filter
+    [[ -z $HOOKS ]] &&
+        HOOKS="${SCBI_ALL_HOOKS}"
+
+    [[ -n $CHOOKS ]] && HOOKS+="|${CHOOKS}"
 
     SCBI_LOADED[${P}.inh]+="$HPLUGIN "
 

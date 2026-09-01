@@ -1,0 +1,58 @@
+
+RUNS ./scbi inh-app-hooks
+
+CLEAN-DIFF <<EOF
+inh-app-hooks-config is a function
+inh-app-hooks-config ()
+{
+    echo @@@ CONFIG
+}
+inh-app-hooks-generic is a function
+inh-app-hooks-generic ()
+{
+    echo @@@ GENERIC-inh-specific
+}
+inh-app-hooks-install is a function
+inh-app-hooks-install ()
+{
+    echo @@@ INSTALL-inh-specific
+}
+inh-app-hooks-shared is a function
+inh-app-hooks-shared ()
+{
+    echo @@@ SHARED-inh-specific
+}
+xxxx/xx/xx xx:xx:xx : Building inh-app-hooks [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End Building inh-app-hooks [default] (n/a)
+EOF
+
+RUNS ./scbi inh-app-hooks2
+
+CLEAN-DIFF <<EOF
+inh-app-hooks2-config is a function
+inh-app-hooks2-config ()
+{
+    echo @@@ CONFIG
+}
+inh-app-hooks2-shared is a function
+inh-app-hooks2-shared ()
+{
+    echo @@@ SHARED-inh-specific
+}
+xxxx/xx/xx xx:xx:xx : Building inh-app-hooks2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building inh-app-hooks2 [default] (n/a)
+EOF

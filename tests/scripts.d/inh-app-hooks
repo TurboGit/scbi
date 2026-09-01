@@ -1,0 +1,12 @@
+
+inherit-plugin inh-specific --custom-hooks=generic,shared
+
+function inh-app-hooks-config()
+{
+    echo @@@ CONFIG
+}
+
+# dump created routines
+declare -F | grep inh-app-hooks | while read d1 d1 n; do
+    type $n | sed 's/ $//g'
+done
