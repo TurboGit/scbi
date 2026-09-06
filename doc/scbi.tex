@@ -188,6 +188,8 @@ A module is described in an SCBI plug-in script (one plug-in in one file). It ca
 		\code{module/auto.fast:v1.3}
 
 		Finally, the \code{auto} variant can only be defined in a build plan or on the command line.
+
+		\item[@] \index{variant!@}This is only available on the command line. To specify that the actual variant is the one described in the build plan. If not defined in the build plan, then the \code{default} variant is used as if it was not specified.
 	\end{description}
 
 	\item[version] The version to build. This version string can be either:
@@ -198,6 +200,7 @@ A module is described in an SCBI plug-in script (one plug-in in one file). It ca
 		\item[keep] \index{version!keep}To specify that the module sources should not be updated. So the \emph{setup, }\emph{configure}, \emph{build}, \emph{install} and \emph{wrapup} steps are not conducted and the module's will keep its current status as it was built last time. If the module didn't get built yet the \emph{keep} status is ignored.
 		\item[skip] \index{version!skip}To specify that the module must be completely ignored. It is as if the plug-in was not present in the dependencies.
 		\item[force] \index{version!force}To enable an otherwise skip module (possibly set to \emph{skip} in a build plan).
+		\item[@] \index{version!@}This is only available on the command line. To specify that the actual version is the one described in the build plan. If not defined in the build plan, then the default version is used (e.g. \code{master} for Git) as if it was not specified.
 	\end{description}
 
 	The version can be set to \code{force} on the command line to tell that the plug-in should not be skipped. On the command line it is always possible to force a build of a module to a specific variant and/or version. But if one need to build the default variant or version it is required to pass the \code{force} as version.
@@ -222,7 +225,9 @@ The following are examples of module references:
 
 	\item[lcms2:v2.0] Build \code{lcms2} from repository using branch (or tag) \emph{2.0}.
 
-	\item[lcms2/fast:v2.0] Build \code{lcms2} \emph{fast} variable from repository using branch (or tag) \emph{2.0}.
+	\item[lcms2/fast:v2.0] Build \code{lcms2} \emph{fast} variant from repository using branch (or tag) \emph{2.0}.
+
+	\item[lcms2/@:v2.0] Build \code{lcms2} using the variant as defined in the build plan and from repository using branch (or tag) \emph{2.0}.
 
 	\item[lcms2:bfaf7b82ed] Build \code{lcms2} from repository using sources from SHA-1 \emph{bfaf7b82ed} (Git only).
 

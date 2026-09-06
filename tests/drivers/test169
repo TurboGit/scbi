@@ -1,0 +1,59 @@
+# On plan-dev we have:
+# lib1:v1
+# lib2/variant1:dev
+
+RUNS ./scbi --plan=dev show --module-ref:full lib1/@:@
+# add eof to osht output
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+/default:v1
+EOF
+
+RUNS ./scbi --plan=dev show --module-ref:full lib1:@
+# add eof to osht output
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+/default:v1
+EOF
+
+RUNS ./scbi --plan=dev show --module-ref:full lib2
+# add eof to osht output
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+/variant1:dev
+EOF
+
+RUNS ./scbi --plan=dev show --module-ref:full lib2/@:@
+# add eof to osht output
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+/variant1:dev
+EOF
+
+RUNS ./scbi --plan=dev show --module-ref:full lib2/@:v88
+# add eof to osht output
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+/variant1:v88
+EOF
+
+RUNS ./scbi --plan=dev show --module-ref:full lib2/me:@
+# add eof to osht output
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+/me:dev
+EOF
+
+RUNS ./scbi --plan=dev show --module-ref:full notset/@:@
+# add eof to osht output
+echo >> ${OSHT_STDIO}
+
+DIFF <<EOF
+/default
+EOF

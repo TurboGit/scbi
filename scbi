@@ -2489,9 +2489,29 @@ function setup-generic-tool-env()
     #  We still need to set the module's ref passed on the command line
     #  for proper handling of the :keep special ref.
 
+    SMT=()
     for module in ${SCBI_MODULES[*]}; do
+        [[ ${module/@/x} != $module ]] &&
+            {
+                local R=()
+                parse-module-ref R $module
+                local mname=${R[0]}
+                get-module-ref R $mname
+                local mvar=${R[1]}
+                local mver=${R[3]}
+                if [[ $mvar == "default" ]]; then
+                    module=${module/\/@/}
+                else
+                    module=${module/\/@/\/$mvar}
+                fi
+                module=${module/:@/:$mver}
+
+            }
+        SMT+=($module)
         set-module-ref $module
     done
+
+    SCBI_MODULES=(${SMT[*]})
 
     if [[ $PLAN_CACHED == yes ]]; then
         if [[ $DO_SUBCMD == no ]] || [[ $DO_STAT != no ]]; then
