@@ -1,0 +1,37 @@
+
+# Check that a valid Git submodule checkout succeeds
+
+export GIT_ALLOW_PROTOCOL=file
+LDIR=.root/builds/withsubmok/x86_64-linux-gnu-default/logs
+
+(
+    mkdir -p .root/git
+    cd .root/git
+    rm -fr withsubmok-main withsubmok-sub
+
+    git init withsubmok-sub &> /dev/null
+    cd withsubmok-sub
+    git config user.name test
+    git config user.email test@example.com
+    echo submodule-ok > sub.txt
+    git add sub.txt
+    git commit -m init &> /dev/null
+
+    SUBM=$(pwd)
+
+    cd ../
+    git init withsubmok-main &> /dev/null
+    cd withsubmok-main
+    git config user.name test
+    git config user.email test@example.com
+    echo main > main.txt
+    git add main.txt
+    git -c protocol.file.allow=always submodule add $SUBM subm &> /dev/null
+    git commit -m init &> /dev/null
+)
+
+RUNS ./scbi withsubmok
+
+GREP "^submodule-ok$" $LDIR/build.log
+
+unset GIT_ALLOW_PROTOCOL

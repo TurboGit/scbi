@@ -1,0 +1,24 @@
+
+function withsubmok-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${ROOTDIR}/.root/git/withsubmok-main
+}
+
+function withsubmok-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    cat ../src/subm/sub.txt
+}
+
+function withsubmok-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo INSTALL
+}
