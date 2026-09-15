@@ -131,7 +131,7 @@ else
 fi
 cd ..
 
-PLAN 1362
+PLAN 1364
 
 export SCBI_CACHE_DIR="no"
 
