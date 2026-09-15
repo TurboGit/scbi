@@ -561,10 +561,17 @@ function _internal_get-branch()
             else
                 (
                     local VCSDIR=""
+                    local GOPTS=""
+                    local LOPTS=",$VCS_OPTIONS,"
+
+                    if [[ "$LOPTS" == "${LOPTS/,no-recursive,}" ]]; then
+                        GOPTS="--recursive"
+                    fi
+
                     get-ln VCSDIR $SCBI_BDIR/$MODULE/vcs
                     cd $VCSDIR &&
                         git-update-submodules $VCS_OPTIONS \
-                                              --init --recursive
+                                              --init $GOPTS
                 ) >> $log 2>&1 ||
                     {
                         ilog build "error: cannot update git submodules"
