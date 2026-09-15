@@ -28,6 +28,10 @@ LDIR=.root/builds/withsubmok/x86_64-linux-gnu-default/logs
     git add main.txt
     git -c protocol.file.allow=always submodule add $SUBM subm &> /dev/null
     git commit -m init &> /dev/null
+
+    cd ../
+    mkdir -p ../builds/.vcs
+    git clone withsubmok-main ../builds/.vcs/withsubmok-main &> /dev/null
 )
 
 RUNS ./scbi withsubmok
