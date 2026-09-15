@@ -26,7 +26,7 @@ LDIR=.root/builds/withsubmok/x86_64-linux-gnu-default/logs
     git config user.email test@example.com
     echo main > main.txt
     git add main.txt
-    git -c protocol.file.allow=always submodule add $SUBM subm &> /dev/null
+    git -c protocol.file.allow=always submodule add "$SUBM" subm &> /dev/null
     git commit -m init &> /dev/null
 
     cd ../
