@@ -70,6 +70,24 @@ function git-set-submodule-url()
     done
 }
 
+function git-update-submodules()
+{
+    local OPTIONS=$1
+
+    shift
+
+    local LOPTS=",$OPTIONS,"
+
+    if [[ "$LOPTS" == "${LOPTS/,no-recursive,}" ]] &&
+           [[ -f .gitmodules ]];
+    then
+        git-set-submodule-url $OPTIONS
+        git submodule update $@
+    else
+        true
+    fi
+}
+
 ############################## git-co
 
 function git-co()
@@ -81,7 +99,6 @@ function git-co()
     local DIR=$5
     local REPO=${DIR:-$(basename $URL .git)}
 
-    local GOPTS1=""
     local GOPTS2=""
     local HAS_LFS=no
     local RECURSIVE=yes
@@ -100,7 +117,6 @@ function git-co()
     done
 
     if [[ $RECURSIVE == yes ]]; then
-        GOPTS1="--recursive"
         GOPTS2="--recurse-submodules"
     fi
 
@@ -113,13 +129,7 @@ function git-co()
             git clone $URL $REPO &&
                 {
                     cd $REPO &&
-                        if [[ -f .gitmodules ]]; then
-                            git-set-submodule-url $OPTIONS
-                            git submodule init
-                            git submodule update $GOPTS1
-                        else
-                            true
-                        fi
+                        git-update-submodules $OPTIONS --init --recursive
                 }
         else
             cd $REPO
@@ -133,12 +143,7 @@ function git-co()
             else
                 true
             fi &&
-                git fetch --force --tags $GOPTS2 &&
-                if [[ -f .gitmodules ]]; then
-                    git submodule update $GOPTS1
-                else
-                    true
-                fi
+                git fetch --force --tags $GOPTS2
         fi &&
         cd $SCBI_BDIR/$NAME &&
         ln -s ../.vcs/$REPO vcs &&
@@ -270,15 +275,7 @@ function git-branch()
             ilog $MODULE "scbi: $MODULE updated $CUR..$NEW"
         fi
 
-        local LOPTS=",$OPTIONS,"
-        if [[ "$LOPTS" == "${LOPTS/,no-recursive,}" ]] &&
-               [[ -f .gitmodules ]];
-        then
-            git-set-submodule-url $OPTIONS
-            git submodule update --force --init --recursive
-        else
-            true
-        fi
+        git-update-submodules $OPTIONS --force --init --recursive
     )
 }
 
@@ -559,6 +556,18 @@ function _internal_get-branch()
                     $MODULE $REF "$VCS_DIR" >> $log 2>&1 ||
                     {
                         ilog build "error: cannot switch to branch $REF"
+                        return 1
+                    }
+            else
+                (
+                    local VCSDIR=""
+                    get-ln VCSDIR $SCBI_BDIR/$MODULE/vcs
+                    cd $VCSDIR &&
+                        git-update-submodules $VCS_OPTIONS \
+                                              --init --recursive
+                ) >> $log 2>&1 ||
+                    {
+                        ilog build "error: cannot update git submodules"
                         return 1
                     }
             fi
