@@ -571,7 +571,7 @@ function _internal_get-branch()
                     get-ln VCSDIR $SCBI_BDIR/$MODULE/vcs
                     cd $VCSDIR &&
                         git-update-submodules $VCS_OPTIONS \
-                                              --init $GOPTS
+                                              --force --init $GOPTS
                 ) >> $log 2>&1 ||
                     {
                         ilog build "error: cannot update git submodules"
