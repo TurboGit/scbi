@@ -82,7 +82,7 @@ function git-update-submodules()
            [[ -f .gitmodules ]];
     then
         git-set-submodule-url $OPTIONS
-        git submodule update $@
+        git submodule update "$@"
     else
         true
     fi
