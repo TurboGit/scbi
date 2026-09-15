@@ -113,12 +113,13 @@ function git-co()
             git clone $URL $REPO &&
                 {
                     cd $REPO &&
-                        [[ -f .gitmodules ]] &&
-                        {
+                        if [[ -f .gitmodules ]]; then
                             git-set-submodule-url $OPTIONS
                             git submodule init
                             git submodule update $GOPTS1
-                        } || true
+                        else
+                            true
+                        fi
                 }
         else
             cd $REPO
@@ -127,8 +128,13 @@ function git-co()
                 exit 1
             #  we set the URL in case the repo has been relocated
             git remote set-url origin $URL
-            [[ -f .gitmodules ]] && git-set-submodule-url $OPTIONS
-            git fetch --force --tags $GOPTS2
+            if [[ -f .gitmodules ]]; then
+                git-set-submodule-url $OPTIONS
+                git submodule update $GOPTS1
+            else
+                true
+            fi &&
+                git fetch --force --tags $GOPTS2
         fi &&
         cd $SCBI_BDIR/$NAME &&
         ln -s ../.vcs/$REPO vcs &&
@@ -261,11 +267,14 @@ function git-branch()
         fi
 
         local LOPTS=",$OPTIONS,"
-        [[ "$LOPTS" == "${LOPTS/,no-recursive,}" ]] && [[ -f .gitmodules ]] &&
-            {
-                git-set-submodule-url $OPTIONS
-                git submodule update --force --init --recursive
-            } || true
+        if [[ "$LOPTS" == "${LOPTS/,no-recursive,}" ]] &&
+               [[ -f .gitmodules ]];
+        then
+            git-set-submodule-url $OPTIONS
+            git submodule update --force --init --recursive
+        else
+            true
+        fi
     )
 }
 
