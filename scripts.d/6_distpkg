@@ -351,7 +351,7 @@ function check-deb-pkg()
     if [[ -z $inst_ver ]]; then
         #  Package is not installed, check if it exists
 
-        local cand=( $(LANG=C apt-cache policy $PCK | grep Candidate 2> /dev/null) )
+        local cand=( $(LANG=C apt-cache policy $PCK 2> /dev/null | grep Candidate ) )
 
         if [[ -n ${cand[1]} ]]; then
             clean-version-string version ${cand[1]}
