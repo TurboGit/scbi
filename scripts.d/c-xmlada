@@ -58,12 +58,26 @@ function c-xmlada-env()
     add-to-var LD_LIBRARY_PATH  $PREFIX/lib
 }
 
+function c-xmlada-common-config-options()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local BUILD_TYPE=$(get-build-type CONFIGURE Production)
+
+    echo --prefix=$PREFIX
+    echo --enable-build=${BUILD_TYPE}
+}
+
 function c-xmlada-cross-config()
 {
     local PREFIX=$1
     local TARGET=$2
 
-    ./configure --prefix=$PREFIX --target=$TARGET
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    ./configure "${OPTIONS[@]}" --target=$TARGET
 }
 
 function c-xmlada-config()
@@ -71,7 +85,10 @@ function c-xmlada-config()
     local PREFIX=$1
     local TARGET=$2
 
-    ./configure --prefix=$PREFIX
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    ./configure "${OPTIONS[@]}"
 }
 
 function c-xmlada-build()
