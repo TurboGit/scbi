@@ -29,7 +29,7 @@ function c-libclang-config-options()
     local PREFIX=$1
     local TARGET=$2
 
-    local BUILD_TYPE=$(get-build-type LIBCLANG Release)
+    local BUILD_TYPE=$(get-build-type CMAKE Release)
     local DEBUG=OFF
 
     [[ $BUILD_TYPE == Debug ]] && DEBUG=ON

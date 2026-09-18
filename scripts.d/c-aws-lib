@@ -44,7 +44,7 @@ function c-aws-lib-common-config-options()
     local VARIANT=$3
 
     echo prefix=$PREFIX
-    echo DEBUG=$(get-build-type AWS_LIB true)
+    echo DEBUG=$(get-build-type MAKE true)
 }
 
 function c-aws-lib-openssl-config-options()
