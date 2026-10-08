@@ -58,6 +58,7 @@ function get-distrib()
 function setup-discriminants()
 {
     export SCBI_OS_VERSION=unknown
+    export SCBI_OS_CODENAME=unknown
     export SCBI_OS_MAJOR_VERSION=unknown
     export SCBI_OS_ID=unknown
 
