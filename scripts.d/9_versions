@@ -166,6 +166,7 @@ function load-module-plan()
         local -n _RES=$1
         local PLG1=$2
         local PLG2=$3
+        local VREX=$4
 
         local minfo=()
         parse-module-ref minfo $PLG1
@@ -185,6 +186,9 @@ function load-module-plan()
         local knd=${ainfo[2]}
         local ref=${ainfo[3]}
         local a=""
+
+        [[ -n $VREX ]] &&
+            [[ $ref =~ $VREX ]] && ref=${BASH_REMATCH[1]}
 
         [[ $SKP == "yes" ]] && ref=skip
         [[ $knd == "VERSION" ]] && a="#"
@@ -223,7 +227,7 @@ function load-module-plan()
     fi
 
     if [[ -f $PLAN ]]; then
-        while read modref arg1 arg2 arg3 arg4; do
+        while read modref arg1 arg2 arg3 arg4 arg5; do
             if [[ "$modref" =~ ^[[:space:]]*# ]]; then
                 continue;
             elif [[ "$modref" = "@load" ]]; then
@@ -261,8 +265,17 @@ function load-module-plan()
 
                 register-module-plan $NAME $module $(resolve-set $arg3) $version
             elif [[ "$modref" = "@ref" ]] && [[ $GROUP == no ]]; then
+                if [[ $arg2 != "as" ]]; then
+                    elog build syntax error, unknown option $arg2 in @ref
+                    exit 1
+                fi
+                if [[ "$arg4" != "" ]] && [[ $arg4 != "version" ]]; then
+                    elog build syntax error, unknown option $arg4 in @ref
+                    exit 1
+                fi
+
                 local mref=""
-                resolve-as mref $arg1 $arg3
+                resolve-as mref $arg1 $arg3 "$arg5"
 
                 local minfo=()
                 parse-module-ref minfo $arg1
@@ -351,7 +364,12 @@ function load-module-plan()
                        [[ $arg2 == "as" ]] &&
                        [[ $GROUP == yes ]];
                 then
-                    resolve-as modref $arg1 $arg3
+                    if [[ "$arg4" != "" ]] && [[ $arg4 != "version" ]]; then
+                        elog build syntax error, unknown option $arg4 in @ref
+                        exit 1
+                    fi
+
+                    resolve-as modref $arg1 $arg3 "$arg5"
                 fi
 
                 [[ $GROUP == yes ]] && GMOD+=( "$modref" )

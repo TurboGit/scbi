@@ -946,10 +946,6 @@ function check-archive-exists()
         return 1
     fi
 
-    #local proxy=${tar[1]}
-    #local taropts=${tar[2]}
-    #local tarcp=${tar[3]}
-    #local tarurl=${tar[4]}
     local tarsrc=${tar[5]}
 
     if [[ -f $SCBI_ARCHIVES/$tarsrc ]]; then
@@ -1055,6 +1051,7 @@ function get-archive()
     local tarcp=${tar[3]}
     local tarurl=${tar[4]}
     local tarsrc=${tar[5]}
+    local tardir=${tar[6]}
 
     #  If tarsrc set to NONE, there is nothing to do for this hook
 
@@ -1095,6 +1092,9 @@ function get-archive()
             elif [[ $tarcp == cp ]] || [[ $tarcp == scp ]]; then
                 $tarcp $options $tarurl/$tarsrc.sha1 \
                        /tmp/$tarsrc.sha1 > $log 2>&1
+            elif [[ $tarcp == ftp ]]; then
+                $tarcp $options $tarurl/$tarsrc.sha1 \
+                       -o /tmp/$tarsrc.sha1 > $log 2>&1
             else
                 false
             fi
@@ -1122,6 +1122,9 @@ function get-archive()
                 elif [[ $tarcp == cp ]] || [[ $tarcp == scp ]]; then
                     $tarcp $options $tarurl/$tarsrc \
                            $SCBI_ARCHIVES/$tarsrc > $log 2>&1
+                elif [[ $tarcp == ftp ]]; then
+                    $tarcp $options $tarurl/$tarsrc \
+                           -o $SCBI_ARCHIVES/$tarsrc > $log 2>&1
                 else
                     elog $MODULE unknown tar protocol $tarcp
                 fi
@@ -1202,13 +1205,31 @@ function get-archive()
     local list=( $(ls .) )
 
     if [[ ${#list[*]} == 1 ]] && [[ -d ${list[0]} ]]; then
-        #  A single top dir
-        local topdir=${list[0]}
-        mv $topdir ../archive-src
+        if [[ -n $tardir ]]; then
+            if [[ -d ${list[0]}/$tardir ]]; then
+                mv ${list[0]}/$tardir ../archive-src
+            else
+                elog $MODULE no directory $tardir in archive $tarsrc
+                return 1
+            fi
+        else
+            #  A single top dir
+            local topdir=${list[0]}
+            mv $topdir ../archive-src
+        fi
     else
-        #  No top dir
-        mkdir ../archive-src
-        mv * .* ../archive-src
+        if [[ -n $tardir ]]; then
+            if [[ -d $tardir ]]; then
+                mv $tardir ../archive-src
+            else
+                elog $MODULE no directory $tardir in archive $tarsrc
+                return 1
+            fi
+        else
+            #  No top dir
+            mkdir ../archive-src
+            mv * .* ../archive-src
+        fi
     fi
 
     cd ..

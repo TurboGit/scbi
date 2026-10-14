@@ -1,6 +1,6 @@
 # scbi
 
-Setup Configure Build Install - Tool to build from sources with local developers checkout support
+Source Code Build Infrastructure - Tool to build from sources with local developers checkout support
 
 
 # A simple tutorial to build Little-CMS
