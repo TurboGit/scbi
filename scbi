@@ -1451,7 +1451,7 @@ function needed-by()
 function triggered-by()
 {
     [[ -f $1 ]] && [[ -f $2 ]] &&
-        join -v1 --nocheck-order <(sort -k1 $1) <(sort -k1 $2) |
+        join -v1 --nocheck-order <(sort -k1 $1) <(sort -k1 $2) | sort -k2 |
             while read sha1 md dummy; do
                 ilog $module "  ↳ $md changed"
             done

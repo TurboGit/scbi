@@ -116,8 +116,8 @@ xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (dev)
 
 xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
 xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
-xxxx/xx/xx xx:xx:xx :   ↳ lib2 changed
 xxxx/xx/xx xx:xx:xx :   ↳ lib1 changed
+xxxx/xx/xx xx:xx:xx :   ↳ lib2 changed
 xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
 xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
