@@ -1091,6 +1091,9 @@ function get-archive()
             elif [[ $tarcp == cp ]] || [[ $tarcp == scp ]]; then
                 $tarcp $options $tarurl/$tarsrc.sha1 \
                        /tmp/$tarsrc.sha1 > $log 2>&1
+            elif [[ $tarcp == ftp ]]; then
+                $tarcp $options $tarurl/$tarsrc.sha1 \
+                       -o /tmp/$tarsrc.sha1 > $log 2>&1
             else
                 false
             fi
@@ -1118,6 +1121,9 @@ function get-archive()
                 elif [[ $tarcp == cp ]] || [[ $tarcp == scp ]]; then
                     $tarcp $options $tarurl/$tarsrc \
                            $SCBI_ARCHIVES/$tarsrc > $log 2>&1
+                elif [[ $tarcp == ftp ]]; then
+                    $tarcp $options $tarurl/$tarsrc \
+                           -o $SCBI_ARCHIVES/$tarsrc > $log 2>&1
                 else
                     elog $MODULE unknown tar protocol $tarcp
                 fi
