@@ -946,10 +946,6 @@ function check-archive-exists()
         return 1
     fi
 
-    #local proxy=${tar[1]}
-    #local taropts=${tar[2]}
-    #local tarcp=${tar[3]}
-    #local tarurl=${tar[4]}
     local tarsrc=${tar[5]}
 
     if [[ -f $SCBI_ARCHIVES/$tarsrc ]]; then
