@@ -389,7 +389,7 @@ Some specific actions are supported with the following syntax:
 		module2:$VERSION
 	\end{lstlisting}
 
-	\item[\code{@ref m2 as m1}] To propagate a variant/version from another module.
+	\item[\code{@ref <m2> as <m1> [version <pattern>]}] To propagate a variant/version from another module.
 
 	\begin{lstlisting}
 		module1/var:1.2
@@ -404,6 +404,26 @@ Some specific actions are supported with the following syntax:
 	\end{lstlisting}
 
 	But this may come handy when inheriting of a plan to set reference of a plug-in inheriting from another one.
+
+	On can also use a \code{pattern} to create the module1 version from module2 version. The pattern can be composed of 3 parts: \code{<prefix>/<regpat>/<suffix>}.
+
+	\begin{description}
+		\item[prefix] If present, a simple string that will be added as prefix.
+		\item[regpat] A regular expression parttern where the first and second match will be use for creating the final version.
+		\item[suffix] If present, a simple string that will be added as suffix.
+	\end{description}
+
+	\begin{lstlisting}
+	module1/var:1.2.3
+	@ref module2 as module1 version v/[0-9].[0-9]/
+	\end{lstlisting}
+
+	Here \code{module2} will use the variant of \code{module1} and the version starting with \code{v} followed by the major and minor version of \code{module1}. The above plan is equivalent to:
+
+	\begin{lstlisting}
+		module1/var:1.2.3
+		module2/var:v1.2
+	\end{lstlisting}
 
 	\item[\code{@on <discriminants> use <module-reference>}] To set a module reference only if the running OS is matching the discriminants (\seeref{discriminants}). If all discriminant are matching the module reference will overwrite previous definitions.
 
