@@ -2662,7 +2662,7 @@ done
 
 #  Add modules from ini file at the end, needed to get
 #  the sub-command below.
-SCBI_MODULES+=( ${SCBI_INI_MODULES} )
+SCBI_MODULES+=( ${SCBI_INI_MODULES[*]} )
 
 ############################## sub-commands
 
