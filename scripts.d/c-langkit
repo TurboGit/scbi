@@ -14,3 +14,8 @@ function c-langkit-aggregate()
 {
     echo direct
 }
+
+function c-langkit-prefix()
+{
+    echo NONE
+}

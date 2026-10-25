@@ -16,3 +16,8 @@ function c-e3-only-explicit-build()
 {
     echo true
 }
+
+function c-e3-prefix()
+{
+    echo NONE
+}

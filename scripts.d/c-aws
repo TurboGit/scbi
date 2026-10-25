@@ -9,3 +9,8 @@ function c-aws-aggregate()
 {
     echo direct
 }
+
+function c-aws-prefix()
+{
+    echo NONE
+}
