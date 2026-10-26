@@ -56,3 +56,11 @@ function c-polyorb-install()
 
     make install
 }
+
+function c-polyorb-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make NONE
+}
