@@ -725,11 +725,11 @@ prefix = $HOME/sandbox
 
 \section{Creating new plug-ins}
 
-To create a new plug-in for SCBI you need to create a single \code{bash} script (one per module) into \code{\$SCBI\_DEFS} and named as the plug-in.
+To create a new plug-in for SCBI you need to create a single \code{Bash} script (one per module) into \code{\$SCBI\_DEFS} and named as the plug-in.
 
 The plug-in script describes, using different hooks, the steps for building. One for configuring, one for building and one for installing. These are the mains steps generally used to build all software.
 
-The different steps are described by a simple \code{bash} code snippet. And some hooks are just descriptions to retrieve artifacts (like VCS sources or archive file).
+The different steps are described by a simple \code{Bash} code snippet. And some hooks are just descriptions to retrieve artifacts (like VCS sources or archive file).
 
 In the following section all the supported hooks are described. Then the calling order conducted by SCBI is described.
 
@@ -779,6 +779,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[\code{SCBI\_VCS\_VARIANT}] Same as above for the all modules.
 	\end{description}
 
+	\index{hook!scbi-rewrite-vcs}\index{rewrite!scbi-rewrite-vcs}
 	And finally the function \code{scbi-rewrite-vcs} can be defined. This function takes the five values returned by the \code{vcs} hook and must return the five values in the same order but possibly rewritten.
 
 	\item[<module>{[}-<variant>{]}-archive] \label{hookarchive}\index{hook!archive}Describe the archive filename and location of the archive containing the module sources.
@@ -818,7 +819,8 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\item[\code{SCBI\_ARCHIVE\_VARIANT}] Same as above for the all modules.
 	\end{description}
 
-	And finally the function \code{scbi-rewrite-archive} can be defined. This function takes the five values returned by the \code{archive} hook and must return the five values in the same order but possibly rewritten.
+	\index{hook!scbi-rewrite-archive}\index{rewrite!scbi-rewrite-archive}
+	And finally the function \code{scbi-rewrite-archive} can be defined. This function takes the six values returned by the \code{archive} hook and must return the six values in the same order but possibly rewritten.
 
 	\item[<module>{[}-common|<variant>{]}-patches] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
 
@@ -828,7 +830,7 @@ The hooks must be prefixed by the name of the plug-in. Each of them are optional
 		\begin{enumerate}
 			\item echo <patch-file-1>
 			\item echo <patch-file-2>
-			\item {[}{[} \$REF =\textasciitilde "7.8" {]}{]} \&\& echo <patch-for-7.8>
+			\item {[[} \$REF =\textasciitilde "7.8" {]]} \&\& echo <patch-for-7.8>
 			\item ...
 		\end{enumerate}
 	\end{description}
@@ -1203,7 +1205,9 @@ Example:
 
  function gnatcoll-modules()
  {
-		echo gnatcoll-core gnatcoll-bindings gnatcoll-db
+		echo gnatcoll-core
+		echo gnatcoll-bindings
+		echo gnatcoll-db
  }
 \end{lstlisting}
 
