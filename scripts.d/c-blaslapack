@@ -1,13 +1,3 @@
-function c-blaslapack-archive()
-{
-    local VERSION=$1
-
-    echo default
-    echo none
-    echo none
-    echo none
-    echo lapack.tgz
-}
 
 function c-blaslapack-out-of-tree()
 {
