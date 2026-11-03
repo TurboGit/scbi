@@ -288,8 +288,8 @@ function check-archive-params()
 
     local v=( $(IFS=';' grep -E " *echo " $TMP | sed 's/echo//g' ) )
 
-    if [[ "${#v[@]}" != 5 ]]; then
-        echo "   error:   ($HOOK) should return 5 values"
+    if [[ "${#v[@]}" != 5 ]] && [[ "${#v[@]}" != 6 ]]; then
+        echo "   error:   ($HOOK) should return 5 or 6 values"
     fi
 
     if [[ -z ${v[2]} ]] || [[ ${v[2]^^} == "NONE;" ]]; then
@@ -305,6 +305,78 @@ function check-archive-params()
     fi
 
     rm -f $TMP
+}
+
+function check-true-false-params()
+{
+    local HOOK=$1
+
+    TMP=$(mktemp)
+
+    type $HOOK > $TMP
+
+    local v=( $(IFS=';' grep -E " *echo " $TMP | sed 's/echo//g' ) )
+
+    if [[ "${#v[@]}" != 1 ]]; then
+        echo "   error:   ($HOOK) should return a single value"
+    fi
+
+    local val=${v[0]^^}
+
+    if [[ $val != "TRUE" ]] &&
+           [[ $val != "FALSE" ]];
+    then
+        echo "   error:   ($HOOK) should return true/false"
+    fi
+}
+
+function check-aggregate-params()
+{
+    local HOOK=$1
+
+    TMP=$(mktemp)
+
+    type $HOOK > $TMP
+
+    local v=( $(IFS=';' grep -E " *echo " $TMP | sed 's/echo//g' ) )
+
+    if [[ "${#v[@]}" != 1 ]]; then
+        echo "   error:   ($HOOK) should return a single value"
+    fi
+
+    local val=${v[0]}
+
+    if [[ $val != "direct" ]] &&
+           [[ $val != "recursive" ]] &&
+           [[ $val != "no" ]];
+    then
+        echo "   error:   ($HOOK) should return direct/aggregate/no"
+    fi
+}
+
+function check-propagate-version-params()
+{
+    local HOOK=$1
+
+    TMP=$(mktemp)
+
+    type $HOOK > $TMP
+
+    local v=( $(IFS=';' grep -E " *echo " $TMP | sed 's/echo//g' ) )
+
+    if [[ "${#v[@]}" != 1 ]]; then
+        echo "   error:   ($HOOK) should return a single value"
+    fi
+
+    local val=${v[0]}
+
+    if [[ $val != "version" ]] &&
+           [[ $val != "variant" ]] &&
+           [[ $val != "both" ]] &&
+           [[ $val != "no" ]];
+    then
+        echo "   error:   ($HOOK) should return direct/aggregate/no"
+    fi
 }
 
 function check-patches-params()
@@ -379,6 +451,30 @@ function check-params()
         while read H; do
             check-patches-params $H
         done < <(get-hooks $PLUGIN "patches")
+
+        #  OUT-OF-TREE parameters
+
+        while read H; do
+            check-true-false-params $H
+        done < <(get-hooks $PLUGIN "out-of-tree")
+
+        #  OUT-OF-TREE parameters
+
+        while read H; do
+            check-true-false-params $H
+        done < <(get-hooks $PLUGIN "only-explicit-build")
+
+        #  AGGREGATE parameters
+
+        while read H; do
+            check-aggregate-params $H
+        done < <(get-hooks $PLUGIN "aggregate")
+
+        #  PROPAGATE-VERSION parameters
+
+        while read H; do
+            check-propagate-version-params $H
+        done < <(get-hooks $PLUGIN "propagate-version")
 
         return $ERROR
     ) || ERROR=1
