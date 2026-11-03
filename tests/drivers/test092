@@ -60,12 +60,12 @@ Check parameters:
    warning: (wrong-nok-vcs) does not require parameters
    error:   (wrong-nok-vcs) should return 4 or 5 values
    warning: (wrong-archive) VERSION not declared
-   error:   (wrong-archive) should return 5 values
+   error:   (wrong-archive) should return 5 or 6 values
    error:   (wrong-archive) URL should be set
    error:   (wrong-archive) filename should be set
    warning: (wrong-ok-archive) VERSION not declared
    error:   (wrong-nok-archive) VERSION should be \$1
-   error:   (wrong-nok-archive) should return 5 values
+   error:   (wrong-nok-archive) should return 5 or 6 values
    error:   (wrong-nok-archive) URL should be set
    error:   (wrong-nok-archive) filename should be set
    error:   (wrong-nok-patches) KIND used but not declared
@@ -84,11 +84,11 @@ DIFF <<EOF
    error:   (wrong-vcs) should return 4 or 5 values
    error:   (wrong-boggus-vcs) wrong definition, no result returned
    error:   (wrong-nok-vcs) should return 4 or 5 values
-   error:   (wrong-archive) should return 5 values
+   error:   (wrong-archive) should return 5 or 6 values
    error:   (wrong-archive) URL should be set
    error:   (wrong-archive) filename should be set
    error:   (wrong-nok-archive) VERSION should be \$1
-   error:   (wrong-nok-archive) should return 5 values
+   error:   (wrong-nok-archive) should return 5 or 6 values
    error:   (wrong-nok-archive) URL should be set
    error:   (wrong-nok-archive) filename should be set
    error:   (wrong-nok-patches) KIND used but not declared
