@@ -1779,6 +1779,147 @@ See below (\ref{store}) how to handle the SCBI's private store. Using the runtim
 	\hspace{1.5cm}\texttt{scbi-store-get-key LICKEY}
 \end{itemize}
 
+\subsection{YAML plug-in format}
+\label{yaml-plugin}
+\index{YAML plug-in}
+
+\emph{This format is supported by the Python driver, currently in development.}
+
+A plug-in can be written as a YAML file named \file{<name>.yaml}. It
+describes exactly the same hooks as a Bash plug-in, the driver applies the
+same rules to select them (variants, \code{common}, \code{cross}, calling
+order). A plug-in is a recipe: it is only read by the driver.
+
+\subsubsection{Structure}
+
+The file is a mapping. The following keys are reserved, all the other ones
+are hook names (including \code{pre-<step>} and \code{post-<step>}):
+
+\begin{description}[font=\texttt]
+	\item[plugin] The plug-in name, optional, must match the file name.
+	\item[vars] Global variables, \code{\{NAME: value\}}.
+	\item[inherit] List of inherited plug-ins (\seeref{inheritance}), each
+	one a mapping with the keys \code{from}, \code{hooks},
+	\code{custom-hooks}, \code{no-variant} and \code{name}.
+	\item[os-variants] Variants using OS packages (\seeref{native variant}):
+	\code{\{native: \{packages: [...], env: [...]\}\}}.
+	\item[functions] Custom functions callable from the other hooks (or used
+	as custom hooks for \code{inherit}): \code{\{name: \{params: [A, B], run: <shell>\}\}}.
+\end{description}
+
+All scalars are strings: \code{yes}, \code{no}, \code{true} or
+\code{1.10} are never converted to booleans or numbers.
+
+\subsubsection{Hooks and variants}
+
+The value of a hook is either its body (the plain hook, \code{<plugin>-<hook>}
+in Bash) or a mapping where each key names \emph{exactly one} qualifier:
+\code{\_} (the plain hook), \code{common} (cumulative hooks only),
+\code{default} or a variant name. The key \code{cross} holds the same kind of
+mapping (or directly a body) used when the target is not the host. There is
+no key combining variants: for a module reference \code{m/a.b} the driver
+takes, as for Bash plug-ins, the first defined variant for the hooks like
+\code{config} or \code{install}, and all of them for the cumulative hooks
+like \code{depends} or \code{config-options}.
+
+\begin{lstlisting}
+plugin: c-gmp
+os-variants:
+  native:
+    packages: [os@-gmp-dev:[v]]
+    env: [set-var GMP_INCLUDE_DIR /usr/include]
+vcs:
+  proxy: default
+  options: none
+  protocol: mercurial
+  url: https://gmplib.org/repo/gmp/
+build-depends: [c-sandbox]
+depends:
+  vcs: [os@-autotools-dev, os@-automake]
+env:
+  - add-to-var C_INCLUDE_PATH $PREFIX/include
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+out-of-tree: false
+config:
+  _: ./configure --prefix=$PREFIX
+  vcs: ./configure --enable-maintainer-mode --prefix=$PREFIX
+  cross:
+    _: ./configure --prefix=$PREFIX/$TARGET --host=$TARGET
+build: make -j$SCBI_JOBS
+install: make install
+\end{lstlisting}
+
+\subsubsection{Hook bodies}
+
+The parameters of a hook are defined once for all by SCBI (for example
+\code{PREFIX TARGET VARIANT} for \code{config}, \code{VERSION} for
+\code{archive}, \code{PREFIX TARGET VARIANT KIND REF} for \code{patches},
+\code{PREFIX TARGET VARIANT OPTIONS} for \code{tests}) and are available as
+variables in the body; they are not declared in the plug-in.
+
+\begin{description}
+	\item[command hooks] (\code{setup}, \code{config}, \code{build},
+	\code{install}, \code{wrapup}, \code{tests}, \code{version}, \code{run}
+	and the \code{pre-}/\code{post-} steps): a shell script.
+	\item[value hooks] (\code{vcs}, \code{archive}, \code{depends},
+	\code{patches}, \code{config-options}, \code{prefix}, \code{out-of-tree}...):
+	a list of values, one per line of output (a single value can be given as a
+	string). \code{vcs} and \code{archive} can also be given as a mapping of
+	their fields (\code{proxy}, \code{options}, \code{protocol}, \code{url},
+	\code{file}, \code{dir}).
+	\item[environment hooks] (\code{env}, \code{build-env},
+	\code{tests-env}): a list of actions \code{<verb> <arguments>} where the
+	verb is one of \code{add-to-var}, \code{prepend-to-var}, \code{set-var},
+	\code{define-var}, \code{unset-var}, \code{export}, \code{system-compiler},
+	\code{target-env}, \code{no-target-env}, \code{mkdir} or \code{import}
+	(\code{import opam env} runs the command and imports the variables it sets).
+\end{description}
+
+Values and environment actions are not shell code: they may only refer to
+variables (\code{\$VAR}, \code{\$\{VAR\}}) and to the following functions:
+\code{\$(get-version)}, \code{\$(get-build-type <kind> <default>)},
+\code{\$(is-enabled <feature> [then] [else])},
+\code{\$(last-modified-directory <glob>)}, \code{\$(get-os-inc-dir <glob>)},
+\code{\$(basename <path>)} and \code{\$(ls <glob>)}.
+
+\subsubsection{Conditions}
+\index{YAML plug-in!condition}
+
+An item of a value list or of an environment list can be guarded by a
+condition, it is then a mapping with a single key \code{if <condition>}:
+
+\begin{lstlisting}
+patches:
+  - fix-common.diff
+  - if ref =~ ^7.8: fix-7.8.diff
+  - if version(lib2) > 1.9: [a.diff, b.diff]
+build-env:
+  - if target =~ mingw32: set-var OS Windows_NT
+\end{lstlisting}
+
+A condition compares operands with \code{==}, \code{!=}, \code{=\textasciitilde}
+(regular expression) or \code{<}, \code{<=}, \code{>}, \code{>=} (versions, as
+\code{check-module-version}), combined with \code{not}, \code{and}, \code{or}
+and parentheses. The operands are \code{ref} (the module version),
+\code{target}, \code{host}, \code{variant}, \code{kind}, \code{cross} (true
+when the target is not the host), \code{version(<plug-in>)} (version in the
+build plan), \code{build-type(<kind>[,<default>])}, \code{enabled(<feature>)},
+\code{exists(<path>)}, \code{on <discriminants>} (as in build plans,
+\seeref{discriminants}), and literal strings. Conditions never select
+between variants, this is done with the qualifiers.
+
+\subsubsection{Converting Bash plug-ins}
+
+A Bash plug-in is converted with:
+
+\cmd{python3 -m scbi.convert [\ddash{}check] [\ddash{}output-dir=<dir>] <plug-in>...}
+
+Everything that cannot be expressed in the YAML format is reported and the
+plug-in is not converted; it must be fixed first. This is the case for hook
+parameters not matching the hook signature, values computed by arbitrary
+shell code or hooks calling other hooks (use a combination of variants in
+the build plan instead, for example \code{c-darktable/ai.hdr.jxl}).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
 \section{Support tools}

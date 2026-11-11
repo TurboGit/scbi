@@ -72,7 +72,8 @@ _SPECS = [
     HookSpec("prefix", VALUE),
     #  OPTIONS: options given with --tests (SCBI_TESTS_OPTIONS)
     HookSpec("tests", COMMAND, STD_PARAMS + ("OPTIONS",)),
-    HookSpec("run", VALUE, cumulative=True),
+    #  run: functions called in sequence in a shell by "scbi shell --run"
+    HookSpec("run", COMMAND, cumulative=True),
 ]
 
 HOOKS: dict[str, HookSpec] = {s.name: s for s in _SPECS}

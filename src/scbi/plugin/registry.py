@@ -21,6 +21,7 @@ from pathlib import Path
 
 from scbi.plugin.catalog import ALL_HOOKS
 from scbi.plugin.legacy import Call, PluginTrace, trace_plugin
+from scbi.plugin.model import EnvOps, OsVariant, PluginDef, Shell, Values
 
 ALL_HOOKS_RE = "|".join(ALL_HOOKS)
 
@@ -29,9 +30,34 @@ class PluginError(Exception):
     pass
 
 
-def copy_function(definition: str, new_name: str) -> str:
-    """Port of ``copy-function``: same body under another name."""
+def copy_function(definition, new_name: str):
+    """Port of ``copy-function``: same body under another name.
+
+    Bash definitions are renamed; model objects (YAML plug-ins) are shared.
+    """
+    if not isinstance(definition, str):
+        return definition
     return f"{new_name} ({definition.split('(', 1)[1]}"
+
+
+def os_variant_functions(plugin: str, variant: OsVariant) -> dict[str, object]:
+    """Model equivalent of ``with-variant``: same names, model bodies."""
+    vname = variant.name
+    funcs: dict[str, object] = {}
+    nop_cmd, nop_val, nop_env = Shell("true"), Values(()), EnvOps(())
+    for h in ("config", "build", "install"):
+        for s in (h, f"pre-{h}", f"post-{h}", f"cross-{h}", f"cross-pre-{h}", f"cross-post-{h}"):
+            funcs[f"{plugin}-{vname}-{s}"] = nop_cmd
+    for h in ("env", "build-env", "build-depends", "patches"):
+        body = nop_env if h.endswith("env") else nop_val
+        for s in (h, f"common-{h}", f"default-{h}", f"cross-{h}", f"common-cross-{h}", f"default-cross-{h}"):
+            funcs[f"{plugin}-{vname}-{s}"] = body
+    funcs[f"{plugin}-{vname}-vcs"] = Values(("NONE",) * 4)
+    funcs[f"{plugin}-{vname}-archive"] = Values(("NONE",) * 5)
+    funcs[f"{plugin}-{vname}-prefix"] = Values(("NONE",))
+    funcs[f"{plugin}-{vname}-depends"] = Values(variant.packages)
+    funcs[f"{plugin}-{vname}-env"] = EnvOps(variant.env)
+    return funcs
 
 
 @dataclass
@@ -133,13 +159,24 @@ class Registry:
     module_alias: dict[str, str] = field(default_factory=dict)
     tracer: Callable[[Path], PluginTrace] = trace_plugin
 
-    functions: dict[str, str] = field(default_factory=dict)
+    #  function name -> Bash definition (legacy plug-in) or model object
+    #  (Shell, Values, EnvOps, Function) for YAML plug-ins
+    functions: dict[str, object] = field(default_factory=dict)
     variables: dict[str, str] = field(default_factory=dict)
     loaded: dict[str, str] = field(default_factory=dict)  # SCBI_LOADED[module]
     inherits: dict[str, list[str]] = field(default_factory=dict)  # SCBI_LOADED[P.inh]
     traces: dict[str, PluginTrace] = field(default_factory=dict)
+    definitions: dict[str, PluginDef] = field(default_factory=dict)
 
     # --------------------------------------------------------------- loading
+
+    def plugin_file(self, module: str) -> Path | None:
+        """``<module>.yaml`` or the legacy ``<module>`` file."""
+        for name in (f"{module}.yaml", module):
+            path = self.plugins_dir / name
+            if path.is_file():
+                return path
+        return None
 
     def load_module(self, module: str) -> bool:
         """Port of the plug-in loading part of ``load-module``.
@@ -148,17 +185,49 @@ class Registry:
         """
         if self.loaded.get(module):
             return True
-        path = self.plugins_dir / module
-        if path.is_file():
-            self._source(module, path)
+        path = self.plugin_file(module)
+        if path is not None:
+            if path.suffix == ".yaml":
+                self._load_definition(module, path)
+            else:
+                self._source(module, path)
             self.loaded[module] = "yes"
             return True
         alias = self.module_alias.get(module)
         if alias:
-            if (self.plugins_dir / alias).is_file():
+            if self.plugin_file(alias) is not None:
                 self._inherit(False, ALL_HOOKS_RE, alias, module)
                 return True
         return False
+
+    def _load_definition(self, module: str, path: Path) -> None:
+        from scbi.plugin import yamlfmt
+
+        pdef = self.definitions.get(module)
+        if pdef is None:
+            pdef = yamlfmt.load(path)
+            self.definitions[module] = pdef
+        self.apply_definition(pdef)
+
+    def apply_definition(self, pdef: PluginDef) -> None:
+        """Add a plug-in definition to the namespace.
+
+        Precedence: own hooks and functions, then OS variants, then
+        inherited hooks (the first inheritance wins), as obtained in Bash
+        with ``inherit-plugin`` / ``with-variant`` at the top of a plug-in.
+        """
+        for inh in pdef.inherits:
+            hooks = "|".join(inh.hooks) or ALL_HOOKS_RE
+            if inh.custom_hooks:
+                hooks += "|" + "|".join(inh.custom_hooks)
+            self.inherits.setdefault(pdef.name, []).append(inh.parent)
+            self._inherit(inh.no_variant, hooks, inh.parent, inh.name or pdef.name)
+        for variant in pdef.os_variants:
+            self.functions.update(os_variant_functions(pdef.name, variant))
+        for key, body in pdef.hooks.items():
+            self.functions[key.function_name(pdef.name)] = body
+        self.functions.update(pdef.functions)
+        self.variables.update(pdef.variables)
 
     def _source(self, module: str, path: Path) -> None:
         trace = self.traces.get(module)

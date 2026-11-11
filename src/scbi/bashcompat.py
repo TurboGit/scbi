@@ -20,6 +20,76 @@ def words(value: str) -> list[str]:
     return value.split()
 
 
+class ShellSyntaxError(ValueError):
+    pass
+
+
+def shell_words(text: str) -> list[str]:
+    """Split a simple command line into words, with quote removal.
+
+    Parameter expansions (``$VAR``, ``${VAR}``) and command substitutions
+    (``$(...)``) are kept verbatim inside their word, to be expanded later:
+    a ``$(...)`` with spaces stays a single word. A ``$`` inside single
+    quotes (literal in Bash) cannot be represented and is an error.
+    """
+    words: list[str] = []
+    cur: list[str] = []
+    in_word = False
+    i, n = 0, len(text)
+    while i < n:
+        c = text[i]
+        if c in " \t\n":
+            if in_word:
+                words.append("".join(cur))
+                cur, in_word = [], False
+            i += 1
+            continue
+        in_word = True
+        if c == "\\" and i + 1 < n:
+            cur.append(text[i + 1])
+            i += 2
+        elif c == "'":
+            j = text.find("'", i + 1)
+            if j < 0:
+                raise ShellSyntaxError(f"unterminated quote: {text}")
+            if "$" in text[i + 1 : j]:
+                raise ShellSyntaxError(f"'$' in single quotes: {text}")
+            cur.append(text[i + 1 : j])
+            i = j + 1
+        elif c == '"':
+            j = i + 1
+            while j < n and text[j] != '"':
+                if text[j] == "\\" and j + 1 < n and text[j + 1] in '"\\$`':
+                    cur.append(text[j + 1])
+                    j += 2
+                    continue
+                cur.append(text[j])
+                j += 1
+            if j >= n:
+                raise ShellSyntaxError(f"unterminated quote: {text}")
+            i = j + 1
+        elif c == "$" and text[i + 1 : i + 2] == "(":
+            depth, j = 0, i + 1
+            while j < n:
+                if text[j] == "(":
+                    depth += 1
+                elif text[j] == ")":
+                    depth -= 1
+                    if depth == 0:
+                        break
+                j += 1
+            if j >= n:
+                raise ShellSyntaxError(f"unterminated $(: {text}")
+            cur.append(text[i : j + 1])
+            i = j + 1
+        else:
+            cur.append(c)
+            i += 1
+    if in_word:
+        words.append("".join(cur))
+    return words
+
+
 def ifs_split(value: str, sep: str) -> list[str]:
     """Word splitting with IFS set to a single non-whitespace character.
 
