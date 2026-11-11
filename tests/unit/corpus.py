@@ -20,6 +20,17 @@ def plan_files() -> list[Path]:
 
 
 @cache
+def plugin_files() -> list[Path]:
+    """Plug-in files: not runtime files ([0-9]*, _os_*), dot or backup files."""
+    files: list[Path] = []
+    for d in PLUGIN_DIRS:
+        for p in sorted(d.iterdir()):
+            if p.is_file() and not re.match(r"[0-9._]", p.name) and not p.name.endswith("~"):
+                files.append(p)
+    return files
+
+
+@cache
 def plan_tokens() -> list[str]:
     """Every word found in plan files (module refs, keywords, barriers...)."""
     tokens: set[str] = set()
