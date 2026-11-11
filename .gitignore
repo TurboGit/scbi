@@ -30,3 +30,7 @@ tests/scbi-store
 tests/scbi-shell
 tests/scbi-show
 tests/scbi-format
+__pycache__/
+*.egg-info/
+.pytest_cache/
+tests/.ratchet

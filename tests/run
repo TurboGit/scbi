@@ -100,9 +100,34 @@ cp ../scripts.d/.pkgs-* scripts.d/
 
 export PATH="$PWD:$PATH"
 
-# patch scbi driver to avoid loading $HOME/.scbi ini file
+# Implementation of the driver under test:
+#   SCBI_IMPL=bash   (default) the reference Bash driver
+#   SCBI_IMPL=python the Python port (src/scbi)
 
-sed -i 's,\(.*ini-load-file \$HOME/.scbi\),#\1,g' scbi
+SCBI_IMPL=${SCBI_IMPL:-bash}
+
+case $SCBI_IMPL in
+    bash)
+        # patch scbi driver to avoid loading $HOME/.scbi ini file
+        sed -i 's,\(.*ini-load-file \$HOME/.scbi\),#\1,g' scbi
+        ;;
+    python)
+        # The Python driver applies the same adjustments as the sed
+        # patches done here on the Bash driver and runtime (no $HOME/.scbi,
+        # rsync checksum mode, sync messages logged with ilog) when
+        # SCBI_TESTSUITE is set.
+        export SCBI_TESTSUITE=yes
+        cat > scbi <<EOF
+#!/bin/bash
+PYTHONPATH=$PWD/../src\${PYTHONPATH:+:\$PYTHONPATH} exec python3 -m scbi "\$@"
+EOF
+        chmod +x scbi
+        ;;
+    *)
+        echo "unknown SCBI_IMPL=$SCBI_IMPL (bash|python)"
+        exit 1
+        ;;
+esac
 
 # patch rsync to use safe mode (checksum) as the tests repositories are small,
 # and has some files with same time-stamp.
@@ -131,7 +156,8 @@ else
 fi
 cd ..
 
-PLAN 1370
+#  The plan is only known when running the whole testsuite
+[ -z "$1" ] && PLAN 1370
 
 export SCBI_CACHE_DIR="no"
 

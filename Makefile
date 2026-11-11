@@ -21,7 +21,9 @@
 #     $ make doc
 #
 
-.SILENT: test sort-pkgs sync-os-deps
+.SILENT: test test-py sort-pkgs sync-os-deps
+
+.PHONY: unit oracle test-py
 
 SHELL=/bin/bash
 
@@ -83,6 +85,22 @@ test:
 
 test-clean:
 	make -C tests clean
+
+#  Python port
+
+PYTEST=python3 -m pytest
+
+#  Unit tests of the Python driver
+unit:
+	$(PYTEST) -q -m "not oracle"
+
+#  Differential tests: Python port vs Bash reference implementation
+oracle:
+	$(PYTEST) -q -m oracle
+
+#  Regression ratchet: testsuite drivers run with the Python driver
+test-py:
+	make -C tests ratchet
 
 doc: force
 	make CORE_VER=$(CORE_VER) -C doc
