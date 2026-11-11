@@ -70,7 +70,8 @@ _SPECS = [
     HookSpec("install", COMMAND),
     HookSpec("wrapup", COMMAND),
     HookSpec("prefix", VALUE),
-    HookSpec("tests", COMMAND),
+    #  OPTIONS: options given with --tests (SCBI_TESTS_OPTIONS)
+    HookSpec("tests", COMMAND, STD_PARAMS + ("OPTIONS",)),
     HookSpec("run", VALUE, cumulative=True),
 ]
 
