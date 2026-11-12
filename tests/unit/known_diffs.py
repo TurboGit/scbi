@@ -15,3 +15,13 @@ def modref_has_glob(ref: str) -> bool:
     are not parsed as module references), so this quirk is not reproduced.
     """
     return bool(GLOB_CHARS & set(ref))
+
+
+def env_value_has_glob(value: str) -> bool:
+    """define-var and the list helpers expand values unquoted, so a value
+    containing glob characters is subject to pathname expansion against
+    the current directory. Environment values never contain glob
+    characters (patterns are resolved before, e.g. by
+    last-modified-directory), this is not reproduced.
+    """
+    return bool(GLOB_CHARS & set(value))

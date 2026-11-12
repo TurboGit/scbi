@@ -87,6 +87,7 @@ class BashOracle:
             f"SCBI_BINARY={self.repo_root / 'scbi'}",
             f"SCBI_HOST={self.host}",
             f"SCBI_TARGET={self.target}",
+            "SCBI_IS_WINDOWS=no",
             f"SCBI_PLUGINS={self.plugins_dir}",
             "SCBI_DLOG=on-failure",
             "SCBI_JOBS=2",
