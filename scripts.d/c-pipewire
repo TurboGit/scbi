@@ -30,8 +30,6 @@ function c-pipewire-depends()
     local PREFIX=$1
     local TARGET=$2
     local VARIANT=$3
-    local KIND=$4
-    local REF=$5
 
     echo libpulse-dev
 }
