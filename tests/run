@@ -119,7 +119,7 @@ case $SCBI_IMPL in
         export SCBI_TESTSUITE=yes
         cat > scbi <<EOF
 #!/bin/bash
-PYTHONPATH=$PWD/../src\${PYTHONPATH:+:\$PYTHONPATH} exec python3 -m scbi "\$@"
+SCBI_ARGV0="\$0" PYTHONPATH=$PWD/../src\${PYTHONPATH:+:\$PYTHONPATH} exec python3 -m scbi "\$@"
 EOF
         chmod +x scbi
         ;;
