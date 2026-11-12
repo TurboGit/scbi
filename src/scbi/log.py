@@ -152,12 +152,17 @@ class Logger:
             msg = msg.replace(code, self.colors.get(name, ""))
         return msg
 
-    def ilog(self, module: str, *words: str) -> None:
+    def ilog(self, module: str, *words: str, tee: str | None = None) -> None:
+        """``tee``: ``ilog ... | tee -a FILE``, the console line is also
+        appended to FILE."""
         ts, msg = self._ts(), self.message(*words)
         line = printf_format(f"{ts} : {msg}\n")
         if not self.quiet:
             self.stdout.write(line)
             self.stdout.flush()
+            if tee:
+                with open(tee, "a") as f:
+                    f.write(line)
         self._append(module, line)
         self._set_sep("0")
 

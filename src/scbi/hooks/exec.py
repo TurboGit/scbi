@@ -122,9 +122,7 @@ class Result:
 _DUMP = r"""
 for __scbi_v in $(compgen -v); do
     [[ $__scbi_v == __scbi_* ]] && continue
-    __scbi_d=$(declare -p $__scbi_v 2>/dev/null) || continue
-    __scbi_a=${__scbi_d#declare -}
-    __scbi_a=${__scbi_a%% *}
+    __scbi_a=${!__scbi_v@a}
     [[ $__scbi_a == *[aA]* ]] && continue
     __scbi_x=0
     [[ $__scbi_a == *x* ]] && __scbi_x=1
@@ -291,3 +289,104 @@ def run_env_hook(shell: HookShell, ctx: HookContext, function: str, args: list[s
         apply_env(obj, ctx, base_env)
     else:
         shell.env(ctx, function, args)
+
+
+#  Associative arrays dumped on file descriptor 3 (name, key, value)
+def _dump_arrays(names: list[str]) -> str:
+    lines = []
+    for n in names:
+        lines.append(
+            f'for __scbi_k in "${{!{n}[@]}}"; do printf \'A\\0%s\\0%s\\0%s\\0\' {n} "$__scbi_k" '
+            f'"${{{n}[$__scbi_k]}}" >&3; done'
+        )
+    return "\n".join(lines)
+
+
+def run_code(shell: HookShell, ctx: HookContext, code: str,
+             on_line: Callable[[str], None] | None = None) -> Result:
+    """Run Bash ``code`` (driver code calling the runtime) in a hook shell;
+    its output (stdout and stderr) is given line by line."""
+    import subprocess as sp
+
+    script = shell.script(ctx, code)
+    proc = sp.Popen(["bash", "-c", 'eval "$(cat)"'], stdin=sp.PIPE, stdout=sp.PIPE,
+                    stderr=sp.STDOUT, cwd=ctx.cwd, env=shell._environ(ctx))
+    assert proc.stdin and proc.stdout
+    proc.stdin.write(script.encode(errors="surrogateescape"))
+    proc.stdin.close()
+    lines: list[str] = []
+    for raw in proc.stdout:
+        line = raw.decode(errors="replace").rstrip("\n")
+        if on_line is not None:
+            on_line(line)
+        else:
+            lines.append(line)
+    return Result(proc.wait(), "\n".join(lines))
+
+
+def env_code(shell: HookShell, ctx: HookContext, code: str, arrays: list[str] = (),
+             on_line: Callable[[str], None] | None = None) -> tuple[int, dict[str, dict[str, str]]]:
+    """Run Bash ``code`` and apply the changes it makes to the shell
+    variables to ``ctx.env``; return its status and the content of the
+    associative ``arrays`` afterwards. Its output is given line by line."""
+    import subprocess as sp
+
+    call = (f"{_DUMP}\n{code}\n__scbi_rc=$?\n{_DUMP}\n{_dump_arrays(list(arrays))}\n"
+            "exit $__scbi_rc")
+    script = shell.script(ctx, call)
+    import os
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(delete=False) as dump:
+        dump_path = dump.name
+    try:
+        proc = sp.Popen(["bash", "-c", f'exec 3>{quote(dump_path)}; eval "$(cat)"'],
+                        stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.STDOUT, cwd=ctx.cwd,
+                        env=shell._environ(ctx))
+        assert proc.stdin and proc.stdout
+        proc.stdin.write(script.encode(errors="surrogateescape"))
+        proc.stdin.close()
+        for raw in proc.stdout:
+            line = raw.decode(errors="replace").rstrip("\n")
+            if on_line is not None:
+                on_line(line)
+        rc = proc.wait()
+        data = open(dump_path, "rb").read()
+    finally:
+        os.unlink(dump_path)
+
+    #  two variables dumps (name, exported, value ... END), then the arrays
+    #  (A, name, key, value); markers are only checked at item positions
+    items = data.decode(errors="surrogateescape").split("\0")
+    dumps: list[dict[str, tuple[str, bool]]] = []
+    current: dict[str, tuple[str, bool]] = {}
+    arrays_part: dict[str, dict[str, str]] = {}
+    i = 0
+    while i < len(items) - 1:
+        if len(dumps) < 2:
+            if items[i] == "END":
+                dumps.append(current)
+                current = {}
+                i += 1
+            else:
+                current[items[i]] = (items[i + 2], items[i + 1] == "1")
+                i += 3
+        elif items[i] == "A" and i + 3 < len(items):
+            arrays_part.setdefault(items[i + 1], {})[items[i + 2]] = items[i + 3]
+            i += 4
+        else:
+            break
+    if len(dumps) == 2:
+        before, after = dumps
+        values, exported = ctx.env.vars.values, ctx.env.vars.exported
+        for name, (value, x) in after.items():
+            if BASH_INTERNAL.match(name):
+                continue
+            if before.get(name) != (value, x):
+                values[name] = value
+                (exported.add if x else exported.discard)(name)
+        for name in before:
+            if name not in after and not BASH_INTERNAL.match(name):
+                values.pop(name, None)
+                exported.discard(name)
+    return rc, arrays_part

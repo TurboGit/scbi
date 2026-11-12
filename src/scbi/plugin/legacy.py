@@ -78,9 +78,8 @@ printf 'E\0' >&3
 for __scbi_v in $(compgen -v); do
     [[ $__scbi_v == __scbi_* ]] && continue
     [[ $__scbi_vars_before == *" $__scbi_v "* ]] && continue
-    __scbi_d=$(declare -p $__scbi_v 2>/dev/null) || continue
-    __scbi_a=${__scbi_d#declare -}
-    [[ ${__scbi_a%% *} == *[aA]* ]] && continue
+    __scbi_a=${!__scbi_v@a}
+    [[ $__scbi_a == *[aA]* ]] && continue
     printf 'V\0%s\0%s\0' "$__scbi_v" "${!__scbi_v}" >&3
 done
 """

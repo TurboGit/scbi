@@ -5,7 +5,8 @@ from __future__ import annotations
 import os
 import sys
 
-from scbi.driver import Driver, Exit, NotImplementedYet
+from scbi.driver import Driver
+from scbi.errors import Exit, NotImplementedYet
 
 
 def main(argv: list[str] | None = None) -> int:

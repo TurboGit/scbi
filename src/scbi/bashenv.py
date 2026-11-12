@@ -81,9 +81,7 @@ def seed(svars: ShellVars) -> str:
 _DUMP = r"""
 for __scbi_v in $(compgen -v); do
     [[ $__scbi_v == __scbi_* ]] && continue
-    __scbi_d=$(declare -p $__scbi_v 2>/dev/null) || continue
-    __scbi_a=${__scbi_d#declare -}
-    __scbi_a=${__scbi_a%% *}
+    __scbi_a=${!__scbi_v@a}
     [[ $__scbi_a == *[aA]* ]] && continue
     __scbi_x=0
     [[ $__scbi_a == *x* ]] && __scbi_x=1

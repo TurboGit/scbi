@@ -27,6 +27,7 @@ from scbi.bashcompat import assoc_keys, read_lines, words
 from scbi.bashenv import BashEvalError, ShellVars, eval_echo
 from scbi.discriminants import forced_discriminants, probe_host, setup_discriminants
 from scbi.envfile import EnvNotFound, load_module_env
+from scbi.errors import Exit, NotImplementedYet
 from scbi.hooks.runtime import Runtime, load_runtime
 from scbi.ini import IniDB
 from scbi.log import Logger
@@ -37,18 +38,6 @@ from scbi.plan import PlanError, PlanLoader, PlanState
 SCBI_VERSION = "@VERSION@"
 
 OS_NAMES = ("deb", "ubt", "cos", "rhl", "fed", "win", "mingw")
-
-
-class Exit(Exception):
-    """Stop the driver with an exit status."""
-
-    def __init__(self, status: int):
-        super().__init__(status)
-        self.status = status
-
-
-class NotImplementedYet(Exception):
-    pass
 
 
 USAGE_OPTIONS = """
@@ -533,7 +522,13 @@ class Driver:
         rt = load_runtime(plugins, self.sv, cwd=Path.cwd(), base_env=self.base_env(),
                           os_module=self.get("SCBI_OS_MODULE"))
         runtime_functions = {k: v for k, v in rt.vars.functions.items() if k not in user_functions}
+        #  Functions exported in the environment (export -f, BASH_FUNC_x%%)
+        #  are imported as functions by Bash, keep them for the hooks
+        exported_functions = {k: v for k, v in self.sv.values.items()
+                              if k.startswith("BASH_FUNC_") and k in self.sv.exported}
         self.sv = ShellVars(rt.vars.values, rt.vars.exported, user_functions)
+        for k, v in exported_functions.items():
+            self.sv.set(k, v, export=True)
         self.runtime = Runtime(ShellVars(functions=runtime_functions), rt.compat)
         if self.get("SCBI_OS_MODULE"):
             self.set("SCBI_OS_MODULE_FILE", str(plugins / f"_os_{self.get('SCBI_OS_MODULE')}"))
@@ -915,8 +910,14 @@ class Driver:
         bdir.mkdir(parents=True, exist_ok=True)
         shutil.copy(Path(self.get("SCBI_PLUGINS")) / "0_runtime", bdir / ".scbi.runtime")
 
-        if self.modules:
-            raise NotImplementedYet("module handling")
+        from scbi.build import Builder
+
+        builder = Builder(self)
+        for module in self.modules:
+            builder.handle_module("@root", module, "default", "no")
+
+        if self.get("DO_STANDALONE") == "yes":
+            raise NotImplementedYet("--standalone")
         return 0
 
     def clean_up(self) -> None:
