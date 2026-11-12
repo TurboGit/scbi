@@ -1,0 +1,22 @@
+
+RUNS scbi m-lib1
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building m-lib1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End Building m-lib1 [default] (n/a)
+EOF
+
+ENVDUMP=.root/builds/m-lib1/env.dump
+
+GREP "A:ADD C_INCLUDE_PATH = a" $ENVDUMP
+GREP "A:PREPEND LD_LIBRARY_PATH = b" $ENVDUMP
+GREP "A:APPEND LIBRARY_PATH = c" $ENVDUMP
+GREP "A:SET C_INCLUDE_PATH = be:a" $ENVDUMP
+GREP "A:SET LIBRARY_PATH = be:.:b" $ENVDUMP
+GREP "A:SET LD_LIBRARY_PATH = be:.:c" $ENVDUMP

@@ -56,6 +56,26 @@ function lib1-env()
     add-to-var LIBRARY_PATH    $PREFIX/lib
 }
 
+function lib1-dv-build-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    set-var C_INCLUDE_PATH  be:a
+    set-var LIBRARY_PATH    be:.:b
+    set-var LD_LIBRARY_PATH be:.:c
+}
+
+function lib1-dv-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var C_INCLUDE_PATH  a
+    prepend-to-var LD_LIBRARY_PATH b
+    append-to-var LIBRARY_PATH    c
+}
+
 function lib1-out-of-tree()
 {
     echo false

@@ -1,0 +1,17 @@
+
+function m-lib1-wrapup()
+{
+    rm env.dump
+
+    function define-var()
+    {
+        local ACTION=$1
+        local VAR=$2
+        local VALUE=$3
+
+        echo A:$ACTION $VAR = ${VALUE##$PWD} >> env.dump
+    }
+
+    plugin-call-env-hooks root lib1/dv env
+    plugin-call-env-hooks root lib1/dv build-env
+}
