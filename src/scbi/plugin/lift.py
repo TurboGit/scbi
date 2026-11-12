@@ -220,9 +220,12 @@ _ASSIGN = re.compile(r"^(?:local\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
 class _BodyLifter:
     """Shared structure of value and env bodies: items, guards, locals."""
 
-    def __init__(self, lines: list[str], item):
+    def __init__(self, lines: list[str], item, local_op=None):
         self.lines = [_strip(ln) for ln in lines if _strip(ln)]
         self.item = item  # callable(line, locals) -> item or None (skip)
+        #  callable(name, value) -> item: assignments kept as items (env)
+        #  instead of being inlined (values)
+        self.local_op = local_op
         self.locals: dict[str, str] = {}
         self.pending_check: str | None = None
 
@@ -275,7 +278,14 @@ class _BodyLifter:
                 continue
             m = _ASSIGN.match(line)
             if m and not line.startswith("export "):
-                self.locals[m.group(1)] = _inline(_unquote(m.group(2)), self.locals)
+                if self.local_op is not None:
+                    value = _words(m.group(2))
+                    if len(value) > 1:
+                        raise _Unliftable(f"assignment of several words: {line}")
+                    items.append(self.local_op(line.startswith("local "), m.group(1),
+                                               value[0] if value else ""))
+                else:
+                    self.locals[m.group(1)] = _inline(_unquote(m.group(2)), self.locals)
                 i += 1
                 continue
             raise _Unliftable(f"unsupported line: {line}")
@@ -316,7 +326,7 @@ def _env_item(line: str, locals_: dict[str, str]):
     if m:
         return EnvOp("import", (m.group(1).strip(),))
     verb = line.split(None, 1)[0] if line.split() else ""
-    if verb not in ENV_VERBS or verb in ("export", "mkdir", "import"):
+    if verb not in ENV_VERBS or verb in ("export", "mkdir", "import", "local", "assign"):
         return None
     args = _words(line)[1:]
     arity = ENV_VERBS[verb]
@@ -347,6 +357,12 @@ def _check_builtins(items) -> None:
         bad = unknown_builtins(text)
         if bad:
             raise _Unliftable(f"command substitution $({bad[0]} ...) is not a known function")
+        from scbi.hooks.expand import ExpandError, check
+
+        try:
+            check(text)
+        except ExpandError as e:
+            raise _Unliftable(str(e)) from None
 
 
 def lift_values(lines: list[str]) -> Values:
@@ -356,7 +372,9 @@ def lift_values(lines: list[str]) -> Values:
 
 
 def lift_env(lines: list[str]) -> EnvOps:
-    ops = _BodyLifter(lines, _env_item).run()
+    ops = _BodyLifter(
+        lines, _env_item, lambda local, n, v: EnvOp("local" if local else "assign", (n, v))
+    ).run()
     _check_builtins(ops)
     return EnvOps(ops)
 

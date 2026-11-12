@@ -1896,12 +1896,20 @@ variables in the body; they are not declared in the plug-in.
 	\code{tests-env}): a list of actions \code{<verb> <arguments>} where the
 	verb is one of \code{add-to-var}, \code{prepend-to-var}, \code{set-var},
 	\code{define-var}, \code{unset-var}, \code{export}, \code{system-compiler},
-	\code{target-env}, \code{no-target-env}, \code{mkdir} or \code{import}
-	(\code{import opam env} runs the command and imports the variables it sets).
+	\code{target-env}, \code{no-target-env}, \code{mkdir}, \code{import}
+	(\code{import opam env} runs the command and imports the variables it sets),
+	\code{local NAME VALUE} (a variable for the following actions of the hook)
+	or \code{assign NAME VALUE} (a shell variable, part of the environment if
+	it is already exported). Actions are applied in order.
 \end{description}
 
 Values and environment actions are not shell code: they may only refer to
-variables (\code{\$VAR}, \code{\$\{VAR\}}) and to the following functions:
+variables (\code{\$VAR}, \code{\$\{VAR\}}, with the suffix and prefix
+removal forms \code{\$\{VAR\%pattern\}}, \code{\$\{VAR\%\%pattern\}},
+\code{\$\{VAR\#pattern\}}, \code{\$\{VAR\#\#pattern\}}), to
+\code{\$\{SCBI\_MODULES\_DIR[<module>[@src|@build]]\}} and to the
+following functions (the arguments are expanded as in a shell, including
+unquoted glob patterns):
 \code{\$(get-version)}, \code{\$(get-build-type <kind> <default>)},
 \code{\$(is-enabled <feature> [then] [else])},
 \code{\$(last-modified-directory <glob>)}, \code{\$(get-os-inc-dir <glob>)},

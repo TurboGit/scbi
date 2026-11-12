@@ -72,6 +72,8 @@ ENV_VERBS = {
     "define-var": 3,
     "unset-var": 1,
     "export": 2,  # export VAR=VALUE
+    "local": 2,  # local VAR VALUE: variable for the following actions only
+    "assign": 2,  # assign VAR VALUE: shell variable (VAR=VALUE), exported if it was
     "system-compiler": 0,
     "target-env": -1,  # optional arguments
     "no-target-env": -1,

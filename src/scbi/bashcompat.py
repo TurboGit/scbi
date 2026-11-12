@@ -24,6 +24,9 @@ class ShellSyntaxError(ValueError):
     pass
 
 
+GLOB_CHARS = frozenset("*?[")
+
+
 def shell_words(text: str) -> list[str]:
     """Split a simple command line into words, with quote removal.
 
@@ -32,16 +35,23 @@ def shell_words(text: str) -> list[str]:
     a ``$(...)`` with spaces stays a single word. A ``$`` inside single
     quotes (literal in Bash) cannot be represented and is an error.
     """
-    words: list[str] = []
+    return [w for w, _ in shell_words_glob(text)]
+
+
+def shell_words_glob(text: str) -> list[tuple[str, bool]]:
+    """Like :func:`shell_words`, with for each word whether it contains an
+    unquoted glob character (so it is subject to pathname expansion)."""
+    words: list[tuple[str, bool]] = []
     cur: list[str] = []
+    glob = False
     in_word = False
     i, n = 0, len(text)
     while i < n:
         c = text[i]
         if c in " \t\n":
             if in_word:
-                words.append("".join(cur))
-                cur, in_word = [], False
+                words.append(("".join(cur), glob))
+                cur, glob, in_word = [], False, False
             i += 1
             continue
         in_word = True
@@ -83,10 +93,12 @@ def shell_words(text: str) -> list[str]:
             cur.append(text[i : j + 1])
             i = j + 1
         else:
+            if c in GLOB_CHARS:
+                glob = True
             cur.append(c)
             i += 1
     if in_word:
-        words.append("".join(cur))
+        words.append(("".join(cur), glob))
     return words
 
 

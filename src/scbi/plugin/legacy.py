@@ -18,7 +18,7 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from scbi.bashenv import _BASH_INTERNAL
+from scbi.bashenv import BASH_INTERNAL
 
 
 @dataclass
@@ -121,7 +121,7 @@ def trace_plugin(path: Path, env: dict[str, str] | None = None) -> PluginTrace:
             snapshot = {}
             i += 1
         elif kind == "V":
-            if not _BASH_INTERNAL.match(items[i + 1]):
+            if not BASH_INTERNAL.match(items[i + 1]):
                 trace.variables[items[i + 1]] = items[i + 2]
             i += 3
         else:

@@ -134,9 +134,15 @@ def _guarded(item: dict, where: str, convert) -> Guarded:
 
 
 def _check_builtins(text: str, where: str) -> str:
+    from scbi.hooks.expand import ExpandError, check
+
     bad = unknown_builtins(text)
     if bad:
         raise _err(where, f"unknown function $({bad[0]} ...) (allowed: {', '.join(BUILTINS)})")
+    try:
+        check(text)
+    except ExpandError as e:
+        raise _err(where, str(e)) from None
     return text
 
 

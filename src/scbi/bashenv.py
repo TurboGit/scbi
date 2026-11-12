@@ -19,7 +19,7 @@ from pathlib import Path
 from scbi.bashcompat import words
 
 #  Variables owned by Bash itself, never imported
-_BASH_INTERNAL = re.compile(
+BASH_INTERNAL = re.compile(
     r"^(BASH.*|BASHOPTS|COLUMNS|COMP_.*|DIRSTACK|EUID|FUNCNAME|GROUPS|HISTCMD|"
     r"HOSTNAME|HOSTTYPE|IFS|LINENO|LINES|MACHTYPE|OPTERR|OPTIND|OSTYPE|PIPESTATUS|"
     r"PPID|PS4|PWD|OLDPWD|RANDOM|SECONDS|SHELL|SHELLOPTS|SHLVL|SRANDOM|UID|_|EPOCH.*|"
@@ -70,7 +70,7 @@ def _quote(value: str) -> str:
 def _seed(svars: ShellVars) -> str:
     lines = []
     for name, value in svars.values.items():
-        if not _NAME.match(name) or _BASH_INTERNAL.match(name):
+        if not _NAME.match(name) or BASH_INTERNAL.match(name):
             continue
         prefix = "export " if name in svars.exported else ""
         lines.append(f"{prefix}{name}={_quote(value)}")
@@ -137,7 +137,7 @@ def source_files(
     for kind, name, exported, value in zip(items[0::4], items[1::4], items[2::4], items[3::4]):
         if kind == "F":
             result.functions[name] = value
-        elif not _BASH_INTERNAL.match(name):
+        elif not BASH_INTERNAL.match(name):
             result.set(name, value, export=exported == "1")
     return result
 
