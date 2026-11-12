@@ -61,6 +61,7 @@ function c-polyorb-prefix()
 {
     local PREFIX=$1
     local TARGET=$2
+    local VARIANT=$3
 
-    make NONE
+    echo NONE
 }
