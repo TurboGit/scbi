@@ -19,7 +19,7 @@ CLI_CASES = [
     ["--stat"], ["--stat:short"], ["--stat", "--plan=meta"], ["--stat:short", "--plan=group"],
     ["--stat:short", "--plan=base/x"], ["-q", "--stat:short", "--plan=set"],
     ["--color:dark", "--stat:short"], ["--color:light", "--stat:short"], ["--ini=x"],
-    ["--stat:short", "--target=arm-linux-gnueabi"],
+    ["--stat:short", "--target=arm-linux-gnueabi"], ["--stat:full"],
 ]
 
 

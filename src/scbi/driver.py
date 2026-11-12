@@ -186,6 +186,10 @@ class Driver:
         if missing:
             self.echo(f"Required tools {' '.join(missing)} missing, please install")
             raise Exit(1)
+        #  Testsuite only: the OS runtime module can be forced (test114,
+        #  the Bash driver is patched with sed for the same purpose)
+        if self.testsuite and self.environ.get("SCBI_OS_MODULE"):
+            s("SCBI_OS_MODULE", self.environ["SCBI_OS_MODULE"])
         s("SCBI_TARGET", self.get("SCBI_HOST"), export=True)
         s("SCBI_TARGET_SPECIFIED", "no")
         s("SCBI_ENV_DIR", "", export=True)
@@ -770,7 +774,7 @@ class Driver:
                 self.display_modules()
                 self.display_plans()
             if stat == "full":
-                raise NotImplementedYet("--stat:full")
+                self.driver_run("display-log-stat")
             elif not self.modules and stat == "yes":
                 self.echo()
 
@@ -866,6 +870,33 @@ class Driver:
         res = propagate_meta_versions(self)
         return eres or res
 
+    def driver_shell(self):
+        from scbi.env import Environment
+        from scbi.hooks.context import HookContext
+        from scbi.hooks.exec import HookShell
+
+        reg = self.registry
+        shell = HookShell(self.runtime, reg.functions, self.base_env(), loaded=reg.scbi_loaded(),
+                          sources=reg.legacy_sources())
+        ctx = HookContext(module="", variant="default", hook="config", env=Environment(self.sv),
+                          plan=self.plan, host=self.get("SCBI_HOST"), target=self.get("SCBI_TARGET"),
+                          discriminants=frozenset(self.discriminants), cwd=Path.cwd())
+        return shell, ctx
+
+    def driver_run(self, code: str) -> int:
+        """Run Bash driver code (runtime functions) in a hook shell, output
+        to the console."""
+        from scbi.hooks.exec import run_code
+
+        sys.stdout.flush()
+        shell, ctx = self.driver_shell()
+
+        def out(line: str) -> None:
+            sys.stdout.write(line + "\n")
+            sys.stdout.flush()
+
+        return run_code(shell, ctx, code, out).returncode
+
     def driver_capture(self, code: str) -> str:
         """Output of Bash driver code run in a hook shell (stderr ignored)."""
         from scbi.env import Environment
@@ -950,7 +981,8 @@ class Driver:
             builder.handle_module("@root", module, "default", "no")
 
         if self.get("DO_STANDALONE") == "yes":
-            raise NotImplementedYet("--standalone")
+            mods = " ".join(quote(m) for m in self.modules)
+            self.driver_run(f"SCBI_MODULES=({mods})\ncreate-standalone-package")
         return 0
 
     def clean_up(self) -> None:

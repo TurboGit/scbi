@@ -1281,6 +1281,41 @@ Example:
 	}
 \end{lstlisting}
 
+Besides its parameters, \code{module-final-step} can use the variables
+\code{\$FORMODULE} (the module depending on the current one, \code{@root}
+for a module given on the command line), \code{\$MODREF} (the module
+reference as found in the dependencies), \code{\$module} and
+\code{\$variant}.
+
+\index{define-var!redefinition}
+The environment helpers (\code{add-to-var}, \code{set-var}...) all call
+\code{define-var} which can be redefined, for example to record the
+environment of a module instead of setting it. The redefinition can be
+done in \code{module-final-step} (or any hook) before calling
+\code{plugin-call-env-hooks}, which runs the \code{env} hooks of a module
+(and of the modules it aggregates for a meta-module):
+
+\begin{lstlisting}
+	function module-final-step()
+	{
+		local PREFIX=$1
+		...
+		(
+		    function define-var()
+		    {
+		        local ACTION=$1
+		        local VAR=$2
+		        local VALUE=$3
+		        echo "$ACTION $VAR $VALUE" >> $PREFIX/env.dump
+		    }
+
+		    plugin-call-env-hooks $FORMODULE $MODREF env
+		)
+	}
+\end{lstlisting}
+
+This works for Bash and YAML plug-ins (\seeref{yaml-plugin}).
+
 \subsection{Setting environment}
 \label{set-env}
 \index{variable!add}
@@ -1785,7 +1820,8 @@ See below (\ref{store}) how to handle the SCBI's private store. Using the runtim
 
 \emph{This format is supported by the Python driver, currently in development.}
 
-A plug-in can be written as a YAML file named \file{<name>.yaml}. It
+A plug-in can be written as a YAML file named \file{<name>.yaml} (used by
+the Python driver, \seeref{python-driver}). It
 describes exactly the same hooks as a Bash plug-in, the driver applies the
 same rules to select them (variants, \code{common}, \code{cross}, calling
 order). A plug-in is a recipe: it is only read by the driver.
@@ -1954,9 +1990,92 @@ A Bash plug-in is converted with:
 
 Everything that cannot be expressed in the YAML format is reported and the
 plug-in is not converted; it must be fixed first. This is the case for hook
-parameters not matching the hook signature, values computed by arbitrary
-shell code or hooks calling other hooks (use a combination of variants in
-the build plan instead, for example \code{c-darktable/ai.hdr.jxl}).
+parameters not matching the hook signature or values computed by arbitrary
+shell code.
+
+A hook of a variant which only calls the same hook of other variants (like
+\code{c-darktable-all-depends} calling the \code{depends} hooks of the
+\code{ai}, \code{hdr} and \code{jxl} variants) is converted into a
+variant including other variants (\seeref{yaml-variants}), after checking
+that the hooks selected are the same for every hook, variant and cross
+mode; otherwise it is reported.
+
+The converted plug-in is written as \file{<name>.yaml} next to the Bash
+plug-in (or into the \ddash{}output-dir directory); with \ddash{}check
+nothing is written. The exit status is 1 if a plug-in cannot be converted.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
+
+\section{The Python driver}
+\label{python-driver}
+\index{Python driver}
+
+\emph{The Python driver is in development; the Bash driver remains the
+reference until the Python one replaces it.}
+
+\subsection{Running}
+
+The Python driver accepts the same command line, options, environment and
+ini files and build plans as the Bash driver, gives the same output and
+builds the same sandbox. From a checkout of SCBI it is run with:
+
+\cmd{PYTHONPATH=<scbi>/src python3 -m scbi [options] module1 ...}
+
+The name of the command displayed in the messages (\code{\$0} of the Bash
+driver) is taken from the environment variable \code{SCBI\_ARGV0} when set
+(a wrapper script named \code{scbi} sets it).
+
+\subsection{Compatibility}
+
+\begin{itemize}
+	\item The runtime files (\file{\$SCBI\_PLUGINS/[0-9]*} and
+	\file{\$SCBI\_PLUGINS/\_os\_<os>}), the environment files and the user's
+	functions they define (\code{module-final-step}, \code{scbi-rewrite-vcs},
+	a redefined \code{define-var}...) are used as with the Bash driver: they
+	are Bash code, evaluated once when the driver starts.
+	\item Each hook runs in its own Bash process with the runtime functions,
+	the environment of the module and the plug-ins. Bash plug-ins are
+	sourced as with the Bash driver (an error refers to the plug-in file
+	and line).
+	\item Bash and YAML plug-ins (\seeref{yaml-plugin}) can be mixed in the
+	plug-ins directory. When both \file{<name>} and \file{<name>.yaml}
+	exist, the YAML one is used.
+	\item When \code{define-var} or one of the environment helpers is
+	redefined globally (in a runtime file, an environment file or a
+	plug-in), the environment actions of YAML plug-ins are run by Bash so
+	that the redefinition applies; otherwise they are evaluated by the
+	driver.
+	\item The cached build plans are stored in
+	\file{\$SCBI\_BDIR/.cache/plan-<signature>.json}, a different file than
+	the Bash driver one: both drivers can use the same build directory.
+	\item Functions exported in the environment (\code{export -f}) are
+	available to the hooks.
+\end{itemize}
+
+\subsection{Not yet available}
+
+The sub-commands (\code{show}, \code{shell}, \code{store}, \code{lint},
+\code{format}, \code{source-archive}) are not available yet with the
+Python driver: use the Bash driver for them. A standalone source archive
+(\ddash{}standalone) contains the driver as installed.
+
+\subsection{Testsuite}
+\index{testsuite}
+
+\begin{description}
+	\item[\code{make test}] The regression testsuite with the Bash driver.
+	\item[\code{SCBI\_IMPL=python ./run testNNN}] (in \file{tests}) A test
+	driver with the Python driver.
+	\item[\code{make test-py}] Each test driver with the Python driver; the
+	ones known to pass are listed in \file{tests/python-pass.txt} and a
+	regression is an error.
+	\item[\code{make unit}, \code{make oracle}] The unit tests of the Python
+	driver and the tests comparing it with the Bash implementation.
+\end{description}
+
+When run by the testsuite (\code{SCBI\_TESTSUITE=yes}) the Python driver
+does not load \file{\$HOME/.scbi} and takes \code{SCBI\_OS\_MODULE} from
+the environment, as the testsuite does with the Bash driver by patching it.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
