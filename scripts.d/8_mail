@@ -8,7 +8,7 @@
 function send-mail()
 {
     local MSG="$1"
-    if [[ "SCBI_$EMAIL_NOTIFICATION" = "yes" ]]; then
+    if [[ "$SCBI_EMAIL_NOTIFICATION" = "yes" ]]; then
         printf "%(%c)T\n" -1 | mail -s "$MSG" $SCBI_EMAIL
     fi
 }
