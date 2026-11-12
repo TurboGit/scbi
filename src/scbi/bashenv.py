@@ -63,17 +63,17 @@ class ShellVars:
         return {k: v for k, v in self.values.items() if k in self.exported}
 
 
-def _quote(value: str) -> str:
+def quote(value: str) -> str:
     return "'" + value.replace("'", "'\\''") + "'"
 
 
-def _seed(svars: ShellVars) -> str:
+def seed(svars: ShellVars) -> str:
     lines = []
     for name, value in svars.values.items():
         if not _NAME.match(name) or BASH_INTERNAL.match(name):
             continue
         prefix = "export " if name in svars.exported else ""
-        lines.append(f"{prefix}{name}={_quote(value)}")
+        lines.append(f"{prefix}{name}={quote(value)}")
     lines += svars.functions.values()
     return "\n".join(lines)
 
@@ -115,8 +115,8 @@ def source_files(
         prelude,
         #  Functions of the prelude are not user code, not reported
         '__scbi_known="$(compgen -A function | tr "\\n" " ")"',
-        _seed(svars),
-        *[f"source {_quote(str(f))} || exit $?" for f in files],
+        seed(svars),
+        *[f"source {quote(str(f))} || exit $?" for f in files],
         _DUMP,
     ]
     env = dict(base_env or {})
@@ -156,7 +156,7 @@ def eval_echo(value: str, svars: ShellVars, base_env: Mapping[str, str] | None =
     env.update(svars.environ())
     proc = subprocess.run(
         ["bash", "-s", "--", value],
-        input=f"{_seed(svars)}\neval echo \"$1\"\n",
+        input=f"{seed(svars)}\neval echo \"$1\"\n",
         env=env,
         capture_output=True,
         text=True,

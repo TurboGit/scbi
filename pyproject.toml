@@ -28,3 +28,6 @@ pythonpath = ["src"]
 markers = [
     "oracle: differential test comparing with the Bash implementation",
 ]
+
+[tool.setuptools.package-data]
+scbi = ["hooks/*.sh"]
