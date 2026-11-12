@@ -23,8 +23,8 @@ import tempfile
 import time
 from pathlib import Path
 
-from scbi.bashcompat import assoc_keys, read_lines, words
-from scbi.bashenv import BashEvalError, ShellVars, eval_echo
+from scbi.bashcompat import assoc_keys, read_fields, read_lines, words
+from scbi.bashenv import BashEvalError, ShellVars, eval_echo, quote
 from scbi.discriminants import forced_discriminants, probe_host, setup_discriminants
 from scbi.envfile import EnvNotFound, load_module_env
 from scbi.errors import Exit, NotImplementedYet
@@ -526,7 +526,7 @@ class Driver:
         #  are imported as functions by Bash, keep them for the hooks
         exported_functions = {k: v for k, v in self.sv.values.items()
                               if k.startswith("BASH_FUNC_") and k in self.sv.exported}
-        self.sv = ShellVars(rt.vars.values, rt.vars.exported, user_functions)
+        self.sv = ShellVars(rt.vars.values, rt.vars.exported, user_functions, rt.vars.arrays)
         for k, v in exported_functions.items():
             self.sv.set(k, v, export=True)
         self.runtime = Runtime(ShellVars(functions=runtime_functions), rt.compat)
@@ -839,14 +839,47 @@ class Driver:
                                 *words(ref)], self.is_built)
 
     def rewrite_module_plan(self, quiet: bool = False) -> int:
-        """Port of ``rewrite-module-plan`` (auto variants: not yet)."""
-        auto = [m for m in assoc_keys(self.plan.modver)
-                if re.search(r"auto(\.|:|$)", self.plan.modver[m])]
-        if auto:
-            raise NotImplementedYet("auto variants")
+        """Port of ``rewrite-module-plan``: auto variants, then the
+        meta-modules propagation."""
         from scbi.metaplan import propagate_meta_versions
 
-        return propagate_meta_versions(self)
+        eres = 0
+        auto = [m for m in assoc_keys(self.plan.modver)
+                if re.search(r"auto(\.|:|$)", self.plan.modver[m])]
+        #  handle-plan-auto-variant (reference Bash code) for each module,
+        #  all against the plan as it is now (parallel jobs in Bash)
+        outputs: list[str] = []
+        for m in auto:
+            outputs += self.driver_capture(f"handle-plan-auto-variant {quote(m)}").splitlines()
+        for line in outputs:
+            f = read_fields(line, 3)
+            e, k, v = f
+            if e == "0":
+                self.plan.register(["auto", *words(k), *words(v)], self.is_built)
+            elif e == "1":
+                if not quiet:
+                    self.log.ilog(k, v)
+            else:
+                if not quiet:
+                    self.log.elog(k, v)
+                eres = 1
+        res = propagate_meta_versions(self)
+        return eres or res
+
+    def driver_capture(self, code: str) -> str:
+        """Output of Bash driver code run in a hook shell (stderr ignored)."""
+        from scbi.env import Environment
+        from scbi.hooks.context import HookContext
+        from scbi.hooks.exec import HookShell, run_code
+
+        reg = self.registry
+        shell = HookShell(self.runtime, reg.functions, self.base_env(), loaded=reg.scbi_loaded(), sources=reg.legacy_sources())
+        ctx = HookContext(module="", variant="default", hook="config", env=Environment(self.sv),
+                          plan=self.plan, host=self.get("SCBI_HOST"), target=self.get("SCBI_TARGET"),
+                          discriminants=frozenset(self.discriminants), cwd=Path.cwd())
+        lines: list[str] = []
+        run_code(shell, ctx, code + " 2>/dev/null", lines.append)
+        return "\n".join(lines)
 
     def store_cached_plan(self, path: Path) -> None:
         import json

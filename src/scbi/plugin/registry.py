@@ -296,6 +296,12 @@ class Registry:
     def fn_exists(self, name: str) -> bool:
         return name in self.functions
 
+    def legacy_sources(self) -> list[str]:
+        """Files of the loaded legacy plug-ins, in loading order (paths as
+        the Bash driver sources them: $SCBI_PLUGINS/<module>)."""
+        return [f"{self.plugins_dir}/{m}" for m in self.loaded
+                if "." not in m and m in self.traces]
+
     def scbi_loaded(self) -> dict[str, str]:
         """SCBI_LOADED entries: ``<module>`` and ``<module>.inh``."""
         res = dict(self.loaded)

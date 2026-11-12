@@ -63,7 +63,8 @@ class HookRunner:
 
     def shell(self) -> HookShell:
         return HookShell(self.runtime, self.registry.functions, self.base_env(),
-                         loaded=self.registry.scbi_loaded())
+                         loaded=self.registry.scbi_loaded(),
+                         sources=self.registry.legacy_sources())
 
     def call_value(self, function: str, module: str, variant: str, args: list[str],
                    plan: PlanState, modules_list: list[str] | None = None) -> list[str]:

@@ -157,6 +157,7 @@ class HookShell:
         namespace: dict[str, object],
         base_env: dict[str, str] | None = None,
         loaded: dict[str, str] | None = None,
+        sources: list | None = None,
     ):
         """``namespace``: functions of the loaded plug-ins (Registry.functions),
         ``loaded``: SCBI_LOADED entries (Registry.loaded), the loaded
@@ -165,6 +166,8 @@ class HookShell:
         self.namespace = namespace
         self.base_env = dict(base_env or {})
         self.loaded = dict(loaded or {})
+        #  legacy plug-in files to source, in loading order
+        self.sources = list(sources or [])
         #  longest names first, to find the plug-in owning a function
         self._modules = sorted(self.loaded, key=len, reverse=True)
 
@@ -194,9 +197,19 @@ class HookShell:
             parts.append(_assoc(name, values))
         parts.append(f"SCBI_MODULES_LIST=({' '.join(quote(m) for m in ctx.modules_list)})")
         parts.append(f"SCBI_HOST={quote(ctx.host)}; SCBI_TARGET={quote(ctx.target)}")
-        #  Plug-ins functions
+        #  Plug-ins functions: YAML ones rendered first, then the legacy
+        #  plug-in files sourced in loading order (as the Bash driver does,
+        #  so errors refer to the plug-in file and line, and inherit-plugin
+        #  / with-variant run as in Bash), then the remaining Bash
+        #  definitions (e.g. alias copies) when not defined by the files
         for name, obj in self.namespace.items():
-            parts.append(render(name, obj, self.owner(name)))
+            if not isinstance(obj, str):
+                parts.append(render(name, obj, self.owner(name)))
+        for path in self.sources:
+            parts.append(f"source {quote(str(path))} > /dev/null 2>&1")
+        for name, obj in self.namespace.items():
+            if isinstance(obj, str):
+                parts.append(f"declare -F {quote(name)} > /dev/null || eval {quote(obj)}")
         parts.append(call)
         return "\n".join(parts) + "\n"
 

@@ -105,7 +105,7 @@ class Builder:
 
     def shell(self) -> HookShell:
         reg = self.d.registry
-        return HookShell(self.d.runtime, reg.functions, self.d.base_env(), loaded=reg.scbi_loaded())
+        return HookShell(self.d.runtime, reg.functions, self.d.base_env(), loaded=reg.scbi_loaded(), sources=reg.legacy_sources())
 
     def bash(self, module: str, variant: str, code: str, hook: str = "config",
              arrays: list[str] = ()) -> int:
@@ -188,7 +188,16 @@ class Builder:
             mods = self.d.runner().variant_values(
                 module, variant, "modules", [self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), variant],
                 self.d.plan, self.modules_list)
-            reg.loaded[key] = "meta" if "".join(mods).strip() else "final"
+            if not "".join(mods).strip():
+                reg.loaded[key] = "final"
+            else:
+                reg.loaded[key] = "meta"
+                if get_hook(reg, module, variant, "aggregate", self.d.runner().cross):
+                    #  $FCT $SCBI_PREFIX $SCBI_TARGET $variant
+                    reg.loaded[f"{key}.agg"] = self.d.runner().hook_value(
+                        module, variant, "aggregate",
+                        [self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), variant],
+                        self.d.plan, self.modules_list) or ""
 
     # -------------------------------------------------------- up-to-date
 
@@ -427,13 +436,31 @@ class Builder:
             os.makedirs(f"{bdir}/{module}", exist_ok=True)
 
         if d.registry.loaded.get(f"{module}.{variant}") == "meta":
-            raise NotImplementedYet("meta-modules")
+            #  in a sub-shell in Bash
+            saved = (copy.deepcopy(d.sv), copy.deepcopy(d.plan), os.getcwd(), dict(self.modules_dir))
+            try:
+                res = self.handle_meta_module(formodule, module, variant, ref, depends_kind,
+                                              is_aggregated, log)
+            except Exit as e:
+                res = e.status
+            finally:
+                d.sv, d.plan, cwd, self.modules_dir = saved
+                os.chdir(cwd)
+            if res != 0:
+                raise Exit(1)
+            return
 
         drefs = Path(bdir, module, f"build-deps-{variant}")
         drefs.unlink(missing_ok=True)
 
         if self.get("DEPS") == "yes":
-            raise NotImplementedYet("--deps")
+            #  in a sub-shell in Bash
+            saved = (copy.deepcopy(d.sv), os.getcwd())
+            try:
+                self.handle_all_depends(modref, module, variant, is_aggregated)
+            finally:
+                d.sv, cwd = saved
+                os.chdir(cwd)
 
         if self.get("DRY_RUN") == "yes":
             self.out(modref)
@@ -506,6 +533,243 @@ class Builder:
 
         self.ilog(module, "End", "Building", module, f"[{' '.join(variant.split('.'))}]", f"({disp})", tee=log)
         d.log.line_sep()
+
+    # -------------------------------------------------------- meta-module
+
+    def handle_meta_module(self, formodule: str, meta: str, variant: str, ref: str,
+                           depends_kind: str, is_aggregated: str, log: str) -> int:
+        """Port of ``handle-meta-module``; returns the status."""
+        from scbi.plan import PlanLoader
+
+        d = self.d
+        bdir = self.get("SCBI_BDIR")
+        mdir = f"{bdir}/{meta}"
+        reg = d.registry
+        cross = d.runner().cross
+        vdisp = " ".join(variant.split("."))
+
+        if get_hook(reg, meta, variant, "plan", cross):
+            name = d.runner().hook_value(meta, variant, "plan", [self.get("SCBI_PLAN")], d.plan,
+                                         self.modules_list) or ""
+            first = (words(name) or [""])[0]
+            PlanLoader(d.plan, Path(self.get("SCBI_PLUGINS")), d.discriminants, Path.cwd(),
+                       d.is_built).load(first)
+
+        self.record_build_plan(meta, variant)
+
+        fct_setup = get_hook(reg, meta, variant, "setup", cross)
+        fct_wrapup = get_hook(reg, meta, variant, "wrapup", cross)
+        fct_agg = get_hook(reg, meta, variant, "aggregate", cross)
+
+        agg_mode = "no"
+        if fct_agg:
+            #  $FCT_AGG $SCBI_PREFIX $TARGET $VARIANT ($TARGET: caller's global)
+            agg_mode = d.runner().hook_value(
+                meta, variant, "aggregate", [self.get("SCBI_PREFIX"), self.get("TARGET"), variant],
+                d.plan, self.modules_list) or ""
+
+        if self.get("DEPS") == "yes":
+            #  $IS_AGGREDATED (sic) is always empty
+            amode = agg_mode if agg_mode != "no" else ""
+            for dmodule in self.get_all_depends(meta, variant, "build-depends"):
+                if self.handle_depends(meta, dmodule, "build", amode) != 0:
+                    return 1
+
+        start = time.monotonic()
+        d.log.line_sep()
+        self.ilog(meta, "%BMetamodule", f"%t{meta}%c", f"[%g{vdisp}%c]", "setup", tee=log)
+        if formodule != "@root":
+            self.needed_by(formodule, log)
+
+        def internal_wrapper(fct: str) -> int:
+            if not fct:
+                return 0
+            return self.run(meta, variant, (
+                f"_internal_module-variant-wrapper {quote(f'{bdir}/install')} {quote(meta)} "
+                f"{quote(variant)} {quote(fct)}"))
+
+        if internal_wrapper(fct_setup) != 0:
+            return 1
+        self.ilog(meta, "End", "metamodule", meta, f"[{vdisp}]", "setup", tee=log)
+        d.log.line_sep()
+
+        do_agg_prefix = False
+        tvmdir = ""
+        #  $module: local of handle-module, assigned by the loop below
+        leaked = meta
+        if self.get("DEPS") == "yes" or (not fct_setup and not fct_wrapup):
+            Path(mdir, "source-ref").unlink(missing_ok=True)
+            tvmdir = self.target_dir(meta, variant)
+            drefs = Path(bdir, meta, f"build-deps-{variant}")
+            shutil.rmtree(f"{tvmdir}/install", ignore_errors=True)
+            drefs.unlink(missing_ok=True)
+            mods = d.runner().variant_values(
+                meta, variant, "modules", [self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), variant],
+                d.plan, self.modules_list)
+            for m in words("\n".join(mods)):
+                leaked = m
+                self.handle_module(meta, m, "default", agg_mode)
+                info = (d.plan.module_ref(m, meta) + [""] * 4)[:4]
+                mvariant, mref = info[1], info[3]
+                self.record_dref(m, mvariant, drefs)
+                if mref == "skip":
+                    continue
+                if fct_agg:
+                    idir = self.target_dir(m, mvariant, "install")
+                    if agg_mode != "no" and os.path.isdir(idir):
+                        if agg_mode == "recursive":
+                            self.run(meta, variant, _DO_SYNC.format(
+                                tvmdir=quote(tvmdir), mdir=quote(mdir), module=quote(m)))
+                        else:
+                            self.run(meta, variant, f"sync-dir {quote(idir)} {quote(f'{tvmdir}/.')}")
+                    _append_file(Path(bdir, m, "source-ref"), Path(mdir, "source-ref"))
+            do_agg_prefix = True
+
+        is_utd = "no"
+        tvdir = self.target_dir(meta, variant)
+        os.chdir(mdir)
+        self.run(meta, variant, (
+            f"get-build-id \"$SCBI_PREFIX\" \"$SCBI_TARGET\" {quote(formodule)} {quote(meta)} "
+            f"{quote(variant)} > build-id-{variant}"))
+        if _same(Path(f"build-id-{variant}"), Path(tvdir, "build-id")) and self.get("DO_FORCE") == "no":
+            is_utd = "yes"
+        shutil.copy(f"build-id-{variant}", f"{tvdir}/build-id")
+
+        d.log.line_sep()
+        self.ilog(meta, "%BMetamodule", f"%t{meta}%c", f"[%g{vdisp}%c]", "wrapup", tee=log)
+        if formodule != "@root":
+            self.needed_by(formodule, log)
+
+        if is_utd == "no":
+            if self.get("DO_FORCE") == "yes":
+                self.ilog(leaked, "trigger: forced")
+            elif Path(tvdir, "build-deps").is_file():
+                self.ilog(leaked, "trigger: build not up-to-date")
+                self.triggered_by(leaked, Path(f"build-deps-{variant}"), Path(tvdir, "build-deps"))
+            elif Path(f"build-deps-{variant}").is_file():
+                self.ilog(leaked, "trigger: not yet built")
+            if internal_wrapper(fct_wrapup) != 0:
+                return 1
+
+        if Path(f"build-deps-{variant}").is_file():
+            shutil.copy(f"build-deps-{variant}", f"{tvdir}/build-deps")
+
+        if agg_mode != "no" and do_agg_prefix:
+            ok, idir = self.handle_prefix(meta, variant, ref, log)
+
+        if self.fn_exists("module-final-step"):
+            mmode = "aggregate" if agg_mode != "no" else "yes"
+            self.ilog(meta, "final", "step", "starting", tee=log)
+            self.run(meta, variant, (
+                f"module-final-step {quote(f'{tvmdir}/install')} \"$SCBI_TARGET\" {quote(variant)} "
+                f"{quote(meta)} {quote(depends_kind)} {mmode} {quote(is_aggregated)} {is_utd}"))
+            self.ilog(meta, "final", "step", "completed", tee=log)
+
+        secs = int(time.monotonic() - start)
+        if secs >= 5:
+            self.ilog(meta, "timing:", time.strftime("%H:%M:%S", time.gmtime(secs)), tee=log)
+        self.ilog(meta, "End", "metamodule", meta, f"[{vdisp}]", "wrapup", tee=log)
+        d.log.line_sep()
+        return 0
+
+    # -------------------------------------------------------- dependencies
+
+    def get_all_depends(self, module: str, variant: str, hook: str) -> list[str]:
+        """Port of ``get-all-depends``."""
+        reg = self.d.registry
+        result = []
+        values = self.d.runner().variant_values(
+            module, variant, hook, [self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), variant],
+            self.d.plan, self.modules_list)
+        for m in words("\n".join(values)):
+            if reg.plugin_file(m) is not None:
+                result.append(m)
+            else:
+                ma = self.d.plan.module_alias.get(m)
+                result.append(ma if ma and reg.plugin_file(ma) is not None else m)
+        return result
+
+    def handle_all_depends(self, modref: str, module: str, variant: str, is_aggregated: str) -> None:
+        """Dependencies of a module (handle-module with --deps)."""
+        dry = self.get("DRY_RUN") == "yes"
+        for dmodule in self.get_all_depends(module, variant, "build-depends"):
+            if self.handle_depends(modref, dmodule, "build", is_aggregated) != 0:
+                raise Exit(1)
+        if not dry:
+            self.d.log.line_sep()
+        for dmodule in self.get_all_depends(module, variant, "depends"):
+            if self.handle_depends(modref, dmodule, "default", is_aggregated) != 0:
+                raise Exit(1)
+        if not dry:
+            self.d.log.line_sep()
+        if self.get("DO_TEST") != "no":
+            for dmodule in self.get_all_depends(module, variant, "tests-depends"):
+                if self.handle_depends(modref, dmodule, "tests", is_aggregated) != 0:
+                    raise Exit(1)
+            if not dry:
+                self.d.log.line_sep()
+
+    def record_dref(self, module: str, variant: str, file: Path) -> None:
+        """Port of ``record-dref``."""
+        biv = Path(self.get("SCBI_BDIR"), module, f"build-id-{variant}")
+        if biv.is_file():
+            with open(file, "a") as f:
+                f.write(f"{_read_first_line(biv)} {module}\n")
+
+    def module_name(self, modref: str, formodule: str) -> str:
+        """Port of ``get-module-name`` (FORMODULE of the caller)."""
+        info = (self.d.plan.module_ref(modref, formodule or "@root") + [""] * 4)[:4]
+        name = info[0]
+        if info[1] != "default":
+            name += f"/{info[1]}"
+        if info[3] != "NONE":
+            name += f":{info[3]}"
+        return name
+
+    def handle_depends(self, formodule: str, modref: str, depends_kind: str, is_aggregated: str) -> int:
+        """Port of ``handle-depends``; returns the status."""
+        d = self.d
+        info = d.plan.module_ref(modref, formodule)
+        if len(info) > 4:
+            self.elog(info[0], *info[4:])
+            raise Exit(1)
+        module, variant, kind, ref = (info + [""] * 4)[:4]
+        is_module = d.registry.plugin_file(module) is not None
+
+        if ref == "skip":
+            what = "%BModule" if is_module else "%BDependency"
+            self.ilog(module, what, f"%t{module}%c", "marked to be skipped")
+            return 0
+
+        finfo = (d.plan.module_ref(formodule) + [""] * 4)[:4]
+        fmodule, fvariant = finfo[0], finfo[1]
+        drefs = Path(self.get("SCBI_BDIR"), fmodule, f"build-deps-{fvariant}")
+
+        if kind == "DEV":
+            self.handle_module(formodule, modref, depends_kind, is_aggregated)
+            self.record_dref(module, variant, drefs)
+            return 0
+
+        os.chdir(self.get("SCBI_ROOT"))
+
+        if not is_module:
+            if self.run(fmodule, fvariant, f"check-pkg {quote(f'{module}:{ref}')} > /dev/null") == 0:
+                return 0
+            mname = fmodule if fvariant == "default" else f"{fmodule}/{fvariant}"
+            msg = "warning" if self.get("DO_WARNING_EXTERNAL") == "yes" else "error"
+            self.out(f"{msg}: missing dependencies for building {mname}")
+            for m in reversed(self.modules_list[:-1]):
+                self.out(f"{msg}    required by {self.module_name(m, formodule)}")
+            hooks = ["build-depends", "depends"] + (["tests-depends"] if self.get("DO_TEST") != "no" else [])
+            for hook in hooks:
+                for dmodule in self.get_all_depends(fmodule, fvariant, hook):
+                    if d.registry.plugin_file(dmodule) is None:
+                        self.run(fmodule, fvariant, f"check-pkg {quote(dmodule)}")
+            return 0 if self.get("DO_WARNING_EXTERNAL") == "yes" else 1
+
+        self.handle_module(fmodule, modref, depends_kind, is_aggregated)
+        self.record_dref(module, variant, drefs)
+        return 0
 
     def display_ref(self, module: str, variant: str, ref: str) -> str:
         """Port of ``get-module-display-ref``."""
@@ -600,12 +864,16 @@ class Builder:
         envtmp = Path(tempfile.mkstemp(dir="/dev/shm" if os.path.isdir("/dev/shm") else None)[1])
         if is_uptodate == "no" or self.get("DO_TEST") != "no":
             d.set("SCBI_ENV_MODULE", str(envtmp))
-            self.bash(module, variant, (
+            #  an exit (e.g. recursive dependencies) ends the module sub-shell
+            env_rc = self.bash(module, variant, (
                 f"handle-build-depends-env {quote(formodule)} {quote(modref)}\n"
                 f"handle-env {quote(formodule)} {quote(modref)}\n"
                 f"handle-module-env {quote(formodule)} {quote(modref)} build-env >> $SCBI_ENV_MODULE\n"
                 "unset SCBI_ENV_MODULE"))
             d.sv.values.pop("SCBI_ENV_MODULE", None)
+            if env_rc != 0:
+                envtmp.unlink(missing_ok=True)
+                return env_rc, is_uptodate
 
         #  the build link points to the variant
         os.chdir(f"{bdir}/{module}") if os.path.isdir(f"{bdir}/{module}") else None
@@ -660,10 +928,11 @@ class Builder:
 
         for step in words(self.get("STEPS")):
             if step == "tests":
-                self.bash(module, variant, (
+                if self.bash(module, variant, (
                     f"handle-tests-depends-env {quote(formodule)} {quote(modref)}\n"
                     f"handle-module-env {quote(formodule)} {quote(modref)} tests-env\n"
-                    f"handle-module-env {quote(formodule)} {quote(modref)} env"), hook="tests")
+                    f"handle-module-env {quote(formodule)} {quote(modref)} env"), hook="tests") != 0:
+                    return 1, is_uptodate
             res = generic(f"pre-{step}")
             if res != 0:
                 self.elog(module, "generic", "module", f"pre-{step}", "failed", "with", "error", str(res))
@@ -691,6 +960,40 @@ class Builder:
                 f"{quote(module)} {quote(depends_kind)} no {quote(is_aggregated)} {quote(is_uptodate)}"))
             self.ilog(module, "final", "step", "completed", tee=log)
         return 0, is_uptodate
+
+
+#  do-sync of handle-meta-module (recursive aggregate)
+_DO_SYNC = r"""
+TVMDIR={tvmdir}
+MDIR={mdir}
+function do-sync()
+{{
+    local FORMODULE=$1
+    local MODREF=$2
+    local smodule_info=()
+    get-module-ref smodule_info $MODREF $FORMODULE
+    local module=${{smodule_info[0]}}
+    local variant=${{smodule_info[1]}}
+    local ref=${{smodule_info[3]}}
+    [[ "$ref" == "skip" ]] && return
+    local IDIR=""
+    get-target-dir IDIR $module $variant install
+    [[ -d $IDIR ]] && sync-dir $IDIR $TVMDIR/.
+    cat $SCBI_BDIR/$module/source-ref >> $MDIR/source-ref
+}}
+for-all-modules-depends-with-meta do-sync {module}
+"""
+
+
+def _append_file(src: Path, dst: Path) -> None:
+    """cat SRC >> DST (an error message when SRC is missing, as cat)."""
+    try:
+        data = src.read_bytes()
+    except OSError:
+        sys.stderr.write(f"cat: {src}: No such file or directory\n")
+        return
+    with open(dst, "ab") as f:
+        f.write(data)
 
 
 def _rm(path: str) -> None:

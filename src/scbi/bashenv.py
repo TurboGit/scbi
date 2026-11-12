@@ -28,6 +28,9 @@ BASH_INTERNAL = re.compile(
 
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
+#  Arrays owned by Bash itself, never imported
+_BASH_ARRAYS = re.compile(r"^(BASH_.*|DIRSTACK|FUNCNAME|GROUPS|PIPESTATUS|COMP_.*|__scbi_.*)$")
+
 
 class BashEvalError(RuntimeError):
     def __init__(self, message: str, returncode: int, output: str):
@@ -49,9 +52,13 @@ class ShellVars:
     values: dict[str, str] = field(default_factory=dict)
     exported: set[str] = field(default_factory=set)
     functions: dict[str, str] = field(default_factory=dict)
+    #  Arrays: name -> (kind, content); kind "a" (indexed, keys are the
+    #  indexes) or "A" (associative)
+    arrays: dict[str, tuple[str, dict[str, str]]] = field(default_factory=dict)
 
     def copy(self) -> "ShellVars":
-        return ShellVars(dict(self.values), set(self.exported), dict(self.functions))
+        return ShellVars(dict(self.values), set(self.exported), dict(self.functions),
+                         {k: (kind, dict(c)) for k, (kind, c) in self.arrays.items()})
 
     def set(self, name: str, value: str, export: bool = False) -> None:
         self.values[name] = value
@@ -74,6 +81,11 @@ def seed(svars: ShellVars) -> str:
             continue
         prefix = "export " if name in svars.exported else ""
         lines.append(f"{prefix}{name}={quote(value)}")
+    for name, (kind, content) in svars.arrays.items():
+        if not _NAME.match(name) or _BASH_ARRAYS.match(name):
+            continue
+        items = " ".join(f"[{quote(k)}]={quote(v)}" for k, v in content.items())
+        lines.append(f"declare -g{'A' if kind == 'A' else 'a'} {name}=({items})")
     lines += svars.functions.values()
     return "\n".join(lines)
 
@@ -82,7 +94,16 @@ _DUMP = r"""
 for __scbi_v in $(compgen -v); do
     [[ $__scbi_v == __scbi_* ]] && continue
     __scbi_a=${!__scbi_v@a}
-    [[ $__scbi_a == *[aA]* ]] && continue
+    if [[ $__scbi_a == *[aA]* ]]; then
+        [[ $__scbi_a == *A* ]] && __scbi_k=A || __scbi_k=a
+        declare -n __scbi_r=$__scbi_v
+        for __scbi_i in "${!__scbi_r[@]}"; do
+            printf 'R\0%s\0%s\0%s\0' "$__scbi_v" "$__scbi_k:$__scbi_i" "${__scbi_r[$__scbi_i]}"
+        done
+        printf 'R\0%s\0%s\0\0' "$__scbi_v" "$__scbi_k"
+        unset -n __scbi_r
+        continue
+    fi
     __scbi_x=0
     [[ $__scbi_a == *x* ]] && __scbi_x=1
     printf 'V\0%s\0%s\0%s\0' "$__scbi_v" "$__scbi_x" "${!__scbi_v}"
@@ -137,6 +158,13 @@ def source_files(
     for kind, name, exported, value in zip(items[0::4], items[1::4], items[2::4], items[3::4]):
         if kind == "F":
             result.functions[name] = value
+        elif kind == "R":
+            if _BASH_ARRAYS.match(name):
+                continue
+            akind, _, key = exported.partition(":")
+            entry = result.arrays.setdefault(name, (akind, {}))
+            if _:
+                entry[1][key] = value
         elif not BASH_INTERNAL.match(name):
             result.set(name, value, export=exported == "1")
     return result
