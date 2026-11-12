@@ -2052,12 +2052,16 @@ driver) is taken from the environment variable \code{SCBI\_ARGV0} when set
 	available to the hooks.
 \end{itemize}
 
-\subsection{Not yet available}
+\subsection{Sub-commands}
 
 The sub-commands (\code{show}, \code{shell}, \code{store}, \code{lint},
-\code{format}, \code{source-archive}) are not available yet with the
-Python driver: use the Bash driver for them. A standalone source archive
-(\ddash{}standalone) contains the driver as installed.
+\code{format}, \code{source-archive}) are available with the same options
+and output. They are the \file{scbi-<sub-command>} scripts installed next
+to the driver, run by the Python driver after its setup (plug-ins
+directory, environment file, runtime, build plan) as the Bash driver does.
+
+A standalone source archive (\ddash{}standalone) contains the driver as
+installed.
 
 \subsection{Testsuite}
 \index{testsuite}

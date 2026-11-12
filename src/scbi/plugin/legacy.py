@@ -14,6 +14,7 @@ variant semantics is implemented here.
 
 from __future__ import annotations
 
+import re
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -40,8 +41,11 @@ class PluginTrace:
     functions: dict[str, str] = field(default_factory=dict)
     #  Global variables set by the plug-in (e.g. SCBI_LAL_LIBS=static)
     variables: dict[str, str] = field(default_factory=dict)
-    #  Output of the plug-in file when sourced (should be empty)
+    #  Output of the plug-in file when sourced with the shims
     output: str = ""
+    #  The file has top-level code besides functions, inherit-plugin /
+    #  with-variant calls and assignments (it may print when sourced)
+    has_code: bool = False
 
 
 class LegacyLoadError(Exception):
@@ -100,7 +104,8 @@ def trace_plugin(path: Path, env: dict[str, str] | None = None) -> PluginTrace:
             f"cannot load plug-in {path}: {proc.stderr.decode(errors='replace')}"
         )
 
-    trace = PluginTrace(path.name, path, output=proc.stderr.decode(errors="replace"))
+    trace = PluginTrace(path.name, path, output=proc.stderr.decode(errors="replace"),
+                        has_code=has_toplevel_code(path.read_text(errors="replace")))
     items = proc.stdout.decode(errors="surrogateescape").split("\0")
     snapshot: dict[str, str] = {}
     i = 0
@@ -126,3 +131,30 @@ def trace_plugin(path: Path, env: dict[str, str] | None = None) -> PluginTrace:
         else:
             raise LegacyLoadError(f"unexpected trace record {kind!r} for {path}")
     return trace
+
+
+_TOPLEVEL_OK = re.compile(
+    r"^\s*($|#|function\s|[A-Za-z_][A-Za-z0-9_]*=|inherit-plugin\b|with-variant\b|export\s+-f\b)"
+)
+
+
+def has_toplevel_code(text: str) -> bool:
+    """True when the plug-in has top-level code other than function
+    definitions, inherit-plugin / with-variant calls and assignments."""
+    in_function = False
+    continuation = False
+    for line in text.split("\n"):
+        if in_function:
+            if line.startswith("}"):
+                in_function = False
+            continue
+        if continuation:
+            continuation = line.rstrip().endswith("\\")
+            continue
+        if re.match(r"^\s*function\s", line) or re.match(r"^[A-Za-z0-9_.@+-]+\s*\(\)", line):
+            in_function = not line.rstrip().endswith("}")
+            continue
+        if not _TOPLEVEL_OK.match(line):
+            return True
+        continuation = line.rstrip().endswith("\\")
+    return False

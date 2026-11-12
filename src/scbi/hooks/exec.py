@@ -189,6 +189,8 @@ class HookShell:
         #  Driver state read by the runtime helpers
         parts.append(_assoc("SCBI_MODVER", ctx.plan.modver))
         parts.append(_assoc("SCBI_MODULE_ALIAS", ctx.plan.module_alias))
+        parts.append(_assoc("SCBI_PLAN_HIST", ctx.plan.plan_hist))
+        parts.append(_assoc("SCBI_PLAN_LOADED", ctx.plan.plan_loaded))
         parts.append(_assoc("SCBI_OS_DISCRIMINANTS", {d: "yes" for d in ctx.discriminants}))
         parts.append(_assoc("SCBI_LOADED", self.loaded))
         #  Associative arrays of the driver, always declared
@@ -403,3 +405,21 @@ def env_code(shell: HookShell, ctx: HookContext, code: str, arrays: list[str] = 
                 values.pop(name, None)
                 exported.discard(name)
     return rc, arrays_part
+
+
+def run_interactive(shell: HookShell, ctx: HookContext, code: str) -> int:
+    """Run Bash ``code`` in a hook shell attached to the terminal (standard
+    input, output and error inherited), e.g. a sub-command spawning an
+    interactive shell. Returns the exit status."""
+    import os
+    import subprocess as sp
+    import tempfile
+
+    script = shell.script(ctx, code)
+    with tempfile.NamedTemporaryFile("w", suffix=".sh", delete=False) as f:
+        f.write(script)
+        path = f.name
+    try:
+        return sp.run(["bash", path], cwd=ctx.cwd, env=shell._environ(ctx)).returncode
+    finally:
+        os.unlink(path)

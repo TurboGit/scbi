@@ -33,7 +33,8 @@ for arg in "$@"; do
 done
 
 if [[ ${#TESTS[@]} == 0 ]]; then
-    TESTS=( $(cd drivers; ls test???) )
+    #  CDPATH= : cd must not print the directory
+    TESTS=( $(CDPATH= cd drivers && ls test???) )
 fi
 
 touch $PASS_FILE

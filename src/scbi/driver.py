@@ -817,7 +817,13 @@ class Driver:
 
         if self._registry is None:
             self._registry = Registry(Path(self.get("SCBI_PLUGINS")), module_alias=self.plan.module_alias)
+            self._registry.on_output = self.show_plugin_output
         return self._registry
+
+    def show_plugin_output(self, module: str, path: Path) -> None:
+        """Output of a plug-in when sourced (top-level code), shown as the
+        Bash driver does when it loads it."""
+        self.driver_run(f"source {quote(str(path))}")
 
     def runner(self):
         from scbi.hooks.runner import HookRunner
@@ -897,6 +903,22 @@ class Driver:
 
         return run_code(shell, ctx, code, out).returncode
 
+    def run_tool(self, subcmd: str) -> int:
+        """A sub-command: the tool scbi-<subcmd> next to the driver, run as
+        reference Bash code sourced in a driver shell, as the Bash driver
+        does (source scbi-<subcmd> subcommand <options> <modules>)."""
+        from scbi.hooks.exec import run_interactive
+
+        tool = Path(self.get("SCBI_BINARY")).parent / f"scbi-{subcmd}"
+        sys.stdout.flush()
+        opts = " ".join(quote(o) for o in self.scbiopts)
+        mods = " ".join(quote(m) for m in self.modules)
+        shell, ctx = self.driver_shell()
+        code = (f"SCBIOPTS=({opts})\nSCBI_MODULES=({mods})\nSCBI_SUBCMD={quote(subcmd)}\n"
+                f"source {quote(str(tool))} subcommand \"${{SCBIOPTS[@]}}\" \"${{SCBI_MODULES[@]}}\"\n"
+                "exit $?")
+        return run_interactive(shell, ctx, code)
+
     def driver_capture(self, code: str) -> str:
         """Output of Bash driver code run in a hook shell (stderr ignored)."""
         from scbi.env import Environment
@@ -949,7 +971,7 @@ class Driver:
 
         if has_subcmd:
             self.setup_generic_tool_env()
-            raise NotImplementedYet(f"sub-command {subcmd}")
+            return self.run_tool(subcmd)
 
         self.second_pass()
 

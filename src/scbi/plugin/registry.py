@@ -167,6 +167,9 @@ class Registry:
     inherits: dict[str, list[str]] = field(default_factory=dict)  # SCBI_LOADED[P.inh]
     traces: dict[str, PluginTrace] = field(default_factory=dict)
     definitions: dict[str, PluginDef] = field(default_factory=dict)
+    #  Called when a legacy plug-in printing something when sourced is
+    #  loaded (module, path): the driver shows that output as Bash does
+    on_output: Callable[[str, Path], None] | None = None
     #  module -> {variant: included variants} (``variants:`` of YAML plug-ins)
     variant_aliases: dict[str, dict[str, tuple[str, ...]]] = field(default_factory=dict)
 
@@ -194,6 +197,9 @@ class Registry:
             else:
                 self._source(module, path)
             self.loaded[module] = "yes"
+            trace = self.traces.get(module)
+            if trace is not None and (trace.output or trace.has_code) and self.on_output is not None:
+                self.on_output(module, path)
             return True
         alias = self.module_alias.get(module)
         if alias:
