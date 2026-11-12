@@ -70,6 +70,23 @@ class ShellVars:
         return {k: v for k, v in self.values.items() if k in self.exported}
 
 
+_ARRAY_CACHE: dict[tuple, str] = {}
+
+
+def _array_decl(name: str, kind: str, content: dict[str, str]) -> str:
+    """Bash declaration of an array, cached (large arrays like SCBI_PKGS
+    are given to every hook shell)."""
+    key = (name, kind, len(content), hash(tuple(content.items())))
+    decl = _ARRAY_CACHE.get(key)
+    if decl is None:
+        items = " ".join(f"[{quote(k)}]={quote(v)}" for k, v in content.items())
+        decl = f"declare -g{'A' if kind == 'A' else 'a'} {name}=({items})"
+        if len(_ARRAY_CACHE) > 256:
+            _ARRAY_CACHE.clear()
+        _ARRAY_CACHE[key] = decl
+    return decl
+
+
 def quote(value: str) -> str:
     return "'" + value.replace("'", "'\\''") + "'"
 
@@ -84,8 +101,7 @@ def seed(svars: ShellVars) -> str:
     for name, (kind, content) in svars.arrays.items():
         if not _NAME.match(name) or _BASH_ARRAYS.match(name):
             continue
-        items = " ".join(f"[{quote(k)}]={quote(v)}" for k, v in content.items())
-        lines.append(f"declare -g{'A' if kind == 'A' else 'a'} {name}=({items})")
+        lines.append(_array_decl(name, kind, content))
     lines += svars.functions.values()
     return "\n".join(lines)
 

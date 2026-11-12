@@ -26,7 +26,7 @@ from scbi.bashenv import ShellVars, quote
 from scbi.env import Environment
 from scbi.errors import Exit, NotImplementedYet
 from scbi.hooks.context import HookContext
-from scbi.hooks.exec import HookShell, env_code, run_code
+from scbi.hooks.exec import HookShell, env_code, is_nop, run_code
 from scbi.plugin.model import Shell
 from scbi.plugin.resolve import get_hook
 from scbi.vercmp import VERSION_ERROR, VERSION_OK, check_versions, get_version_number
@@ -267,20 +267,10 @@ class Builder:
 
     def record_build_plan(self, module: str, variant: str) -> None:
         """Port of ``record-build-plan``."""
-        plan = self.d.plan
-        rows = []
-        for m in assoc_keys(plan.modver):
-            if m.endswith((".skip", ".keep")):
-                continue
-            fm = m.split("=", 1)[0] if "=" in m else m
-            ref = plan.modver[m]
-            if plan.modver.get(f"{m}.skip") == "yes":
-                ref = (ref.rsplit(":", 1)[0] if ":" in ref else ref) + ":skip"
-            rows.append(f"@for {fm} use {ref}" if fm != m else ref)
-        width = max((len(r) for r in rows), default=0)
-        lines = sorted(f"{r:<{width}} " for r in rows)
+        from scbi.planview import list_build_plan
+
         path = Path(self.target_dir(module, variant)) / "logs" / "build-plan"
-        path.write_text("# build plan\n" + "".join(f"{ln}\n" for ln in lines))
+        path.write_text("# build plan\n" + "".join(f"{ln}\n" for ln in list_build_plan(self.d.plan)))
 
     def record_module_env(self, module: str, variant: str) -> None:
         """Port of ``record-module-env``."""
@@ -922,6 +912,11 @@ class Builder:
                 "exit ${PIPESTATUS[0]}"))
 
         def wrapper(step: str) -> int:
+            #  module-variant-wrapper does nothing without a hook or for a
+            #  nop hook ({ true }): no shell needed then
+            fct = get_hook(d.registry, module, variant, step, d.runner().cross)
+            if not fct or is_nop(d.registry.functions.get(fct)):
+                return 0
             return self.run(module, variant, (
                 f"module-variant-wrapper {quote(f'{tvdir}/install')} {quote(module)} "
                 f"{quote(variant)} {quote(step)}"))

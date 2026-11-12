@@ -107,3 +107,51 @@ def test_meta_propagation_oracle(oracle, tmp_path):
         d.clean_up()
         checked += 1
     assert checked > 20
+
+
+# ------------------------------------------------------------- sub-commands
+
+STORE_SEQUENCE = [
+    ["store", "k1", "v1"], ["store", "k2", "a  b"], ["store", "k1"], ["store", "k2"],
+    ["store", "-l"], ["store", "--list:full"], ["store", "-k", "k1"], ["store", "nothere"],
+    ["store", "-d", "k1"], ["store", "--list:full"], ["store", "-d"], ["store", "--bogus"],
+    ["store"], ["-h", "store"], ["store", "k3", "back\\slash"], ["store", "--list:full"],
+]
+
+
+@pytest.mark.oracle
+def test_store_same_as_bash(tmp_path):
+    bash, python = pair(tmp_path)
+    for args in STORE_SEQUENCE:
+        rb, rp = bash.run(args), python.run(args)
+        assert (rp.returncode, rp.stdout, rp.stderr) == (rb.returncode, rb.stdout, rb.stderr), args
+    sb = (bash.root / "scripts.d" / ".store").read_text()
+    sp = (python.root / "scripts.d" / ".store").read_text()
+    assert sp == sb
+
+
+SHOW_CASES = [
+    ["show", "--plan=autobar", "--build-plan", "lib1"],
+    ["show", "--plan=ondeps", "--build-plan", "ondeps"],
+    ["show", "--target=i686-pc-mingw32", "--plan=cross", "--build-plan", "lib1"],
+    ["show", "--plan=set", "--build-plan", "lib1"],
+    ["show", "--plan=plgv4", "--build-plan:history", "lib1"],
+    ["show", "--plan=plgv9", "--build-plan:history=plg", "lib1"],
+    ["show", "--plan=modver/meta", "--build-plan"],
+    ["show", "--plan=meta-meta", "--build-plan", "meta-meta/both:v2"],
+    ["show", "--plan=group", "--build-plan=mod[AB],modE"],
+    ["show", "--plan=set", "--module-ref", "module1", "module3"],
+    ["show", "--plan=set", "--module-ref:version", "module1"],
+    ["show", "--plan=set", "--module-ref:variant", "module3"],
+    ["show", "--plan=dev", "--module-ref:full", "lib1", "lib2"],
+    ["show"], ["-h", "show"], ["show", "--bogus"],
+    ["show", "--depends", "dmain"],
+]
+
+
+@pytest.mark.oracle
+@pytest.mark.parametrize("args", SHOW_CASES, ids=" ".join)
+def test_show_same_as_bash(sandboxes, args):
+    bash, python = sandboxes
+    rb, rp = bash.run(args), python.run(args)
+    assert (rp.returncode, rp.stdout, rp.stderr) == (rb.returncode, rb.stdout, rb.stderr)

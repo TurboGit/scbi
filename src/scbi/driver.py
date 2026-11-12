@@ -779,8 +779,10 @@ class Driver:
                 self.echo()
 
         #  module references of the command line
+        #  for module in ${SCBI_MODULES[*]} ... SCBI_MODULES=(${SMT[*]}):
+        #  unquoted, an argument with blanks gives several modules
         smt = []
-        for module in self.modules:
+        for module in words(" ".join(self.modules)):
             if "@" in module:
                 r = (parse_module_ref(module).to_bash_array() + [""] * 4)
                 mname = r[0]
@@ -793,7 +795,7 @@ class Driver:
                 module = module.replace(":@", f":{mver}", 1)
             smt.append(module)
             self.set_module_ref(module)
-        self.modules = smt
+        self.modules = words(" ".join(smt))
 
         if plan_cached:
             if (not subcmd or stat != "no") and self.plan.modver:
@@ -907,7 +909,16 @@ class Driver:
         """A sub-command: the tool scbi-<subcmd> next to the driver, run as
         reference Bash code sourced in a driver shell, as the Bash driver
         does (source scbi-<subcmd> subcommand <options> <modules>)."""
+        import importlib
+
         from scbi.hooks.exec import run_interactive
+        from scbi.tools import TOOLS
+
+        if subcmd in TOOLS and self.environ.get("SCBI_BASH_TOOLS") != "yes":
+            sys.stdout.flush()
+            res = importlib.import_module(TOOLS[subcmd]).main(self, self.scbiopts + self.modules)
+            if res is not None:
+                return res
 
         tool = Path(self.get("SCBI_BINARY")).parent / f"scbi-{subcmd}"
         sys.stdout.flush()

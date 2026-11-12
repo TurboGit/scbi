@@ -22,7 +22,10 @@ it makes to the shell variables are applied to the context environment).
 
 from __future__ import annotations
 
+import atexit
+import os
 import subprocess
+import tempfile
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -99,7 +102,10 @@ def render(name: str, obj, plugin: str = "") -> str:
     key = parse_hook_name(plugin, name) if plugin else None
     params = catalog.spec(key.hook).params if key else catalog.STD_PARAMS
     if isinstance(obj, Shell):
-        return f"function {name}()\n{{\n{_params(params)}{obj.script or 'true'}\n}}"
+        if obj.script.strip() in ("", "true"):
+            #  nop body, as with-variant defines it ({ true; })
+            return f"function {name}()\n{{\n    true\n}}"
+        return f"function {name}()\n{{\n{_params(params)}{obj.script}\n}}"
     if isinstance(obj, Values):
         body = _block(obj.items, lambda v: f"printf '%s\\n' {_dq(v)}")
         return f"function {name}()\n{{\n{_params(params)}{body}    true\n}}"
@@ -179,12 +185,24 @@ class HookShell:
                 return m
         return ""
 
+    def _prelude_file(self) -> str:
+        """The static part of the scripts (compat and runtime functions,
+        runtime settings), written once per runtime and sourced."""
+        rt = self.runtime
+        path = getattr(rt, "_prelude_path", None)
+        if path is None or not os.path.exists(path):
+            text = "\n".join(["shopt -s extglob", rt.compat, *rt.vars.functions.values(),
+                              seed(ShellVars(rt.vars.values, rt.vars.exported))]) + "\n"
+            fd, path = tempfile.mkstemp(prefix="scbi-prelude-", suffix=".sh")
+            with os.fdopen(fd, "w") as f:
+                f.write(text)
+            rt._prelude_path = path
+            atexit.register(_unlink_quiet, path)
+        return path
+
     def script(self, ctx: HookContext, call: str) -> str:
-        rt = self.runtime.vars
-        parts = ["shopt -s extglob", self.runtime.compat]
-        parts += rt.functions.values()
-        #  Runtime settings (1_setup...), then the hook environment
-        parts.append(seed(ShellVars(rt.values, rt.exported)))
+        parts = ["shopt -s extglob", f"source {quote(self._prelude_file())}"]
+        #  The hook environment
         parts.append(seed(ctx.env.vars))
         #  Driver state read by the runtime helpers
         parts.append(_assoc("SCBI_MODVER", ctx.plan.modver))
@@ -423,3 +441,21 @@ def run_interactive(shell: HookShell, ctx: HookContext, code: str) -> int:
         return sp.run(["bash", path], cwd=ctx.cwd, env=shell._environ(ctx)).returncode
     finally:
         os.unlink(path)
+
+
+def _unlink_quiet(path: str) -> None:
+    try:
+        os.unlink(path)
+    except OSError:
+        pass
+
+
+def is_nop(obj) -> bool:
+    """The test of _internal_module-variant-wrapper: the body of the
+    function (last 3 lines of declare -f, blanks collapsed) is { true }."""
+    if isinstance(obj, Shell):
+        return obj.script.strip() in ("", "true")
+    if isinstance(obj, str):
+        body = " ".join(" ".join(obj.rstrip("\n").split("\n")[-3:]).split())
+        return body == "{ true }"
+    return False
