@@ -19,6 +19,12 @@ class EvalError(Exception):
     pass
 
 
+_DEFINE_VAR = {
+    "add-to-var": "ADD", "prepend-to-var": "PREPEND", "append-to-var": "APPEND",
+    "remove-from-var": "REMOVE", "set-var": "SET",
+}
+
+
 class GuardContext:
     """scbi.plugin.expr.Context for a hook context."""
 
@@ -92,8 +98,8 @@ def apply_env(ops: EnvOps | tuple, ctx: HookContext, base_env: dict[str, str] | 
             _import(op.args[0], ctx, base_env)
             continue
         args = [expand(a, ctx) for a in op.args]
-        if verb in ("add-to-var", "prepend-to-var", "set-var"):
-            action = {"add-to-var": "ADD", "prepend-to-var": "PREPEND", "set-var": "SET"}[verb]
+        if verb in _DEFINE_VAR:
+            action = _DEFINE_VAR[verb]
             env.define_var(action, args[0], args[1])
         elif verb == "define-var":
             env.define_var(args[0], args[1], args[2])

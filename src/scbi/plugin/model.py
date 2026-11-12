@@ -68,6 +68,8 @@ def unknown_builtins(text: str) -> list[str]:
 ENV_VERBS = {
     "add-to-var": 2,
     "prepend-to-var": 2,
+    "append-to-var": 2,
+    "remove-from-var": 2,
     "set-var": 2,
     "define-var": 3,
     "unset-var": 1,

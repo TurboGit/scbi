@@ -28,11 +28,11 @@ from dataclasses import dataclass
 
 from scbi.bashenv import BASH_INTERNAL, ShellVars, quote, seed
 from scbi.hooks.context import HookContext
-from scbi.hooks.evaluate import _select
+from scbi.hooks.bashguard import to_bash
 from scbi.hooks.runtime import Runtime
 from scbi.plugin import catalog
 from scbi.plugin.lift import parse_hook_name
-from scbi.plugin.model import EnvOp, EnvOps, Function, Shell, Values
+from scbi.plugin.model import EnvOp, EnvOps, Function, Guarded, Shell, Values
 
 
 class HookError(Exception):
@@ -71,10 +71,26 @@ def _env_action_bash(op: EnvOp) -> str:
     return " ".join([op.verb] + [_dq(x) for x in a])
 
 
-def render(name: str, obj, ctx: HookContext | None, plugin: str = "") -> str:
+def _block(items, emit, indent: str = "    ") -> str:
+    """Bash lines for value/env items, guards translated to Bash."""
+    out = []
+    for it in items:
+        if isinstance(it, Guarded):
+            out.append(f"{indent}if {to_bash(it.cond)}; then\n")
+            out.append(_block(it.items, emit, indent + "    ") or f"{indent}    true\n")
+            out.append(f"{indent}fi\n")
+        else:
+            out.append(f"{indent}{emit(it)}\n")
+    return "".join(out)
+
+
+def render(name: str, obj, plugin: str = "") -> str:
     """Bash definition of the namespace entry ``name``.
 
-    Guards and values of YAML hooks are evaluated for ``ctx``.
+    YAML hooks are rendered entirely in Bash: values are expanded and
+    guards evaluated when the function is called (with its arguments), and
+    environment actions call the runtime helpers, hence the visible
+    ``define-var`` (which a user may have redefined).
     """
     if isinstance(obj, str):
         return obj
@@ -85,12 +101,10 @@ def render(name: str, obj, ctx: HookContext | None, plugin: str = "") -> str:
     if isinstance(obj, Shell):
         return f"function {name}()\n{{\n{_params(params)}{obj.script or 'true'}\n}}"
     if isinstance(obj, Values):
-        #  items expanded by Bash when called (parameters bound at call)
-        items = list(_select(obj.items, ctx)) if ctx else [i for i in obj.items if isinstance(i, str)]
-        lines = "".join(f"    printf '%s\\n' {_dq(v)}\n" for v in items)
-        return f"function {name}()\n{{\n{_params(params)}{lines}    true\n}}"
+        body = _block(obj.items, lambda v: f"printf '%s\\n' {_dq(v)}")
+        return f"function {name}()\n{{\n{_params(params)}{body}    true\n}}"
     if isinstance(obj, EnvOps):
-        body = "".join(f"    {_env_action_bash(op)}\n" for op in _select(obj.ops, ctx)) if ctx else ""
+        body = _block(obj.ops, _env_action_bash)
         return f"function {name}()\n{{\n{_params(params)}{body}    true\n}}"
     raise HookError(f"cannot render {name}: {type(obj).__name__}")
 
@@ -139,10 +153,30 @@ def _parse_dumps(data: bytes) -> list[dict[str, tuple[str, bool]]]:
 class HookShell:
     """Build and run the Bash process of a hook."""
 
-    def __init__(self, runtime: Runtime, namespace: dict[str, object], base_env: dict[str, str] | None = None):
+    def __init__(
+        self,
+        runtime: Runtime,
+        namespace: dict[str, object],
+        base_env: dict[str, str] | None = None,
+        loaded: dict[str, str] | None = None,
+    ):
+        """``namespace``: functions of the loaded plug-ins (Registry.functions),
+        ``loaded``: SCBI_LOADED entries (Registry.loaded), the loaded
+        plug-ins are not sourced again by load-module in the shell."""
         self.runtime = runtime
         self.namespace = namespace
         self.base_env = dict(base_env or {})
+        self.loaded = dict(loaded or {})
+        #  longest names first, to find the plug-in owning a function
+        self._modules = sorted(self.loaded, key=len, reverse=True)
+
+    def owner(self, name: str) -> str:
+        """Plug-in owning the function ``name`` ("" for a custom function
+        not prefixed by a loaded plug-in name)."""
+        for m in self._modules:
+            if name.startswith(f"{m}-"):
+                return m
+        return ""
 
     def script(self, ctx: HookContext, call: str) -> str:
         rt = self.runtime.vars
@@ -155,6 +189,7 @@ class HookShell:
         parts.append(_assoc("SCBI_MODVER", ctx.plan.modver))
         parts.append(_assoc("SCBI_MODULE_ALIAS", ctx.plan.module_alias))
         parts.append(_assoc("SCBI_OS_DISCRIMINANTS", {d: "yes" for d in ctx.discriminants}))
+        parts.append(_assoc("SCBI_LOADED", self.loaded))
         #  Associative arrays of the driver, always declared
         arrays = {"SCBI_MODULES_DIR": {}, **ctx.arrays}
         for name, values in arrays.items():
@@ -163,8 +198,7 @@ class HookShell:
         parts.append(f"SCBI_HOST={quote(ctx.host)}; SCBI_TARGET={quote(ctx.target)}")
         #  Plug-ins functions
         for name, obj in self.namespace.items():
-            owner = ctx.module if name.startswith(f"{ctx.module}-") else ""
-            parts.append(render(name, obj, ctx, owner))
+            parts.append(render(name, obj, self.owner(name)))
         parts.append(call)
         return "\n".join(parts) + "\n"
 
@@ -237,3 +271,23 @@ class HookShell:
                 values.pop(name, None)
                 exported.discard(name)
         return Result(proc.returncode)
+
+
+def run_env_hook(shell: HookShell, ctx: HookContext, function: str, args: list[str],
+                 python_env: bool, base_env: dict[str, str] | None = None) -> None:
+    """Apply the environment hook ``function`` to ``ctx.env``.
+
+    A YAML hook is evaluated in Python when ``python_env`` is true (see
+    scbi.hooks.policy); otherwise, and for legacy hooks, it runs in a hook
+    shell, so that a redefined ``define-var`` applies.
+    """
+    from scbi.hooks.evaluate import apply_env
+
+    obj = shell.namespace.get(function)
+    if isinstance(obj, EnvOps) and python_env:
+        spec_params = catalog.spec(parse_hook_name(shell.owner(function), function).hook).params \
+            if shell.owner(function) else catalog.STD_PARAMS
+        ctx.params = dict(zip(spec_params, args))
+        apply_env(obj, ctx, base_env)
+    else:
+        shell.env(ctx, function, args)

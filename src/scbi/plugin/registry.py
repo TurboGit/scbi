@@ -296,5 +296,12 @@ class Registry:
     def fn_exists(self, name: str) -> bool:
         return name in self.functions
 
+    def scbi_loaded(self) -> dict[str, str]:
+        """SCBI_LOADED entries: ``<module>`` and ``<module>.inh``."""
+        res = dict(self.loaded)
+        for module, parents in self.inherits.items():
+            res[f"{module}.inh"] = "".join(f"{p} " for p in parents)
+        return res
+
     def variant_members(self, module: str, variant: str) -> tuple[str, ...]:
         return self.variant_aliases.get(module, {}).get(variant, ())

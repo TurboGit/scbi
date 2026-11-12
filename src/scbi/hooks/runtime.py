@@ -30,6 +30,7 @@ class Runtime:
 
 
 def runtime_files(plugins_dir: Path, os_module: str = "") -> list[Path]:
+    plugins_dir = Path(plugins_dir).resolve()
     files = sorted(p for p in Path(plugins_dir).glob("[0-9]*") if p.is_file() and not p.name.endswith("~"))
     if os_module:
         osf = Path(plugins_dir) / f"_os_{os_module}"

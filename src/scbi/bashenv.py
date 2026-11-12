@@ -106,7 +106,7 @@ def source_files(
     """Source ``files`` in order in Bash seeded with ``svars``.
 
     Returns all scalar variables afterwards (Bash internal ones excluded).
-    A file calling ``exit`` with a non-zero status raises BashEvalError.
+    A file calling ``exit`` (with a non-zero status) raises BashEvalError.
     ``base_env`` is the process environment of the Bash process (PATH,
     HOME...), exported variables of ``svars`` are added to it.
     """
@@ -116,7 +116,9 @@ def source_files(
         #  Functions of the prelude are not user code, not reported
         '__scbi_known="$(compgen -A function | tr "\\n" " ")"',
         seed(svars),
-        *[f"source {quote(str(f))} || exit $?" for f in files],
+        #  as in the Bash driver, the status of a sourced file is ignored
+        #  (only an explicit exit stops)
+        *[f"source {quote(str(f))}" for f in files],
         _DUMP,
     ]
     env = dict(base_env or {})

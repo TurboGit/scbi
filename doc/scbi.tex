@@ -1894,13 +1894,18 @@ variables in the body; they are not declared in the plug-in.
 	\code{file}, \code{dir}).
 	\item[environment hooks] (\code{env}, \code{build-env},
 	\code{tests-env}): a list of actions \code{<verb> <arguments>} where the
-	verb is one of \code{add-to-var}, \code{prepend-to-var}, \code{set-var},
+	verb is one of \code{add-to-var}, \code{prepend-to-var},
+	\code{append-to-var}, \code{remove-from-var}, \code{set-var},
 	\code{define-var}, \code{unset-var}, \code{export}, \code{system-compiler},
 	\code{target-env}, \code{no-target-env}, \code{mkdir}, \code{import}
 	(\code{import opam env} runs the command and imports the variables it sets),
 	\code{local NAME VALUE} (a variable for the following actions of the hook)
 	or \code{assign NAME VALUE} (a shell variable, part of the environment if
-	it is already exported). Actions are applied in order.
+	it is already exported). Actions are applied in order. The actions on
+	variables go through \code{define-var} as for a Bash plug-in: if
+	\code{define-var} is redefined (for example in a \code{module-final-step}
+	calling \code{plugin-call-env-hooks} to record the environment of the
+	modules), the redefinition applies to YAML plug-ins too.
 \end{description}
 
 Values and environment actions are not shell code: they may only refer to
