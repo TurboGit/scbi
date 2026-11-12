@@ -19,12 +19,15 @@ from pathlib import Path
 from scbi.plugin import yamlfmt
 from scbi.plugin.legacy import LegacyLoadError, trace_plugin
 from scbi.plugin.lift import Issue, lift
+from scbi.plugin.registry import Registry
 
 
 def convert(path: Path) -> tuple[str | None, list[Issue]]:
     """YAML text for the plug-in ``path`` (None when not convertible)."""
     try:
-        res = lift(trace_plugin(path))
+        registry = Registry(path.parent)
+        registry.load_module(path.name)
+        res = lift(registry.traces[path.name], set(registry.functions))
     except LegacyLoadError as e:
         return None, [Issue(path.name, str(e))]
     if res.issues:

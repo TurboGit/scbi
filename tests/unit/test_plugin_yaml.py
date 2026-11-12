@@ -6,7 +6,7 @@ import pytest
 
 from corpus import plugin_files
 from scbi.plugin import yamlfmt
-from scbi.plugin.catalog import step_names
+from scbi.plugin.catalog import spec, step_names
 from scbi.plugin.expr import ExprError, evaluate, parse
 from scbi.plugin.legacy import trace_plugin
 from scbi.plugin.lift import lift
@@ -150,7 +150,9 @@ PLUGINS = plugin_files()
 
 @cache
 def lifted(path: Path):
-    return lift(trace_plugin(path))
+    reg = Registry(path.parent)
+    reg.load_module(path.name)
+    return lift(reg.traces[path.name], set(reg.functions))
 
 
 def convertible() -> list[Path]:
@@ -213,12 +215,29 @@ def test_yaml_namespace_and_resolution(converted_dirs):
         assert legacy.load_module(p.name)
         yaml_reg = Registry(converted_dirs[p.parent])
         assert yaml_reg.load_module(p.name)
-        assert set(yaml_reg.functions) == set(legacy.functions), p
+        #  composite Bash hooks are replaced by "variants:"
+        composite = lifted(p).composite if not lifted(p).issues else {}
+
+        def effective(functions):
+            out = []
+            for f in functions:
+                for g in composite.get(f, [f]):
+                    if g and g not in out:
+                        out.append(g)
+            return out
+
+        assert set(yaml_reg.functions) == set(legacy.functions) - set(composite), p
         for v in variants_of(legacy.functions, p.name):
             for h in step_names():
                 for cross in (False, True):
-                    assert get_hook(yaml_reg, p.name, v, h, cross) == get_hook(legacy, p.name, v, h, cross)
-                    assert variant_hooks(yaml_reg, p.name, h, v, cross) == variant_hooks(legacy, p.name, h, v, cross)
+                    if spec(h).cumulative:
+                        #  same functions, duplicates aside (a variant listed
+                        #  twice calls its hook once with "variants:")
+                        assert effective(variant_hooks(yaml_reg, p.name, h, v, cross)) == \
+                            effective(variant_hooks(legacy, p.name, h, v, cross)), (p, v, h, cross)
+                    else:
+                        assert [x for x in [get_hook(yaml_reg, p.name, v, h, cross)] if x] == \
+                            effective([get_hook(legacy, p.name, v, h, cross)]), (p, v, h, cross)
 
 
 # ------------------------------------- lifted static values vs Bash output
@@ -274,3 +293,72 @@ def test_convert_command(tmp_path, capsys):
     assert "bad-build: parameter VARIANT=$2" in out
     assert yamlfmt.load(tmp_path / "lib.yaml").hooks[HookKey("depends")] == Values(("zlib",))
     assert not (tmp_path / "bad.yaml").exists()
+
+
+# ------------------------------------------------- variants including others
+
+
+class AliasNs:
+    def __init__(self, names, aliases):
+        self.names, self.aliases = set(names), aliases
+
+    def fn_exists(self, name):
+        return name in self.names
+
+    def variant_members(self, module, variant):
+        return self.aliases.get(variant, ())
+
+
+def test_variant_members_resolution():
+    ns = AliasNs(
+        ["d-common-depends", "d-ai-depends", "d-hdr-depends", "d-jxl-depends", "d-depends",
+         "d-ai-config-options", "d-config", "d-hdr-config", "d-x-config"],
+        {"all": ("ai", "hdr", "jxl")},
+    )
+    assert variant_hooks(ns, "d", "depends", "all") == \
+        ["d-common-depends", "d-ai-depends", "d-hdr-depends", "d-jxl-depends"]
+    assert variant_hooks(ns, "d", "depends", "all.ai") == variant_hooks(ns, "d", "depends", "all")
+    assert variant_hooks(ns, "d", "config-options", "all") == ["d-ai-config-options"]
+    assert get_hook(ns, "d", "all", "config") == "d-hdr-config"
+    assert get_hook(ns, "d", "x.all", "config") == "d-x-config"
+    ns.names.add("d-all-config")
+    assert get_hook(ns, "d", "all", "config") == "d-all-config"
+    #  default variant unchanged
+    assert variant_hooks(ns, "d", "depends", "default") == ["d-common-depends", "d-depends"]
+
+
+def test_variant_members_cycle():
+    ns = AliasNs([], {"a": ("b",), "b": ("a",)})
+    with pytest.raises(ValueError, match="cycle"):
+        get_hook(ns, "d", "a", "config")
+
+
+def test_variants_yaml(tmp_path):
+    p = tmp_path / "d.yaml"
+    p.write_text("variants:\n  all: [ai, hdr, jxl]\n  big: all\ndepends:\n  ai: [x]\n")
+    d = yamlfmt.load(p)
+    assert d.variants == {"all": ("ai", "hdr", "jxl"), "big": ("all",)}
+    reg = Registry(tmp_path)
+    reg.load_module("d")
+    assert variant_hooks(reg, "d", "depends", "big") == ["d-ai-depends"]
+    p.write_text("variants:\n  all: [a.b]\n")
+    with pytest.raises(yamlfmt.FormatError, match="list of variant names"):
+        yamlfmt.load(p)
+
+
+def test_composite_variant_converted():
+    res = lifted(next(p for p in PLUGINS if p.name == "c-darktable"))
+    assert res.issues == []
+    assert res.plugin.variants == {"all": ("ai", "hdr", "jxl")}
+    assert set(res.composite) == {"c-darktable-all-depends", "c-darktable-all-config-options"}
+
+
+def test_composite_not_equivalent_reported(tmp_path):
+    #  "all" would also select ai-config, which the Bash all variant did not
+    (tmp_path / "m").write_text(
+        "function m-ai-depends() { echo a; }\nfunction m-all-depends() { m-ai-depends; }\n"
+        "function m-ai-config() { true; }\n")
+    reg = Registry(tmp_path)
+    reg.load_module("m")
+    res = lift(reg.traces["m"], set(reg.functions))
+    assert res.issues and "cannot be expressed" in res.issues[0].message

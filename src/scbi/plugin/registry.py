@@ -167,6 +167,8 @@ class Registry:
     inherits: dict[str, list[str]] = field(default_factory=dict)  # SCBI_LOADED[P.inh]
     traces: dict[str, PluginTrace] = field(default_factory=dict)
     definitions: dict[str, PluginDef] = field(default_factory=dict)
+    #  module -> {variant: included variants} (``variants:`` of YAML plug-ins)
+    variant_aliases: dict[str, dict[str, tuple[str, ...]]] = field(default_factory=dict)
 
     # --------------------------------------------------------------- loading
 
@@ -224,6 +226,8 @@ class Registry:
             self._inherit(inh.no_variant, hooks, inh.parent, inh.name or pdef.name)
         for variant in pdef.os_variants:
             self.functions.update(os_variant_functions(pdef.name, variant))
+        if pdef.variants:
+            self.variant_aliases.setdefault(pdef.name, {}).update(pdef.variants)
         for key, body in pdef.hooks.items():
             self.functions[key.function_name(pdef.name)] = body
         self.functions.update(pdef.functions)
@@ -267,6 +271,13 @@ class Registry:
         """Port of ``_inherit-plugin_internal``."""
         self.load_module(parent)
 
+        #  Variants including other variants are inherited with the hooks
+        #  (own definitions take precedence)
+        if not no_variant and parent in self.variant_aliases:
+            own = self.variant_aliases.setdefault(plugin, {})
+            for v, members in self.variant_aliases[parent].items():
+                own.setdefault(v, members)
+
         regexp = f"({hooks})$"
         if no_variant:
             regexp = f"^{parent}(-pre|-post|-cross)*-({hooks})$"
@@ -284,3 +295,6 @@ class Registry:
 
     def fn_exists(self, name: str) -> bool:
         return name in self.functions
+
+    def variant_members(self, module: str, variant: str) -> tuple[str, ...]:
+        return self.variant_aliases.get(module, {}).get(variant, ())

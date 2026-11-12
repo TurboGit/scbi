@@ -18,6 +18,33 @@ class Namespace(Protocol):
     def fn_exists(self, name: str) -> bool: ...
 
 
+def lookup_variants(ns, module: str, variant: str) -> list[str]:
+    """Variants to look hooks up for, in order.
+
+    The variants of ``variant`` (``default`` if none), each one followed by
+    the variants it includes (``variants:`` of the plug-in, recursively),
+    duplicates removed. A namespace without ``variant_members`` (legacy Bash
+    semantics) gives just the variants of ``variant``.
+    """
+    base = all_variants(variant) or ["default"]
+    members = getattr(ns, "variant_members", None)
+    if members is None:
+        return base
+    result: list[str] = []
+
+    def add(v: str, stack: tuple[str, ...]) -> None:
+        if v in stack:
+            raise ValueError(f"{module}: cycle in variants: {' -> '.join(stack + (v,))}")
+        if v not in result:
+            result.append(v)
+        for m in members(module, v):
+            add(m, stack + (v,))
+
+    for v in base:
+        add(v, ())
+    return result
+
+
 def _variant_hook(ns: Namespace, module: str, variant: str, step: str, cross: bool) -> str:
     """Port of ``_internal_get-hook``."""
     if cross:
@@ -39,7 +66,7 @@ def get_hook(ns: Namespace, module: str, variant: str, step: str, cross: bool = 
     ``cross`` is true when SCBI_HOST != SCBI_TARGET.
     """
     hook = ""
-    for v in all_variants(variant) or ["default"]:
+    for v in lookup_variants(ns, module, variant):
         hook = _variant_hook(ns, module, v, step, cross)
         if hook:
             break
@@ -56,7 +83,7 @@ def variant_hooks(ns: Namespace, module: str, hook: str, variant: str, cross: bo
     specific hook was found.
     """
     result: list[str] = []
-    candidates = ([] if variant == "native" else ["common"]) + (all_variants(variant) or ["default"])
+    candidates = ([] if variant == "native" else ["common"]) + lookup_variants(ns, module, variant)
     varfound = False
 
     for v in candidates:

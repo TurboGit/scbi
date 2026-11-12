@@ -4,6 +4,7 @@ A plug-in ``<name>.yaml`` is a mapping. Reserved keys:
 
     plugin:       the plug-in name (optional, must match the file name)
     vars:         global variables {NAME: value}
+    variants:     variants including other variants {all: [ai, hdr, jxl]}
     inherit:      [{from: P, hooks: [..], custom-hooks: [..], no-variant: true,
                     name: N}]
     os-variants:  {native: {packages: [os@-x:[v], ...], env: [<env op>...]}}
@@ -58,7 +59,7 @@ from scbi.plugin.model import (
     Values,
 )
 
-RESERVED = ("plugin", "vars", "inherit", "os-variants", "functions")
+RESERVED = ("plugin", "vars", "variants", "inherit", "os-variants", "functions")
 PLAIN_KEY = "_"
 CROSS_KEY = "cross"
 
@@ -242,6 +243,13 @@ def from_data(name: str, data: dict, where: str = "") -> PluginDef:
     for k, v in (data.get("vars") or {}).items():
         pdef.variables[str(k)] = "" if v is None else str(v)
 
+    for vname, members in (data.get("variants") or {}).items():
+        w = f"{where}.variants.{vname}"
+        members = tuple(str(m) for m in _as_list(members, w))
+        if not members or any(not m or "." in m for m in members):
+            raise _err(w, "a list of variant names is expected")
+        pdef.variants[str(vname)] = members
+
     for i, inh in enumerate(_as_list(data.get("inherit"), f"{where}.inherit")):
         if isinstance(inh, str):
             inh = {"from": inh}
@@ -320,6 +328,8 @@ def to_data(pdef: PluginDef) -> dict:
     data: dict = {"plugin": pdef.name}
     if pdef.variables:
         data["vars"] = dict(pdef.variables)
+    if pdef.variants:
+        data["variants"] = {v: list(m) for v, m in pdef.variants.items()}
     if pdef.inherits:
         lst = []
         for inh in pdef.inherits:
@@ -347,7 +357,8 @@ def to_data(pdef: PluginDef) -> dict:
 
     order = {h: i for i, h in enumerate(catalog.step_names())}
     by_hook: dict[str, dict[HookKey, object]] = {}
-    for key in sorted(pdef.hooks, key=lambda k: (order[k.hook], k.cross, k.qualifier)):
+    rank = {PLAIN: 0, "common": 1, "default": 2}
+    for key in sorted(pdef.hooks, key=lambda k: (order[k.hook], k.cross, rank.get(k.qualifier, 3), k.qualifier)):
         by_hook.setdefault(key.hook, {})[key] = pdef.hooks[key]
 
     for hook, entries in by_hook.items():

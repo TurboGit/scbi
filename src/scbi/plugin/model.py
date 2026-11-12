@@ -140,6 +140,10 @@ class PluginDef:
     variables: dict[str, str] = field(default_factory=dict)
     inherits: list[Inherit] = field(default_factory=list)
     os_variants: list[OsVariant] = field(default_factory=list)
+    #  Variants including other variants: {"all": ("ai", "hdr", "jxl")}.
+    #  Only the hook lookup is affected (see scbi.plugin.resolve), the
+    #  variant keeps its own name (sandbox, build id, logs, plans).
+    variants: dict[str, tuple[str, ...]] = field(default_factory=dict)
     #  name -> Function; names are full function names (may not start with
     #  the plug-in name)
     functions: dict[str, Function] = field(default_factory=dict)

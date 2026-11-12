@@ -1798,6 +1798,8 @@ are hook names (including \code{pre-<step>} and \code{post-<step>}):
 \begin{description}[font=\texttt]
 	\item[plugin] The plug-in name, optional, must match the file name.
 	\item[vars] Global variables, \code{\{NAME: value\}}.
+	\item[variants] Variants including other variants
+	(\seeref{yaml-variants}), \code{\{all: [ai, hdr, jxl]\}}.
 	\item[inherit] List of inherited plug-ins (\seeref{inheritance}), each
 	one a mapping with the keys \code{from}, \code{hooks},
 	\code{custom-hooks}, \code{no-variant} and \code{name}.
@@ -1848,6 +1850,29 @@ config:
 build: make -j$SCBI_JOBS
 install: make install
 \end{lstlisting}
+
+\subsubsection{Variants including other variants}
+\label{yaml-variants}
+\index{YAML plug-in!variants}\index{variant!including variants}
+
+A variant can be defined as including other variants, to share their
+definitions without repeating them:
+
+\begin{lstlisting}
+variants:
+  all: [ai, hdr, jxl]
+\end{lstlisting}
+
+When looking for the hooks of the module reference \code{c-darktable/all}
+the driver uses the variants \code{all ai hdr jxl}, in this order: each
+variant is followed by the variants it includes (recursively), a variant
+already listed is not repeated. So \code{all} gets the \code{depends} of
+\code{ai}, \code{hdr} and \code{jxl} (cumulative hook) and, for a hook like
+\code{config}, the first one defined for \code{all}, \code{ai}, \code{hdr}
+or \code{jxl}. A hook defined for \code{all} itself is still used.
+
+Only the hooks lookup is affected: the variant keeps its name for the
+sandbox directory, the build identifier, the logs and the build plans.
 
 \subsubsection{Hook bodies}
 

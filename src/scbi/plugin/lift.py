@@ -47,6 +47,9 @@ class Issue:
 class LiftResult:
     plugin: PluginDef
     issues: list[Issue] = field(default_factory=list)
+    #  Bash hooks only calling the same hook of other variants, replaced by
+    #  ``variants:``: function -> called functions
+    composite: dict[str, list[str]] = field(default_factory=dict)
 
 
 class _Unliftable(Exception):
@@ -365,7 +368,9 @@ def _script(lines: list[str]) -> str:
 # ------------------------------------------------------------------ main
 
 
-def lift(trace: PluginTrace) -> LiftResult:
+def lift(trace: PluginTrace, names: set[str] | None = None) -> LiftResult:
+    """Lift ``trace``; ``names`` is the namespace after loading the plug-in
+    (inherited hooks included) used to check variant compositions."""
     plugin = trace.name
     pdef = PluginDef(plugin, variables=dict(trace.variables))
     res = LiftResult(pdef)
@@ -402,10 +407,18 @@ def lift(trace: PluginTrace) -> LiftResult:
                 if name.startswith(f"{plugin}-{vname}-") and trace.functions.get(name) == defined_before[name]:
                     res.issues.append(Issue(name, "defined before with-variant, overwritten by it"))
 
+    #  Hooks only calling the same hook of other variants, e.g.
+    #  c-darktable-all-depends calling c-darktable-{ai,hdr,jxl}-depends
+    composite: dict[str, list[str]] = {}  # function -> called functions
+
     for name, definition in trace.functions.items():
         key = parse_hook_name(plugin, name)
         lines = body_lines(definition)
         params, rest = split_params(lines)
+        calls = _variant_calls(plugin, key, rest)
+        if calls:
+            composite[name] = calls
+            continue
         try:
             if key is None:
                 for pos, (_, n) in enumerate(params):
@@ -429,5 +442,95 @@ def lift(trace: PluginTrace) -> LiftResult:
                 pdef.hooks[key] = lift_env(rest)
         except _Unliftable as e:
             res.issues.append(Issue(name, str(e)))
+
+    if composite:
+        res.composite = composite
+        _variants_from_composite(trace, pdef, composite, res, names)
     return res
+
+
+def _variant_calls(plugin: str, key: HookKey | None, lines: list[str]) -> list[str]:
+    """Functions called when the body only calls the same hook of other
+    variants (with or without arguments), else []."""
+    if key is None or key.qualifier in (PLAIN, "common", "default"):
+        return []
+    calls = []
+    for ln in lines:
+        name = ln.split()[0] if ln.split() else ""
+        k = parse_hook_name(plugin, name)
+        if (k is None or k.hook != key.hook or k.cross != key.cross
+                or k.qualifier in (PLAIN, "common", "default", key.qualifier)):
+            return []
+        calls.append(name)
+    return calls
+
+
+class _AliasNamespace:
+    def __init__(self, names: set[str], aliases: dict[str, tuple[str, ...]], plugin: str):
+        self.names, self.aliases, self.plugin = names, aliases, plugin
+
+    def fn_exists(self, name: str) -> bool:
+        return name in self.names
+
+    def variant_members(self, module: str, variant: str) -> tuple[str, ...]:
+        return self.aliases.get(variant, ()) if module == self.plugin else ()
+
+
+class _LegacyNamespace:
+    def __init__(self, names: set[str]):
+        self.names = names
+
+    def fn_exists(self, name: str) -> bool:
+        return name in self.names
+
+
+def _variants_from_composite(trace, pdef, composite, res, names) -> None:
+    """Turn composite hooks into ``variants:`` and check the equivalence."""
+    from scbi.plugin.resolve import get_hook, variant_hooks
+
+    plugin = trace.name
+    aliases: dict[str, list[str]] = {}
+    for fname, calls in composite.items():
+        q = parse_hook_name(plugin, fname).qualifier
+        members = aliases.setdefault(q, [])
+        for c in calls:
+            m = parse_hook_name(plugin, c).qualifier
+            if m not in members:
+                members.append(m)
+
+    legacy_names = set(names) if names is not None else set(trace.functions)
+    new_names = legacy_names - set(composite)
+    legacy_ns = _LegacyNamespace(legacy_names)
+    new_ns = _AliasNamespace(new_names, {q: tuple(m) for q, m in aliases.items()}, plugin)
+
+    def effective(functions: list[str]) -> list[str]:
+        out: list[str] = []
+        for f in functions:
+            for g in composite.get(f, [f]):
+                if g and g not in out:
+                    out.append(g)
+        return out
+
+    for q, members in aliases.items():
+        for variant in [q] + [f"{q}.{m}" for m in members] + [f"{m}.{q}" for m in members]:
+            for hook in catalog.step_names():
+                for cross in (False, True):
+                    #  compare with the selection rule used by the driver
+                    if catalog.spec(hook).cumulative:
+                        old = effective(variant_hooks(legacy_ns, plugin, hook, variant, cross))
+                        #  duplicates aside: with "variants:" a variant
+                        #  selected twice calls its hook once
+                        new = effective(variant_hooks(new_ns, plugin, hook, variant, cross))
+                    else:
+                        old = effective([get_hook(legacy_ns, plugin, variant, hook, cross)])
+                        new = [x for x in [get_hook(new_ns, plugin, variant, hook, cross)] if x]
+                    if old != new:
+                        res.issues.append(Issue(
+                            f"{plugin}-{q}-*",
+                            f"variant {q} cannot be expressed as variants: {{{q}: [{', '.join(members)}]}}"
+                            f" (hook {hook}, variant {variant}{', cross' if cross else ''}:"
+                            f" {old} != {new})",
+                        ))
+                        return
+        pdef.variants[q] = tuple(members)
 
