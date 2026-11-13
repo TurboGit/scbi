@@ -167,7 +167,7 @@ cd ..
 
 #  The plan is only known when running the whole testsuite
 case $SCBI_IMPL in
-    python) [ -z "$1" ] && PLAN 1380 ;;
+    python) [ -z "$1" ] && PLAN 1384 ;;
     *)      [ -z "$1" ] && PLAN 1378 ;;
 esac
 

@@ -1,3 +1,4 @@
 # Drivers run only with the Python driver (SCBI_IMPL=python): features of
 # the Python driver without a Bash implementation.
 test174  scbi lint on YAML plug-ins
+test175  scbi format on YAML plug-ins

@@ -13,4 +13,5 @@ TOOLS = {
     "shell": "scbi.tools.shell",
     "source-archive": "scbi.tools.source_archive",
     "lint": "scbi.tools.lint",
+    "format": "scbi.tools.format",
 }

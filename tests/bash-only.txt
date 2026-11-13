@@ -1,3 +1,4 @@
 # Drivers run only with the Bash driver (SCBI_IMPL=bash): Bash tools that
 # the Python driver replaces by YAML ones (Bash plug-ins are converted).
 test092  scbi lint on Bash plug-ins (Python: scbi lint on YAML, test174)
+test141  scbi format on Bash plug-ins (Python: scbi format on YAML, test175)

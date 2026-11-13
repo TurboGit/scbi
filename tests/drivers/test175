@@ -1,0 +1,76 @@
+# scbi format on YAML plug-ins (Python driver only, see python-only.txt)
+
+RUNS ./scbi format fixtures/format/fmt.yaml
+
+CLEAN-DIFF <<'EOF2'
+# Header of the plug-in (stays at the top)
+# second header line
+
+plugin: fmt
+
+vars:
+  B: '@x'
+
+vcs:
+  proxy: none
+  options: none
+  protocol: git
+  url: /r/fmt.git
+
+patches:
+  - if ref =~ 1.0: a.diff
+
+# Comment of depends
+depends:
+  - lib2  # needed for x
+  # lib1 comes after
+  - lib1
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - set-var A "b c"
+
+pre-config: echo pre
+
+config:
+  _: |
+    # this is shell, not a YAML comment
+    ./configure --prefix=$PREFIX
+  default: ./configure
+  # the v1 variant
+  v1: ./configure --enable-v1
+  cross:
+    _: ./configure --host=$TARGET
+
+# Comment of build
+build: make -j4  # end of line of build
+
+# End of file comment
+EOF2
+
+# --replace rewrites the plug-in, a second run changes nothing
+
+cp fixtures/format/fmt.yaml .root/fmt.yaml
+
+RUNS ./scbi format --replace .root/fmt.yaml
+
+RUNS ./scbi format .root/fmt.yaml
+
+RUNS diff .root/fmt.yaml <(./scbi format .root/fmt.yaml)
+
+rm -f .root/fmt.yaml
+
+# Bash plug-ins and invalid plug-ins are not formatted
+
+NRUNS ./scbi format lib1
+
+CLEAN-DIFF <<EOF2
+
+========== Skip lib1: not a YAML plug-in, convert it with: python3 -m scbi.convert
+EOF2
+
+NRUNS ./scbi format fixtures/lint/lintbad.yaml
+
+CLEAN-DIFF <<EOF2
+error: lintbad.vcs: missing fields ['protocol', 'url']
+EOF2
