@@ -1954,9 +1954,82 @@ unquoted glob patterns):
 \code{\$(get-version)}, \code{\$(get-build-type <kind> <default>)},
 \code{\$(is-enabled <feature> [then] [else])},
 \code{\$(last-modified-directory <glob>)}, \code{\$(get-os-inc-dir <glob>)},
-\code{\$(basename <path>)} and \code{\$(ls <glob>)}.
+\code{\$(basename <path>)} and \code{\$(ls <glob>)}. A default value is given
+with \code{\$\{VAR:-default\}}.
+
+\subsubsection{Command language}
+\label{yaml-command-language}
+\index{YAML plug-in!command language}
+
+The command hooks and the functions of a YAML plug-in are written in a
+small command language interpreted by the driver: no shell is involved.
+External commands are run as processes with the environment of the hook,
+built-ins are part of the driver. A body is a text block, one step per
+line; \code{\#} starts a comment, blank lines are ignored, a line ending
+with \code{\textbackslash} continues on the next one. Blocks are given by
+indentation:
+
+\begin{lstlisting}
+config: |
+  BT = get-build-type CMAKE Release
+  OPTS = config-options
+  if not is-link(../src/.git):
+      ln -s ../../src/.git ../src/.git
+  if cross:
+      cmake -DCMAKE_BUILD_TYPE=$BT -DTARGET=$TARGET $OPTS ../src
+  else:
+      cmake -DCMAKE_BUILD_TYPE=$BT $OPTS ../src
+version: |
+  write prj.gpr:
+      with "aunit";
+      project prj is end prj;
+  if ok("gprbuild-project prj.gpr"):
+      echo $VERSION_OK
+  else:
+      echo $VERSION_ERROR
+\end{lstlisting}
+
+\begin{description}
+	\item[commands] The words are split as by a shell (quotes, backslash)
+	and expanded by the driver: variables and their forms (see above),
+	\code{\$(<function> args)}, unquoted glob patterns (left as they are
+	when nothing matches). A variable holding a list gives a word per
+	element, other values are never split, an unquoted word expanding to
+	nothing is removed. Leading \code{NAME=value} words set the
+	environment of the command only. \code{\&\&}, \code{||}, pipes
+	\code{|} and the redirections \code{>}, \code{>>}, \code{<},
+	\code{2>}, \code{2>>}, \code{2>\&1}, \code{\&>} work as in a shell.
+	\item[assignments] \code{VAR = <words>} sets a variable of the hook
+	(one word: a value, several: a list), \code{VAR = <function> <args>}
+	sets it to the result of a function: \code{get-build-type <kind>
+	<default>}, \code{config-options} (the list of the
+	\code{config-options} hooks of the module), \code{last-modified-directory
+	<glob>}, \code{is-enabled <feature> [then] [else]}, \code{get-version},
+	\code{output <command line>} (its standard output), \code{first-line
+	<value>}, \code{status} (of the previous step), \code{basename},
+	\code{dirname}, \code{command-path <tool>}. \code{export VAR = ...}
+	also sets it in the environment of the following commands.
+	\item[built-in commands] \code{cd}, \code{echo [-n]}, \code{return
+	[N]}, \code{exit [N]}, \code{true}, \code{false}, \code{export NAME},
+	\code{unset NAME}, \code{gprbuild-project <project>} and the functions
+	of the plug-in (\code{functions:}, called with their parameters).
+	\item[blocks] \code{if <condition>:}, \code{elif <condition>:},
+	\code{else:} (the conditions of values, \seeref{yaml-conditions}, plus
+	\code{is-dir(path)}, \code{is-file(path)}, \code{is-link(path)},
+	\code{empty(\$VAR)}, \code{ok("<command line>")} true when the command
+	succeeds, \code{status} of the previous step, and \code{\$VAR} or
+	quoted strings as operands); \code{for NAME in <words>:};
+	\code{write FILE:} (the indented text, expanded, written to the file),
+	\code{append FILE:}, \code{write-raw FILE:}, \code{append-raw FILE:}
+	(not expanded).
+\end{description}
+
+The status of a body is the status of its last step: a failing command
+does not stop it unless the next one is chained with \code{\&\&}. An
+error gives the plug-in file, the hook and the line.
 
 \subsubsection{Conditions}
+\label{yaml-conditions}
 \index{YAML plug-in!condition}
 
 An item of a value list or of an environment list can be guarded by a

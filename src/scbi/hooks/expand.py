@@ -26,7 +26,7 @@ from scbi.plugin.model import BUILTINS
 _NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 _BRACED = re.compile(
     r"(?P<name>[A-Za-z_][A-Za-z0-9_]*)"
-    r"(?:\[(?P<key>[^\]]+)\]|(?P<op>%%|%|##|#)(?P<arg>[^{}$]*))?"
+    r"(?:\[(?P<key>[^\]]+)\]|(?P<op>%%|%|##|#|:-)(?P<arg>[^{}$]*))?"
 )
 
 
@@ -46,7 +46,8 @@ class _Var:
 
 @dataclass(frozen=True)
 class _Op:
-    """${NAME%pat} ${NAME%%pat} ${NAME#pat} ${NAME##pat} ${NAME[key]}"""
+    """${NAME%pat} ${NAME%%pat} ${NAME#pat} ${NAME##pat} ${NAME:-default}
+    ${NAME[key]}"""
 
     name: str
     op: str  # "%", "%%", "#", "##" or "[]"
@@ -132,7 +133,10 @@ def _parse(text: str) -> list:
 
 
 def _trim(value: str, op: str, pattern: str) -> str:
-    """${VAR%pat} (shortest suffix), %% (longest), # and ## for prefixes."""
+    """${VAR%pat} (shortest suffix), %% (longest), # and ## for prefixes,
+    ${VAR:-default}."""
+    if op == ":-":
+        return value or pattern
     n = len(value)
     if op in ("%", "%%"):
         starts = range(n, -1, -1) if op == "%" else range(0, n + 1)

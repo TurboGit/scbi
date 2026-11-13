@@ -54,10 +54,12 @@ def test_expand_builtins(tmp_path):
     assert expand('$(last-modified-directory "$PREFIX/lib/python*")', c) == f"{tmp_path}/lib/python3.11"
     assert expand("$(basename $PREFIX/lib/python3.9)", c) == "python3.9"
     assert expand("$(ls $PREFIX/lib)", c) == "python3.11 python3.9"
+    #  default value
+    assert expand("${NOPE:-dflt}/${PREFIX:-x}", c) == f"dflt/{tmp_path}"
 
 
 @pytest.mark.parametrize(
-    "text", ["$(cat x)", "${X:-a}", "$1", "$(ls", "${A[b]c}"]
+    "text", ["$(cat x)", "${X:=a}", "$1", "$(ls", "${A[b]c}"]
 )
 def test_expand_check_rejects(text):
     with pytest.raises(ExpandError):

@@ -16,8 +16,11 @@ Grammar (evaluated by Python, no shell involved)::
     operand := "(" expr ")"
              | "on" WORD                   discriminants, comma separated
              | NAME "(" WORD ")"           version(m) build-type(K) enabled(f)
-                                           exists(path) dir(m)
+                                           exists(path) dir(m); in command
+                                           hooks also is-dir(p) is-file(p)
+                                           is-link(p) empty(v) ok("command")
              | NAME                        ref target host variant kind cross
+                                           (status in command hooks)
              | WORD | "quoted string"
 
 ``< > <= >=`` compare versions (as ``check-module-version``), ``=~`` is a
@@ -34,8 +37,10 @@ from typing import Protocol
 from scbi.vercmp import check_versions
 
 OPERATORS = ("==", "!=", "<=", ">=", "<", ">", "=~")
-VARIABLES = ("ref", "target", "host", "variant", "kind", "cross")
-FUNCTIONS = ("version", "build-type", "enabled", "exists", "dir")
+VARIABLES = ("ref", "target", "host", "variant", "kind", "cross", "status")
+FUNCTIONS = ("version", "build-type", "enabled", "exists", "dir",
+             #  command hooks (scbi.hooks.cmdlang)
+             "is-dir", "is-file", "is-link", "empty", "ok")
 
 
 class ExprError(Exception):
