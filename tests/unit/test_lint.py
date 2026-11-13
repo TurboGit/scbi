@@ -20,8 +20,10 @@ env:
   - set-var P_HOME $PREFIX
 config: |
   ../src/configure --prefix=$PREFIX --host=$TARGET $MYVAR $P_HOME
-  for f in a b; do echo $f; done
-  local X=1; echo $X $SCBI_JOBS $PATH
+  for f in a b:
+      echo $f
+  X = 1
+  echo $X $SCBI_JOBS $PATH
 archive:
   - default
   - none
@@ -44,7 +46,7 @@ out-of-tree: false
     ("env: [frob-var A b]\n", (ERROR, "env", "unknown environment action 'frob-var'")),
     ("patches: [{'if ref ==': a.diff}]\n", None),
     ("depends: ['$(get-thing)']\n", None),
-    ("config: [make]\n", (ERROR, "config", "a shell script (string) is expected")),
+    ("config: [make]\n", (ERROR, "config", "a body in the command language (string) is expected")),
 ])
 def test_errors(text, expected):
     found = issues(text)

@@ -22,6 +22,7 @@ from collections import deque
 from scbi.bashenv import quote
 from scbi.hooks.exec import is_nop, run_code
 from scbi.plugin.resolve import get_hook
+from scbi.steps import interp
 
 #  driver functions reproduced here (a user definition makes them run in
 #  Bash) and ported runtime functions
@@ -56,7 +57,9 @@ class _Sink:
         self.console = console
 
     def line(self, text: str) -> None:
-        text += "\n"
+        self.text(text + "\n")
+
+    def text(self, text: str) -> None:
         if self.console:
             sys.stdout.write(text)
             sys.stdout.flush()
@@ -128,19 +131,33 @@ class StepWrapper:
             cwd = os.getcwd()
 
         fct = f"{module}-{mstep}"
-        self.write_command(clog, fct, prefix, cwd)
-
+        target = self.get("SCBI_TARGET")
         is_tests = "tests" in step
+        commands = interp.is_commands(b, fct)
+        if commands:
+            tests_opts = self.get("SCBI_TESTS_OPTIONS") if is_tests else self.get("TESTS_OPTS")
+            hook = interp.Hook(b, module, variant, fct, [prefix, target, variant, tests_opts], cwd)
+            hook.write_replay(clog)
+            #  the plug-in files, as show-command copies them
+            copy_plugin(self.get("SCBI_PLUGINS"), module, f"{tvdir}/logs", [], self.d.registry)
+        else:
+            self.write_command(clog, fct, prefix, cwd)
+
         if not is_tests and cached:
             return 0
 
-        target = self.get("SCBI_TARGET")
-        if self.get("SCBI_DLOG") == "yes" or is_tests:
-            tests_opts = self.get("SCBI_TESTS_OPTIONS") if is_tests else self.get("TESTS_OPTS")
+        dlog = self.get("SCBI_DLOG") == "yes" or is_tests
+        if dlog:
             sink = _Sink([(log, "a"), (mlog, "w")], console=True)
-            res = self.run_hook(fct, [prefix, target, variant, tests_opts], cwd, sink.line, trace=False)
         else:
             sink = _Sink([(mlog, "w"), (log, "a")], console=False)
+        sys.stdout.flush()
+        if commands:
+            res = hook.run(sink.text, trace=None if dlog else sink.line)
+        elif dlog:
+            tests_opts = self.get("SCBI_TESTS_OPTIONS") if is_tests else self.get("TESTS_OPTS")
+            res = self.run_hook(fct, [prefix, target, variant, tests_opts], cwd, sink.line, trace=False)
+        else:
             res = self.run_hook(fct, [prefix, target, variant], cwd, sink.line, trace=True)
 
         if res != 0:
@@ -149,8 +166,12 @@ class StepWrapper:
             b.elog(module, mstep, "failed", "with", "error", str(res))
             if _REPRODUCE.match(step):
                 b.elog(module, "to", "reproduce:")
-                b.elog(module, "bash", clog)
-                b.elog(module, "use", "bash", "-x", "option", "for", "debug")
+                if commands:
+                    b.elog(module, "scbi", "replay", clog)
+                    b.elog(module, "use", "--trace", "option", "for", "debug")
+                else:
+                    b.elog(module, "bash", clog)
+                    b.elog(module, "use", "bash", "-x", "option", "for", "debug")
             return res
         b.ilog(module, f"{mstep}{dvariant}", "completed")
         return 0
@@ -205,9 +226,19 @@ class StepWrapper:
             sys.stderr.write(f"{clog}: {e.strerror}\n")
 
 
-def copy_plugin(plugins: str, plugin: str, dest: str, errors: list[str]) -> None:
+def copy_plugin(plugins: str, plugin: str, dest: str, errors: list[str], registry=None) -> None:
     """``_internal_copy-plugin PLG DIR``: the plug-in file and the files of
-    the plug-ins it inherits are copied to DIR."""
+    the plug-ins it inherits are copied to DIR (with ``registry``: the YAML
+    files too)."""
+    yml = f"{plugins}/{plugin}.yaml"
+    if registry is not None and os.path.isfile(yml):
+        try:
+            shutil.copy(yml, dest)
+        except OSError as e:
+            errors.append(f"cp: cannot create regular file '{dest}': {e.strerror}")
+        pdef = registry.definitions.get(plugin)
+        for inh in (pdef.inherits if pdef else ()):
+            copy_plugin(plugins, inh.parent, dest, errors, registry)
     src = f"{plugins}/{plugin}"
     if not os.path.isfile(src):
         return
@@ -241,7 +272,7 @@ def copy_plugin(plugins: str, plugin: str, dest: str, errors: list[str]) -> None
             parent = a
             break
         if parent:
-            copy_plugin(plugins, parent, dest, errors)
+            copy_plugin(plugins, parent, dest, errors, registry)
 
 
 def _append(path: str, text: str) -> None:

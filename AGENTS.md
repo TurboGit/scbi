@@ -139,6 +139,14 @@ SCBI_IMPL=python ./run test001   # in tests/: one driver with the Python driver
   order `catalog.FORMAT_ORDER`); Bash plug-ins are converted with
   `python3 -m scbi.convert`. Their test fixtures are in `tests/fixtures/`
   (not in `tests/scripts.d`, which only holds valid plug-ins).
+- Command hooks and functions of YAML plug-ins are in the command
+  language (`hooks/cmdlang.py`), run by the interpreter, never by Bash
+  (`steps/interp.py`, isolated environment `steps/hookenv.py`, replay
+  files `steps/replay.py` / `scbi replay`). The converter
+  (`plugin/liftcmd.py`) refuses what has no equivalent; `--closure DIR`
+  keeps Bash the plug-ins inherited by Bash plug-ins. Steps are run by
+  `steps/wrapper.py` and `steps/generic.py` (ports of module-wrapper and
+  7_modgen, Bash fallback when redefined).
 - Port Bash code literally (word splitting, `read`, associative array order
   ...): helpers for these semantics are in `src/scbi/bashcompat.py`.
 

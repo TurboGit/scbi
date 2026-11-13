@@ -36,7 +36,7 @@ from scbi.hooks.bashguard import to_bash
 from scbi.hooks.runtime import Runtime
 from scbi.plugin import catalog
 from scbi.plugin.lift import parse_hook_name
-from scbi.plugin.model import EnvOp, EnvOps, Function, Guarded, Shell, Values
+from scbi.plugin.model import EnvOp, EnvOps, Function, Guarded, Commands, Values
 
 
 class HookError(Exception):
@@ -98,15 +98,15 @@ def render(name: str, obj, plugin: str = "") -> str:
     """
     if isinstance(obj, str):
         return obj
-    if isinstance(obj, Function):
-        return f"function {name}()\n{{\n{_params(obj.params)}{obj.script or 'true'}\n}}"
+    if isinstance(obj, (Function, Commands)):
+        #  bodies in the command language are run by the interpreter, never
+        #  in Bash: a stub (fn-exists, nop hooks of with-variant)
+        if obj.script.strip() in ("", "true"):
+            return f"function {name}()\n{{\n    true\n}}"
+        return (f"function {name}()\n{{\n    echo \"{name}: command language body called from Bash\" >&2\n"
+                "    return 1\n}")
     key = parse_hook_name(plugin, name) if plugin else None
     params = catalog.spec(key.hook).params if key else catalog.STD_PARAMS
-    if isinstance(obj, Shell):
-        if obj.script.strip() in ("", "true"):
-            #  nop body, as with-variant defines it ({ true; })
-            return f"function {name}()\n{{\n    true\n}}"
-        return f"function {name}()\n{{\n{_params(params)}{obj.script}\n}}"
     if isinstance(obj, Values):
         body = _block(obj.items, lambda v: f"printf '%s\\n' {_dq(v)}")
         return f"function {name}()\n{{\n{_params(params)}{body}    true\n}}"
@@ -454,8 +454,8 @@ def _unlink_quiet(path: str) -> None:
 def is_nop(obj) -> bool:
     """The test of _internal_module-variant-wrapper: the body of the
     function (last 3 lines of declare -f, blanks collapsed) is { true }."""
-    if isinstance(obj, Shell):
-        return obj.script.strip() in ("", "true")
+    if isinstance(obj, Commands):
+        return obj.is_nop()
     if isinstance(obj, str):
         #  declare -f text ("f () \n{ \n    true\n}") or the source of the
         #  definition ("function f() { true; }")

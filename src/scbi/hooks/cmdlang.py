@@ -45,6 +45,7 @@ step does not stop it, unless chained with ``&&``.
 
 from __future__ import annotations
 
+import errno
 import glob as _glob
 import os
 import re
@@ -53,6 +54,7 @@ import subprocess
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
+from scbi.bashenv import quote
 from scbi.hooks import builtins as _builtins
 from scbi.hooks.context import HookContext
 from scbi.hooks.expand import ExpandError, expand
@@ -75,6 +77,11 @@ _ENV_WORD = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$", re.S)
 _HEADER = re.compile(r"^(if|elif)\s+(.+):$|^else\s*:$|^for\s+([A-Za-z_]\w*)\s+in\s+(.*):$|"
                      r"^(write|append|write-raw|append-raw)\s+(.+):$")
 _GLOB = re.compile(r"[*?\[]")
+
+
+def _xq(word: str) -> str:
+    """A word as Bash xtrace shows it (quoted only when needed)."""
+    return word if re.fullmatch(r"[\w@%+=:,./-]+", word) else quote(word)
 
 
 class CmdSyntaxError(Exception):
@@ -477,6 +484,9 @@ class Runner:
     config_options: Callable[[], list[str]] = list
     #  plug-in functions: name -> (params, body)
     functions: dict[str, tuple[tuple[str, ...], tuple]] = field(default_factory=dict)
+    #  called with a "_TRACE: ..." line for each command and assignment (as
+    #  Bash xtrace does)
+    trace: Callable[[str], None] | None = None
 
     # ------------------------------------------------------------ entry
 
@@ -633,6 +643,9 @@ class Runner:
             value = values[0] if len(values) == 1 else ("" if not values else values)
         if value is None:
             return
+        if self.trace is not None:
+            shown = " ".join(_xq(v) for v in value) if isinstance(value, list) else _xq(value)
+            self.trace(f"_TRACE: {step.name}={shown}")
         state.vars[step.name] = value
         if step.export:
             state.env[step.name] = " ".join(value) if isinstance(value, list) else value
@@ -700,7 +713,11 @@ class Runner:
             env[m.group(1)] = "".join(self.expand_words((first,), state, glob=False)) if \
                 _word_text(first) else ""
             words.pop(0)
-        return env, self.expand_words(words, state)
+        argv = self.expand_words(words, state)
+        if self.trace is not None:
+            self.trace("_TRACE: " + " ".join([f"{k}={_xq(v)}" for k, v in env.items()]
+                                             + [_xq(a) for a in argv]))
+        return env, argv
 
     def simple(self, cmd: Simple, state: State, line: int) -> int:
         env_extra, argv = self._argv(cmd, state)
@@ -896,8 +913,16 @@ class Runner:
                     popen_err = stderr
                 try:
                     #  argv[0] as written (as a shell does), the program found
-                    proc = subprocess.Popen(argv, executable=exe, cwd=state.cwd, env=env, stdin=stdin,
-                                            stdout=popen_out, stderr=popen_err)
+                    try:
+                        proc = subprocess.Popen(argv, executable=exe, cwd=state.cwd, env=env, stdin=stdin,
+                                                stdout=popen_out, stderr=popen_err)
+                    except OSError as e:
+                        if e.errno != errno.ENOEXEC:
+                            raise
+                        #  a script without #! line: run by the shell, as
+                        #  execvp and a shell do
+                        proc = subprocess.Popen(["/bin/sh", exe, *argv[1:]], cwd=state.cwd, env=env,
+                                                stdin=stdin, stdout=popen_out, stderr=popen_err)
                 except PermissionError:
                     state.err(f"{self.where}: line {line}: {argv[0]}: Permission denied\n")
                     status = 126

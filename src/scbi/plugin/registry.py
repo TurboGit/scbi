@@ -21,7 +21,7 @@ from pathlib import Path
 
 from scbi.plugin.catalog import ALL_HOOKS
 from scbi.plugin.legacy import Call, PluginTrace, trace_plugin
-from scbi.plugin.model import EnvOps, OsVariant, PluginDef, Shell, Values
+from scbi.plugin.model import EnvOps, OsVariant, PluginDef, Commands, Values
 
 ALL_HOOKS_RE = "|".join(ALL_HOOKS)
 
@@ -44,7 +44,7 @@ def os_variant_functions(plugin: str, variant: OsVariant) -> dict[str, object]:
     """Model equivalent of ``with-variant``: same names, model bodies."""
     vname = variant.name
     funcs: dict[str, object] = {}
-    nop_cmd, nop_val, nop_env = Shell("true"), Values(()), EnvOps(())
+    nop_cmd, nop_val, nop_env = Commands("true"), Values(()), EnvOps(())
     for h in ("config", "build", "install"):
         for s in (h, f"pre-{h}", f"post-{h}", f"cross-{h}", f"cross-pre-{h}", f"cross-post-{h}"):
             funcs[f"{plugin}-{vname}-{s}"] = nop_cmd
@@ -160,7 +160,7 @@ class Registry:
     tracer: Callable[[Path], PluginTrace] = trace_plugin
 
     #  function name -> Bash definition (legacy plug-in) or model object
-    #  (Shell, Values, EnvOps, Function) for YAML plug-ins
+    #  (Commands, Values, EnvOps, Function) for YAML plug-ins
     functions: dict[str, object] = field(default_factory=dict)
     variables: dict[str, str] = field(default_factory=dict)
     loaded: dict[str, str] = field(default_factory=dict)  # SCBI_LOADED[module]

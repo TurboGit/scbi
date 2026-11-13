@@ -23,7 +23,7 @@ EOF
 #sed -i 's/export SCBI_PLUGINS/#export SCBI_PLUGINS/' \
 #    .root/builds/libinh1/build/logs/env.cmd
 
-RUNS source .root/builds/libinh1/build/logs/build.cmd
+RUNS REPRODUCE .root/builds/libinh1/build/logs/build.cmd
 
 CLEAN-DIFF <<EOF
 cc    -c -o lib1.o lib1.c
@@ -33,7 +33,7 @@ cc    -c -o main.o main.c
 gcc -o main main.o -llib1
 EOF
 
-RUNS source .root/builds/libinh1/build/logs/tests.cmd
+RUNS REPRODUCE .root/builds/libinh1/build/logs/tests.cmd
 
 CLEAN-DIFF <<EOF
 main

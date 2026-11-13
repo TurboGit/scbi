@@ -9,8 +9,10 @@ in memory.
 
 Hook bodies:
 
-- :class:`Shell`   command hooks (config, build...) and custom functions:
-                   shell script, parameters bound by name from the catalog.
+- :class:`Commands` command hooks (config, build...): a body in the
+                   command language (scbi.hooks.cmdlang), parameters bound
+                   by name from the catalog; custom functions
+                   (:class:`Function`) use the same language.
 - :class:`Values`  value hooks (depends, vcs, patches...): one item per
                    output line, possibly guarded by a condition.
 - :class:`EnvOps`  env hooks: environment actions (add-to-var, set-var...).
@@ -34,8 +36,31 @@ class Guarded:
 
 
 @dataclass(frozen=True)
-class Shell:
+class Commands:
+    """A body in the command language; ``line``: its first line in the
+    plug-in file (for the messages, not compared)."""
+
     script: str
+    line: int = field(default=1, compare=False)
+
+    @property
+    def ast(self) -> tuple:
+        return _parse(self.script, self.line)
+
+    def is_nop(self) -> bool:
+        return self.script.strip() in ("", "true")
+
+
+def _parse(script: str, line: int) -> tuple:
+    from scbi.hooks.cmdlang import parse
+
+    key = (script, line)
+    if key not in _ASTS:
+        _ASTS[key] = parse(script, line)
+    return _ASTS[key]
+
+
+_ASTS: dict[tuple[str, int], tuple] = {}
 
 
 @dataclass(frozen=True)
@@ -102,6 +127,11 @@ class Function:
 
     params: tuple[str, ...]
     script: str
+    line: int = field(default=1, compare=False)
+
+    @property
+    def ast(self) -> tuple:
+        return _parse(self.script, self.line)
 
 
 @dataclass(frozen=True)
@@ -151,7 +181,7 @@ class PluginDef:
     #  name -> Function; names are full function names (may not start with
     #  the plug-in name)
     functions: dict[str, Function] = field(default_factory=dict)
-    hooks: dict[HookKey, Shell | Values | EnvOps] = field(default_factory=dict)
+    hooks: dict[HookKey, Commands | Values | EnvOps] = field(default_factory=dict)
 
     def function_names(self) -> set[str]:
         return {k.function_name(self.name) for k in self.hooks} | set(self.functions)

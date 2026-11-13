@@ -14,8 +14,8 @@ env:
 config: |
   echo config $PREFIX $TARGET $VARIANT $LINTOK_OPTS
 build: |
-  for f in a b; do
-      echo $f
-  done
+  OPTS = config-options
+  for f in a b:
+      echo $f $OPTS
 install: |
   echo install $PREFIX

@@ -19,7 +19,7 @@ from dataclasses import dataclass
 import yaml
 
 from scbi.plugin import catalog, yamlfmt
-from scbi.plugin.model import EnvOp, EnvOps, Guarded, Shell, Values
+from scbi.plugin.model import EnvOp, EnvOps, Guarded, Commands, Values
 
 ERROR = "error"
 WARNING = "warning"
@@ -62,6 +62,8 @@ _DECL = re.compile(r"(?:^|[\s;&|(])(?:local|export|declare|readonly|typeset)((?:
 _READ = re.compile(r"(?:^|[\s;&|(])read((?:\s+-[A-Za-z]+)*)\s+([A-Za-z_][A-Za-z0-9_ \t]*)")
 _FOR = re.compile(r"(?:^|[\s;&|(])(?:for|select)\s+([A-Za-z_][A-Za-z0-9_]*)\s+in\b")
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*")
+#  command language: VAR = value, export VAR = value
+_CMD_ASSIGN = re.compile(r"(?m)^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+=(?:\s|$)")
 
 
 def _strip_single_quotes(script: str) -> str:
@@ -108,9 +110,11 @@ def referenced(text: str) -> list[str]:
 
 
 def assigned(script: str) -> set[str]:
-    """Variables set by a shell script (assignments, local/export/declare,
-    read, for)."""
+    """Variables set by a body (command language: ``VAR = ...``, ``export
+    VAR = ...``, ``for NAME in ...:``, ``NAME=value`` words; and the shell
+    forms: local/export/declare, read)."""
     names = {m.group(1) for m in _ASSIGN.finditer(script)}
+    names.update(m.group(1) for m in _CMD_ASSIGN.finditer(script))
     for m in _DECL.finditer(script):
         for word in m.group(2).split():
             nm = _NAME.match(word)
@@ -252,7 +256,7 @@ class Linter:
     def check_body(self, hook: str, label: str, body) -> None:
         spec = catalog.spec(hook)
         known = set(spec.params)
-        if isinstance(body, Shell):
+        if isinstance(body, Commands):
             if not body.script.strip():
                 self.warning(label, "defined but empty")
                 return

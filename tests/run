@@ -8,6 +8,10 @@ function clean-up-osht-output()
     sed -i 's,^[0-9/]* [0-9:]* :,xxxx/xx/xx xx:xx:xx :,g;${/^$/d;};s/squid-cgi [0-9\.]*/squid-cgi v.vv/g;s,(....................),(xxxxxxxxxxxxxxxxxxxx),g' \
         ${OSHT_STDIO}
     sed -i "s,$PWD,<pwd>,g;s,$PWD2,<pwd>,g;" ${OSHT_STDIO}
+    #  how to reproduce a failing step: a Bash script (legacy hooks) or a
+    #  replay file (hooks in the command language)
+    sed -i -E 's,\(FAILED\) (bash|scbi replay) (.*\.cmd)$,(FAILED) <reproduce> \2,;s,\(FAILED\) use (bash -x|--trace) option for debug$,(FAILED) use <debug> option for debug,' \
+        ${OSHT_STDIO}
 }
 
 function no-osht-output-version()
@@ -169,8 +173,21 @@ function PLG-UPDATE()
             PYTHONPATH=$ROOTDIR/../src python3 -m scbi.convert \
                        --output-dir scripts.d scripts.d/$p > /dev/null 2>&1
     done
+    PYTHONPATH=$ROOTDIR/../src python3 -m scbi.convert --closure scripts.d > /dev/null 2>&1
     true
 }
+
+#  Run the reproduction file of a step: a Bash script (legacy hooks) or a
+#  replay file (hooks in the command language): REPRODUCE file
+function REPRODUCE()
+{
+    if [[ $(head -1 $1) == "# scbi replay "* ]]; then
+        ./scbi replay $1
+    else
+        source $1
+    fi
+}
+export -f REPRODUCE
 
 #  Change a plug-in without changing what it does (its YAML version too):
 #  PLG-TOUCH name
@@ -184,6 +201,8 @@ function PLG-TOUCH()
 if [[ $SCBI_PLUGIN_FORMAT == yaml ]]; then
     PYTHONPATH=$PWD/../src python3 -m scbi.convert --output-dir scripts.d \
               $(plugin-sources) > /dev/null 2>&1
+    #  a Bash plug-in does not inherit a YAML one
+    PYTHONPATH=$PWD/../src python3 -m scbi.convert --closure scripts.d > /dev/null 2>&1
 fi
 
 # patch rsync to use safe mode (checksum) as the tests repositories are small,

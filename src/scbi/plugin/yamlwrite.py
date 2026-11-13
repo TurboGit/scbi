@@ -237,7 +237,7 @@ class _Writer:
                     self.out.append(f"{prefix} {block[0]}{self.inline(path)}")
                     self.out.extend(block[1:])
                     return
-                quoted = yaml.dump(text, Dumper=yamlfmt._Dumper, default_style='"', width=100000)
+                quoted = yaml.dump(text, Dumper=yaml.SafeDumper, default_style='"', width=100000)
                 quoted = quoted[:-len("\n...\n")] if quoted.endswith("\n...\n") else quoted.rstrip("\n")
                 self.out.append(f"{prefix} {quoted}{self.inline(path)}")
                 return

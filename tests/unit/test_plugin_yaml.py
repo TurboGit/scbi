@@ -10,7 +10,7 @@ from scbi.plugin.catalog import spec, step_names
 from scbi.plugin.expr import ExprError, evaluate, parse
 from scbi.plugin.legacy import trace_plugin
 from scbi.plugin.lift import lift
-from scbi.plugin.model import EnvOp, EnvOps, Guarded, HookKey, Shell, Values
+from scbi.plugin.model import EnvOp, EnvOps, Guarded, HookKey, Commands, Values
 from scbi.plugin.registry import Registry
 from scbi.plugin.resolve import get_hook, variant_hooks
 
@@ -62,7 +62,7 @@ def test_load_yaml(tmp_path):
         Guarded("target =~ mingw32", (EnvOp("set-var", ("OS", "Windows_NT")),)),
     ))
     assert d.hooks[HookKey("config", "vcs", True)].script.endswith("--host=$TARGET")
-    assert d.hooks[HookKey("pre-config", "vcs")] == Shell("./.bootstrap")
+    assert d.hooks[HookKey("pre-config", "vcs")] == Commands("./.bootstrap")
     assert d.os_variants[0].packages == ("os@-gmp-dev:[v]",)
     assert d.function_names() >= {"c-gmp-config", "c-gmp-vcs-cross-config", "c-gmp-vcs-depends"}
 
@@ -72,7 +72,7 @@ def test_load_yaml(tmp_path):
     [
         ("plugin: other\n", "does not match"),
         ("nothook: x\n", "unknown hook"),
-        ("config: [a]\n", "shell script"),
+        ("config: [a]\n", "command language"),
         ("env: [frobnicate X]\n", "unknown environment action"),
         ("config: {common: x}\n", "only allowed for cumulative"),
         ("depends: [{if version(: x}]\n", "condition"),
@@ -362,3 +362,19 @@ def test_composite_not_equivalent_reported(tmp_path):
     reg.load_module("m")
     res = lift(reg.traces["m"], set(reg.functions))
     assert res.issues and "cannot be expressed" in res.issues[0].message
+
+
+def test_command_bodies_parsed_with_lines(tmp_path):
+    from scbi.plugin.model import Commands, HookKey
+
+    p = tmp_path / "p.yaml"
+    p.write_text("plugin: p\nconfig: ./configure\nbuild: |\n  make\n  if cross:\n    make cross\n"
+                 "functions:\n  f:\n    params: [A]\n    run: |\n      echo $A\n")
+    d = yamlfmt.load(p)
+    assert d.hooks[HookKey("build")] == Commands("make\nif cross:\n  make cross")
+    assert d.hooks[HookKey("build")].line == 4
+    assert d.hooks[HookKey("config")].line == 2
+    assert d.functions["f"].line == 11
+    p.write_text("plugin: p\nbuild: |\n  make\n  if cross\n    x\n")
+    with pytest.raises(yamlfmt.FormatError, match=r"build: line 4: .*':'"):
+        yamlfmt.load(p)

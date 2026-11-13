@@ -1921,7 +1921,10 @@ variables in the body; they are not declared in the plug-in.
 \begin{description}
 	\item[command hooks] (\code{setup}, \code{config}, \code{build},
 	\code{install}, \code{wrapup}, \code{tests}, \code{version}, \code{run}
-	and the \code{pre-}/\code{post-} steps): a shell script.
+	and the \code{pre-}/\code{post-} steps): a body in the command
+	language (\seeref{yaml-command-language}), run by the driver without
+	any shell. A syntax error is reported when the plug-in is loaded,
+	with the line in the file.
 	\item[value hooks] (\code{vcs}, \code{archive}, \code{depends},
 	\code{patches}, \code{config-options}, \code{prefix}, \code{out-of-tree}...):
 	a list of values, one per line of output (a single value can be given as a
@@ -2037,7 +2040,7 @@ error gives the plug-in file, the hook and the line.
 \code{\$PWD} is the current directory of the hook. \code{return N} and
 \code{exit N} give the status modulo 256 (\code{return -1} is 255).
 
-The plug-in converter (\code{python3 -m scbi.convert --commands=cmdlang})
+The plug-in converter (\code{python3 -m scbi.convert})
 translates the Bash command hooks to this language. It reports, instead
 of converting, the constructs which have no equivalent (\code{eval},
 \code{while}, nested functions, arithmetic, calls of runtime functions
@@ -2143,14 +2146,71 @@ driver) is taken from the environment variable \code{SCBI\_ARGV0} when set
 	\file{\$SCBI\_BDIR/.cache/plan-<signature>.json}, a different file than
 	the Bash driver one: both drivers can use the same build directory.
 	\item Functions exported in the environment (\code{export -f}) are
-	available to the hooks.
+	available to the hooks of Bash plug-ins.
+	\item The steps are run by the driver: the generic steps of the runtime
+	(\code{module-setup}, \code{module-install}...) and the step wrapper
+	(messages, logs) are ported to Python. When one of them is redefined
+	(or a command they use), the Bash functions are used instead.
+	\item The command hooks of YAML plug-ins are run by the driver
+	(\seeref{yaml-command-language}), with the hook environment described
+	below. A Bash plug-in cannot inherit a YAML plug-in (its hooks would be
+	called from Bash).
 \end{itemize}
+
+\subsection{Hook environment}
+\index{environment!hook}
+
+A command hook of a YAML plug-in runs with an environment built for that
+call only, and discarded after it: nothing accumulates between hooks or
+modules. It contains:
+
+\begin{itemize}
+	\item from the user's environment only \code{PATH}, \code{HOME},
+	\code{USER}, \code{LOGNAME}, \code{SHELL}, \code{TERM}, \code{TMPDIR},
+	\code{DISPLAY}, \code{LANG}, \code{LANGUAGE}, \code{LC\_*} and the
+	proxy variables (\code{http\_proxy}, \code{https\_proxy},
+	\code{ftp\_proxy}, \code{no\_proxy} and their upper-case forms);
+	\item every exported variable set or changed by the driver: the
+	\code{SCBI\_*} variables, the settings of the environment files and
+	the environment of the module (the \code{env} hooks of its
+	dependencies, its \code{build-env} or \code{tests-env}).
+\end{itemize}
+
+The plug-in variables (\code{vars}) and the hook parameters are
+variables of the body, not environment variables (use \code{export VAR =
+...} to give one to the commands).
+
+\subsection{Reproducing a step}
+\index{replay}
+
+For a command hook of a YAML plug-in the file
+\file{\$TVDIR/logs/<step>.cmd} is a replay file (YAML): the directory,
+the environment, the parameters, the plug-in variables, the
+config-options and the body of the hook (\code{run}, which can be edited)
+with the plug-in functions it may call. When a step fails the driver
+displays:
+
+\begin{footnotesize}
+	\begin{verbatim}
+2026/11/13 13:23:30 : h-handson-lib (FAILED) to reproduce:
+2026/11/13 13:23:30 : h-handson-lib (FAILED) scbi replay /<...>/logs/build.cmd
+2026/11/13 13:23:30 : h-handson-lib (FAILED) use --trace option for debug
+    \end{verbatim}
+\end{footnotesize}
+
+\cmd{scbi replay [\ddash{}trace] <step>.cmd}
+
+reruns the hook; \ddash{}trace displays each command (and assignment)
+before running it, as \code{bash -x} does. The step logs contain the same
+trace (lines starting with \code{\_TRACE:}) unless
+\code{SCBI\_DLOG=yes}.
 
 \subsection{Sub-commands}
 
 The sub-commands are implemented by the Python driver. \code{show},
 \code{shell}, \code{store} and \code{source-archive} have the same options
-and output as with the Bash driver. \code{lint} and \code{format} work on
+and output as with the Bash driver. \code{replay} reruns a step of a YAML
+plug-in (see above). \code{lint} and \code{format} work on
 YAML plug-ins only (\seeref{linter}, \seeref{formatter}). Setting
 \code{SCBI\_BASH\_TOOLS=yes} runs the \file{scbi-<sub-command>} scripts
 installed next to the driver instead (e.g. to compare both, or to check

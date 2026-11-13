@@ -14,4 +14,8 @@ TOOLS = {
     "source-archive": "scbi.tools.source_archive",
     "lint": "scbi.tools.lint",
     "format": "scbi.tools.format",
+    "replay": "scbi.tools.replay",
 }
+
+#  sub-commands without a Bash script (scbi-<sub-command>)
+PYTHON_ONLY = ("replay",)

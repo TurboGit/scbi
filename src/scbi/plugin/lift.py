@@ -29,7 +29,7 @@ from scbi.plugin.model import (
     Inherit,
     OsVariant,
     PluginDef,
-    Shell,
+    Commands,
     Values,
 )
 from scbi.plugin.registry import parse_inherit_args
@@ -379,18 +379,14 @@ def lift_env(lines: list[str]) -> EnvOps:
     return EnvOps(ops)
 
 
-def _script(lines: list[str]) -> str:
-    return "\n".join(lines).rstrip()
-
-
 # ------------------------------------------------------------------ main
 
 
-def lift(trace: PluginTrace, names: set[str] | None = None, cmdlang: bool = False) -> LiftResult:
+def lift(trace: PluginTrace, names: set[str] | None = None) -> LiftResult:
     """Lift ``trace``; ``names`` is the namespace after loading the plug-in
-    (inherited hooks included) used to check variant compositions;
-    ``cmdlang``: command hooks and functions converted to the command
-    language (scbi.plugin.liftcmd), otherwise kept as shell scripts."""
+    (inherited hooks included) used to check variant compositions. Command
+    hooks and functions are converted to the command language
+    (scbi.plugin.liftcmd)."""
     plugin = trace.name
     pdef = PluginDef(plugin, variables=dict(trace.variables))
     res = LiftResult(pdef)
@@ -450,10 +446,7 @@ def lift(trace: PluginTrace, names: set[str] | None = None, cmdlang: bool = Fals
                 for pos, (_, n) in enumerate(params):
                     if n != pos + 1:
                         raise _Unliftable(f"parameters not in order: {params}")
-                if cmdlang:
-                    script = _lift_cmd(rest, {n: p for p, n in params})
-                else:
-                    script = _script(rest)
+                script = _lift_cmd(rest, {n: p for p, n in params})
                 pdef.functions[name] = Function(tuple(p for p, _ in params), script)
                 continue
 
@@ -465,10 +458,7 @@ def lift(trace: PluginTrace, names: set[str] | None = None, cmdlang: bool = Fals
                         f"({' '.join(spec.params) or 'no parameter'})"
                     )
             if spec.kind == COMMAND:
-                if cmdlang:
-                    pdef.hooks[key] = Shell(_lift_cmd(rest, {i + 1: p for i, p in enumerate(spec.params)}))
-                else:
-                    pdef.hooks[key] = Shell(_script(rest))
+                pdef.hooks[key] = Commands(_lift_cmd(rest, {i + 1: p for i, p in enumerate(spec.params)}))
             elif spec.kind == VALUE:
                 pdef.hooks[key] = lift_values(rest)
             else:

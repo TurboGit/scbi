@@ -68,7 +68,7 @@ def test_fixture_comments_and_order():
 @pytest.mark.parametrize("text", [
     "plugin: p\nbuild: |\n  a\n\n  b\n",                   # blank line in a block
     "build: |-\n  no final newline\n",
-    "build: \"  leading blank\\nx\\n\"\n",                  # not a literal block
+    "vars: {A: \"  leading blank\\nx\\n\"}\n",              # not a literal block
     "build: \"trailing  \\nx\\n\"\n",
     "vars: {A: '', B: '*x', C: 'a: b', D: '# x'}\n",
     "env: [{'if on debian': [set-var A b, set-var C d]}]\n",

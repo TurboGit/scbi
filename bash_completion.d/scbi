@@ -284,8 +284,21 @@ _scbi()
             store)
                 _SCBI_MODE=str
                 ;;
+            replay)
+                _SCBI_MODE=rpl
+                ;;
         esac
     done
+
+    #  scbi replay: the replay files (<step>.cmd)
+    if [[ ${_SCBI_MODE} == rpl ]]; then
+        if [[ $cur == -* ]]; then
+            COMPREPLY=( $(compgen -W "--trace --help" -- "$cur") )
+        else
+            COMPREPLY=( $(compgen -f -X '!*.cmd' -- "$cur") $(compgen -d -- "$cur") )
+        fi
+        return 0
+    fi
 
     case "$cur" in
         --ini=*)
@@ -375,7 +388,7 @@ _scbi()
                     return 0
                     ;;
                 *)
-                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*) source-archive lint format shell show store"
+                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*) source-archive lint format shell show store replay"
                     ;;
             esac
     esac

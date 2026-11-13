@@ -61,11 +61,11 @@ config-options:
   common: [--prefix=$PREFIX]
   fast: [-O3]
 config: |
-  local OPTIONS=()
-  get-config-options OPTIONS $PREFIX $TARGET $VARIANT
-  echo configure "${OPTIONS[@]}" for $VARIANT
+  OPTIONS = config-options
+  echo configure $OPTIONS for $VARIANT
   helper one two
-  echo version $(get-version)
+  V = get-version
+  echo version $V
 build: exit 3
 functions:
   helper:
@@ -84,19 +84,32 @@ def ctx_for(module, variant="default", hook="config", **kw) -> HookContext:
 
 
 def test_run_yaml_command_hook(runtime, tmp_path):
+    """A YAML command hook is run by the interpreter; in a hook shell it is
+    only a stub (never Bash)."""
+    from scbi.hooks.cmdlang import Runner, State
+    from scbi.hooks.evaluate import eval_values
+
     (tmp_path / "y.yaml").write_text(YAML_PLUGIN)
     reg = Registry(tmp_path)
     assert reg.load_module("y")
     shell = HookShell(runtime, reg.functions, BASE_ENV)
-    #  y handled as a dependency of top (with only y, get-version reads
-    #  SCBI_MODULES_LIST[-2] and Bash reports a bad array subscript)
+    #  y handled as a dependency of top (get-version reads the module before
+    #  the last one of the modules list)
     c = ctx_for("y", "fast", cwd=tmp_path, modules_list=["top", "y"])
     res = shell.run(c, "y-config", ["/opt/y", HOST, "fast"])
-    assert res.returncode == 0, res.output
-    assert res.output.split("\n") == [
-        "configure --prefix=/opt/y -O3 for fast", "helper two one", "version 1.4"]
-    lines = []
-    assert shell.run(c, "y-build", ["/opt/y", HOST, "fast"], on_line=lines.append).returncode == 3
+    assert (res.returncode, res.output) == (1, "y-config: command language body called from Bash")
+    c.params = {"PREFIX": "/opt/y", "TARGET": HOST, "VARIANT": "fast"}
+    options = eval_values(reg.functions["y-common-config-options"], c) + \
+        eval_values(reg.functions["y-fast-config-options"], c)
+    helper = reg.functions["helper"]
+    out: list[str] = []
+    runner = Runner(c, "y.yaml: config", config_options=lambda: options,
+                    functions={"helper": (helper.params, helper.ast)})
+    state = State({}, dict(BASE_ENV), str(tmp_path), out.append, out.append)
+    assert runner.run(reg.functions["y-config"].ast, state) == 0
+    assert "".join(out).split("\n") == [
+        "configure --prefix=/opt/y -O3 for fast", "helper two one", "version 1.4", ""]
+    assert runner.run(reg.functions["y-build"].ast, state) == 3
 
 
 def test_env_file_function(runtime, tmp_path):

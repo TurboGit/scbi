@@ -914,7 +914,9 @@ class Driver:
         from scbi.hooks.exec import run_interactive
         from scbi.tools import TOOLS
 
-        if subcmd in TOOLS and self.environ.get("SCBI_BASH_TOOLS") != "yes":
+        from scbi.tools import PYTHON_ONLY
+
+        if subcmd in TOOLS and (self.environ.get("SCBI_BASH_TOOLS") != "yes" or subcmd in PYTHON_ONLY):
             sys.stdout.flush()
             res = importlib.import_module(TOOLS[subcmd]).main(self, self.scbiopts + self.modules)
             if res is not None:
@@ -970,7 +972,9 @@ class Driver:
         self.modules += self.ini_modules
 
         subcmd = self.ini_subcmd or (self.modules[0] if self.modules else "")
-        has_subcmd = bool(subcmd) and self.which(f"scbi-{subcmd}") is not None
+        from scbi.tools import PYTHON_ONLY
+
+        has_subcmd = bool(subcmd) and (self.which(f"scbi-{subcmd}") is not None or subcmd in PYTHON_ONLY)
         if has_subcmd:
             self.set("DO_SUBCMD", "yes", export=True)
             if not self.ini_subcmd:

@@ -55,7 +55,7 @@ from scbi.plugin.model import (
     Inherit,
     OsVariant,
     PluginDef,
-    Shell,
+    Commands,
     Values,
 )
 
@@ -183,12 +183,38 @@ def _env_item(item, where: str):
     return EnvOp(verb, tuple(parts))
 
 
+#  where -> line of the scalar in the file (1-based, first line of the
+#  content for a block scalar), for the messages of command bodies
+_LINES: dict[str, int] = {}
+
+
+def _scalar_lines(node, where: str, out: dict[str, int]) -> None:
+    if isinstance(node, yaml.MappingNode):
+        for k, v in node.value:
+            _scalar_lines(v, f"{where}.{k.value}", out)
+    elif isinstance(node, yaml.ScalarNode):
+        out[where] = node.start_mark.line + (2 if node.style in ("|", ">") else 1)
+
+
+def _commands(text, where: str, cls=Commands, *args):
+    """A body of the command language, parsed (syntax errors are load
+    errors)."""
+    from scbi.hooks.cmdlang import CmdSyntaxError
+
+    if not isinstance(text, str):
+        raise _err(where, "a body in the command language (string) is expected")
+    obj = cls(*args, text.rstrip("\n"), _LINES.get(where, 1))
+    try:
+        obj.ast
+    except CmdSyntaxError as e:
+        raise _err(where, str(e)) from None
+    return obj
+
+
 def _body(hook: str, value, where: str):
     kind = catalog.spec(hook).kind
     if kind == COMMAND:
-        if not isinstance(value, str):
-            raise _err(where, "a shell script (string) is expected")
-        return Shell(value.rstrip("\n"))
+        return _commands(value, where)
     if kind == VALUE:
         if isinstance(value, dict) and hook in RECORDS and set(value) <= set(RECORDS[hook]):
             fields = RECORDS[hook]
@@ -232,12 +258,20 @@ def load(path: Path) -> PluginDef:
     path = Path(path)
     name = path.name[: -len(".yaml")] if path.name.endswith(".yaml") else path.name
     try:
-        data = yaml.load(path.read_text(), Loader=_Loader) or {}
+        text = path.read_text()
+        data = yaml.load(text, Loader=_Loader) or {}
+        node = yaml.compose(text, Loader=_Loader)
     except yaml.YAMLError as e:
         raise FormatError(f"{path}: {e}") from None
     if not isinstance(data, dict):
         raise FormatError(f"{path}: a mapping is expected")
-    return from_data(name, data, str(path))
+    _LINES.clear()
+    if node is not None:
+        _scalar_lines(node, str(path), _LINES)
+    try:
+        return from_data(name, data, str(path))
+    finally:
+        _LINES.clear()
 
 
 def from_data(name: str, data: dict, where: str = "") -> PluginDef:
@@ -285,10 +319,10 @@ def from_data(name: str, data: dict, where: str = "") -> PluginDef:
     for fname, f in (data.get("functions") or {}).items():
         w = f"{where}.functions.{fname}"
         if isinstance(f, str):
+            _LINES.setdefault(f"{w}.run", _LINES.get(w, 1))
             f = {"run": f}
-        pdef.functions[str(fname)] = Function(
-            tuple(_as_list(f.get("params"), w)), str(f.get("run", "")).rstrip("\n")
-        )
+        pdef.functions[str(fname)] = _commands(str(f.get("run", "")), f"{w}.run", Function,
+                                               tuple(_as_list(f.get("params"), w)))
 
     names = set(catalog.step_names())
     for key, value in data.items():
@@ -317,7 +351,7 @@ def _dump_items(items) -> list:
 
 
 def _dump_body(hook: str, body):
-    if isinstance(body, Shell):
+    if isinstance(body, Commands):
         return body.script
     if isinstance(body, EnvOps):
         return _dump_items(body.ops)

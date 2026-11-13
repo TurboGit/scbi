@@ -28,12 +28,13 @@ from scbi.errors import Exit, NotImplementedYet
 from scbi.hooks.context import HookContext
 from scbi.hooks.exec import HookShell, env_code, is_nop, run_code
 from scbi.hooks.policy import is_reference
-from scbi.plugin.model import Shell
+from scbi.plugin.model import Commands
 from scbi.plugin.resolve import get_hook
 from scbi.sources import handle as sources
 from scbi.sources.buildid import build_id
 from scbi.sources.data import archive_exists, vcs_data
 from scbi.steps import generic as generic_steps
+from scbi.steps import interp
 from scbi.steps import wrapper as step_wrapper
 from scbi.vercmp import VERSION_ERROR, VERSION_OK, check_versions, get_version_number
 
@@ -138,6 +139,18 @@ class Builder:
         run_code(self.shell(), ctx, code + " 2>/dev/null", lines.append)
         return "\n".join(lines).rstrip("\n")
 
+    def module_env(self, module: str, variant: str, code: str) -> ShellVars:
+        """The driver variables after running ``code`` (e.g. the
+        environment setup of a module) on a copy: the driver is not
+        changed (a sub-shell in Bash)."""
+        sv = self.d.sv
+        copy_sv = ShellVars(dict(sv.values), set(sv.exported), dict(sv.functions))
+        ctx = self.ctx(module, variant)
+        ctx.env = Environment(copy_sv)
+        lines: list[str] = []
+        env_code(self.shell(), ctx, code + " 2>/dev/null", ["SCBI_MODULES_DIR"], lines.append)
+        return ctx.env.vars
+
     def ported(self, name: str) -> bool:
         """The Python port of the runtime function ``name`` may be used:
         it is not redefined by the user (scbi.hooks.policy)."""
@@ -233,12 +246,20 @@ class Builder:
             tdir = tempfile.mkdtemp()
             cwd = os.getcwd()
             os.chdir(tdir)
+            setup = (f"handle-build-depends-env @root {quote(modref)}\n"
+                     f"handle-module-env @root {quote(modref)} env\n"
+                     f"handle-module-env @root {quote(modref)} build-env\n")
             try:
-                mver = self.capture(module, variant, (
-                    f"handle-build-depends-env @root {quote(modref)}\n"
-                    f"handle-module-env @root {quote(modref)} env\n"
-                    f"handle-module-env @root {quote(modref)} build-env\n"
-                    f"{fct} \"$SCBI_PREFIX\" \"$SCBI_TARGET\" {quote(variant)}"))
+                if interp.is_commands(self, fct):
+                    sv = self.module_env(module, variant, setup)
+                    chunks: list[str] = []
+                    interp.Hook(self, module, variant, fct,
+                                [self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), variant], tdir, sv).run(
+                        chunks.append, err=lambda text: None)
+                    mver = "".join(chunks).rstrip("\n")
+                else:
+                    mver = self.capture(module, variant, (
+                        f"{setup}{fct} \"$SCBI_PREFIX\" \"$SCBI_TARGET\" {quote(variant)}"))
             finally:
                 os.chdir(cwd)
                 shutil.rmtree(tdir, ignore_errors=True)
@@ -876,7 +897,7 @@ class Builder:
                             shutil.copy(f"{cached_dir}/source-id", f"{bdir}/{module}")
                             msg = "trigger: copy from cache"
                             d.set("SCBI_IS_FROM_CACHE", "yes")
-                            d.registry.functions[f"{module}-cached"] = Shell("true")
+                            d.registry.functions[f"{module}-cached"] = Commands("true")
                         else:
                             Path(cache, cbdir).unlink(missing_ok=True)
             elif cbdir:

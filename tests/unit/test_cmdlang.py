@@ -211,3 +211,16 @@ check-versions 1.2 ">" 1.9 || echo le
 """
     status, out, _ = run(tmp_path, text)
     assert out == "<a><b>gt\nle\n"
+
+
+def test_trace_and_script_without_shebang(tmp_path):
+    script = tmp_path / "configure"
+    script.write_text("echo configured $1\n")
+    script.chmod(0o755)
+    lines = []
+    out = []
+    state = State({}, {"PATH": os.environ["PATH"], "HOME": str(tmp_path)}, str(tmp_path), out.append, out.append)
+    runner = make(tmp_path, trace=lines.append)
+    status = runner.run(parse("X = a 'b c'\nA=1 ./configure --prefix=$PREFIX"), state)
+    assert status == 0 and "".join(out) == "configured --prefix=/p\n"
+    assert lines == ["_TRACE: X=a 'b c'", "_TRACE: A=1 ./configure --prefix=/p"]
