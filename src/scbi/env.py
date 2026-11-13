@@ -71,6 +71,25 @@ def _remove_from_list(items: list[str], value: str) -> list[str]:
     return [e for e in items if not _match(e, value)]
 
 
+#  define_var(env, action, name, value) of the Python environment file
+#  (scbi.envpy), set by the driver
+USER_DEFINE_VAR: Callable | None = None
+
+
+class _UserEnv:
+    """The ``env`` given to the user's ``define_var``."""
+
+    def __init__(self, environment: "Environment"):
+        self._e = environment
+
+    def apply(self, action: str, name: str, value: str = "") -> None:
+        """The default action (``define-var ACTION NAME VALUE``)."""
+        self._e._define_var(action, name, value)
+
+    def get(self, name: str) -> str:
+        return self._e.get(name)
+
+
 @dataclass
 class Environment:
     """Shell variables of a module build (``ShellVars``) and the helpers."""
@@ -78,6 +97,8 @@ class Environment:
     vars: ShellVars = field(default_factory=ShellVars)
     #  SCBI_ENV_MODULE: file recording the define-var calls (env.cmd)
     record: Path | None = None
+    #  in the user's define_var (env.apply calls the default action)
+    _in_user: bool = field(default=False, repr=False, compare=False)
     windows: bool = False
     #  cygpath -u for Windows paths
     cygpath: Callable[[str], str] = lambda p: p
@@ -102,7 +123,19 @@ class Environment:
     # ------------------------------------------------------------ define-var
 
     def define_var(self, action: str, var: str, value: str = "") -> None:
-        """Port of ``define-var ACTION VAR VALUE``."""
+        """Port of ``define-var ACTION VAR VALUE``; with a ``define_var`` in
+        the Python environment file, that function is called instead (it
+        may apply the action with ``env.apply``)."""
+        if USER_DEFINE_VAR is not None and not self._in_user:
+            self._in_user = True
+            try:
+                USER_DEFINE_VAR(_UserEnv(self), action, var, value)
+            finally:
+                self._in_user = False
+            return
+        self._define_var(action, var, value)
+
+    def _define_var(self, action: str, var: str, value: str = "") -> None:
         sep = ";" if self.windows else ":"
 
         #  If adding to PATH, do so only if VALUE exists

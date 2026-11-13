@@ -12,33 +12,10 @@ xxxx/xx/xx xx:xx:xx : error: cannot get sources from /this.is.path/some/dir
 xxxx/xx/xx xx:xx:xx : error: see <pwd>/.root/builds/.logs//x86_64-linux-gnu-checkvcs-default-report.log
 EOF
 
-function scbi-rewrite-vcs()
-{
-    local PROXY="$1"
-    local OPTIONS="$2"
-    local VCS="$3"
-    local URL="$4"
-    local DIR="$5"
-
-    # rewrite URL
-    FROM="/this.is.path"
-    URL=${URL/$FROM/$TESTREPOS}
-
-    # rewrite dir/path
-    FROM_DIR="some/dir"
-    TO_DIR="lib1.bundle"
-    URL=${URL/$FROM_DIR/$TO_DIR}
-
-    echo "$PROXY"
-    echo "$OPTIONS"
-    echo "$VCS"
-    echo "$URL"
-    echo "$DIR"
-}
-export -f scbi-rewrite-vcs
+#  the vcs records are rewritten by the environment (.env-rewrite)
 
 # ========= should be ok
-RUNS ./scbi --setup --tests:only checkvcs
+RUNS ./scbi --env=rewrite --setup --tests:only checkvcs
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building checkvcs [default] (master)

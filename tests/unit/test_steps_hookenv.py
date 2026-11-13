@@ -17,3 +17,8 @@ def test_hook_environment():
 def test_path_changed_is_kept():
     env = hook_environment({"PATH": "/x:/usr/bin"}, {"PATH": "/usr/bin"})
     assert env == {"PATH": "/x:/usr/bin"}
+
+
+def test_passthrough():
+    initial = {"PATH": "/usr/bin", "CC": "clang", "EDITOR": "vi"}
+    assert hook_environment(initial, initial, ("CC",)) == {"PATH": "/usr/bin", "CC": "clang"}

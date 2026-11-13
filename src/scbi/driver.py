@@ -23,10 +23,11 @@ import tempfile
 import time
 from pathlib import Path
 
+from scbi import env as env_mod
+from scbi import envpy
 from scbi.bashcompat import assoc_keys, read_fields, read_lines, words
-from scbi.bashenv import BashEvalError, ShellVars, eval_echo, quote
+from scbi.bashenv import ShellVars, eval_echo, quote
 from scbi.discriminants import forced_discriminants, probe_host, setup_discriminants
-from scbi.envfile import EnvNotFound, load_module_env
 from scbi.errors import Exit, NotImplementedYet
 from scbi.hooks.runtime import Runtime, load_runtime
 from scbi.ini import IniDB
@@ -127,6 +128,8 @@ class Driver:
         self.ini_modules: list[str] = []
         self.ini_options: list[str] = []
         self.ini_subcmd = ""
+        #  the Python environment file (settings and hooks)
+        self.envfile = envpy.EnvFile()
         self.plan = PlanState()
         self.runtime: Runtime | None = None
         self.discriminants: list[str] = []
@@ -687,17 +690,19 @@ class Driver:
             self.echo(f"{self.argv0}: cannot find module definition files")
             raise Exit(1)
 
-        #  the environment file (ENV_NAME as given, see load-module-env)
+        #  the environment file (ENV_NAME as given, see load-module-env): a
+        #  Python file (scbi.envpy)
         try:
-            self.sv = load_module_env(
-                self.get("ENV_NAME"), self.sv, Path.cwd(), Path(self.get("HOME") or "/"),
-                Path(self.get("SCBI_PLUGINS")), self.base_env())
-        except EnvNotFound as e:
+            self.envfile = envpy.load(self.get("ENV_NAME"), Path.cwd(), Path(self.get("HOME") or "/"),
+                                      Path(self.get("SCBI_PLUGINS")), self.get)
+        except envpy.EnvFileError as e:
             self.echo(str(e))
             raise Exit(1) from None
-        except BashEvalError as e:
-            sys.stdout.write(e.output)
-            raise Exit(e.returncode) from None
+        if self.envfile.path is not None:
+            self.set("SCBI_ENV_DIR", str(self.envfile.path.parent), export=True)
+        for name, value in self.envfile.settings.items():
+            self.set(name, value, export=True)
+        env_mod.USER_DEFINE_VAR = self.envfile.hook("define_var")
 
         if self.cmdline.get("SCBI_BDIR"):
             self.set("SCBI_BDIR", self.cmdline["SCBI_BDIR"])
@@ -1020,7 +1025,39 @@ class Driver:
         if self.get("DO_STANDALONE") == "yes":
             mods = " ".join(quote(m) for m in self.modules)
             self.driver_run(f"SCBI_MODULES=({mods})\ncreate-standalone-package")
+            self.standalone_env_file()
         return 0
+
+    def standalone_env_file(self) -> None:
+        """The Python version of the environment of a standalone package
+        (.scbi-env-std, written by create-standalone-package) added to the
+        archive: the package is built with this driver."""
+        import io
+        import tarfile
+
+        tmp = self.get("SCBI_TMP") or "/tmp"
+        name = f"sa-{os.path.basename(self.get('SCBI_BDIR'))}"
+        archive = Path(tmp, f"{name}.tgz")
+        if not archive.is_file():
+            return
+        text = ('"""Environment of the standalone package."""\n\nimport os\n\n'
+                "SCBI_ROOT = os.getcwd()\n"
+                'SCBI_BDIR = SCBI_ROOT + "/builds"\n'
+                'SCBI_PREFIX = SCBI_BDIR + "/install"\n'
+                'SCBI_ARCHIVES = SCBI_BDIR + "/.archives"\n'
+                'SCBI_PATCH = SCBI_BDIR + "/.patches"\n'
+                'SCBI_LOGS = SCBI_BDIR + "/.logs"\n'
+                f"SCBI_PLAN = {self.get('SCBI_PLAN')!r}\n").encode()
+        with tarfile.open(archive, "r:gz") as t:
+            members = [(m, t.extractfile(m).read() if m.isfile() else None) for m in t.getmembers()]
+        with tarfile.open(archive, "w:gz") as t:
+            for m, data in members:
+                t.addfile(m, io.BytesIO(data) if data is not None else None)
+            info = tarfile.TarInfo(f"{name}/.scbi-env-std.py")
+            info.size = len(text)
+            info.mode = 0o644
+            info.mtime = int(time.time())
+            t.addfile(info, io.BytesIO(text))
 
     def clean_up(self) -> None:
         for v in ("SCBI_HANDLED", "SCBI_LINE_SEP"):

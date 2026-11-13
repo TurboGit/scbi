@@ -80,8 +80,12 @@ def command_env(builder, module: str, variant: str, proxy: str) -> dict[str, str
     from scbi.hooks.exec import env_code
 
     ctx = builder.ctx(module, variant)
-    if proxy and builder.fn_exists(f"proxy-{proxy}"):
+    hook = builder.d.envfile.hook("proxy")
+    if proxy and hook is None and builder.fn_exists(f"proxy-{proxy}"):
         env_code(builder.shell(), ctx, f"proxy-{proxy}", [], builder.out)
     env = dict(builder.d.base_env())
     env.update(ctx.env.environ())
+    if proxy and hook is not None:
+        #  proxy(name, env) of the Python environment file
+        hook(proxy, env)
     return env

@@ -77,7 +77,7 @@ class Hook:
         return funcs
 
     def environment(self) -> dict[str, str]:
-        return hook_environment(self.sv.environ(), self.d.environ)
+        return hook_environment(self.sv.environ(), self.d.environ, self.d.envfile.passthrough)
 
     def where(self) -> str:
         path = self.d.registry.plugin_file(self.plugin)

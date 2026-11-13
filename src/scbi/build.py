@@ -35,6 +35,7 @@ from scbi.sources.buildid import build_id
 from scbi.sources.data import archive_exists, vcs_data
 from scbi.steps import generic as generic_steps
 from scbi.steps import interp
+from scbi.steps.final import FinalStep
 from scbi.steps import wrapper as step_wrapper
 from scbi.vercmp import VERSION_ERROR, VERSION_OK, check_versions, get_version_number
 
@@ -138,6 +139,24 @@ class Builder:
         lines: list[str] = []
         run_code(self.shell(), ctx, code + " 2>/dev/null", lines.append)
         return "\n".join(lines).rstrip("\n")
+
+    def final_step(self, hook, ctx) -> None:
+        """``module_final_step(ctx)`` of the Python environment file (an
+        error in it is reported, the build goes on as with Bash)."""
+        sys.stdout.flush()
+        try:
+            hook(ctx)
+        except Exception as e:  # noqa: BLE001 - the user's code
+            self.elog(ctx.module, "module_final_step:", f"{type(e).__name__}:", str(e))
+        sys.stdout.flush()
+
+    def capture_raw(self, module: str, variant: str, code: str) -> str:
+        """The standard output of driver code, as is."""
+        from scbi.hooks.exec import run_code
+
+        lines: list[str] = []
+        run_code(self.shell(), self.ctx(module, variant), code, lines.append)
+        return "\n".join(lines)
 
     def module_env(self, module: str, variant: str, code: str) -> ShellVars:
         """The driver variables after running ``code`` (e.g. the
@@ -695,7 +714,14 @@ class Builder:
         if agg_mode != "no" and do_agg_prefix:
             ok, idir = self.handle_prefix(meta, variant, ref, log)
 
-        if self.fn_exists("module-final-step"):
+        final = self.d.envfile.hook("module_final_step")
+        if final is not None:
+            mmode = "aggregate" if agg_mode != "no" else "yes"
+            self.ilog(meta, "final", "step", "starting", tee=log)
+            self.final_step(final, FinalStep(self, f"{tvmdir}/install", self.get("SCBI_TARGET"), variant, meta,
+                                             formodule, meta, depends_kind, mmode, is_aggregated, is_utd))
+            self.ilog(meta, "final", "step", "completed", tee=log)
+        elif self.fn_exists("module-final-step"):
             mmode = "aggregate" if agg_mode != "no" else "yes"
             self.ilog(meta, "final", "step", "starting", tee=log)
             self.run(meta, variant, (
@@ -1003,7 +1029,13 @@ class Builder:
                 self.elog(module, "generic", "module", f"post-{step}", "failed", "with", "error", str(res))
                 return res, is_uptodate
 
-        if self.fn_exists("module-final-step"):
+        final = self.d.envfile.hook("module_final_step")
+        if final is not None:
+            self.ilog(module, "final", "step", "starting", tee=log)
+            self.final_step(final, FinalStep(self, f"{tvdir}/install", self.get("SCBI_TARGET"), variant, module,
+                                             formodule, modref, depends_kind, "no", is_aggregated, is_uptodate))
+            self.ilog(module, "final", "step", "completed", tee=log)
+        elif self.fn_exists("module-final-step"):
             self.ilog(module, "final", "step", "starting", tee=log)
             for name, value in (("FORMODULE", formodule), ("MODREF", modref), ("module", module),
                                 ("variant", variant)):

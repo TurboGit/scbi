@@ -2120,10 +2120,9 @@ driver) is taken from the environment variable \code{SCBI\_ARGV0} when set
 
 \begin{itemize}
 	\item The runtime files (\file{\$SCBI\_PLUGINS/[0-9]*} and
-	\file{\$SCBI\_PLUGINS/\_os\_<os>}), the environment files and the user's
-	functions they define (\code{module-final-step}, \code{scbi-rewrite-vcs},
-	a redefined \code{define-var}...) are used as with the Bash driver: they
-	are Bash code, evaluated once when the driver starts.
+	\file{\$SCBI\_PLUGINS/\_os\_<os>}) are Bash code, evaluated once when
+	the driver starts (for the Bash plug-ins).
+	\item The environment files are Python files (\seeref{python-env-files}).
 	\item Each hook runs in its own Bash process with the runtime functions,
 	the environment of the module and the plug-ins. Bash plug-ins are
 	sourced as with the Bash driver (an error refers to the plug-in file
@@ -2157,6 +2156,71 @@ driver) is taken from the environment variable \code{SCBI\_ARGV0} when set
 	called from Bash).
 \end{itemize}
 
+\subsection{Environment files}
+\label{python-env-files}
+\index{environment!file}
+
+The environment files of the Python driver are Python files, searched as
+the Bash ones (\seeref{cmdline}) with a \file{.py} suffix:
+\file{\$PWD/.scbi-env.py}, \file{\$PWD/../.scbi-env.py},
+\file{\$HOME/.scbi-env.py}, then \file{\$SCBI\_PLUGINS/.env.py}
+(\file{env-<name>} for \code{\ddash{}env=<name>}). A Bash environment file
+without its Python version is an error. The settings of a Bash file are
+converted with:
+
+\cmd{python3 -m scbi.envconvert .env-<name>}
+
+which writes \file{.env-<name>.py}; the functions it may define are
+reported and converted by hand to the hooks below.
+
+The file is run once when the driver starts, with \code{SCBI\_ENV\_DIR}
+(its directory) and \code{getvar(name, default)} (the value of a driver
+variable, or \code{default} when it is empty, as
+\code{\$\{name:-default\}}). It may define:
+
+\begin{description}
+	\item[settings] module variables in upper case holding a string, e.g.
+	\code{SCBI\_PLAN = getvar("SCBI\_PLAN", "default")}: driver variables,
+	given to the hooks;
+	\item[\code{PASSTHROUGH}] a list of variables of the user's environment
+	given to the hooks (see below);
+	\item[\code{define\_var(env, action, name, value)}] called for each
+	environment action (\code{ADD}, \code{SET}, \code{PREPEND},
+	\code{APPEND}, \code{REMOVE}, \code{UNSET}) evaluated by the driver,
+	instead of the default; \code{env.apply(action, name, value)} does the
+	default action, \code{env.get(name)} reads a variable;
+	\item[\code{rewrite\_vcs(record)}, \code{rewrite\_archive(record)}] the
+	fields of a \code{vcs} / \code{archive} hook (a list: proxy, options,
+	protocol, url, [file,] dir); the function returns the fields to use;
+	\item[\code{proxy(name, env)}] the proxy \code{name} of a record:
+	\code{env} is the environment (a dictionary) of the VCS or download
+	command, to change;
+	\item[\code{module\_final\_step(ctx)}] called after each module.
+	\code{ctx} has the attributes \code{prefix}, \code{target},
+	\code{variant}, \code{module}, \code{formodule}, \code{modref},
+	\code{depends\_kind}, \code{is\_meta}, \code{is\_aggregated},
+	\code{is\_up\_to\_date} (the parameters of the Bash
+	\code{module-final-step}) and the methods \code{get(var)},
+	\code{is\_enabled(feature)}, \code{module\_ref(modref)} (module,
+	variant, kind, reference in the plan), \code{module\_name(modref)},
+	\code{target\_dir(module, variant)}, \code{ilog(...)} and
+	\code{env\_actions(hook="env", modref=None)}, the (action, variable,
+	value) of the environment hooks of the module (aggregated modules
+	included), to write launch scripts for example.
+\end{description}
+
+\begin{lstlisting}
+SCBI_PLAN = getvar("SCBI_PLAN", "default")
+PASSTHROUGH = ["CC"]
+
+def rewrite_vcs(record):
+    return [f.replace("git@server:", "https://server/") for f in record]
+
+def module_final_step(ctx):
+    for action, var, value in ctx.env_actions():
+        ctx.ilog(action, var, value)
+\end{lstlisting}
+
 \subsection{Hook environment}
 \index{environment!hook}
 
@@ -2170,6 +2234,7 @@ modules. It contains:
 	\code{DISPLAY}, \code{LANG}, \code{LANGUAGE}, \code{LC\_*} and the
 	proxy variables (\code{http\_proxy}, \code{https\_proxy},
 	\code{ftp\_proxy}, \code{no\_proxy} and their upper-case forms);
+	\item the variables of \code{PASSTHROUGH} (environment file);
 	\item every exported variable set or changed by the driver: the
 	\code{SCBI\_*} variables, the settings of the environment files and
 	the environment of the module (the \code{env} hooks of its

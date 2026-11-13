@@ -152,6 +152,12 @@ SCBI_IMPL=python ./run test001   # in tests/: one driver with the Python driver
   keeps Bash the plug-ins inherited by Bash plug-ins. Steps are run by
   `steps/wrapper.py` and `steps/generic.py` (ports of module-wrapper and
   7_modgen, Bash fallback when redefined).
+- With the Python driver the environment files are Python
+  (`.env-<name>.py`, `src/scbi/envpy.py`: settings, `PASSTHROUGH`, hooks
+  `define_var`, `rewrite_vcs`, `rewrite_archive`, `proxy`,
+  `module_final_step` with `steps/final.py`); Bash ones are converted
+  with `python3 -m scbi.envconvert`. Test env files exist in both forms
+  in `tests/scripts.d` (`.env-x` and `.env-x.py`).
 - Port Bash code literally (word splitting, `read`, associative array order
   ...): helpers for these semantics are in `src/scbi/bashcompat.py`.
 
