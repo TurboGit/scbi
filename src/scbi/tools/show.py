@@ -254,6 +254,40 @@ def deps_hooks(module: str, plugin: Path, found: list[str]) -> None:
             check = True
 
 
+#  hook -> label of the dependency kind (as get-deps-hooks)
+_YAML_FOR = {"depends": "", "build-depends": "build", "tests-depends": "test", "modules": "modules"}
+
+
+def yaml_depends_hooks(module: str, path: Path, found: list[str]) -> None:
+    """The hooks of a YAML plug-in listing ``module`` (in a value, guarded
+    or not), named as get-deps-hooks names those of a Bash plug-in."""
+    from scbi.plugin import yamlfmt
+    from scbi.plugin.model import PLAIN, Guarded, Values
+
+    try:
+        pdef = yamlfmt.load(path)
+    except (yamlfmt.FormatError, OSError):
+        return
+
+    def values(items) -> list[str]:
+        out: list[str] = []
+        for it in items:
+            out += values(it.items) if isinstance(it, Guarded) else [it]
+        return out
+
+    plg = path.name[: -len(".yaml")]
+    for key, body in pdef.hooks.items():
+        if key.hook not in _YAML_FOR or not isinstance(body, Values):
+            continue
+        if module not in [v.strip() for v in values(body.items)]:
+            continue
+        tag = "cross" if key.cross else ""
+        if key.qualifier not in (PLAIN, "common"):
+            tag += ("/" if tag else "") + key.qualifier
+        for_ = _YAML_FOR[key.hook]
+        found.append(plg + (f" [{tag}]" if tag else "") + (f" ({for_})" if for_ else ""))
+
+
 def show_rdepends(driver) -> int:
     """--rdepends: port of ``get-rdepends`` for each module, then
     ``sort | uniq``. The plug-ins are the files whose text has a line
@@ -273,6 +307,12 @@ def show_rdepends(driver) -> int:
         for name in files:
             path = plugins / name
             if not path.is_file():
+                continue
+            if name.endswith(".yaml"):
+                yaml_depends_hooks(module, path, found)
+                continue
+            if (plugins / f"{name}.yaml").is_file():
+                #  the YAML version is the one in use
                 continue
             try:
                 lines = path.read_text(errors="surrogateescape").splitlines()
