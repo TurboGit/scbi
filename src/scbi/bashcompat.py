@@ -150,6 +150,38 @@ def read_lines(text: str) -> list[str]:
     return lines[:-1]
 
 
+
+def read_lines_escaped(text: str) -> list[str]:
+    """Values of ``line`` seen by ``while read line; ...; done < file``
+    (no ``-r``): a backslash-newline joins lines, a backslash quotes the
+    next character (removed), unquoted IFS whitespace is trimmed at both
+    ends. A last line without a terminating newline is not seen."""
+    result: list[str] = []
+    chars: list[tuple[str, bool]] = []
+    i, n = 0, len(text)
+    while i < n:
+        c = text[i]
+        if c == "\\" and i + 1 < n:
+            if text[i + 1] != "\n":
+                chars.append((text[i + 1], True))
+            i += 2
+            continue
+        if c == "\\":
+            i += 1
+            continue
+        if c == "\n":
+            start, end = 0, len(chars)
+            while start < end and not chars[start][1] and chars[start][0] in _IFS_WS:
+                start += 1
+            while end > start and not chars[end - 1][1] and chars[end - 1][0] in _IFS_WS:
+                end -= 1
+            result.append("".join(ch for ch, _ in chars[start:end]))
+            chars = []
+        else:
+            chars.append((c, False))
+        i += 1
+    return result
+
 _ASSOC_BUCKETS = 1024
 
 

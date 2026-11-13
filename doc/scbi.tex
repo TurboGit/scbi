@@ -2077,8 +2077,8 @@ installed.
 	driver and the tests comparing it with the Bash implementation.
 \end{description}
 
-Some sub-commands (or some of their options) are implemented in Python;
-setting \code{SCBI\_BASH\_TOOLS=yes} runs the \file{scbi-<sub-command>}
+Some sub-commands are implemented in Python (\code{store} and
+\code{show} currently, the other ones still run their script); setting \code{SCBI\_BASH\_TOOLS=yes} runs the \file{scbi-<sub-command>}
 scripts instead, to compare both.
 
 When run by the testsuite (\code{SCBI\_TESTSUITE=yes}) the Python driver

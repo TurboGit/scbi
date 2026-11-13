@@ -146,6 +146,27 @@ SHOW_CASES = [
     ["show", "--plan=dev", "--module-ref:full", "lib1", "lib2"],
     ["show"], ["-h", "show"], ["show", "--bogus"],
     ["show", "--depends", "dmain"],
+    ["show", "--externals:only", "dmain"],
+    ["show", "--externals", "dmain"],
+    ["show", "--depends:direct", "--externals", "dmain"],
+    ["show", "--externals", "--no-version", "dmain"],
+    ["show", "--depends", "listDA"],
+    ["show", "--depends", "--filter:dev", "listDA"],
+    ["show", "--depends", "--filter:run", "listDA"],
+    ["show", "--depends:direct", "--filter:run", "listDA"],
+    ["show", "--depends:direct", "--filter:dev", "listDA"],
+    ["show", "--depends", "reca"],
+    ["show", "--depends", "recb"],
+    ["show", "--depends", "cd1"],
+    ["show", "--depends", "--externals:only", "cdb"],
+    ["show", "--depends", "supermod"],
+    ["show", "--depends", "dmain", "listDA"],
+    ["show", "--plan=meta-meta", "--depends", "meta-meta/both:v2"],
+    ["show", "--rdepends", "usethisplg"],
+    ["show", "--rdepends", "lib1"],
+    ["show", "--rdepends", "lib2", "dep1"],
+    ["show", "--rdepends", "nothere"],
+    ["show", "-r", "lib3"],
 ]
 
 
@@ -155,3 +176,22 @@ def test_show_same_as_bash(sandboxes, args):
     bash, python = sandboxes
     rb, rp = bash.run(args), python.run(args)
     assert (rp.returncode, rp.stdout, rp.stderr) == (rb.returncode, rb.stdout, rb.stderr)
+
+
+#  scbi show on the real plug-ins (scripts.d): more hook shapes for
+#  --rdepends, real OS packages for --externals
+REAL_SHOW_CASES = [
+    ["show", "--rdepends", "c-sandbox"], ["show", "--rdepends", "c-gprbuild"],
+    ["show", "--depends", "c-gps"], ["show", "--externals", "c-darktable"],
+    ["show", "--externals:only", "--no-version", "c-libadalang"],
+]
+
+
+@pytest.mark.oracle
+@pytest.mark.parametrize("args", REAL_SHOW_CASES, ids=" ".join)
+def test_show_real_plugins_same_as_bash(sandboxes, args):
+    bash, python = sandboxes
+    args = [f"--plugins={REPO_ROOT}/scripts.d", *args]
+    rb, rp = bash.run(args), python.run(args)
+    assert (rp.returncode, rp.stdout, rp.stderr) == (rb.returncode, rb.stdout, rb.stderr)
+
