@@ -101,8 +101,10 @@ def build_id(builder, prefix: str, target: str, formodule: str, modref: str, vid
     module, variant, kind, ref = (d.plan.module_ref(modref, formodule) + [""] * 4)[:4]
     plugins = d.get("SCBI_PLUGINS")
     mid = f"{variant}:{ref},{target},{d.get('SCBI_OS_VERSION')},{d.get('SCBI_OS_CODENAME')}"
-    if os.path.isfile(f"{plugins}/{module}"):
-        mid += f",{file_md5(f'{plugins}/{module}')}"
+    #  the plug-in file in use (<module>.yaml or the legacy <module>)
+    pfile = d.registry.plugin_file(module)
+    if pfile is not None:
+        mid += f",{file_md5(str(pfile))}"
 
     #  hash of the inherited plug-ins, recursively
     loaded = d.registry.scbi_loaded()
@@ -111,7 +113,8 @@ def build_id(builder, prefix: str, target: str, formodule: str, modref: str, vid
     def inh_md5(m: str) -> None:
         nonlocal hid
         for h in words(loaded.get(f"{m}.inh", "")):
-            hid += f",{file_md5(f'{plugins}/{h}')}"
+            hfile = d.registry.plugin_file(h)
+            hid += f",{file_md5(str(hfile) if hfile else f'{plugins}/{h}')}"
             inh_md5(h)
 
     inh_md5(module)
