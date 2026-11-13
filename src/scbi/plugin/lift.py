@@ -393,6 +393,12 @@ def lift(trace: PluginTrace, names: set[str] | None = None) -> LiftResult:
     pdef = PluginDef(plugin, variables=dict(trace.variables))
     res = LiftResult(pdef)
 
+    #  Top-level code other than function definitions, inherit-plugin /
+    #  with-variant calls and assignments (or output when sourced) has no
+    #  YAML form: the plug-in stays a Bash one
+    if trace.has_code or trace.output:
+        res.issues.append(Issue("top-level", "code at the top level of the plug-in (not only definitions)"))
+
     defined_before: dict[str, str] = {}
 
     for call in trace.calls:

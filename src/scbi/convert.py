@@ -25,7 +25,8 @@ from scbi.plugin.registry import Registry
 def convert(path: Path) -> tuple[str | None, list[Issue]]:
     """YAML text for the plug-in ``path`` (None when not convertible)."""
     try:
-        registry = Registry(path.parent)
+        #  the legacy plug-ins only (YAML versions may be next to them)
+        registry = Registry(path.parent, yaml=False)
         registry.load_module(path.name)
         res = lift(registry.traces[path.name], set(registry.functions))
     except LegacyLoadError as e:

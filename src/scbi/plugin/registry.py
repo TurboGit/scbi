@@ -172,12 +172,14 @@ class Registry:
     on_output: Callable[[str, Path], None] | None = None
     #  module -> {variant: included variants} (``variants:`` of YAML plug-ins)
     variant_aliases: dict[str, dict[str, tuple[str, ...]]] = field(default_factory=dict)
+    #  False: only the legacy plug-ins are read (the converter)
+    yaml: bool = True
 
     # --------------------------------------------------------------- loading
 
     def plugin_file(self, module: str) -> Path | None:
         """``<module>.yaml`` or the legacy ``<module>`` file."""
-        for name in (f"{module}.yaml", module):
+        for name in ((f"{module}.yaml", module) if self.yaml else (module,)):
             path = self.plugins_dir / name
             if path.is_file():
                 return path
