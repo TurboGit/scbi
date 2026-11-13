@@ -235,3 +235,55 @@ def test_shell_same_as_bash(tmp_path):
         rp = python.run(args, env)
         m = mask_bash_error_location
         assert (rp.returncode, m(rp.stdout), m(rp.stderr)) == (rb.returncode, m(rb.stdout), m(rb.stderr)), args
+
+
+SOURCE_ARCHIVE_CASES = [
+    ["source-archive", "libarch:v1"], ["source-archive", "libarch/gz"],
+    ["source-archive", "libarch/bz2:v2"], ["source-archive", "--lower-case", "libarch/tar:v1"],
+    ["source-archive", "--sha1", "libarch/xz"], ["source-archive", "--sha256", "--clean-version", "libarch/zip:v1"],
+    ["source-archive", "--md5", "-c", "libarch:v2.0"], ["source-archive", "libarch:nothere"],
+    ["source-archive", "nothere"], ["source-archive", "libarch/native"], ["source-archive", "dep1"],
+    ["source-archive", "lib1", "lib2"], ["source-archive"], ["-h", "source-archive"],
+    ["source-archive", "--bogus", "lib1"],
+]
+
+
+@pytest.mark.oracle
+def test_source_archive_same_as_bash(tmp_path):
+    import hashlib
+    import shutil
+    import subprocess
+
+    from oracle import REPO_ROOT
+
+    bash, python = pair(tmp_path)
+    repos = tmp_path / "repos"
+    shutil.copytree(REPO_ROOT / "tests" / ".root" / "repos", repos, ignore=shutil.ignore_patterns("withsubm*"))
+    env = {"TESTREPOS": str(repos), "GIT_ALLOW_PROTOCOL": "file"}
+    for args in SOURCE_ARCHIVE_CASES:
+        rb, rp = bash.run(args, env), python.run(args, env)
+        def m(text):
+            #  random work directory
+            return re.sub(r"/dev/shm/(tmp)?[\w]{6,8}", "<workdir>", mask_bash_error_location(text))
+
+        assert (rp.returncode, m(rp.stdout), m(rp.stderr)) == (rb.returncode, m(rb.stdout), m(rb.stderr)), args
+        made_b = sorted(p.name for p in bash.root.iterdir() if p.is_file() and not p.name.startswith("scbi"))
+        made_p = sorted(p.name for p in python.root.iterdir() if p.is_file() and not p.name.startswith("scbi"))
+        assert made_p == made_b, args
+        for name in made_b:
+            fb, fp = bash.root / name, python.root / name
+            if name.endswith((".md5", ".sha1", ".sha256")):
+                #  the archives hold the time of the checkouts: the sums
+                #  differ, each one must match its archive
+                assert fp.read_text().split()[1:] == fb.read_text().split()[1:], (args, name)
+                tool = {"md5": "md5sum", "sha1": "sha1sum", "sha256": "sha256sum"}[name.rsplit(".", 1)[1]]
+                for sb in (bash, python):
+                    assert subprocess.run([tool, "-c", name], cwd=sb.root, capture_output=True).returncode == 0
+            elif ".tar" in name or name.endswith((".tgz", ".zip")):
+                lst = ["unzip", "-Z1"] if name.endswith(".zip") else ["tar", "tf"]
+                lb = sorted(subprocess.run([*lst, str(fb)], capture_output=True, text=True).stdout.split())
+                lp = sorted(subprocess.run([*lst, str(fp)], capture_output=True, text=True).stdout.split())
+                assert lp == lb, (args, name)
+        for name in made_b:
+            (bash.root / name).unlink()
+            (python.root / name).unlink()
