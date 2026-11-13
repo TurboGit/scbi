@@ -16,8 +16,8 @@ from scbi.hooks.bashguard import to_bash
 from scbi.hooks.context import HookContext
 from scbi.hooks.evaluate import GuardContext
 from scbi.hooks.exec import HookShell, run_env_hook
-from scbi.hooks.policy import python_env_allowed, redefined
-from scbi.hooks.reference import REFERENCE
+from scbi.hooks.policy import is_reference, python_env_allowed, redefined
+from scbi.hooks.reference import PORTED, REFERENCE
 from scbi.hooks.runtime import load_runtime
 from scbi.plan import PlanState
 from scbi.plugin import expr, yamlfmt
@@ -47,7 +47,7 @@ def runtime(oracle):
 
 
 def test_reference_up_to_date(runtime):
-    for name, ref in REFERENCE.items():
+    for name, ref in {**REFERENCE, **PORTED}.items():
         current = hashlib.sha256(runtime.functions[name].encode()).hexdigest()
         assert current == ref, f"{name} changed in scripts.d: update its Python port and hooks/reference.py"
 
@@ -58,6 +58,9 @@ def test_redefined(runtime, tmp_path):
     user = {"define-var": "define-var () \n{ \n    echo $*\n}"}
     assert redefined(runtime.functions, user) == ["define-var"]
     assert redefined({}) == list(REFERENCE)
+    assert is_reference("get-vcs-data", runtime.functions)
+    assert not is_reference("get-vcs-data", runtime.functions, {"get-vcs-data": "get-vcs-data () \n{ \n    echo x\n}"})
+    assert redefined(runtime.functions, {"get-vcs-data": "x"}) == []
     #  the Windows runtime has its own define-var
     win = load_runtime(REPO_ROOT / "scripts.d", driver_vars(tmp_path), cwd=tmp_path,
                        base_env=BASE_ENV, os_module="windows")

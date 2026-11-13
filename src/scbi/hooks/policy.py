@@ -48,3 +48,17 @@ def redefined(*function_maps: Mapping[str, object]) -> list[str]:
 def python_env_allowed(*function_maps: Mapping[str, object]) -> bool:
     """True when environment actions can be evaluated in Python."""
     return not redefined(*function_maps)
+
+
+def is_reference(name: str, *function_maps: Mapping[str, object]) -> bool:
+    """True when the visible definition of the ported runtime function
+    ``name`` (REFERENCE or PORTED) is the reference one; ``function_maps``
+    in loading order as for ``redefined``."""
+    from scbi.hooks.reference import PORTED
+
+    ref = REFERENCE.get(name) or PORTED[name]
+    definition = None
+    for m in function_maps:
+        if name in m:
+            definition = m[name]
+    return isinstance(definition, str) and _hash(definition) == ref

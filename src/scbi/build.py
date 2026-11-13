@@ -27,8 +27,11 @@ from scbi.env import Environment
 from scbi.errors import Exit, NotImplementedYet
 from scbi.hooks.context import HookContext
 from scbi.hooks.exec import HookShell, env_code, is_nop, run_code
+from scbi.hooks.policy import is_reference
 from scbi.plugin.model import Shell
 from scbi.plugin.resolve import get_hook
+from scbi.sources.buildid import build_id
+from scbi.sources.data import archive_exists, vcs_data
 from scbi.vercmp import VERSION_ERROR, VERSION_OK, check_versions, get_version_number
 
 #  is-module-up-to-date statuses
@@ -132,6 +135,19 @@ class Builder:
         run_code(self.shell(), ctx, code + " 2>/dev/null", lines.append)
         return "\n".join(lines).rstrip("\n")
 
+    def ported(self, name: str) -> bool:
+        """The Python port of the runtime function ``name`` may be used:
+        it is not redefined by the user (scbi.hooks.policy)."""
+        d = self.d
+        return is_reference(name, d.runtime.functions, d.sv.functions, d.registry.functions)
+
+    def bash_words(self, module: str, variant: str, call: str) -> tuple[list[str], int]:
+        """``r=( $(call) )``: the words and the status of a Bash call."""
+        lines: list[str] = []
+        rc = run_code(self.shell(), self.ctx(module, variant),
+                      f'__r=( $({call}) ); __s=$?; echo "${{__r[*]}}"; exit $__s', lines.append).returncode
+        return words("\n".join(lines)), rc
+
     def fn_exists(self, name: str) -> bool:
         return (name in self.d.registry.functions or name in self.d.runtime.functions
                 or name in self.d.sv.functions)
@@ -204,7 +220,8 @@ class Builder:
     def is_module_up_to_date(self, modref: str, formodule: str, module: str, variant: str, ref: str) -> int:
         """Port of ``is-module-up-to-date``."""
         bdir = Path(self.get("SCBI_BDIR"))
-        self.run(module, variant, f"check-archive-exists {quote(module)} {quote(variant)} {quote(ref)}")
+        #  check-archive-exists ... && kind=VERSION (kind is not used after)
+        archive_exists(self, module, variant, ref)
 
         fct = get_hook(self.d.registry, module, variant, "version", self.d.runner().cross)
         if fct:
@@ -618,9 +635,8 @@ class Builder:
         is_utd = "no"
         tvdir = self.target_dir(meta, variant)
         os.chdir(mdir)
-        self.run(meta, variant, (
-            f"get-build-id \"$SCBI_PREFIX\" \"$SCBI_TARGET\" {quote(formodule)} {quote(meta)} "
-            f"{quote(variant)} > build-id-{variant}"))
+        Path(f"build-id-{variant}").write_text(
+            build_id(self, self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), formodule, meta, variant))
         if _same(Path(f"build-id-{variant}"), Path(tvdir, "build-id")) and self.get("DO_FORCE") == "no":
             is_utd = "yes"
         shutil.copy(f"build-id-{variant}", f"{tvdir}/build-id")
@@ -763,10 +779,10 @@ class Builder:
 
     def display_ref(self, module: str, variant: str, ref: str) -> str:
         """Port of ``get-module-display-ref``."""
+        vcs, _ = vcs_data(self, module, variant)
+        vcs_name = vcs[3] if len(vcs) > 3 else ""
         if variant == "native":
             return ref.replace("NONE", "os", 1)
-        vcs = words(self.capture(module, variant, f"get-vcs-data {quote(module)} {quote(variant)}"))
-        vcs_name = vcs[3] if len(vcs) > 3 else ""
         if not vcs_name:
             return ref.replace("NONE", "n/a", 1)
         if ref == "dev":

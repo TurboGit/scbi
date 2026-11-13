@@ -46,3 +46,18 @@ REFERENCE = {
     "all-variants-v": "cd9e777cccef70558753dc4e11707c06a75a9ab50f7bd4f50914919b459ac28e",
     "has-variant": "9a4b03cc4fb4677ef3f60c368b195f6828d5aa3a4819a9a66ee37d0ad2228f93",
 }
+
+#  Other ported runtime functions: each one falls back to the Bash function
+#  on its own when redefined (scbi.hooks.policy.is_reference), without
+#  changing how the environment actions are evaluated.
+PORTED = {
+    "get-vcs-data": "9d043762cf09dc51ea9ae4fbf008652cca51d3a0263e3f3ef452f1bb8016b9b2",
+    "get-archive-data": "43f16efcdbb62212bce366478618c6fe7ea2de8c4c6f62910a6ddeae76e8941f",
+    "check-archive-exists": "04a05aad108efc51e49db470bb1b3f058335c4e6ad5072e7238b36128429d41b",
+    "get-vcs-dir": "a819b4d16442f1b4b79defd09c6be8b8a0e7e6a604090384c76c261bd14257a3",
+    "get-vcs-display-ref": "c75091fcd359bc2bfffe0bb45ce0b0258e09c1db716819ff2686a93cb1ae7b88",
+    "get-build-id": "18a17dc3b26bbeab0e0e71b47aa4226d23ba7b44f84a9d5aaf7044021fe0c673",
+    "get-depends-build-id": "58e24dd3b19d56058afe14692f9e1c8c04e5cb83915c0ab73539318076d9b5c6",
+    "get-patch-md5": "714527cda72e60f88c51d5a7a9b44fe5d111615133a290ee05fd518a200ba622",
+    "get-vcs-user-co-dir": "21262128a6ef3725bc8e8fad15cd3b17577d6914621a96407a3afd15a4b7ad60",
+}
