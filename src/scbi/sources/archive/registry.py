@@ -6,9 +6,10 @@ from __future__ import annotations
 from scbi.sources.archive.base import Downloader
 from scbi.sources.archive.copy import Copy
 from scbi.sources.archive.curl import Curl
+from scbi.sources.archive.ftp import Ftp
 from scbi.sources.archive.wget import Wget
 
-IMPLEMENTATIONS: list[Downloader] = [Wget(), Curl(), Copy()]
+IMPLEMENTATIONS: list[Downloader] = [Wget(), Curl(), Copy(), Ftp()]
 
 BY_NAME: dict[str, Downloader] = {name: impl for impl in IMPLEMENTATIONS for name in impl.names}
 
