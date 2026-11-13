@@ -71,6 +71,7 @@ CASES = [
     ({"ARCH_URL": "{store}", "ARCH_FILE": "top-1.tar.bz2", "ARCH_CP": "true"}, "1", None),  # unknown
     ({"ARCH_URL": "file://{store}", "ARCH_FILE": "top-1.tar.bz2", "ARCH_CP": "curl"}, "1", "rmarch"),
     ({"ARCH_URL": "file://{store}", "ARCH_FILE": "nothere.tar.bz2", "ARCH_CP": "curl"}, "1", None),
+    ({"ARCH_URL": "file://{store}", "ARCH_FILE": "top-1.tar.bz2", "ARCH_CP": "wget"}, "1", "rmarch"),
     ({"ARCH_URL": "{store}", "ARCH_FILE": "NONE"}, "1", None),
 ]
 
