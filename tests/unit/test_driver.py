@@ -7,6 +7,7 @@ import pytest
 
 from corpus import plan_files
 from e2e import pair
+from known_diffs import mask_bash_error_location
 from oracle import REPO_ROOT
 from scbi.bashenv import ShellVars
 from scbi.driver import Driver
@@ -195,3 +196,42 @@ def test_show_real_plugins_same_as_bash(sandboxes, args):
     rb, rp = bash.run(args), python.run(args)
     assert (rp.returncode, rp.stdout, rp.stderr) == (rb.returncode, rb.stdout, rb.stderr)
 
+
+SHELL_CASES = [
+    ["shell", "--run", "dorun"], ["shell", "--run", "dorun/one"], ["shell", "--run", "dorun/one.two"],
+    ["shell", "--run", "dorun/two.one"], ["shell", "--run=echo toto", "dorun"],
+    ["shell", "--run", "mainmult"], ["shell", "--run=mainmult", "mainmult"],
+    ["shell", "--run=which mainlib ; mainlib", "metaagg3"],
+    ["shell", "--run=which mainlib ; mainlib", "metaagg3/agg"],
+    ["shell", "--run=echo $SCBI_SHELL $PATH", "lib1", "lib2"],
+    ["shell", "--mode:tests", "--run=echo $SCBI_SHELL", "lib2"],
+    ["shell", "--mode:dev", "--run=echo $SCBI_SHELL", "lib2"],
+    ["shell", "--run", "lib1"], ["shell"], ["-h", "shell"], ["shell", "--mode:bogus", "lib1"],
+    #  interactive mode: $SHELL is a script showing where it runs
+    ["shell", "lib2"], ["shell", "--mode:sb", "lib2"], ["shell", "--mode:dev", "lib2"],
+    ["shell", "--mode:tests", "lib2"], ["shell", "metaagg3/agg"],
+]
+
+FAKE_SHELL = """#!/bin/bash
+echo "shell in $PWD mode=$SCBI_SHELL args=$*"
+echo "PATH=$PATH"
+declare -F | grep -c handle-env
+"""
+
+
+@pytest.mark.oracle
+def test_shell_same_as_bash(tmp_path):
+    bash, python = pair(tmp_path)
+    for sb in (bash, python):
+        fake = sb.root / "fakeshell"
+        fake.write_text(FAKE_SHELL)
+        fake.chmod(0o755)
+        #  build the modules used (same state in both sandboxes)
+        for mod in ("dorun", "mainmult", "metaagg3", "lib1", "lib2"):
+            sb.run([mod])
+    for args in SHELL_CASES:
+        env = {"SHELL": str(python.root / "fakeshell")}
+        rb = bash.run(args, {"SHELL": str(bash.root / "fakeshell")})
+        rp = python.run(args, env)
+        m = mask_bash_error_location
+        assert (rp.returncode, m(rp.stdout), m(rp.stderr)) == (rb.returncode, m(rb.stdout), m(rb.stderr)), args

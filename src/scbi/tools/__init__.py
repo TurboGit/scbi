@@ -10,4 +10,5 @@ from __future__ import annotations
 TOOLS = {
     "store": "scbi.tools.store",
     "show": "scbi.tools.show",
+    "shell": "scbi.tools.shell",
 }
