@@ -8,11 +8,11 @@ import os
 
 from scbi.sources.vcs.base import Vcs
 from scbi.sources.vcs.git import Git
+from scbi.sources.vcs.hg import Mercurial
 from scbi.sources.vcs.svn import Subversion
 
 #  in the order of vcs-build-id (.git, .svn, .hg)
-#  in the order of vcs-build-id (.git, .svn, .hg)
-IMPLEMENTATIONS: list[Vcs] = [Git(), Subversion()]
+IMPLEMENTATIONS: list[Vcs] = [Git(), Subversion(), Mercurial()]
 
 BY_NAME: dict[str, Vcs] = {name: impl for impl in IMPLEMENTATIONS for name in impl.names}
 
