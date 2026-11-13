@@ -2045,6 +2045,12 @@ driver) is taken from the environment variable \code{SCBI\_ARGV0} when set
 	plug-in), the environment actions of YAML plug-ins are run by Bash so
 	that the redefinition applies; otherwise they are evaluated by the
 	driver.
+	\item The sources of the modules (VCS checkouts and archives,
+	\code{get-vcs-data}, \code{get-archive}, \code{git-co}...) and the
+	build ids are handled by the driver. When one of these runtime
+	functions, or a command they use (\code{ln}, \code{git}...), is
+	redefined in a runtime file or a plug-in (e.g. by
+	\file{\_os\_windows}), the Bash functions are used instead.
 	\item The cached build plans are stored in
 	\file{\$SCBI\_BDIR/.cache/plan-<signature>.json}, a different file than
 	the Bash driver one: both drivers can use the same build directory.

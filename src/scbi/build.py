@@ -30,6 +30,7 @@ from scbi.hooks.exec import HookShell, env_code, is_nop, run_code
 from scbi.hooks.policy import is_reference
 from scbi.plugin.model import Shell
 from scbi.plugin.resolve import get_hook
+from scbi.sources import handle as sources
 from scbi.sources.buildid import build_id
 from scbi.sources.data import archive_exists, vcs_data
 from scbi.vercmp import VERSION_ERROR, VERSION_OK, check_versions, get_version_number
@@ -149,8 +150,10 @@ class Builder:
         return words("\n".join(lines)), rc
 
     def fn_exists(self, name: str) -> bool:
-        return (name in self.d.registry.functions or name in self.d.runtime.functions
-                or name in self.d.sv.functions)
+        d = self.d
+        return (name in d.registry.functions or name in d.runtime.functions or name in d.sv.functions
+                #  exported in the environment (export -f)
+                or f"BASH_FUNC_{name}%%" in d.sv.values)
 
     def target_dir(self, module: str, variant: str, file: str = "") -> str:
         """Port of ``get-target-dir``."""
@@ -819,7 +822,11 @@ class Builder:
             lnk = self.get("SCBI_LNK")
             for p in ("src", f"src{lnk}", f"vcs{lnk}"):
                 _rm(p)
-            if self.bash(module, variant, f"handle-sources {quote(formodule)} {quote(modref)}") != 0:
+            if sources.python_allowed(self):
+                rc = sources.handle_sources(self, formodule, modref)
+            else:
+                rc = self.bash(module, variant, f"handle-sources {quote(formodule)} {quote(modref)}")
+            if rc != 0:
                 return 1, "no"
 
         if self.get("SCBI_HOST") != self.get("SCBI_TARGET"):
