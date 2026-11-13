@@ -9,7 +9,12 @@
 #    - a newly passing driver is appended to python-pass.txt
 #      (unless --no-update is given)
 #
-#  usage: ratchet [--no-update] [--impl=bash|python] [testNNN...]
+#  usage: ratchet [--no-update] [--impl=bash|python] [--format=legacy|yaml]
+#                 [testNNN...]
+#
+#  With --format=yaml the plug-ins are the YAML versions generated from
+#  tests/scripts.d (SCBI_PLUGIN_FORMAT=yaml), compared with
+#  python-yaml-pass.txt.
 #
 #  Logs of each driver are kept in .ratchet/<test>.log
 #
@@ -20,13 +25,15 @@ PASS_FILE=python-pass.txt
 LOG_DIR=.ratchet
 UPDATE=yes
 IMPL=python
+FORMAT=legacy
 TESTS=()
 
 for arg in "$@"; do
     case $arg in
         --no-update) UPDATE=no ;;
         --impl=*)    IMPL=${arg#--impl=} ;;
-        -*)          echo "usage: $0 [--no-update] [--impl=bash|python] [testNNN...]"
+        --format=*)  FORMAT=${arg#--format=} ;;
+        -*)          echo "usage: $0 [--no-update] [--impl=bash|python] [--format=legacy|yaml] [testNNN...]"
                      exit 2 ;;
         *)           TESTS+=( "$arg" ) ;;
     esac
@@ -49,6 +56,7 @@ for t in "${TESTS[@]}"; do
 done
 TESTS=( "${SELECTED[@]}" )
 
+[[ $FORMAT == yaml ]] && PASS_FILE=python-yaml-pass.txt
 touch $PASS_FILE
 rm -fr $LOG_DIR
 mkdir -p $LOG_DIR
@@ -59,7 +67,7 @@ REGRESSIONS=()
 NEW=()
 
 for t in "${TESTS[@]}"; do
-    SCBI_IMPL=$IMPL ./run $t > $LOG_DIR/$t.log 2>&1
+    SCBI_IMPL=$IMPL SCBI_PLUGIN_FORMAT=$FORMAT ./run $t > $LOG_DIR/$t.log 2>&1
     if [[ $? == 0 ]]; then
         PASSED+=( $t )
         grep -qx $t $PASS_FILE || NEW+=( $t )
@@ -76,7 +84,7 @@ for t in "${TESTS[@]}"; do
 done
 
 echo
-echo "impl=$IMPL passed=${#PASSED[@]} failed=${#FAILED[@]}" \
+echo "impl=$IMPL format=$FORMAT passed=${#PASSED[@]} failed=${#FAILED[@]}" \
      "new=${#NEW[@]} regressions=${#REGRESSIONS[@]}"
 
 if [[ $IMPL == python ]] && [[ $UPDATE == yes ]] && [[ ${#NEW[@]} -gt 0 ]]; then

@@ -2081,9 +2081,18 @@ installed.
 	\item[\code{make test-py}] Each test driver with the Python driver; the
 	ones known to pass are listed in \file{tests/python-pass.txt} and a
 	regression is an error.
+	\item[\code{make test-py-yaml}] The same with the YAML versions of the
+	test plug-ins (\code{SCBI\_PLUGIN\_FORMAT=yaml}: \file{tests/run}
+	converts \file{tests/scripts.d} to \file{<name>.yaml} files, preferred by
+	the driver, removed at the end; the plug-ins which cannot be converted
+	stay Bash ones), against \file{tests/python-yaml-pass.txt}.
 	\item[\code{make unit}, \code{make oracle}] The unit tests of the Python
 	driver and the tests comparing it with the Bash implementation.
 \end{description}
+
+A test driver changing a plug-in calls \code{PLG-UPDATE <name>} after the
+change (the YAML version is generated again) or uses \code{PLG-TOUCH
+<name>} (a change of the file only, both formats).
 
 Some test drivers are specific to one driver, they are skipped with the
 other one: \file{tests/python-only.txt} (features of the Python driver,

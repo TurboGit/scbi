@@ -16,6 +16,7 @@ xxxx/xx/xx xx:xx:xx : End Building mauto [native] ($GVER)
 EOF
 
 sed -i 's/4.3.1/99.99.09/g' scripts.d/mauto
+PLG-UPDATE mauto
 
 RUNS ./scbi mauto/auto
 
@@ -38,3 +39,4 @@ xxxx/xx/xx xx:xx:xx : End Building mauto [default] (n/a)
 EOF
 
 sed -i 's/99.99.09/4.3.1/g' scripts.d/mauto
+PLG-UPDATE mauto

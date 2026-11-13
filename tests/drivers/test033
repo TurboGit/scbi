@@ -40,6 +40,7 @@ xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1.2)
 EOF
 
 sed -i 's/return 0/return 00/g' scripts.d/lib1
+PLG-UPDATE lib1
 
 RUNS ./scbi --no-patch --tests lib1:#v1.2
 
@@ -61,3 +62,4 @@ xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1.2)
 EOF
 
 sed -i 's/return 00/return 0/g' scripts.d/lib1
+PLG-UPDATE lib1

@@ -37,11 +37,11 @@ EOF2
 
 # Bash plug-ins are not checked: they are to be converted
 
-NRUNS ./scbi lint lib1
+NRUNS ./scbi lint wrong
 
 CLEAN-DIFF <<EOF2
 
-========== Skip lib1: not a YAML plug-in, convert it with: python3 -m scbi.convert
+========== Skip wrong: not a YAML plug-in, convert it with: python3 -m scbi.convert
 EOF2
 
 RUNS ./scbi lint nothere

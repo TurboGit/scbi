@@ -21,9 +21,9 @@
 #     $ make doc
 #
 
-.SILENT: test test-py sort-pkgs sync-os-deps
+.SILENT: test test-py test-py-yaml sort-pkgs sync-os-deps
 
-.PHONY: unit oracle test-py
+.PHONY: unit oracle test-py test-py-yaml
 
 SHELL=/bin/bash
 
@@ -101,6 +101,9 @@ oracle:
 #  Regression ratchet: testsuite drivers run with the Python driver
 test-py:
 	make -C tests ratchet
+
+test-py-yaml:
+	make -C tests ratchet-yaml
 
 doc: force
 	make CORE_VER=$(CORE_VER) -C doc

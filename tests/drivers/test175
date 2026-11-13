@@ -62,11 +62,11 @@ rm -f .root/fmt.yaml
 
 # Bash plug-ins and invalid plug-ins are not formatted
 
-NRUNS ./scbi format lib1
+NRUNS ./scbi format wrong
 
 CLEAN-DIFF <<EOF2
 
-========== Skip lib1: not a YAML plug-in, convert it with: python3 -m scbi.convert
+========== Skip wrong: not a YAML plug-in, convert it with: python3 -m scbi.convert
 EOF2
 
 NRUNS ./scbi format fixtures/lint/lintbad.yaml

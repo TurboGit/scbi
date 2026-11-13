@@ -11,6 +11,7 @@ function $PLG-config()
     echo $PLG
 }
 EOF
+PLG-UPDATE $PLG
 done
 
 RUNS ./scbi --deps metavar
@@ -346,4 +347,5 @@ for PLG in mv-common1 mv-common2 mv-var1 mv-var2 \
            mv-default1 mv-default2 mv-default-ex1 mv-default-ex2;
 do
    rm -f scripts.d/$PLG
+   PLG-UPDATE $PLG
 done

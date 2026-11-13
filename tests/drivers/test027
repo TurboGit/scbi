@@ -1,5 +1,6 @@
 cp scripts.d/test2 scripts.d/test99
 sed -i 's/test2-/test99-/g' scripts.d/test99
+PLG-UPDATE test99
 
 RUNS ./scbi test99
 
@@ -31,6 +32,7 @@ xxxx/xx/xx xx:xx:xx : End Building test99 [default] (master)
 EOF
 
 sed -i 's/make/make -j2/g' scripts.d/test99
+PLG-UPDATE test99
 
 RUNS ./scbi test99
 
@@ -50,3 +52,4 @@ xxxx/xx/xx xx:xx:xx : End Building test99 [default] (master)
 EOF
 
 rm scripts.d/test99
+PLG-UPDATE test99

@@ -34,3 +34,4 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 tests/.ratchet
+tests/scripts.d/*.yaml

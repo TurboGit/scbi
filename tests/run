@@ -129,6 +129,63 @@ EOF
         ;;
 esac
 
+# Plug-ins format (Python driver only):
+#   SCBI_PLUGIN_FORMAT=legacy (default) the Bash plug-ins of scripts.d
+#   SCBI_PLUGIN_FORMAT=yaml   their YAML versions, generated here with the
+#                             converter (scripts.d/<name>.yaml, preferred
+#                             by the driver); the plug-ins which cannot be
+#                             converted stay Bash ones.
+
+SCBI_PLUGIN_FORMAT=${SCBI_PLUGIN_FORMAT:-legacy}
+
+if [[ $SCBI_PLUGIN_FORMAT == yaml && $SCBI_IMPL != python ]]; then
+    echo "SCBI_PLUGIN_FORMAT=yaml needs SCBI_IMPL=python"
+    exit 1
+fi
+
+rm -f scripts.d/*.yaml
+
+function plugin-sources()
+{
+    local f
+    for f in scripts.d/*; do
+        [[ -f $f ]] || continue
+        case $(basename $f) in
+            [0-9]*|_*|*~|*.yaml) ;;
+            *) echo $f ;;
+        esac
+    done
+}
+
+#  The YAML versions of plug-ins changed by a driver (legacy format: nothing
+#  to do): PLG-UPDATE name...
+function PLG-UPDATE()
+{
+    [[ $SCBI_PLUGIN_FORMAT == yaml ]] || return 0
+    local p
+    for p in "$@"; do
+        rm -f scripts.d/$p.yaml
+        [[ -f scripts.d/$p ]] &&
+            PYTHONPATH=$ROOTDIR/../src python3 -m scbi.convert \
+                       --output-dir scripts.d scripts.d/$p > /dev/null 2>&1
+    done
+    true
+}
+
+#  Change a plug-in without changing what it does (its YAML version too):
+#  PLG-TOUCH name
+function PLG-TOUCH()
+{
+    echo >> scripts.d/$1
+    [[ -f scripts.d/$1.yaml ]] && echo "# touched" >> scripts.d/$1.yaml
+    true
+}
+
+if [[ $SCBI_PLUGIN_FORMAT == yaml ]]; then
+    PYTHONPATH=$PWD/../src python3 -m scbi.convert --output-dir scripts.d \
+              $(plugin-sources) > /dev/null 2>&1
+fi
+
 # patch rsync to use safe mode (checksum) as the tests repositories are small,
 # and has some files with same time-stamp.
 
@@ -147,6 +204,11 @@ mkdir -p $PWD/.root/builds/install
 mkdir -p $PWD/logs
 
 . osht
+
+#  The generated YAML plug-ins are removed at the end (before the osht
+#  report, which exits)
+[[ $SCBI_PLUGIN_FORMAT == yaml ]] &&
+    trap 'rm -f $ROOTDIR/scripts.d/*.yaml; _osht_cleanup' INT TERM EXIT
 
 #  Drivers specific to one implementation: skipped with the other one
 case $SCBI_IMPL in

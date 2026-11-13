@@ -124,7 +124,7 @@ EOF
 
 cp scripts.d/depA scripts.d/depA.keep
 
-echo >> scripts.d/depA
+PLG-TOUCH depA
 
 RUNS ./scbi --deps smain
 
@@ -185,6 +185,7 @@ xxxx/xx/xx xx:xx:xx : End Building smain [default] (n/a)
 EOF
 
 mv scripts.d/depA.keep scripts.d/depA
+PLG-UPDATE depA
 
 # Now check for a dependency on a two level metamodule
 
@@ -259,7 +260,7 @@ EOF
 
 cp scripts.d/depA scripts.d/depA.keep
 
-echo >> scripts.d/depA
+PLG-TOUCH depA
 
 # And now that depA and smain are recompiled
 
@@ -340,3 +341,4 @@ xxxx/xx/xx xx:xx:xx : End Building smain [two] (n/a)
 EOF
 
 mv scripts.d/depA.keep scripts.d/depA
+PLG-UPDATE depA
