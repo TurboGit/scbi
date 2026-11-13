@@ -126,6 +126,14 @@ SCBI_IMPL=python ./run test001   # in tests/: one driver with the Python driver
   Accepted divergences are documented in `tests/unit/known_diffs.py`.
 - `tests/python-pass.txt` lists the drivers passing with the Python driver;
   `tests/ratchet` fails if one of them regresses and appends new passes.
+- Drivers specific to one implementation are listed in
+  `tests/python-only.txt` / `tests/bash-only.txt` (skipped with the other
+  driver; the `PLAN` count of `tests/run` differs per implementation).
+- With the Python driver `scbi lint` and `scbi format` handle YAML
+  plug-ins only (`plugin/lint.py`, `plugin/yamlwrite.py`, canonical key
+  order `catalog.FORMAT_ORDER`); Bash plug-ins are converted with
+  `python3 -m scbi.convert`. Their test fixtures are in `tests/fixtures/`
+  (not in `tests/scripts.d`, which only holds valid plug-ins).
 - Port Bash code literally (word splitting, `read`, associative array order
   ...): helpers for these semantics are in `src/scbi/bashcompat.py`.
 

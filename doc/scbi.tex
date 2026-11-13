@@ -2060,11 +2060,13 @@ driver) is taken from the environment variable \code{SCBI\_ARGV0} when set
 
 \subsection{Sub-commands}
 
-The sub-commands (\code{show}, \code{shell}, \code{store}, \code{lint},
-\code{format}, \code{source-archive}) are available with the same options
-and output. They are the \file{scbi-<sub-command>} scripts installed next
-to the driver, run by the Python driver after its setup (plug-ins
-directory, environment file, runtime, build plan) as the Bash driver does.
+The sub-commands are implemented by the Python driver. \code{show},
+\code{shell}, \code{store} and \code{source-archive} have the same options
+and output as with the Bash driver. \code{lint} and \code{format} work on
+YAML plug-ins only (\seeref{linter}, \seeref{formatter}). Setting
+\code{SCBI\_BASH\_TOOLS=yes} runs the \file{scbi-<sub-command>} scripts
+installed next to the driver instead (e.g. to compare both, or to check
+Bash plug-ins with the Bash \code{lint} and \code{format}).
 
 A standalone source archive (\ddash{}standalone) contains the driver as
 installed.
@@ -2083,10 +2085,10 @@ installed.
 	driver and the tests comparing it with the Bash implementation.
 \end{description}
 
-Some sub-commands are implemented in Python (\code{store}, \code{shell},
-\code{source-archive} and
-\code{show} currently, the other ones still run their script); setting \code{SCBI\_BASH\_TOOLS=yes} runs the \file{scbi-<sub-command>}
-scripts instead, to compare both.
+Some test drivers are specific to one driver, they are skipped with the
+other one: \file{tests/python-only.txt} (features of the Python driver,
+e.g. \code{scbi lint} on YAML plug-ins) and \file{tests/bash-only.txt}
+(Bash tools replaced, e.g. \code{scbi lint} on Bash plug-ins).
 
 When run by the testsuite (\code{SCBI\_TESTSUITE=yes}) the Python driver
 does not load \file{\$HOME/.scbi} and takes \code{SCBI\_OS\_MODULE} from
@@ -2233,6 +2235,30 @@ It will report:
 
 The option \code{\ddash{}error} will only report errors.
 
+With the Python driver (\seeref{python-driver}) \code{scbi lint} checks
+YAML plug-ins (\seeref{yaml-plugin}) only: a Bash plug-in is reported as
+to be converted (\code{python3 -m scbi.convert}). A plug-in is given by
+name (\file{\$SCBI\_PLUGINS/<name>.yaml}) or by path. All the problems
+found are reported:
+
+\begin{itemize}
+	\item errors: unknown keys (hooks with a typo, with the closest
+	known name), structure of the hooks (qualifiers, \code{common} for a
+	non-cumulative hook, nested \code{cross}, missing fields of
+	\code{vcs} and \code{archive}), values of \code{out-of-tree},
+	\code{only-explicit-build} (true or false), \code{aggregate} (direct,
+	recursive or no) and \code{propagate-version} (version, variant, both
+	or no), conditions, functions in values and environment actions;
+	\item warnings: empty hooks, and variables used by a hook (shell code,
+	values, environment actions) which are not known there: not a
+	parameter of the hook (a parameter of another hook is named as such,
+	e.g. \code{VERSION} used in \code{config}), not set by the hook, the
+	plug-in variables or environment actions, nor a driver
+	(\code{SCBI\_*}) or a usual environment variable.
+\end{itemize}
+
+The exit status is 1 when an error is found.
+
 \subsection{Formatter}
 \label{formatter}
 \index{formatted}
@@ -2245,6 +2271,37 @@ For example:
 \cmd{scbi format lcms2}
 
 The option \code{\ddash{}replace} will replace the plug-in after formatting otherwise the formatted plug-in is displayed on the console.
+
+With the Python driver (\seeref{python-driver}) \code{scbi format}
+formats YAML plug-ins (\seeref{yaml-plugin}) only, a Bash plug-in is
+reported as to be converted (the converter already writes the canonical
+form). An invalid plug-in is not formatted (see \code{scbi lint}). The
+canonical form is:
+
+\begin{itemize}
+	\item the keys in this order: \code{plugin}, \code{inherit},
+	\code{vars}, \code{functions}, \code{variants}, \code{os-variants};
+	the sources \code{vcs}, \code{archive}, \code{patches}; the
+	dependencies \code{depends}, \code{build-depends},
+	\code{tests-depends}; the environment \code{env}, \code{build-env},
+	\code{tests-env}, \code{external-env}; the steps \code{setup},
+	\code{out-of-tree}, \code{only-explicit-build}, \code{config-options},
+	\code{config}, \code{build}, \code{install}, \code{wrapup},
+	\code{tests} (each step between its \code{pre-} and \code{post-}
+	hooks); then \code{run}, \code{version}, \code{prefix}; and the
+	meta-module hooks \code{modules}, \code{aggregate},
+	\code{propagate-version}, \code{plan};
+	\item inside a hook the qualifiers \code{\_}, \code{common},
+	\code{default}, the variants in alphabetical order, then \code{cross};
+	the fields of \code{vcs} and \code{archive} in their order;
+	\item block style, indented by 2, multi-line values as literal blocks
+	(\code{|}), quotes only where needed, a blank line between the hooks.
+\end{itemize}
+
+The comments are kept: a comment line goes with the key or list item it
+precedes (and moves with it), an end of line comment with its line; the
+comments at the top of the file (separated from the first key by a blank
+line) and at the end stay there.
 
 \subsection{Create Source Archive}
 \label{createsourcearchive}
