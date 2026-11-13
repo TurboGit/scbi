@@ -1,4 +1,4 @@
-"""Running a command hook of a YAML plug-in (a body in the command
+"""Running a command hook of a plug-in definition (a body in the command
 language) with the interpreter (scbi.hooks.cmdlang): its context
 (parameters, plug-in variables, config-options, callable functions),
 its isolated environment (steps.hookenv) and its replay file."""

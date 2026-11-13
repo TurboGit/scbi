@@ -42,7 +42,7 @@ echo "REC $(basename "$0") $*"
 def hooks_of(directory: Path):
     """(plugin, function, key or None, body lines, params mapping) of the
     command hooks and functions which convert."""
-    reg = Registry(directory, yaml=False)
+    reg = Registry(directory, read_formats=False)
     result = []
     plugins = [p for p in plugin_files() if Path(p).parent == directory]
     for p in plugins:

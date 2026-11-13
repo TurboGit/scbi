@@ -1,6 +1,6 @@
 """Calling the hooks of a module from the driver.
 
-Value hooks of YAML plug-ins are evaluated in Python, legacy (Bash) hooks
+Value hooks of plug-in definitions (scbi.plugin.model) are evaluated in Python, legacy (Bash) hooks
 in a hook shell (scbi.hooks.exec). The selection of the hook functions
 follows the Bash driver (scbi.plugin.resolve).
 """

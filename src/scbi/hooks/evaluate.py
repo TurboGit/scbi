@@ -1,4 +1,4 @@
-"""Evaluation of declarative hooks (YAML plug-ins): values and environment
+"""Evaluation of declarative hooks (plug-in definitions): values and environment
 actions, with their guard conditions."""
 
 from __future__ import annotations

@@ -16,6 +16,7 @@ from pathlib import Path
 
 from scbi.bashcompat import read_lines_escaped, words
 from scbi.planview import display_build_plan
+from scbi.plugin import formats
 
 USAGE = """
 SCBI-SHOW {version}
@@ -255,18 +256,19 @@ def deps_hooks(module: str, plugin: Path, found: list[str]) -> None:
 
 
 #  hook -> label of the dependency kind (as get-deps-hooks)
-_YAML_FOR = {"depends": "", "build-depends": "build", "tests-depends": "test", "modules": "modules"}
+_DEPENDS_FOR = {"depends": "", "build-depends": "build", "tests-depends": "test", "modules": "modules"}
 
 
-def yaml_depends_hooks(module: str, path: Path, found: list[str]) -> None:
-    """The hooks of a YAML plug-in listing ``module`` (in a value, guarded
-    or not), named as get-deps-hooks names those of a Bash plug-in."""
-    from scbi.plugin import yamlfmt
+def definition_depends_hooks(module: str, path: Path, found: list[str]) -> None:
+    """The hooks of a plug-in definition (any format) listing ``module`` (in
+    a value, guarded or not), named as get-deps-hooks names those of a Bash
+    plug-in."""
+    from scbi.plugin import formats
     from scbi.plugin.model import PLAIN, Guarded, Values
 
     try:
-        pdef = yamlfmt.load(path)
-    except (yamlfmt.FormatError, OSError):
+        pdef = formats.load(path)
+    except (formats.PluginFormatError, OSError):
         return
 
     def values(items) -> list[str]:
@@ -275,16 +277,16 @@ def yaml_depends_hooks(module: str, path: Path, found: list[str]) -> None:
             out += values(it.items) if isinstance(it, Guarded) else [it]
         return out
 
-    plg = path.name[: -len(".yaml")]
+    plg = pdef.name
     for key, body in pdef.hooks.items():
-        if key.hook not in _YAML_FOR or not isinstance(body, Values):
+        if key.hook not in _DEPENDS_FOR or not isinstance(body, Values):
             continue
         if module not in [v.strip() for v in values(body.items)]:
             continue
         tag = "cross" if key.cross else ""
         if key.qualifier not in (PLAIN, "common"):
             tag += ("/" if tag else "") + key.qualifier
-        for_ = _YAML_FOR[key.hook]
+        for_ = _DEPENDS_FOR[key.hook]
         found.append(plg + (f" [{tag}]" if tag else "") + (f" ({for_})" if for_ else ""))
 
 
@@ -308,11 +310,11 @@ def show_rdepends(driver) -> int:
             path = plugins / name
             if not path.is_file():
                 continue
-            if name.endswith(".yaml"):
-                yaml_depends_hooks(module, path, found)
+            if formats.format_of(name) is not None:
+                definition_depends_hooks(module, path, found)
                 continue
-            if (plugins / f"{name}.yaml").is_file():
-                #  the YAML version is the one in use
+            if formats.find(plugins, name) is not None:
+                #  the definition file is the one in use
                 continue
             try:
                 lines = path.read_text(errors="surrogateescape").splitlines()

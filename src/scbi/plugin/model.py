@@ -1,8 +1,8 @@
 """Plug-in definition: the in-memory form of a plug-in recipe.
 
 A :class:`PluginDef` is what a plug-in file declares, independently of its
-format (legacy Bash lifted by scbi.plugin.lift, or YAML loaded by
-scbi.plugin.yamlfmt). It is read-only input: the driver never writes it
+format (legacy Bash lifted by scbi.plugin.lift, or a file read by the reader
+of its format, scbi.plugin.formats). It is read-only input: the driver never writes it
 back. The registry turns it into the namespace of hook functions used by
 the resolution (scbi.plugin.resolve), applying inheritance and OS variants
 in memory.

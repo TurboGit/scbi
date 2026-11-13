@@ -39,23 +39,20 @@ from pathlib import Path
 
 import yaml
 
-from scbi.plugin import catalog
+from scbi.plugin import catalog, construct
 from scbi.plugin.catalog import COMMAND, VALUE
-from scbi.plugin.expr import ExprError, parse
+from scbi.plugin.construct import RECORD_MIN, RECORDS, DefinitionError
+from scbi.plugin.formats import PluginFormatError
 from scbi.plugin.model import (
-    BUILTINS,
-    ENV_VERBS,
-    unknown_builtins,
     PLAIN,
+    Commands,
     EnvOp,
     EnvOps,
-    Function,
     Guarded,
     HookKey,
     Inherit,
     OsVariant,
     PluginDef,
-    Commands,
     Values,
 )
 
@@ -63,19 +60,12 @@ RESERVED = ("plugin", "vars", "variants", "inherit", "os-variants", "functions")
 PLAIN_KEY = "_"
 CROSS_KEY = "cross"
 
-RECORDS = {
-    "vcs": ("proxy", "options", "protocol", "url", "dir"),
-    "archive": ("proxy", "options", "protocol", "url", "file", "dir"),
-}
-#  Mandatory fields count of the records
-RECORD_MIN = {"vcs": 4, "archive": 5}
-
 #  Value hooks usually holding a single value, dumped as a scalar
 SCALAR_HOOKS = ("out-of-tree", "only-explicit-build", "prefix", "aggregate", "propagate-version", "plan")
 
 
-class FormatError(Exception):
-    pass
+class FormatError(PluginFormatError):
+    """An invalid YAML plug-in (message with its location)."""
 
 
 # ----------------------------------------------------------- YAML dialect
@@ -119,6 +109,14 @@ def _as_list(value, where: str) -> list:
     raise _err(where, f"expected a list, got {type(value).__name__}")
 
 
+def _built(where: str, build, *args):
+    """A model object built by scbi.plugin.construct, its errors located."""
+    try:
+        return build(*args)
+    except DefinitionError as e:
+        raise _err(where, str(e)) from None
+
+
 def _guarded(item: dict, where: str, convert) -> Guarded:
     if len(item) != 1:
         raise _err(where, f"a guarded item must have a single 'if <cond>' key: {item}")
@@ -126,31 +124,15 @@ def _guarded(item: dict, where: str, convert) -> Guarded:
     if not isinstance(key, str) or not key.startswith("if "):
         raise _err(where, f"unexpected mapping in list: {item}")
     cond = key[3:].strip()
-    try:
-        parse(cond)
-    except ExprError as e:
-        raise _err(where, str(e)) from None
+    _built(where, construct.guarded, cond, (), None)  # the condition first
     return Guarded(cond, tuple(convert(i, where) for i in _as_list(value, where)))
-
-
-def _check_builtins(text: str, where: str) -> str:
-    from scbi.hooks.expand import ExpandError, check
-
-    bad = unknown_builtins(text)
-    if bad:
-        raise _err(where, f"unknown function $({bad[0]} ...) (allowed: {', '.join(BUILTINS)})")
-    try:
-        check(text)
-    except ExpandError as e:
-        raise _err(where, str(e)) from None
-    return text
 
 
 def _value_item(item, where: str):
     if isinstance(item, dict):
         return _guarded(item, where, _value_item)
     if isinstance(item, str):
-        return _check_builtins(item, where)
+        return _built(where, construct.value, item)
     if item is None:
         return ""
     raise _err(where, f"unexpected value {item!r}")
@@ -161,26 +143,7 @@ def _env_item(item, where: str):
         return _guarded(item, where, _env_item)
     if not isinstance(item, str):
         raise _err(where, f"unexpected environment action {item!r}")
-    words = item.split(None, 1)
-    verb = words[0] if words else ""
-    if verb not in ENV_VERBS:
-        raise _err(where, f"unknown environment action {verb!r}")
-    rest = words[1] if len(words) > 1 else ""
-    arity = ENV_VERBS[verb]
-    if verb != "import":
-        _check_builtins(rest, where)
-    if verb == "import":
-        return EnvOp(verb, (rest,))
-    if arity == 0:
-        if rest:
-            raise _err(where, f"{verb} takes no argument")
-        return EnvOp(verb, ())
-    if arity < 0:
-        return EnvOp(verb, tuple(rest.split()))
-    parts = rest.split(None, arity - 1)
-    if len(parts) != arity:
-        raise _err(where, f"{verb} takes {arity} arguments")
-    return EnvOp(verb, tuple(parts))
+    return _built(where, construct.env_action, item)
 
 
 #  where -> line of the scalar in the file (1-based, first line of the
@@ -196,19 +159,10 @@ def _scalar_lines(node, where: str, out: dict[str, int]) -> None:
         out[where] = node.start_mark.line + (2 if node.style in ("|", ">") else 1)
 
 
-def _commands(text, where: str, cls=Commands, *args):
-    """A body of the command language, parsed (syntax errors are load
-    errors)."""
-    from scbi.hooks.cmdlang import CmdSyntaxError
-
+def _commands(text, where: str) -> Commands:
     if not isinstance(text, str):
         raise _err(where, "a body in the command language (string) is expected")
-    obj = cls(*args, text.rstrip("\n"), _LINES.get(where, 1))
-    try:
-        obj.ast
-    except CmdSyntaxError as e:
-        raise _err(where, str(e)) from None
-    return obj
+    return _built(where, construct.commands, text, _LINES.get(where, 1))
 
 
 def _body(hook: str, value, where: str):
@@ -216,13 +170,8 @@ def _body(hook: str, value, where: str):
     if kind == COMMAND:
         return _commands(value, where)
     if kind == VALUE:
-        if isinstance(value, dict) and hook in RECORDS and set(value) <= set(RECORDS[hook]):
-            fields = RECORDS[hook]
-            missing = [f for f in fields[: RECORD_MIN[hook]] if f not in value]
-            if missing:
-                raise _err(where, f"missing fields {missing}")
-            items = [str(value[f]) for f in fields if f in value]
-            return Values(tuple(items))
+        if isinstance(value, dict) and construct.is_record(hook, value):
+            return _built(where, construct.record, hook, value)
         return Values(tuple(_value_item(i, where) for i in _as_list(value, where)))
     return EnvOps(tuple(_env_item(i, where) for i in _as_list(value, where)))
 
@@ -230,7 +179,7 @@ def _body(hook: str, value, where: str):
 def _is_qualifier_map(hook: str, value) -> bool:
     if not isinstance(value, dict):
         return False
-    if hook in RECORDS and set(value) <= set(RECORDS[hook]):
+    if construct.is_record(hook, value):
         return False
     #  a guarded single item is a list item, not a qualifier map
     return not (len(value) == 1 and str(next(iter(value))).startswith("if "))
@@ -249,8 +198,7 @@ def _hooks(hook: str, value, where: str, cross: bool, out: dict) -> None:
             _hooks(hook, body, w, True, out)
         else:
             qualifier = PLAIN if q == PLAIN_KEY else q
-            if qualifier == "common" and not catalog.spec(hook).cumulative:
-                raise _err(w, f"'common' is only allowed for cumulative hooks")
+            _built(w, construct.check_qualifier, hook, qualifier)
             out[HookKey(hook, qualifier, cross)] = _body(hook, body, w)
 
 
@@ -285,10 +233,8 @@ def from_data(name: str, data: dict, where: str = "") -> PluginDef:
 
     for vname, members in (data.get("variants") or {}).items():
         w = f"{where}.variants.{vname}"
-        members = tuple(str(m) for m in _as_list(members, w))
-        if not members or any(not m or "." in m for m in members):
-            raise _err(w, "a list of variant names is expected")
-        pdef.variants[str(vname)] = members
+        pdef.variants[str(vname)] = _built(w, construct.variant_members,
+                                           [str(m) for m in _as_list(members, w)])
 
     for i, inh in enumerate(_as_list(data.get("inherit"), f"{where}.inherit")):
         if isinstance(inh, str):
@@ -321,8 +267,11 @@ def from_data(name: str, data: dict, where: str = "") -> PluginDef:
         if isinstance(f, str):
             _LINES.setdefault(f"{w}.run", _LINES.get(w, 1))
             f = {"run": f}
-        pdef.functions[str(fname)] = _commands(str(f.get("run", "")), f"{w}.run", Function,
-                                               tuple(_as_list(f.get("params"), w)))
+        run = f.get("run", "")
+        if not isinstance(run, str):
+            raise _err(f"{w}.run", "a body in the command language (string) is expected")
+        pdef.functions[str(fname)] = _built(f"{w}.run", construct.function, _as_list(f.get("params"), w),
+                                           run, _LINES.get(f"{w}.run", 1))
 
     names = set(catalog.step_names())
     for key, value in data.items():

@@ -21,6 +21,7 @@ from pathlib import Path
 
 from scbi.plugin.catalog import ALL_HOOKS
 from scbi.plugin.legacy import Call, PluginTrace, trace_plugin
+from scbi.plugin import formats
 from scbi.plugin.model import EnvOps, OsVariant, PluginDef, Commands, Values
 
 ALL_HOOKS_RE = "|".join(ALL_HOOKS)
@@ -33,7 +34,7 @@ class PluginError(Exception):
 def copy_function(definition, new_name: str):
     """Port of ``copy-function``: same body under another name.
 
-    Bash definitions are renamed; model objects (YAML plug-ins) are shared.
+    Bash definitions are renamed; model objects (plug-in definitions) are shared.
     """
     if not isinstance(definition, str):
         return definition
@@ -160,7 +161,8 @@ class Registry:
     tracer: Callable[[Path], PluginTrace] = trace_plugin
 
     #  function name -> Bash definition (legacy plug-in) or model object
-    #  (Commands, Values, EnvOps, Function) for YAML plug-ins
+    #  (Commands, Values, EnvOps, Function) for plug-ins read from a
+    #  definition format (scbi.plugin.formats)
     functions: dict[str, object] = field(default_factory=dict)
     variables: dict[str, str] = field(default_factory=dict)
     loaded: dict[str, str] = field(default_factory=dict)  # SCBI_LOADED[module]
@@ -170,20 +172,23 @@ class Registry:
     #  Called when a legacy plug-in printing something when sourced is
     #  loaded (module, path): the driver shows that output as Bash does
     on_output: Callable[[str, Path], None] | None = None
-    #  module -> {variant: included variants} (``variants:`` of YAML plug-ins)
+    #  module -> {variant: included variants} (composite variants of a definition)
     variant_aliases: dict[str, dict[str, tuple[str, ...]]] = field(default_factory=dict)
     #  False: only the legacy plug-ins are read (the converter)
-    yaml: bool = True
+    read_formats: bool = True
 
     # --------------------------------------------------------------- loading
 
     def plugin_file(self, module: str) -> Path | None:
-        """``<module>.yaml`` or the legacy ``<module>`` file."""
-        for name in ((f"{module}.yaml", module) if self.yaml else (module,)):
-            path = self.plugins_dir / name
-            if path.is_file():
+        """The definition file of ``module`` (``<module><suffix>`` of a
+        plug-in format, scbi.plugin.formats) or the legacy ``<module>``
+        file."""
+        if self.read_formats:
+            path = formats.find(self.plugins_dir, module)
+            if path is not None:
                 return path
-        return None
+        path = self.plugins_dir / module
+        return path if path.is_file() else None
 
     def load_module(self, module: str) -> bool:
         """Port of the plug-in loading part of ``load-module``.
@@ -194,7 +199,7 @@ class Registry:
             return True
         path = self.plugin_file(module)
         if path is not None:
-            if path.suffix == ".yaml":
+            if formats.format_of(path) is not None:
                 self._load_definition(module, path)
             else:
                 self._source(module, path)
@@ -211,11 +216,9 @@ class Registry:
         return False
 
     def _load_definition(self, module: str, path: Path) -> None:
-        from scbi.plugin import yamlfmt
-
         pdef = self.definitions.get(module)
         if pdef is None:
-            pdef = yamlfmt.load(path)
+            pdef = formats.load(path)
             self.definitions[module] = pdef
         self.apply_definition(pdef)
 

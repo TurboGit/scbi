@@ -9,7 +9,7 @@ environment actions are run by Bash so that the user definitions apply.
 
 A redefinition limited to a function body (e.g. ``define-var`` redefined
 inside ``module-final-step`` before calling ``plugin-call-env-hooks``)
-needs nothing special: that code runs in a hook shell where YAML hooks
+needs nothing special: that code runs in a hook shell where the hooks of plug-in definitions
 are rendered as Bash calls of the helpers (scbi.hooks.exec.render).
 """
 

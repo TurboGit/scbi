@@ -139,6 +139,11 @@ SCBI_IMPL=python ./run test001   # in tests/: one driver with the Python driver
   order `catalog.FORMAT_ORDER`); Bash plug-ins are converted with
   `python3 -m scbi.convert`. Their test fixtures are in `tests/fixtures/`
   (not in `tests/scripts.d`, which only holds valid plug-ins).
+- The driver only uses the plug-in model (`plugin/model.py`). YAML is
+  confined to its reader/writer (`plugin/yamlfmt.py`, `plugin/yamlwrite.py`)
+  and the YAML tools (lint, format, converter). Readers find files through
+  `plugin/formats.py` (suffix → reader; add a format there) and build the
+  model with `plugin/construct.py` (checks common to all formats).
 - Command hooks and functions of YAML plug-ins are in the command
   language (`hooks/cmdlang.py`), run by the interpreter, never by Bash
   (`steps/interp.py`, isolated environment `steps/hookenv.py`, replay

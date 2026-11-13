@@ -1,6 +1,6 @@
 """Translation of guard conditions (scbi.plugin.expr) to Bash.
 
-YAML hooks run in a Bash shell (when called from Bash code, e.g. by
+Hooks of plug-in definitions run in a Bash shell (when called from Bash code, e.g. by
 ``plugin-call-env-hooks`` from a user hook) are rendered as Bash functions;
 their guards are translated to Bash conditions using the runtime helpers,
 so that they are evaluated when the hook is called, with its arguments,
@@ -27,7 +27,7 @@ from scbi.plugin import expr
 
 
 def _q(text: str) -> str:
-    """Double quoted Bash word keeping $ expansions (YAML text)."""
+    """Double quoted Bash word keeping $ expansions (text of a definition)."""
     return '"' + text.replace("\\", "\\\\").replace('"', '\\"').replace("`", "\\`") + '"'
 
 

@@ -18,9 +18,11 @@ import re
 import shutil
 import sys
 from collections import deque
+from pathlib import Path
 
 from scbi.bashenv import quote
 from scbi.hooks.exec import is_nop, run_code
+from scbi.plugin import formats
 from scbi.plugin.resolve import get_hook
 from scbi.steps import interp
 
@@ -228,12 +230,12 @@ class StepWrapper:
 
 def copy_plugin(plugins: str, plugin: str, dest: str, errors: list[str], registry=None) -> None:
     """``_internal_copy-plugin PLG DIR``: the plug-in file and the files of
-    the plug-ins it inherits are copied to DIR (with ``registry``: the YAML
-    files too)."""
-    yml = f"{plugins}/{plugin}.yaml"
-    if registry is not None and os.path.isfile(yml):
+    the plug-ins it inherits are copied to DIR (with ``registry``: the
+    definition files too, scbi.plugin.formats)."""
+    definition = formats.find(Path(plugins), plugin) if registry is not None else None
+    if definition is not None:
         try:
-            shutil.copy(yml, dest)
+            shutil.copy(definition, dest)
         except OSError as e:
             errors.append(f"cp: cannot create regular file '{dest}': {e.strerror}")
         pdef = registry.definitions.get(plugin)

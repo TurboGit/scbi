@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 
 import yaml
 
-from scbi.plugin import catalog, yamlfmt
+from scbi.plugin import catalog, construct, yamlfmt
 
 QUALIFIER_RANK = {yamlfmt.PLAIN_KEY: 0, "common": 1, "default": 2}
 INHERIT_ORDER = ("from", "hooks", "custom-hooks", "no-variant", "name")
@@ -167,8 +167,8 @@ def _keys_order(path: tuple, value: dict):
         return _field_order(OS_VARIANT_ORDER) if len(path) == 2 else None
     if top == "inherit":
         return _field_order(INHERIT_ORDER)
-    if top in yamlfmt.RECORDS and set(value) <= set(yamlfmt.RECORDS[top]):
-        return _field_order(yamlfmt.RECORDS[top])
+    if construct.is_record(top, value):
+        return _field_order(construct.RECORDS[top])
     if top in catalog.step_names() and yamlfmt._is_qualifier_map(top, value):
         return _qualifier_rank
     return None

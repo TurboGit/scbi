@@ -16,7 +16,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from scbi.plugin import yamlfmt
+from scbi.plugin import formats, yamlfmt
 from scbi.plugin.legacy import LegacyLoadError, trace_plugin
 from scbi.plugin.lift import Issue, lift
 from scbi.plugin.registry import Registry
@@ -26,7 +26,7 @@ def convert(path: Path) -> tuple[str | None, list[Issue]]:
     """YAML text for the plug-in ``path`` (None when not convertible)."""
     try:
         #  the legacy plug-ins only (YAML versions may be next to them)
-        registry = Registry(path.parent, yaml=False)
+        registry = Registry(path.parent, read_formats=False)
         registry.load_module(path.name)
         res = lift(registry.traces[path.name], set(registry.functions))
     except LegacyLoadError as e:
@@ -48,7 +48,7 @@ def closure(directory: Path) -> list[str]:
     plugins = sorted(p.name for p in directory.iterdir()
                      if p.is_file() and not p.name.startswith((".", "_")) and not p.name[0].isdigit()
                      and "." not in p.name and not p.name.endswith("~"))
-    registry = Registry(directory, yaml=False)
+    registry = Registry(directory, read_formats=False)
     for name in plugins:
         try:
             registry.load_module(name)
@@ -59,11 +59,11 @@ def closure(directory: Path) -> list[str]:
     while changed:
         changed = False
         for name in plugins:
-            if (directory / f"{name}.yaml").exists():
+            if formats.find(directory, name) is not None:
                 continue
             for parent in registry.inherits.get(name, []):
-                yml = directory / f"{parent}.yaml"
-                if yml.exists():
+                yml = formats.find(directory, parent)
+                if yml is not None:
                     yml.unlink()
                     removed.append(parent)
                     changed = True

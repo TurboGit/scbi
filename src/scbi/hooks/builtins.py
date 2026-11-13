@@ -1,4 +1,4 @@
-"""Built-in functions usable in YAML values and environment actions.
+"""Built-in functions usable in the values and environment actions of plug-in definitions.
 
 Ports of the runtime helpers of scripts.d/0_runtime callable as ``$(...)``:
 get-version, get-build-type, is-enabled, last-modified-directory,

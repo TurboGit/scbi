@@ -18,13 +18,14 @@ import re
 from pathlib import Path
 
 from scbi.bashcompat import assoc_keys, words
+from scbi.plugin import formats
 
 
 def may_be_meta(plugins: Path, module: str) -> bool:
     """Fast check of a meta-module (false positives are harmless).
 
     Bash: ``egrep -sq "function $M.*modules" $SCBI_PLUGINS/$M``; for a
-    YAML plug-in, a ``modules`` key.
+    plug-in definition, a ``modules`` hook.
     """
     f = plugins / module
     if f.is_file():
@@ -32,9 +33,13 @@ def may_be_meta(plugins: Path, module: str) -> bool:
             return re.search(f"function {module}.*modules", f.read_text(errors="replace")) is not None
         except re.error:
             return False
-    y = plugins / f"{module}.yaml"
-    if y.is_file():
-        return re.search(r"(?m)^modules\s*:", y.read_text(errors="replace")) is not None
+    path = formats.find(plugins, module)
+    if path is not None:
+        try:
+            pdef = formats.load(path)
+        except formats.PluginFormatError:
+            return False
+        return any(key.hook == "modules" for key in pdef.hooks)
     return False
 
 

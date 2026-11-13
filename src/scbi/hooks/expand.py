@@ -1,4 +1,4 @@
-"""Expansion of YAML values and environment action arguments.
+"""Expansion of the values of plug-in definitions and environment action arguments.
 
 A value is text where ``$NAME`` and ``${NAME}`` are replaced by the hook
 parameter or shell variable ``NAME`` (empty when undefined) and

@@ -1,4 +1,4 @@
-"""The command language of the command hooks of YAML plug-ins (config,
+"""The command language of the command hooks of plug-in definitions (config,
 build, install, setup, wrapup, tests, version, run, pre-/post- steps and
 the plug-in functions).
 

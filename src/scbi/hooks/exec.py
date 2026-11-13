@@ -11,7 +11,7 @@ own sub-shell by the Bash driver) containing:
 - the driver state read by the runtime helpers (SCBI_MODVER,
   SCBI_MODULES_LIST, SCBI_MODULES_DIR, SCBI_OS_DISCRIMINANTS...),
 - the functions of the loaded plug-ins: Bash definitions for legacy
-  plug-ins, YAML hooks rendered as Bash functions (needed when Bash code
+  plug-ins, hooks of plug-in definitions rendered as Bash functions (needed when Bash code
   calls them, e.g. get-config-options from a config script).
 
 :meth:`HookShell.run` runs a command hook (output given line by line),
@@ -91,7 +91,7 @@ def _block(items, emit, indent: str = "    ") -> str:
 def render(name: str, obj, plugin: str = "") -> str:
     """Bash definition of the namespace entry ``name``.
 
-    YAML hooks are rendered entirely in Bash: values are expanded and
+    Hooks of plug-in definitions are rendered entirely in Bash: values are expanded and
     guards evaluated when the function is called (with its arguments), and
     environment actions call the runtime helpers, hence the visible
     ``define-var`` (which a user may have redefined).
@@ -218,7 +218,7 @@ class HookShell:
             parts.append(_assoc(name, values))
         parts.append(f"SCBI_MODULES_LIST=({' '.join(quote(m) for m in ctx.modules_list)})")
         parts.append(f"SCBI_HOST={quote(ctx.host)}; SCBI_TARGET={quote(ctx.target)}")
-        #  Plug-ins functions: YAML ones rendered first, then the legacy
+        #  Plug-ins functions: definitions (model objects) rendered first, then the legacy
         #  plug-in files sourced in loading order (as the Bash driver does,
         #  so errors refer to the plug-in file and line, and inherit-plugin
         #  / with-variant run as in Bash), then the remaining Bash
@@ -309,7 +309,7 @@ def run_env_hook(shell: HookShell, ctx: HookContext, function: str, args: list[s
                  python_env: bool, base_env: dict[str, str] | None = None) -> None:
     """Apply the environment hook ``function`` to ``ctx.env``.
 
-    A YAML hook is evaluated in Python when ``python_env`` is true (see
+    A hook of a plug-in definition is evaluated in Python when ``python_env`` is true (see
     scbi.hooks.policy); otherwise, and for legacy hooks, it runs in a hook
     shell, so that a redefined ``define-var`` applies.
     """
