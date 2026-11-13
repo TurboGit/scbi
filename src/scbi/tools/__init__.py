@@ -12,4 +12,5 @@ TOOLS = {
     "show": "scbi.tools.show",
     "shell": "scbi.tools.shell",
     "source-archive": "scbi.tools.source_archive",
+    "lint": "scbi.tools.lint",
 }

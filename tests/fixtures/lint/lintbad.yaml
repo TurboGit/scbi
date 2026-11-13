@@ -1,0 +1,20 @@
+# A YAML plug-in with errors and warnings (scbi lint, tests/drivers/test174)
+plugin: lintbad
+vcs:
+  proxy: none
+  options: none
+confg: make
+depends:
+  common:
+    - lib1
+  v1: []
+config:
+  common: ./configure
+  v1: ./configure --prefix=$PREFIX $VERSION
+build: make $UNKNOWN_VAR
+env:
+  - frob-var A b
+  - set-var B $OTHER
+out-of-tree: maybe
+patches:
+  - if ref ==: a.diff

@@ -148,16 +148,28 @@ mkdir -p $PWD/logs
 
 . osht
 
+#  Drivers specific to one implementation: skipped with the other one
+case $SCBI_IMPL in
+    python) ONLY_OTHER=bash-only.txt ;;
+    *)      ONLY_OTHER=python-only.txt ;;
+esac
+
 cd drivers
 if [ -z "$1" ]; then
-    TESTS=( test??? )
+    TESTS=()
+    for t in test???; do
+        grep -q "^$t\b" ../$ONLY_OTHER || TESTS+=( $t )
+    done
 else
     TESTS=( $* )
 fi
 cd ..
 
 #  The plan is only known when running the whole testsuite
-[ -z "$1" ] && PLAN 1378
+case $SCBI_IMPL in
+    python) [ -z "$1" ] && PLAN 1380 ;;
+    *)      [ -z "$1" ] && PLAN 1378 ;;
+esac
 
 export SCBI_CACHE_DIR="no"
 

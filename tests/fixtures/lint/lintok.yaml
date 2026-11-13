@@ -1,0 +1,21 @@
+# A correct YAML plug-in (scbi lint, tests/drivers/test174)
+plugin: lintok
+vars:
+  LINTOK_OPTS: --enable-all
+vcs:
+  proxy: none
+  options: none
+  protocol: git
+  url: /nothere/lintok.git
+depends:
+  - lib2
+env:
+  - add-to-var PATH $PREFIX/bin
+config: |
+  echo config $PREFIX $TARGET $VARIANT $LINTOK_OPTS
+build: |
+  for f in a b; do
+      echo $f
+  done
+install: |
+  echo install $PREFIX

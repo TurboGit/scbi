@@ -37,6 +37,18 @@ if [[ ${#TESTS[@]} == 0 ]]; then
     TESTS=( $(CDPATH= cd drivers && ls test???) )
 fi
 
+#  Drivers specific to the other implementation are skipped
+[[ $IMPL == python ]] && ONLY_OTHER=bash-only.txt || ONLY_OTHER=python-only.txt
+SELECTED=()
+for t in "${TESTS[@]}"; do
+    if grep -q "^$t\b" $ONLY_OTHER; then
+        echo "skip  $t  (see $ONLY_OTHER)"
+    else
+        SELECTED+=( $t )
+    fi
+done
+TESTS=( "${SELECTED[@]}" )
+
 touch $PASS_FILE
 rm -fr $LOG_DIR
 mkdir -p $LOG_DIR
