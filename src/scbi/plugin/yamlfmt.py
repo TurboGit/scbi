@@ -331,11 +331,9 @@ def _dump_body(hook: str, body):
 
 
 def to_data(pdef: PluginDef) -> dict:
+    """The plug-in as YAML data, keys in the canonical order
+    (catalog.FORMAT_ORDER)."""
     data: dict = {"plugin": pdef.name}
-    if pdef.variables:
-        data["vars"] = dict(pdef.variables)
-    if pdef.variants:
-        data["variants"] = {v: list(m) for v, m in pdef.variants.items()}
     if pdef.inherits:
         lst = []
         for inh in pdef.inherits:
@@ -350,18 +348,22 @@ def to_data(pdef: PluginDef) -> dict:
                 d["name"] = inh.name
             lst.append(d)
         data["inherit"] = lst
-    if pdef.os_variants:
-        data["os-variants"] = {
-            v.name: {"packages": list(v.packages), **({"env": _dump_items(v.env)} if v.env else {})}
-            for v in pdef.os_variants
-        }
+    if pdef.variables:
+        data["vars"] = dict(pdef.variables)
     if pdef.functions:
         data["functions"] = {
             n: ({"params": list(f.params)} if f.params else {}) | {"run": f.script}
             for n, f in pdef.functions.items()
         }
+    if pdef.variants:
+        data["variants"] = {v: list(m) for v, m in pdef.variants.items()}
+    if pdef.os_variants:
+        data["os-variants"] = {
+            v.name: {"packages": list(v.packages), **({"env": _dump_items(v.env)} if v.env else {})}
+            for v in pdef.os_variants
+        }
 
-    order = {h: i for i, h in enumerate(catalog.step_names())}
+    order = {h: i for i, h in enumerate(catalog.FORMAT_ORDER)}
     by_hook: dict[str, dict[HookKey, object]] = {}
     rank = {PLAIN: 0, "common": 1, "default": 2}
     for key in sorted(pdef.hooks, key=lambda k: (order[k.hook], k.cross, rank.get(k.qualifier, 3), k.qualifier)):
@@ -387,7 +389,7 @@ def to_data(pdef: PluginDef) -> dict:
 
 
 def dump(pdef: PluginDef) -> str:
-    return yaml.dump(
-        to_data(pdef), Dumper=_Dumper, sort_keys=False, default_flow_style=False,
-        allow_unicode=True, width=1000,
-    )
+    """The canonical YAML text of the plug-in (scbi.plugin.yamlwrite)."""
+    from scbi.plugin.yamlwrite import write
+
+    return write(to_data(pdef))

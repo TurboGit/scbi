@@ -87,6 +87,34 @@ FINAL_STEP = HookSpec(
 )
 
 
+#  Canonical order of the keys of a YAML plug-in (scbi format and the
+#  converter): header, sources, dependencies, environment, steps (each one
+#  between its pre- and post- hooks), others, meta-modules
+HEADER_KEYS = ("plugin", "inherit", "vars", "functions", "variants", "os-variants")
+_ORDER = (
+    "vcs", "archive", "patches",
+    "depends", "build-depends", "tests-depends",
+    "env", "build-env", "tests-env", "external-env",
+    "setup", "out-of-tree", "only-explicit-build", "config-options",
+    "config", "build", "install", "wrapup", "tests",
+    "run", "version", "prefix",
+    "modules", "aggregate", "propagate-version", "plan",
+)
+
+
+def _format_order() -> tuple[str, ...]:
+    keys: list[str] = list(HEADER_KEYS)
+    for h in _ORDER:
+        if h in STEPS:
+            keys += [f"pre-{h}", h, f"post-{h}"]
+        else:
+            keys.append(h)
+    return tuple(keys)
+
+
+FORMAT_ORDER = _format_order()
+
+
 def step_names() -> list[str]:
     """All hook names a plug-in can define, including pre-/post- steps."""
     names = list(ALL_HOOKS)
@@ -101,3 +129,6 @@ def spec(hook: str) -> HookSpec:
         if hook.startswith(prefix) and hook[len(prefix):] in STEPS:
             return HOOKS[hook[len(prefix):]]
     return HOOKS[hook]
+
+
+assert sorted(FORMAT_ORDER[len(HEADER_KEYS):]) == sorted(step_names())

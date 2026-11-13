@@ -1,0 +1,32 @@
+# Header of the plug-in (stays at the top)
+# second header line
+
+# Comment of build
+build: make -j4   # end of line of build
+
+config:
+  # the v1 variant
+  v1: ./configure --enable-v1
+  cross:
+    _: ./configure --host=$TARGET
+  _: |
+    # this is shell, not a YAML comment
+    ./configure --prefix=$PREFIX
+  default: ./configure
+
+# Comment of depends
+depends:
+  - lib2   # needed for x
+  # lib1 comes after
+  - lib1
+
+plugin: fmt
+vcs: {url: /r/fmt.git, protocol: git, options: none, proxy: none}
+env: [add-to-var PATH $PREFIX/bin, 'set-var A "b c"']
+pre-config: echo pre
+vars:
+  B: '@x'
+patches:
+  - {if ref =~ 1.0: a.diff}
+
+# End of file comment
