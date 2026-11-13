@@ -33,6 +33,8 @@ from scbi.plugin.resolve import get_hook
 from scbi.sources import handle as sources
 from scbi.sources.buildid import build_id
 from scbi.sources.data import archive_exists, vcs_data
+from scbi.steps import generic as generic_steps
+from scbi.steps import wrapper as step_wrapper
 from scbi.vercmp import VERSION_ERROR, VERSION_OK, check_versions, get_version_number
 
 #  is-module-up-to-date statuses
@@ -481,7 +483,11 @@ class Builder:
         purge = self.get("DO_PURGE")
         if purge in ("yes", "only"):
             self.ilog(module, "%BPurging", f"%t{module}%c", "for", f"{self.get('SCBI_TARGET')}/{variant}")
-            if os.path.isdir(f"{bdir}/{module}"):
+            if os.path.isdir(f"{bdir}/{module}") and generic_steps.python_allowed(self, "purge"):
+                sys.stdout.flush()
+                generic_steps.Generic(self, formodule, module, variant,
+                                      self.target_dir(module, variant)).step("purge", None)
+            elif os.path.isdir(f"{bdir}/{module}"):
                 self.run(module, variant, (
                     f"module-purge {quote(f'{bdir}/{module}')} {quote(formodule)} {quote(module)} "
                     f"{quote(variant)} \"$SCBI_TARGET\""))
@@ -594,6 +600,8 @@ class Builder:
         def internal_wrapper(fct: str) -> int:
             if not fct:
                 return 0
+            if step_wrapper.python_allowed(self):
+                return step_wrapper.StepWrapper(self, meta, variant).internal(f"{bdir}/install", fct)
             return self.run(meta, variant, (
                 f"_internal_module-variant-wrapper {quote(f'{bdir}/install')} {quote(meta)} "
                 f"{quote(variant)} {quote(fct)}"))
@@ -929,6 +937,10 @@ class Builder:
         def generic(step: str) -> int:
             if not self.fn_exists(f"module-{step}"):
                 return 0
+            if generic_steps.python_allowed(self, step):
+                sys.stdout.flush()
+                return generic_steps.Generic(self, formodule, module, variant, tvdir).step(
+                    step, self.get("log"), append=bool(teeopt))
             return self.run(module, variant, (
                 f"cd {quote(f'{bdir}/{module}')}\n"
                 f"module-{step} {args} 2>&1 | tee {teeopt} \"$log\"\n"
@@ -940,6 +952,8 @@ class Builder:
             fct = get_hook(d.registry, module, variant, step, d.runner().cross)
             if not fct or is_nop(d.registry.functions.get(fct)):
                 return 0
+            if step_wrapper.python_allowed(self):
+                return step_wrapper.StepWrapper(self, module, variant).internal(f"{tvdir}/install", fct)
             return self.run(module, variant, (
                 f"module-variant-wrapper {quote(f'{tvdir}/install')} {quote(module)} "
                 f"{quote(variant)} {quote(step)}"))

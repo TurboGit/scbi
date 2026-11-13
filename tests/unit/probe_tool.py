@@ -15,6 +15,10 @@ Commands (several separated by @@):
   handle-sources FORMODULE MODREF         handle-sources (in $SCBI_BDIR/MODULE)
   get-archive MODULE VARIANT VERSION      get-archive (in $SCBI_BDIR/MODULE, as
                                           handle-sources: 2>>$log | tee -a $log)
+  generic STEP FORMODULE MODREF OOT       module-STEP as the driver runs it
+                                          (2>&1 | tee -a $log, purge: no tee)
+  wrapper STEP MODREF OOT                 module-variant-wrapper (the target
+                                          directory and its logs created)
 """
 
 import sys
@@ -90,6 +94,38 @@ case $cmd in
         mkdir -p $SCBI_BDIR/$1
         log=$SCBI_BDIR/$1.log
         (cd $SCBI_BDIR/$1; get-archive $1 $2 $3 2>>$log | tee -a $log; echo "rc=${PIPESTATUS[0]}")
+        ;;
+    generic)
+        mi=()
+        get-module-ref mi $3 $2
+        m=${mi[0]}
+        v=${mi[1]}
+        load-module $m
+        module=$m
+        SCBI_ISOOT=$4
+        TVDIR=""
+        get-target-dir TVDIR $m $v
+        mkdir -p $SCBI_BDIR/$m
+        log=$SCBI_BDIR/$m.log
+        if [[ $1 == purge ]]; then
+            (module-purge $SCBI_BDIR/$m $2 $m $v "$SCBI_TARGET"; echo "rc=$?")
+        else
+            (cd $SCBI_BDIR/$m; module-$1 $TVDIR/install $2 $m $v "$SCBI_TARGET" "$SCBI_ISOOT" 2>&1 | tee -a $log
+             echo "rc=${PIPESTATUS[0]}")
+        fi
+        ;;
+    wrapper)
+        mi=()
+        get-module-ref mi $2 @root
+        m=${mi[0]}
+        v=${mi[1]}
+        load-module $m
+        module=$m
+        SCBI_ISOOT=$3
+        TVDIR=""
+        get-target-dir TVDIR $m $v
+        mkdir -p $TVDIR/logs $TVDIR/build $TVDIR/src
+        (module-variant-wrapper $TVDIR/install $m $v $1); echo "rc=$?"
         ;;
 esac
 }
@@ -179,6 +215,49 @@ def run1(driver, b, argv):
             rc = get_archive(b, a[0], a[1], a[2], log, tee)
         finally:
             os.chdir(cwd)
+        out(f"rc={rc}")
+        return
+    if cmd == "generic":
+        import os
+
+        from scbi.steps.generic import Generic
+
+        info = (driver.plan.module_ref(a[2], a[1]) + ["", ""])[:2]
+        m, v = info
+        if driver.registry.load_module(m):
+            b.load_module(m, v)
+        saved = {n: driver.get(n) for n in ("SCBI_ISOOT", "module")}
+        driver.set("SCBI_ISOOT", a[3])
+        driver.set("module", m)
+        tvdir = b.target_dir(m, v)
+        os.makedirs(f"{driver.get('SCBI_BDIR')}/{m}", exist_ok=True)
+        log = f"{driver.get('SCBI_BDIR')}/{m}.log"
+        try:
+            rc = Generic(b, a[1], m, v, tvdir).step(a[0], None if a[0] == "purge" else log)
+        finally:
+            for n, val in saved.items():
+                driver.set(n, val)
+        out(f"rc={rc}")
+        return
+    if cmd == "wrapper":
+        import os
+
+        from scbi.steps.wrapper import StepWrapper
+
+        m, v = (driver.plan.module_ref(a[1]) + ["", ""])[:2]
+        if driver.registry.load_module(m):
+            b.load_module(m, v)
+        saved = {n: driver.get(n) for n in ("SCBI_ISOOT", "module")}
+        driver.set("SCBI_ISOOT", a[2])
+        driver.set("module", m)
+        tvdir = b.target_dir(m, v)
+        for sub in ("logs", "build", "src"):
+            os.makedirs(f"{tvdir}/{sub}", exist_ok=True)
+        try:
+            rc = StepWrapper(b, m, v).variant_step(f"{tvdir}/install", a[0])
+        finally:
+            for n, val in saved.items():
+                driver.set(n, val)
         out(f"rc={rc}")
         return
     if cmd == "patch-md5":

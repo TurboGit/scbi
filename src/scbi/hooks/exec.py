@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import atexit
 import os
+import re
 import subprocess
 import tempfile
 from collections.abc import Callable
@@ -456,6 +457,8 @@ def is_nop(obj) -> bool:
     if isinstance(obj, Shell):
         return obj.script.strip() in ("", "true")
     if isinstance(obj, str):
-        body = " ".join(" ".join(obj.rstrip("\n").split("\n")[-3:]).split())
-        return body == "{ true }"
+        #  declare -f text ("f () \n{ \n    true\n}") or the source of the
+        #  definition ("function f() { true; }")
+        body = obj.split("()", 1)[1] if "()" in obj else obj
+        return re.split(r"[\s;]+", body.strip()) == ["{", "true", "}"]
     return False
