@@ -123,7 +123,8 @@ class BashOracle:
         return env
 
     def run(
-        self, script: str, env: dict[str, str] | None = None, check: bool = True
+        self, script: str, env: dict[str, str] | None = None, check: bool = True,
+        timeout: float | None = None,
     ) -> subprocess.CompletedProcess:
         full = f"source {self.prelude} 2>/dev/null\n{script}\n"
         proc = subprocess.run(
@@ -133,6 +134,7 @@ class BashOracle:
             env=self.env(env),
             capture_output=True,
             text=True,
+            timeout=timeout,
         )
         if check and proc.returncode != 0:
             raise BashError(script, proc)

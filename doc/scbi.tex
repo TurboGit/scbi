@@ -2005,13 +2005,18 @@ version: |
 	<default>}, \code{config-options} (the list of the
 	\code{config-options} hooks of the module), \code{last-modified-directory
 	<glob>}, \code{is-enabled <feature> [then] [else]}, \code{get-version},
-	\code{output <command line>} (its standard output), \code{first-line
-	<value>}, \code{status} (of the previous step), \code{basename},
-	\code{dirname}, \code{command-path <tool>}. \code{export VAR = ...}
+	\code{output <command line>} (its standard output), \code{output-words
+	<command line>} (the words of its standard output, a list),
+	\code{first-line <value>}, \code{status} (of the previous step),
+	\code{basename}, \code{dirname}, \code{command-path <tool>},
+	\code{all-variants <variant>} (the list of the variants of a variant
+	string, empty for \code{default}). \code{export VAR = ...}
 	also sets it in the environment of the following commands.
 	\item[built-in commands] \code{cd}, \code{echo [-n]}, \code{return
 	[N]}, \code{exit [N]}, \code{true}, \code{false}, \code{export NAME},
-	\code{unset NAME}, \code{gprbuild-project <project>} and the functions
+	\code{unset NAME}, \code{gprbuild-project <project>},
+	\code{check-versions <v1> <op> <v2>} (succeeds when the version
+	comparison is true) and the functions
 	of the plug-in (\code{functions:}, called with their parameters).
 	\item[blocks] \code{if <condition>:}, \code{elif <condition>:},
 	\code{else:} (the conditions of values, \seeref{yaml-conditions}, plus
@@ -2021,12 +2026,22 @@ version: |
 	quoted strings as operands); \code{for NAME in <words>:};
 	\code{write FILE:} (the indented text, expanded, written to the file),
 	\code{append FILE:}, \code{write-raw FILE:}, \code{append-raw FILE:}
-	(not expanded).
+	(not expanded). In the expanded forms, \code{\textbackslash\$},
+	\code{\textbackslash`} and \code{\textbackslash\textbackslash} give the
+	character, as in a here-document.
 \end{description}
 
 The status of a body is the status of its last step: a failing command
 does not stop it unless the next one is chained with \code{\&\&}. An
 error gives the plug-in file, the hook and the line.
+\code{\$PWD} is the current directory of the hook. \code{return N} and
+\code{exit N} give the status modulo 256 (\code{return -1} is 255).
+
+The plug-in converter (\code{python3 -m scbi.convert --commands=cmdlang})
+translates the Bash command hooks to this language. It reports, instead
+of converting, the constructs which have no equivalent (\code{eval},
+\code{while}, nested functions, arithmetic, calls of runtime functions
+other than the built-ins above...).
 
 \subsubsection{Conditions}
 \label{yaml-conditions}

@@ -36,3 +36,23 @@ def mask_bash_error_location(text: str) -> str:
     line N:``) instead of the tool script (``scbi-shell: line N:``); the
     message itself is the same."""
     return _BASH_ERROR_LOCATION.sub("<bash>: ", text)
+
+
+#  Bash command hooks which are broken, the converted hook does what was
+#  intended
+BROKEN_BASH_HOOKS = {
+    #  local OPTIONS=$(get-config-options $PREFIX $TARGET $VARIANT): old
+    #  calling convention (the result variable comes first), Bash fails
+    "c-ansel-config",
+}
+
+
+def converted_hook_differs(name: str, text: str = "") -> bool:
+    """Also: get-config-options in a cross-/pre-/post- hook: get-caller
+    removes only the hook name ("c-x-cross" for c-x-cross-config), Bash
+    finds no config-options; the converted hook gets those of the module."""
+    import re
+
+    if "config-options" in text and re.search(r"-(cross|pre|post)-", name):
+        return True
+    return name in BROKEN_BASH_HOOKS

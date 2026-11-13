@@ -57,14 +57,17 @@ from scbi.hooks import builtins as _builtins
 from scbi.hooks.context import HookContext
 from scbi.hooks.expand import ExpandError, expand
 from scbi.plugin import expr
+from scbi.vercmp import check_versions
 
 #  Functions usable in an assignment (VAR = <function> args)
 FUNCTIONS = (
     "get-build-type", "config-options", "last-modified-directory", "is-enabled", "get-version",
-    "output", "first-line", "status", "basename", "dirname", "command-path",
+    "output", "output-words", "first-line", "status", "basename", "dirname", "command-path",
+    "all-variants",
 )
 #  Built-in commands
-COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset", "gprbuild-project")
+COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset", "gprbuild-project",
+            "check-versions")
 
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _ASSIGN = re.compile(r"^(export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+=(?:\s+(.*)|\s*)$")
@@ -206,7 +209,11 @@ def tokenize(text: str, line: int = 0) -> list:
             j, buf = i + 1, []
             while j < n and text[j] != '"':
                 if text[j] == "\\" and j + 1 < n and text[j + 1] in '"\\$`':
-                    buf.append(text[j + 1])
+                    #  escaped: a literal part (not expanded)
+                    if buf:
+                        parts.append(("".join(buf), '"'))
+                        buf = []
+                    parts.append((text[j + 1], "'"))
                     j += 2
                     continue
                 if text.startswith("$(", j):
@@ -224,7 +231,9 @@ def tokenize(text: str, line: int = 0) -> list:
                 j += 1
             if j >= n:
                 raise CmdSyntaxError(line, f"unterminated quote in {text!r}")
-            parts.append(("".join(buf), '"'))
+            #  an empty "" still makes a (quoted) word
+            if buf or not parts or parts[-1][1] != "'":
+                parts.append(("".join(buf), '"'))
             i = j + 1
         elif text.startswith("$(", i):
             depth, k = 0, i + 1
@@ -403,7 +412,7 @@ def _block(lines, pos: int, indent: int) -> tuple[tuple, int]:
             rhs = a.group(3) or ""
             words = tuple(w for w in tokenize(rhs, number) if isinstance(w, Word))
             if any(not isinstance(t, Word) for t in tokenize(rhs, number)) and \
-                    not (words and _word_text(words[0]) == "output"):
+                    not (words and _word_text(words[0]) in ("output", "output-words")):
                 raise CmdSyntaxError(number, f"operators are only allowed after 'output' in {s!r}")
             steps.append(Assign(number, a.group(2), bool(a.group(1)), words, rhs))
             pos += 1
@@ -523,13 +532,19 @@ class Runner:
         import copy
 
         ctx = copy.copy(self.ctx)
-        ctx.locals = {k: (" ".join(v) if isinstance(v, list) else v) for k, v in state.vars.items()}
+        #  PWD: the current directory of the hook (as cd sets it in Bash)
+        ctx.locals = {"PWD": state.cwd,
+                      **{k: (" ".join(v) if isinstance(v, list) else v) for k, v in state.vars.items()}}
         ctx.cwd = type(self.ctx.cwd)(state.cwd)
         return ctx
 
     def expand_text(self, text: str, state: State, line: int) -> str:
+        """Expansion of a write block, like a here-document: \\$ \\` and
+        \\\\ give the character."""
         try:
-            return expand(text, self.hook_ctx(state))
+            ctx = self.hook_ctx(state)
+            pieces = re.split(r"\\([$`\\])", text)
+            return "".join(expand(piece, ctx) if k % 2 == 0 else piece for k, piece in enumerate(pieces))
         except ExpandError as e:
             self.error(state, line, str(e))
             return ""
@@ -624,13 +639,15 @@ class Runner:
         state.status = 0 if name != "output" else state.status
 
     def function(self, name: str, step: Assign, state: State):
-        if name == "output":
-            rest = step.text.strip()[len("output"):].strip()
+        if name in ("output", "output-words"):
+            rest = step.text.strip()[len(name):].strip()
             chunks: list[str] = []
             sink = State(state.vars, state.env, state.cwd, chunks.append, state.err)
             status = self.run(parse(rest, step.line), sink)
             state.status = status
-            return "".join(chunks).rstrip("\n")
+            text = "".join(chunks).rstrip("\n")
+            #  output-words: the words of the output (unquoted $(...))
+            return text.split() if name == "output-words" else text
         args = self.expand_words(step.words[1:], state)
         ctx = self.hook_ctx(state)
         if name == "get-build-type":
@@ -653,6 +670,10 @@ class Runner:
             return os.path.dirname(args[0].rstrip("/")) or "." if args else "."
         if name == "command-path":
             return shutil.which(args[0], path=state.env.get("PATH")) or "" if args else ""
+        if name == "all-variants":
+            #  the variants of a variant string (a.b -> [a, b]), none for default
+            v = " ".join(args)
+            return [] if v == "default" else v.replace(".", " ").split()
         return None
 
     # --------------------------------------------------------- commands
@@ -711,7 +732,9 @@ class Runner:
                 out(" ".join(args) + ("\n" if newline else ""))
                 return 0
             if name in ("return", "exit"):
-                raise _Return(int(args[0]) if args and args[0].isdigit() else state.status)
+                #  Bash: the status is taken modulo 256 (return -1 gives 255)
+                raise _Return(int(args[0]) & 0xFF if args and re.fullmatch(r"-?\d+", args[0])
+                              else state.status)
             if name in ("true", ":"):
                 return 0
             if name == "false":
@@ -729,6 +752,9 @@ class Runner:
                     state.vars.pop(a, None)
                     state.env.pop(a, None)
                 return 0
+            if name == "check-versions":
+                a, op, b = (args + ["", "", ""])[:3]
+                return 0 if check_versions(a, op, b) else 1
             if name == "gprbuild-project":
                 target = self.ctx.params.get("TARGET") or self.ctx.target
                 argv = ["gprbuild", "-p", "-q"]
@@ -768,11 +794,12 @@ class Runner:
                 continue
             if r.op == "<":
                 continue
-            path = self._path(self.expand_words((r.target,), state, glob=False)[0], state)
+            target = self.expand_words((r.target,), state, glob=False)[0]
+            path = self._path(target, state)
             try:
                 f = open(path, "a" if r.op.endswith(">>") else "w")
             except OSError as e:
-                state.err(f"{self.where}: line {line}: {path}: {e.strerror}\n")
+                state.err(f"{self.where}: line {line}: {target}: {e.strerror}\n")
                 close()
                 return None, None, close
             files.append(f)
@@ -844,6 +871,7 @@ class Runner:
                 if stdin is None:
                     stdin = prev_read if prev_read is not None else subprocess.DEVNULL
                 env = dict(state.env)
+                env["PWD"] = state.cwd
                 env.update(env_extra)
                 if "/" in argv[0]:
                     #  relative to the directory of the hook
@@ -867,7 +895,8 @@ class Runner:
                 else:
                     popen_err = stderr
                 try:
-                    proc = subprocess.Popen([exe, *argv[1:]], cwd=state.cwd, env=env, stdin=stdin,
+                    #  argv[0] as written (as a shell does), the program found
+                    proc = subprocess.Popen(argv, executable=exe, cwd=state.cwd, env=env, stdin=stdin,
                                             stdout=popen_out, stderr=popen_err)
                 except PermissionError:
                     state.err(f"{self.where}: line {line}: {argv[0]}: Permission denied\n")

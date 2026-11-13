@@ -386,9 +386,11 @@ def _script(lines: list[str]) -> str:
 # ------------------------------------------------------------------ main
 
 
-def lift(trace: PluginTrace, names: set[str] | None = None) -> LiftResult:
+def lift(trace: PluginTrace, names: set[str] | None = None, cmdlang: bool = False) -> LiftResult:
     """Lift ``trace``; ``names`` is the namespace after loading the plug-in
-    (inherited hooks included) used to check variant compositions."""
+    (inherited hooks included) used to check variant compositions;
+    ``cmdlang``: command hooks and functions converted to the command
+    language (scbi.plugin.liftcmd), otherwise kept as shell scripts."""
     plugin = trace.name
     pdef = PluginDef(plugin, variables=dict(trace.variables))
     res = LiftResult(pdef)
@@ -448,7 +450,11 @@ def lift(trace: PluginTrace, names: set[str] | None = None) -> LiftResult:
                 for pos, (_, n) in enumerate(params):
                     if n != pos + 1:
                         raise _Unliftable(f"parameters not in order: {params}")
-                pdef.functions[name] = Function(tuple(p for p, _ in params), _script(rest))
+                if cmdlang:
+                    script = _lift_cmd(rest, {n: p for p, n in params})
+                else:
+                    script = _script(rest)
+                pdef.functions[name] = Function(tuple(p for p, _ in params), script)
                 continue
 
             spec = catalog.spec(key.hook)
@@ -459,7 +465,10 @@ def lift(trace: PluginTrace, names: set[str] | None = None) -> LiftResult:
                         f"({' '.join(spec.params) or 'no parameter'})"
                     )
             if spec.kind == COMMAND:
-                pdef.hooks[key] = Shell(_script(rest))
+                if cmdlang:
+                    pdef.hooks[key] = Shell(_lift_cmd(rest, {i + 1: p for i, p in enumerate(spec.params)}))
+                else:
+                    pdef.hooks[key] = Shell(_script(rest))
             elif spec.kind == VALUE:
                 pdef.hooks[key] = lift_values(rest)
             else:
@@ -471,6 +480,15 @@ def lift(trace: PluginTrace, names: set[str] | None = None) -> LiftResult:
         res.composite = composite
         _variants_from_composite(trace, pdef, composite, res, names)
     return res
+
+
+def _lift_cmd(lines: list[str], params: dict[int, str]) -> str:
+    from scbi.plugin.liftcmd import CmdUnliftable, lift_commands
+
+    try:
+        return lift_commands(lines, params).rstrip("\n")
+    except CmdUnliftable as e:
+        raise _Unliftable(str(e)) from None
 
 
 def _variant_calls(plugin: str, key: HookKey | None, lines: list[str]) -> list[str]:

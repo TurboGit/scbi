@@ -185,3 +185,29 @@ def test_syntax_errors(text, line):
 def test_streaming_large_output(tmp_path):
     status, out, _ = run(tmp_path, "seq 1 20000")
     assert out.splitlines()[-1] == "20000" and status == 0
+
+
+def test_escapes_pwd_and_status(tmp_path):
+    text = """
+echo "a \\$PREFIX $PREFIX" \\$X
+write f:
+    run \\$1 in $PREFIX \\\\ \\`x\\`
+echo $PWD
+return -1
+"""
+    status, out, _ = run(tmp_path, text)
+    assert out == f"a $PREFIX /p $X\n{tmp_path}\n"
+    assert (tmp_path / "f").read_text() == "run $1 in /p \\ `x`\n"
+    assert status == 255  # modulo 256, as Bash
+
+
+def test_variant_builtins(tmp_path):
+    text = """
+V = all-variants a.b
+D = all-variants default
+printf '<%s>' $V $D
+check-versions 1.10 ">" 1.9 && echo gt
+check-versions 1.2 ">" 1.9 || echo le
+"""
+    status, out, _ = run(tmp_path, text)
+    assert out == "<a><b>gt\nle\n"

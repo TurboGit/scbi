@@ -22,13 +22,13 @@ from scbi.plugin.lift import Issue, lift
 from scbi.plugin.registry import Registry
 
 
-def convert(path: Path) -> tuple[str | None, list[Issue]]:
+def convert(path: Path, cmdlang: bool = False) -> tuple[str | None, list[Issue]]:
     """YAML text for the plug-in ``path`` (None when not convertible)."""
     try:
         #  the legacy plug-ins only (YAML versions may be next to them)
         registry = Registry(path.parent, yaml=False)
         registry.load_module(path.name)
-        res = lift(registry.traces[path.name], set(registry.functions))
+        res = lift(registry.traces[path.name], set(registry.functions), cmdlang=cmdlang)
     except LegacyLoadError as e:
         return None, [Issue(path.name, str(e))]
     if res.issues:
@@ -44,12 +44,15 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="scbi convert", description=__doc__.split("\n\n")[0])
     ap.add_argument("--check", action="store_true", help="only report, write nothing")
     ap.add_argument("--output-dir", type=Path, help="where to write the YAML files")
+    ap.add_argument("--commands", choices=("bash", "cmdlang"), default="bash",
+                    help="command hooks: kept as Bash scripts (default) or converted to the "
+                         "command language")
     ap.add_argument("plugins", nargs="+", type=Path)
     args = ap.parse_args(argv)
 
     status = 0
     for path in args.plugins:
-        text, issues = convert(path)
+        text, issues = convert(path, cmdlang=args.commands == "cmdlang")
         if issues:
             status = 1
             for i in issues:
