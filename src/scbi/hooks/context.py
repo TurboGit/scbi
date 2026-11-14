@@ -43,4 +43,7 @@ class HookContext:
             return self.locals[name]
         if name in self.params:
             return self.params[name]
+        if name == "PWD":
+            #  maintained by Bash: the current directory of the hook
+            return str(self.cwd)
         return self.env.get(name)

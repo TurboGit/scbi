@@ -91,3 +91,34 @@ def test_log_oracle(oracle, tmp_path):
         assert TS.sub("TS", merged.getvalue()) == TS.sub("TS", console), msg
         assert TS.sub("TS", log.report("mod").read_text()) == TS.sub("TS", report), msg
         assert log.line_sep_file.read_text() == sep
+
+
+# ------------------------------------------------------------ statistics
+
+REPORT_A = """2024/01/02 10:00:00 : Building lib1 [default] (master)
+2024/01/02 10:00:00 : native x86_64-linux-gnu
+2024/01/02 10:01:05 : End Building lib1 [default] (master)
+2024/01/02 10:02:00 : Building app [default] (master)
+2024/01/02 10:12:30 : End Building app [default] (master)
+"""
+REPORT_B = """2024/01/03 09:00:00 : Building lib1 [default] (master)
+2024/01/03 09:00:20 : End Building lib1 [default] (master)
+2024/01/03 09:00:20 : End Building other [default] (master)
+2024/01/03 09:30:00 : Building my-lib_2 [v1] (1.0)
+2024/01/03 09:30:07 : End Building my-lib_2 [v1] (1.0)
+"""
+
+
+@pytest.mark.oracle
+def test_display_log_stat_same_as_bash(oracle, tmp_path):
+    from scbi.log import display_log_stat
+
+    logs = tmp_path / "logs"
+    (logs / "2024_01_02").mkdir(parents=True)
+    (logs / "2024_01_03").mkdir()
+    (logs / "2024_01_02" / "x86_64-linux-gnu-app-report.log").write_text(REPORT_A)
+    (logs / "2024_01_03" / "x86_64-linux-gnu-lib1-report.log").write_text(REPORT_B)
+    (logs / "2024_01_03" / "x86_64-linux-gnu-lib1-env.log").write_text(REPORT_A)
+    expected = oracle.call(f"SCBI_LOGS={logs}\nSCBI_JOBS=2\ndisplay-log-stat")
+    assert display_log_stat(logs) == expected
+    assert "lib1" in expected

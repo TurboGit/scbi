@@ -38,6 +38,7 @@ from scbi.steps import interp
 from scbi.steps.final import FinalStep
 from scbi.steps import wrapper as step_wrapper
 from scbi.vercmp import VERSION_ERROR, VERSION_OK, check_versions, get_version_number
+from scbi.walker import Walker
 
 #  is-module-up-to-date statuses
 V_MATCHING, SRC_CHANGED, V_NOT_MATCHING, V_CANNOT_GET, V_ERROR = 0, 1, 2, 3, 4
@@ -158,11 +159,43 @@ class Builder:
         run_code(self.shell(), self.ctx(module, variant), code, lines.append)
         return "\n".join(lines)
 
-    def module_env(self, module: str, variant: str, code: str) -> ShellVars:
+    def module_environment(self, module: str, variant: str, calls, hook: str = "config") -> int:
+        """The environment setup of a module applied to the driver
+        variables: ``calls`` of scbi.steps.modenv.ModuleEnv.run (a
+        ``module-env`` call ending with ``record`` has its output appended
+        to $SCBI_ENV_MODULE, which is then unset); the Bash functions when
+        a ported one is redefined. Returns the status."""
+        from scbi.steps import modenv
+
+        d = self.d
+        if not modenv.python_allowed(self):
+            return self.bash(module, variant, _env_calls_code(calls), hook=hook)
+        sys.stdout.flush()
+        me = modenv.ModuleEnv(self)
+        rc = me.run(calls)
+        d.sv = me.env.vars
+        if any(c[-1] == "record" for c in calls):
+            d.sv.values.pop("SCBI_ENV_MODULE", None)
+            d.sv.exported.discard("SCBI_ENV_MODULE")
+        return rc
+
+    def module_env(self, module: str, variant: str, code: str, calls=None) -> ShellVars:
         """The driver variables after running ``code`` (e.g. the
         environment setup of a module) on a copy: the driver is not
-        changed (a sub-shell in Bash)."""
+        changed (a sub-shell in Bash). With ``calls`` (see
+        module_environment) and the ported functions not redefined, they
+        are run in Python instead of ``code``."""
+        from scbi.steps import modenv
+
         sv = self.d.sv
+        if calls is not None and modenv.python_allowed(self):
+            me = modenv.ModuleEnv(self, Environment(sv.copy()))
+            saved = dict(self.modules_dir)
+            try:
+                me.run(calls, out=lambda line: None)
+            finally:
+                self.modules_dir = saved
+            return me.env.vars
         copy_sv = ShellVars(dict(sv.values), set(sv.exported), dict(sv.functions))
         ctx = self.ctx(module, variant)
         ctx.env = Environment(copy_sv)
@@ -270,7 +303,10 @@ class Builder:
                      f"handle-module-env @root {quote(modref)} build-env\n")
             try:
                 if interp.is_commands(self, fct):
-                    sv = self.module_env(module, variant, setup)
+                    sv = self.module_env(module, variant, setup, [
+                        ("handle-build-depends-env", "@root", modref),
+                        ("module-env", "@root", modref, "env"),
+                        ("module-env", "@root", modref, "build-env")])
                     chunks: list[str] = []
                     interp.Hook(self, module, variant, fct,
                                 [self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), variant], tdir, sv).run(
@@ -676,10 +712,9 @@ class Builder:
                     idir = self.target_dir(m, mvariant, "install")
                     if agg_mode != "no" and os.path.isdir(idir):
                         if agg_mode == "recursive":
-                            self.run(meta, variant, _DO_SYNC.format(
-                                tvmdir=quote(tvmdir), mdir=quote(mdir), module=quote(m)))
+                            self.sync_recursive(meta, variant, m, tvmdir, mdir)
                         else:
-                            self.run(meta, variant, f"sync-dir {quote(idir)} {quote(f'{tvmdir}/.')}")
+                            self.sync_dir(meta, variant, idir, f"{tvmdir}/.")
                     _append_file(Path(bdir, m, "source-ref"), Path(mdir, "source-ref"))
             do_agg_prefix = True
 
@@ -817,7 +852,7 @@ class Builder:
         os.chdir(self.get("SCBI_ROOT"))
 
         if not is_module:
-            if self.run(fmodule, fvariant, f"check-pkg {quote(f'{module}:{ref}')} > /dev/null") == 0:
+            if self.check_pkg(fmodule, fvariant, f"{module}:{ref}", quiet=True) == 0:
                 return 0
             mname = fmodule if fvariant == "default" else f"{fmodule}/{fvariant}"
             msg = "warning" if self.get("DO_WARNING_EXTERNAL") == "yes" else "error"
@@ -828,12 +863,50 @@ class Builder:
             for hook in hooks:
                 for dmodule in self.get_all_depends(fmodule, fvariant, hook):
                     if d.registry.plugin_file(dmodule) is None:
-                        self.run(fmodule, fvariant, f"check-pkg {quote(dmodule)}")
+                        self.check_pkg(fmodule, fvariant, dmodule)
             return 0 if self.get("DO_WARNING_EXTERNAL") == "yes" else 1
 
         self.handle_module(fmodule, modref, depends_kind, is_aggregated)
         self.record_dref(module, variant, drefs)
         return 0
+
+    def sync_dir(self, module: str, variant: str, src: str, dst: str) -> int:
+        """``sync-dir SRC DST`` (output to the console)."""
+        if generic_steps.python_allowed(self, "install"):
+            sys.stdout.flush()
+            return generic_steps.Generic(self, "@root", module, variant, "").sync_dir(src, dst)
+        return self.run(module, variant, f"sync-dir {quote(src)} {quote(dst)}")
+
+    def sync_recursive(self, meta: str, variant: str, module: str, tvmdir: str, mdir: str) -> None:
+        """``do-sync`` of a recursive aggregate: the installation of
+        ``module`` and of its dependencies copied into the meta-module."""
+        from scbi.steps import modenv
+
+        if not (modenv.python_allowed(self) and generic_steps.python_allowed(self, "install")):
+            self.run(meta, variant, _DO_SYNC.format(tvmdir=quote(tvmdir), mdir=quote(mdir), module=quote(module)))
+            return
+        bdir = self.get("SCBI_BDIR")
+
+        def do_sync(argv: list[str]) -> None:
+            a = argv + ["", ""]
+            smodule, svariant, _kind, sref = (self.d.plan.module_ref(a[1], a[0]) + [""] * 4)[:4]
+            if sref == "skip":
+                return
+            idir = self.target_dir(smodule, svariant, "install")
+            if os.path.isdir(idir):
+                self.sync_dir(meta, variant, idir, f"{tvmdir}/.")
+            _append_file(Path(bdir, smodule, "source-ref"), Path(mdir, "source-ref"))
+
+        Walker(self).walk("for-all-modules-depends-with-meta", do_sync, module, name="do-sync")
+
+    def check_pkg(self, module: str, variant: str, pkg: str, quiet: bool = False) -> int:
+        """``check-pkg PKG`` (its messages to the console unless ``quiet``)."""
+        from scbi import ospkg
+
+        if ospkg.python_allowed(self):
+            sys.stdout.flush()
+            return ospkg.OsPackages(self.d).check_pkg(pkg, (lambda line: None) if quiet else self.out)
+        return self.run(module, variant, f"check-pkg {quote(pkg)}" + (" > /dev/null" if quiet else ""))
 
     def display_ref(self, module: str, variant: str, ref: str) -> str:
         """Port of ``get-module-display-ref``."""
@@ -919,7 +992,7 @@ class Builder:
                     if cached_dir != tvdir:
                         bid = _read_first_line(Path(cached_dir, "build-id"))
                         if bid == cbdir:
-                            self.run(module, variant, f"sync-dir {quote(cached_dir)} {quote(f'{bdir}/{module}')}")
+                            self.sync_dir(module, variant, cached_dir, f"{bdir}/{module}")
                             shutil.copy(f"{cached_dir}/source-id", f"{bdir}/{module}")
                             msg = "trigger: copy from cache"
                             d.set("SCBI_IS_FROM_CACHE", "yes")
@@ -933,11 +1006,10 @@ class Builder:
         if is_uptodate == "no" or self.get("DO_TEST") != "no":
             d.set("SCBI_ENV_MODULE", str(envtmp))
             #  an exit (e.g. recursive dependencies) ends the module sub-shell
-            env_rc = self.bash(module, variant, (
-                f"handle-build-depends-env {quote(formodule)} {quote(modref)}\n"
-                f"handle-env {quote(formodule)} {quote(modref)}\n"
-                f"handle-module-env {quote(formodule)} {quote(modref)} build-env >> $SCBI_ENV_MODULE\n"
-                "unset SCBI_ENV_MODULE"))
+            env_rc = self.module_environment(module, variant, [
+                ("handle-build-depends-env", formodule, modref),
+                ("handle-env", formodule, modref),
+                ("module-env", formodule, modref, "build-env", "record")])
             d.sv.values.pop("SCBI_ENV_MODULE", None)
             if env_rc != 0:
                 envtmp.unlink(missing_ok=True)
@@ -1007,10 +1079,10 @@ class Builder:
 
         for step in words(self.get("STEPS")):
             if step == "tests":
-                if self.bash(module, variant, (
-                    f"handle-tests-depends-env {quote(formodule)} {quote(modref)}\n"
-                    f"handle-module-env {quote(formodule)} {quote(modref)} tests-env\n"
-                    f"handle-module-env {quote(formodule)} {quote(modref)} env"), hook="tests") != 0:
+                if self.module_environment(module, variant, [
+                        ("handle-tests-depends-env", formodule, modref),
+                        ("module-env", formodule, modref, "tests-env"),
+                        ("module-env", formodule, modref, "env")], hook="tests") != 0:
                     return 1, is_uptodate
             res = generic(f"pre-{step}")
             if res != 0:
@@ -1045,6 +1117,20 @@ class Builder:
                 f"{quote(module)} {quote(depends_kind)} no {quote(is_aggregated)} {quote(is_uptodate)}"))
             self.ilog(module, "final", "step", "completed", tee=log)
         return 0, is_uptodate
+
+
+def _env_calls_code(calls) -> str:
+    """The Bash driver code of ModuleEnv.run calls."""
+    lines = []
+    for name, *args in calls:
+        record = bool(args) and args[-1] == "record"
+        if record:
+            args = args[:-1]
+        call = " ".join(["handle-module-env" if name == "module-env" else name, *(quote(a) for a in args)])
+        lines.append(call + (" >> $SCBI_ENV_MODULE" if record else ""))
+    if any(c[-1] == "record" for c in calls):
+        lines.append("unset SCBI_ENV_MODULE")
+    return "\n".join(lines)
 
 
 #  do-sync of handle-meta-module (recursive aggregate)

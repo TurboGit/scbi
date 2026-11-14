@@ -16,7 +16,7 @@ from scbi.hooks.bashguard import to_bash
 from scbi.hooks.context import HookContext
 from scbi.hooks.evaluate import GuardContext
 from scbi.hooks.exec import HookShell, run_env_hook
-from scbi.hooks.policy import is_reference, python_env_allowed, redefined
+from scbi.hooks.policy import alternate, is_reference, python_env_allowed, redefined
 from scbi.hooks.reference import PORTED, REFERENCE
 from scbi.hooks.runtime import load_runtime
 from scbi.plan import PlanState
@@ -64,7 +64,37 @@ def test_redefined(runtime, tmp_path):
     #  the Windows runtime has its own define-var
     win = load_runtime(REPO_ROOT / "scripts.d", driver_vars(tmp_path), cwd=tmp_path,
                        base_env=BASE_ENV, os_module="windows")
-    assert "define-var" in redefined(win.functions)
+    #  a known alternate (scbi.env.WINDOWS_DEFINE_VAR), unless cygpath is
+    #  a shell function
+    assert redefined(win.functions) == []
+    assert alternate("define-var", win.functions) == "windows"
+    assert alternate("define-var", runtime.functions) is None
+    assert python_env_allowed(win.functions)
+    assert not python_env_allowed(win.functions, {"cygpath": "cygpath () \n{ \n    echo x\n}"})
+
+
+@pytest.mark.oracle
+def test_windows_define_var_same_as_bash(oracle, monkeypatch):
+    from scbi import env as env_mod
+    from scbi.env import Environment
+
+    calls = [("SET", "A", "x y"), ("ADD", "L", "a"), ("ADD", "L", "b"), ("ADD", "L", "a"),
+             ("APPEND", "L", "c"), ("PREPEND", "L", "c"), ("REMOVE", "L", "b"), ("REMOVE", "M", "z"),
+             ("ADD", "PATH", "/"), ("ADD", "PATH", "/no/such/dir"), ("UNSET", "A", "")]
+    script = (f"source {REPO_ROOT}/scripts.d/_os_windows\n"
+              "function cygpath() { echo \"/cyg$2\"; }\nexport PATH=/usr/bin:/bin\nL=\"\"\n"
+              + "\n".join(f'define-var {a} {n} "{v}"' for a, n, v in calls)
+              + '\necho "L=$L"\necho "M=${M-unset}"\necho "A=${A-unset}"\necho "PATH=$PATH"')
+    expected = oracle.call(script)
+    monkeypatch.setattr(env_mod, "WINDOWS_DEFINE_VAR", True)
+    monkeypatch.setattr(env_mod, "cygpath", lambda p: "/cyg" + p)
+    e = Environment()
+    e.export("PATH", "/usr/bin:/bin")
+    e.vars.values["L"] = ""
+    for a, n, v in calls:
+        e.define_var(a, n, v)
+    got = "".join(f"{n}={e.vars.values.get(n, 'unset')}\n" for n in ("L", "M", "A", "PATH"))
+    assert got == expected
 
 
 # ----------------------------------------------------- guards in Bash

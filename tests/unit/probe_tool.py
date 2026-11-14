@@ -19,6 +19,16 @@ Commands (several separated by @@):
                                           (2>&1 | tee -a $log, purge: no tee)
   wrapper STEP MODREF OOT                 module-variant-wrapper (the target
                                           directory and its logs created)
+  env KIND FORMODULE MODREF               handle-env (KIND env), handle-build-
+                                          depends-env (build), handle-tests-
+                                          depends-env (tests) or handle-module-
+                                          env FORMODULE MODREF KIND (other
+                                          KIND): the define-var records, the
+                                          modules dirs and the variables set
+  check-pkg PKG[:VERSION]                 check-pkg (messages and status)
+  pkg-status PKG[:VERSION]                check-pkg-status
+  auto M                                  handle-plan-auto-variant (M: a key
+                                          of the plan)
 """
 
 import sys
@@ -127,6 +137,41 @@ case $cmd in
         mkdir -p $TVDIR/logs $TVDIR/build $TVDIR/src
         (module-variant-wrapper $TVDIR/install $m $v $1); echo "rc=$?"
         ;;
+    check-pkg)
+        (check-pkg $1; echo "rc=$?")
+        ;;
+    pkg-status)
+        (r=(); check-pkg-status r $1; echo "${r[*]}")
+        ;;
+    auto)
+        (handle-plan-auto-variant $1)
+        ;;
+    env)
+        load-module $3
+        (declare -A SCBI_MODULES_DIR=()
+         SCBI_ENV_MODULE=$SCBI_BDIR/env.rec
+         rm -f $SCBI_ENV_MODULE
+         case $1 in
+             env) handle-env $2 $3;;
+             build) handle-build-depends-env $2 $3;;
+             tests) handle-tests-depends-env $2 $3;;
+             *) handle-module-env $2 $3 $1;;
+         esac
+         echo "rc=$?"
+         unset SCBI_ENV_MODULE
+         vars=""
+         if [[ -f $SCBI_BDIR/env.rec ]]; then
+             cat $SCBI_BDIR/env.rec
+             vars=$(sed -n 's/^define-var [A-Z]* \([A-Za-z_0-9]*\) .*/\1/p' $SCBI_BDIR/env.rec | sort -u)
+         fi
+         rm -f $SCBI_BDIR/env.rec
+         for k in $(printf '%s\n' "${!SCBI_MODULES_DIR[@]}" | sort); do
+             echo "DIR $k=${SCBI_MODULES_DIR[$k]}"
+         done
+         for v in $vars; do
+             echo "VAR $v=${!v}"
+         done)
+        ;;
 esac
 }
 
@@ -163,8 +208,71 @@ def main(driver, args):
     return 0
 
 
+def probe_env(driver, b, a):
+    import os
+    import re
+
+    from scbi.bashenv import ShellVars
+    from scbi.errors import Exit
+    from scbi.steps.modenv import ModuleEnv
+
+    kind, formodule, modref = a[:3]
+    Walker(b).load_module(modref)
+    #  a sub-shell in the Bash probe
+    sv = driver.sv
+    driver.sv = ShellVars(dict(sv.values), set(sv.exported), dict(sv.functions))
+    saved_dirs = dict(b.modules_dir)
+    rec = f"{driver.get('SCBI_BDIR')}/env.rec"
+    driver.set("SCBI_ENV_MODULE", rec)
+    try:
+        if os.path.exists(rec):
+            os.unlink(rec)
+        me = ModuleEnv(b)
+        try:
+            if kind == "env":
+                rc = me.handle_env(formodule, modref)
+            elif kind == "build":
+                rc = me.handle_build_depends_env(formodule, modref)
+            elif kind == "tests":
+                rc = me.handle_tests_depends_env(formodule, modref)
+            else:
+                me.module_env(formodule, modref, kind)
+                rc = 0
+        except Exit:
+            return
+        out(f"rc={rc}")
+        names = []
+        if os.path.exists(rec):
+            text = open(rec).read()
+            sys.stdout.write(text)
+            names = sorted({m.group(1) for m in re.finditer(r"^define-var [A-Z]* ([A-Za-z_0-9]*) ", text, re.M)})
+            os.unlink(rec)
+        for k in sorted(b.modules_dir):
+            out(f"DIR {k}={b.modules_dir[k]}")
+        for v in names:
+            out(f"VAR {v}={me.env.get(v)}")
+    finally:
+        driver.sv = sv
+        b.modules_dir = saved_dirs
+
+
 def run1(driver, b, argv):
     cmd, a = argv[0], argv[1:] + [""] * 3
+    if cmd == "env":
+        probe_env(driver, b, a)
+        return
+    if cmd in ("check-pkg", "pkg-status", "auto"):
+        from scbi.ospkg import OsPackages
+
+        osp = OsPackages(driver)
+        if cmd == "check-pkg":
+            out(f"rc={osp.check_pkg(a[0], out)}")
+        elif cmd == "pkg-status":
+            out(" ".join(osp.check_pkg_status(a[0])))
+        else:
+            for line in osp.plan_auto_variant(b, a[0]):
+                out(line)
+        return
     if cmd == "walk":
         rc = Walker(b).walk(a[0], lambda v: out("CB " + " ".join(v)), a[1], "x1", "x2", name="cb")
         out(f"rc={rc}")

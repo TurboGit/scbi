@@ -210,3 +210,62 @@ def _open_tty() -> TextIO | None:
     except OSError:
         return None
     return os.fdopen(fd, "w")
+
+
+# ---------------------------------------------------------------- statistics
+
+def _epoch(date: str, clock: str) -> int | None:
+    """``date +%s --date="DATE TIME"`` (local time)."""
+    import time
+
+    for fmt in ("%Y/%m/%d %H:%M:%S", "%Y-%m-%d %H:%M:%S"):
+        try:
+            return int(time.mktime(time.strptime(f"{date} {clock}", fmt)))
+        except ValueError:
+            pass
+    return None
+
+
+def log_stat_file(path: Path) -> list[tuple[str, int]]:
+    """Port of ``compute-log-stat-file``: (module, duration) of each
+    Building ... End Building pair of a report log."""
+    result = []
+    start = 0
+    try:
+        lines = path.read_text(errors="replace").splitlines()
+    except OSError:
+        return result
+    for line in lines:
+        f = (line.split() + [""] * 6)[:6]
+        date, clock, _x, action, _word, mod = f
+        if "Building" in action:
+            start = _epoch(date, clock) or 0
+        elif action == "End" and start != 0:
+            end = _epoch(date, clock) or 0
+            result.append((mod, end - start))
+            start = 0
+    return result
+
+
+def display_log_stat(logs: Path, module: str = "") -> str:
+    """Port of ``display-log-stat``: min, average and max build time of
+    each module from the report logs, sorted as ``sort`` does."""
+    import subprocess
+    import time
+
+    stats: dict[str, list[int]] = {}
+    for path in sorted(Path(logs).rglob(f"*{module}-report.log")):
+        for mod, duration in log_stat_file(path):
+            stats.setdefault(mod, []).append(duration)
+
+    def mmss(seconds: int) -> str:
+        return time.strftime("%M:%S", time.localtime(seconds))
+
+    rows = []
+    for key, values in stats.items():
+        avg = abs(sum(values)) // len(values) * (1 if sum(values) >= 0 else -1)
+        rows.append(f"{key:<55} : {mmss(min(min(values), 999999))}   {mmss(avg)}   {mmss(max(max(values), 0))}\n")
+    text = "".join(rows)
+    if text:
+        text = subprocess.run(["sort"], input=text, capture_output=True, text=True).stdout
+    return "\nbuild times (min, average, max):\n\n" + text + "\n"

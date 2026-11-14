@@ -94,7 +94,11 @@ class Walker:
         return self.d.registry.loaded.get(f"{module}.{variant}.agg", "")
 
     def check_pkg(self, module: str, ref: str) -> int:
-        """``check-pkg`` (reference Bash code: queries the OS packages)."""
+        """``check-pkg`` (queries the OS packages, scbi.ospkg)."""
+        from scbi import ospkg
+
+        if ospkg.python_allowed(self.b):
+            return ospkg.OsPackages(self.d).check_pkg(f"{module}:{ref}", self.b.out)
         return self.d.driver_run(f"check-pkg {quote(f'{module}:{ref}')}")
 
     # ------------------------------------------------------------ walker

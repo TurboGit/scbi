@@ -537,6 +537,10 @@ class Driver:
         for k, v in exported_functions.items():
             self.sv.set(k, v, export=True)
         self.runtime = Runtime(ShellVars(functions=runtime_functions), rt.compat)
+        from scbi import env as env_mod
+        from scbi.hooks.policy import alternate
+
+        env_mod.WINDOWS_DEFINE_VAR = alternate("define-var", runtime_functions, user_functions) == "windows"
         if self.get("SCBI_OS_MODULE"):
             self.set("SCBI_OS_MODULE_FILE", str(plugins / f"_os_{self.get('SCBI_OS_MODULE')}"))
         self.setup_os_discriminants(forced_os)
@@ -779,7 +783,7 @@ class Driver:
                 self.display_modules()
                 self.display_plans()
             if stat == "full":
-                self.driver_run("display-log-stat")
+                self.display_log_stat()
             elif not self.modules and stat == "yes":
                 self.echo()
 
@@ -865,9 +869,17 @@ class Driver:
                 if re.search(r"auto(\.|:|$)", self.plan.modver[m])]
         #  handle-plan-auto-variant (reference Bash code) for each module,
         #  all against the plan as it is now (parallel jobs in Bash)
+        from scbi import ospkg
+        from scbi.build import Builder
+
         outputs: list[str] = []
+        builder = Builder(self)
+        python = ospkg.python_allowed(builder, auto=True)
         for m in auto:
-            outputs += self.driver_capture(f"handle-plan-auto-variant {quote(m)}").splitlines()
+            if python:
+                outputs += ospkg.OsPackages(self).plan_auto_variant(builder, m)
+            else:
+                outputs += self.driver_capture(f"handle-plan-auto-variant {quote(m)}").splitlines()
         for line in outputs:
             f = read_fields(line, 3)
             e, k, v = f
@@ -877,11 +889,24 @@ class Driver:
                 if not quiet:
                     self.log.ilog(k, v)
             else:
-                if not quiet:
-                    self.log.elog(k, v)
+                #  an error (stderr) is shown even when quiet (> /dev/null)
+                self.log.elog(k, v)
                 eres = 1
         res = propagate_meta_versions(self)
         return eres or res
+
+    def display_log_stat(self) -> None:
+        """``display-log-stat``: build times from the report logs."""
+        from scbi.hooks.policy import is_reference
+        from scbi.log import display_log_stat
+
+        names = ("display-log-stat", "compute-log-stat-file", "get-min-avr-max", "display-time")
+        maps = (self.runtime.functions, self.sv.functions, self.registry.functions)
+        if all(is_reference(n, *maps) for n in names):
+            sys.stdout.write(display_log_stat(Path(self.get("SCBI_LOGS"))))
+            sys.stdout.flush()
+        else:
+            self.driver_run("display-log-stat")
 
     def driver_shell(self):
         from scbi.env import Environment
@@ -1023,41 +1048,10 @@ class Driver:
             builder.handle_module("@root", module, "default", "no")
 
         if self.get("DO_STANDALONE") == "yes":
-            mods = " ".join(quote(m) for m in self.modules)
-            self.driver_run(f"SCBI_MODULES=({mods})\ncreate-standalone-package")
-            self.standalone_env_file()
+            from scbi.standalone import Standalone
+
+            Standalone(builder).create(self.modules)
         return 0
-
-    def standalone_env_file(self) -> None:
-        """The Python version of the environment of a standalone package
-        (.scbi-env-std, written by create-standalone-package) added to the
-        archive: the package is built with this driver."""
-        import io
-        import tarfile
-
-        tmp = self.get("SCBI_TMP") or "/tmp"
-        name = f"sa-{os.path.basename(self.get('SCBI_BDIR'))}"
-        archive = Path(tmp, f"{name}.tgz")
-        if not archive.is_file():
-            return
-        text = ('"""Environment of the standalone package."""\n\nimport os\n\n'
-                "SCBI_ROOT = os.getcwd()\n"
-                'SCBI_BDIR = SCBI_ROOT + "/builds"\n'
-                'SCBI_PREFIX = SCBI_BDIR + "/install"\n'
-                'SCBI_ARCHIVES = SCBI_BDIR + "/.archives"\n'
-                'SCBI_PATCH = SCBI_BDIR + "/.patches"\n'
-                'SCBI_LOGS = SCBI_BDIR + "/.logs"\n'
-                f"SCBI_PLAN = {self.get('SCBI_PLAN')!r}\n").encode()
-        with tarfile.open(archive, "r:gz") as t:
-            members = [(m, t.extractfile(m).read() if m.isfile() else None) for m in t.getmembers()]
-        with tarfile.open(archive, "w:gz") as t:
-            for m, data in members:
-                t.addfile(m, io.BytesIO(data) if data is not None else None)
-            info = tarfile.TarInfo(f"{name}/.scbi-env-std.py")
-            info.size = len(text)
-            info.mode = 0o644
-            info.mtime = int(time.time())
-            t.addfile(info, io.BytesIO(text))
 
     def clean_up(self) -> None:
         for v in ("SCBI_HANDLED", "SCBI_LINE_SEP"):

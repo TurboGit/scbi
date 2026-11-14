@@ -18,7 +18,7 @@ from __future__ import annotations
 import hashlib
 from collections.abc import Mapping
 
-from scbi.hooks.reference import REFERENCE
+from scbi.hooks.reference import ALTERNATES, REFERENCE
 
 
 def _hash(definition: str) -> str:
@@ -40,14 +40,33 @@ def redefined(*function_maps: Mapping[str, object]) -> list[str]:
     result = []
     for name, ref in REFERENCE.items():
         definition = effective.get(name)
-        if not isinstance(definition, str) or _hash(definition) != ref:
+        if not isinstance(definition, str) or (_hash(definition) != ref
+                                               and _hash(definition) not in ALTERNATES.get(name, {}).values()):
             result.append(name)
     return result
 
 
+def alternate(name: str, *function_maps: Mapping[str, object]) -> str | None:
+    """The name of the known alternate definition (ALTERNATES) of ``name``
+    in effect, if any."""
+    definition = None
+    for m in function_maps:
+        if name in m:
+            definition = m[name]
+    if not isinstance(definition, str):
+        return None
+    h = _hash(definition)
+    return next((k for k, v in ALTERNATES.get(name, {}).items() if v == h), None)
+
+
 def python_env_allowed(*function_maps: Mapping[str, object]) -> bool:
-    """True when environment actions can be evaluated in Python."""
-    return not redefined(*function_maps)
+    """True when environment actions can be evaluated in Python (the
+    Windows define-var too, unless ``cygpath`` is a shell function)."""
+    if redefined(*function_maps):
+        return False
+    if alternate("define-var", *function_maps) == "windows":
+        return not any("cygpath" in m for m in function_maps)
+    return True
 
 
 def is_reference(name: str, *function_maps: Mapping[str, object]) -> bool:

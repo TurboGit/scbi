@@ -88,4 +88,35 @@ PORTED = {
     "get-md5": "e13a8355affecbcc12eebd36321ff36c2aecbf13809e684631a889e34c2443ec",
     "show-command": "a77eeddff7ac8015382fc069b59d5a4116fe0dd30d10f2338ab84b766d80772c",
     "_internal_copy-plugin": "29e37c40da62df607213a9e4bd88351a8f142acea460376ee395a98189225b6c",
+    "plugin-call-env-hooks": "8fa98d59b216a693b8fdc664416357d35d755705b493ecddb9dba25b50842f35",
+    "plugin-call-variant-hooks": "4fe52ecb2d0f7a89bc2e846f77635080029c66479a6569d6edc0dfa51ccc5a63",
+    "is-meta-module": "af36548901844182c16d8cfc0a4ecbf035c91ab418fd90ec99fc5bacde3113fb",
+    "is-meta-aggregate-module": "8178f2cab073044d50fdd91fc39e44ab11925c637fce857564742a17e16fc20a",
+    "check-pkg": "02e167376a1ba63fadafbb2cb373e83106989ef37f2c9445b61ff15662a7bd4e",
+    "check-pkg-status": "0fe4b51e9c853aec0396c673514afd9d464768d27af01759528d18d357d7273c",
+    "get-pkg-name": "ed9ad7156efaf8920cc3c1626409cd2be6dee9495441b67711114aa9f2b036e0",
+    "clean-version-string": "2239850a3a8dc49d2dc1d7db2a753e9a7b042d08807014a1b1d5d2857cde6666",
+    "check-deb-pkg": "a9f853d4436de83680cc923e1c60c1c63efdd1c48707a5bcedf14e8971b06cbd",
+    "check-ubt-pkg": "99776c03bdf994cd92bcaffb632a2a6919de5135d240c245844372798a9c08d2",
+    "check-cos-pkg": "3fcd4b2e8df42c309e310733d4ad8ec64ca1e7f90cf0784b96f81f6fdf91c23b",
+    "check-fed-pkg": "9be73b28e62b655e33b1e1094b21aae60ecb130337dfd4c1bc4b571b64f888e3",
+    "check-rhl-pkg": "121a98c220fa75354e1d5ba6589b93c7c16f881592bd676f052e9c2afee06cd6",
+    "check-mingw-pkg": "d6d51b1c734bfbbe6acb8472d98780a2bf319b7f4816d169a0bee1a947b2148a",
+    "check-none-pkg": "31f38a8e7fcfe659366ee0924214d64afee767d3843ea7668c301e0a10434175",
+    "check-win-pkg": "f872c9d4df57f262fdd9955acfc266c9c874ed47d56817f79f86ef5fbee0972a",
+    "check-auto-variant": "6767431fee9dcba655de4e5d36815d62f8b6ceb31de0163fb4d7b28784a8c68a",
+    "handle-plan-auto-variant": "476793061cd038385ee894774d07f0d2a5b1d73056874616d44bd82563a7034a",
+    "display-log-stat": "2385523170aef82b7b8d3b88170c7ebc28d2f731acd3f2b6c68142875d45e4fc",
+    "compute-log-stat-file": "812070f05cd6e14526ec5cbc4d5637377ef0b31f644e3666a7ed2dab0a0a09cf",
+    "get-min-avr-max": "cd2ec5c0cfd577d81ba490c0d701722f48ebd4cceb6bf1b43f802292ff2676f0",
+    "display-time": "c8f78f0c7095d097898a1bb69718e278e1a150c5faedbe07eb1b94c4f3470bcb",
+    #  ported without a Bash fallback (scbi.standalone)
+    "copy-module-src-callback": "ff76fa577c3e75c41e510925b57c2f6ee46d13c1b11ab4d65da47e4abe427789",
+    "create-standalone-package": "f9b21d36b43c17b616354a9cc5688ff587a2f552654284c9c1dfc6c016df5364",
+}
+
+#  Other known definitions of a REFERENCE function, reproduced by the
+#  Python port (scbi.env.WINDOWS_DEFINE_VAR for the Windows OS module)
+ALTERNATES = {
+    "define-var": {"windows": "23036547b0c125f12265c267a63f6c02a3a699e4c5ecd45f090fad666d064c49"},
 }

@@ -75,6 +75,19 @@ def _remove_from_list(items: list[str], value: str) -> list[str]:
 #  (scbi.envpy), set by the driver
 USER_DEFINE_VAR: Callable | None = None
 
+#  define-var of the Windows OS module (scripts.d/_os_windows) in effect:
+#  ';' separator, PATH values converted with ``cygpath -u``
+WINDOWS_DEFINE_VAR = False
+
+
+def cygpath(path: str) -> str:
+    """``$(cygpath -u PATH)``."""
+    try:
+        out = subprocess.run(["cygpath", "-u", path], capture_output=True, text=True).stdout
+    except OSError:
+        return ""
+    return out.rstrip("\n")
+
 
 class _UserEnv:
     """The ``env`` given to the user's ``define_var``."""
@@ -136,7 +149,8 @@ class Environment:
         self._define_var(action, var, value)
 
     def _define_var(self, action: str, var: str, value: str = "") -> None:
-        sep = ";" if self.windows else ":"
+        windows = self.windows or WINDOWS_DEFINE_VAR
+        sep = ";" if windows else ":"
 
         #  If adding to PATH, do so only if VALUE exists
         if var == "PATH" and not os.path.isdir(value):
@@ -148,9 +162,9 @@ class Environment:
             with open(self.record, "a") as f:
                 f.write(line + "\n")
 
-        if self.windows and var == "PATH":
+        if windows and var == "PATH":
             sep = ":"
-            value = self.cygpath(value)
+            value = self.cygpath(value) if self.windows else cygpath(value)
 
         act = ACTIONS.get(action)
         current = self.get(var)
