@@ -4,39 +4,22 @@
 ``plugin-call-env-hooks`` / ``plugin-call-variant-hooks`` (0_runtime).
 
 The environment actions of the plug-in definitions are applied by Python
-(scbi.env, so a ``define_var`` of the Python environment file sees each
-of them); the env hooks of legacy Bash plug-ins still run in a hook shell
-until legacy loading is removed. When a function of the ``define-var``
-family is redefined in Bash (runtime, plug-in), every env hook runs in a
-hook shell (scbi.hooks.policy), as before.
+(scbi.env): a ``define_var`` of the Python environment file sees each of
+them.
 """
 
 from __future__ import annotations
 
-import os
-import tempfile
 from pathlib import Path
 
 from scbi.bashcompat import words
 from scbi.env import ACTIONS, Environment
 from scbi.errors import Exit
 from scbi.hooks.evaluate import apply_env
-from scbi.hooks.exec import env_code
-from scbi.hooks.policy import python_env_allowed
 from scbi.plugin import catalog
 from scbi.plugin.model import EnvOps
 from scbi.plugin.resolve import variant_hooks
 from scbi.walker import Walker
-
-#  Runtime and driver functions ported here: a redefinition (e.g. by a
-#  plug-in) makes the driver run the Bash ones
-PORTED_FUNCTIONS = ("plugin-call-env-hooks", "plugin-call-variant-hooks", "is-meta-module",
-                    "is-meta-aggregate-module")
-
-
-def python_allowed(builder) -> bool:
-    return all(builder.ported(name) for name in PORTED_FUNCTIONS)
-
 
 class _Recording(Environment):
     """``define-var`` replaced by a recorder: the actions are given to
@@ -49,11 +32,6 @@ class _Recording(Environment):
         self.recorder(action, var, value)
         if ACTIONS.get(action) == "SET":
             self.export(var, value)
-
-
-#  The recording define-var of the Bash hooks (legacy plug-ins)
-_BASH_RECORDER = ("function define-var() {{ printf '%s\\0%s\\0%s\\0' \"$1\" \"$2\" \"$3\" >> {file}\n"
-                  "  [[ $1 == SET || $1 == S ]] && export \"$2=$3\"; true; }}\n")
 
 
 class ModuleEnv:
@@ -74,15 +52,11 @@ class ModuleEnv:
             sv = env.vars if env is not None else d.sv
             self.env = _Recording(sv.copy())
             self.env.recorder = recorder
-            self.python_env = True
         else:
             self.env = env if env is not None else Environment(d.sv)
             rec = self.env.vars.values.get("SCBI_ENV_MODULE", "")
             self.env.record = Path(rec) if rec else None
-            self.python_env = python_env_allowed(d.runtime.functions, d.sv.functions, d.registry.functions)
         self.walker = Walker(builder)
-        #  output of the legacy hooks (None: the console)
-        self.out = None
 
     # ------------------------------------------------------------ helpers
 
@@ -118,32 +92,10 @@ class ModuleEnv:
             ctx.env = self.env
             ctx.arrays = {"SCBI_MODULES_DIR": self.b.modules_dir}
             ctx.target_dir = self.b.target_dir
-            if isinstance(obj, EnvOps) and self.python_env:
-                ctx.params = dict(zip(catalog.spec(hook).params, args))
-                apply_env(obj, ctx, d.base_env())
-            else:
-                #  legacy hook (or define-var redefined): $H $PREFIX $TARGET $VARIANT
-                self._bash_hook(ctx, fct, args, out)
-
-    def _bash_hook(self, ctx, fct: str, args: list[str], out) -> None:
-        code = " ".join([fct, *[_q(a) for a in args]])
-        rec = None
-        if self.recorder is not None:
-            fd, rec = tempfile.mkstemp()
-            os.close(fd)
-            code = _BASH_RECORDER.format(file=_q(rec)) + code + " > /dev/null 2>&1"
-        try:
-            _, arr = env_code(self.b.shell(), ctx, code, ["SCBI_MODULES_DIR"],
-                              out or self.out or self.b.out)
-            if rec is not None:
-                items = Path(rec).read_text(errors="surrogateescape").split("\0")
-                for i in range(0, len(items) - 2, 3):
-                    self.recorder(*items[i:i + 3])
-        finally:
-            if rec is not None:
-                os.unlink(rec)
-        if "SCBI_MODULES_DIR" in arr:
-            self.b.modules_dir = arr["SCBI_MODULES_DIR"]
+            if not isinstance(obj, EnvOps):
+                raise TypeError(f"{fct}: not an environment hook")
+            ctx.params = dict(zip(catalog.spec(hook).params, args))
+            apply_env(obj, ctx, d.base_env())
 
     def call_env_hooks(self, formodule: str, modref: str, hook: str, out=None) -> None:
         """Port of ``plugin-call-env-hooks FORMODULE MODREF ENV``."""
@@ -212,10 +164,8 @@ class ModuleEnv:
         e.g. recursive dependencies, stops them); returns the status of the
         last one, or the exit status. ``name`` is a handle-*-env function
         or ``module-env`` (handle-module-env, its output appended to the
-        recording file with ``record``). ``out``: the output of the legacy
-        hooks (default: the console)."""
+        recording file with ``record``)."""
         rc = 0
-        self.out = out
         try:
             for name, *args in calls:
                 if name == "module-env":
@@ -241,8 +191,3 @@ def _int(value: str) -> int:
     except ValueError:
         return 0
 
-
-def _q(s: str) -> str:
-    from scbi.hooks.exec import quote
-
-    return quote(s)

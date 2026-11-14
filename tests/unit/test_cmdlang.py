@@ -159,7 +159,7 @@ def test_errors(tmp_path):
     status, out, _ = run(tmp_path, "nothere-cmd a\n./nothere")
     assert status == 127
     assert out == ("m.yaml: config: line 10: nothere-cmd: command not found\n"
-                   "m.yaml: config: line 11: ./nothere: command not found\n")
+                   "m.yaml: config: line 11: ./nothere: No such file or directory\n")
     status, out, _ = run(tmp_path, "cd nodir")
     assert status == 1 and "cd: nodir: No such file or directory" in out
 

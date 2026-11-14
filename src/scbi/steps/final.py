@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from scbi.bashenv import quote
-from scbi.steps.modenv import python_allowed as modenv_python_allowed
 
 
 @dataclass
@@ -75,19 +73,6 @@ class FinalStep:
         b = self.builder
         modref = modref or self.modref
         actions: list[tuple[str, str, str]] = []
-        if not modenv_python_allowed(b):
-            return self._bash_env_actions(hook, modref)
         ModuleEnv(b, recorder=lambda *a: actions.append(tuple(a))).call_env_hooks(
             self.formodule, modref, hook, out=lambda line: None)
         return actions
-
-    def _bash_env_actions(self, hook: str, modref: str) -> list[tuple[str, str, str]]:
-        """env_actions by the Bash runtime (plugin-call-env-hooks redefined)."""
-        #  the module's environment hooks run with a recording define-var;
-        #  a SET is applied (as export) so that the following hooks see it
-        code = ("function define-var() { printf '%s\\0%s\\0%s\\0' \"$1\" \"$2\" \"$3\" >&3\n"
-                "  [[ $1 == SET || $1 == S ]] && export \"$2=$3\"; true; }\n"
-                f"plugin-call-env-hooks {quote(self.formodule)} {quote(modref)} {quote(hook)} 3>&1 >/dev/null 2>&1")
-        data = self.builder.capture_raw(self.module, self.variant, code)
-        items = data.split("\0")
-        return [tuple(items[i:i + 3]) for i in range(0, len(items) - 2, 3)]

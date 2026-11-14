@@ -27,14 +27,15 @@ def env_value_has_glob(value: str) -> bool:
     return bool(GLOB_CHARS & set(value))
 
 
-_BASH_ERROR_LOCATION = __import__("re").compile(r"(?m)^\S+: line \d+: ")
+#  "file: line N: " (Bash), "environment: " (an exported function run by
+#  bash -c), "plugin.yaml: hook: line N: " (the interpreter)
+_BASH_ERROR_LOCATION = __import__("re").compile(r"(?m)^(\S+: (\S+: )?line \d+|environment): ")
 
 
 def mask_bash_error_location(text: str) -> str:
-    """Bash errors of reference code run by the Python driver in a hook
-    shell give the location in the generated script (``/tmp/tmpXXX.sh:
-    line N:``) instead of the tool script (``scbi-shell: line N:``); the
-    message itself is the same."""
+    """The location of an error differs (Bash script and line, exported
+    function, or YAML plug-in, hook and line); the message itself is the
+    same."""
     return _BASH_ERROR_LOCATION.sub("<bash>: ", text)
 
 

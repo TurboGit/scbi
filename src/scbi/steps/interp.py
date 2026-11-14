@@ -90,7 +90,7 @@ class Hook:
         """Run the hook, its output (text chunks) to ``out`` (and its errors
         to ``err``, default ``out``)."""
         ctx = self.b.ctx(self.module, self.variant, self.hook)
-        ctx.env = Environment(ShellVars(dict(self.sv.values), set(self.sv.exported), dict(self.sv.functions)))
+        ctx.env = Environment(ShellVars(dict(self.sv.values), set(self.sv.exported)))
         ctx.params = dict(self.params)
         ctx.cwd = Path(self.cwd)
         runner = Runner(ctx, self.where(), config_options=self.config_options,

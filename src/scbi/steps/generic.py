@@ -7,10 +7,7 @@ The driver runs ``module-<step> PREFIX FORMODULE MODULE VARIANT TARGET
 OOT 2>&1 | tee [-a] $log`` in a sub-shell from ``$SCBI_BDIR/<module>``;
 ``Generic.step`` does the same: the messages and the output of the
 commands go to the console and to the module log, the current directory
-is restored afterwards. The Python port is used only when the runtime
-functions involved are the reference ones and no command they run is
-redefined as a function (``python_allowed``), otherwise the Bash
-functions run as before.
+is restored afterwards.
 """
 
 from __future__ import annotations
@@ -27,25 +24,8 @@ import time
 from scbi.bashcompat import read_lines_escaped, words
 from scbi.sources import buildid
 
-#  runtime functions reproduced here
-PORTED_FUNCTIONS = (
-    "module-setup", "module-patch", "module-apply-patch", "module-purge", "module-purge-tvdir",
-    "module-pre-install", "module-install", "module-clean-install", "sync-dir", "get-ln", "get-md5",
-)
-#  commands run by them: a function of the same name makes them Bash only
-SHADOWED_COMMANDS = ("rsync", "patch", "cp", "rm", "ln", "mkdir", "find", "md5sum", "cat", "realpath",
-                     "rmdir", "sudo", "sort", "uniq", "basename", "dirname", "pushd", "popd", "cd")
 #  steps with a generic implementation
 STEPS = ("setup", "pre-install", "install", "purge")
-
-
-def python_allowed(builder, step: str) -> bool:
-    """``module-<step>`` may run in Python."""
-    if step not in STEPS:
-        return False
-    if not all(builder.ported(name) for name in PORTED_FUNCTIONS):
-        return False
-    return not any(builder.fn_exists(c) for c in SHADOWED_COMMANDS)
 
 
 class Tee:

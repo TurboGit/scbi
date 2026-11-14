@@ -183,9 +183,11 @@ def show_depends(driver, do_deps: str, do_ext: str, list_ver: str, filt: str) ->
 
 def _sort_uniq(driver, items: list[str]) -> None:
     if items:
-        proc = subprocess.run("sort | uniq", shell=True, input="".join(f"{m}\n" for m in items),
-                              capture_output=True, text=True, env=driver.base_env())
-        sys.stdout.write(proc.stdout)
+        #  sort | uniq (the locale order of sort)
+        env = driver.base_env()
+        out = subprocess.run(["sort"], input="".join(f"{m}\n" for m in items), capture_output=True,
+                             text=True, env=env).stdout
+        sys.stdout.write(subprocess.run(["uniq"], input=out, capture_output=True, text=True, env=env).stdout)
         sys.stdout.flush()
 
 

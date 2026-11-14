@@ -5,9 +5,7 @@
 
 The installed packages (SCBI_PKGS) and the aliases (SCBI_ALIAS) are the
 arrays of the driver variables. A distribution is supported when it has
-an entry in CHECKERS; otherwise (or when a ported function is redefined,
-e.g. by a test defining its own ``check-<os>-pkg``) the driver runs the
-Bash functions.
+an entry in CHECKERS.
 """
 
 from __future__ import annotations
@@ -100,39 +98,22 @@ CHECKERS = {
     "mingw": check_mingw, "none": check_none, "win": check_none,
 }
 
-#  The Bash functions ported here
-PORTED_FUNCTIONS = ("check-pkg", "check-pkg-status", "get-pkg-name", "clean-version-string")
-#  check-<os>-pkg calling another one
-_DELEGATES = {"ubt": "deb", "fed": "cos", "rhl": "cos"}
-
-
-def python_allowed(builder, auto: bool = False) -> bool:
-    """The OS package queries (``auto``: and the auto variants) may run in
-    Python: the distribution is supported and no ported function is
-    redefined."""
-    os_name = builder.get("SCBI_OS_NAME")
-    if os_name not in CHECKERS:
-        return False
-    names = [*PORTED_FUNCTIONS, f"check-{os_name}-pkg"]
-    if os_name in _DELEGATES:
-        names.append(f"check-{_DELEGATES[os_name]}-pkg")
-    if auto:
-        names += ["check-auto-variant", "handle-plan-auto-variant"]
-    return all(builder.ported(n) for n in names)
-
-
 class OsPackages:
     def __init__(self, driver):
         self.d = driver
         self.os_name = driver.get("SCBI_OS_NAME")
-        #  a copy: the Bash queries run in sub-shells (driver_run, the
-        #  parallel auto-variant jobs), a candidate version they record is
-        #  not kept
+        #  a copy: in Bash the queries run in sub-shells (the parallel
+        #  auto-variant jobs), a candidate version they record is not kept
         self.pkgs = dict(array(driver, "SCBI_PKGS"))
 
     def check_os(self, pck: str, version: str) -> int:
-        """``check-${SCBI_OS_NAME}-pkg PCK VERSION``."""
-        return CHECKERS[self.os_name](self.pkgs, pck, version)
+        """``check-${SCBI_OS_NAME}-pkg PCK VERSION`` (the fake OS of the
+        testsuite, scbi.setup.TEST_OS, is checked as Debian)."""
+        checker = CHECKERS.get(self.os_name)
+        if checker is None:
+            testsuite = self.d.get("SCBI_TESTSUITE") == "yes"
+            checker = check_deb if self.os_name == "test" and testsuite else check_none
+        return checker(self.pkgs, pck, version)
 
     @staticmethod
     def _name_ver(arg: str) -> tuple[str, str]:

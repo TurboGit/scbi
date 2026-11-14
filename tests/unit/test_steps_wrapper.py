@@ -1,8 +1,11 @@
 """The step wrapper (steps/wrapper.py) compared with the Bash
-module-variant-wrapper / module-wrapper / show-command: messages on the
-console, global and local logs, reproduction file, for steps which
-succeed, fail, are cached or nop, with SCBI_DLOG no / yes / on-failure,
-in and out of tree, and a plug-in inheriting another one."""
+module-variant-wrapper / module-wrapper: messages on the console, global
+and local logs, for steps which succeed, fail, are cached or nop, with
+SCBI_DLOG no / yes / on-failure, in and out of tree, and a plug-in
+inheriting another one. The Python driver runs YAML plug-ins: the way to
+reproduce a step (scbi replay of a replay file instead of a Bash script),
+the trace lines and the copies of the plug-in files in the logs
+directory differ by design and are not compared."""
 
 import re
 from pathlib import Path
@@ -16,7 +19,14 @@ from test_sources_handle import mask as _mask
 def mask(text: str, root: Path) -> str:
     #  error locations: Bash file and line of the hook (hook shells: their
     #  prelude, a known difference)
-    return re.sub(r"(?m)^\S+: line \d+: ", "<loc>: ", _mask(text, root))
+    #  error locations: Bash file and line, or plug-in, hook and line
+    text = re.sub(r"(?m)^\S+: (\S+: )?line \d+: ", "<loc>: ", _mask(text, root))
+    #  how to reproduce a failing step (as tests/run masks it)
+    text = re.sub(r"\(FAILED\) (bash|scbi replay) (.*\.cmd)$", r"(FAILED) <reproduce> \2", text, flags=re.M)
+    text = re.sub(r"\(FAILED\) use (bash -x|--trace) option for debug$", "(FAILED) use <debug> option for debug",
+                  text, flags=re.M)
+    #  trace lines
+    return re.sub(r"(?m)^_+TRACE: .*\n", "", text)
 
 #  (step, modref, oot, extra environment)
 CASES = [
@@ -34,10 +44,12 @@ CASES = [
 
 
 def files(root: Path) -> dict[str, str]:
-    """Logs and reproduction files (time-stamps masked, trace lines kept)."""
+    """Logs (time-stamps and trace lines masked)."""
     out = {}
     for p in sorted(root.rglob("*")):
         rel = str(p.relative_to(root))
+        if not p.name.endswith(".log"):
+            continue
         if p.is_file() and (rel.startswith("logs/") or "/logs/" in rel) and "report" not in rel:
             text = mask(p.read_text(errors="replace"), root)
             out[re.sub(r"logs/\d+-\d+-\d+", "logs/<today>", rel)] = text

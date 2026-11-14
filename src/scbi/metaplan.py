@@ -27,12 +27,6 @@ def may_be_meta(plugins: Path, module: str) -> bool:
     Bash: ``egrep -sq "function $M.*modules" $SCBI_PLUGINS/$M``; for a
     plug-in definition, a ``modules`` hook.
     """
-    f = plugins / module
-    if f.is_file():
-        try:
-            return re.search(f"function {module}.*modules", f.read_text(errors="replace")) is not None
-        except re.error:
-            return False
     path = formats.find(plugins, module)
     if path is not None:
         try:

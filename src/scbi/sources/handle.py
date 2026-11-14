@@ -23,27 +23,6 @@ from scbi.sources.data import archive_data, archive_exists, display_ref, user_co
 from scbi.sources.run import Run, command_env
 from scbi.sources.vcs import registry
 
-#  Runtime functions whose Python port is used here: a redefinition of
-#  one of them (or of a command used through a function, e.g. ln on
-#  Windows) makes the driver run the reference Bash handle-sources.
-PORTED_FUNCTIONS = (
-    "get-vcs-data", "get-archive-data", "check-archive-exists", "get-vcs-display-ref",
-    "get-vcs-user-co-dir", "get-build-id", "get-depends-build-id", "get-patch-md5",
-    "get-vcs", "get-branch", "_internal_get-branch", "vcs-build-id", "get-vcs-ref",
-    "get-vcs-commit-id", "get-archive", "set-proxy", "get-ln",
-    "git-co", "git-branch", "git-set-submodule-url", "hg-co", "hg-branch", "svn-co", "svn-branch",
-)
-SHADOWED_COMMANDS = ("ln", "cp", "mv", "rm", "mkdir", "realpath", "basename", "git", "svn", "hg", "tar")
-
-
-def python_allowed(builder) -> bool:
-    """handle-sources may run in Python: every function it uses is the
-    reference one and no command it runs is replaced by a function."""
-    if not all(builder.ported(name) for name in PORTED_FUNCTIONS):
-        return False
-    return not any(builder.fn_exists(c) for c in SHADOWED_COMMANDS)
-
-
 def read_content(path: str) -> str:
     """``read-content VAR FILE``: first line (``read`` without -r)."""
     try:

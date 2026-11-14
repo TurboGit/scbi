@@ -117,6 +117,21 @@ def test_import(tmp_path):
     assert c.env.get("OTHER") == "1"
 
 
+def test_import_opam_like(tmp_path):
+    from scbi.plugin.model import EnvOp
+
+    script = tmp_path / "fake-opam"
+    script.write_text("#!/bin/sh\nprintf \"%s\\n\" \"OPAM_SWITCH_PREFIX='/o p/default'; export OPAM_SWITCH_PREFIX;\" "
+                      "\"PATH='/o/bin:$PATH'; export PATH;\" \"unset GONE;\"\n")
+    script.chmod(0o755)
+    env = Environment(ShellVars({"PATH": "/usr/bin:/bin", "GONE": "x"}, {"PATH", "GONE"}))
+    c = ctx(tmp_path, env=env)
+    apply_env(EnvOps((EnvOp("import", (str(script),)),)), c, base_env={"PATH": "/usr/bin:/bin"})
+    assert c.env.get("OPAM_SWITCH_PREFIX") == "/o p/default"
+    assert c.env.get("PATH") == "/o/bin:/usr/bin:/bin"
+    assert "GONE" not in c.env.vars.values and "OPAM_SWITCH_PREFIX" in c.env.vars.exported
+
+
 # ------------------------------------------------------- oracle: builtins
 
 

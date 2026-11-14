@@ -11,7 +11,6 @@ from __future__ import annotations
 import os
 
 from scbi.bashcompat import words
-from scbi.hooks.exec import quote
 from scbi.plugin.resolve import get_hook
 
 #  VCS name -> the variable holding the users' checkout directory
@@ -34,18 +33,12 @@ def _call(builder, function: str, module: str, variant: str, args: list[str], re
     if hook is not None:
         #  rewrite_vcs / rewrite_archive of the Python environment file
         return [str(f) for f in hook(words("\n".join(out)))]
-    if builder.fn_exists(rewrite):
-        #  scbi-rewrite-xxx $($FUNCTION ...): a user function
-        vals = " ".join(quote(w) for w in words("\n".join(out)))
-        return words(builder.capture(module, variant, f"{rewrite} {vals}"))
     return words("\n".join(out))
 
 
 def vcs_data(builder, module: str, variant: str) -> tuple[list[str], int]:
     """``get-vcs-data MODULE VARIANT``: [variant, proxy, options, name,
     url, (dir)] as words."""
-    if not builder.ported("get-vcs-data"):
-        return builder.bash_words(module, variant, f"get-vcs-data {quote(module)} {quote(variant)}")
     d = builder.d
     function = get_hook(d.registry, module, variant, "vcs", d.runner().cross) or f"{module}-vcs"
     vcs_variant = _hook_variant(function, module, "vcs")
@@ -71,9 +64,6 @@ def archive_data(builder, module: str, variant: str, version: str) -> tuple[list
 
     The Bash function uses the caller's ``$module`` in places; all the
     callers have it equal to MODULE."""
-    if not builder.ported("get-archive-data"):
-        return builder.bash_words(module, variant, (
-            f"module={quote(module)}; get-archive-data {quote(module)} {quote(variant)} {quote(version)}"))
     d = builder.d
     function = get_hook(d.registry, module, variant, "archive", d.runner().cross) or f"{module}-archive"
     archive_variant = _hook_variant(function, module, "archive")
@@ -97,9 +87,6 @@ def archive_data(builder, module: str, variant: str, version: str) -> tuple[list
 
 def archive_exists(builder, module: str, variant: str, version: str) -> bool:
     """``check-archive-exists``: the archive file is in SCBI_ARCHIVES."""
-    if not builder.ported("check-archive-exists"):
-        return builder.run(module, variant, (
-            f"module={quote(module)}; check-archive-exists {quote(module)} {quote(variant)} {quote(version)}")) == 0
     tar, status = archive_data(builder, module, variant, version)
     if status != 0:
         return False
@@ -110,10 +97,6 @@ def archive_exists(builder, module: str, variant: str, version: str) -> bool:
 def vcs_dir(builder, modref: str) -> tuple[str, int]:
     """``get-vcs-dir MODREF`` (output, status: 1 after an error)."""
     d = builder.d
-    if not builder.ported("get-vcs-dir"):
-        info = (d.plan.module_ref(modref) + ["", ""])[:2]
-        out, rc = builder.bash_words(info[0], info[1], f"get-vcs-dir {quote(modref)}")
-        return " ".join(out), rc
     info = (d.plan.module_ref(modref) + [""] * 4)[:4]
     module, variant, kind = info[:3]
     vcs, _ = vcs_data(builder, module, variant)

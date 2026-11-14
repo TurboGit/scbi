@@ -7,6 +7,8 @@ import sys
 
 from scbi.driver import Driver
 from scbi.errors import Exit, NotImplementedYet
+from scbi.plugin.formats import PluginFormatError
+from scbi.plugin.registry import LegacyPluginError
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -19,6 +21,10 @@ def main(argv: list[str] | None = None) -> int:
         return driver.main(argv)
     except Exit as e:
         return e.status
+    except (LegacyPluginError, PluginFormatError) as e:
+        sys.stdout.flush()
+        print(f"error: {e}", file=sys.stderr)
+        return 1
     except NotImplementedYet as e:
         sys.stdout.flush()
         print(f"scbi (python): not implemented yet: {e}", file=sys.stderr)

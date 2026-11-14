@@ -896,7 +896,9 @@ class Runner:
                 else:
                     exe = shutil.which(argv[0], path=env.get("PATH"))
                 if exe is None:
-                    state.err(f"{self.where}: line {line}: {argv[0]}: command not found\n")
+                    #  as Bash: a path is not searched in PATH
+                    why = "No such file or directory" if "/" in argv[0] else "command not found"
+                    state.err(f"{self.where}: line {line}: {argv[0]}: {why}\n")
                     status = 127
                     prev_read = next_read
                     continue

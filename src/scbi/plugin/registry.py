@@ -152,6 +152,10 @@ def with_variant_functions(plugin: str, vname: str, args: list[str]) -> dict[str
     return funcs
 
 
+class LegacyPluginError(Exception):
+    """A Bash plug-in found by a registry reading definitions only."""
+
+
 @dataclass
 class Registry:
     """Plug-ins loaded from ``plugins_dir`` and their function namespace."""
@@ -176,6 +180,9 @@ class Registry:
     variant_aliases: dict[str, dict[str, tuple[str, ...]]] = field(default_factory=dict)
     #  False: only the legacy plug-ins are read (the converter)
     read_formats: bool = True
+    #  False: the legacy Bash plug-ins are not read (the driver); a module
+    #  with a Bash plug-in only is an error (LegacyPluginError)
+    read_legacy: bool = True
 
     # --------------------------------------------------------------- loading
 
@@ -188,7 +195,12 @@ class Registry:
             if path is not None:
                 return path
         path = self.plugins_dir / module
-        return path if path.is_file() else None
+        if not path.is_file():
+            return None
+        if not self.read_legacy:
+            raise LegacyPluginError(
+                f"{path}: Bash plug-in, convert it with: python3 -m scbi.convert {path}")
+        return path
 
     def load_module(self, module: str) -> bool:
         """Port of the plug-in loading part of ``load-module``.

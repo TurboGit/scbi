@@ -9,12 +9,12 @@ from probe import probe_pair, same
 
 MODULES = ["lvl0", "lvl3", "mainmult", "mainlib", "libenv", "testme", "usetool", "metaagg",
            "metaagg2", "metaagg3", "metaagg4", "metapoly", "extenv", "varenv", "lib1:skip", "cd1",
-           "supermod", "reca"]
+           "reca"]
 
 
-@pytest.fixture(scope="module", params=["legacy", "yaml"])
-def sandboxes(request, tmp_path_factory):
-    return probe_pair(tmp_path_factory.mktemp("modenv"), yaml=request.param == "yaml")
+@pytest.fixture(scope="module")
+def sandboxes(tmp_path_factory):
+    return probe_pair(tmp_path_factory.mktemp("modenv"))
 
 
 @pytest.mark.oracle

@@ -12,12 +12,16 @@ from probe import probe_pair
 FUNC = re.compile(r"(?m)^\s*(?:function\s+)?([A-Za-z0-9_.+@-]+)\s*\(\)")
 
 
-def plugin_variants(directory):
+def plugin_variants(directory, converted):
+    """(plug-in, variant) of the Bash plug-ins of ``directory`` which have a
+    YAML version in ``converted`` (the plug-ins of the Python driver)."""
     result = []
     for f in sorted(directory.iterdir()):
         if not f.is_file() or f.name.startswith((".", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "_")):
             continue
         if f.name.endswith(("~", ".yaml", ".diff")):
+            continue
+        if not (converted / f"{f.name}.yaml").is_file():
             continue
         if subprocess.run(["bash", "-n", str(f)], capture_output=True).returncode != 0:
             continue  # broken on purpose (fixtures of lint/format)
@@ -57,57 +61,49 @@ def compare(sandboxes, args):
 
 
 def chunks(pairs, size=60):
-    #  one driver run per chunk: a hook shell sources all the loaded
-    #  plug-ins, so loading every plug-in in one run is slow
+    #  one driver run per chunk
     return [pairs[i:i + size] for i in range(0, len(pairs), size)]
 
 
 @pytest.mark.oracle
 def test_data_test_plugins(sandboxes):
     plugins = sandboxes[0].root / "scripts.d"
-    for chunk in chunks(plugin_variants(plugins)):
+    for chunk in chunks(plugin_variants(plugins, sandboxes[1].root / "scripts.d")):
         compare(sandboxes, ["probe", *commands(chunk)])
 
 
 @pytest.mark.oracle
-def test_data_real_plugins(sandboxes):
+def test_data_real_plugins(sandboxes, tmp_path):
+    import shutil
+
+    from e2e import convert_dir
+
     plugins = REPO_ROOT / "scripts.d"
-    for chunk in chunks(plugin_variants(plugins)):
-        compare(sandboxes, [f"--plugins={plugins}", "probe", *commands(chunk)])
+    converted = tmp_path / "scripts.d"
+    shutil.copytree(plugins, converted, ignore=shutil.ignore_patterns("*.yaml", "*~"))
+    convert_dir(converted)
+    bash, python = sandboxes
+    #  the settings of the real 1_setup (not those of the testsuite)
+    root = f"{python.root}/home/dev"
+    env = {"SCBI_ROOT": root, "SCBI_ARCHIVES": "", "SCBI_PATCH": "",
+           "SCBI_GIT_REPO": f"{root}/repositories/git", "SCBI_SVN_REPO": f"{root}/repositories/svn",
+           "SCBI_HG_REPO": f"{root}/repositories/hg"}
+    for chunk in chunks(plugin_variants(plugins, converted)):
+        args = ["probe", *commands(chunk)]
+        rb, rp = bash.run([f"--plugins={plugins}", *args]), python.run([f"--plugins={converted}", *args], env)
+        lb, lp = rb.stdout.splitlines(), rp.stdout.splitlines()
+        for i, (x, y) in enumerate(zip(lb, lp)):
+            assert y == x.replace(str(plugins), str(converted)), f"line {i}"
+        assert (rp.returncode, len(lp)) == (rb.returncode, len(lb))
 
 
 @pytest.mark.oracle
 def test_data_variant_selection(sandboxes):
     plugins = sandboxes[0].root / "scripts.d"
-    pairs = plugin_variants(plugins)
+    pairs = plugin_variants(plugins, sandboxes[1].root / "scripts.d")
     for env in ({"SCBI_VCS_VARIANT": "vcs", "SCBI_ARCHIVE_VARIANT": "vcs"},
                 {"SCBI_lib1_VCS_VARIANT": "nope", "SCBI_lib1_ARCHIVE_VARIANT": "nope"}):
         bash, python = sandboxes
         args = ["probe", *commands(pairs[:60])]
         rb, rp = bash.run(args, env), python.run(args, env)
         assert (rp.returncode, rp.stdout, rp.stderr) == (rb.returncode, rb.stdout, rb.stderr), env
-
-
-REDEF = """
-function get-vcs-data() { echo user none none git http://redefined/$1.git; }
-function get-archive-data() { echo user none none cp /x $1-$3.tgz; return 3; }
-function check-archive-exists() { echo "never shown"; return 0; }
-function get-vcs-dir() { echo /user/$1; }
-"""
-
-
-@pytest.mark.oracle
-def test_data_redefined_uses_bash(sandboxes):
-    """A user redefinition of a ported function (here in a runtime file
-    sourced after the reference one) is used instead of the Python port."""
-    bash, python = sandboxes
-    args = ["probe", *commands([("lib1", "default"), ("lib2", "default")])]
-    try:
-        for sb in sandboxes:
-            (sb.root / "scripts.d" / "9_zredef").write_text(REDEF)
-        rb, rp = bash.run(args), python.run(args)
-    finally:
-        for sb in sandboxes:
-            (sb.root / "scripts.d" / "9_zredef").unlink()
-    assert "redefined" in rb.stdout
-    assert (rp.returncode, rp.stdout, rp.stderr) == (rb.returncode, rb.stdout, rb.stderr)

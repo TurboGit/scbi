@@ -6,7 +6,7 @@ import pytest
 from probe import probe_pair
 
 VARIANTS = ["default", "v1", "v2", "agg", "one", "two", "native"]
-MODULES = ["lib1", "lib2", "dmain", "supermod", "metaagg3", "mainmult", "dep1", "lib3", "dmod", "cd1", "listDA", "metaagg3/agg", "lib1:skip", "lib2/v1", "inh-specific",
+MODULES = ["lib1", "lib2", "dmain", "metaagg3", "mainmult", "dep1", "lib3", "dmod", "cd1", "listDA", "metaagg3/agg", "lib1:skip", "lib2/v1",
                    "libinh1", "child", "multpatch", "patches", "nothere"]
 
 

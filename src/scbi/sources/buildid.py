@@ -15,7 +15,6 @@ import time
 
 from scbi.bashcompat import words
 from scbi.errors import Exit
-from scbi.hooks.exec import quote
 
 
 def md5(data: bytes) -> str:
@@ -53,10 +52,6 @@ def depends_build_id(builder, modref: str) -> str:
     Bash, so an exit of the walker only ends the list."""
     from scbi.walker import Walker
 
-    if not builder.ported("get-depends-build-id"):
-        info = (builder.d.plan.module_ref(modref) + ["", ""])[:2]
-        return " ".join(builder.bash_words(info[0], info[1], f"get-depends-build-id {quote(modref)}")[0])
-
     d = builder.d
     walker = Walker(builder)
     module, variant = (d.plan.module_ref(modref) + ["", ""])[:2]
@@ -93,15 +88,10 @@ def build_id(builder, prefix: str, target: str, formodule: str, modref: str, vid
     """``get-build-id PREFIX TARGET FORMODULE MODREF VID`` (output, no
     newline)."""
     d = builder.d
-    if not builder.ported("get-build-id"):
-        info = (d.plan.module_ref(modref, formodule) + ["", ""])[:2]
-        call = " ".join(quote(x) for x in ("get-build-id", prefix, target, formodule, modref, vid))
-        return " ".join(builder.bash_words(info[0], info[1], call)[0])
-
     module, variant, kind, ref = (d.plan.module_ref(modref, formodule) + [""] * 4)[:4]
     plugins = d.get("SCBI_PLUGINS")
     mid = f"{variant}:{ref},{target},{d.get('SCBI_OS_VERSION')},{d.get('SCBI_OS_CODENAME')}"
-    #  the plug-in file in use (its definition file, any format, or the legacy <module>)
+    #  the plug-in file in use (its definition file)
     pfile = d.registry.plugin_file(module)
     if pfile is not None:
         mid += f",{file_md5(str(pfile))}"

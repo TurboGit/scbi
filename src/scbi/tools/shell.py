@@ -1,20 +1,19 @@
 """scbi shell: a shell or a command in the environment of modules (port
 of scbi-shell).
 
-The options, the checks and the choice of the directory are done here.
-Setting up the environment (handle-env..., the env hooks of the
-plug-ins, user redefinitions of define-var), exporting the functions and
-spawning $SHELL are Bash work: they run in a hook shell attached to the
-terminal, with the reference functions of the driver and the runtime.
+The environment is computed by the driver (scbi.steps.modenv); then the
+user's $SHELL is spawned (or ``$SHELL -c CMD`` for ``--run=CMD``). The
+``run`` hooks of a module (``--run`` without a command) are interpreted
+(command language).
 """
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 
 from scbi.bashcompat import words
-from scbi.hooks.exec import quote
 
 USAGE = """
 SCBI-SHELL {version}
@@ -37,25 +36,21 @@ MODES = {
 }
 
 
-def setup_env(modref: str, info: list[str], modules: list[str], docd: str, mode: str) -> str:
-    """Bash code of ``shl-setup-env``."""
-    q = quote
-    code = ['if [[ "$SCBI_HOST" != "$SCBI_TARGET" ]]; then target-env $SCBI_BDIR/install $SCBI_TARGET; fi']
+def setup_env(modref: str, modules: list[str], docd: str) -> list[tuple]:
+    """The environment calls of ``shl-setup-env`` (scbi.steps.modenv)."""
+    calls: list[tuple] = []
     for m in modules:
-        code.append(f"handle-env @root {q(m)}\nhandle-module-env @root {q(m)} env")
-    code.append(f"SHL_MODULE={q(info[0])}\nSHL_VARIANT={q(info[1])}\nSHL_KIND={q(info[2])}")
-    code.append(f"export SCBI_SHELL={q(mode)}:$SHL_MODULE")
+        calls += [("handle-env", "@root", m), ("module-env", "@root", m, "env")]
     if docd in ("yes", "yes-dev"):
-        code.append(f"handle-build-depends-env @root {q(modref)}")
+        calls.append(("handle-build-depends-env", "@root", modref))
     if docd == "yes-tests":
-        code.append(f"handle-tests-depends-env @root {q(modref)}\n"
-                    f"handle-module-env @root {q(modref)} tests-env")
-    code.append(f"handle-env @root {q(modref)}")
+        calls += [("handle-tests-depends-env", "@root", modref), ("module-env", "@root", modref, "tests-env")]
+    calls.append(("handle-env", "@root", modref))
     if docd in ("yes", "yes-dev"):
-        code.append(f"handle-module-env @root {q(modref)} build-env")
+        calls.append(("module-env", "@root", modref, "build-env"))
     if docd in ("yes-nocd", "yes-tests"):
-        code.append(f"handle-module-env @root {q(modref)} env")
-    return "\n".join(code)
+        calls.append(("module-env", "@root", modref, "env"))
+    return calls
 
 
 def main(driver, args: list[str]) -> int:
@@ -93,53 +88,83 @@ def main(driver, args: list[str]) -> int:
         print("error: shell/run commands need a plug-in, see scbi shell --help")
         return 0
 
-    #  run as the Bash tool does: state of the tool shell
+    #  state of the Bash tool
     driver.set("DO_WARNING_EXTERNAL", "yes")
+    shell = driver.get("SHELL")
+    if not shell:
+        print("$SHELL is not defined, cannot spawn a shell")
+        return 1
+
+    from scbi.build import Builder
+    from scbi.env import Environment
+    from scbi.steps import interp
+    from scbi.steps.modenv import ModuleEnv
+
+    builder = Builder(driver)
     target = driver.get("SCBI_TARGET")
     modref = modules[-1]
-    info = (driver.plan.module_ref(modref) + [""] * 4)[:4]
-    shl_module, shl_variant, shl_kind = info[:3]
-    q = quote
+    shl_module, shl_variant, shl_kind = (driver.plan.module_ref(modref) + [""] * 4)[:3]
+    curcd = os.getcwd()
 
-    code = [
-        f"DO_EXT=no\nDO_LIST_VER=yes-nocd\nDO_MOD_VER=no\nDO_SHELL={q(docd)}\nDO_MODE={q(mode)}\n"
-        f"DO_WARNING_EXTERNAL=yes\nSCBI_FILTER=all\nSHL_MODULE=''\nSHL_VARIANT=''\nSHL_KIND=''\n"
-        f"DO_RUN={'yes' if do_run == 'yes' else ''}\nDO_RUN_CMD={q(run_cmd)}",
-        "declare -A SCBI_MODULES_DIR=()",
-        'if [[ -z $SHELL ]]; then echo \\$SHELL is not defined, cannot spawn a shell; exit 1; fi',
-    ]
+    env = Environment(driver.sv.copy())
+    if driver.get("SCBI_HOST") != target:
+        env.target_env(f"{driver.get('SCBI_BDIR')}/install", target, driver.get("SCBI_HOST"),
+                       driver.get("SCBI_BDIR"))
+    me = ModuleEnv(builder, env)
+    me.env.export("SCBI_SHELL", f"{mode}:{shl_module}")
+    rc = me.run(setup_env(modref, modules[:-1], docd))
+    if rc != 0:
+        return rc
+    sv = me.env.vars
+    environ = sv.environ()
+    sys.stdout.flush()
 
     if do_run == "yes":
-        code.append(setup_env(modref, info, modules[:-1], docd, mode))
-        if not run_cmd:
-            prefix = f"$SCBI_BDIR/{q(shl_module)}/{q(target)}-{q(shl_variant)}/install"
-            code.append(
-                f"CMD=''\nPREFIX={prefix}\nHOOKS=()\n"
-                f"plugin-get-variant-hooks HOOKS {q(shl_module)} run $PREFIX {q(target)} {q(shl_variant)}\n"
-                'for H in ${HOOKS[*]}; do declare -fx $H; CMD+="$H; "; done\n'
-                f"[[ -z $CMD ]] && elog {q(shl_module)} no command specified for run option")
-        else:
-            code.append(f"CMD={q(run_cmd)}")
-        code.append("eval \"$(declare -F | sed -e 's/-f /-fx /')\"\n"
-                    '$SHELL -c "$CMD"\nexit 0')
-    else:
-        code.append("curcd=$(pwd)\nDIR=''")
-        code.append(setup_env(modref, info, modules[:-1], docd, mode))
-        if docd == "yes-nocd":
-            code.append("cd $curcd")
-        elif shl_kind == "DEV" or docd == "yes-dev":
-            code.append(
-                f"if is-meta-module {q(modref)} > /dev/null; then DIR=$PWD\n"
-                f"else DIR=$(get-vcs-dir {q(shl_module)}:dev)\n"
-                f"  if [[ ! -d $DIR ]]; then DIR=''; elog {q(shl_module)} no user checkout directory $DIR; fi\n"
-                "fi")
-        else:
-            code.append(f"DIR=$(get-build-dir {q(target)} {q(modref)})")
-        code.append('[[ -n $DIR ]] && { PFX=${curcd#$DIR}; [[ $PFX == $curcd ]] && cd $DIR; }')
-        code.append("eval \"$(declare -F | sed -e 's/-f /-fx /')\"\n$SHELL\nexit 0")
+        if run_cmd:
+            return _spawn([shell, "-c", run_cmd], environ, curcd)
+        prefix = f"{driver.get('SCBI_BDIR')}/{shl_module}/{target}-{shl_variant}/install"
+        from scbi.plugin.resolve import variant_hooks
 
-    from scbi.hooks.exec import run_interactive
+        fcts = variant_hooks(driver.registry, shl_module, "run", shl_variant, driver.runner().cross)
+        if not fcts:
+            driver.log.elog(shl_module, "no", "command", "specified", "for", "run", "option")
+            return 0
+        for fct in fcts:
+            hook = interp.Hook(builder, shl_module, shl_variant, fct, [prefix, target, shl_variant], curcd, sv)
+            hook.run(lambda text: (sys.stdout.write(text), sys.stdout.flush()),
+                     err=lambda text: (sys.stderr.write(text), sys.stderr.flush()))
+        return 0
 
-    sys.stdout.flush()
-    shell, ctx = driver.driver_shell()
-    return run_interactive(shell, ctx, "\n".join(code))
+    cwd = curcd
+    if docd != "yes-nocd":
+        if shl_kind == "DEV" or docd == "yes-dev":
+            if me.is_meta_module(modref):
+                tdir = curcd
+            else:
+                from scbi.sources.data import vcs_dir
+
+                tdir, _ = vcs_dir(builder, f"{shl_module}:dev")
+                if not os.path.isdir(tdir):
+                    #  (Bash: DIR is emptied before the message)
+                    tdir = ""
+                    driver.log.elog(shl_module, "no", "user", "checkout", "directory")
+        else:
+            tdir = f"{builder.target_dir(shl_module, shl_variant)}/build"
+        #  stay in a sub-directory of the module's directory
+        if tdir and not curcd.startswith(tdir):
+            if os.path.isdir(tdir):
+                cwd = tdir
+            else:
+                #  cd fails, the shell starts in the current directory
+                sys.stdout.flush()
+                print(f"cd: {tdir}: No such file or directory", file=sys.stderr)
+    return _spawn([shell], environ, cwd)
+
+
+def _spawn(argv: list[str], environ: dict[str, str], cwd: str) -> int:
+    try:
+        subprocess.run(argv, env=environ, cwd=cwd)
+    except OSError as e:
+        print(f"{argv[0]}: {e.strerror}")
+        return 1
+    return 0

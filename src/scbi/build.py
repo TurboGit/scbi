@@ -2,12 +2,10 @@
 global install (port of handle-module and its helpers from the scbi
 driver).
 
-The flow, the decisions, the messages and the logs are in Python. Some
-leaf parts still run as reference Bash code in a hook shell (functions of
-hooks/compat.sh and of the runtime): the sources (handle-sources), the
-running of a step with its logs (module-wrapper), the environment of the
-module and its dependencies (handle-env...), the generic steps of the
-runtime (module-setup, module-install...).
+Everything runs in Python (no Bash): the sources (scbi.sources), the
+environment of the module and its dependencies (scbi.steps.modenv), the
+steps and their logs (scbi.steps.wrapper, scbi.steps.generic, the
+command hooks interpreted by scbi.steps.interp).
 """
 
 from __future__ import annotations
@@ -22,12 +20,10 @@ import time
 from pathlib import Path
 
 from scbi.bashcompat import assoc_keys, words
-from scbi.bashenv import ShellVars, quote
+from scbi.bashenv import ShellVars
 from scbi.env import Environment
 from scbi.errors import Exit, NotImplementedYet
 from scbi.hooks.context import HookContext
-from scbi.hooks.exec import HookShell, env_code, is_nop, run_code
-from scbi.hooks.policy import is_reference
 from scbi.plugin.model import Commands
 from scbi.plugin.resolve import get_hook
 from scbi.sources import handle as sources
@@ -112,35 +108,6 @@ class Builder:
             scbi_bdir=self.get("SCBI_BDIR"),
         )
 
-    def shell(self) -> HookShell:
-        reg = self.d.registry
-        return HookShell(self.d.runtime, reg.functions, self.d.base_env(), loaded=reg.scbi_loaded(), sources=reg.legacy_sources())
-
-    def bash(self, module: str, variant: str, code: str, hook: str = "config",
-             arrays: list[str] = ()) -> int:
-        """Run driver code in a shell (output to the console), the changes
-        to the shell variables are kept."""
-        sys.stdout.flush()
-        ctx = self.ctx(module, variant, hook)
-        rc, arr = env_code(self.shell(), ctx, code, ["SCBI_MODULES_DIR", *arrays], self.out)
-        self.d.sv = ctx.env.vars
-        if "SCBI_MODULES_DIR" in arr:
-            self.modules_dir = arr["SCBI_MODULES_DIR"]
-        return rc
-
-    def run(self, module: str, variant: str, code: str, hook: str = "config") -> int:
-        """Run driver code in a shell (output to the console); it cannot
-        change the driver variables (e.g. code run in a sub-shell in Bash)."""
-        sys.stdout.flush()
-        return run_code(self.shell(), self.ctx(module, variant, hook), code, self.out).returncode
-
-    def capture(self, module: str, variant: str, code: str) -> str:
-        """``$(code)``: output of driver code, trailing newlines removed."""
-        ctx = self.ctx(module, variant)
-        lines: list[str] = []
-        run_code(self.shell(), ctx, code + " 2>/dev/null", lines.append)
-        return "\n".join(lines).rstrip("\n")
-
     def final_step(self, hook, ctx) -> None:
         """``module_final_step(ctx)`` of the Python environment file (an
         error in it is reported, the build goes on as with Bash)."""
@@ -151,25 +118,14 @@ class Builder:
             self.elog(ctx.module, "module_final_step:", f"{type(e).__name__}:", str(e))
         sys.stdout.flush()
 
-    def capture_raw(self, module: str, variant: str, code: str) -> str:
-        """The standard output of driver code, as is."""
-        from scbi.hooks.exec import run_code
-
-        lines: list[str] = []
-        run_code(self.shell(), self.ctx(module, variant), code, lines.append)
-        return "\n".join(lines)
-
     def module_environment(self, module: str, variant: str, calls, hook: str = "config") -> int:
         """The environment setup of a module applied to the driver
         variables: ``calls`` of scbi.steps.modenv.ModuleEnv.run (a
         ``module-env`` call ending with ``record`` has its output appended
-        to $SCBI_ENV_MODULE, which is then unset); the Bash functions when
-        a ported one is redefined. Returns the status."""
+        to $SCBI_ENV_MODULE, which is then unset). Returns the status."""
         from scbi.steps import modenv
 
         d = self.d
-        if not modenv.python_allowed(self):
-            return self.bash(module, variant, _env_calls_code(calls), hook=hook)
         sys.stdout.flush()
         me = modenv.ModuleEnv(self)
         rc = me.run(calls)
@@ -179,48 +135,23 @@ class Builder:
             d.sv.exported.discard("SCBI_ENV_MODULE")
         return rc
 
-    def module_env(self, module: str, variant: str, code: str, calls=None) -> ShellVars:
-        """The driver variables after running ``code`` (e.g. the
-        environment setup of a module) on a copy: the driver is not
-        changed (a sub-shell in Bash). With ``calls`` (see
-        module_environment) and the ported functions not redefined, they
-        are run in Python instead of ``code``."""
+    def module_env(self, calls) -> ShellVars:
+        """The driver variables after the environment setup ``calls`` (see
+        module_environment) run on a copy: the driver is not changed (a
+        sub-shell in Bash)."""
         from scbi.steps import modenv
 
-        sv = self.d.sv
-        if calls is not None and modenv.python_allowed(self):
-            me = modenv.ModuleEnv(self, Environment(sv.copy()))
-            saved = dict(self.modules_dir)
-            try:
-                me.run(calls, out=lambda line: None)
-            finally:
-                self.modules_dir = saved
-            return me.env.vars
-        copy_sv = ShellVars(dict(sv.values), set(sv.exported), dict(sv.functions))
-        ctx = self.ctx(module, variant)
-        ctx.env = Environment(copy_sv)
-        lines: list[str] = []
-        env_code(self.shell(), ctx, code + " 2>/dev/null", ["SCBI_MODULES_DIR"], lines.append)
-        return ctx.env.vars
-
-    def ported(self, name: str) -> bool:
-        """The Python port of the runtime function ``name`` may be used:
-        it is not redefined by the user (scbi.hooks.policy)."""
-        d = self.d
-        return is_reference(name, d.runtime.functions, d.sv.functions, d.registry.functions)
-
-    def bash_words(self, module: str, variant: str, call: str) -> tuple[list[str], int]:
-        """``r=( $(call) )``: the words and the status of a Bash call."""
-        lines: list[str] = []
-        rc = run_code(self.shell(), self.ctx(module, variant),
-                      f'__r=( $({call}) ); __s=$?; echo "${{__r[*]}}"; exit $__s', lines.append).returncode
-        return words("\n".join(lines)), rc
+        me = modenv.ModuleEnv(self, Environment(self.d.sv.copy()))
+        saved = dict(self.modules_dir)
+        try:
+            me.run(calls, out=lambda line: None)
+        finally:
+            self.modules_dir = saved
+        return me.env.vars
 
     def fn_exists(self, name: str) -> bool:
-        d = self.d
-        return (name in d.registry.functions or name in d.runtime.functions or name in d.sv.functions
-                #  exported in the environment (export -f)
-                or f"BASH_FUNC_{name}%%" in d.sv.values)
+        """A function of the loaded plug-ins."""
+        return name in self.d.registry.functions
 
     def target_dir(self, module: str, variant: str, file: str = "") -> str:
         """Port of ``get-target-dir``."""
@@ -298,23 +229,16 @@ class Builder:
             tdir = tempfile.mkdtemp()
             cwd = os.getcwd()
             os.chdir(tdir)
-            setup = (f"handle-build-depends-env @root {quote(modref)}\n"
-                     f"handle-module-env @root {quote(modref)} env\n"
-                     f"handle-module-env @root {quote(modref)} build-env\n")
             try:
-                if interp.is_commands(self, fct):
-                    sv = self.module_env(module, variant, setup, [
-                        ("handle-build-depends-env", "@root", modref),
-                        ("module-env", "@root", modref, "env"),
-                        ("module-env", "@root", modref, "build-env")])
-                    chunks: list[str] = []
-                    interp.Hook(self, module, variant, fct,
-                                [self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), variant], tdir, sv).run(
-                        chunks.append, err=lambda text: None)
-                    mver = "".join(chunks).rstrip("\n")
-                else:
-                    mver = self.capture(module, variant, (
-                        f"{setup}{fct} \"$SCBI_PREFIX\" \"$SCBI_TARGET\" {quote(variant)}"))
+                sv = self.module_env([
+                    ("handle-build-depends-env", "@root", modref),
+                    ("module-env", "@root", modref, "env"),
+                    ("module-env", "@root", modref, "build-env")])
+                chunks: list[str] = []
+                interp.Hook(self, module, variant, fct,
+                            [self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), variant], tdir, sv).run(
+                    chunks.append, err=lambda text: None)
+                mver = "".join(chunks).rstrip("\n")
             finally:
                 os.chdir(cwd)
                 shutil.rmtree(tdir, ignore_errors=True)
@@ -559,21 +483,17 @@ class Builder:
         purge = self.get("DO_PURGE")
         if purge in ("yes", "only"):
             self.ilog(module, "%BPurging", f"%t{module}%c", "for", f"{self.get('SCBI_TARGET')}/{variant}")
-            if os.path.isdir(f"{bdir}/{module}") and generic_steps.python_allowed(self, "purge"):
+            if os.path.isdir(f"{bdir}/{module}"):
                 sys.stdout.flush()
                 generic_steps.Generic(self, formodule, module, variant,
                                       self.target_dir(module, variant)).step("purge", None)
-            elif os.path.isdir(f"{bdir}/{module}"):
-                self.run(module, variant, (
-                    f"module-purge {quote(f'{bdir}/{module}')} {quote(formodule)} {quote(module)} "
-                    f"{quote(variant)} \"$SCBI_TARGET\""))
 
         if self.get("DO_CLEAN_INSTALL") == "yes":
             self.ilog(module, "Clean", module, "install for", f"{self.get('SCBI_TARGET')}/{variant}")
             if os.path.isdir(f"{bdir}/{module}"):
-                self.run(module, variant, (
-                    f"module-clean-install {quote(f'{tvdir}/install')} {quote(formodule)} "
-                    f"{quote(module)} {quote(variant)} \"$SCBI_TARGET\""))
+                sys.stdout.flush()
+                generic_steps.Generic(self, formodule, module, variant, str(tvdir)).clean_install(
+                    f"{tvdir}/install", self.get("SCBI_TARGET"))
             return
 
         if purge == "only":
@@ -676,11 +596,7 @@ class Builder:
         def internal_wrapper(fct: str) -> int:
             if not fct:
                 return 0
-            if step_wrapper.python_allowed(self):
-                return step_wrapper.StepWrapper(self, meta, variant).internal(f"{bdir}/install", fct)
-            return self.run(meta, variant, (
-                f"_internal_module-variant-wrapper {quote(f'{bdir}/install')} {quote(meta)} "
-                f"{quote(variant)} {quote(fct)}"))
+            return step_wrapper.StepWrapper(self, meta, variant).internal(f"{bdir}/install", fct)
 
         if internal_wrapper(fct_setup) != 0:
             return 1
@@ -755,13 +671,6 @@ class Builder:
             self.ilog(meta, "final", "step", "starting", tee=log)
             self.final_step(final, FinalStep(self, f"{tvmdir}/install", self.get("SCBI_TARGET"), variant, meta,
                                              formodule, meta, depends_kind, mmode, is_aggregated, is_utd))
-            self.ilog(meta, "final", "step", "completed", tee=log)
-        elif self.fn_exists("module-final-step"):
-            mmode = "aggregate" if agg_mode != "no" else "yes"
-            self.ilog(meta, "final", "step", "starting", tee=log)
-            self.run(meta, variant, (
-                f"module-final-step {quote(f'{tvmdir}/install')} \"$SCBI_TARGET\" {quote(variant)} "
-                f"{quote(meta)} {quote(depends_kind)} {mmode} {quote(is_aggregated)} {is_utd}"))
             self.ilog(meta, "final", "step", "completed", tee=log)
 
         secs = int(time.monotonic() - start)
@@ -872,19 +781,12 @@ class Builder:
 
     def sync_dir(self, module: str, variant: str, src: str, dst: str) -> int:
         """``sync-dir SRC DST`` (output to the console)."""
-        if generic_steps.python_allowed(self, "install"):
-            sys.stdout.flush()
-            return generic_steps.Generic(self, "@root", module, variant, "").sync_dir(src, dst)
-        return self.run(module, variant, f"sync-dir {quote(src)} {quote(dst)}")
+        sys.stdout.flush()
+        return generic_steps.Generic(self, "@root", module, variant, "").sync_dir(src, dst)
 
     def sync_recursive(self, meta: str, variant: str, module: str, tvmdir: str, mdir: str) -> None:
         """``do-sync`` of a recursive aggregate: the installation of
         ``module`` and of its dependencies copied into the meta-module."""
-        from scbi.steps import modenv
-
-        if not (modenv.python_allowed(self) and generic_steps.python_allowed(self, "install")):
-            self.run(meta, variant, _DO_SYNC.format(tvmdir=quote(tvmdir), mdir=quote(mdir), module=quote(module)))
-            return
         bdir = self.get("SCBI_BDIR")
 
         def do_sync(argv: list[str]) -> None:
@@ -903,10 +805,8 @@ class Builder:
         """``check-pkg PKG`` (its messages to the console unless ``quiet``)."""
         from scbi import ospkg
 
-        if ospkg.python_allowed(self):
-            sys.stdout.flush()
-            return ospkg.OsPackages(self.d).check_pkg(pkg, (lambda line: None) if quiet else self.out)
-        return self.run(module, variant, f"check-pkg {quote(pkg)}" + (" > /dev/null" if quiet else ""))
+        sys.stdout.flush()
+        return ospkg.OsPackages(self.d).check_pkg(pkg, (lambda line: None) if quiet else self.out)
 
     def display_ref(self, module: str, variant: str, ref: str) -> str:
         """Port of ``get-module-display-ref``."""
@@ -950,10 +850,7 @@ class Builder:
             lnk = self.get("SCBI_LNK")
             for p in ("src", f"src{lnk}", f"vcs{lnk}"):
                 _rm(p)
-            if sources.python_allowed(self):
-                rc = sources.handle_sources(self, formodule, modref)
-            else:
-                rc = self.bash(module, variant, f"handle-sources {quote(formodule)} {quote(modref)}")
+            rc = sources.handle_sources(self, formodule, modref)
             if rc != 0:
                 return 1, "no"
 
@@ -1049,33 +946,22 @@ class Builder:
                 Path(tvdir, "build-id").unlink(missing_ok=True)
         envtmp.unlink(missing_ok=True)
 
-        teeopt = "" if self.get("SCBI_DLOG") == "yes" else "-a"
-        args = (f"{quote(f'{tvdir}/install')} {quote(formodule)} {quote(module)} "
-                f"{quote(variant)} \"$SCBI_TARGET\" \"$SCBI_ISOOT\"")
+        append = self.get("SCBI_DLOG") != "yes"
 
         def generic(step: str) -> int:
-            if not self.fn_exists(f"module-{step}"):
+            if step not in generic_steps.STEPS:
                 return 0
-            if generic_steps.python_allowed(self, step):
-                sys.stdout.flush()
-                return generic_steps.Generic(self, formodule, module, variant, tvdir).step(
-                    step, self.get("log"), append=bool(teeopt))
-            return self.run(module, variant, (
-                f"cd {quote(f'{bdir}/{module}')}\n"
-                f"module-{step} {args} 2>&1 | tee {teeopt} \"$log\"\n"
-                "exit ${PIPESTATUS[0]}"))
+            sys.stdout.flush()
+            return generic_steps.Generic(self, formodule, module, variant, tvdir).step(
+                step, self.get("log"), append=append)
 
         def wrapper(step: str) -> int:
             #  module-variant-wrapper does nothing without a hook or for a
             #  nop hook ({ true }): no shell needed then
             fct = get_hook(d.registry, module, variant, step, d.runner().cross)
-            if not fct or is_nop(d.registry.functions.get(fct)):
+            if not fct or step_wrapper.is_nop(d.registry.functions.get(fct)):
                 return 0
-            if step_wrapper.python_allowed(self):
-                return step_wrapper.StepWrapper(self, module, variant).internal(f"{tvdir}/install", fct)
-            return self.run(module, variant, (
-                f"module-variant-wrapper {quote(f'{tvdir}/install')} {quote(module)} "
-                f"{quote(variant)} {quote(step)}"))
+            return step_wrapper.StepWrapper(self, module, variant).internal(f"{tvdir}/install", fct)
 
         for step in words(self.get("STEPS")):
             if step == "tests":
@@ -1107,53 +993,7 @@ class Builder:
             self.final_step(final, FinalStep(self, f"{tvdir}/install", self.get("SCBI_TARGET"), variant, module,
                                              formodule, modref, depends_kind, "no", is_aggregated, is_uptodate))
             self.ilog(module, "final", "step", "completed", tee=log)
-        elif self.fn_exists("module-final-step"):
-            self.ilog(module, "final", "step", "starting", tee=log)
-            for name, value in (("FORMODULE", formodule), ("MODREF", modref), ("module", module),
-                                ("variant", variant)):
-                d.set(name, value)
-            self.bash(module, variant, (
-                f"module-final-step {quote(f'{tvdir}/install')} \"$SCBI_TARGET\" {quote(variant)} "
-                f"{quote(module)} {quote(depends_kind)} no {quote(is_aggregated)} {quote(is_uptodate)}"))
-            self.ilog(module, "final", "step", "completed", tee=log)
         return 0, is_uptodate
-
-
-def _env_calls_code(calls) -> str:
-    """The Bash driver code of ModuleEnv.run calls."""
-    lines = []
-    for name, *args in calls:
-        record = bool(args) and args[-1] == "record"
-        if record:
-            args = args[:-1]
-        call = " ".join(["handle-module-env" if name == "module-env" else name, *(quote(a) for a in args)])
-        lines.append(call + (" >> $SCBI_ENV_MODULE" if record else ""))
-    if any(c[-1] == "record" for c in calls):
-        lines.append("unset SCBI_ENV_MODULE")
-    return "\n".join(lines)
-
-
-#  do-sync of handle-meta-module (recursive aggregate)
-_DO_SYNC = r"""
-TVMDIR={tvmdir}
-MDIR={mdir}
-function do-sync()
-{{
-    local FORMODULE=$1
-    local MODREF=$2
-    local smodule_info=()
-    get-module-ref smodule_info $MODREF $FORMODULE
-    local module=${{smodule_info[0]}}
-    local variant=${{smodule_info[1]}}
-    local ref=${{smodule_info[3]}}
-    [[ "$ref" == "skip" ]] && return
-    local IDIR=""
-    get-target-dir IDIR $module $variant install
-    [[ -d $IDIR ]] && sync-dir $IDIR $TVMDIR/.
-    cat $SCBI_BDIR/$module/source-ref >> $MDIR/source-ref
-}}
-for-all-modules-depends-with-meta do-sync {module}
-"""
 
 
 def _append_file(src: Path, dst: Path) -> None:

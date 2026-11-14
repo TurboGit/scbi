@@ -24,7 +24,6 @@ from typing import Callable
 
 from scbi.bashcompat import words
 from scbi.errors import Exit
-from scbi.hooks.exec import quote
 
 Callback = Callable[[list[str]], int | None]
 
@@ -97,9 +96,7 @@ class Walker:
         """``check-pkg`` (queries the OS packages, scbi.ospkg)."""
         from scbi import ospkg
 
-        if ospkg.python_allowed(self.b):
-            return ospkg.OsPackages(self.d).check_pkg(f"{module}:{ref}", self.b.out)
-        return self.d.driver_run(f"check-pkg {quote(f'{module}:{ref}')}")
+        return ospkg.OsPackages(self.d).check_pkg(f"{module}:{ref}", self.b.out)
 
     # ------------------------------------------------------------ walker
 

@@ -10,6 +10,7 @@ scbi-store).
 from __future__ import annotations
 
 import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -86,8 +87,7 @@ def main(driver, args: list[str]) -> int:
         print('try "scbi store --help" for more information.')
         return 1
     #  eval set -- <getopt output>
-    parsed = subprocess.run(["bash", "-c", 'eval set -- "$1"; printf "%s\\0" "$@"', "_", proc.stdout.strip()],
-                            capture_output=True, text=True).stdout.split("\0")[:-1]
+    parsed = shlex.split(proc.stdout)
 
     do_list, do_delete, keys = "no", False, []
     for a in parsed:

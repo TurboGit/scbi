@@ -1,11 +1,12 @@
 """Running of a module step: port of ``module-variant-wrapper``,
 ``_internal_module-variant-wrapper`` and ``module-wrapper`` of the
-driver, and of ``show-command`` (scripts.d/2_log).
+driver.
 
 For each step the wrapper displays the starting/cached/completed or
 failure messages, chooses the directory (the build directory, the
 sources for an in-tree build, the module directory for setup and
-wrapup), writes the reproduction file ``<step>.cmd`` and runs the hook,
+wrapup), writes the replay file ``<step>.cmd`` (scbi replay) and runs
+the hook (command language, scbi.steps.interp),
 its output going to the global log of the step, to the local log
 ``$TVDIR/logs/<step>.log`` and, with ``SCBI_DLOG=yes`` or for the tests,
 to the console.
@@ -20,29 +21,19 @@ import sys
 from collections import deque
 from pathlib import Path
 
-from scbi.bashenv import quote
-from scbi.hooks.exec import is_nop, run_code
 from scbi.plugin import formats
+from scbi.plugin.model import Commands
 from scbi.plugin.resolve import get_hook
 from scbi.steps import interp
-
-#  driver functions reproduced here (a user definition makes them run in
-#  Bash) and ported runtime functions
-DRIVER_FUNCTIONS = ("module-wrapper", "module-variant-wrapper", "_internal_module-variant-wrapper")
-PORTED_FUNCTIONS = ("show-command", "_internal_copy-plugin")
 
 _REPRODUCE = re.compile(r".*(config|build|install|cross-config|cross-build|cross-install)$")
 _HOME_DIR_STEP = re.compile(r"(pre-|post-)*(setup|wrapup)$")
 _TRACE = re.compile(r"^_[_]*TRACE: ")
 
 
-def python_allowed(builder) -> bool:
-    """The steps may be run by the Python wrapper."""
-    d = builder.d
-    for name in DRIVER_FUNCTIONS:
-        if name in d.sv.functions or name in d.registry.functions:
-            return False
-    return all(builder.ported(name) for name in PORTED_FUNCTIONS)
+def is_nop(obj) -> bool:
+    """A hook doing nothing (``true``): the step is skipped."""
+    return isinstance(obj, Commands) and obj.is_nop()
 
 
 class _Sink:
@@ -135,15 +126,11 @@ class StepWrapper:
         fct = f"{module}-{mstep}"
         target = self.get("SCBI_TARGET")
         is_tests = "tests" in step
-        commands = interp.is_commands(b, fct)
-        if commands:
-            tests_opts = self.get("SCBI_TESTS_OPTIONS") if is_tests else self.get("TESTS_OPTS")
-            hook = interp.Hook(b, module, variant, fct, [prefix, target, variant, tests_opts], cwd)
-            hook.write_replay(clog)
-            #  the plug-in files, as show-command copies them
-            copy_plugin(self.get("SCBI_PLUGINS"), module, f"{tvdir}/logs", [], self.d.registry)
-        else:
-            self.write_command(clog, fct, prefix, cwd)
+        tests_opts = self.get("SCBI_TESTS_OPTIONS") if is_tests else self.get("TESTS_OPTS")
+        hook = interp.Hook(b, module, variant, fct, [prefix, target, variant, tests_opts], cwd)
+        hook.write_replay(clog)
+        #  the plug-in files (and those of the inherited plug-ins)
+        copy_plugin(self.get("SCBI_PLUGINS"), module, f"{tvdir}/logs", [], self.d.registry)
 
         if not is_tests and cached:
             return 0
@@ -154,13 +141,7 @@ class StepWrapper:
         else:
             sink = _Sink([(mlog, "w"), (log, "a")], console=False)
         sys.stdout.flush()
-        if commands:
-            res = hook.run(sink.text, trace=None if dlog else sink.line)
-        elif dlog:
-            tests_opts = self.get("SCBI_TESTS_OPTIONS") if is_tests else self.get("TESTS_OPTS")
-            res = self.run_hook(fct, [prefix, target, variant, tests_opts], cwd, sink.line, trace=False)
-        else:
-            res = self.run_hook(fct, [prefix, target, variant], cwd, sink.line, trace=True)
+        res = hook.run(sink.text, trace=None if dlog else sink.line)
 
         if res != 0:
             if self.get("SCBI_DLOG") == "on-failure" and step != "tests":
@@ -168,30 +149,11 @@ class StepWrapper:
             b.elog(module, mstep, "failed", "with", "error", str(res))
             if _REPRODUCE.match(step):
                 b.elog(module, "to", "reproduce:")
-                if commands:
-                    b.elog(module, "scbi", "replay", clog)
-                    b.elog(module, "use", "--trace", "option", "for", "debug")
-                else:
-                    b.elog(module, "bash", clog)
-                    b.elog(module, "use", "bash", "-x", "option", "for", "debug")
+                b.elog(module, "scbi", "replay", clog)
+                b.elog(module, "use", "--trace", "option", "for", "debug")
             return res
         b.ilog(module, f"{mstep}{dvariant}", "completed")
         return 0
-
-    def run_hook(self, fct: str, args: list[str], cwd: str, on_line, trace: bool) -> int:
-        """Run the hook function in a hook shell from ``cwd`` (xtrace in the
-        logs when ``trace``)."""
-        b = self.b
-        call = " ".join([fct, *(quote(a) for a in args)])
-        if trace:
-            code = (f'{{\n    PS4="_TRACE: "\n    set -o xtrace\n    {call}\n    res=$?\n'
-                    "    set +o xtrace\n    exit $res\n} 2>&1")
-        else:
-            code = f"{call} 2>&1"
-        sys.stdout.flush()
-        ctx = b.ctx(self.module, self.variant, fct[len(self.module) + 1:])
-        ctx.cwd = type(ctx.cwd)(cwd)
-        return run_code(b.shell(), ctx, code, on_line).returncode
 
     def tail(self, mlog: str) -> None:
         """``tail -100 $mlog | grep -v "^_[_]*TRACE: "``."""
@@ -205,76 +167,20 @@ class StepWrapper:
                 sys.stdout.write(line if line.endswith("\n") else line + "\n")
         sys.stdout.flush()
 
-    # ---------------------------------------------------- show-command
 
-    def write_command(self, clog: str, fct: str, prefix: str, cwd: str) -> None:
-        """``show-command MODULE FCT PREFIX TARGET VARIANT &> $clog``: the
-        Bash script reproducing the step."""
-        module, variant = self.module, self.variant
-        tvdir = self.b.target_dir(module, variant)
-        lines = [f"# {fct}", "(", f"   cd {cwd}", f"   source {self.get('SCBI_BDIR')}/.scbi.runtime",
-                 f"   LOGDIR={tvdir}/logs", "   [[ -f $LOGDIR/env.cmd ]] && source $LOGDIR/env.cmd"]
-        if self.get("SCBI_TARGET") != self.get("SCBI_HOST"):
-            lines.append("   target-env $SCBI_BDIR/install $SCBI_TARGET")
-        lines += ["   [[ -f $LOGDIR/build-plan ]] &&", "      load-runtime-module-plan $LOGDIR/build-plan", ""]
-        #  the errors of _internal_copy-plugin go to the file too
-        copy_plugin(self.get("SCBI_PLUGINS"), module, f"{tvdir}/logs", lines)
-        lines += [f"   source $LOGDIR/{module}", "",
-                  f"   {fct} {prefix} {self.get('SCBI_TARGET')} {variant}", ")"]
-        try:
-            with open(clog, "w") as f:
-                f.write("\n".join(lines) + "\n")
-        except OSError as e:
-            sys.stderr.write(f"{clog}: {e.strerror}\n")
-
-
-def copy_plugin(plugins: str, plugin: str, dest: str, errors: list[str], registry=None) -> None:
-    """``_internal_copy-plugin PLG DIR``: the plug-in file and the files of
-    the plug-ins it inherits are copied to DIR (with ``registry``: the
-    definition files too, scbi.plugin.formats)."""
-    definition = formats.find(Path(plugins), plugin) if registry is not None else None
+def copy_plugin(plugins: str, plugin: str, dest: str, errors: list[str], registry) -> None:
+    """The definition file of the plug-in and those of the plug-ins it
+    inherits are copied to DIR (``_internal_copy-plugin`` of the Bash
+    driver)."""
+    definition = formats.find(Path(plugins), plugin)
     if definition is not None:
         try:
             shutil.copy(definition, dest)
         except OSError as e:
             errors.append(f"cp: cannot create regular file '{dest}': {e.strerror}")
-        pdef = registry.definitions.get(plugin)
-        for inh in (pdef.inherits if pdef else ()):
-            copy_plugin(plugins, inh.parent, dest, errors, registry)
-    src = f"{plugins}/{plugin}"
-    if not os.path.isfile(src):
-        return
-    try:
-        shutil.copy(src, dest)
-    except OSError as e:
-        errors.append(f"cp: cannot create regular file '{dest}': {e.strerror}")
-        return
-    with open(f"{dest}/{plugin}", errors="surrogateescape") as f:
-        text = f.read()
-    for line in text.split("\n"):
-        words = line.split()
-        if not words or words[0] != "inherit-plugin":
-            continue
-        #  getopt -l no-variant,hooks:,custom-hooks:,name: -- inherit-plugin ...
-        #  (the first word is taken as the short options): the first
-        #  argument which is not an option is the inherited plug-in
-        args, parent = words[1:], ""
-        i = 0
-        while i < len(args):
-            a = args[i]
-            if a in ("--hooks", "--custom-hooks", "--name"):
-                i += 2
-                continue
-            if a == "--no-variant" or re.match(r"--(hooks|custom-hooks|name)=", a):
-                i += 1
-                continue
-            if a == "--":
-                parent = args[i + 1] if i + 1 < len(args) else ""
-                break
-            parent = a
-            break
-        if parent:
-            copy_plugin(plugins, parent, dest, errors, registry)
+    pdef = registry.definitions.get(plugin)
+    for inh in (pdef.inherits if pdef else ()):
+        copy_plugin(plugins, inh.parent, dest, errors, registry)
 
 
 def _append(path: str, text: str) -> None:

@@ -194,7 +194,25 @@ def out(text):
     sys.stdout.flush()
 
 
+def _legacy_md5():
+    """Build ids hash the plug-in file in use: the YAML one for the Python
+    driver, the Bash one for the Bash driver. To compare the rest of the
+    computation, the probe hashes the Bash file kept next to the YAML one."""
+    import os
+
+    orig = buildid.file_md5
+
+    def file_md5(path):
+        p = str(path)
+        if p.endswith(".yaml") and os.path.isfile(p[:-5]):
+            return orig(p[:-5])
+        return orig(p)
+
+    buildid.file_md5 = file_md5
+
+
 def main(driver, args):
+    _legacy_md5()
     argv = words(" ".join(driver.modules))
     b = Builder(driver)
     group: list[str] = []
@@ -220,7 +238,7 @@ def probe_env(driver, b, a):
     Walker(b).load_module(modref)
     #  a sub-shell in the Bash probe
     sv = driver.sv
-    driver.sv = ShellVars(dict(sv.values), set(sv.exported), dict(sv.functions))
+    driver.sv = ShellVars(dict(sv.values), set(sv.exported))
     saved_dirs = dict(b.modules_dir)
     rec = f"{driver.get('SCBI_BDIR')}/env.rec"
     driver.set("SCBI_ENV_MODULE", rec)

@@ -59,5 +59,9 @@ def move_sources(io, tmp: str, dest: str, tardir: str, tarsrc: str, elog) -> boo
     else:
         #  no top directory: everything, hidden files included
         os.makedirs(dest, exist_ok=True)
-        io.run(["bash", "-c", "mv * .* ../archive-src"], tmp)
+        #  mv * .* ../archive-src (a pattern without match stays as is)
+        names = os.listdir(tmp)
+        visible = sorted(e for e in names if not e.startswith(".")) or ["*"]
+        hidden = sorted(e for e in names if e.startswith(".")) or [".*"]
+        io.run(["mv", *visible, *hidden, "../archive-src"], tmp)
     return True

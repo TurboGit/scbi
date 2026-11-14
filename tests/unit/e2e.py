@@ -12,6 +12,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -44,7 +45,7 @@ class Sandbox:
         root.mkdir(parents=True, exist_ok=True)
         plugins = root / "scripts.d"
         shutil.copytree(REPO_ROOT / "tests" / "scripts.d", plugins, dirs_exist_ok=True,
-                        ignore=shutil.ignore_patterns("*~", "[0-9]_*", "_os_*", ".pkgs-*", ".store"))
+                        ignore=shutil.ignore_patterns("*~", "*.yaml", "[0-9]_*", "_os_*", ".pkgs-*", ".store"))
         #  test-specific runtime files are tracked in tests/scripts.d
         for f in ("1_setup", "1_shell"):
             src = REPO_ROOT / "tests" / "scripts.d" / f
@@ -72,6 +73,8 @@ class Sandbox:
                 f"SCBI_ARGV0=\"$0\" PYTHONPATH={REPO_ROOT / 'src'}${{PYTHONPATH:+:$PYTHONPATH}} "
                 "exec python3 -m scbi \"$@\"\n"
             )
+            #  the Python driver reads YAML plug-ins only
+            to_yaml(self)
         (root / "scbi").chmod(0o755)
         for p in root.glob("scbi-*"):
             p.chmod(0o755)
@@ -90,7 +93,10 @@ class Sandbox:
             "TERM": "dumb",
         }
         if self.impl == "python":
-            env["SCBI_TESTSUITE"] = "yes"
+            #  as tests/run: the settings of the test runtime file 1_setup
+            root = self.root / ".root"
+            env.update(SCBI_TESTSUITE="yes", SCBI_ROOT=str(root), SCBI_ARCHIVES=f"{root}/.archives",
+                       SCBI_PATCH=f"{root}/.patches", SCBI_GIT_REPO=f"{root}/git", SCBI_SVN_REPO="", SCBI_HG_REPO="", TODAY="")
         if extra:
             env.update(extra)
         return env
@@ -101,6 +107,30 @@ class Sandbox:
             capture_output=True, text=True,
         )
         return Run(proc.returncode, mask(proc.stdout, self.root), mask(proc.stderr, self.root))
+
+
+def to_yaml(sandbox: "Sandbox") -> None:
+    """Convert the plug-ins of a sandbox to YAML, as tests/run does for the
+    Python driver (the plug-ins that do not convert stay Bash)."""
+    convert_dir(sandbox.root / "scripts.d")
+
+
+def convert_file(plugin: Path) -> None:
+    """Write the YAML version of a Bash plug-in next to it."""
+    env = {**os.environ, "PYTHONPATH": str(REPO_ROOT / "src")}
+    subprocess.run([sys.executable, "-m", "scbi.convert", "--output-dir", str(plugin.parent), str(plugin)],
+                   env=env, check=True, stdout=subprocess.DEVNULL)
+
+
+def convert_dir(plugins: Path) -> None:
+    """Convert the plug-ins of a directory to YAML (in place)."""
+    sources = [str(f) for f in sorted(plugins.iterdir())
+               if f.is_file() and not f.name.startswith(("_", ".")) and not f.name[0].isdigit()
+               and not f.name.endswith(("~", ".yaml"))]
+    env = {**os.environ, "PYTHONPATH": str(REPO_ROOT / "src")}
+    for args in (["--output-dir", str(plugins), *sources], ["--closure", str(plugins)]):
+        subprocess.run([sys.executable, "-m", "scbi.convert", *args], env=env,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def pair(tmp_path: Path) -> tuple[Sandbox, Sandbox]:

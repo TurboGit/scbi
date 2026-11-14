@@ -9,7 +9,9 @@ error for a module does not change the exit status.
 
 from __future__ import annotations
 
+import glob as _glob
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -120,7 +122,7 @@ def _handle(driver, builder, modref, cdir, clean, lower, sha) -> None:
     #  echo Create source archive for $module \[${variant//./ }\] \($ref\)
     out(" ".join(words(f"Create source archive for {module} [{variant.replace('.', ' ')}] ({ref})")))
 
-    if not os.path.isfile(f"{driver.get('SCBI_PLUGINS')}/{module}"):
+    if driver.registry.plugin_file(module) is None:
         out(f"error: cannot find {module} plugin")
         return
     driver.registry.load_module(module)
@@ -142,16 +144,19 @@ def _handle(driver, builder, modref, cdir, clean, lower, sha) -> None:
             sys.stderr.flush()
         if name == "git":
             out("Possible tags found")
-            subprocess.run(["bash", "-c", 'git tag | grep $(echo $1 | sed "s/[A-Z]\\|[a-z]//g")', "_", ref],
-                           cwd=vdir if os.path.isdir(vdir) else None, env=driver.base_env())
+            #  git tag | grep $(echo $REF | sed "s/[A-Z]\|[a-z]//g")
+            cwd = vdir if os.path.isdir(vdir) else None
+            tags = subprocess.run(["git", "tag"], cwd=cwd, env=driver.base_env(), stdout=subprocess.PIPE).stdout
+            subprocess.run(["grep", *re.sub("[A-Za-z]", "", ref).split()], input=tags, cwd=cwd,
+                           env=driver.base_env())
         return
 
     mdir = f"{workdir_of(driver)}/{module}"
     os.chdir(mdir)
 
     if clean == "yes":
-        ref = subprocess.run(["bash", "-c", 'echo $1 | sed "s/[A-Z]\\|[a-z]//g;s/_/\\./g"', "_", ref],
-                             capture_output=True, text=True).stdout.rstrip("\n")
+        #  echo $REF | sed "s/[A-Z]\|[a-z]//g;s/_/\./g"
+        ref = " ".join(re.sub("[A-Za-z]", "", ref).replace("_", ".").split())
         ref = ref.split("-", 1)[0]
 
     tar, _ = archive_data(builder, module, variant, ref)
@@ -203,7 +208,12 @@ def _create(archive_name: str, rep: str, cdir: str) -> None:
         elif suffix == "zip":
             f = f"{cdir}/{archive_name}"
             _rm(f"{f}.zip")
-            subprocess.run(["bash", "-c", 'rm -fr $1/.git* $1/.hg $1/.svn', "_", rep])
+            #  rm -fr $REP/.git* $REP/.hg $REP/.svn
+            for p in [*_glob.glob(f"{_glob.escape(rep)}/.git*"), f"{rep}/.hg", f"{rep}/.svn"]:
+                if os.path.isdir(p) and not os.path.islink(p):
+                    shutil.rmtree(p, ignore_errors=True)
+                elif os.path.lexists(p):
+                    os.unlink(p)
             subprocess.run(["zip", "-qr", f, rep])
         else:
             ext = suffix.rsplit(".", 1)[1]

@@ -125,3 +125,25 @@ def test_ini_get_option_oracle(oracle, tmp_path):
         db = load(tmp_path, INI_SAMPLES[name])
         sv = ShellVars({"HOME": oracle.env()["HOME"], "SCBI_X": "fromenv"}, {"HOME", "SCBI_X"})
         assert db.get_option(section, key, sv) == out.rstrip("\n"), (name, section, key)
+
+
+EXPAND_VALUES = [
+    "plain", "a  b   c", "$SCBI_X", "${SCBI_X}", "x${SCBI_X}y", "$SCBI_SP", "a${SCBI_SP}b",
+    '"$SCBI_SP"', "'$SCBI_X'", '"a  b"', "~", "~/dir", "x~", "${SCBI_NONE:-dflt}",
+    "${SCBI_X%env}", "${SCBI_X#from}", "$SCBI_NONE", '""', "a '' b", "$(echo  one   two)",
+    "pre$(printf %s x)post", "\\$SCBI_X", "a\\ b", "*.nomatch", "ini-*", "$HOME/x",
+    '"$(echo a  b)"', "a#b", "a #comment",
+]
+
+
+@pytest.mark.oracle
+def test_expand_value_same_as_eval_echo(oracle):
+    from scbi.ini import expand_value
+
+    (oracle.workdir / "ini-glob1").write_text("")
+    (oracle.workdir / "ini-glob2").write_text("")
+    env = {"SCBI_X": "fromenv", "SCBI_SP": "  s1  s2 "}
+    outputs = oracle.batch('eval echo "$1"', [(v,) for v in EXPAND_VALUES], env)
+    full = oracle.env(env)
+    for value, out in zip(EXPAND_VALUES, outputs):
+        assert expand_value(value, full.get, str(oracle.workdir)) == out.rstrip("\n"), value

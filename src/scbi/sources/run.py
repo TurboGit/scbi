@@ -74,15 +74,11 @@ class Run:
 
 
 def command_env(builder, module: str, variant: str, proxy: str) -> dict[str, str]:
-    """The environment of the commands: the driver environment, after
-    ``set-proxy PROXY`` (a user function ``proxy-PROXY`` setting the
-    proxy variables, run in a hook shell)."""
-    from scbi.hooks.exec import env_code
-
+    """The environment of the commands: the driver environment, changed
+    by ``proxy(name, env)`` of the Python environment file for a vcs or
+    archive record with a proxy."""
     ctx = builder.ctx(module, variant)
     hook = builder.d.envfile.hook("proxy")
-    if proxy and hook is None and builder.fn_exists(f"proxy-{proxy}"):
-        env_code(builder.shell(), ctx, f"proxy-{proxy}", [], builder.out)
     env = dict(builder.d.base_env())
     env.update(ctx.env.environ())
     if proxy and hook is not None:

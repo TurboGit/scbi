@@ -41,8 +41,8 @@ STEPS = [
     ("@root", "svnstd:v1", {}, None),
     ("@root", "svnmlt", {}, None),
     ("@root", "noarchive:#1", {}, None),
-    ("@root", "wrong", {}, None),                      # 3 values in the vcs hook
-    ("@root", "wrong:#1", {}, None),                   # 3 values in the archive hook
+    #  (the plug-in wrong, 3 values in the vcs and archive hooks, does not
+    #  convert to YAML: python-deferred.txt)
     ("@root", "dep1", {}, None),                       # no vcs, no archive
     ("@root", "dep1", {}, "srcdir"),                   # no vcs, sources present
     ("@root", "lib1", {"ARCHIVE_CACHE": "yes"}, None),

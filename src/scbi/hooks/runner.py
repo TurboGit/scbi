@@ -1,7 +1,7 @@
 """Calling the hooks of a module from the driver.
 
-Value hooks of plug-in definitions (scbi.plugin.model) are evaluated in Python, legacy (Bash) hooks
-in a hook shell (scbi.hooks.exec). The selection of the hook functions
+Value hooks of plug-in definitions (scbi.plugin.model) are evaluated in
+Python. The selection of the hook functions
 follows the Bash driver (scbi.plugin.resolve).
 """
 
@@ -14,8 +14,6 @@ from scbi.bashenv import ShellVars
 from scbi.env import Environment
 from scbi.hooks.context import HookContext
 from scbi.hooks.evaluate import eval_values
-from scbi.hooks.exec import HookShell
-from scbi.hooks.runtime import Runtime
 from scbi.plan import PlanState
 from scbi.plugin import catalog
 from scbi.plugin.lift import parse_hook_name
@@ -27,7 +25,6 @@ from scbi.plugin.resolve import get_hook, variant_hooks
 class HookRunner:
     def __init__(
         self,
-        runtime: Runtime,
         registry: Registry,
         svars: Callable[[], ShellVars],
         base_env: Callable[[], dict[str, str]],
@@ -36,7 +33,6 @@ class HookRunner:
         discriminants: Callable[[], list[str]],
         cwd: Path,
     ):
-        self.runtime = runtime
         self.registry = registry
         self.svars = svars
         self.base_env = base_env
@@ -55,16 +51,11 @@ class HookRunner:
         return HookContext(
             module=module, variant=variant, hook=hook,
             params=dict(zip(catalog.spec(hook).params, args)),
-            env=Environment(ShellVars(dict(sv.values), set(sv.exported), dict(sv.functions))),
+            env=Environment(ShellVars(dict(sv.values), set(sv.exported))),
             plan=plan, modules_list=list(modules_list or []), host=self.host, target=self.target,
             discriminants=frozenset(self.discriminants()), cwd=self.cwd,
             scbi_bdir=sv.values.get("SCBI_BDIR", ""),
         )
-
-    def shell(self) -> HookShell:
-        return HookShell(self.runtime, self.registry.functions, self.base_env(),
-                         loaded=self.registry.scbi_loaded(),
-                         sources=self.registry.legacy_sources())
 
     def call_value(self, function: str, module: str, variant: str, args: list[str],
                    plan: PlanState, modules_list: list[str] | None = None) -> list[str]:
@@ -73,9 +64,9 @@ class HookRunner:
         hook = key.hook if key else "modules"
         ctx = self.context(module, variant, hook, args, plan, modules_list)
         obj = self.registry.functions.get(function)
-        if isinstance(obj, Values):
-            return eval_values(obj, ctx)
-        return self.shell().capture(ctx, function, args)
+        if not isinstance(obj, Values):
+            raise TypeError(f"{function}: not a value hook")
+        return eval_values(obj, ctx)
 
     def hook_value(self, module: str, variant: str, hook: str, args: list[str],
                    plan: PlanState, modules_list: list[str] | None = None) -> str | None:

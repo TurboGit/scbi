@@ -6,9 +6,9 @@ setup-generic-tool-env (colors, plug-ins directory, environment file,
 runtime, version, plan cache and loading, usage, statistics, module
 references of the command line, plan rewriting).
 
-The driver state is kept, as in Bash, in shell variables (``self.sv``):
-ini files and environment files may set any of them, and they are given to
-the runtime and the hooks.
+The driver state is kept, as in Bash, in variables (``self.sv``): ini
+files and environment files may set any of them, the exported ones are
+given to the hooks.
 """
 
 from __future__ import annotations
@@ -26,13 +26,13 @@ from pathlib import Path
 from scbi import env as env_mod
 from scbi import envpy
 from scbi.bashcompat import assoc_keys, read_fields, read_lines, words
-from scbi.bashenv import ShellVars, eval_echo, quote
+from scbi.bashenv import ShellVars
 from scbi.discriminants import forced_discriminants, probe_host, setup_discriminants
 from scbi.errors import Exit, NotImplementedYet
-from scbi.hooks.runtime import Runtime, load_runtime
-from scbi.ini import IniDB
+from scbi.ini import IniDB, expand_value
 from scbi.log import Logger
 from scbi.modref import parse_module_ref
+from scbi.plugin import formats
 from scbi.plan import PlanError, PlanLoader, PlanState
 
 #  Replaced by the installation (as in the Bash driver)
@@ -131,7 +131,6 @@ class Driver:
         #  the Python environment file (settings and hooks)
         self.envfile = envpy.EnvFile()
         self.plan = PlanState()
-        self.runtime: Runtime | None = None
         self.discriminants: list[str] = []
         self.log: Logger | None = None
         self.testsuite = self.environ.get("SCBI_TESTSUITE") == "yes"
@@ -261,7 +260,7 @@ class Driver:
                     self.set("SCBI_DEFAULT_PREFIX", "no")
             else:
                 var = var.replace("-", "_")
-                val = eval_echo(self.ini.db[k], self.sv, self.base_env())
+                val = expand_value(self.ini.db[k], self.sv.values.get)
             if val and f",{var}," not in INI_SKIP:
                 self.set(var, val, export=True)
 
@@ -520,39 +519,73 @@ class Driver:
                       colors=c)
 
     def load_runtime(self) -> None:
-        """Source the runtime files: their settings become driver variables,
-        their functions are kept for the hook shells (user functions from
-        the environment file stay in ``self.sv.functions``)."""
+        """The start-up settings of the runtime files (scbi.setup: the
+        runtime files are not read)."""
+        from scbi import setup
+
         plugins = Path(self.get("SCBI_PLUGINS"))
         forced_os = bool(self.get("SCBI_OS_NAME"))
-        user_functions = dict(self.sv.functions)
-        rt = load_runtime(plugins, self.sv, cwd=Path.cwd(), base_env=self.base_env(),
-                          os_module=self.get("SCBI_OS_MODULE"))
-        runtime_functions = {k: v for k, v in rt.vars.functions.items() if k not in user_functions}
-        #  Functions exported in the environment (export -f, BASH_FUNC_x%%)
-        #  are imported as functions by Bash, keep them for the hooks
-        exported_functions = {k: v for k, v in self.sv.values.items()
-                              if k.startswith("BASH_FUNC_") and k in self.sv.exported}
-        self.sv = ShellVars(rt.vars.values, rt.vars.exported, user_functions, rt.vars.arrays)
-        for k, v in exported_functions.items():
-            self.sv.set(k, v, export=True)
-        self.runtime = Runtime(ShellVars(functions=runtime_functions), rt.compat)
-        from scbi import env as env_mod
-        from scbi.hooks.policy import alternate
+        #  1_setup, 2_log, 5_tools, 8_mail
+        for name, value in setup.defaults(self.get).items():
+            #  testsuite: the test 1_setup does not set the SVN/HG
+            #  repositories (given empty by tests/run)
+            if not (self.testsuite and name in setup.TEST_UNSET and name in self.environ):
+                self.set(name, value)
+        #  testsuite: the test 1_setup does not set TODAY (logs directly in
+        #  $SCBI_LOGS), given by tests/run
+        if self.testsuite and "TODAY" in self.environ:
+            self.set("TODAY", self.environ["TODAY"])
+        else:
+            self.set("TODAY", setup.today())
+        if not self.get("KEEP_LOG_DAYS"):
+            self.set("KEEP_LOG_DAYS", "120")
+        self.set("SCBI_LINE_SEP", setup.line_sep_file())
+        for name, value in setup.CONSTANTS.items():
+            self.set(name, value)
+        if not self.get("SCBI_EMAIL_NOTIFICATION"):
+            self.set("SCBI_EMAIL_NOTIFICATION", "no")
+        os.makedirs(f"{self.get('SCBI_LOGS')}/{self.get('TODAY')}", exist_ok=True)
+        setup.clean_logs(self.get("SCBI_LOGS"), self.get("HOME"), self.get("KEEP_LOG_DAYS"))
+        #  6_distpkg
+        self.setup_os_discriminants(forced_os)
+        tools = {"deb": "dpkg-query", "ubt": "dpkg-query", "cos": "dnf rpm", "fed": "dnf rpm",
+                 "rhl": "dnf rpm"}.get(self.get("SCBI_OS_NAME"))
+        if tools:
+            self.check_tools_abort(*tools.split())
+        pkgs, alias = setup.os_packages(self.get("SCBI_OS_NAME"), self.get, os.getcwd())
+        self.sv.arrays["SCBI_PKGS"] = ("A", pkgs)
+        self.sv.arrays["SCBI_ALIAS"] = ("A", alias)
+        #  _os_windows
+        if self.get("SCBI_OS_MODULE") == "windows" and self.get("SCBI_OS_NAME") == "mingw":
+            self.set("SCBI_LNK", ".lnk")
 
-        env_mod.WINDOWS_DEFINE_VAR = alternate("define-var", runtime_functions, user_functions) == "windows"
+        #  the define-var of _os_windows
+        env_mod.WINDOWS_DEFINE_VAR = self.get("SCBI_OS_MODULE") == "windows"
         if self.get("SCBI_OS_MODULE"):
             self.set("SCBI_OS_MODULE_FILE", str(plugins / f"_os_{self.get('SCBI_OS_MODULE')}"))
-        self.setup_os_discriminants(forced_os)
+
+    def check_tools_abort(self, *tools: str) -> None:
+        missing = [t for t in tools if not self.which(t)]
+        if missing:
+            self.echo(f"Required tools {' '.join(missing)} missing, please install")
+            raise Exit(1)
 
     def setup_os_discriminants(self, forced: bool) -> None:
-        """SCBI_OS_DISCRIMINANTS as set by scripts.d/6_distpkg (the OS can
-        be forced by setting SCBI_OS_NAME before, e.g. in the testsuite)."""
+        """SCBI_OS_NAME and SCBI_OS_DISCRIMINANTS as set by
+        scripts.d/6_distpkg (the OS can be forced by setting SCBI_OS_NAME
+        before, e.g. in the testsuite)."""
+        if self.get("SCBI_IS_WINDOWS") == "no":
+            self.check_tools_abort("lsb_release")
         if forced:
             self.discriminants = forced_discriminants(
                 self.get("SCBI_OS_NAME"), self.get("SCBI_OS_VERSION"), self.get("SCBI_OS_MAJOR_VERSION"))
             return
         info = setup_discriminants(probe_host(), self.get("SCBI_HOST"), self.get("SCBI_TARGET"))
+        self.set("SCBI_OS_NAME", info.name, export=True)
+        self.set("SCBI_OS_VERSION", info.version, export=True)
+        self.set("SCBI_OS_CODENAME", info.codename, export=True)
+        self.set("SCBI_OS_MAJOR_VERSION", info.major_version, export=True)
+        self.set("SCBI_OS_ID", info.os_id, export=True)
         self.discriminants = info.discriminants
 
     def module_plan_md5(self, nameref: str) -> str:
@@ -662,7 +695,9 @@ class Driver:
     def display_modules(self) -> None:
         plugins = Path(self.get("SCBI_PLUGINS"))
         #  Bash pathname expansion: no dot-files
-        names = sorted(p.name for p in plugins.glob("[!0-9_]*") if not p.name.startswith("."))
+        #  (a plug-in definition file gives its module name)
+        names = sorted({formats.module_name(p.name) for p in plugins.glob("[!0-9_]*")
+                        if not p.name.startswith(".")})
         self.display_names("modules:", names)
         self.echo()
 
@@ -742,8 +777,9 @@ class Driver:
             module, variant, ref = info[0], info[1], info[3]
             if variant != "default" or ref != "NONE":
                 msig += f"({m}/{variant}/{ref})"
-            if (plugins / module).is_file():
-                msig += (plugins / module).read_text().rstrip("\n")
+            pfile = formats.find(plugins, module)
+            if pfile is not None:
+                msig += pfile.read_text().rstrip("\n")
         discs_values = " ".join("yes" for _ in self.discriminants)
         planmd5 = md5_echo(
             f"{planmd5} {osmd5} {self.get('SCBI_TARGET')} {self.get('SCBI_OS_ID')} "
@@ -827,21 +863,16 @@ class Driver:
         from scbi.plugin.registry import Registry
 
         if self._registry is None:
-            self._registry = Registry(Path(self.get("SCBI_PLUGINS")), module_alias=self.plan.module_alias)
-            self._registry.on_output = self.show_plugin_output
+            self._registry = Registry(Path(self.get("SCBI_PLUGINS")), module_alias=self.plan.module_alias,
+                                      read_legacy=False)
         return self._registry
-
-    def show_plugin_output(self, module: str, path: Path) -> None:
-        """Output of a plug-in when sourced (top-level code), shown as the
-        Bash driver does when it loads it."""
-        self.driver_run(f"source {quote(str(path))}")
 
     def runner(self):
         from scbi.hooks.runner import HookRunner
 
         if self._runner is None:
             self._runner = HookRunner(
-                self.runtime, self.registry, lambda: self.sv, self.base_env,
+                self.registry, lambda: self.sv, self.base_env,
                 self.get("SCBI_HOST"), self.get("SCBI_TARGET"), lambda: self.discriminants, Path.cwd())
         return self._runner
 
@@ -867,19 +898,15 @@ class Driver:
         eres = 0
         auto = [m for m in assoc_keys(self.plan.modver)
                 if re.search(r"auto(\.|:|$)", self.plan.modver[m])]
-        #  handle-plan-auto-variant (reference Bash code) for each module,
-        #  all against the plan as it is now (parallel jobs in Bash)
+        #  handle-plan-auto-variant for each module, all against the plan as
+        #  it is now (parallel jobs in Bash)
         from scbi import ospkg
         from scbi.build import Builder
 
         outputs: list[str] = []
         builder = Builder(self)
-        python = ospkg.python_allowed(builder, auto=True)
         for m in auto:
-            if python:
-                outputs += ospkg.OsPackages(self).plan_auto_variant(builder, m)
-            else:
-                outputs += self.driver_capture(f"handle-plan-auto-variant {quote(m)}").splitlines()
+            outputs += ospkg.OsPackages(self).plan_auto_variant(builder, m)
         for line in outputs:
             f = read_fields(line, 3)
             e, k, v = f
@@ -897,85 +924,20 @@ class Driver:
 
     def display_log_stat(self) -> None:
         """``display-log-stat``: build times from the report logs."""
-        from scbi.hooks.policy import is_reference
         from scbi.log import display_log_stat
 
-        names = ("display-log-stat", "compute-log-stat-file", "get-min-avr-max", "display-time")
-        maps = (self.runtime.functions, self.sv.functions, self.registry.functions)
-        if all(is_reference(n, *maps) for n in names):
-            sys.stdout.write(display_log_stat(Path(self.get("SCBI_LOGS"))))
-            sys.stdout.flush()
-        else:
-            self.driver_run("display-log-stat")
-
-    def driver_shell(self):
-        from scbi.env import Environment
-        from scbi.hooks.context import HookContext
-        from scbi.hooks.exec import HookShell
-
-        reg = self.registry
-        shell = HookShell(self.runtime, reg.functions, self.base_env(), loaded=reg.scbi_loaded(),
-                          sources=reg.legacy_sources())
-        ctx = HookContext(module="", variant="default", hook="config", env=Environment(self.sv),
-                          plan=self.plan, host=self.get("SCBI_HOST"), target=self.get("SCBI_TARGET"),
-                          discriminants=frozenset(self.discriminants), cwd=Path.cwd())
-        return shell, ctx
-
-    def driver_run(self, code: str) -> int:
-        """Run Bash driver code (runtime functions) in a hook shell, output
-        to the console."""
-        from scbi.hooks.exec import run_code
-
+        sys.stdout.write(display_log_stat(Path(self.get("SCBI_LOGS"))))
         sys.stdout.flush()
-        shell, ctx = self.driver_shell()
-
-        def out(line: str) -> None:
-            sys.stdout.write(line + "\n")
-            sys.stdout.flush()
-
-        return run_code(shell, ctx, code, out).returncode
 
     def run_tool(self, subcmd: str) -> int:
-        """A sub-command: the tool scbi-<subcmd> next to the driver, run as
-        reference Bash code sourced in a driver shell, as the Bash driver
-        does (source scbi-<subcmd> subcommand <options> <modules>)."""
+        """A sub-command (scbi.tools)."""
         import importlib
 
-        from scbi.hooks.exec import run_interactive
         from scbi.tools import TOOLS
 
-        from scbi.tools import PYTHON_ONLY
-
-        if subcmd in TOOLS and (self.environ.get("SCBI_BASH_TOOLS") != "yes" or subcmd in PYTHON_ONLY):
-            sys.stdout.flush()
-            res = importlib.import_module(TOOLS[subcmd]).main(self, self.scbiopts + self.modules)
-            if res is not None:
-                return res
-
-        tool = Path(self.get("SCBI_BINARY")).parent / f"scbi-{subcmd}"
         sys.stdout.flush()
-        opts = " ".join(quote(o) for o in self.scbiopts)
-        mods = " ".join(quote(m) for m in self.modules)
-        shell, ctx = self.driver_shell()
-        code = (f"SCBIOPTS=({opts})\nSCBI_MODULES=({mods})\nSCBI_SUBCMD={quote(subcmd)}\n"
-                f"source {quote(str(tool))} subcommand \"${{SCBIOPTS[@]}}\" \"${{SCBI_MODULES[@]}}\"\n"
-                "exit $?")
-        return run_interactive(shell, ctx, code)
-
-    def driver_capture(self, code: str) -> str:
-        """Output of Bash driver code run in a hook shell (stderr ignored)."""
-        from scbi.env import Environment
-        from scbi.hooks.context import HookContext
-        from scbi.hooks.exec import HookShell, run_code
-
-        reg = self.registry
-        shell = HookShell(self.runtime, reg.functions, self.base_env(), loaded=reg.scbi_loaded(), sources=reg.legacy_sources())
-        ctx = HookContext(module="", variant="default", hook="config", env=Environment(self.sv),
-                          plan=self.plan, host=self.get("SCBI_HOST"), target=self.get("SCBI_TARGET"),
-                          discriminants=frozenset(self.discriminants), cwd=Path.cwd())
-        lines: list[str] = []
-        run_code(shell, ctx, code + " 2>/dev/null", lines.append)
-        return "\n".join(lines)
+        res = importlib.import_module(TOOLS[subcmd]).main(self, self.scbiopts + self.modules)
+        return res or 0
 
     def store_cached_plan(self, path: Path) -> None:
         import json
@@ -1002,9 +964,9 @@ class Driver:
         self.modules += self.ini_modules
 
         subcmd = self.ini_subcmd or (self.modules[0] if self.modules else "")
-        from scbi.tools import PYTHON_ONLY
+        from scbi.tools import TOOLS
 
-        has_subcmd = bool(subcmd) and (self.which(f"scbi-{subcmd}") is not None or subcmd in PYTHON_ONLY)
+        has_subcmd = subcmd in TOOLS
         if has_subcmd:
             self.set("DO_SUBCMD", "yes", export=True)
             if not self.ini_subcmd:
@@ -1039,7 +1001,10 @@ class Driver:
 
         bdir = Path(self.get("SCBI_BDIR"))
         bdir.mkdir(parents=True, exist_ok=True)
-        shutil.copy(Path(self.get("SCBI_PLUGINS")) / "0_runtime", bdir / ".scbi.runtime")
+        #  for the users sourcing env.cmd
+        runtime = Path(self.get("SCBI_PLUGINS")) / "0_runtime"
+        if runtime.is_file():
+            shutil.copy(runtime, bdir / ".scbi.runtime")
 
         from scbi.build import Builder
 

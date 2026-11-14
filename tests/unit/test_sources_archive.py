@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pytest
 
+from e2e import convert_file
 from probe import probe_pair
 
 PLUGIN = """
@@ -25,7 +26,7 @@ function arch-archive()
     echo ${ARCH_CP:-cp}
     echo ${ARCH_URL:-none}
     echo ${ARCH_FILE}
-    [[ -n $ARCH_DIR ]] && echo $ARCH_DIR
+    echo ${ARCH_DIR}
 }
 """
 
@@ -104,6 +105,8 @@ def test_get_archive_same_as_bash(tmp_path):
     make_store(store)
     for sb in (bash, python):
         (sb.root / "scripts.d" / "arch").write_text(PLUGIN)
+    convert_file(python.root / "scripts.d" / "arch")
+    for sb in (bash, python):
         (sb.root / ".root" / ".archives").mkdir(parents=True, exist_ok=True)
     for i, (env, version, action) in enumerate(CASES):
         env = {k: v.format(store=store) for k, v in env.items()}

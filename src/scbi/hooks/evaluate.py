@@ -4,10 +4,12 @@ actions, with their guard conditions."""
 from __future__ import annotations
 
 import os
-import tempfile
+import re
+import shlex
+import subprocess
 from pathlib import Path
 
-from scbi.bashenv import BASH_INTERNAL, BashEvalError, source_files
+from scbi.bashcompat import ShellSyntaxError, shell_words
 from scbi.hooks import builtins
 from scbi.hooks.context import HookContext
 from scbi.hooks.expand import expand
@@ -125,21 +127,49 @@ def apply_env(ops: EnvOps | tuple, ctx: HookContext, base_env: dict[str, str] | 
             raise EvalError(f"unknown environment action {verb}")
 
 
+_ASSIGN = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$", re.S)
+
+
 def _import(command: str, ctx: HookContext, base_env: dict[str, str] | None) -> None:
-    """``eval $(command)``: run the command, evaluate its output."""
-    with tempfile.NamedTemporaryFile("w", suffix=".sh", delete=False) as f:
-        f.write(f"eval $({command})\n")
-        script = f.name
+    """``eval $(command)``: run the command (no shell), then apply the
+    variable assignments, ``export`` and ``unset`` statements it prints
+    (e.g. ``NAME='value'; export NAME;`` of ``opam env``)."""
     try:
-        res = source_files([script], ctx.env.vars, cwd=ctx.cwd, base_env=base_env)
-    except BashEvalError as e:
+        argv = [expand(w, ctx) for w in shell_words(command)]
+    except ShellSyntaxError as e:
         raise EvalError(f"import {command}: {e}") from None
-    finally:
-        os.unlink(script)
-    old = ctx.env.vars
-    #  Variables owned by Bash are not imported back: keep the current ones
-    for name, value in old.values.items():
-        if BASH_INTERNAL.match(name):
-            res.set(name, value, export=name in old.exported)
-    res.functions = old.functions
-    ctx.env.vars = res
+    env = {**(base_env or {}), **ctx.env.vars.environ()}
+    try:
+        proc = subprocess.run(argv, capture_output=True, text=True, cwd=ctx.cwd, env=env)
+    except OSError as e:
+        raise EvalError(f"import {command}: {e.strerror}") from None
+    #  unquoted $(...): the output words joined with a space, then parsed
+    lexer = shlex.shlex(" ".join(proc.stdout.split()), posix=True, punctuation_chars=";")
+    lexer.whitespace_split = True
+    try:
+        tokens = list(lexer)
+    except ValueError as e:
+        raise EvalError(f"import {command}: {e}") from None
+    statements: list[list[str]] = [[]]
+    for tok in tokens:
+        if tok and set(tok) == {";"}:
+            statements.append([])
+        else:
+            statements[-1].append(tok)
+    for st in statements:
+        if not st:
+            continue
+        if st[0] in ("export", "unset"):
+            for arg in st[1:]:
+                m = _ASSIGN.match(arg)
+                if st[0] == "unset":
+                    ctx.env.vars.values.pop(arg, None)
+                    ctx.env.vars.exported.discard(arg)
+                else:
+                    ctx.env.export(m.group(1), m.group(2)) if m else ctx.env.export(arg)
+            continue
+        for arg in st:
+            m = _ASSIGN.match(arg)
+            if not m:
+                raise EvalError(f"import {command}: unsupported statement {' '.join(st)!r}")
+            ctx.env.vars.values[m.group(1)] = m.group(2)

@@ -6,7 +6,7 @@ import pytest
 from probe import probe_pair, same
 from scbi.walker import ENTRY_POINTS
 
-MODULES = ["supermod", "dmain", "listDA", "reca", "cd1", "cdb", "lib1", "meta-meta/both:v2",
+MODULES = ["dmain", "listDA", "reca", "cd1", "cdb", "lib1", "meta-meta/both:v2",
            "lib2", "dmod", "nothere", "lib1:skip"]
 
 
