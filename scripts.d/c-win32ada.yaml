@@ -1,0 +1,42 @@
+plugin: c-win32ada
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/win32ada
+
+build-depends:
+  cross:
+    _:
+      - c-sandbox
+
+out-of-tree: false
+
+build:
+  _: make PROCESSORS=$SCBI_JOBS prefix=$PREFIX build
+  cross:
+    _: make PROCESSORS=$SCBI_JOBS prefix=$PREFIX TARGET=$TARGET DEBUG=false build
+
+install:
+  _: make prefix=$PREFIX install
+  cross:
+    _: make prefix=$PREFIX TARGET=$TARGET DEBUG=false install
+
+version: |-
+  write prj.gpr:
+      with "win32ada";
+      project prj is
+      end prj;
+  write main.adb:
+      with win32;
+      procedure main is
+         n : win32.dword;
+      begin
+         null;
+      end main;
+  gprbuild-project prj.gpr
+  if status == 0:
+      echo $VERSION_OK
+  else:
+      echo $VERSION_ERROR

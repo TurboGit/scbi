@@ -1,0 +1,28 @@
+plugin: c-gcc
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: git+ssh://git.adacore.com/gcc
+
+build-env:
+  - system-compiler
+
+config-options:
+  - --prefix=$PREFIX
+  - --build=$TARGET
+  - --target=$TARGET
+  - --disable-multilib
+  - --disable-libada
+  - --disable-nls
+  - --enable-languages=c,c++
+
+config: |-
+  OPTIONS =
+  OPTIONS = config-options
+  ../src/configure $OPTIONS
+
+build: make -j$SCBI_JOBS
+
+install: make install

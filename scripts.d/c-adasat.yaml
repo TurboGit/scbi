@@ -1,0 +1,27 @@
+plugin: c-adasat
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/adasat
+
+build-depends:
+  _:
+    - p-gnat
+    - c-gprbuild
+  cross:
+    _:
+      - c-sandbox
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+out-of-tree: false
+
+build: make INSTALL_DIR=$PREFIX all-libs
+
+install: make INSTALL_DIR=$PREFIX install
+
+prefix: NONE

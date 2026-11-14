@@ -1,0 +1,44 @@
+plugin: c-templates-parser
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/templates-parser
+
+build-depends:
+  _:
+    - p-gnat
+    - c-gprbuild
+  cross:
+    _:
+      - c-sandbox
+
+tests-depends:
+  - c-e3
+  - c-sandbox
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+
+tests-env:
+  - mkdir $PREFIX/../build/.build/rbin/$TARGET/release/static
+  - add-to-var PATH .
+  - add-to-var PATH $PREFIX/../build/.build/rbin/$TARGET/release/static
+
+out-of-tree: false
+
+config:
+  _: rm -f makefile.setup && make prefix=$PREFIX setup
+  cross:
+    _: rm -f makefile.setup && make prefix=$PREFIX TARGET=$TARGET setup
+
+build: make
+
+install: make install
+
+tests: |-
+  OPTIONS = "$OPTIONS"
+  cd regtests && make build
+  python3 ./testsuite.py --jobs=4 $OPTIONS

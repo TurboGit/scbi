@@ -1,0 +1,34 @@
+plugin: c-libavif
+
+os-variants:
+  native:
+    packages:
+      - os@-avif-dev:[v]
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AOMediaCodec/libavif.git
+
+depends:
+  - libgav1-dev
+
+build-depends:
+  - c-cmake
+
+env:
+  - add-to-var CMAKE_PREFIX_PATH $PREFIX/lib/cmake/libavif
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+out-of-tree: true
+
+config: cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DAVIF_CODEC_LIBGAV1=ON ../src
+
+build: make -j$JOBS
+
+install: make install
+
+prefix:
+  _: NONE
+  darktable: /opt/darktable

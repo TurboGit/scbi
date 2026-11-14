@@ -1,0 +1,35 @@
+plugin: c-llvm-bindings
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/llvm-bindings
+
+depends:
+  - c-libclang
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+
+out-of-tree: false
+
+config-options:
+  - prefix=$PREFIX
+  - PROCESSORS=$SCBI_JOBS
+  - ENABLE_SHARED=no
+
+config: |-
+  OPTIONS =
+  OPTIONS = config-options
+  cd clang-bindings && make $OPTIONS setup
+
+build: cd clang-bindings && make
+
+install: cd clang-bindings && make install
+
+prefix: NONE

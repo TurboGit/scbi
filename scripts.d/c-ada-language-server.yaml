@@ -1,0 +1,37 @@
+plugin: c-ada-language-server
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/ada_language_server
+
+depends:
+  - c-spawn
+  - c-vss
+  - c-ada-libfswatch
+  - c-libadalang-tools
+  - c-libadalang-refactor
+  - c-langkit
+  - c-gpr2-lib
+  - c-templates-parser
+  - c-gnatdoc4
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/gnat
+  - add-to-var GPR_PROJECT_PATH $PREFIX/../build/gnat
+
+build-env:
+  - export LIBRARY_TYPE relocatable
+
+out-of-tree: false
+
+build: PROCESSORS=$SCBI_JOBS make -j1
+
+install: make DESTDIR=$PREFIX install
+
+prefix: NONE

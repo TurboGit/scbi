@@ -1,0 +1,21 @@
+plugin: c-librest
+
+vcs:
+  proxy: none
+  options: none
+  protocol: git
+  url: https://gitlab.gnome.org/GNOME/librest.git
+
+depends:
+  - libsoup-3.0-dev
+  - python3-typogrify
+
+out-of-tree: false
+
+config: meson _build --prefix=$PREFIX -Dexamples=false
+
+build: ninja -j$SCBI_JOBS -C _build
+
+install: meson install -C _build
+
+prefix: NONE

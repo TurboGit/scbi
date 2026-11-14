@@ -1,0 +1,51 @@
+plugin: c-mpfr
+
+os-variants:
+  native:
+    packages:
+      - os@-mpfr-dev:[v]
+    env:
+      - set-var MPFR_INCLUDE_DIR /usr/include
+      - set-var MPFR_LIBRARY_DIR /usr/lib/$SCBI_TARGET
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://gitlab.inria.fr/mpfr/mpfr.git
+
+archive:
+  proxy: default
+  options: none
+  protocol: curl
+  url: https://www.mpfr.org/mpfr-current/
+  file: mpfr-$VERSION.tar.xz
+
+depends:
+  vcs:
+    - os@-autotools-dev
+    - os@-automake
+    - os@-libtool
+
+build-depends:
+  - c-sandbox
+
+env:
+  - add-to-var C_INCLUDE_PATH $PREFIX/include
+  - add-to-var CXX_INCLUDE_PATH $PREFIX/include
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var LIBRARY_PATH $PREFIX/lib
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+
+out-of-tree: false
+
+pre-config:
+  vcs: |-
+    ./autogen.sh
+    true
+
+config: ./configure --prefix=$PREFIX
+
+build: make -j$JOBS
+
+install: make install

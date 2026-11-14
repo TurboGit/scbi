@@ -1,0 +1,41 @@
+plugin: c-libopenjpeg
+
+os-variants:
+  native:
+    packages:
+      - libopenjp2-7-dev:[v]
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/uclouvain/openjpeg
+
+archive:
+  proxy: default
+  options: none
+  protocol: curl
+  url: https://github.com/uclouvain/openjpeg/releases/tag/$VERSION
+  file: $VERSION.tar.gz
+
+env:
+  - local INCD $(last-modified-directory $PREFIX/include/open*)
+  - local CMKD $(last-modified-directory $PREFIX/lib/cmake/open*)
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var CMAKE_PREFIX_PATH $CMKD
+  - add-to-var C_INCLUDE_PATH $INCD
+  - add-to-var CXX_INCLUDE_PATH $INCD
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var LIBRARY_PATH $PREFIX/lib
+
+pre-config: |-
+  sed -i 's/set(OPENJPEG_VERSION_BUILD 3)/set(OPENJPEG_VERSION_BUILD 4)/' ../src/CMakeLists.txt
+  true
+
+config: cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=$(get-build-type CMAKE Release) ../src
+
+build: make -j$JOBS
+
+install: make install
+
+prefix: NONE

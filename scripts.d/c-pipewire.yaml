@@ -1,0 +1,24 @@
+plugin: c-pipewire
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://gitlab.freedesktop.org/pipewire/pipewire.git
+
+depends:
+  - libpulse-dev
+
+env:
+  - add-to-var PATH $PREFIX/bin
+
+build-env:
+  - system-compiler
+
+config: meson setup --prefix=$PREFIX . ../src
+
+build: meson compile -C .
+
+install: meson install -C .
+
+prefix: NONE

@@ -1,0 +1,20 @@
+plugin: c-blaslapack
+
+out-of-tree: true
+
+config: |-
+  if cross:
+      COPTS = -DCMAKE_Fortran_COMPILER=$SCBI_BDIR/install/bin/$TARGET-gfortran
+  cmake -DCMAKE_INSTALL_PREFIX=$PREFIX $COPTS ../src
+
+build: make PROCESSORS=$SCBI_JOBS blas lapack
+
+install: |-
+  if not cross:
+      TPREFIX = $PREFIX
+      ranlib lib/*.a
+  else:
+      TPREFIX = $PREFIX/$TARGET
+      $TARGET-ranlib lib/*.a
+  mkdir -p $TPREFIX/lib
+  cp lib/*.a $TPREFIX/lib

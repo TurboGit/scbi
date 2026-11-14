@@ -1,0 +1,35 @@
+plugin: c-liblktlang
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/langkit
+
+depends:
+  - c-langkit-support
+
+build-depends:
+  - p-gnat
+  - c-sandbox
+  - c-gprbuild
+  - c-e3
+  - c-langkit-support
+
+env:
+  - add-to-var PYTHONPATH $PREFIX/python
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+out-of-tree: false
+
+config: |-
+  cd lkt
+  rm -f build
+  ln -s bootstrap build
+
+build: python3 -m langkit.scripts.lkm build -c lkt/langkit.yaml --library-types=static,static-pic,relocatable --disable-all-mains
+
+install: python3 -m langkit.scripts.lkm install -c lkt/langkit.yaml --library-types=static,static-pic,relocatable --disable-all-mains $PREFIX
+
+prefix: NONE

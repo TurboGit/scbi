@@ -1,0 +1,27 @@
+plugin: c-prettier-ada
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/prettier-ada
+
+depends:
+  - c-vss-text
+  - c-gnatcoll-core
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+out-of-tree: false
+
+build: make all
+
+install: make PREFIX=$PREFIX install-all
+
+prefix: NONE

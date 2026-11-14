@@ -1,0 +1,49 @@
+plugin: c-gtkada
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gtkada
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+build-env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/lib/gnat
+
+out-of-tree: false
+
+config: ./configure --prefix=$PREFIX --with-GL=no
+
+build: PROCESSORS=$SCBI_JOBS make
+
+install: make install
+
+version: |-
+  write prj.gpr:
+      with "gtkada";
+      project prj is
+         for main use ("main.adb");
+      end prj;
+  write main.adb:
+      with gtkada.canvas;
+      with gtk;
+      with gnat.io;
+      with gnat.formatted_string;
+      procedure main is
+         use gnat.formatted_string;
+         c : gtkada.canvas.interactive_canvas_record;
+      begin
+         gnat.io.put
+           (- (+"%d.%d"
+               & integer (gtk.major_version)
+               & integer (gtk.minor_version)));
+      end main;
+  gprbuild-project prj.gpr
+  if status == 0:
+      _S1 = output-words ./main
+      echo $_S1
+  else:
+      echo $VERSION_ERROR

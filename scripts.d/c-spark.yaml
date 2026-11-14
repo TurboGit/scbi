@@ -1,0 +1,28 @@
+plugin: c-spark
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/spark2014
+
+depends:
+  - cvc4
+  - alt-ergo
+  - menhir
+  - libnum-ocaml-dev
+  - libmenhir-ocaml-dev
+  - libyojson-ocaml-dev
+
+out-of-tree: false
+
+config: |-
+  rm -f gnat2why/gnat_src
+  ln -s $SCBI_BDIR/p-gnat/src gnat2why/gnat_src
+  make setup
+
+build: make
+
+install: |-
+  mkdir -p $PREFIX
+  make install-all && cp -r install/* $PREFIX/ && rm -fr install

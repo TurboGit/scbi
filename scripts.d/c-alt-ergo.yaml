@@ -1,0 +1,30 @@
+plugin: c-alt-ergo
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/alt-ergo
+
+depends:
+  - ocaml
+  - dune
+  - opam
+  - libzarith-ocaml-dev
+  - libzarith-ocaml
+  - libzip-ocaml-dev
+  - ocplib-simplex-ocaml-dev
+  - liblablgtksourceview2-ocaml-dev
+  - libdune-ocaml-dev
+
+build-env:
+  - system-compiler
+  - import opam env
+
+out-of-tree: false
+
+config: cd sources && ./configure --prefix=$PREFIX
+
+build: cd sources && make -j$SCBI_JOBS
+
+install: cd sources && make install

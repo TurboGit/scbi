@@ -1,0 +1,7 @@
+plugin: c-gpr2
+
+modules:
+  - c-gpr2-lib
+  - c-gpr2-tools
+
+propagate-version: both

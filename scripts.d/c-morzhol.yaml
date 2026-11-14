@@ -1,0 +1,21 @@
+plugin: c-morzhol
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/TurboGit/morzhol.git
+
+out-of-tree: false
+
+build:
+  _: PROCESSORS=$SCBI_JOBS make
+  cross:
+    _: PROCESSORS=$SCBI_JOBS make GNAT=$TARGET-gnat prefix=$PREFIX/$TARGET
+
+install:
+  _: make install
+  cross:
+    _: |-
+      mkdir -p $PREFIX/$TARGET/bin
+      make OS=Windows_NT prefix=$PREFIX/$TARGET install

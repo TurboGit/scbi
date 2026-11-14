@@ -1,0 +1,55 @@
+plugin: c-xmlada
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/xmlada
+
+build-depends:
+  - p-gnat
+  - c-sandbox
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+out-of-tree: false
+
+config-options:
+  common:
+    - --prefix=$PREFIX
+    - --enable-build=$(get-build-type CONFIGURE Production)
+
+config:
+  _: |-
+    OPTIONS =
+    OPTIONS = config-options
+    ./configure $OPTIONS
+  cross:
+    _: |-
+      OPTIONS =
+      OPTIONS = config-options
+      ./configure $OPTIONS --target=$TARGET
+
+build: make PROCESSORS=$SCBI_JOBS -j2
+
+install: make install
+
+version: |-
+  write prj.gpr:
+      with "xmlada";
+      project prj is
+      end prj;
+  write main.adb:
+      with dom.core;
+      procedure main is
+         n : dom.core.node;
+      begin
+         null;
+      end main;
+  gprbuild-project prj.gpr
+  if status == 0:
+      echo $VERSION_OK
+  else:
+      echo $VERSION_ERROR

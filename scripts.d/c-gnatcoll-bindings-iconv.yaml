@@ -1,0 +1,45 @@
+plugin: c-gnatcoll-bindings-iconv
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gnatcoll-bindings
+
+depends:
+  - c-gnatcoll-core
+  - c-xmlada
+  - c-libiconv
+
+build-depends:
+  _:
+    - p-gnat
+    - c-gprbuild
+  cross:
+    _:
+      - c-sandbox
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+build-env:
+  - set-var GNATCOLL_ICONV_OPT -lc
+
+out-of-tree: false
+
+build: |-
+  GOPTS = "-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
+  for kind in static relocatable static-pic:
+      gprbuild $GOPTS -XLIBRARY_TYPE=$kind iconv/gnatcoll_iconv.gpr || return 1
+  true
+
+install: |-
+  GOPTS = "-p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET"
+  GOPTS = "$GOPTS --build-var=LIBRARY_TYPE"
+  PM = $PREFIX/share/gpr/manifests
+  if is-file($PM/gnatcoll_iconv):
+      gprinstall $GOPTS --uninstall gnatcoll_iconv
+  for kind in static relocatable static-pic:
+      gprinstall $GOPTS -XLIBRARY_TYPE=$kind --build-var=GNATCOLL.ICONV_BUILD --install-name=gnatcoll_iconv --build-name=$kind iconv/gnatcoll_iconv.gpr || return 1
+  true

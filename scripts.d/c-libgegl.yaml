@@ -1,0 +1,22 @@
+plugin: c-libgegl
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: git://git.gnome.org/gegl
+
+env:
+  - system-compiler
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+  - add-to-var PATH $PREFIX/bin
+
+out-of-tree: false
+
+config: ./autogen.sh && ./configure --prefix=$PREFIX
+
+build: make -j$SCBI_JOBS
+
+install: make install
+
+prefix: /opt/gimp/libgegl

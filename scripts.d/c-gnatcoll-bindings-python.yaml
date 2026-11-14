@@ -1,0 +1,47 @@
+plugin: c-gnatcoll-bindings-python
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gnatcoll-bindings
+
+depends:
+  - os@-python3-dev
+  - c-gnatcoll-core
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+
+build-env:
+  _:
+    - assign PYINC $(get-os-inc-dir /usr/include/python3*/Python.h)
+    - assign PYLIB $(basename $PYINC)
+    - export GNATCOLL_PYTHON_CFLAGS -I$PYINC
+    - export GNATCOLL_PYTHON_LIBS -l$PYLIB
+  cross:
+    _:
+      - local PYINC $(get-os-inc-dir $SCBI_BDIR/install/$TARGET/Python3*/include/Python.h)
+      - local PYLIB $(basename ${PYINC%%/include})
+      - export GNATCOLL_PYTHON_CFLAGS -I$PYINC
+      - export GNATCOLL_PYTHON_LIBS -l$PYLIB
+
+out-of-tree: false
+
+build: |-
+  GOPTS = "-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
+  for kind in static relocatable:
+      gprbuild -v $GOPTS -XLIBRARY_TYPE=$kind python/gnatcoll_python.gpr || return 1
+
+install: |-
+  GOPTS = "-p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET"
+  GOPTS = "$GOPTS --build-var=LIBRARY_TYPE"
+  PM = $PREFIX/share/gpr/manifests
+  if is-file($PM/gnatcoll_python):
+      gprinstall $GOPTS --uninstall gnatcoll_python
+  for kind in static relocatable:
+      gprinstall $GOPTS -XLIBRARY_TYPE=$kind --build-var=GNATCOLL.PYTHON_BUILD --build-name=$kind python/gnatcoll_python.gpr || return 1

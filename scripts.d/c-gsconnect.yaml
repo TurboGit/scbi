@@ -1,0 +1,22 @@
+plugin: c-gsconnect
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/andyholmes/gnome-shell-extension-gsconnect.git
+
+depends:
+  - meson
+  - ninja-build
+  - libglib2.0-dev
+
+config: meson . ../src/.
+
+build: ninja -C . install-zip
+
+install: |-
+  mkdir -p ../install
+  mv ./gsconnect@andyholmes.github.io ../install
+
+prefix: $HOME/.local/share/gnome-shell/extensions

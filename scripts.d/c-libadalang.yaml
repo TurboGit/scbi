@@ -1,0 +1,73 @@
+plugin: c-libadalang
+
+vars:
+  SCBI_LAL_LIBS: static
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/libadalang
+
+depends:
+  _:
+    - c-langkit
+  common:
+    - c-gnatcoll-bindings-gmp
+    - c-gnatcoll-core
+    - c-gpr2-lib
+    - libyaml-dev
+    - python3-funcy
+    - python3-mako
+  stable:
+    - c-langkit/stable:stable
+
+build-depends:
+  _:
+    - p-gnat
+    - c-gprbuild
+    - c-e3
+  cross:
+    _:
+      - c-sandbox
+      - c-e3
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+build-env:
+  - set-var LIBLANG_SUPPORT_EXTERNALLY_BUILT false
+
+out-of-tree: false
+
+config: lkm generate
+
+build:
+  _: |-
+    GOPTS = "-p -m -j$SCBI_JOBS"
+    for KIND in ${SCBI_LAL_LIBS}:
+        gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND -XGPR2_LIBRARY_TYPE=static ./build/libadalang.gpr || return 1
+  cross:
+    _: |-
+      GOPTS = "-p -m -j$SCBI_JOBS --target=$TARGET"
+      for KIND in ${SCBI_LAL_LIBS}:
+          gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND -XGPR2_LIBRARY_TYPE=static ./build/libadalang.gpr || return 1
+
+pre-install: |-
+  gprinstall --prefix=$PREFIX --uninstall libadalang
+  true
+
+install:
+  _: |-
+    BV = "--build-var=LIBRARY_TYPE --build-var=LIBADALANG_BUILD"
+    GOPTS = "-p --prefix=$PREFIX --target=$TARGET $BV"
+    for KIND in ${SCBI_LAL_LIBS}:
+        gprinstall $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND --build-name=$KIND ./build/libadalang.gpr || return 1
+  cross:
+    pre: |-
+      gprinstall --prefix=$PREFIX --target=$TARGET --uninstall libadalang
+      true
+
+prefix: NONE

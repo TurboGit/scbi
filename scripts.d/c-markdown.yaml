@@ -1,0 +1,12 @@
+plugin: c-markdown
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/markdown
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/gnat
+
+install: ln -s src ../install

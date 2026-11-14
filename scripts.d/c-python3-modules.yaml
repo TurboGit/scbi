@@ -1,0 +1,20 @@
+plugin: c-python3-modules
+
+env:
+  - local PYDIR $(last-modified-directory $PREFIX/local/lib/python*)
+  - add-to-var PYTHONPATH $PYDIR/dist-packages
+
+out-of-tree: false
+
+only-explicit-build: true
+
+config-options:
+  net:
+    - websocket-client
+
+install: |-
+  MODULES_LIST =
+  MODULES_LIST = config-options
+  pip3 install $MODULES_LIST --prefix $PREFIX
+
+prefix: NONE

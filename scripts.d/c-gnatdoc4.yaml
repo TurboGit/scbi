@@ -1,0 +1,39 @@
+plugin: c-gnatdoc4
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gnatdoc
+
+depends:
+  - c-gpr2-lib
+  - c-libadalang
+  - c-langkit
+  - c-vss
+  - c-markdown
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var GPR_PROJECT_PATH $PREFIX/gnat
+
+build-env:
+  - set-var GPR2_LIBRARY_TYPE static
+
+out-of-tree: false
+
+pre-config: |-
+  MKD = ${SCBI_MODULES_DIR[c-markdown@src]}
+  cp -r $MKD subprojects/markdown
+
+build: make INSTALL_DIR=$PREFIX
+
+install: |-
+  mkdir -p $PREFIX
+  cp -r bin $PREFIX && cp -r .objs $PREFIX && cp -r source $PREFIX && cp -r gnat $PREFIX
+
+prefix: NONE

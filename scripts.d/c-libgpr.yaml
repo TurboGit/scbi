@@ -1,0 +1,34 @@
+plugin: c-libgpr
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gprbuild
+
+depends:
+  - c-xmlada
+
+build-depends:
+  - p-gnat
+  - c-sandbox
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+build-env:
+  cross:
+    _:
+      - if target =~ mingw32: set-var OS Windows_NT
+
+out-of-tree: true
+
+config:
+  _: make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$SCBI_JOBS setup
+  cross:
+    _: make -f ../src/Makefile prefix=$PREFIX/$TARGET PROCESSORS=$SCBI_JOBS TARGET=$TARGET setup
+
+build: make -f ../src/Makefile libgpr.build
+
+install: make -f ../src/Makefile libgpr.install

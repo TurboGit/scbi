@@ -1,0 +1,25 @@
+plugin: c-ada-mode
+
+vcs:
+  proxy: none
+  options: none
+  protocol: git
+  url: https://github.com/emacsmirror/ada-mode.git
+
+build-depends:
+  - c-sandbox
+  - c-wisi-token
+
+out-of-tree: false
+
+pre-build: |-
+  wisitoken-bnf-generate --output_bnf ada_annex_p.wy
+  re2c --no-generation-date --debug-output --input custom -W -Werror --utf-8 -o ../src/ada_annex_p_re2c.c ada_annex_p.re2c
+
+build: gprbuild -p -j$SCBI_JOBS ada_mode_wisi_parse.gpr
+
+pre-install: sed -i 's/_p_lr1_parse_table.txt/_p_lr1_re2c_parse_table.txt/g' ada_mode_wisi_parse.gpr
+
+install: gprinstall -q -p --mode:usage --prefix=$PREFIX ada_mode_wisi_parse.gpr
+
+prefix: $HOME/.local

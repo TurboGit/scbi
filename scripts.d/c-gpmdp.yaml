@@ -1,0 +1,32 @@
+plugin: c-gpmdp
+
+functions:
+  c-gpmdp-test:
+    params:
+      - PREFIX
+      - TARGET
+    run: npm start
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/MarshallOfSound/Google-Play-Music-Desktop-Player-UNOFFICIAL-.git
+
+patches:
+  - 0001-fix-mpris-support-in-gnome.patch
+
+depends:
+  - yarn
+  - libavahi-compat-libdnssd-dev
+  - node-babel-register
+
+out-of-tree: false
+
+config: yarn
+
+build: yarn run build
+
+install: yarn run make:deb:64
+
+post-install: echo sudo dpkg -i ./dist/installers/debian/google-play-music-desktop-player_4.6.1_amd64.deb

@@ -1,0 +1,27 @@
+plugin: c-ada-toml
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/pmderodat/ada-toml.git
+
+depends:
+  - c-gnatcoll-core
+  - c-libadalang
+  - c-langkit-support
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+
+out-of-tree: false
+
+build: make build
+
+install: make prefix=$PREFIX install
+
+prefix: NONE

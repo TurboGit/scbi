@@ -1,0 +1,37 @@
+plugin: c-readline
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://git.savannah.gnu.org/git/readline.git
+
+archive:
+  proxy: default
+  options: none
+  protocol: curl
+  url: http://ftp.gnu.org/gnu/readline
+  file: readline-$VERSION.tar.gz
+
+depends: []
+
+build-depends:
+  - c-sandbox
+
+env:
+  - add-to-var C_INCLUDE_PATH $PREFIX/include/readline
+  - add-to-var CXX_INCLUDE_PATH $PREFIX/include/readline
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var LIBRARY_PATH $PREFIX/lib
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+
+out-of-tree: false
+
+config:
+  _: ./configure --prefix=$PREFIX
+  cross:
+    _: ./configure --prefix=$PREFIX/$TARGET --build=$HOST --host=$TARGET --without-curses --disable-shared
+
+build: make -j$JOBS
+
+install: make install

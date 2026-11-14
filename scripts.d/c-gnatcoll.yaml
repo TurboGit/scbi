@@ -1,0 +1,6 @@
+plugin: c-gnatcoll
+
+modules:
+  - c-gnatcoll-core
+  - c-gnatcoll-bindings
+  - c-gnatcoll-db

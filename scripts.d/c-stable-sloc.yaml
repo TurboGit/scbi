@@ -1,0 +1,28 @@
+plugin: c-stable-sloc
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/stable_sloc.git
+
+depends:
+  - c-gnatcoll-core
+  - c-libadalang
+  - c-langkit-support
+  - c-ada-toml
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+
+out-of-tree: false
+
+build: make C_SUPPORT=False build
+
+install: make PREFIX=$PREFIX C_SUPPORT=False install
+
+prefix: NONE

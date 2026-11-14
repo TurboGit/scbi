@@ -1,0 +1,46 @@
+plugin: c-aunit
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/aunit
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+
+out-of-tree: false
+
+build: |-
+  if not cross:
+      PROCESSORS=$SCBI_JOBS make INSTALL=$PREFIX
+  else:
+      PROCESSORS=$SCBI_JOBS make TARGET=$TARGET INSTALL=$PREFIX
+
+install: |-
+  if not cross:
+      make install INSTALL=$PREFIX
+  else:
+      make TARGET=$TARGET INSTALL=$PREFIX/$TARGET install
+
+version: |-
+  write prj.gpr:
+      with "aunit";
+      project prj is
+      end prj;
+  write main.adb:
+      with aunit;
+      procedure main is
+         s : aunit.status;
+      begin
+         null;
+      end main;
+  gprbuild-project prj.gpr
+  if status == 0:
+      echo $VERSION_OK
+  else:
+      echo $VERSION_ERROR

@@ -1,0 +1,33 @@
+plugin: c-ada-libfswatch
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/ada_libfswatch
+
+depends:
+  - c-gnatcoll
+  - c-libfswatch
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+
+build-env:
+  - add-to-var C_INCLUDE_PATH .
+
+out-of-tree: false
+
+config: |-
+  LIB = ${SCBI_MODULES_DIR[c-libfswatch]}
+  IDIR = libfswatch/include/libfswatch/c/
+  LDIR = libfswatch/lib
+  mkdir -p $IDIR $LDIR && cp $LIB/include/libfswatch/c/* $IDIR && cp $LIB/lib/*.a $LDIR
+
+build: make DESTDIR=$PREFIX
+
+install: make DESTDIR=$PREFIX install

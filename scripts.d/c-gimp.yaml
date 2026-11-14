@@ -1,0 +1,36 @@
+plugin: c-gimp
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/GNOME/gimp
+
+depends:
+  - c-libmypaint:v1.3.0
+  - c-mypaint-brushes:v1.3.0
+  - c-libgegl:dev
+  - gtk-doc-tools
+  - libbabl-dev
+  - c-libgegl-dev
+  - libgexiv2-dev
+  - libpoppler-glib-dev
+  - python-gtk2-dev
+  - python-cairo-dev
+  - mypaint
+  - libmng-dev
+  - libxpm-dev
+
+env:
+  - system-compiler
+  - export PERL5LIB .
+
+out-of-tree: false
+
+config: ./autogen.sh --prefix=$PREFIX
+
+build: make -j$SCBI_JOBS
+
+install: make install
+
+prefix: /opt/gimp/gimp

@@ -1,0 +1,23 @@
+plugin: c-e3-core
+
+inherit:
+  - from: c-python-post-install-dist-packages
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/e3-core
+
+env:
+  - local PYDIR $(last-modified-directory $PREFIX/lib/python*)
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var PYTHONPATH $PYDIR/site-packages
+
+out-of-tree: false
+
+only-explicit-build: true
+
+install: pip3 install . --prefix $PREFIX
+
+prefix: NONE

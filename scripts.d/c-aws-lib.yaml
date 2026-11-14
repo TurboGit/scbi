@@ -1,0 +1,53 @@
+plugin: c-aws-lib
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/aws
+
+depends:
+  - c-xmlada
+
+build-depends:
+  _:
+    - c-gprbuild
+  common:
+    - p-gnat
+    - c-sandbox
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+
+out-of-tree: false
+
+config-options:
+  common:
+    - prefix=$PREFIX
+    - DEBUG=$(get-build-type MAKE true)
+  gnutls:
+    - SOCKET=gnutls
+  openssl:
+    - SOCKET=openssl
+
+config:
+  _: |-
+    OPTIONS =
+    OPTIONS = config-options
+    rm -f makefile.setup && make $OPTIONS setup
+  cross:
+    _: |-
+      OPTIONS =
+      OPTIONS = config-options
+      rm -f makefile.setup && make LAL=false ZLIB=false TARGET=$TARGET $OPTIONS setup
+
+build:
+  _: make build-lib-native
+  cross:
+    _: make TARGET=$TARGET build-lib-cross
+
+install:
+  _: make install-lib-native
+  cross:
+    _: make TARGET=$TARGET install-lib-cross

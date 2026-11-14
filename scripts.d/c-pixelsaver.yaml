@@ -1,0 +1,18 @@
+plugin: c-pixelsaver
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/deadalnix/pixel-saver.git
+
+depends:
+  - x11-utils
+
+out-of-tree: false
+
+install: |-
+  mkdir -p ../install
+  mv ./pixel-saver@deadalnix.me ../install
+
+prefix: $HOME/.local/share/gnome-shell/extensions

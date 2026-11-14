@@ -1,0 +1,11 @@
+plugin: c-gnatcoll-bindings
+
+modules:
+  _:
+    - c-gnatcoll-bindings-readline
+    - c-gnatcoll-bindings-gmp
+    - c-gnatcoll-bindings-iconv
+  cross:
+    _:
+      - c-gnatcoll-bindings-gmp
+      - c-gnatcoll-bindings-iconv

@@ -1,0 +1,25 @@
+plugin: c-spawn
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/spawn
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/../build/gnat
+
+build-env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/../build/gnat
+
+out-of-tree: false
+
+build: make -j1 all
+
+install: make -j1 PREFIX=$PREFIX install
+
+prefix: NONE

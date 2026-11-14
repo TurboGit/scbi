@@ -1,0 +1,5 @@
+plugin: c-gnatcoll-db
+
+modules:
+  - c-gnatcoll-db-libs
+  - c-gnatcoll-db-tools

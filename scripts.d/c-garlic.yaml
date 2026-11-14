@@ -1,0 +1,22 @@
+plugin: c-garlic
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/reznikmm/garlic.git
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/gnat
+
+out-of-tree: false
+
+build: gprbuild -v -j$SCBI_JOBS -p gnat/garlic.gpr
+
+install: gprinstall --prefix=$PREFIX -p --sources-subdir=lib/garlic gnat/garlic.gpr
+
+prefix: NONE

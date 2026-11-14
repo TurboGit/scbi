@@ -1,0 +1,67 @@
+plugin: c-pgcc
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://gcc.gnu.org/git/gcc.git
+
+build-depends:
+  - os@-gmp-dev
+  - os@-mpc-dev
+  - os@-mpfr-dev
+  - c-binutils
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var C_INCLUDE_PATH $(last-modified-directory $PREFIX/lib/gcc/$TARGET/*/include)
+
+build-env:
+  - system-compiler
+
+pre-setup:
+  _: |-
+    echo c-pgcc is only meant to be used in cross mode
+    false
+  cross:
+    _: true
+
+out-of-tree: true
+
+config-options:
+  - --prefix=$PREFIX
+  - --target=$TARGET
+  - --host=$SCBI_HOST
+  - --enable-thread=win32
+  - --enable-__cxa_atexit
+  - --disable-nls
+  - --disable-multilib
+  - --disable-libada
+  - --disable-sjlj-exceptions
+  - --enable-large-address-aware
+  - --enable-languages=c
+
+pre-config: rm -fr ../src/gcc/ada
+
+config:
+  cross:
+    _: |-
+      OPTIONS =
+      OPTIONS = config-options
+      CFLAGS = ""-O1" ../src/configure $OPTIONS"
+
+build: |-
+  make -j$SCBI_JOBS
+  return 0
+
+install: |-
+  make -k install
+  return 0
+
+version: |-
+  if is-file($PREFIX/bin/$TARGET-gcc):
+      return $VERSION_OK
+  else:
+      return $VERSION_ERROR
+
+prefix: NONE

@@ -1,0 +1,31 @@
+plugin: c-wisi-token
+
+vcs:
+  proxy: none
+  options: none
+  protocol: git
+  url: https://github.com/emacsmirror/wisi.git
+
+patches:
+  - wisi-adb.patch
+
+build-depends:
+  - c-sandbox
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var GPR_PROJECT_PATH $PREFIX/include
+
+out-of-tree: false
+
+config: gnatprep -DELPA="yes" wisi.gpr.gp wisi.gpr
+
+build: gprbuild -p -j$SCBI_JOBS wisi.gpr wisitoken-bnf-generate -cargs:ada -gnatws
+
+install: |-
+  mkdir -p ../install/bin
+  cp wisitoken-bnf-generate ../install/bin
+  mkdir -p ../install/include
+  cp *.ad* *.gpr *.c ../install/include
+
+prefix: none

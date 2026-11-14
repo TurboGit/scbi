@@ -1,0 +1,47 @@
+plugin: c-gnatcoll-core
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gnatcoll-core.git
+
+depends:
+  - c-libgpr
+  - c-xmlada
+
+build-depends:
+  _:
+    - p-gnat
+    - c-gprbuild
+  cross:
+    _:
+      - c-sandbox
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+out-of-tree: false
+
+config-options:
+  _:
+    - GNATCOLL_MMAP=yes
+    - GNATCOLL_OS=unix
+  common:
+    - prefix=$PREFIX
+    - PROCESSORS=$SCBI_JOBS
+    - INTEGRATED=yes
+    - TARGET=$TARGET
+    - NORMALIZED_TARGET=$TARGET
+  cross:
+    _:
+      - GNATCOLL_MMAP=no
+      - GNATCOLL_OS=windows
+
+build: |-
+  OPTIONS =
+  OPTIONS = config-options
+  make $OPTIONS
+
+install: make NORMALIZED_TARGET=$TARGET prefix=$PREFIX install

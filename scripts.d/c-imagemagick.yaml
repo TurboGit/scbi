@@ -1,0 +1,25 @@
+plugin: c-imagemagick
+
+vcs:
+  proxy: none
+  options: none
+  protocol: git
+  url: https://github.com/ImageMagick/ImageMagick.git
+
+depends:
+  - os@-jxl-dev
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var C_INCLUDE_PATH $(ls $PREFIX/include/*)
+  - add-to-var CPLUS_INCLUDE_PATH $(ls $PREFIX/include/*)
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+
+config: ../src/configure --with-jxl=yes --prefix=$PREFIX
+
+build: make -j$SCBI_JOBS
+
+install: make install
+
+prefix: none

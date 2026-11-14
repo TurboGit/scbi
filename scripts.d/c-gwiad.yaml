@@ -1,0 +1,22 @@
+plugin: c-gwiad
+
+functions:
+  c-gwiad-update:
+    params:
+      - PREFIX
+      - TARGET
+    run: cd $SCBI_GIT_REPO/gwiad && git pull
+
+setup: |-
+  if not (is-dir(src_cp)):
+      ln -s $SCBI_GIT_REPO/gwiad src_cp
+
+out-of-tree: false
+
+config: cd build && rm mk.install
+
+build: |-
+  export AWS_BUILD = relocatable
+  cd build && make setup && PROCESSORS=$SCBI_JOBS make
+
+install: cd build && make install && make install_server

@@ -1,0 +1,7 @@
+plugin: c-glade
+
+modules:
+  - c-garlic
+  - c-gnatdist
+
+aggregate: direct

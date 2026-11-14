@@ -1,0 +1,20 @@
+plugin: c-git
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: git://git.kernel.org/pub/scm/git/git.git
+
+env:
+  - system-compiler
+
+out-of-tree: false
+
+config: make configure && ./configure --prefix=$PREFIX CFLAGS="-O2"
+
+build: make -j6 PREFIX=$PREFIX all doc
+
+install: make PREFIX=$PREFIX install install-doc && sudo cp contrib/completion/git-completion.bash $PREFIX/etc/
+
+prefix: /opt/git

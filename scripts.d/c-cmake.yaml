@@ -1,0 +1,31 @@
+plugin: c-cmake
+
+os-variants:
+  native:
+    packages:
+      - os@-cmake:[v]
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/Kitware/CMake.git
+
+build-depends:
+  - os@-g++
+  - os@-make
+
+env:
+  - prepend-to-var PATH $PREFIX/bin
+
+config-options:
+  - --prefix=$PREFIX
+
+config: |-
+  OPTIONS =
+  OPTIONS = config-options
+  ../src/configure $OPTIONS
+
+build: make -j$SCBI_JOBS
+
+install: make install

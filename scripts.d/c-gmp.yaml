@@ -1,0 +1,56 @@
+plugin: c-gmp
+
+os-variants:
+  native:
+    packages:
+      - os@-gmp-dev:[v]
+    env:
+      - set-var GMP_INCLUDE_DIR /usr/include
+      - set-var GMP_LIBRARY_DIR /usr/lib/$SCBI_TARGET
+
+vcs:
+  proxy: default
+  options: none
+  protocol: mercurial
+  url: https://gmplib.org/repo/gmp/
+
+archive:
+  proxy: default
+  options: none
+  protocol: curl
+  url: https://gmplib.org/download/gmp
+  file: gmp-$VERSION.tar.xz
+
+depends:
+  vcs:
+    - os@-autotools-dev
+    - os@-automake
+    - os@-libtool
+
+build-depends:
+  - c-sandbox
+
+env:
+  - add-to-var C_INCLUDE_PATH $PREFIX/include
+  - add-to-var CXX_INCLUDE_PATH $PREFIX/include
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var LIBRARY_PATH $PREFIX/lib
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+
+out-of-tree: false
+
+pre-config:
+  vcs: |-
+    ./.bootstrap
+    true
+
+config:
+  _: ./configure --prefix=$PREFIX
+  vcs: ./configure --enable-maintainer-mode --prefix=$PREFIX
+  cross:
+    _: ./configure --prefix=$PREFIX/$TARGET --build=$SCBI_HOST --host=$TARGET
+    vcs: ./configure --enable-maintainer-mode --prefix=$PREFIX/$TARGET --build=$SCBI_HOST --host=$TARGET
+
+build: make -j$JOBS
+
+install: make install

@@ -1,0 +1,41 @@
+plugin: c-gnatcoll-db-tools
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gnatcoll-db
+
+depends:
+  - c-gnatcoll-core
+  - c-gnatcoll-bindings-iconv
+  - c-gnatcoll-db-libs-sql
+  - c-gnatcoll-db-libs-sqlite
+
+build-depends:
+  _:
+    - p-gnat
+    - c-gprbuild
+  cross:
+    _:
+      - c-sandbox
+
+env:
+  - add-to-var PATH $PREFIX/bin
+
+out-of-tree: false
+
+config:
+  _: make -C gnatcoll_db2ada prefix=$PREFIX setup && make -C xref prefix=$PREFIX setup
+  cross:
+    _: make -C gnatcoll_db2ada prefix=$PREFIX TARGET=$TARGET setup
+
+build:
+  _: PROCESSORS=$SCBI_JOBS make -C gnatcoll_db2ada && PROCESSORS=$SCBI_JOBS make -C xref
+  cross:
+    _: PROCESSORS=$SCBI_JOBS make -C gnatcoll_db2ada
+
+install:
+  _: make -C gnatcoll_db2ada install && make -C xref install
+  cross:
+    _: make -C gnatcoll_db2ada install

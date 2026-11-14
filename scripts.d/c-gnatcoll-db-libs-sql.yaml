@@ -1,0 +1,30 @@
+plugin: c-gnatcoll-db-libs-sql
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gnatcoll-db
+
+depends:
+  - c-gnatcoll-core
+
+build-depends:
+  _:
+    - p-gnat
+    - c-gprbuild
+  cross:
+    _:
+      - c-sandbox
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/$TARGET/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/$TARGET/lib
+
+out-of-tree: false
+
+config: make -C sql prefix=$PREFIX INTEGRATED=yes TARGET=$TARGET NORMALIZED_TARGET=$TARGET PROCESSORS=$SCBI_JOBS setup
+
+build: make -C sql NORMALIZED_TARGET=$TARGET
+
+install: make -C sql NORMALIZED_TARGET=$TARGET install

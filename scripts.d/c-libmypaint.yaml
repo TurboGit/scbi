@@ -1,0 +1,21 @@
+plugin: c-libmypaint
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/mypaint/libmypaint.git
+
+env:
+  - system-compiler
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+
+out-of-tree: false
+
+config: ./autogen.sh && ./configure --prefix=$PREFIX
+
+build: make -j$SCBI_JOBS
+
+install: make install
+
+prefix: /opt/gimp/libmypaint

@@ -1,0 +1,52 @@
+plugin: c-gps
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gps
+
+patches:
+  _:
+    - gps-css-gtk3.36.patch
+  gtk324:
+    - ''
+
+depends:
+  - libclang-dev
+  - python3-pep8
+  - python3-jedi
+  - python-gi-dev
+  - c-xmlada
+  - c-gtkada
+  - c-libadalang
+  - c-libadalang-tools
+  - c-gnatcoll-db
+  - c-ada-language-server
+  - c-spawn
+
+build-env:
+  - export LIBRARY_TYPE relocatable
+  - export LANGKIT_SUPPORT_BUILD relocatable
+  - add-to-var C_INCLUDE_PATH /usr/include/python2.7
+
+out-of-tree: false
+
+config: |-
+  rm -fr gnat
+  ln -s $SCBI_BDIR/p-gnat/$TARGET-default/src/gcc/ada/doc/gnat_ugn gnat
+  rm -f laltools
+  ln -s $SCBI_BDIR/c-libadalang-tools/$TARGET-default/src laltools
+  rm -f ada_language_server
+  ln -s $SCBI_BDIR/c-ada-language-server/$TARGET-default/build ada_language_server
+  ./configure --prefix=$PREFIX --with-gtk=$SCBI_GTK_VERSION --with-sqlite=embedded --with-gnatcoll=$SCBI_BDIR/install --with-clang=/usr/lib/llvm-11/lib
+
+pre-build: |-
+  DATE = output date "+%Y/%m/%d"
+  sed -i "s,unknown date,$DATE,g" common/core/src/config.ads
+
+build: PROCESSORS=$SCBI_JOBS make PYTHON=python2 -j1
+
+install: make install
+
+prefix: /opt/gnat/gps

@@ -1,0 +1,20 @@
+plugin: c-lcms2
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: http://github.com/mm2/Little-CMS
+
+env:
+  - system-compiler
+
+out-of-tree: false
+
+config: ../src/configure --prefix=$PREFIX
+
+build: make -j4
+
+install: make install
+
+prefix: /opt/darktable

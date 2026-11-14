@@ -1,0 +1,21 @@
+plugin: c-llvm
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/llvm/llvm-project.git
+
+build-depends:
+  - cmake
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var C_INCLUDE_PATH $PREFIX/include
+
+config: cmake -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=$(get-build-type CMAKE Release) -DLLVM_ENABLE_PROJECTS="llvm" -DLLVM_ENABLE_DUMP=ON -DLLVM_ENABLE_ASSERTIONS=ON -DLLVM_INSTALL_UTILS=ON -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_TARGETS_TO_BUILD="AArch64;ARM;NVPTX;X86" ../src/llvm
+
+build: make -j$SCBI_JOBS
+
+install: make install

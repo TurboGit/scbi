@@ -1,0 +1,9 @@
+plugin: c-gprconfig-kb
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gprconfig_kb
+
+config: echo done

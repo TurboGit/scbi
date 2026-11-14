@@ -1,0 +1,13 @@
+plugin: c-sandbox
+
+env:
+  _:
+    - add-to-var PATH $SCBI_BDIR/install/bin
+    - add-to-var LD_LIBRARY_PATH $SCBI_BDIR/install/lib
+    - add-to-var GPR_PROJECT_PATH $SCBI_BDIR/install/share/gpr
+  cross:
+    _:
+      - add-to-var PATH $SCBI_BDIR/install/$TARGET/bin
+      - add-to-var PATH $SCBI_BDIR/install/bin
+      - add-to-var LD_LIBRARY_PATH $SCBI_BDIR/install/$TARGET/lib
+      - add-to-var GPR_PROJECT_PATH $SCBI_BDIR/install/$TARGET/share/gpr

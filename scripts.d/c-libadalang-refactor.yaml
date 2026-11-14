@@ -1,0 +1,31 @@
+plugin: c-libadalang-refactor
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/lal-refactor
+
+depends:
+  - c-libadalang-tools
+
+build-depends:
+  _:
+    - p-gnat
+    - c-gprbuild
+  cross:
+    _:
+      - c-sandbox
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+out-of-tree: false
+
+build: make BUILD_MODE=prod lib bin
+
+install: make install PREFIX=$PREFIX
+
+prefix: NONE

@@ -1,0 +1,65 @@
+plugin: c-aws-tools
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/aws
+
+depends:
+  - c-xmlada
+  - c-aws-lib
+  - c-libadalang
+
+build-depends:
+  _:
+    - c-gprbuild
+    - c-libadalang-tools
+  common:
+    - p-gnat
+    - c-sandbox
+
+tests-depends:
+  - c-sandbox
+  - c-e3
+  - c-python3-modules/net
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+
+out-of-tree: false
+
+config-options:
+  common:
+    - prefix=$PREFIX
+    - DEBUG=$(get-build-type MAKE true)
+  gnutls:
+    - SOCKET=gnutls
+  openssl:
+    - SOCKET=openssl
+
+config:
+  _: |-
+    OPTIONS =
+    OPTIONS = config-options
+    rm -f makefile.setup && make $OPTIONS setup
+  cross:
+    _: |-
+      OPTIONS =
+      OPTIONS = config-options
+      rm -f makefile.setup && make LAL=false ZLIB=false TARGET=$TARGET $OPTIONS setup
+
+build:
+  _: make build-tools-native
+  cross:
+    _: make TARGET=$TARGET build-tools-cross
+
+install:
+  _: make install-tools-native
+  cross:
+    _: make TARGET=$TARGET install-tools-cross
+
+tests: |-
+  OPTIONS = "$OPTIONS"
+  cd regtests && rm -fr results && mkdir results && ./gen_system_tags.py ../$TARGET/makefile.setup ../$TARGET/testsuite.tags && ./testsuite.py --jobs=$SCBI_JOBS --temp-dir=$PWD/results --target-dir=../$TARGET $OPTIONS

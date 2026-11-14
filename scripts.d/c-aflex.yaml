@@ -1,0 +1,22 @@
+plugin: c-aflex
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/Ada-France/aflex.git
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var PATH $PREFIX/bin
+
+out-of-tree: false
+
+build: make build
+
+install: make prefix=$PREFIX install
+
+prefix: NONE

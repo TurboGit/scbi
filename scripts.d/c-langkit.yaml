@@ -1,0 +1,11 @@
+plugin: c-langkit
+
+prefix: NONE
+
+modules:
+  - c-langkit-support
+  - c-liblktlang
+
+aggregate: direct
+
+propagate-version: both

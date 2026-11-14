@@ -1,0 +1,16 @@
+plugin: c-gdb
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: http://sourceware.org/git/binutils-gdb.git
+
+build-env:
+  - system-compiler
+
+config: ../src/configure --prefix=$PREFIX --disable-binutils --disable-gas --disable-ld --disable-gold --disable-gprof
+
+build: make -j$SCBI_JOBS
+
+install: make -C gdb install

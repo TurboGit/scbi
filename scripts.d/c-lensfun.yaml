@@ -1,0 +1,20 @@
+plugin: c-lensfun
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/lensfun/lensfun.git
+
+env:
+  - system-compiler
+
+out-of-tree: false
+
+config: cmake -DCMAKE_INSTALL_PREFIX=$PREFIX ../src
+
+build: make -j4
+
+install: make install
+
+prefix: /opt/lensfun

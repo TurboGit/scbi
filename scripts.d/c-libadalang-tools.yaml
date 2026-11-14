@@ -1,0 +1,36 @@
+plugin: c-libadalang-tools
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/libadalang-tools
+
+depends:
+  - c-libadalang
+  - c-templates-parser
+  - c-vss-text
+
+build-depends:
+  _:
+    - p-gnat
+    - c-gprbuild
+  cross:
+    _:
+      - c-sandbox
+
+env:
+  - assign LALT $SCBI_BDIR/c-libadalang-tools
+  - add-to-var GPR_PROJECT_PATH $LALT/$TARGET-$VARIANT/build/src
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+build-env:
+  - export LIBRARY_TYPE static
+
+out-of-tree: false
+
+build: make BUILD_MODE=prod bin
+
+install: |-
+  make install-bin-strip ALL_LIBRARY_TYPES="static" DESTDIR=$PREFIX
+  make install-lib ALL_LIBRARY_TYPES="static" DESTDIR=$PREFIX

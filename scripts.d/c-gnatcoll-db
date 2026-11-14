@@ -1,5 +1,0 @@
-function c-gnatcoll-db-modules()
-{
-    echo c-gnatcoll-db-libs
-    echo c-gnatcoll-db-tools
-}

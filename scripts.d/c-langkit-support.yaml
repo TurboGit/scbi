@@ -1,0 +1,38 @@
+plugin: c-langkit-support
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/langkit
+
+depends:
+  - c-gnatcoll-core
+  - c-gnatcoll-bindings
+  - c-adasat
+  - c-prettier-ada
+
+build-depends:
+  - p-gnat
+  - c-sandbox
+  - c-gprbuild
+  - c-e3
+
+env:
+  - add-to-var PATH $PREFIX/local/bin
+  - add-to-var PYTHONPATH $(last-modified-directory $PREFIX/local/lib/python*/dist-packages)
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+build-env:
+  - add-to-var PYTHONPATH ${SCBI_MODULES_DIR[c-langkit-support@build]}
+
+out-of-tree: false
+
+pre-build: pip3 install . --prefix=$PREFIX
+
+build: python3 manage.py build-langkit-support --library-types=static,static-pic,relocatable
+
+install: python3 manage.py install-langkit-support --library-types=static,static-pic,relocatable $PREFIX
+
+prefix: NONE

@@ -1,0 +1,43 @@
+plugin: c-gnatcoll-bindings-gmp
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gnatcoll-bindings
+
+depends:
+  common:
+    - c-gnatcoll-core
+    - c-xmlada
+  cross:
+    _:
+      - c-gmp
+
+build-depends:
+  _:
+    - p-gnat
+    - c-gprbuild
+  cross:
+    _:
+      - c-sandbox
+
+env:
+  - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+out-of-tree: false
+
+build: |-
+  GOPTS = "-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
+  for kind in static relocatable static-pic:
+      gprbuild $GOPTS -XLIBRARY_TYPE=$kind gmp/gnatcoll_gmp.gpr || return 1
+
+install: |-
+  GOPTS = "-p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET"
+  GOPTS = "$GOPTS --build-var=LIBRARY_TYPE"
+  PM = $PREFIX/share/gpr/manifests
+  if is-file($PM/gnatcoll_gmp):
+      gprinstall $GOPTS --uninstall gnatcoll_gmp
+  for kind in static relocatable static-pic:
+      gprinstall $GOPTS -XLIBRARY_TYPE=$kind --build-var=GNATCOLL.GMP_BUILD --install-name=gnatcoll_gmp --build-name=$kind gmp/gnatcoll_gmp.gpr || return 1

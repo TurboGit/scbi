@@ -1,0 +1,35 @@
+plugin: c-exiv2
+
+os-variants:
+  native:
+    packages:
+      - os@-exiv2:[v]
+      - os@-exiv2-dev:[v]
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/Exiv2/exiv2.git
+
+build-depends:
+  - os@-g++
+  - c-cmake
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var C_INCLUDE_PATH $PREFIX/include
+  - add-to-var CXX_INCLUDE_PATH $PREFIX/include
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+  - add-to-var CMAKE_PREFIX_PATH $PREFIX/lib/cmake/exiv2
+
+out-of-tree: true
+
+config: cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DEXIV2_ENABLE_BMFF=ON ../src
+
+build: make -j$SCBI_JOBS
+
+install: make install
+
+prefix: NONE

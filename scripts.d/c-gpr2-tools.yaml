@@ -1,0 +1,54 @@
+plugin: c-gpr2-tools
+
+functions:
+  do-gpr2-tools-config:
+    params:
+      - PREFIX
+      - TARGET
+      - BUILD
+    run: |-
+      rm -fr .build/kb
+      mkdir .build
+      ln -s ${SCBI_MODULES_DIR[c-gpr2-lib@build]}/.build/kb .build/kb
+      make $BUILD GPR2KBDIR=${SCBI_MODULES_DIR[c-gprconfig-kb@src]}/db prefix=$PREFIX setup
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gpr
+
+depends:
+  - c-gpr2-lib
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+  - c-gprconfig-kb
+
+tests-depends:
+  - c-e3
+  - p-gnatmem
+
+env:
+  - add-to-var PATH $PREFIX/bin
+
+out-of-tree: false
+
+config:
+  _: do-gpr2-tools-config $PREFIX $TARGET "BUILD=release"
+  debug: do-gpr2-tools-config $PREFIX $TARGET "BUILD=debug"
+
+build: make build-tools
+
+install: make GPRINSTALL=gprinstall install-tools
+
+tests: |-
+  OPTIONS = "$OPTIONS"
+  TSTDIR = $HOME/.local/tmp
+  if not (is-dir($TSTDIR)):
+      mkdir $TSTDIR
+  export LIBRARY_TYPE = static
+  cd testsuite && python3 ./testsuite.py --temp-dir=$TSTDIR --show-error-output -j$SCBI_JOBS $OPTIONS
+
+prefix: NONE

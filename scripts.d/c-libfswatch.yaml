@@ -1,0 +1,30 @@
+plugin: c-libfswatch
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/fswatch
+
+patches:
+  - libfswatch.patch
+
+build-depends:
+  - autoconf
+  - autopoint
+
+env:
+  - add-to-var LIBRARY_PATH $PREFIX/lib
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+  - add-to-var C_INCLUDE_PATH $PREFIX/include/libfswatch/c
+  - add-to-var CXX_INCLUDE_PATH $PREFIX/include/libfswatch/c++
+
+out-of-tree: false
+
+config: ./autogen.sh && ./configure --prefix=$PREFIX
+
+build: make -j$SCBI_JOBS
+
+install: make install
+
+prefix: NONE

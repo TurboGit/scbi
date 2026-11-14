@@ -1,0 +1,35 @@
+plugin: c-mingw-header
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/mirror/mingw-w64.git
+
+depends:
+  - c-binutils
+
+env:
+  - add-to-var C_INCLUDE_PATH $PREFIX/include
+
+build-env:
+  - no-target-env
+
+setup: |-
+  if $TARGET =~ "^(?:.*mingw.*)$":
+      true
+  else:
+      echo $TARGET not supported for mingw.
+      return 1
+
+out-of-tree: true
+
+config: ../src/mingw-w64-headers/configure --prefix=$PREFIX
+
+build: make -j$SCBI_JOBS
+
+install: make install
+
+version: return $VERSION_ERROR
+
+prefix: $SCBI_PREFIX/$TARGET

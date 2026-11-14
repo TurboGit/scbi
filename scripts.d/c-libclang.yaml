@@ -1,0 +1,50 @@
+plugin: c-libclang
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/llvm/llvm-project.git
+
+depends:
+  - os@-ninja
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+
+config-options:
+  - -GNinja
+  - -DCMAKE_INSTALL_PREFIX=$PREFIX
+  - -DCMAKE_BUILD_TYPE=$(get-build-type CMAKE Release)
+  - -DCMAKE_C_COMPILER=gcc
+  - -DCMAKE_CXX_COMPILER=g++
+  - -DCMAKE_EXE_LINKER_FLAGS=-static-libgcc -static-libstdc++
+  - -DLLVM_ENABLE_PROJECTS=clang;clang-tools-extra;lld
+  - -DLLVM_ENABLE_RUNTIMES=libcxx;libcxxabi;libunwind
+  - -DLLVM_ENABLE_BINDINGS=FALSE
+  - -DLLVM_INCLUDE_TESTS=OFF
+  - -DLLVM_INCLUDE_BENCHMARKS=OFF
+  - -DLLVM_INCLUDE_EXAMPLES=OFF
+  - -DLLVM_INSTALL_UTILS=ON
+  - if build-type(CMAKE,Release) == Debug: -DLLVM_ENABLE_ASSERTIONS=ON
+  - if build-type(CMAKE,Release) != Debug: -DLLVM_ENABLE_ASSERTIONS=OFF
+  - -DCLANG_DEFAULT_LINKER=lld
+  - -DCLANG_DEFAULT_UNWINDLIB=libunwind
+  - -DCLANG_DEFAULT_CXX_STDLIB=libc++
+  - -DLIBCLANG_FULL=ON
+  - -DLIBCLANG_BUILD_STATIC=ON
+  - -DLLVM_ENABLE_LIBXML2=OFF
+
+config: |-
+  OPTIONS =
+  OPTIONS = config-options
+  cmake $OPTIONS ../src/llvm
+
+build: ninja -j$SCBI_JOBS
+
+install: cmake --install . --strip
+
+post-install: cp -r ../src/clang/tools/libclang $PREFIX/include/.
+
+prefix: NONE

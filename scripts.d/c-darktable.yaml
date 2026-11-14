@@ -1,0 +1,140 @@
+plugin: c-darktable
+
+variants:
+  all:
+    - ai
+    - hdr
+    - jxl
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/darktable-org/darktable.git
+
+depends:
+  common:
+    - os@-cairo-dev
+    - os@-colord-dev
+    - os@-colord-gtk-dev
+    - os@-cups2-dev
+    - os@-curl4
+    - os@-curl4-openssl-dev
+    - os@-gmic-dev
+    - os@-gomp1
+    - os@-gphoto2-dev
+    - os@-graphicsmagick1-dev
+    - os@-heif-dev
+    - os@-image-exiftool-perl
+    - os@-jpeg-dev
+    - os@-json-glib-dev
+    - os@-lcms2-dev
+    - os@-lensfun-dev
+    - os@-lua5.4-dev
+    - os@-openexr-dev
+    - os@-openjp2-dev
+    - os@-openjph-dev
+    - os@-osmgpsmap-1.0-dev
+    - os@-png-dev
+    - os@-pod-parser-perl
+    - os@-potrace-dev
+    - os@-pugixml-dev
+    - os@-rav1e-dev
+    - os@-rsvg2-dev
+    - os@-secret-dev
+    - os@-soup3-dev
+    - os@-sqlite3-dev
+    - os@-svtav1enc-dev
+    - os@-tiff-dev
+    - os@-webp-dev
+    - os@-xml2-dev
+    - os@-xml2-utils
+    - os@-yuv-dev
+    - c-exiv2
+    - c-libavif
+    - c-libopenjpeg
+  ai:
+    - os@-archive-dev
+    - os@-onnxruntime-dev
+  hdr:
+    - os@-opencv-core-dev
+    - os@-opencv-features2d-dev
+    - os@-opencv-flann-dev
+    - os@-opencv-imgproc-dev
+  im:
+    - c-imagemagick
+  jxl:
+    - os@-jxl-dev
+
+build-depends:
+  common:
+    - os@-python3-jsonschema
+    - os@-intltool
+    - os@-xsltproc
+    - os@-findbin
+    - c-cmake
+  clang:
+    - os@-llvm-$SCBI_CLANG_VERSION
+    - os@-clang-$SCBI_CLANG_VERSION
+    - os@-omp-$SCBI_CLANG_VERSION
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/views
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/plugins
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/plugins/lighttable
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/plugins/imageio/format
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib/darktable/plugins/imageio/storage
+
+build-env:
+  _:
+    - set-var CMAKE_C_COMPILER gcc
+    - set-var CMAKE_CXX_COMPILER g++
+  clang:
+    - set-var CMAKE_C_COMPILER clang-$SCBI_CLANG_VERSION
+    - set-var CMAKE_CXX_COMPILER clang++-$SCBI_CLANG_VERSION
+
+out-of-tree: true
+
+config-options:
+  common:
+    - -DCMAKE_INSTALL_PREFIX=$PREFIX
+    - -DCMAKE_C_COMPILER=$CMAKE_C_COMPILER
+    - -DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER
+  default:
+    - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+  ai:
+    - -DUSE_AI=ON
+  clang:
+    - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+  debug:
+    - -DCMAKE_BUILD_TYPE=Debug
+  im:
+    - -DUSE_GRAPHICSMAGICK=OFF
+    - -DUSE_IMAGEMAGICK=ON
+  release:
+    - -DCMAKE_BUILD_TYPE=Release
+
+pre-config:
+  relaxclang: sed -i "s/\(.*\"Clang\".*\)COMPILER_VERSION VERSION_LESS [0-9][0-9]/\1COMPILER_VERSION VERSION_LESS $SCBI_CLANG_VERSION/" ../src/cmake/compiler-versions.cmake ../src/src/external/rawspeed/cmake/compiler-versions.cmake
+
+config: |-
+  if not (is-link(../src/.git)):
+      ln -s ../../src/.git ../src/.git
+  OPTIONS =
+  OPTIONS = config-options
+  cmake $OPTIONS ../src
+
+build: make -j$SCBI_HALF_JOBS
+
+install: |-
+  make install
+  rm -f ../src/.git
+
+tests: |-
+  OPTIONS = "$OPTIONS"
+  cd ../src/src/tests/integration
+  ./run.sh $OPTIONS
+
+prefix: /opt/darktable

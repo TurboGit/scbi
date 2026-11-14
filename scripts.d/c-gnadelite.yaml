@@ -1,0 +1,16 @@
+plugin: c-gnadelite
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: git+ssh://repo.or.cz/srv/git/gnadelite.git
+
+depends:
+  - libsqlite3-dev
+
+out-of-tree: false
+
+build: PROCESSORS=$SCBI_JOBS make prefix=$PREFIX
+
+install: make prefix=$PREFIX prepare_install && make prefix=$PREFIX install

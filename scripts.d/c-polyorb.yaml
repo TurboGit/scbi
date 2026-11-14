@@ -1,0 +1,26 @@
+plugin: c-polyorb
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/PolyORB.git
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+out-of-tree: false
+
+pre-config: |-
+  ./support/reconfig
+  echo > support/compile
+  echo > support/missing
+
+config: ./configure --prefix=$PREFIX --with-appli-perso="corba dsa"
+
+build: make
+
+install: make install
+
+prefix: NONE

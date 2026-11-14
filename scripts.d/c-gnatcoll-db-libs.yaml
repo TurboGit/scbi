@@ -1,0 +1,5 @@
+plugin: c-gnatcoll-db-libs
+
+modules:
+  - c-gnatcoll-db-libs-sql
+  - c-gnatcoll-db-libs-sqlite

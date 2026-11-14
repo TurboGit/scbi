@@ -1,0 +1,71 @@
+plugin: c-binutils
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: http://sourceware.org/git/binutils-gdb.git
+
+depends:
+  - os@-makeinfo
+  - os@-bison
+  - os@-flex
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var C_INCLUDE_PATH $PREFIX/include
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var LIBRARY_PATH $PREFIX/lib
+
+build-env:
+  - system-compiler
+
+out-of-tree: true
+
+config-options:
+  _:
+    - --build=$SCBI_HOST
+    - --enable-gold
+    - --enable-plugins
+  common:
+    - --prefix=$PREFIX
+    - --disable-nls
+    - --disable-werror
+    - --disable-compressed-debug-sections
+    - --disable-separate-code
+    - --disable-gdb
+    - --disable-gdbserver
+    - --disable-sim
+    - --disable-libquadmath
+    - --disable-readline
+    - --disable-ld
+    - --enable-install-libiberty
+  cross:
+    _:
+      - --target=$TARGET
+
+config: |-
+  OPTIONS =
+  OPTIONS = config-options
+  ../src/configure $OPTIONS
+
+build: |-
+  DEBUG = get-build-type MAKE false
+  if $DEBUG == true:
+      CFLAGS = "-O0 -g -Wno-error"
+  else:
+      CFLAGS = "-O2 -g -Wno-error"
+  make -j$SCBI_JOBS CFLAGS="$CFLAGS" CC=gcc
+
+install: make install
+
+version: |-
+  TOOL = ld
+  if cross:
+      TOOL = ${TARGET}-ld
+  _S1 = command-path $TOOL
+  if $_S1 == "":
+      echo $VERSION_ERROR
+  else:
+      V = output $TOOL --version | head -1
+      echo ${V##* }

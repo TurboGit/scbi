@@ -1,6 +1,0 @@
-
-function c-ada-tools-modules()
-{
-    echo c-xmlada c-libgpr c-gtkada c-gnatcoll c-gprbuild c-langkit
-    echo c-libadalang c-libadalang-tools c-aunit c-gpr2-tools c-aws
-}

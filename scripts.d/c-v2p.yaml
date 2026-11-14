@@ -1,0 +1,22 @@
+plugin: c-v2p
+
+functions:
+  c-v2p-update:
+    params:
+      - PREFIX
+      - TARGET
+    run: cd $SCBI_GIT_REPO/v2p && git pull
+
+setup: |-
+  if not (is-dir(src_cp)):
+      ln -s $SCBI_GIT_REPO/v2p src_cp
+
+out-of-tree: false
+
+build: |-
+  export AWS_BUILD = relocatable
+  cd build && PROCESSORS=$SCBI_JOBS make
+
+install: |-
+  export ARGWIAD_ROOT = $HOME/opt/gwiad
+  cd build && make install_gwiad_plugin

@@ -1,0 +1,10 @@
+plugin: c-ada-cross-tools
+
+modules:
+  - c-xmlada
+  - c-libgpr
+  - c-gnatcoll
+  - c-win32ada
+  - c-wposix
+  - c-aws
+  - c-templates-parser

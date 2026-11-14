@@ -1,0 +1,35 @@
+plugin: c-gnatcov
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gnatcoverage.git
+
+depends:
+  common:
+    - p-gnat-util
+    - c-binutils
+    - c-gnatcoll-core
+    - c-libadalang
+    - c-gpr2-lib
+    - c-templates-parser
+    - c-stable-sloc
+  c:
+    - c-llvm-bindings
+
+build-depends:
+  - p-gnat
+  - c-gprbuild
+
+env:
+  - add-to-var PATH $PREFIX/bin
+
+build-env:
+  - prepend-to-var PATH $SCBI_PREFIX/bin
+
+out-of-tree: false
+
+build: cd tools/gnatcov && make LIBRARY_TYPE=static C_SUPPORT=True PROCESSORS=$SCBI_JOBS bin
+
+install: cd tools/gnatcov && make PREFIX=$PREFIX LIBRARY_TYPE=static C_SUPPORT=True install

@@ -1,0 +1,47 @@
+plugin: c-mingw
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/mirror/mingw-w64.git
+
+depends:
+  - c-mingw-header
+
+build-depends:
+  - c-pgcc
+
+build-env:
+  - local CROSSCOMP $SCBI_BDIR/c-pgcc/$TARGET-$VARIANT/install
+  - target-env $CROSSCOMP
+  - add-to-var C_INCLUDE_PATH $(last-modified-directory $CROSSCOMP/lib/gcc/$TARGET/*/include)
+
+setup: |-
+  if $TARGET =~ "^(?:.*mingw.*)$":
+      true
+  else:
+      echo $TARGET not supported for mingw.
+      return 1
+
+out-of-tree: true
+
+config-options:
+  - --prefix=$PREFIX
+  - --host=$TARGET
+  - --build=$SCBI_HOST
+  - --enable-wildcard
+
+config: |-
+  OPTIONS =
+  OPTIONS = config-options
+  ../src/mingw-w64-crt/configure $OPTIONS
+
+build: |-
+  sed -i 's/^winrt32_DATA/#winrt32_DATA/' Makefile
+  sed -i 's/^winrt64_DATA/#winrt64_DATA/' Makefile
+  make -j$SCBI_JOBS
+
+install: make install
+
+prefix: $SCBI_PREFIX/$TARGET

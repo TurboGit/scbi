@@ -1,0 +1,22 @@
+plugin: c-diouzhtu
+
+functions:
+  c-diouzhtu-update:
+    params:
+      - PREFIX
+      - TARGET
+    run: cd $SCBI_GIT_REPO/diouzhtu && git pull
+
+setup: |-
+  if not (is-dir(src_cp)):
+      ln -s $SCBI_GIT_REPO/diouzhtu src_cp
+
+out-of-tree: false
+
+build: |-
+  export AWS_BUILD = relocatable
+  cd build && PROCESSORS=$SCBI_JOBS make
+
+install: |-
+  export ARGWIAD_ROOT = $HOME/opt/gwiad
+  cd build && make install && make install_gwiad_plugins

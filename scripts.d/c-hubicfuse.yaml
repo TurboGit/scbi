@@ -1,0 +1,27 @@
+plugin: c-hubicfuse
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/TurboGit/hubicfuse.git
+
+depends:
+  - libfuse-dev
+  - libjson-c-dev
+  - libmagic-dev
+
+env:
+  - system-compiler
+
+out-of-tree: false
+
+config: ../src/configure --prefix=$PREFIX
+
+build: make -j4
+
+install: make install
+
+post-install: sudo cp $PREFIX/bin/hubicfuse /usr/local/bin
+
+prefix: NONE

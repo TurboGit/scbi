@@ -1,0 +1,27 @@
+plugin: c-graphicsmagick
+
+os-variants:
+  native:
+    packages:
+      - libgraphicsmagick1-dev:[v]
+
+vcs:
+  proxy: none
+  options: none
+  protocol: mercurial
+  url: https://hg.osdn.net/view/graphicsmagick/GM
+
+env:
+  - add-to-var PATH $PREFIX/bin
+  - add-to-var C_INCLUDE_PATH $PREFIX/GraphicsMagick
+  - add-to-var CPLUS_INCLUDE_PATH $PREFIX/GraphicsMagick
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+
+config: ../src/configure --prefix=$PREFIX
+
+build: make -j$SCBI_JOBS
+
+install: make install
+
+prefix: none

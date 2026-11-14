@@ -1,0 +1,30 @@
+plugin: c-gprbuild
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/AdaCore/gprbuild
+
+depends:
+  - c-libgpr
+  - c-xmlada
+  - c-gprconfig-kb
+
+build-depends:
+  - p-gnat
+  - c-sandbox
+
+env:
+  - add-to-var PATH $PREFIX/bin
+
+out-of-tree: true
+
+config: |-
+  if not (exists(../src/share/gprconfig)):
+      ln -s ${SCBI_MODULES_DIR[c-gprconfig-kb@src]}/db ../src/share/gprconfig
+  make -f ../src/Makefile prefix=$PREFIX PROCESSORS=$SCBI_JOBS setup
+
+build: make -f ../src/Makefile
+
+install: make -f ../src/Makefile install
