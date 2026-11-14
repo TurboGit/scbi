@@ -158,6 +158,12 @@ SCBI_IMPL=python ./run test001   # in tests/: one driver with the Python driver
   `module_final_step` with `steps/final.py`); Bash ones are converted
   with `python3 -m scbi.envconvert`. Test env files exist in both forms
   in `tests/scripts.d` (`.env-x` and `.env-x.py`).
+- The module environment (handle-env, handle-module-env,
+  plugin-call-env-hooks) is `steps/modenv.py`, the OS packages and auto
+  variants `ospkg.py` (both fall back to
+  the Bash functions when a ported one is redefined: hashes in
+  `hooks/reference.py`, checked by `tests/unit/test_hooks_policy.py`),
+  `--standalone` `standalone.py`.
 - Port Bash code literally (word splitting, `read`, associative array order
   ...): helpers for these semantics are in `src/scbi/bashcompat.py`.
 

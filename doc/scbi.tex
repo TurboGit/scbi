@@ -2130,11 +2130,26 @@ driver) is taken from the environment variable \code{SCBI\_ARGV0} when set
 	\item Bash and YAML plug-ins (\seeref{yaml-plugin}) can be mixed in the
 	plug-ins directory. When both \file{<name>} and \file{<name>.yaml}
 	exist, the YAML one is used.
-	\item When \code{define-var} or one of the environment helpers is
-	redefined globally (in a runtime file, an environment file or a
-	plug-in), the environment actions of YAML plug-ins are run by Bash so
-	that the redefinition applies; otherwise they are evaluated by the
-	driver.
+	\item The environment of a module (the \code{env} hooks of its
+	dependencies, of the aggregated modules of a meta-module, its
+	\code{build-env} and \code{tests-env}) is computed by the driver; the
+	environment actions of YAML plug-ins go through the
+	\code{define\_var} of the Python environment file, if any. When
+	\code{define-var} or one of the environment helpers is redefined
+	globally in a runtime file or a Bash plug-in, the environment actions
+	are run by Bash so that the redefinition applies. The \code{define-var}
+	of \file{\_os\_windows} (\code{;} separator, \code{cygpath -u} for
+	\code{PATH}) is reproduced by the driver, unless \code{cygpath} is a
+	shell function.
+	\item The OS packages (\code{os@-} dependencies, \code{check-pkg})
+	and the \code{auto} variants are checked by the driver for the
+	supported distributions (\code{SCBI\_OS\_NAME} \code{deb},
+	\code{ubt}, \code{cos}, \code{fed}, \code{rhl}, \code{mingw},
+	\code{win}, \code{none}); for another one, or when a
+	\code{check-<os>-pkg} function is redefined, the Bash functions are
+	used. The \code{auto} variants of a plan are checked in plan order (in
+	parallel with the Bash driver: the order of their messages may
+	differ).
 	\item The sources of the modules (VCS checkouts and archives,
 	\code{get-vcs-data}, \code{get-archive}, \code{git-co}...) and the
 	build ids are handled by the driver. When one of these runtime
@@ -2186,8 +2201,8 @@ variable, or \code{default} when it is empty, as
 	given to the hooks (see below);
 	\item[\code{define\_var(env, action, name, value)}] called for each
 	environment action (\code{ADD}, \code{SET}, \code{PREPEND},
-	\code{APPEND}, \code{REMOVE}, \code{UNSET}) evaluated by the driver,
-	instead of the default; \code{env.apply(action, name, value)} does the
+	\code{APPEND}, \code{REMOVE}, \code{UNSET}) of the YAML plug-ins
+	(the environment of each module, see above), instead of the default; \code{env.apply(action, name, value)} does the
 	default action, \code{env.get(name)} reads a variable;
 	\item[\code{rewrite\_vcs(record)}, \code{rewrite\_archive(record)}] the
 	fields of a \code{vcs} / \code{archive} hook (a list: proxy, options,
@@ -2282,7 +2297,8 @@ installed next to the driver instead (e.g. to compare both, or to check
 Bash plug-ins with the Bash \code{lint} and \code{format}).
 
 A standalone source archive (\ddash{}standalone) contains the driver as
-installed.
+installed, the plug-in definitions of the modules (YAML or Bash) and a
+Python environment file (\file{.scbi-env-std.py}).
 
 \subsection{Testsuite}
 \index{testsuite}
