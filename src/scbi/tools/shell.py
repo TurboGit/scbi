@@ -54,7 +54,9 @@ def setup_env(modref: str, modules: list[str], docd: str) -> list[tuple]:
 
 
 def main(driver, args: list[str]) -> int:
-    do_run, run_cmd = "no", ""
+    #  the run option of an ini section (DO_RUN, DO_RUN_CMD set by the
+    #  driver), overridden by --run on the command line
+    do_run, run_cmd = driver.get("DO_RUN") or "no", driver.get("DO_RUN_CMD") or ""
     opts: list[str] = []
     for a in args:
         if a.startswith("--run="):
