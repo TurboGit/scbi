@@ -1937,14 +1937,14 @@ variables in the body; they are not declared in the plug-in.
 	\code{append-to-var}, \code{remove-from-var}, \code{set-var},
 	\code{define-var}, \code{unset-var}, \code{export}, \code{system-compiler},
 	\code{target-env}, \code{no-target-env}, \code{mkdir}, \code{import}
-	(\code{import opam env} runs the command and imports the variables it sets),
+	(\code{import opam env} runs the command, without a shell, and applies
+	the variable assignments, \code{export} and \code{unset} statements it
+	prints),
 	\code{local NAME VALUE} (a variable for the following actions of the hook)
 	or \code{assign NAME VALUE} (a shell variable, part of the environment if
 	it is already exported). Actions are applied in order. The actions on
-	variables go through \code{define-var} as for a Bash plug-in: if
-	\code{define-var} is redefined (for example in a \code{module-final-step}
-	calling \code{plugin-call-env-hooks} to record the environment of the
-	modules), the redefinition applies to YAML plug-ins too.
+	variables go through the \code{define\_var} of the Python environment
+	file, if any (\seeref{python-env-files}).
 \end{description}
 
 Values and environment actions are not shell code: they may only refer to
@@ -2118,57 +2118,52 @@ driver) is taken from the environment variable \code{SCBI\_ARGV0} when set
 
 \subsection{Compatibility}
 
+The Python driver runs no Bash code: no runtime file, no Bash plug-in and
+no Bash environment file is read.
+
 \begin{itemize}
-	\item The runtime files (\file{\$SCBI\_PLUGINS/[0-9]*} and
-	\file{\$SCBI\_PLUGINS/\_os\_<os>}) are Bash code, evaluated once when
-	the driver starts (for the Bash plug-ins).
+	\item The plug-ins are YAML ones (\seeref{yaml-plugin}). A Bash plug-in
+	without its YAML version is an error; it is converted with
+	\code{python3 -m scbi.convert <plug-in>}.
 	\item The environment files are Python files (\seeref{python-env-files}).
-	\item Each hook runs in its own Bash process with the runtime functions,
-	the environment of the module and the plug-ins. Bash plug-ins are
-	sourced as with the Bash driver (an error refers to the plug-in file
-	and line).
-	\item Bash and YAML plug-ins (\seeref{yaml-plugin}) can be mixed in the
-	plug-ins directory. When both \file{<name>} and \file{<name>.yaml}
-	exist, the YAML one is used.
+	\item The settings of the runtime files (\file{1\_setup},
+	\file{6\_distpkg}, \file{8\_mail}...) are computed by the driver with
+	the same defaults: \code{SCBI\_ROOT} (\file{\$HOME/dev}),
+	\code{SCBI\_BDIR}, \code{SCBI\_PREFIX}, \code{SCBI\_ARCHIVES},
+	\code{SCBI\_PATCH}, \code{SCBI\_LOGS}, \code{SCBI\_GIT\_REPO},
+	\code{SCBI\_SVN\_REPO}, \code{SCBI\_HG\_REPO}, \code{KEEP\_LOG\_DAYS},
+	\code{SCBI\_EMAIL\_NOTIFICATION}, the distribution
+	(\code{SCBI\_OS\_NAME}...), the installed packages and the \code{os@-}
+	aliases of the \file{.pkgs-<distrib>} files. They are changed through
+	the environment or an environment file, not by editing the runtime
+	files.
+	\item The runtime functions cannot be redefined: the extension points
+	are the hooks of the environment file (\code{define\_var},
+	\code{rewrite\_vcs}, \code{rewrite\_archive}, \code{proxy},
+	\code{module\_final\_step}).
 	\item The environment of a module (the \code{env} hooks of its
 	dependencies, of the aggregated modules of a meta-module, its
-	\code{build-env} and \code{tests-env}) is computed by the driver; the
-	environment actions of YAML plug-ins go through the
-	\code{define\_var} of the Python environment file, if any. When
-	\code{define-var} or one of the environment helpers is redefined
-	globally in a runtime file or a Bash plug-in, the environment actions
-	are run by Bash so that the redefinition applies. The \code{define-var}
-	of \file{\_os\_windows} (\code{;} separator, \code{cygpath -u} for
-	\code{PATH}) is reproduced by the driver, unless \code{cygpath} is a
-	shell function.
+	\code{build-env} and \code{tests-env}) is computed by the driver; each
+	environment action goes through the \code{define\_var} of the Python
+	environment file, if any. With \file{\_os\_windows}
+	(\code{SCBI\_OS\_MODULE=windows}) the \code{define-var} of that file
+	(\code{;} separator, \code{cygpath -u} for \code{PATH}) is reproduced.
 	\item The OS packages (\code{os@-} dependencies, \code{check-pkg})
-	and the \code{auto} variants are checked by the driver for the
-	supported distributions (\code{SCBI\_OS\_NAME} \code{deb},
-	\code{ubt}, \code{cos}, \code{fed}, \code{rhl}, \code{mingw},
-	\code{win}, \code{none}); for another one, or when a
-	\code{check-<os>-pkg} function is redefined, the Bash functions are
-	used. The \code{auto} variants of a plan are checked in plan order (in
-	parallel with the Bash driver: the order of their messages may
-	differ).
-	\item The sources of the modules (VCS checkouts and archives,
-	\code{get-vcs-data}, \code{get-archive}, \code{git-co}...) and the
-	build ids are handled by the driver. When one of these runtime
-	functions, or a command they use (\code{ln}, \code{git}...), is
-	redefined in a runtime file or a plug-in (e.g. by
-	\file{\_os\_windows}), the Bash functions are used instead.
+	and the \code{auto} variants are checked for the supported
+	distributions (\code{SCBI\_OS\_NAME} \code{deb}, \code{ubt},
+	\code{cos}, \code{fed}, \code{rhl}, \code{mingw}, \code{win},
+	\code{none}). The \code{auto} variants of a plan are checked in plan
+	order (in parallel with the Bash driver: the order of their messages
+	may differ).
+	\item The values of the ini files are expanded as \code{eval echo}
+	does in Bash (variables, \code{\textasciitilde{}}, quotes, \code{\$(command)},
+	globs), without a shell.
 	\item The cached build plans are stored in
 	\file{\$SCBI\_BDIR/.cache/plan-<signature>.json}, a different file than
 	the Bash driver one: both drivers can use the same build directory.
-	\item Functions exported in the environment (\code{export -f}) are
-	available to the hooks of Bash plug-ins.
-	\item The steps are run by the driver: the generic steps of the runtime
-	(\code{module-setup}, \code{module-install}...) and the step wrapper
-	(messages, logs) are ported to Python. When one of them is redefined
-	(or a command they use), the Bash functions are used instead.
-	\item The command hooks of YAML plug-ins are run by the driver
+	\item The command hooks are run by the driver
 	(\seeref{yaml-command-language}), with the hook environment described
-	below. A Bash plug-in cannot inherit a YAML plug-in (its hooks would be
-	called from Bash).
+	below; a step is reproduced with \code{scbi replay}.
 \end{itemize}
 
 \subsection{Environment files}
@@ -2289,12 +2284,11 @@ trace (lines starting with \code{\_TRACE:}) unless
 
 The sub-commands are implemented by the Python driver. \code{show},
 \code{shell}, \code{store} and \code{source-archive} have the same options
-and output as with the Bash driver. \code{replay} reruns a step of a YAML
-plug-in (see above). \code{lint} and \code{format} work on
-YAML plug-ins only (\seeref{linter}, \seeref{formatter}). Setting
-\code{SCBI\_BASH\_TOOLS=yes} runs the \file{scbi-<sub-command>} scripts
-installed next to the driver instead (e.g. to compare both, or to check
-Bash plug-ins with the Bash \code{lint} and \code{format}).
+and output as with the Bash driver; \code{shell} spawns the user's
+\code{\$SHELL} in the environment computed by the driver (and runs the
+\code{run} hooks of the module for \ddash{}run without a command).
+\code{replay} reruns a step (see above). \code{lint} and \code{format}
+work on YAML plug-ins only (\seeref{linter}, \seeref{formatter}).
 
 A standalone source archive (\ddash{}standalone) contains the driver as
 installed, the plug-in definitions of the modules (YAML or Bash) and a
@@ -2306,15 +2300,12 @@ Python environment file (\file{.scbi-env-std.py}).
 \begin{description}
 	\item[\code{make test}] The regression testsuite with the Bash driver.
 	\item[\code{SCBI\_IMPL=python ./run testNNN}] (in \file{tests}) A test
-	driver with the Python driver.
+	driver with the Python driver. \file{tests/run} converts the test
+	plug-ins (\file{tests/scripts.d}) to \file{<name>.yaml} files, removed
+	at the end.
 	\item[\code{make test-py}] Each test driver with the Python driver; the
 	ones known to pass are listed in \file{tests/python-pass.txt} and a
 	regression is an error.
-	\item[\code{make test-py-yaml}] The same with the YAML versions of the
-	test plug-ins (\code{SCBI\_PLUGIN\_FORMAT=yaml}: \file{tests/run}
-	converts \file{tests/scripts.d} to \file{<name>.yaml} files, preferred by
-	the driver, removed at the end; the plug-ins which cannot be converted
-	stay Bash ones), against \file{tests/python-yaml-pass.txt}.
 	\item[\code{make unit}, \code{make oracle}] The unit tests of the Python
 	driver and the tests comparing it with the Bash implementation.
 \end{description}
@@ -2323,14 +2314,21 @@ A test driver changing a plug-in calls \code{PLG-UPDATE <name>} after the
 change (the YAML version is generated again) or uses \code{PLG-TOUCH
 <name>} (a change of the file only, both formats).
 
-Some test drivers are specific to one driver, they are skipped with the
-other one: \file{tests/python-only.txt} (features of the Python driver,
-e.g. \code{scbi lint} on YAML plug-ins) and \file{tests/bash-only.txt}
-(Bash tools replaced, e.g. \code{scbi lint} on Bash plug-ins).
+Some test drivers are skipped with one of the drivers:
+\file{tests/python-only.txt} (features of the Python driver, e.g.
+\code{scbi lint} on YAML plug-ins), \file{tests/bash-only.txt} (Bash tools
+replaced, e.g. \code{scbi lint} on Bash plug-ins) and
+\file{tests/python-deferred.txt} (drivers using a test plug-in which does
+not convert to YAML, to be reviewed).
 
 When run by the testsuite (\code{SCBI\_TESTSUITE=yes}) the Python driver
 does not load \file{\$HOME/.scbi} and takes \code{SCBI\_OS\_MODULE} from
 the environment, as the testsuite does with the Bash driver by patching it.
+\file{tests/run} gives it the settings of the test runtime file
+\file{tests/scripts.d/1\_setup} through the environment. With
+\code{SCBI\_OS\_NAME=test} the installed packages are those of
+\code{SCBI\_TEST\_PKGS} (\code{"name=version ..."}), checked as Debian
+packages.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
