@@ -1,8 +1,9 @@
 """``--standalone``: port of ``create-standalone-package`` and
 ``copy-module-src-callback`` (scripts.d/5_tools).
 
-The archive ``$SCBI_TMP/sa-<bdir>.tgz`` holds the driver, the runtime
-files, the plan, the plug-in definitions (any format) and the sources
+The archive ``$SCBI_TMP/sa-<bdir>.tgz`` holds the driver (the Python
+package in ``lib/`` and the ``bin/scbi`` wrapper), the runtime files, the
+plan, the plug-in definitions (any format) and the sources
 (VCS checkouts, archives, patches) of the modules and of their
 dependencies, an environment file (``.scbi-env-std.py``) and a ``build``
 script. The archive is built with this driver: the environment file is
@@ -19,6 +20,12 @@ from pathlib import Path
 from scbi.bashcompat import words
 from scbi.errors import Exit
 from scbi.walker import Walker
+
+#  bin/scbi of the archive: the embedded driver
+WRAPPER = """#!/bin/bash
+D=$(cd "$(dirname "$0")/.." && pwd)
+SCBI_ARGV0="$0" PYTHONPATH=$D/lib${PYTHONPATH:+:$PYTHONPATH} exec python3 -m scbi "$@"
+"""
 
 ENV_FILE = '''"""Environment of the standalone package."""
 
@@ -113,9 +120,14 @@ class Standalone:
             dest.mkdir()
             os.chdir(dest)
             (dest / "build-deps").write_text("apt install")
-            for sub in ("bin", "scripts.d", "builds/.vcs", "builds/.tar", "builds/.patches"):
+            for sub in ("bin", "lib", "scripts.d", "builds/.vcs", "builds/.tar", "builds/.patches"):
                 (dest / sub).mkdir(parents=True, exist_ok=True)
-            _cp(self.get("SCBI_BINARY"), str(dest / "bin"), preserve=False)
+            import scbi
+
+            shutil.copytree(Path(scbi.__file__).parent, dest / "lib" / "scbi",
+                            ignore=shutil.ignore_patterns("__pycache__"))
+            (dest / "bin" / "scbi").write_text(WRAPPER)
+            os.chmod(dest / "bin" / "scbi", 0o755)
             plugins = Path(self.get("SCBI_PLUGINS"))
             for f in sorted(plugins.glob("[0-9]_*")):
                 _cp(str(f), str(dest / "scripts.d"))

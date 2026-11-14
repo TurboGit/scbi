@@ -149,7 +149,7 @@ def loaded(oracle):
 
 @pytest.mark.oracle
 def test_load_module_namespace_oracle(oracle, loaded):
-    assert len(loaded) > 200
+    assert len(loaded) > 150
     for p, bash, reg in loaded:
         assert set(reg.functions) == set(bash), p
     canon = canonical_all(oracle, [reg.functions for _, _, reg in loaded])

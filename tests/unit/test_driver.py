@@ -187,37 +187,23 @@ def test_show_same_as_bash(sandboxes, args):
     assert (rp.returncode, rp.stdout, rp.stderr) == (rb.returncode, rb.stdout, rb.stderr)
 
 
-#  scbi show on the real plug-ins (scripts.d): more hook shapes for
-#  --rdepends, real OS packages for --externals
-#  (--rdepends c-sandbox differs: the Bash driver names the hooks from the
-#  text of the function names, c-aws-tools-tests-depends as [tests])
+#  scbi show on the real plug-ins (scripts.d, YAML only: no Bash version
+#  to compare with), output checked for a few known lines
 REAL_SHOW_CASES = [
-    ["show", "--rdepends", "c-gprbuild"],
-    ["show", "--depends", "c-gps"],
-    ["show", "--externals:only", "--no-version", "c-libadalang"],
+    (["show", "--rdepends", "c-gprbuild"], "c-gnatcoll-core"),
+    (["show", "--depends", "c-gps"], "c-gprbuild"),
+    (["show", "--externals:only", "--no-version", "c-libadalang"], "python3-mako"),
+    (["show", "--rdepends", "c-sandbox"], "c-aws-tools (test)"),
 ]
 
 
-@pytest.fixture(scope="module")
-def real_yaml(tmp_path_factory):
-    """The real plug-ins converted to YAML (for the Python driver)."""
-    import shutil
-
-    from e2e import convert_dir
-
-    d = tmp_path_factory.mktemp("real") / "scripts.d"
-    shutil.copytree(REPO_ROOT / "scripts.d", d, ignore=shutil.ignore_patterns("*.yaml", "*~"))
-    convert_dir(d)
-    return d
-
-
 @pytest.mark.oracle
-@pytest.mark.parametrize("args", REAL_SHOW_CASES, ids=" ".join)
-def test_show_real_plugins_same_as_bash(sandboxes, real_yaml, args):
-    bash, python = sandboxes
-    rb = bash.run([f"--plugins={REPO_ROOT}/scripts.d", *args])
-    rp = python.run([f"--plugins={real_yaml}", *args])
-    assert (rp.returncode, rp.stdout, rp.stderr) == (rb.returncode, rb.stdout, rb.stderr)
+@pytest.mark.parametrize("args, expected", REAL_SHOW_CASES, ids=lambda a: " ".join(a) if isinstance(a, list) else "")
+def test_show_real_plugins(sandboxes, args, expected):
+    _, python = sandboxes
+    rp = python.run([f"--plugins={REPO_ROOT}/scripts.d", *args])
+    assert rp.returncode == 0 and rp.stderr == ""
+    assert expected in rp.stdout
 
 
 SHELL_CASES = [

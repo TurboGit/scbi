@@ -1,8 +1,13 @@
 ######################################################################
 #
-#  Install tools and plug-ins:
+#  Install the driver (Python: needs python3 and python3-yaml) and the
+#  plug-ins:
 #
 #     $ make
+#
+#  Check the plug-ins:
+#
+#     $ make lint
 #
 #  Synchronize the OS packages for supported platforms:
 #
@@ -29,10 +34,15 @@ SHELL=/bin/bash
 
 SCRDIR=$(HOME)/.config/scbi
 INSTALL_DIR=$(HOME)/.local/bin
+LIB_DIR=$(HOME)/.local/lib/scbi
+
+#  The Bash driver and tools (scbi, scbi-*) are kept in the repository for
+#  the Bash testsuite only; they are not installed anymore.
+BASH_TOOLS=scbi-lint scbi-format scbi-store scbi-source-archive scbi-show scbi-shell
 
 #  Get SHA-1 of last commit in core SCBI
-CORE_SHA1=$(shell git log -1 --format="%h" -- scbi scbi-* scripts.d/[0-9]* \
-	scripts.d/_os_* bash_completion.d/*)
+CORE_SHA1=$(shell git log -1 --format="%h" -- src/scbi pyproject.toml scripts.d/[0-9]* \
+	scripts.d/_os_* scripts.d/.pkgs-* bash_completion.d/*)
 CORE_VER=$(shell git describe $(CORE_SHA1))
 
 PLG_SHA1=$(shell git log -1 --format="%h" -- scripts.d/c-* scripts.d/patches)
@@ -41,22 +51,23 @@ PLG_VER=$(shell git describe $(PLG_SHA1))
 install: all
 
 all: clean.install
-	mkdir -p $(INSTALL_DIR) $(HOME)/.bash_completion.d/
-	cat scbi | sed "s/@VERSION@/$(CORE_VER)/" > $(INSTALL_DIR)/scbi
-	cp scbi-lint $(INSTALL_DIR)/scbi-lint
-	cp scbi-format $(INSTALL_DIR)/scbi-format
-	cp scbi-store $(INSTALL_DIR)/scbi-store
-	cp scbi-source-archive $(INSTALL_DIR)/scbi-source-archive
-	cp scbi-show $(INSTALL_DIR)/scbi-show
-	cp scbi-shell $(INSTALL_DIR)/scbi-shell
+	python3 -c "import yaml" 2> /dev/null || \
+		{ echo "PyYAML is needed: apt install python3-yaml (or pip install PyYAML)"; exit 1; }
+	mkdir -p $(INSTALL_DIR) $(LIB_DIR) $(HOME)/.bash_completion.d/
+	#  The Python driver: a copy of the package (version stamped) and a
+	#  wrapper running it
+	rm -fr $(LIB_DIR)/scbi
+	cp -r src/scbi $(LIB_DIR)/scbi
+	find $(LIB_DIR)/scbi -name __pycache__ -prune -exec rm -fr {} +
+	sed -i "s/@VERSION@/$(CORE_VER)/" $(LIB_DIR)/scbi/driver.py
+	printf '%s\n' '#!/bin/bash' \
+		'SCBI_ARGV0="$$0" PYTHONPATH=$(LIB_DIR)$${PYTHONPATH:+:$$PYTHONPATH} exec python3 -m scbi "$$@"' \
+		> $(INSTALL_DIR)/scbi
 	chmod u+x $(INSTALL_DIR)/scbi
-	chmod u+x $(INSTALL_DIR)/scbi-lint
-	chmod u+x $(INSTALL_DIR)/scbi-store
-	chmod u+x $(INSTALL_DIR)/scbi-show
-	chmod u+x $(INSTALL_DIR)/scbi-shell
-	#  Remove old installation if any
+	#  Remove old installation if any (the Bash driver tools)
 	rm -f $(HOME)/bin/scbi
 	rm -f $(HOME)/bin/scbi-lint
+	for t in $(BASH_TOOLS); do rm -f $(INSTALL_DIR)/$$t; done
 	mkdir -p $(SCRDIR)
 	rm -f $(SCRDIR)/*~ $(SCRDIR)/.*~ scripts.d/*~ scripts.d/.*~
 	cp -r scripts.d/* scripts.d/.[a-z]* $(SCRDIR)
@@ -77,7 +88,7 @@ clean.install:
 	rm -f $(HOME)/.bash_completion.d/scbi
 
 lint:
-	./scbi lint --error scripts.d/c-*
+	PYTHONPATH=src python3 -m scbi lint --error scripts.d/c-*.yaml
 	echo No problem detected
 
 test:

@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from corpus import plugin_files
+from oracle import REPO_ROOT
 from scbi.plugin import yamlfmt
 from scbi.plugin.catalog import spec, step_names
 from scbi.plugin.expr import ExprError, evaluate, parse
@@ -160,7 +161,7 @@ def convertible() -> list[Path]:
 
 
 def test_most_plugins_convertible():
-    assert len(convertible()) > 250
+    assert len(convertible()) > 140
 
 
 @pytest.mark.parametrize("path", PLUGINS, ids=lambda p: f"{p.parent.parent.name}/{p.name}")
@@ -268,7 +269,7 @@ def test_static_values_oracle(oracle):
             lines = text.split("\n")[:-1] if text else []
             assert static[name] == lines, (path, name)
             checked += 1
-    assert checked > 500
+    assert checked > 150
 
 
 def test_unknown_builtin_rejected(tmp_path):
@@ -347,10 +348,9 @@ def test_variants_yaml(tmp_path):
 
 
 def test_composite_variant_converted():
-    res = lifted(next(p for p in PLUGINS if p.name == "c-darktable"))
-    assert res.issues == []
-    assert res.plugin.variants == {"all": ("ai", "hdr", "jxl")}
-    assert set(res.composite) == {"c-darktable-all-depends", "c-darktable-all-config-options"}
+    #  c-darktable (converted from Bash, its all variant was a composite)
+    pdef = yamlfmt.load(REPO_ROOT / "scripts.d" / "c-darktable.yaml")
+    assert pdef.variants == {"all": ("ai", "hdr", "jxl")}
 
 
 def test_composite_not_equivalent_reported(tmp_path):
@@ -378,3 +378,30 @@ def test_command_bodies_parsed_with_lines(tmp_path):
     p.write_text("plugin: p\nbuild: |\n  make\n  if cross\n    x\n")
     with pytest.raises(yamlfmt.FormatError, match=r"build: line 4: .*':'"):
         yamlfmt.load(p)
+
+
+# ------------------------------------------------- plug-ins of scripts.d
+
+
+def _repository_plugins():
+    from corpus import yaml_plugin_files
+
+    return yaml_plugin_files()
+
+
+@pytest.mark.parametrize("path", _repository_plugins(), ids=lambda p: p.name)
+def test_repository_plugin_valid(path):
+    """Each YAML plug-in of scripts.d loads, has no lint error and is in
+    the canonical form (scbi format)."""
+    from scbi.plugin.lint import lint_text
+    from scbi.plugin.yamlwrite import format_text
+
+    yamlfmt.load(path)
+    text = path.read_text()
+    module = path.name[:-len(".yaml")]
+    assert [i for i in lint_text(module, text) if i.level == "error"] == []
+    assert format_text(module, text) == text
+
+
+def test_repository_plugins_count():
+    assert len(_repository_plugins()) > 100

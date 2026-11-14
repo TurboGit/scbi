@@ -124,12 +124,15 @@ _scbi_env()
 {
     local IFS=$'\n'
 
-    for r in $(ls $HOME/.config/scbi/.env-* 2>/dev/null); do
-        printf %s$'\n' "${r#$HOME/.config/scbi/.env-} "
+    #  the Python environment files (.env-<name>.py)
+    for r in $(ls $HOME/.config/scbi/.env-*.py 2>/dev/null); do
+        r=${r#$HOME/.config/scbi/.env-}
+        printf %s$'\n' "${r%.py} "
     done
 
-    for r in $(ls $PWD/.env-* 2>/dev/null); do
-        printf %s$'\n' "${r#$PWD/.env-} "
+    for r in $(ls $PWD/.env-*.py 2>/dev/null); do
+        r=${r#$PWD/.env-}
+        printf %s$'\n' "${r%.py} "
     done
 }
 
@@ -150,8 +153,11 @@ _scbi_feature()
 {
     local IFS=$'\n'
 
-    for r in $(grep -s '$(is-enabled' $HOME/.config/scbi/* |
-                   sed 's/.*is-enabled \([a-zA-Z\-\_]*\).*/--enable-\1/g');
+    #  $(is-enabled F ...) values and enabled(F) guards of the plug-ins
+    for r in $( (grep -sho 'is-enabled [a-zA-Z_-]*' $HOME/.config/scbi/*.yaml |
+                     sed 's/is-enabled /--enable-/';
+                 grep -sho 'enabled([a-zA-Z_-]*)' $HOME/.config/scbi/*.yaml |
+                     sed 's/enabled(\(.*\))/--enable-\1/') | sort -u);
     do
         printf %s$'\n' "$r "
     done
@@ -177,11 +183,14 @@ _scbi_variants()
     # Remove current variants from the completing list
     [[ -z $cur ]] && cur="@noname@" || cur="${cur//./|}"
 
-    for v in $(grep "function $mod-*" ~/.config/scbi/$mod | \
-                   sed "s/function $mod-//g;s/()//g" | \
-                   sed -r "s/${_SCBI_HOOKS}//g" | \
-                   tr '-' '\n' | sort | uniq | \
-                   grep -v common | grep -v -E "$cur");
+    #  the qualifiers of the hooks of the YAML plug-in (keys indented by
+    #  two spaces), except the reserved ones and the plug-in variables
+    for v in $(awk '/^[^ #-]/ { top = $1 }
+                    /^  [A-Za-z0-9_.+@-]+:/ && top !~ /^(vars|functions|plugin|inherit|vcs|archive):/ {
+                        k = $1; sub(":.*", "", k); print k }' \
+                   ~/.config/scbi/$mod.yaml 2>/dev/null | \
+                   grep -v -E "^(_|common|cross|default)$" | sort -u | \
+                   grep -v -E "$cur");
     do
         printf %s$'\n' $v
     done
@@ -351,7 +360,7 @@ _scbi()
             ;;
         */*)
             local mod=${cur%/*}
-            if [[ -f $HOME/.config/scbi/$mod ]]; then
+            if [[ -f $HOME/.config/scbi/$mod.yaml ]]; then
                 local curdef=${cur##*/}
                 local curv=""
                 local ccurv=""
@@ -388,7 +397,7 @@ _scbi()
                     return 0
                     ;;
                 *)
-                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*) source-archive lint format shell show store replay"
+                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*.yaml | sed 's/\.yaml$//') source-archive lint format shell show store replay"
                     ;;
             esac
     esac

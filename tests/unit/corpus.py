@@ -9,6 +9,8 @@ from pathlib import Path
 from oracle import REPO_ROOT
 
 PLUGIN_DIRS = [REPO_ROOT / "scripts.d", REPO_ROOT / "tests" / "scripts.d"]
+#  The Bash plug-ins (the plug-ins of scripts.d are YAML ones)
+BASH_PLUGIN_DIRS = [REPO_ROOT / "tests" / "scripts.d"]
 
 
 @cache
@@ -21,13 +23,20 @@ def plan_files() -> list[Path]:
 
 @cache
 def plugin_files() -> list[Path]:
-    """Plug-in files: not runtime files ([0-9]*, _os_*), dot or backup files."""
+    """Bash plug-in files (of the testsuite): not runtime files ([0-9]*,
+    _os_*), dot, backup or YAML files."""
     files: list[Path] = []
-    for d in PLUGIN_DIRS:
+    for d in BASH_PLUGIN_DIRS:
         for p in sorted(d.iterdir()):
-            if p.is_file() and not re.match(r"[0-9._]", p.name) and not p.name.endswith("~"):
+            if p.is_file() and not re.match(r"[0-9._]", p.name) and not p.name.endswith(("~", ".yaml")):
                 files.append(p)
     return files
+
+
+@cache
+def yaml_plugin_files() -> list[Path]:
+    """The YAML plug-ins of the repository (scripts.d)."""
+    return sorted((REPO_ROOT / "scripts.d").glob("c-*.yaml"))
 
 
 @cache

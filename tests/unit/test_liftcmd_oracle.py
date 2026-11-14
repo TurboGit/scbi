@@ -238,7 +238,7 @@ def unconverted_calls(reg, plugin, text):
 
 
 CASES = []
-for d in (REPO_ROOT / "scripts.d", REPO_ROOT / "tests" / "scripts.d"):
+for d in (REPO_ROOT / "tests" / "scripts.d",):
     try:
         _reg, _hooks = hooks_of(d)
     except Exception:  # noqa: BLE001

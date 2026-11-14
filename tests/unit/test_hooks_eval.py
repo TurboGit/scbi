@@ -241,7 +241,7 @@ fi
 def test_converted_hooks_oracle(oracle, tmp_path):
     prefix = fake_prefix(tmp_path)
     cases = hook_cases()
-    assert len(cases) > 700
+    assert len(cases) > 250
     outputs = oracle.batch(
         TEMPLATE,
         [(str(p.parent), p.name, fname, "value" if isinstance(b, Values) else "env",

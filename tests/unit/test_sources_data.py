@@ -73,31 +73,6 @@ def test_data_test_plugins(sandboxes):
 
 
 @pytest.mark.oracle
-def test_data_real_plugins(sandboxes, tmp_path):
-    import shutil
-
-    from e2e import convert_dir
-
-    plugins = REPO_ROOT / "scripts.d"
-    converted = tmp_path / "scripts.d"
-    shutil.copytree(plugins, converted, ignore=shutil.ignore_patterns("*.yaml", "*~"))
-    convert_dir(converted)
-    bash, python = sandboxes
-    #  the settings of the real 1_setup (not those of the testsuite)
-    root = f"{python.root}/home/dev"
-    env = {"SCBI_ROOT": root, "SCBI_ARCHIVES": "", "SCBI_PATCH": "",
-           "SCBI_GIT_REPO": f"{root}/repositories/git", "SCBI_SVN_REPO": f"{root}/repositories/svn",
-           "SCBI_HG_REPO": f"{root}/repositories/hg"}
-    for chunk in chunks(plugin_variants(plugins, converted)):
-        args = ["probe", *commands(chunk)]
-        rb, rp = bash.run([f"--plugins={plugins}", *args]), python.run([f"--plugins={converted}", *args], env)
-        lb, lp = rb.stdout.splitlines(), rp.stdout.splitlines()
-        for i, (x, y) in enumerate(zip(lb, lp)):
-            assert y == x.replace(str(plugins), str(converted)), f"line {i}"
-        assert (rp.returncode, len(lp)) == (rb.returncode, len(lb))
-
-
-@pytest.mark.oracle
 def test_data_variant_selection(sandboxes):
     plugins = sandboxes[0].root / "scripts.d"
     pairs = plugin_variants(plugins, sandboxes[1].root / "scripts.d")

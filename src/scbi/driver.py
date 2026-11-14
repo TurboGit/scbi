@@ -723,7 +723,9 @@ class Driver:
         self.setup_colors()
 
         plugins = self.get("SCBI_PLUGINS")
-        if not os.path.isdir(plugins) or not list(Path(plugins).glob("[0-9]*")):
+        #  a plug-ins directory: runtime files or plug-in definitions
+        if not os.path.isdir(plugins) or not (any(Path(plugins).glob("[0-9]*"))
+                                               or any(formats.format_of(p) for p in Path(plugins).iterdir())):
             self.set("SCBI_PLUGINS", f"{self.get('HOME')}/.config/scbi", export=True)
         if not os.path.isdir(self.get("SCBI_PLUGINS")):
             self.echo(f"{self.argv0}: cannot find module definition files")

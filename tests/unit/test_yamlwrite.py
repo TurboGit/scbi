@@ -28,7 +28,7 @@ def corpus():
 
 
 def test_converted_plugins_canonical_and_stable(corpus):
-    assert len(corpus) > 250
+    assert len(corpus) > 140
     for name, text in corpus:
         #  the converter writes the canonical form
         assert format_text(name, text) == text, name

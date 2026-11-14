@@ -77,8 +77,7 @@ def test_convert(tmp_path):
     assert [i.split(":")[0] for i in issues] == ["line 1", "line 5", "line 6"]
 
 
-def test_repository_env_converts():
+def test_repository_env_runs():
     root = Path(__file__).resolve().parents[2]
-    text, issues = envconvert.convert_text((root / "scripts.d" / ".env").read_text())
-    assert issues == []
-    assert (root / "scripts.d" / ".env.py").read_text().split("\n")[1:] == text.split("\n")[1:]
+    env = envpy.run(root / "scripts.d" / ".env.py", {}.get)
+    assert env.settings == {"SCBI_PLAN": "default", "SCBI_CLANG_VERSION": "16", "SCBI_GTK_VERSION": "3.0"}
