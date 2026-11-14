@@ -17,8 +17,10 @@ xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : End Building test37 [default] (n/a)
 EOF
 
-OK -f .root/builds/test37/build/logs/test37
-OK -f .root/builds/test37/build/logs/test17
+#  the plug-in files (YAML ones with the Python driver)
+[[ $SCBI_IMPL == python ]] && PSFX=.yaml || PSFX=
+OK -f .root/builds/test37/build/logs/test37$PSFX
+OK -f .root/builds/test37/build/logs/test17$PSFX
 
 RUNS cat .root/builds/.logs/*test37*config.log
 

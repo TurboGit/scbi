@@ -121,6 +121,13 @@ case $SCBI_IMPL in
         # rsync checksum mode, sync messages logged with ilog) when
         # SCBI_TESTSUITE is set.
         export SCBI_TESTSUITE=yes
+        # The runtime files are not read by the Python driver: the
+        # settings of the test runtime file scripts.d/1_setup
+        export SCBI_ROOT=$PWD/.root
+        export SCBI_ARCHIVES=$SCBI_ROOT/.archives
+        export SCBI_PATCH=$SCBI_ROOT/.patches
+        export SCBI_GIT_REPO=$SCBI_ROOT/git
+        export SCBI_SVN_REPO= SCBI_HG_REPO= TODAY=
         cat > scbi <<EOF
 #!/bin/bash
 SCBI_ARGV0="\$0" PYTHONPATH=$PWD/../src\${PYTHONPATH:+:\$PYTHONPATH} exec python3 -m scbi "\$@"
@@ -133,18 +140,15 @@ EOF
         ;;
 esac
 
-# Plug-ins format (Python driver only):
-#   SCBI_PLUGIN_FORMAT=legacy (default) the Bash plug-ins of scripts.d
-#   SCBI_PLUGIN_FORMAT=yaml   their YAML versions, generated here with the
-#                             converter (scripts.d/<name>.yaml, preferred
-#                             by the driver); the plug-ins which cannot be
-#                             converted stay Bash ones.
+# Plug-ins format: the Bash driver reads the Bash plug-ins of scripts.d,
+# the Python driver their YAML versions, generated here with the converter
+# (scripts.d/<name>.yaml). The plug-ins which cannot be converted stay
+# Bash ones: the drivers using them are listed in python-deferred.txt.
 
-SCBI_PLUGIN_FORMAT=${SCBI_PLUGIN_FORMAT:-legacy}
-
-if [[ $SCBI_PLUGIN_FORMAT == yaml && $SCBI_IMPL != python ]]; then
-    echo "SCBI_PLUGIN_FORMAT=yaml needs SCBI_IMPL=python"
-    exit 1
+if [[ $SCBI_IMPL == python ]]; then
+    SCBI_PLUGIN_FORMAT=yaml
+else
+    SCBI_PLUGIN_FORMAT=legacy
 fi
 
 rm -f scripts.d/*.yaml
@@ -229,17 +233,19 @@ mkdir -p $PWD/logs
 [[ $SCBI_PLUGIN_FORMAT == yaml ]] &&
     trap 'rm -f $ROOTDIR/scripts.d/*.yaml; _osht_cleanup' INT TERM EXIT
 
-#  Drivers specific to one implementation: skipped with the other one
+#  Drivers specific to one implementation: skipped with the other one;
+#  with the Python driver, the drivers needing a test plug-in that does not
+#  convert to YAML are skipped too (python-deferred.txt)
 case $SCBI_IMPL in
-    python) ONLY_OTHER=bash-only.txt ;;
-    *)      ONLY_OTHER=python-only.txt ;;
+    python) SKIP_LISTS="bash-only.txt python-deferred.txt" ;;
+    *)      SKIP_LISTS=python-only.txt ;;
 esac
 
 cd drivers
 if [ -z "$1" ]; then
     TESTS=()
     for t in test???; do
-        grep -q "^$t\b" ../$ONLY_OTHER || TESTS+=( $t )
+        (cd .. && grep -q "^$t\b" $SKIP_LISTS) || TESTS+=( $t )
     done
 else
     TESTS=( $* )
@@ -248,7 +254,7 @@ cd ..
 
 #  The plan is only known when running the whole testsuite
 case $SCBI_IMPL in
-    python) [ -z "$1" ] && PLAN 1384 ;;
+    python) [ -z "$1" ] && PLAN 1197 ;;
     *)      [ -z "$1" ] && PLAN 1378 ;;
 esac
 

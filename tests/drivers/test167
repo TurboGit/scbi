@@ -1,9 +1,13 @@
+#  utp3-test-depends is the variant "test" of the depends hook: the Bash
+#  driver names it from the text of the function name, (test)
+[[ $SCBI_IMPL == python ]] && UTP3="utp3 [test]" || UTP3="utp3 (test)"
+
 RUNS ./scbi show --rdepends usethisplg
 
 CLEAN-DIFF <<EOF
 utp1
 utp2 (build)
-utp3 (test)
+$UTP3
 utp4
 utp5 [utp]
 utp6 (modules)

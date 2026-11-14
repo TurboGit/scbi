@@ -1,0 +1,28 @@
+# Drivers skipped with the Python driver (SCBI_IMPL=python): they need a
+# test plug-in that the converter cannot turn into YAML (the plug-in is
+# named). To be reviewed one by one after the migration to Python.
+test014  supermod (inherited by i-supermod, which does not convert)
+test015  supermod
+test019  test19 (inherited by iset-test19, which does not convert)
+test026  var
+test041  natv
+test042  varhook
+test048  dephook
+test054  mspace
+test087  supermod
+test105  supermod
+test111  invset-test19 inv-test19 iset-test19
+test112  iset-supermod i-supermod
+test114  osenv (and sources the Bash build.cmd)
+test115  metadeps
+test140  e-main
+test144  dyn-dependency
+test151  testenv
+test154  supermod
+test155  supermod
+test156  supermod
+test158  supermod
+test159  supermod
+test160  supermod
+test168  inh-app-hooks inh-app-hooks2
+test173  m-lib1 (define-var redefined in a hook)

@@ -9,12 +9,11 @@
 #    - a newly passing driver is appended to python-pass.txt
 #      (unless --no-update is given)
 #
-#  usage: ratchet [--no-update] [--impl=bash|python] [--format=legacy|yaml]
-#                 [testNNN...]
+#  usage: ratchet [--no-update] [--impl=bash|python] [testNNN...]
 #
-#  With --format=yaml the plug-ins are the YAML versions generated from
-#  tests/scripts.d (SCBI_PLUGIN_FORMAT=yaml), compared with
-#  python-yaml-pass.txt.
+#  The Python driver reads the YAML versions of the test plug-ins generated
+#  by ./run. The drivers listed in bash-only.txt and python-deferred.txt
+#  (python-only.txt with --impl=bash) are skipped.
 #
 #  Logs of each driver are kept in .ratchet/<test>.log
 #
@@ -25,15 +24,13 @@ PASS_FILE=python-pass.txt
 LOG_DIR=.ratchet
 UPDATE=yes
 IMPL=python
-FORMAT=legacy
 TESTS=()
 
 for arg in "$@"; do
     case $arg in
         --no-update) UPDATE=no ;;
         --impl=*)    IMPL=${arg#--impl=} ;;
-        --format=*)  FORMAT=${arg#--format=} ;;
-        -*)          echo "usage: $0 [--no-update] [--impl=bash|python] [--format=legacy|yaml] [testNNN...]"
+        -*)          echo "usage: $0 [--no-update] [--impl=bash|python] [testNNN...]"
                      exit 2 ;;
         *)           TESTS+=( "$arg" ) ;;
     esac
@@ -45,18 +42,18 @@ if [[ ${#TESTS[@]} == 0 ]]; then
 fi
 
 #  Drivers specific to the other implementation are skipped
-[[ $IMPL == python ]] && ONLY_OTHER=bash-only.txt || ONLY_OTHER=python-only.txt
+[[ $IMPL == python ]] && SKIP_LISTS="bash-only.txt python-deferred.txt" || SKIP_LISTS=python-only.txt
 SELECTED=()
 for t in "${TESTS[@]}"; do
-    if grep -q "^$t\b" $ONLY_OTHER; then
-        echo "skip  $t  (see $ONLY_OTHER)"
+    list=$(grep -l "^$t\b" $SKIP_LISTS)
+    if [[ -n $list ]]; then
+        echo "skip  $t  (see $list)"
     else
         SELECTED+=( $t )
     fi
 done
 TESTS=( "${SELECTED[@]}" )
 
-[[ $FORMAT == yaml ]] && PASS_FILE=python-yaml-pass.txt
 touch $PASS_FILE
 rm -fr $LOG_DIR
 mkdir -p $LOG_DIR
@@ -67,7 +64,7 @@ REGRESSIONS=()
 NEW=()
 
 for t in "${TESTS[@]}"; do
-    SCBI_IMPL=$IMPL SCBI_PLUGIN_FORMAT=$FORMAT ./run $t > $LOG_DIR/$t.log 2>&1
+    SCBI_IMPL=$IMPL ./run $t > $LOG_DIR/$t.log 2>&1
     if [[ $? == 0 ]]; then
         PASSED+=( $t )
         grep -qx $t $PASS_FILE || NEW+=( $t )
@@ -84,7 +81,7 @@ for t in "${TESTS[@]}"; do
 done
 
 echo
-echo "impl=$IMPL format=$FORMAT passed=${#PASSED[@]} failed=${#FAILED[@]}" \
+echo "impl=$IMPL passed=${#PASSED[@]} failed=${#FAILED[@]}" \
      "new=${#NEW[@]} regressions=${#REGRESSIONS[@]}"
 
 if [[ $IMPL == python ]] && [[ $UPDATE == yes ]] && [[ ${#NEW[@]} -gt 0 ]]; then
