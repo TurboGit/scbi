@@ -13,9 +13,13 @@ Little-CMS is an Open Source Color Management System project
 
 ## Install scbi
 
-Checkout this repository and do:
+The driver is written in Python, it needs python3 and its YAML module
+(python3-yaml on Debian). Checkout this repository and do:
 
       $ make
+
+The command scbi is installed into $HOME/.local/bin and the plug-ins
+into $HOME/.config/scbi.
 
 
 ## Check scbi status
@@ -45,23 +49,21 @@ By default the scbi build directories can be displayed with --stat option (outpu
 
 0. The scbi build module name will be lcms
 
-   Open your favorite editor to create lcms file. This file must be placed into
-   $HOME/.config/scbi for it to be found by scbi driver.
+   Open your favorite editor to create the lcms.yaml file. This file must
+   be placed into $HOME/.config/scbi for it to be found by scbi driver.
 
-   All (bash) functions in this file will be prefixed by "lcms-".
+   Each hook is a key of this YAML file.
 
 1. Defining the VCS
 
-   In this function we define the protocol and the location of the repository.
+   Here we define the protocol and the location of the repository.
 
       ```
-      function lcms-vcs()
-      {
-             echo default
-             echo none
-             echo git
-             echo http://github.com/mm2/Little-CMS
-      }
+      vcs:
+        proxy: default
+        options: none
+        protocol: git
+        url: http://github.com/mm2/Little-CMS
       ```
 
 2. This project is based autotools and so using configure. The build
@@ -69,51 +71,39 @@ By default the scbi build directories can be displayed with --stat option (outpu
    build, let's declare this:
 
       ```
-      function lcms-out-of-tree()
-      {
-             echo true
-      }
+      out-of-tree: true
       ```
 
-   Note that this routine is optional, and when not defined it means
+   Note that this hook is optional, and when not defined it means
    that we are building out of the source directory.
 
 3. Then we need to configure the project:
 
       ```
-      function lcms-config()
-      {
-          local PREFIX=$1
-          local TARGET=$2
-          local VARIANT=$3
-
-          ../src/configure --prefix=$PREFIX
-      }
+      config: ../src/configure --prefix=$PREFIX
       ```
 
-   Note that the "config" (but also build and install functions below)
+   Note that the "config" (but also build and install hooks below)
    are called in the proper location. That is, it is never needed to
    change directory. So above we are in the build directory and the
    source directory is always on the same level and named src. This is
    true whether we are building out-of-tree or not.
 
-   Note also that hook functions are passed PREFIX, TARGET &
+   Note also that the hooks get the variables PREFIX, TARGET &
    VARIANT. The PREFIX is not the final install location. It is the
    location of the module's install directory in the sandbox. The
    final installation location is given by the hook "prefix" (see
    below).
 
+   The commands of a hook are run by scbi itself (no shell): one
+   command per line, with variables, quotes, `&&`, pipes and
+   redirections as in a shell (see the "Command language" section of
+   the documentation, doc/scbi.tex).
+
 4. Now it is time to build the project:
 
       ```
-      function lcms-build()
-      {
-          local PREFIX=$1
-          local TARGET=$2
-          local VARIANT=$3
-
-          make -j4
-      }
+      build: make -j$SCBI_JOBS
       ```
 
    Again, we are placed into the right directory, so we just need to call make.
@@ -121,27 +111,17 @@ By default the scbi build directories can be displayed with --stat option (outpu
 5. Let's install the project:
 
       ```
-      function lcms-install()
-      {
-          local PREFIX=$1
-          local TARGET=$2
-          local VARIANT=$3
-
-          make install
-      }
+      install: make install
       ```
 
    Note, that this will install into the module's install directory.
 
 6. This is optional, but if we want to have the final installation
    done in a specific location (default in /usr for Little-CMS) we can
-   specify it with the prefix function:
+   specify it with the prefix hook:
 
       ```
-      function lcms-prefix()
-      {
-          echo /opt/lcms
-      }
+      prefix: /opt/lcms
       ```
 
    Note that this is equivalent to calling scbi with --prefix parameter:
@@ -150,6 +130,10 @@ By default the scbi build directories can be displayed with --stat option (outpu
 
    If the final install prefix is not writable by user, a sudo
    password will be asked.
+
+   The plug-in can be checked with:
+
+      `$ scbi lint lcms`
 
 
 ## Building lcms
@@ -188,16 +172,12 @@ sources have not changed:
 
 Now, we'd want to create a fast release version of the code. The
 default is to compile with "-g -O2". We want to add a release variant
-to build with just "-O3" at configuration step:
+to build with just "-O3" at configuration step, the config hook
+becomes a mapping with the plain hook ("_") and the release variant:
 
-      function lcms-release-config()
-      {
-          local PREFIX=$1
-          local TARGET=$2
-          local VARIANT=$3
-
-          CFLAGS="-O3" ../src/configure --prefix=$PREFIX
-      }
+      config:
+        _: ../src/configure --prefix=$PREFIX
+        release: CFLAGS="-O3" ../src/configure --prefix=$PREFIX
 
 And then build the release version:
 
@@ -215,7 +195,7 @@ And then build the release version:
       2019/12/03 13:18:35 : copy install into ../opt/lcms
       2019/12/03 13:18:35 : End building lcms [release] (master)
 
-Note that the variant release-config is properly called above.
+Note that the release variant of the config hook is properly called above.
 
 
 ## Building v2.9
@@ -269,13 +249,13 @@ checkouts. The default as listed above is:
 
       user's Git repository : $HOME/dev/repositories/git
 
-The default configuration file can be found in:
+The default configuration file (a Python file) can be found in:
 
-      $ vi $HOME/.config/scbi/.env
+      $ vi $HOME/.config/scbi/.env.py
 
-So we need to set GIT_REPO to point to $HOME/dev.
+So we need to set SCBI_GIT_REPO to point to $HOME/dev.
 
-      GIT_REPO=$HOME/dev
+      SCBI_GIT_REPO = getvar("HOME") + "/dev"
 
 We can now start hacking the project from our local checkout:
 

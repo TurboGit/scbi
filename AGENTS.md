@@ -1,26 +1,29 @@
 # AGENTS.md — SCBI
 
-SCBI (Source Code Build Infrastructure) is a Bash tool that builds software
-from sources (VCS checkouts or archives), handles dependencies, variants,
-versions, build plans and developers' local checkouts. Everything is plain
-Bash; there is no compile step.
+SCBI (Source Code Build Infrastructure) builds software from sources (VCS
+checkouts or archives), handles dependencies, variants, versions, build
+plans and developers' local checkouts. The driver is Python (`src/scbi`,
+python3 + PyYAML, no compile step); the plug-ins are YAML files. The
+former Bash driver (`scbi`, `scbi-*`, runtime `scripts.d/[0-9]*`) is kept
+for its testsuite, which is also the reference of the Python driver.
 
 ## Repository layout
 
 | Path | What it is |
 |------|------------|
-| `scbi` | Main driver: option parsing, ini/env/plan loading, dependency resolution, per-module step orchestration (`handle-module`, `handle-depends`, `handle-sources`, ...). |
-| `scbi-lint`, `scbi-format`, `scbi-show`, `scbi-shell`, `scbi-store`, `scbi-source-archive`, `scbi-patch` | Sub-command drivers. They are not run directly: `scbi <subcmd> ...` sources `scbi-<subcmd>` with `subcommand` as first argument after setting up the generic environment (`setup-generic-tool-env`). |
-| `scripts.d/[0-9]_*` | **Runtime** (core library), sourced in numeric order by the driver at start-up. |
-| `scripts.d/_os_<name>` | OS-specific runtime overrides (e.g. `_os_windows`), sourced after the numbered runtime files. |
-| `scripts.d/c-*` (and every other non-dot file) | **Plug-ins**: one Bash file per buildable project/module. |
+| `src/scbi/` | **The driver** (Python package, `python3 -m scbi`), installed by `make` as `~/.local/bin/scbi`. See *Python driver* below. |
+| `scbi` | Former Bash driver: kept for the Bash testsuite (reference); not installed. |
+| `scbi-lint`, `scbi-format`, `scbi-show`, `scbi-shell`, `scbi-store`, `scbi-source-archive`, `scbi-patch` | Sub-commands of the Bash driver (sourced by `scbi <subcmd>`); the Python driver has its own (`src/scbi/tools/`). |
+| `scripts.d/[0-9]_*` | **Runtime** of the Bash driver (copied by `tests/run`); the Python driver does not read them (`src/scbi/setup.py` computes their settings). |
+| `scripts.d/_os_<name>` | OS-specific runtime overrides of the Bash driver (e.g. `_os_windows`). |
+| `scripts.d/c-*.yaml` | **Plug-ins**: one YAML file per buildable project/module. |
 | `scripts.d/patches/` | Patches referenced by plug-ins' `patches` hooks. |
-| `scripts.d/.env`, `.plan-default`, `.pkgs-<distrib>` | Default environment, default build plan, mapping of `os@-<name>` dependencies to distribution packages. |
+| `scripts.d/.env.py`, `.plan-default`, `.pkgs-<distrib>` | Default environment (Python), default build plan, mapping of `os@-<name>` dependencies to distribution packages. |
 | `bash_completion.d/scbi` | Bash completion. |
 | `doc/scbi.tex` | Reference manual (LaTeX). The authoritative spec for hooks, options, env variables, plans and ini files. |
 | `tests/` | Regression testsuite (see below). |
 
-### Runtime files (`scripts.d/[0-9]*`)
+### Runtime files of the Bash driver (`scripts.d/[0-9]*`)
 
 - `0_runtime` — core helpers: `fn-exists`, `copy-function`, `get-hook-value`, `is-hook-true`, `get-config-options`, `is-enabled`, ...
 - `1_setup` — default values for `SCBI_ROOT`, `SCBI_BDIR`, `SCBI_PREFIX`, `SCBI_*_REPO`, archives/patches/logs dirs (all overridable via env).
@@ -40,57 +43,66 @@ helpers with `_internal_`.
 
 ## Plug-ins
 
-A plug-in file `scripts.d/<module>` defines Bash functions (hooks) prefixed
-with the module name, all optional:
+A plug-in file `scripts.d/<module>.yaml` maps hook names to their
+definition, all optional (format: `doc/scbi.tex`, *Creating new
+plug-ins → Plug-in format*):
 
-```bash
-function c-lcms2-vcs()      { echo default; echo none; echo git; echo http://github.com/mm2/Little-CMS; }
-function c-lcms2-config()   { local PREFIX=$1 TARGET=$2 VARIANT=$3; ../src/configure --prefix=$PREFIX; }
-function c-lcms2-build()    { local PREFIX=$1 TARGET=$2 VARIANT=$3; make -j$SCBI_JOBS; }
-function c-lcms2-install()  { local PREFIX=$1 TARGET=$2 VARIANT=$3; make install; }
+```yaml
+plugin: c-lcms2
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: http://github.com/mm2/Little-CMS
+config: ../src/configure --prefix=$PREFIX
+build: make -j$SCBI_JOBS
+install: make install
 ```
 
-- Hook name: `<module>[-<variant>|-common]-<hook>`, e.g. `vcs`, `archive`,
-  `patches`, `depends`, `build-depends`, `tests-depends`, `env`, `build-env`,
-  `external-env`, `setup`, `out-of-tree`, `config`, `config-options`,
-  `build`, `install`, `wrapup`, `prefix`, `tests`, `run`, `version`,
-  `pre-<step>`/`post-<step>`; meta-modules use `modules`, `aggregate`,
-  `propagate-version`, `plan`. See `doc/scbi.tex` section *Creating new
-  plug-ins → Hooks* for parameters and return values before adding or
-  changing one.
-- Hooks receive `PREFIX TARGET VARIANT` (the `archive` hook gets
-  `VERSION`). Declare them as `local PREFIX=$1`, `local TARGET=$2`,
-  `local VARIANT=$3` in new hooks even if unused: `scbi-lint` warns
-  otherwise (many existing plug-ins still trigger these warnings).
+- Hooks: `vcs`, `archive`, `patches`, `depends`, `build-depends`,
+  `tests-depends`, `env`, `build-env`, `tests-env`, `external-env`,
+  `setup`, `out-of-tree`, `config`, `config-options`, `build`, `install`,
+  `wrapup`, `prefix`, `tests`, `run`, `version`, `pre-<step>`/`post-<step>`;
+  meta-modules use `modules`, `aggregate`, `propagate-version`, `plan`.
+  A hook value is its body or a mapping of qualifiers (`_`, `common`,
+  `default`, a variant, `cross:`). See *Hooks* in the doc for parameters
+  and values before adding or changing one.
+- Command hooks are in the command language (one command per line, run by
+  the driver, no shell); value hooks are lists; env hooks are lists of
+  actions (`add-to-var`, `set-var`...). Items can be guarded with
+  `if <condition>:`.
 - Hooks run already `cd`'d into the right place; the sources are always at
   `../src`. Do not `cd` around in hooks.
-- Value hooks return data by `echo`ing one value per line.
 - In-repo plug-ins are named `c-<project>`; new ones should follow that.
-- Plug-ins may inherit/reuse others' hooks (see *Inheritance* in the doc).
+- Plug-ins may inherit others' hooks (`inherit:`, see *Inheritance*).
 
-After editing plug-ins, run the linter:
+After editing plug-ins, run the linter (and the formatter for the
+canonical form):
 
 ```bash
-make lint                       # scbi lint --error scripts.d/c-*
-./scbi lint --plugins=$PWD/scripts.d c-foo   # a single plug-in
+make lint                                        # scbi lint --error scripts.d/c-*.yaml
+PYTHONPATH=src python3 -m scbi format --replace scripts.d/c-foo.yaml
 ```
 
 ## Building, installing, testing
 
 ```bash
-make              # install drivers to ~/.local/bin and runtime+plug-ins to ~/.config/scbi
+make              # install the driver (~/.local/lib/scbi + ~/.local/bin/scbi), plug-ins to ~/.config/scbi
 make test         # full regression testsuite (tests/run)
 make doc          # build doc/scbi.pdf (latex, bibtex, makeindex, pdflatex)
 make sync-os-deps # propagate/sort .pkgs-* files across distributions
 ```
 
 `make` overwrites files in `~/.config/scbi` (tracked in
-`~/.config/scbi/.core.plugins`) and `~/.local/bin`; do not run it unless the
-user asks. Note that `scbi-patch` is not installed by `make`.
+`~/.config/scbi/.core.plugins`), `~/.local/lib/scbi` and `~/.local/bin`
+(it removes the old Bash `scbi-*` tools there); do not run it unless the
+user asks (`make HOME=<tmp>` installs into a temporary directory).
 
 ### Testsuite
 
-- Run all: `cd tests && ./run`. Run some: `cd tests && ./run test001 test092`.
+- Run all with the Bash driver: `cd tests && ./run`. Run some: `cd tests &&
+  ./run test001 test092`. The test plug-ins (`tests/scripts.d`) are Bash
+  ones, converted to YAML at test time for the Python driver.
 - `tests/run` copies the top-level drivers and the runtime files
   (`0_runtime`, `[2-9]*`, `_os_*`, `.pkgs-*`) into `tests/` and
   `tests/scripts.d/`, patches a few things for determinism, then sources each
@@ -109,13 +121,13 @@ user asks. Note that `scbi-patch` is not installed by `make`.
   several drivers; update them and say which in the commit.
 - The `PLAN` count is only applied when running the whole suite.
 
-### Python port (in progress)
+### Python driver
 
-The driver is being ported to Python in `src/scbi/`, step by step; the
-Bash driver remains the reference and must stay green. The Python driver
-runs no Bash at all: it reads YAML plug-ins and Python environment files
-only, not the runtime files (their settings are computed by
-`src/scbi/setup.py`), and nothing can be redefined in Bash.
+The driver (`src/scbi/`) is the port of the Bash driver, which remains the
+reference of the testsuite and must stay green. It runs no Bash at all: it
+reads YAML plug-ins and Python environment files only, not the runtime
+files (their settings are computed by `src/scbi/setup.py`), and nothing
+can be redefined in Bash.
 
 ```bash
 make unit      # pytest unit tests (tests/unit), no Bash involved
@@ -184,18 +196,21 @@ directive or sub-command needs a matching update there (also check
 
 ## Conventions
 
-- Bash only, `#!/bin/bash`, 4-space indentation, `[[ ... ]]` tests, `local`
-  for every function variable. In `scbi`, functions are preceded by a
-  `############################## <name>` banner; follow it there.
-- Inside runtime and build steps, report through the logging helpers of
-  `2_log` (`ilog`, `dlog`, `elog`) so messages reach the build logs.
+- Python driver: Python >= 3.11, PyYAML only, no shell (`subprocess` with
+  argument lists); report through `scbi.log` (`ilog`, `elog`...) so
+  messages reach the build logs.
+- Bash driver (testsuite reference): `#!/bin/bash`, 4-space indentation,
+  `[[ ... ]]` tests, `local` for every function variable; in `scbi`,
+  functions are preceded by a `############################## <name>`
+  banner.
 - Commit messages: short imperative subject, prefixed by the component when
   scoped, e.g. `c-polyorb: Disable global install.`, `scbi-lint: Add more
   hook checks.`, `test092: Update expected output (archive hook).`
 - The `Makefile` derives the core version from the last commit touching
-  `scbi`, `scbi-*`, `scripts.d/[0-9]*`, `scripts.d/_os_*` and the completion
-  file, and the plug-in version from `scripts.d/c-*` and
-  `scripts.d/patches`. Keep core and plug-in changes in separate commits.
+  `src/scbi`, `pyproject.toml`, `scripts.d/[0-9]*`, `scripts.d/_os_*`,
+  `scripts.d/.pkgs-*` and the completion file, and the plug-in version
+  from `scripts.d/c-*` and `scripts.d/patches`. Keep core and plug-in
+  changes in separate commits.
 
 ## Repository hygiene
 

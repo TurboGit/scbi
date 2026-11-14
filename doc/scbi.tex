@@ -144,11 +144,12 @@ The goal is to automate the build procedures from sources. The main features are
 	\item Support for build plans (modules with specific variant and/or version)
 \end{itemize}
 
-The driver and plug-in modules are all written in \code{bash} scripts.
+The driver is written in Python (it needs \code{python3} and its YAML
+module, \code{python3-yaml} on Debian); the plug-in modules are YAML files.
 
-For developer of new plug-in modules in SCBI, all setup, source copy and installation are transparent actions, developers just need to fill functions to configure, build and install (generally just calling \code{configure} from \code{autotool} or \code{cmake} and \code{make}).
+For developer of new plug-in modules in SCBI, all setup, source copy and installation are transparent actions, developers just need to fill the hooks to configure, build and install (generally just calling \code{configure} from \code{autotool} or \code{cmake} and \code{make}).
 
-Those functions are very close to what would have been typed when building manually from the command line. The goal is to reduce as much as possible the gap between a standard manual build and the commands used on plug-in modules.
+Those hooks are very close to what would have been typed when building manually from the command line. The goal is to reduce as much as possible the gap between a standard manual build and the commands used on plug-in modules.
 
 When properly setup, building any software should be as easy as:
 
@@ -253,7 +254,7 @@ An environment is a set of shell variables used to control the build environment
 	\\This version is \version.
 
 	\item[SCBI\_PLUGINS] The directories where the SCBI plug-ins are located.
-	Default is \file{\$HOME/config/scbi}.
+	Default is \file{\$HOME/.config/scbi}.
 
 	\item[SCBI\_PLAN] The name of the build-plan to use if any.
 
@@ -294,21 +295,22 @@ An environment is a set of shell variables used to control the build environment
 \label{envfile}
 \index{environment!file}
 
-The environment can be set in the following files searched in this exact order:
+The environment can be set in the following files (Python files,
+\seeref{python-env-files}) searched in this exact order:
 
 \begin{description}
-	\item[\code{\$PWD/.scbi-env}] The local environment found in the current working directory.
+	\item[\code{\$PWD/.scbi-env.py}] The local environment found in the current working directory.
 
-	\item[\code{\$PWD/../.scbi-env}] The local environment found in the parent of the working directory. This environment can then be shared for a set of repositories.
+	\item[\code{\$PWD/../.scbi-env.py}] The local environment found in the parent of the working directory. This environment can then be shared for a set of repositories.
 
-	\item[\code{\$HOME/.scbi-env}] The local environment found in the HOME. This environment can then be shared by all builds.
+	\item[\code{\$HOME/.scbi-env.py}] The local environment found in the HOME. This environment can then be shared by all builds.
 
-	\item[\code{\$SCBI\_DEFS/.env}] The default global environment used for all builds.
+	\item[\code{\$SCBI\_PLUGINS/.env.py}] The default global environment used for all builds.
 \end{description}
 
-Also note that instead of the default \file{.env} (or \file{.scbi-env} for local environment files) a specific environment file can be specified with the \code{\ddash{}env=<name>} command line option. (\seeref{cmdline}).
+Also note that instead of the default \file{.env.py} (or \file{.scbi-env.py} for local environment files) a specific environment file can be specified with the \code{\ddash{}env=<name>} command line option (\file{.env-<name>.py}, \seeref{cmdline}).
 
-Example, to use environment \file{.env-next} to build \code{lcms2}:
+Example, to use environment \file{.env-next.py} to build \code{lcms2}:
 
 \cmd{scbi \ddash{}env=next lcms2}
 
@@ -531,7 +533,7 @@ A build-plan can be set in the following files searched in this exact order:
 \begin{description}
 	\item[\code{\$PWD/.scbi-plan-<name>}] A local build plan found in the current working directory.
 
-	\item[\code{\$SCBI\_DEFS/.plan-<name>}] A global build-plan.
+	\item[\code{\$SCBI\_PLUGINS/.plan-<name>}] A global build-plan.
 \end{description}
 
 \subsection{Standalone source archive}
@@ -666,7 +668,7 @@ The following options are supported:
 
 	\item[\ddash{}safe] Build in safe mode. If a module needs to be built the previous build directory is removed. This ensures that the old configuration and/or build artifacts won't interact in any way with new build.
 
-	\item[\ddash{}plugins=<directory>] Specify a non default location for the modules and plug-ins directory. This overrides the \code{SCBI\_DEFS} environment.
+	\item[\ddash{}plugins=<directory>] Specify a non default location for the modules and plug-ins directory. This overrides the \code{SCBI\_PLUGINS} environment.
 \end{description}
 
 A completion support for bash is provided. If activated many options will give hints about possible values like listing plans for \code{\ddash{}plan=} option or listing the supported modules.
@@ -725,1106 +727,24 @@ prefix = $HOME/sandbox
 
 \section{Creating new plug-ins}
 
-To create a new plug-in for SCBI you need to create a single \code{Bash} script (one per module) into \code{\$SCBI\_DEFS} and named as the plug-in.
+To create a new plug-in for SCBI you need to create a single YAML file
+(one per module) into \code{\$SCBI\_PLUGINS}, named
+\file{<plug-in>.yaml}.
 
-The plug-in script describes, using different hooks, the steps for building. One for configuring, one for building and one for installing. These are the mains steps generally used to build all software.
+The plug-in describes, using different hooks, the steps for building. One for configuring, one for building and one for installing. These are the mains steps generally used to build all software.
 
-The different steps are described by a simple \code{Bash} code snippet. And some hooks are just descriptions to retrieve artifacts (like VCS sources or archive file).
+The steps are described by a few commands (the command language,
+\seeref{yaml-command-language}). And some hooks are just descriptions to retrieve artifacts (like VCS sources or archive file).
 
-In the following section all the supported hooks are described. Then the calling order conducted by SCBI is described.
+The format of the file is described first, then all the supported hooks
+and the calling order conducted by SCBI.
 
-\subsection{Hooks}
-
-The hooks must be prefixed by the name of the plug-in. Each of them are optional.
-
-\subsubsection{Description}
-
-\begin{description}[font=\large\texttt]
-
-	\item[<module>{[}-<variant>{]}-vcs] \index{hook!vcs}Describe the module source VCS.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} NONE
-		\item[return] \tabto{2cm} array
-		\begin{enumerate}
-			\item proxy : name of a proxy, or \emph{default} to use default system one. (\seeref{proxy}).
-			\item options : comma separated list of options, possible values are \emph{none}, \emph{no-recursive}, \emph{lfs}, \emph{submodule:PATH:URL}. The later option is to change the \code{URL} for a given submodule while cloning or updating the module repository. It is possible to specify multiple \emph{submodule} options.
-			\item protocol : \emph{git}, \emph{svn}, \emph{hg}
-			\item URL : repository location with protocol
-			\item DIR (optional): name of the directory if the repository is hosting multiple projects. This is mostly needed for Subversion non standard repository layout. If \code{URL} is pointing to the tree where \code{trunk}, \code{branches} and \code{tags} directories are found, then SCBI will check for the actual sources in:
-			\begin{itemize}
-				\item \code{<root>/trunk/\$DIR}
-				\item \code{<root>/[branches|tags]/<VER>/\$DIR}
-				\item \code{<root>/[branches|tags]/\$DIR/<VER>}
-			\end{itemize}.
-		\end{enumerate}
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	function lcms2-vcs()
-	{
-		echo default
-		echo none
-		echo git
-		echo http://github.com/mm2/Little-CMS
-	}
-	\end{lstlisting}
-
-	It is possible specify a specific \code{vcs} hook in an environment file by two means:
-
-	\begin{description}[style=standard]
-		\item[\code{SCBI\_<module>\_VCS\_VARIANT}] \hfill \\
-		If environment variable \code{SCBI\_<module>\_VCS\_VARIANT} is set then the hook \\ \code{<module>-\$\{SCBI\_<module>\_VCS\_VARIANT\}-vcs} is looked for before the generic \code{<module>-vcs}. This is specific to module name \code{<module>}.
-
-		\item[\code{SCBI\_VCS\_VARIANT}] Same as above for the all modules.
-	\end{description}
-
-	\index{hook!scbi-rewrite-vcs}\index{rewrite!scbi-rewrite-vcs}
-	And finally the function \code{scbi-rewrite-vcs} can be defined. This function takes the five values returned by the \code{vcs} hook and must return the five values in the same order but possibly rewritten.
-
-	\item[<module>{[}-<variant>{]}-archive] \label{hookarchive}\index{hook!archive}Describe the archive filename and location of the archive containing the module sources.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$VERSION}
-		\item[return] \tabto{2cm} array
-		\begin{enumerate}
-		\item proxy : name of a proxy, or \emph{default} to use default system one. (\seeref{proxy}).
-		\item options : comma separated list of options to be used on the command line for the tool used (see protocol below). Use \emph{none} if no option are needed.
-		\item protocol: \emph{scp}, \emph{cp}, \emph{wget}, \emph{curl}, \emph{ftp}, \emph{none}.
-		\item URL: location where the archive can be downloaded.
-		\item filename : name of the archive with a possible \$VERSION in the pattern.
-		\item DIR (optional) : name of the directory (with a possible \$VERSION) to use as source container if the archive is hosting multiple projects.
-		\end{enumerate}
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	function cmake-archive()
-	{
-		local VERSION=$1
-
-		echo default
-		echo --no-check-certificate
-		echo wget
-		echo http://some.server.fr/sources
-		echo cmake-$VERSION.tar.gz
-	}
-	\end{lstlisting}
-
-	It is possible specify a specific \code{archive} hook in an environment file by two means:
-
-	\begin{description}[style=standard]
-		\item[\code{SCBI\_<module>\_ARCHIVE\_VARIANT}] \hfill \\
-		If environment variable \code{SCBI\_<module>\_ARCHIVE\_VARIANT} is set then the hook \\ \code{<module>-\$\{SCBI\_<module>\_ARCHIVE\_VARIANT\}-archive} is looked for before the generic \code{<module>-archive}. This is specific to module name \code{<module>}.
-
-		\item[\code{SCBI\_ARCHIVE\_VARIANT}] Same as above for the all modules.
-	\end{description}
-
-	\index{hook!scbi-rewrite-archive}\index{rewrite!scbi-rewrite-archive}
-	And finally the function \code{scbi-rewrite-archive} can be defined. This function takes the six values returned by the \code{archive} hook and must return the six values in the same order but possibly rewritten.
-
-	\item[<module>{[}-common|<variant>{]}-patches] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT \$KIND \$REF}
-		\item[return] \tabto{2cm} array
-		\begin{enumerate}
-			\item echo <patch-file-1>
-			\item echo <patch-file-2>
-			\item {[[} \$REF =\textasciitilde "7.8" {]]} \&\& echo <patch-for-7.8>
-			\item ...
-		\end{enumerate}
-	\end{description}
-
-	\item[<module>{[}-<variant>{]}-version] \index{hook!version}Returns the current version of the installed module.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} version or \code{\$VERSION\_OK} or \code{\$VERSION\_ERROR}
-		\begin{enumerate}
-			\item the version as a string corresponding to the current installed version. Can be \$VERSION\_OK or \$VERSION\_ERROR if the actual version cannot be determined.
-		\end{enumerate}
-	\end{description}
-
-	\item[<module>{[}-common|<variant>{]}-external-env] \index{hook!external-env}Used to compute the module's build identifier and will trigger a rebuild of the module if the value returned by this hook changes. This may be needed if the module must setup its sources depending on some external environment. The return value has no semantic, it must just reflect a change of value, generally just returning the value of the controlling environment variable is sufficient.
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} value
-		\begin{enumerate}
-			\item echo \code{\$SOME\_VAR}
-		\end{enumerate}
-	\end{description}
-
-	\item[<module>{[}-common|<variant>{]}-build-depends] \index{hook!build-depends}Lists all modules required to build the actual module. These are generally some tools like \code{cmake}, \code{swig} or \code{gcc} which are only needed to build but not needed at runtime. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} array
-		\begin{enumerate}
-			\item echo <module1>
-			\item echo <module2>
-			\item ...
-		\end{enumerate}
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	function aws-build-depends()
-	{
-		echo gnat
-	}
-	\end{lstlisting}
-
-	\item[<module>{[}-common|<variant>{]}-tests-depends] \index{hook!tests-depends}Lists all modules required to run the test-suite for the module. These are generally some tools or frameworks like \code{cunit} which are only needed to run the tests.
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} array
-		\begin{enumerate}
-			\item echo <module1>
-			\item echo <module2>
-			\item ...
-		\end{enumerate}
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	function aws-tests-depends()
-	{
-		echo libcunit1
-	}
-	\end{lstlisting}
-
-	\item[<module>{[}-common|<variant>{]}-depends] \index{hook!depends}Lists all modules required to build the actual module and to use/execute it. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} array
-		\begin{enumerate}
-			\item echo <module1>
-			\item echo <module2>
-			\item ...
-		\end{enumerate}
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	function aws-depends()
-	{
-		echo xmlada
-		echo asis
-	}
-	\end{lstlisting}
-
-	\item[<module>{[}-common|<variant>{]}-env] \index{hook!env}Set the environment to use this module as a dependency. This is the exported environment. The know how to set the environment using the helper routines \seeref{set-env}.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\begin{enumerate}
-			\item \code{add-to-var} <name> <value>
-			\item ...
-		\end{enumerate}
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	function libgegl-env()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-
-		add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
-		add-to-var PATH            $PREFIX/bin
-	}
-	\end{lstlisting}
-
-	\item[<module>{[}-common|<variant>{]}-build-env] \index{hook!build-env}Set the environment needed to build this module.
-	Those settings are not exported and only visible and used for the module. The \code{build-env} hook sees only the environment of the build dependencies.
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\begin{enumerate}
-			\item export <name>=<value>
-			\item ...
-		\end{enumerate}
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	\item[<module>{[}-<variant>{]}-setup] \index{hook!setup}To put in place the sources just before configuration step. This is generally not needed as the sources are setup by \code{scbi} using the information provided by the archive or vcs hook. This may be needed in some complex case or if the sources are generated based on the running environment.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	\item[<module>{[}-<variant>{]}-out-of-tree] \index{hook!out-of-tree}Whether to build out of the source tree or not. Default is \code{true}.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} \code{\textbf{true} | false}
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	function lcms2-out-of-tree()
-	{
-		echo false
-	}
-	\end{lstlisting}
-
-	\item[<module>{[}-<variant>{]}-only-explicit-build] \index{hook!only-explicit-build}Whether to build when found in dependencies or only when the plug-in is passed on the command line. If function returns \code{true} then it will be built only when on the command line. In all cases it will be used to get the environment when found in dependencies. Default is \code{false}.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} \code{true | \textbf{false}}
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	function lcms2-only-explicit-build()
-	{
-		echo false
-	}
-	\end{lstlisting}
-
-	\item[<module>{[}-<variant>{]}-config] \index{hook!config}To configure the sources before starting the build. This is generally a call to GNU \code{configure} or \code{cmake}. The source tree is always accessible as \code{../src}.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\begin{enumerate}
-			\item ./configure \ddash{}prefix=\$PREFIX ../src
-		\end{enumerate}
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	\item[<module>{[}-common|<variant>{]}-config-options] \index{hook!config-options}Returns a list of options for the configuration step. The config (see above) hook is then supposed to be using the \code{get-config-options} routine to get the options to pass to the configuration tools like \code{cmake} or \code{configure} (\seeref{get config options}).
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
-		\item[return] \tabto{2cm} array
-		\begin{enumerate}
-			\item echo <option1>
-			\item echo <option2>
-			\item ...
-		\end{enumerate}
-	\end{description}
-
-	\item[<module>{[}-<variant>{]}-build] \index{hook!build}The command to build the application. This is most of the case a simple call to \code{make}.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\begin{enumerate}
-			\item make
-		\end{enumerate}
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	function lcms2-build()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-
-		make -J$SCBI_JOBS
-	}
-	\end{lstlisting}
-
-	\item[<module>{[}-<variant>{]}-install] \index{hook!install}The command to install the application. This is most of the case a simple call to \code{make} with target \code{install}.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\begin{enumerate}
-			\item make install
-		\end{enumerate}
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	\item[<module>{[}-<variant>{]}-wrapup] \index{hook!wrapup}This is to do whatever is needed after the installation step.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	\item[<module>{[}-<variant>{]}-prefix] \index{hook!prefix}The directory for the installation of the module. The returned value can be set to NONE to skip the installation step. If this hook is not defined the module will be installed into \code{\$SCBI\_PREFIX}.
-	\label{global-install}
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} string
-		\begin{enumerate}
-			\item echo <install\_dir>
-			\\ or
-			\item echo NONE
-		\end{enumerate}
-	\end{description}
-
-	\item[<module>{[}-<variant>{]}-tests] \index{hook!tests}Set of commands to run the tests for the module.
-	\label{tests-hook}
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT [\$OPTIONS]}
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	\item[<module>{[}-common|<variant>{]}-run] \index{hook!run}Set the command line to run when option \code{\ddash{}run} is used without argument (\seeref{cmd!run}).
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\begin{enumerate}
-			\item echo myprog
-			\item echo option1
-			\item echo option2...
-		\end{enumerate}
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-\end{description}
-
-\subsubsection{Calling order}
-\index{hook!calling order}
-
-Some of the hooks are called by the main SCBI driver when needed as they are returning information of some artifacts. Those hooks do not have specific calling order:
-
-\begin{itemize}
-	\item vcs
-	\item archive
-	\item version
-	\item external-env
-	\item out-of-tree
-	\item prefix
-	\item env
-	\item build-env
-	\item depends
-	\item build-depends
-	\item run
-\end{itemize}
-
-For all other hooks there is a specific calling order which is:
-
-\begin{enumerate}
-	\item setup
-	\item config
-	\item build
-	\item install
-	\item wrapup
-\end{enumerate}
-
-It must be noted that for those steps we have generic internal version and \code{pre}, \code{post} corresponding steps:
-
-\begin{description}[font=\texttt,style=nextline]
-	\item[module-pre-<step>] \index{hook!pre-}The generic pre step handled internally by scbi driver. Must not be redefined.
-	\item[<module>-pre-<step>] The pre step action done before the main step.
-	\item[<module>-<step>] The default step.
-	\item[module-<step>] The generic step handled internally. Must not be redefined.
-	\item[<module>-post-<step>] \index{hook!post-}The post step action.
-	\item[module-post-<step>] The generic post step handled internally. Must not be redefined.
-\end{description}
-
-For example, the generic internal setup step (\code{module-setup}) is used by the scbi driver to setup the sources (creating the build environment and populating the proper sources to compile) using the \code{vcs}, \code{version}, \code{tar} and \code{out-of-tree} hooks.
-
-The \code{patches}, \code{depends}, \code{build-depends}, \code{tests-depends}, \code{env}, \code{build-env}, \code{external-env} and \code{config-options} can have a \code{common} variant which is cumulative with the corresponding variant hooks or with the default hook. If a variant hook is present then the default hook is not called, we stop at the first \code{<variant>} call below:
-
-\begin{enumerate}
-	\item <module>-common-cross-<step>
-	\item <module>-<variant>-cross-<step>
-	\item <module>-cross-<step>
-	\item <module>-common-<step>
-	\item <module>-<variant>-<step>
-	\item <module>-<step>
-\end{enumerate}
-
-The \code{cross} hooks are used when the target is different than the host.
-\index{hook!cross}
-
-For all other hooks there is no \code{common} variant. Again if a variant hook is present the default hook is not called, we stop at the first \code{<variant>} call below:
-
-\begin{enumerate}
-	\item <module>-<variant>-cross-<step>
-	\item <module>-cross-<step>
-	\item <module>-<variant>-<step>
-	\item <module>-<step>
-\end{enumerate}
-
-\subsection{Meta-module}
-\label{meta-module}
-\index{meta-module}
-
-A meta-module is a module listing a set of modules to build. This can be used to aggregate some related modules that are generally built together but not depending on each others.
-
-Other modules can depend on a meta-module.
-
-A module defining the hook \code{modules} (possibly with variants) becomes a meta-module. Furthermore a meta-module defining the hook \code{aggregate} becomes an aggregate meta-module.
-
-\begin{description}[style=nextline]
-	\item[<module>{[}-common|<variant>{]}-modules] \index{hook!modules}Lists the aggregated modules.
-		\begin{description}[font=\textit,style=standard]
-			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
-			\item[return] \tabto{2cm} array
-				\begin{enumerate}
-					\item echo <module1>
-					\item echo <module2>
-		\end{enumerate}
-	\end{description}
-
-	\item[<module>{[}-<variant>{]}-propagate-version] \index{hook!propagate-version}\label{propagate-version}Whether the meta-module's version and/or variant are to be propagated to aggregated modules. Default is \code{version}.
-		\begin{description}[font=\textit,style=standard]
-			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
-			\item[return] \tabto{2cm} \code{\textbf{version} | variant | both | no}
-		\end{description}
-
-	\item[<module>{[}-<variant>{]}-aggregate] \index{hook!aggregate}\label{aggregate}If set to \code{direct} or \code{recursive} the meta-module becomes an aggregate meta-module. In this case artifacts of all modules listed in \code{modules} hook are copied into the aggregate meta-module and the environment of all aggregated modules is pointing to the aggregate module. With this option it is possible to group into a single place the artifacts of multiple modules. When \code{direct} is used only the modules listed in the \code{modules} hook are aggregated, if \code{recursive} is used all dependencies are also aggregated. Default is \code{false}.
-	\begin{description}[font=\textit,style=standard]
-	\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
-	\item[return] \tabto{2cm} \code{direct | recursive | \textbf{no}}
-	\end{description}
-
-	\item[<module>{[}-<variant>{]}-prefix] \index{hook!prefix}\label{prefix}The directory for the installation of the meta-aggregate module. This hook is not used for standard meta modules. The returned value can be set to NONE to skip the installation step. If this hook is not defined the module will be installed into \code{\$SCBI\_PREFIX}.
-	\label{global-install}
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
-		\item[return] \tabto{2cm} string
-		\begin{enumerate}
-			\item echo <install\_dir>
-			\\ or
-			\item echo NONE
-		\end{enumerate}
-    \end{description}
-\end{description}
-
-And can list a build-plan to use for building all listed modules:
-
-\begin{description}
-	\item[<module>{[}-<variant>{]}-plan] \index{hook!plan}Returns the build-plan to use.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} NONE
-		\item[return] \tabto{2cm} string
-		\begin{enumerate}
-			\item echo <plan-name>
-		\end{enumerate}
-	\end{description}
-\end{description}
-
-Example:
-
-\begin{lstlisting}
- function gnatcoll-plan()
- {
-		echo stable
- }
-
- function gnatcoll-modules()
- {
-		echo gnatcoll-core
-		echo gnatcoll-bindings
-		echo gnatcoll-db
- }
-\end{lstlisting}
-
-A module listed in a meta-module can itself be a meta-module. A meta-module can define only a limited set of hooks, that is:
-
-\begin{itemize}[font=\texttt]
-	\item {[variant]-setup}
-	\item {[variant]-propagate-version}
-	\item {[variant]-external-env}
-	\item {[variant]-build-depends}
-	\item {[variant]-plan}
-	\item {[variant]-modules}
-	\item {[variant]-prefix}
-	\item {[variant]-wrapup}
-\end{itemize}
-
-It is possible to specify a version for a meta-module even if there is no sources as this version will be propagated to all aggregated modules and recursively for all meta-modules. To disable this feature it is necessary to define the hook \code{propagate-version} and returns \code{false}.
-
-The \code{external-env} hook can be used to ensure that the \code{wrapup} hook is run consistently. That is, if the \code{wrapup} hook use some environment variables or enabled options (\seeref{enable-feature}) to generate a package or take any action when a change is made on aggregated modules one need to add in the \code{external-env} hook the used environment.
-
-\subsection{User's defined final step}
-\label{module-final-step}
-\index{hook!module-final-step}
-
-After a successful build of a module or aggregate meta-module a specific hook named \code{module-final-step} is called.
-
-\begin{description}
-	\item[module-final-step] Called after a successful build. Can be used to update an application packaging for example.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT \$MODULE}
-		\par \tabto{2cm} \code{\$DEPENDS\_KIND \$IS\_META \$IS\_AGGREGATED \$IS\_UP\_TO\_DATE}
-		\begin{description}
-		\item [\$PREFIX] The installation directory for the module.
-		\item [\$TARGET] The build target for the module.
-		\item [\$VARIANT] The variants for the module.
-		\item [\$MODULE] The module plug-in's name.
-		\item [\$DEPENDS\_KIND] The kind of dependency for the module, values are \code{default}, \code{build} or \code{tests}
-		\item [\$IS\_META] Wether the module is standard meta or aggregate meta, values are \code{yes}, \code{no} or \code{aggregate}
-		\item [\$IS\_AGGREGATED] Wether the module is aggregated into a meta-module, values are \code{yes} or \code{no}.
-		\item [\$IS\_UP\_TO\_DATE] Wether the module is up-to-date or not, values are \code{yes} or \code{no}. A module may be up-to-date but not yet handled as the dependency kind was rejected.
-		\end{description}
-		\item[return] \tabto{2cm} NONE
-\end{description}
-\end{description}
-
-Example:
-
-\begin{lstlisting}
-	function module-final-step()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-		local VARIANT=$3
-		local MODULE=$4
-		local DEPENDS_KIND=$5
-		local IS_META=$6
-		local IS_AGGREGATED=$7
-		local IS_UP_TO_DATE=$8
-
-		#  Hande only standard dependencies
-		#  (skip build & tests dependencies)
-
-		[[ $DEPENDS_KIND != default ]] && return
-
-		local APP="/some/dir/$MODULE"
-
-		#  Copy if not up-to-date or not yet copied
-
-		[[ $IS_UP_TO_DATE == no ]] || [[ ! -d $APP ]] &&
-		   rsync -a $PREFIX/. $APP
-	}
-\end{lstlisting}
-
-Besides its parameters, \code{module-final-step} can use the variables
-\code{\$FORMODULE} (the module depending on the current one, \code{@root}
-for a module given on the command line), \code{\$MODREF} (the module
-reference as found in the dependencies), \code{\$module} and
-\code{\$variant}.
-
-\index{define-var!redefinition}
-The environment helpers (\code{add-to-var}, \code{set-var}...) all call
-\code{define-var} which can be redefined, for example to record the
-environment of a module instead of setting it. The redefinition can be
-done in \code{module-final-step} (or any hook) before calling
-\code{plugin-call-env-hooks}, which runs the \code{env} hooks of a module
-(and of the modules it aggregates for a meta-module):
-
-\begin{lstlisting}
-	function module-final-step()
-	{
-		local PREFIX=$1
-		...
-		(
-		    function define-var()
-		    {
-		        local ACTION=$1
-		        local VAR=$2
-		        local VALUE=$3
-		        echo "$ACTION $VAR $VALUE" >> $PREFIX/env.dump
-		    }
-
-		    plugin-call-env-hooks $FORMODULE $MODREF env
-		)
-	}
-\end{lstlisting}
-
-This works for Bash and YAML plug-ins (\seeref{yaml-plugin}).
-
-\subsection{Setting environment}
-\label{set-env}
-\index{variable!add}
-\index{variable!set}
-\index{variable!unset}
-\index{variable!prepend}
-\index{variable!append}
-\index{variable|delete}
-\index{helpers!define-var}
-\index{helpers!add-to-var}
-\index{helpers!prepend-to-var}
-\index{helpers!append-to-var}
-\index{helpers!set-var}
-\index{helpers!unset-var}
-\index{helpers!remove-from-var}
-
-The five helper routines are to be used to set environment variables in \code{env} and \code{build-env} hook. They permit a fine control about the way the variables are set and avoid duplicate values.
-
-\begin{description}[style=nextline]
-	\item[define-var {[PREPEND|APPEND|ADD|SET|UNSET]} <VARIABLE> <VALUE>] Prepend, append, add or set a variable depending on the first action parameter. Note that a single character action is supported as alias.
-	\begin{description}
-		\item[PREPEND | P] Prepend \code{<VALUE>} in \code{<VARIABLE>}, remove previous value if it exists. This ensures that the value is found after the current ones if needed.
-		\item[APPEND | A] Append \code{<VALUE>} in \code{<VARIABLE>}, remove previous value if it exists. This ensures that the value is found before the current ones.
-		\item[ADD] Add \code{<VALUE>} in \code{<VARIABLE>} if it is not already present. The place of the value in the variable is not important, it may be at the start, middle or end.
-		\item[REMOVE | R] Remove \code{<VALUE>} from \code{<VARIABLE>} if it is present. This can be the single value in \code{<VARIABLE>} or one of the value in a list like for \code{PATH} or \code{LD\_LIBRARY\_PATH} variables.
-		\item[SET | S] Set \code{<VARIABLE>} to \code{<VALUE>} removing all previous values. After this call we always have a single value set.
-		\item[UNSET | U] Unset \code{<VARIABLE>}. After this call \code{<VARIABLE>} is not set.
-	\end{description}
-
-	\item[prepend-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable PREPEND <VARIABLE> <VALUE>}.
-	\item[append-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable APPEND <VARIABLE> <VALUE>}.
-	\item[add-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable ADD <VARIABLE> <VALUE>}.
-	\item[remove-from-var <VARIABLE> <VALUE>] short hand for \code{define-variable DELETE <VARIABLE> <VALUE>}.
-	\item[set-var <VARIABLE> <VALUE>] short hand for \code{define-variable SET <VARIABLE> <VALUE>}.
-	\item[unset-var <VARIABLE>] short hand for \code{define-variable UNSET <VARIABLE>}.
-\end{description}
-
-Example:
-
-\begin{lstlisting}
-	function mymodule-build-env()
-	{
-		set-var MYMODULE_USE_CLANG no
-	}
-
-	function mymodule-env()
-	{
-		add-to-var      CMAKE_PREFIX_PATH /some/path
-		preprend-to-var PATH              /priority/dir/bin
-	}
-\end{lstlisting}
-
-\subsection{Setting a proxy}
-\label{proxy}
-\index{proxy}
-
-When a Web protocol is used to retrieve an archive with the sources or a VCS it may be necessary to pass through a proxy. In the archive and vcs hook description the name of a proxy can be given. This name corresponds to a bash function named \code{proxy-<name>} that is used to set the proxy.
-
-\begin{description}[style=nextline]
-	\item[proxy-<name>] Set a proxy.
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} NONE
-		\item[return] \tabto{2cm} NONE
-		\begin{enumerate}
-			\item export https\_proxy=...
-		\end{enumerate}
-	\end{description}
-\end{description}
-
-A typical setting is:
-
-\begin{lstlisting}
- function proxy-enterprise()
- {
-    export http_proxy=http:/myproxy.org:3128
-    export https_proxy=http:/myproxy.org:3128
-    export ftp_proxy=http:/myproxy.org:3128
-    export no_proxy=localhost,.net
- }
-\end{lstlisting}
-
-This routine can be set into the environment file (\seeref{build-env}) or in the meta-module (\seeref{meta-module})description depending on use cases.
-
-Also, note that this setting will be available only during the download of the archive file or the VCS and won't be polluting other module download not requiring a proxy.
-
-\subsection{Feature}
-\label{enable-feature}
-\index{feature}\index{helpers!is-enabled}\index{is-enabled}
-
-It is possible to enable a feature using the command line \code{\ddash{}enable-<feature>} or some environment variables:
-
-\begin{description}[style=nextline]
-	\item [SCBI\_<feature>\_FEATURE] The \emph{feature} is set for all plug-ins with the corresponding value (\code{true} or \code{false}).
-	\item [SCBI\_<plugin>\_<feature>\_FEATURE] The \emph{feature} is set for the given plug-in with the corresponding value (\code{true} or \code{false}).
-\end{description}
-
-This option activate the feature named \code{feature}. This is a convenience function and it is up to the user to decide about the semantic of the enabled feature. For \code{SCBI} driver this is only a flag set or not.
-
-In module's plug-ins the feature can be checked with \code{is-enabled} function:
-
-\code{is-enabled <name> [then-value] [else-value]}
-
-This function set the return code to 0 (true) if activated and returns \code{yes} by default or \code{then-value} if set. If the feature is not activated the function set the return code to 1 (as for errors) and returns the empty string by default or \code{else-value} if set.
-
-Some example, setting the \emph{installer} feature:
-
-\cmd{scbi \ddash{}enable-installer ...}
-
-or
-
-\cmd{export SCBI\_installer\_FEATURE=true}
-
-And a single feature check:
-
-\begin{lstlisting}
- if [[ $(is-enabled installer) ]]; then
-\end{lstlisting}
-
-For checking two features:
-
-\begin{lstlisting}
- if [[ "$(is-enabled appli)" = "yes" ]] \
-       || [[ "$(is-enabled installer)" = "yes" ]];
- then
-\end{lstlisting}
-
-Or setting a specific compiler option, example of a \code{config-options} hook:
-
-\begin{lstlisting}
- echo -DCMAKE_CXX_FLAGS="-march=$(is-enabled safe-arch x86_64 native)"
-\end{lstlisting}
-
-\subsection{Build kind}
-\index{helpers!get-build-type} \index{build kind}
-
-One of the most generic build variant that must be handled is the \code{Release} vs \code{Debug} one. To support this more easily without requiring to create a specific variant hook there is a simple support using the function \code{get-build-type}:
-
-\cmd{get-build-type <config> <default>}
-
-The \code{<config>} represents the configuration tool (CMAKE or CONFIGURE for example). But it can be whatever string.
-
-This function will return the build-kind for the calling module and system type (\code{cmake} or \code{configure}) and if not specified the default value is returned.
-
-The actual build kind for the given module can be set using some environment variables in the following order:
-
-\begin{description}[style=nextline]
-	\item [SCBI\_<module>\_BUILD\_TYPE] Build kind for this specific module.
-	\item [SCBI\_<CONFIG>\_BUILD\_TYPE] Build kind for the builder kind.
-\end{description}
-
-And then this can be used in the \code{config} hook simply with:
-
-\begin{lstlisting}
-  function lcms2-config()
-  {
-    local PREFIX=$1
-    local TARGET=$1
-
-    local BUILD_TYPE=$(get-build-type CMAKE Release)
-
-    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX \
-          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-          ../src
-  }
-\end{lstlisting}
-
-With the above example, if no variables are set in the environment to set the build type the default \code{Release} will be used. To force a \code{Debug} build one can set in the environment file or in the current shell:
-
-\begin{lstlisting}
- export SCBI_CMAKE_BUILD_TYPE=Debug
-\end{lstlisting}
-
-Which will force a \code{Debug} build for all modules using \code{cmake}, or:
-
-\begin{lstlisting}
- export SCBI_lcms2_BUILD_TYPE=Debug
-\end{lstlisting}
-
-With will force a \code{Debug} build for the \code{lcms2} plug-in only. In both cases, the corresponding plug-in must have been coded to use the \code{get-build-type} routine as seen above. Note that the \code{export} must use \emph{underscores} instead of dashes in plug-in name as dashes are forbidden in variable name.
-
-\subsection{Checking installed tools}
-\index{helpers!check-tool}\index{check-tool}
-
-It may be needed to check for the existence of a tool installed on the machine. It may not be a direct dependency but a tool needed for a specific need. For example the need to have \code{makeself} installed to create a self installer.
-
-Two helper routines are provided for this:
-
-\begin{description}
-	\item[check-tool] Take the name of a tool as parameter, returns status code different than 0 if not found.
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} tool-name
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	check-tool makeself
-	if [ $? != 0 ]; then
-	   echo Required tool makeself missing
-	   exit 1
-	fi
-	\end{lstlisting}
-
-	\item[check-tools] Take a list of tools as parameter, returns status code different that 0 if not found.
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} tool-name1 [tool-name2...]
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-	check-tool wget rsync
-	if [ $? != 0 ]; then
-		echo Required tools wget and/or rsync missing
-		exit 1
-	fi
-	\end{lstlisting}
-\end{description}
-
-\subsection{Checking dependency version}
-\index{helpers!get-module-version}\index{get-module-verson}
-\index{helpers!check-module-version}\index{check-module-verson}
-
-Those two helpers can be used to check a version of a dependency in a plug-in. This can be used for example to apply a patch for a specific version of a dependency.
-
-\begin{description}
-	\item[get-module-version] Take the name of a plug-in as parameter, returns the version for this plug-in as described in the build plan.
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} plug-in
-		\item[return] \tabto{2cm} version
-	\end{description}
-
-	Example:
-	\begin{lstlisting}[basicstyle=\footnotesize]
-		if [[ $(get-module-version lib2) =~ "2.0" ]]; then
-		   ...
-		else
-		   ...
-		fi
-	\end{lstlisting}
-
-	or
-
-	\begin{lstlisting}[basicstyle=\footnotesize]
-		local VER=$(get-module-version lib2)
-	\end{lstlisting}
-
-	\item[check-module-version] Check a plug-in version. Take a plug-in name, an operator and a version, returns status code different than 0 if expression is true. The operator can be \code{=}, \code{!=}, \code{>}, \code{<}, \code{>=} or \code{<=}.
-
-	\begin{description}[font=\textit,style=standard]
-		\item[parameter] \tabto{2cm} plug-in operator version
-		\item[return] \tabto{2cm} NONE
-	\end{description}
-
-	Example:
-	\begin{lstlisting}
-		if check-module-version "lib2" ">" "1.9"; then
-		   ...
-		else
-		   ...
-		fi
-	\end{lstlisting}
-\end{description}
-
-\subsection{Inheritance}
-\label{inheritance}
-\index{inheritance}\index{inherit-plugin}\index{helpers!inherit-plugin}
-
-It is possible to create a plug-in by inheriting from the definition
-of another plug-in. This can be done by adding one or multiple commands \code{inherit-plugin} into the plug-in definition:
-
-\begin{lstlisting}
-	inherit-plugin [--no-variant
-	               |--hooks=<hook1,hook2>
-	               |--custom-hooks=<hook1,hook2>
-	               |--name=<name>] <name>
-\end{lstlisting}
-
-\begin{description}
-	\item[\ddash{}no-variant] This option is to not inherit from any hook's variant. Only the default variants will be inherited.
-	\item[\ddash{}hooks=<hook1,hook2>] Specify a set of hooks separated with comma to inherit from. Multiple \code{\ddash{}hooks} options can also be used. If not specified all SCBI supported hooks are inherited.
-	\item[\ddash{}custom-hooks=<hook1,hook2>] Specify a set of custom hooks separated with comma to inherit from. Multiple \code{\ddash{}custom-hooks} options can also be used.
-	\item[\ddash{}name=<name>] Specify the name to be used for the inherited plug-in instead of the default plug-in name. This makes it possible to inherit from multiple modules having the same hook and chain them manually.
-	\item[<name>] The name of an existing plug-in from which we want to inherit all the current hooks.
-\end{description}
-
-After this line it is possible to redefine any hook if needed. This may be handy if a module need to redefine only
-the \code{vcs} or \code{proxy} hook for a specific context.
-
-\subsection{Native variant}
-\label{native variant}
-\index{native variant}\index{variant!native}
-\index{with-variant}\index{helpers!with-variant}
-
-For a plug-in it is sometimes needed to have a native variant to use the OS libraries instead of building from sources. It is possible to do so by creating the variant hooks manually. All hooks must be nop action except the \code{depends} hooks which may list the OS libraries and possible the \code{env} hook which may need to define some environment variables.
-
-The support routine \code{with-variant} can be used to automate this action:
-
-\begin{lstlisting}
-with-variant native [<packages>:[v]|NONE] \
-	--env 'cmd1 'cmd2'
-\end{lstlisting}
-
-The first parameter is the variant name. The followings are the OS package names or \code{NONE}. An optional environment section can be opened with \code{\ddash{}env}. The value \code{NONE} will create an empty \code{depends} hook and can be used if the actual OS dependency has been installed manually on the machine. A possible reason is that the library has not been packaged by the OS maintainers. The \code{[v]} tag can be used to check that install \code{<package>} has the version specified for the plug-in.
-
-For example:
-
-\begin{lstlisting}
-with-variant native pckA:[v] pckB \
-	--env 'set-var ROOT_DIR /usr'
-\end{lstlisting}
-
-The command above will automatically create the following hooks when called from \file{natv} module script and if \code{natv} has version \code{1.2} in build plan:
-
-\begin{lstlisting}
-function natv-native-build-env ()
-{
-	true
-}
-
-function natv-native-env ()
-{
-	set-var ROOT_DIR /usr
-}
-
-function natv-native-build-depends ()
-{
-	true
-}
-
-function natv-native-depends ()
-{
-	echo pckA:1.2
-	echo pckB
-}
-
-function natv-native-config ()
-{
-	true
-}
-
-function natv-native-build ()
-{
-	true
-}
-
-function natv-native-install ()
-{
-	true
-}
-
-function natv-native-prefix ()
-{
-	echo NONE
-}
-\end{lstlisting}
-
-\subsection{Calling variant hooks}
-\label{call variant hooks}
-\index{call-variant-hooks}\index{helpers!call-variant-hooks}
-
-The support routine \code{call-variant-hook} can be used to call a set of hook in a module based on the variants.
-
-\begin{lstlisting}
-call-variant-hooks hname $PREFIX $TARGET $VARIANT \
-    [$P1 $P2...]
-\end{lstlisting}
-
-Will call all hooks in the current plug-in (<plugin>) with arguments \code{\$PREFIX}, \code{\$TARGET}, \code{\$VARIANT} and optional parameters \code{\$P<n>} in the form:
-
-\begin{lstlisting}
-   <plugin>-<variant>-hname
-\end{lstlisting}
-
-Where \code{<variant>} is all possible values found in \code{\$VARIANT}.
-
-\subsection{Getting configuration options}
-\label{get config options}
-\index{get-config-options}\index{helpers!get-config-options}
-
-It is often needed to set configuration options based on the variant we want to build. This is for example to activate an external module.
-
-\begin{lstlisting}
-	local OPTIONS=()
-	get-config-options OPTIONS $PREFIX $TARGET $VARIANT
-\end{lstlisting}
-
-Will call all hooks in the current plug-in (<plugin>) named:
-
-\begin{lstlisting}
-	<plugin>-common-config-options
-	<plugin>-<variant>-config-options
-\end{lstlisting}
-
-The \code{common} hook is designed to contain all the common options to be used regardless of the selected variant. The options will be recorded into \code{OPTIONS} list variable.
-
-For example:
-
-\begin{lstlisting}
-function mod-mpi-config-options()
-{
-	echo -DMPI=ON
-}
-
-function mod-openmp-config-options()
-{
-	echo -DOpenMP=ON
-}
-
-function mod-common-config-options()
-{
-	echo -DPREFIX=/my/path
-}
-
-function mod-config()
-{
-	local PREFIX=$1
-	local TARGET=$2
-	local VARIANT=$3
-
-	local OPTIONS=()
-	get-config-options OPTIONS /usr lin $VARIANT
-
-	cmake "${OPTIONS[@]}" ../src
-}
-\end{lstlisting}
-
-If the current module reference is \code{mod/mpi} the \code{cmake} command will be:
-
-\begin{lstlisting}
-	cmake -DPREFIX=/my/path -DMPI=ON ../src
-\end{lstlisting}
-
-And if the module reference is \code{mod/mpi.openmp} the \code{cmake} command will be:
-
-\begin{lstlisting}
-	cmake -DPREFIX=/my/path -DMPI=ON -DOpenMP=ON ../src
-\end{lstlisting}
-
-Note that it is important to use \code{"\$\{OPTIONS[@]\}"} to properly support parameters with spaces.
-
-\subsection{OS dependencies}
-\label{OS dependencies}
-\index{os dependencies}
-
-The hook \code{depends} list dependencies to other plug-ins or external libraries/tools. As the name of the external dependency packages may be different depending on the Linux distribution and version it is possible to use an OS independent naming.
-
-\begin{lstlisting}
-	os@-<name>
-\end{lstlisting}
-
-The \code{os@-<name>} is then search against a table to find the corresponding OS package name.
-
-A distribution acronym is represented by a 3 letters name (deb, ubt, rhl for example). See output of the \code{\ddash{}stat} option for the currently supported distributions.
-
-An alias table is searched into the following places and in this specific order:
-
-\begin{enumerate}
-	\item \code{.pkgs-<distrib>[-<id>]} into \$SCBI\_DEFS (default \file{~/.config/scbi})
-	\item \code{.scbi-pkgs-<distrib>[-<id>]} into \$SCBI\_BDIR (build directory)
-	\item \code{.scbi-pkgs-<distrib>[-<id>]} into \$PWD (current directory)
-\end{enumerate}
-
-\begin{description}
-	\item [\code{<distrib>}] The acronym of one of the supported distribution. The \code{<distrib>} can also have appended the \emph{major} and \emph{minor} version of the distribution. The separator between the name and version is the tilde \textasciitilde{}.
-
-For example on \code{Debian 10.6} the searched files will be, and in that order:
-
-\begin{enumerate}
-	\item \code{.pkgs-deb}
-	\item \code{.pkgs-deb\textasciitilde{}10}
-	\item \code{.pkgs-deb\textasciitilde{}10.6}
-\end{enumerate}
-
-So \code{.pkgs-deb\textasciitilde{}10} can add new dependencies or override some dependencies that are set in \code{.pkgs-deb}.
-
-\item [\code{<id>}] An optional random string that can be added for project's specific aliases. Such a file is loaded after the default one (without the \code{<id>}) so can override some entries if needed.
-\end{description}
-
-\subsection{Private Store}
-\index{Private Store}
-\index{API|Private Store}
-
-See below (\ref{store}) how to handle the SCBI's private store. Using the runtime it is possible to handle it from within a plug-in:
-
-\begin{itemize}
-	\item The runtime routine to set a key:
-
-	\hspace{1.5cm}\texttt{scbi-store-set-key LICKEY 89AXCDPPP6BGG}
-
-	\item To get value associated with a key:
-
-	\hspace{1.5cm}\texttt{scbi-store-get-key LICKEY}
-\end{itemize}
-
-\subsection{YAML plug-in format}
+\subsection{Plug-in format}
 \label{yaml-plugin}
 \index{YAML plug-in}
 
-\emph{This format is supported by the Python driver, currently in development.}
-
-A plug-in can be written as a YAML file named \file{<name>.yaml} (used by
-the Python driver, \seeref{python-driver}). It
-describes exactly the same hooks as a Bash plug-in, the driver applies the
-same rules to select them (variants, \code{common}, \code{cross}, calling
-order). A plug-in is a recipe: it is only read by the driver.
+A plug-in is a YAML file named \file{<name>.yaml}. It is a recipe: it is
+only read by the driver.
 
 \subsubsection{Structure}
 
@@ -1850,13 +770,12 @@ All scalars are strings: \code{yes}, \code{no}, \code{true} or
 
 \subsubsection{Hooks and variants}
 
-The value of a hook is either its body (the plain hook, \code{<plugin>-<hook>}
-in Bash) or a mapping where each key names \emph{exactly one} qualifier:
+The value of a hook is either its body (the plain hook) or a mapping where each key names \emph{exactly one} qualifier:
 \code{\_} (the plain hook), \code{common} (cumulative hooks only),
 \code{default} or a variant name. The key \code{cross} holds the same kind of
 mapping (or directly a body) used when the target is not the host. There is
 no key combining variants: for a module reference \code{m/a.b} the driver
-takes, as for Bash plug-ins, the first defined variant for the hooks like
+takes the first defined variant for the hooks like
 \code{config} or \code{install}, and all of them for the cumulative hooks
 like \code{depends} or \code{config-options}.
 
@@ -2073,52 +992,904 @@ build plan), \code{build-type(<kind>[,<default>])}, \code{enabled(<feature>)},
 \seeref{discriminants}), and literal strings. Conditions never select
 between variants, this is done with the qualifiers.
 
-\subsubsection{Converting Bash plug-ins}
+\subsection{Hooks}
 
-A Bash plug-in is converted with:
+Each hook is a key of the plug-in file, all of them are optional. In
+this reference a hook which can be given per variant is written
+\code{<hook> [<variant>]} and \code{<hook> [common|<variant>]} for the
+cumulative hooks (\seeref{yaml-plugin}). The parameters are variables
+of the hook body; the result of a value hook is its list of values.
 
-\cmd{python3 -m scbi.convert [\ddash{}check] [\ddash{}output-dir=<dir>] <plug-in>...}
+\subsubsection{Description}
 
-Everything that cannot be expressed in the YAML format is reported and the
-plug-in is not converted; it must be fixed first. This is the case for hook
-parameters not matching the hook signature or values computed by arbitrary
-shell code.
+\begin{description}[font=\large\texttt]
 
-A hook of a variant which only calls the same hook of other variants (like
-\code{c-darktable-all-depends} calling the \code{depends} hooks of the
-\code{ai}, \code{hdr} and \code{jxl} variants) is converted into a
-variant including other variants (\seeref{yaml-variants}), after checking
-that the hooks selected are the same for every hook, variant and cross
-mode; otherwise it is reported.
+	\item[vcs {[}<variant>{]}] \index{hook!vcs}Describe the module source VCS.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} NONE
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+			\item proxy : name of a proxy, or \emph{default} to use default system one. (\seeref{proxy}).
+			\item options : comma separated list of options, possible values are \emph{none}, \emph{no-recursive}, \emph{lfs}, \emph{submodule:PATH:URL}. The later option is to change the \code{URL} for a given submodule while cloning or updating the module repository. It is possible to specify multiple \emph{submodule} options.
+			\item protocol : \emph{git}, \emph{svn}, \emph{hg}
+			\item URL : repository location with protocol
+			\item DIR (optional): name of the directory if the repository is hosting multiple projects. This is mostly needed for Subversion non standard repository layout. If \code{URL} is pointing to the tree where \code{trunk}, \code{branches} and \code{tags} directories are found, then SCBI will check for the actual sources in:
+			\begin{itemize}
+				\item \code{<root>/trunk/\$DIR}
+				\item \code{<root>/[branches|tags]/<VER>/\$DIR}
+				\item \code{<root>/[branches|tags]/\$DIR/<VER>}
+			\end{itemize}.
+		\end{enumerate}
+	\end{description}
 
-The converted plug-in is written as \file{<name>.yaml} next to the Bash
-plug-in (or into the \ddash{}output-dir directory); with \ddash{}check
-nothing is written. The exit status is 1 if a plug-in cannot be converted.
+	Example:
+	\begin{lstlisting}
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: http://github.com/mm2/Little-CMS
+\end{lstlisting}
+
+	The fields can also be given as a list of values, in this order. A
+	specific \code{vcs} hook can be selected in the environment by two means:
+
+	\begin{description}[style=standard]
+		\item[\code{SCBI\_<module>\_VCS\_VARIANT}] \hfill \\
+		If environment variable \code{SCBI\_<module>\_VCS\_VARIANT} is set then the \code{vcs} hook of variant \code{\$\{SCBI\_<module>\_VCS\_VARIANT\}} is looked for before the generic one. This is specific to module name \code{<module>}.
+
+		\item[\code{SCBI\_VCS\_VARIANT}] Same as above for the all modules.
+	\end{description}
+
+	\index{rewrite!rewrite\_vcs}
+	And finally the function \code{rewrite\_vcs(record)} of the environment
+	file (\seeref{python-env-files}) takes the five values of the
+	\code{vcs} hook and returns them, possibly rewritten.
+
+	\item[archive {[}<variant>{]}] \label{hookarchive}\index{hook!archive}Describe the archive filename and location of the archive containing the module sources.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$VERSION}
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+		\item proxy : name of a proxy, or \emph{default} to use default system one. (\seeref{proxy}).
+		\item options : comma separated list of options to be used on the command line for the tool used (see protocol below). Use \emph{none} if no option are needed.
+		\item protocol: \emph{scp}, \emph{cp}, \emph{wget}, \emph{curl}, \emph{ftp}, \emph{none}.
+		\item URL: location where the archive can be downloaded.
+		\item filename : name of the archive with a possible \$VERSION in the pattern.
+		\item DIR (optional) : name of the directory (with a possible \$VERSION) to use as source container if the archive is hosting multiple projects.
+		\end{enumerate}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+archive:
+  proxy: default
+  options: --no-check-certificate
+  protocol: wget
+  url: http://some.server.fr/sources
+  file: cmake-$VERSION.tar.gz
+\end{lstlisting}
+
+	A specific \code{archive} hook can be selected in the environment by two means:
+
+	\begin{description}[style=standard]
+		\item[\code{SCBI\_<module>\_ARCHIVE\_VARIANT}] \hfill \\
+		If environment variable \code{SCBI\_<module>\_ARCHIVE\_VARIANT} is set then the \code{archive} hook of variant \code{\$\{SCBI\_<module>\_ARCHIVE\_VARIANT\}} is looked for before the generic one. This is specific to module name \code{<module>}.
+
+		\item[\code{SCBI\_ARCHIVE\_VARIANT}] Same as above for the all modules.
+	\end{description}
+
+	\index{rewrite!rewrite\_archive}
+	And finally the function \code{rewrite\_archive(record)} of the
+	environment file (\seeref{python-env-files}) takes the six values of the
+	\code{archive} hook and returns them, possibly rewritten.
+
+	\item[patches {[}common|<variant>{]}] \index{hook!patches}Returns the patch files to apply. REF is the actual module version making it possible to apply a patch selectively.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT \$KIND \$REF}
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+			\item <patch-file-1>
+			\item <patch-file-2>
+			\item if ref =\textasciitilde{} 7.8: <patch-for-7.8>
+			\item ...
+		\end{enumerate}
+	\end{description}
+
+	\item[version {[}<variant>{]}] \index{hook!version}Returns the current version of the installed module.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} version or \code{\$VERSION\_OK} or \code{\$VERSION\_ERROR}
+		\begin{enumerate}
+			\item the version as a string corresponding to the current installed version. Can be \$VERSION\_OK or \$VERSION\_ERROR if the actual version cannot be determined.
+		\end{enumerate}
+	\end{description}
+
+	\item[external-env {[}common|<variant>{]}] \index{hook!external-env}Used to compute the module's build identifier and will trigger a rebuild of the module if the value returned by this hook changes. This may be needed if the module must setup its sources depending on some external environment. The return value has no semantic, it must just reflect a change of value, generally just returning the value of the controlling environment variable is sufficient.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} value
+		\begin{enumerate}
+			\item \code{\$SOME\_VAR}
+		\end{enumerate}
+	\end{description}
+
+	\item[build-depends {[}common|<variant>{]}] \index{hook!build-depends}Lists all modules required to build the actual module. These are generally some tools like \code{cmake}, \code{swig} or \code{gcc} which are only needed to build but not needed at runtime. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+			\item <module1>
+			\item <module2>
+			\item ...
+		\end{enumerate}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+build-depends: [gnat]
+\end{lstlisting}
+
+	\item[tests-depends {[}common|<variant>{]}] \index{hook!tests-depends}Lists all modules required to run the test-suite for the module. These are generally some tools or frameworks like \code{cunit} which are only needed to run the tests.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+			\item <module1>
+			\item <module2>
+			\item ...
+		\end{enumerate}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+tests-depends: [libcunit1]
+\end{lstlisting}
+
+	\item[depends {[}common|<variant>{]}] \index{hook!depends}Lists all modules required to build the actual module and to use/execute it. These are either other modules handled by SCBI or distribution packages. A dependent module can be specified as a full module-reference (\seeref{modref}) so with variant and/or version even if this is a generally a bad idea. To keep the module generic it is better to use the simple module name here and have a build-plan to specify a specific version and/or variant.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+			\item <module1>
+			\item <module2>
+			\item ...
+		\end{enumerate}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+depends:
+  - xmlada
+  - asis
+\end{lstlisting}
+
+	\item[env {[}common|<variant>{]}] \index{hook!env}Set the environment to use this module as a dependency. This is the exported environment. The know how to set the environment using the helper routines \seeref{set-env}.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\begin{enumerate}
+			\item \code{add-to-var} <name> <value>
+			\item ...
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+env:
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+  - add-to-var PATH $PREFIX/bin
+\end{lstlisting}
+
+	\item[build-env {[}common|<variant>{]}] \index{hook!build-env}Set the environment needed to build this module.
+	Those settings are not exported and only visible and used for the module. The \code{build-env} hook sees only the environment of the build dependencies.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\begin{enumerate}
+			\item set-var <name> <value>
+			\item ...
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[setup {[}<variant>{]}] \index{hook!setup}To put in place the sources just before configuration step. This is generally not needed as the sources are setup by \code{scbi} using the information provided by the archive or vcs hook. This may be needed in some complex case or if the sources are generated based on the running environment.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[out-of-tree {[}<variant>{]}] \index{hook!out-of-tree}Whether to build out of the source tree or not. Default is \code{true}.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} \code{\textbf{true} | false}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+out-of-tree: false
+\end{lstlisting}
+
+	\item[only-explicit-build {[}<variant>{]}] \index{hook!only-explicit-build}Whether to build when found in dependencies or only when the plug-in is passed on the command line. If it is \code{true} then it will be built only when on the command line. In all cases it will be used to get the environment when found in dependencies. Default is \code{false}.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} \code{true | \textbf{false}}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+only-explicit-build: false
+\end{lstlisting}
+
+	\item[config {[}<variant>{]}] \index{hook!config}To configure the sources before starting the build. This is generally a call to GNU \code{configure} or \code{cmake}. The source tree is always accessible as \code{../src}.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\begin{enumerate}
+			\item ./configure \ddash{}prefix=\$PREFIX ../src
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[config-options {[}common|<variant>{]}] \index{hook!config-options}Returns a list of options for the configuration step. The config (see above) hook gets them with \code{OPTIONS = config-options} and passes the options to pass to the configuration tools like \code{cmake} or \code{configure} (\seeref{get config options}).
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+		\item[return] \tabto{2cm} array
+		\begin{enumerate}
+			\item <option1>
+			\item <option2>
+			\item ...
+		\end{enumerate}
+	\end{description}
+
+	\item[build {[}<variant>{]}] \index{hook!build}The command to build the application. This is most of the case a simple call to \code{make}.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\begin{enumerate}
+			\item make
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	Example:
+	\begin{lstlisting}
+build: make -j$SCBI_JOBS
+\end{lstlisting}
+
+	\item[install {[}<variant>{]}] \index{hook!install}The command to install the application. This is most of the case a simple call to \code{make} with target \code{install}.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\begin{enumerate}
+			\item make install
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[wrapup {[}<variant>{]}] \index{hook!wrapup}This is to do whatever is needed after the installation step.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[prefix {[}<variant>{]}] \index{hook!prefix}The directory for the installation of the module. The returned value can be set to NONE to skip the installation step. If this hook is not defined the module will be installed into \code{\$SCBI\_PREFIX}.
+	\label{global-install}
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} string
+		\begin{enumerate}
+			\item <install\_dir>
+			\\ or
+			\item NONE
+		\end{enumerate}
+	\end{description}
+
+	\item[tests {[}<variant>{]}] \index{hook!tests}Set of commands to run the tests for the module.
+	\label{tests-hook}
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT [\$OPTIONS]}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+	\item[run {[}common|<variant>{]}] \index{hook!run}Set the command line to run when option \code{\ddash{}run} is used without argument (\seeref{cmd!run}).
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\begin{enumerate}
+			\item myprog
+			\item option1
+			\item option2...
+		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+
+\end{description}
+
+\subsubsection{Calling order}
+\index{hook!calling order}
+
+Some of the hooks are called by the main SCBI driver when needed as they are returning information of some artifacts. Those hooks do not have specific calling order:
+
+\begin{itemize}
+	\item vcs
+	\item archive
+	\item version
+	\item external-env
+	\item out-of-tree
+	\item prefix
+	\item env
+	\item build-env
+	\item depends
+	\item build-depends
+	\item run
+\end{itemize}
+
+For all other hooks there is a specific calling order which is:
+
+\begin{enumerate}
+	\item setup
+	\item config
+	\item build
+	\item install
+	\item wrapup
+\end{enumerate}
+
+It must be noted that for those steps the driver has generic internal
+steps and the plug-in can define \code{pre} and \code{post} steps, run in
+this order:
+
+\begin{description}[font=\texttt,style=nextline]
+	\item[generic pre-<step>] \index{hook!pre-}The generic pre step handled internally by the driver (\code{pre-install} removes the previous installation).
+	\item[pre-<step>] The pre step action done before the main step.
+	\item[<step>] The default step.
+	\item[generic <step>] The generic step handled internally (\code{setup}, \code{install}).
+	\item[post-<step>] \index{hook!post-}The post step action.
+\end{description}
+
+For example, the generic internal setup step is used by the scbi driver to setup the sources (creating the build environment and populating the proper sources to compile) using the \code{vcs}, \code{version}, \code{tar} and \code{out-of-tree} hooks.
+
+The \code{patches}, \code{depends}, \code{build-depends}, \code{tests-depends}, \code{env}, \code{build-env}, \code{external-env} and \code{config-options} can have a \code{common} variant which is cumulative with the corresponding variant hooks or with the default hook. If a variant hook is present then the default hook is not called, we stop at the first \code{<variant>} call below (\code{\_} is the plain hook):
+
+\begin{enumerate}
+	\item \code{cross: common}
+	\item \code{cross: <variant>}
+	\item \code{cross: \_}
+	\item \code{common}
+	\item \code{<variant>}
+	\item \code{\_}
+\end{enumerate}
+
+The \code{cross} hooks are used when the target is different than the host.
+\index{hook!cross}
+
+For all other hooks there is no \code{common} variant. Again if a variant hook is present the default hook is not called, we stop at the first \code{<variant>} call below:
+
+\begin{enumerate}
+	\item \code{cross: <variant>}
+	\item \code{cross: \_}
+	\item \code{<variant>}
+	\item \code{\_}
+\end{enumerate}
+
+\subsection{Meta-module}
+\label{meta-module}
+\index{meta-module}
+
+A meta-module is a module listing a set of modules to build. This can be used to aggregate some related modules that are generally built together but not depending on each others.
+
+Other modules can depend on a meta-module.
+
+A module defining the hook \code{modules} (possibly with variants) becomes a meta-module. Furthermore a meta-module defining the hook \code{aggregate} becomes an aggregate meta-module.
+
+\begin{description}[style=nextline]
+	\item[modules {[}common|<variant>{]}] \index{hook!modules}Lists the aggregated modules.
+		\begin{description}[font=\textit,style=standard]
+			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+			\item[return] \tabto{2cm} array
+				\begin{enumerate}
+					\item echo <module1>
+					\item echo <module2>
+		\end{enumerate}
+	\end{description}
+
+	\item[propagate-version {[}<variant>{]}] \index{hook!propagate-version}\label{propagate-version}Whether the meta-module's version and/or variant are to be propagated to aggregated modules. Default is \code{version}.
+		\begin{description}[font=\textit,style=standard]
+			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+			\item[return] \tabto{2cm} \code{\textbf{version} | variant | both | no}
+		\end{description}
+
+	\item[aggregate {[}<variant>{]}] \index{hook!aggregate}\label{aggregate}If set to \code{direct} or \code{recursive} the meta-module becomes an aggregate meta-module. In this case artifacts of all modules listed in \code{modules} hook are copied into the aggregate meta-module and the environment of all aggregated modules is pointing to the aggregate module. With this option it is possible to group into a single place the artifacts of multiple modules. When \code{direct} is used only the modules listed in the \code{modules} hook are aggregated, if \code{recursive} is used all dependencies are also aggregated. Default is \code{false}.
+	\begin{description}[font=\textit,style=standard]
+	\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
+	\item[return] \tabto{2cm} \code{direct | recursive | \textbf{no}}
+	\end{description}
+
+	\item[prefix {[}<variant>{]}] \index{hook!prefix}\label{prefix}The directory for the installation of the meta-aggregate module. This hook is not used for standard meta modules. The returned value can be set to NONE to skip the installation step. If this hook is not defined the module will be installed into \code{\$SCBI\_PREFIX}.
+	\label{global-install}
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} string
+		\begin{enumerate}
+			\item <install\_dir>
+			\\ or
+			\item NONE
+		\end{enumerate}
+    \end{description}
+\end{description}
+
+And can list a build-plan to use for building all listed modules:
+
+\begin{description}
+	\item[plan {[}<variant>{]}] \index{hook!plan}Returns the build-plan to use.
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} NONE
+		\item[return] \tabto{2cm} string
+		\begin{enumerate}
+			\item <plan-name>
+		\end{enumerate}
+	\end{description}
+\end{description}
+
+Example:
+
+\begin{lstlisting}
+modules:
+  - gnatcoll-core
+  - gnatcoll-bindings
+  - gnatcoll-db
+plan: stable
+\end{lstlisting}
+
+A module listed in a meta-module can itself be a meta-module. A meta-module can define only a limited set of hooks, that is:
+
+\begin{itemize}[font=\texttt]
+	\item setup
+	\item propagate-version
+	\item external-env
+	\item build-depends
+	\item plan
+	\item modules
+	\item prefix
+	\item wrapup
+\end{itemize}
+
+It is possible to specify a version for a meta-module even if there is no sources as this version will be propagated to all aggregated modules and recursively for all meta-modules. To disable this feature it is necessary to define the hook \code{propagate-version} as \code{no}.
+
+The \code{external-env} hook can be used to ensure that the \code{wrapup} hook is run consistently. That is, if the \code{wrapup} hook use some environment variables or enabled options (\seeref{enable-feature}) to generate a package or take any action when a change is made on aggregated modules one need to add in the \code{external-env} hook the used environment.
+
+\subsection{User's defined final step}
+\label{module-final-step}
+\index{hook!module-final-step}
+
+After a successful build of a module or aggregate meta-module the
+function \code{module\_final\_step(ctx)} of the environment file
+(\seeref{python-env-files}) is called, if defined. It can be used to
+update an application packaging for example.
+
+\code{ctx} gives the information about the module:
+
+\begin{description}
+	\item [prefix] The installation directory for the module.
+	\item [target] The build target for the module.
+	\item [variant] The variants for the module.
+	\item [module] The module plug-in's name.
+	\item [formodule] The module depending on the current one, \code{@root} for a module given on the command line.
+	\item [modref] The module reference as found in the dependencies.
+	\item [depends\_kind] The kind of dependency for the module, values are \code{default}, \code{build} or \code{tests}
+	\item [is\_meta] Wether the module is standard meta or aggregate meta, values are \code{yes}, \code{no} or \code{aggregate}
+	\item [is\_aggregated] Wether the module is aggregated into a meta-module, values are \code{yes} or \code{no}.
+	\item [is\_up\_to\_date] Wether the module is up-to-date or not, values are \code{yes} or \code{no}. A module may be up-to-date but not yet handled as the dependency kind was rejected.
+\end{description}
+
+and the methods \code{get(var)}, \code{is\_enabled(feature)},
+\code{module\_ref(modref)}, \code{module\_name(modref)},
+\code{target\_dir(module, variant)}, \code{ilog(...)} and
+\code{env\_actions(hook="env", modref=None)}.
+
+Example:
+
+\begin{lstlisting}
+import os
+import subprocess
+
+def module_final_step(ctx):
+    #  Handle only standard dependencies
+    #  (skip build & tests dependencies)
+    if ctx.depends_kind != "default":
+        return
+    app = f"/some/dir/{ctx.module}"
+    #  Copy if not up-to-date or not yet copied
+    if ctx.is_up_to_date == "no" or not os.path.isdir(app):
+        subprocess.run(["rsync", "-a", f"{ctx.prefix}/.", app])
+\end{lstlisting}
+
+\index{define-var!redefinition}
+\code{ctx.env\_actions()} gives the environment actions (action,
+variable, value) of the \code{env} hooks of the module (and of the
+modules it aggregates for a meta-module), for example to write a launch
+script setting the environment of an application:
+
+\begin{lstlisting}
+def module_final_step(ctx):
+    with open(f"{ctx.prefix}/env.dump", "w") as f:
+        for action, var, value in ctx.env_actions():
+            f.write(f"{action} {var} {value}\n")
+\end{lstlisting}
+
+\subsection{Setting environment}
+\label{set-env}
+\index{variable!add}
+\index{variable!set}
+\index{variable!unset}
+\index{variable!prepend}
+\index{variable!append}
+\index{variable|delete}
+\index{helpers!define-var}
+\index{helpers!add-to-var}
+\index{helpers!prepend-to-var}
+\index{helpers!append-to-var}
+\index{helpers!set-var}
+\index{helpers!unset-var}
+\index{helpers!remove-from-var}
+
+The following actions are used to set environment variables in the \code{env}, \code{build-env} and \code{tests-env} hooks. They permit a fine control about the way the variables are set and avoid duplicate values. Each action goes through the function \code{define\_var} of the environment file when it is defined (\seeref{python-env-files}).
+
+\begin{description}[style=nextline]
+	\item[define-var {[PREPEND|APPEND|ADD|SET|UNSET]} <VARIABLE> <VALUE>] Prepend, append, add or set a variable depending on the first action parameter. Note that a single character action is supported as alias.
+	\begin{description}
+		\item[PREPEND | P] Prepend \code{<VALUE>} in \code{<VARIABLE>}, remove previous value if it exists. This ensures that the value is found after the current ones if needed.
+		\item[APPEND | A] Append \code{<VALUE>} in \code{<VARIABLE>}, remove previous value if it exists. This ensures that the value is found before the current ones.
+		\item[ADD] Add \code{<VALUE>} in \code{<VARIABLE>} if it is not already present. The place of the value in the variable is not important, it may be at the start, middle or end.
+		\item[REMOVE | R] Remove \code{<VALUE>} from \code{<VARIABLE>} if it is present. This can be the single value in \code{<VARIABLE>} or one of the value in a list like for \code{PATH} or \code{LD\_LIBRARY\_PATH} variables.
+		\item[SET | S] Set \code{<VARIABLE>} to \code{<VALUE>} removing all previous values. After this call we always have a single value set.
+		\item[UNSET | U] Unset \code{<VARIABLE>}. After this call \code{<VARIABLE>} is not set.
+	\end{description}
+
+	\item[prepend-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable PREPEND <VARIABLE> <VALUE>}.
+	\item[append-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable APPEND <VARIABLE> <VALUE>}.
+	\item[add-to-var <VARIABLE> <VALUE>] short hand for \code{define-variable ADD <VARIABLE> <VALUE>}.
+	\item[remove-from-var <VARIABLE> <VALUE>] short hand for \code{define-variable DELETE <VARIABLE> <VALUE>}.
+	\item[set-var <VARIABLE> <VALUE>] short hand for \code{define-variable SET <VARIABLE> <VALUE>}.
+	\item[unset-var <VARIABLE>] short hand for \code{define-variable UNSET <VARIABLE>}.
+\end{description}
+
+Example:
+
+\begin{lstlisting}
+build-env:
+  - set-var MYMODULE_USE_CLANG no
+env:
+  - add-to-var CMAKE_PREFIX_PATH /some/path
+  - prepend-to-var PATH /priority/dir/bin
+\end{lstlisting}
+
+\subsection{Setting a proxy}
+\label{proxy}
+\index{proxy}
+
+When a Web protocol is used to retrieve an archive with the sources or a VCS it may be necessary to pass through a proxy. In the archive and vcs hook description the name of a proxy can be given. The function \code{proxy(name, env)} of the environment file (\seeref{python-env-files}) is then called with this name and the environment (a dictionary) of the download or VCS commands, to change.
+
+A typical setting is:
+
+\begin{lstlisting}
+def proxy(name, env):
+    if name == "enterprise":
+        for var in ("http_proxy", "https_proxy", "ftp_proxy"):
+            env[var] = "http://myproxy.org:3128"
+        env["no_proxy"] = "localhost,.net"
+\end{lstlisting}
+
+Note that this setting will be available only during the download of the archive file or the VCS and won't be polluting other module download not requiring a proxy.
+
+\subsection{Feature}
+\label{enable-feature}
+\index{feature}\index{helpers!is-enabled}\index{is-enabled}
+
+It is possible to enable a feature using the command line \code{\ddash{}enable-<feature>} or some environment variables:
+
+\begin{description}[style=nextline]
+	\item [SCBI\_<feature>\_FEATURE] The \emph{feature} is set for all plug-ins with the corresponding value (\code{true} or \code{false}).
+	\item [SCBI\_<plugin>\_<feature>\_FEATURE] The \emph{feature} is set for the given plug-in with the corresponding value (\code{true} or \code{false}).
+\end{description}
+
+This option activate the feature named \code{feature}. This is a convenience function and it is up to the user to decide about the semantic of the enabled feature. For \code{SCBI} driver this is only a flag set or not.
+
+In module's plug-ins the feature can be checked with the \code{is-enabled} function:
+
+\code{is-enabled <name> [then-value] [else-value]}
+
+which returns \code{yes} by default or \code{then-value} if set when the feature is enabled, and the empty string by default or \code{else-value} if set when it is not. In conditions \code{enabled(<name>)} is true when the feature is enabled.
+
+Some example, setting the \emph{installer} feature:
+
+\cmd{scbi \ddash{}enable-installer ...}
+
+or
+
+\cmd{export SCBI\_installer\_FEATURE=true}
+
+A feature check in a command hook:
+
+\begin{lstlisting}
+wrapup: |
+  if enabled(installer) or enabled(appli):
+      makeself ...
+\end{lstlisting}
+
+Or setting a specific compiler option, example of a \code{config-options} hook:
+
+\begin{lstlisting}
+config-options:
+  - -DCMAKE_CXX_FLAGS=-march=$(is-enabled safe-arch x86_64 native)
+\end{lstlisting}
+
+\subsection{Build kind}
+\index{helpers!get-build-type} \index{build kind}
+
+One of the most generic build variant that must be handled is the \code{Release} vs \code{Debug} one. To support this more easily without requiring to create a specific variant hook there is a simple support using the function \code{get-build-type}:
+
+\cmd{get-build-type <config> <default>}
+
+(\code{\$(get-build-type <config> <default>)} in a value,
+\code{VAR = get-build-type <config> <default>} in a command hook,
+\code{build-type(<config>,<default>)} in a condition).
+
+The \code{<config>} represents the configuration tool (CMAKE or CONFIGURE for example). But it can be whatever string.
+
+This function will return the build-kind for the calling module and system type (\code{cmake} or \code{configure}) and if not specified the default value is returned.
+
+The actual build kind for the given module can be set using some environment variables in the following order:
+
+\begin{description}[style=nextline]
+	\item [SCBI\_<module>\_BUILD\_TYPE] Build kind for this specific module.
+	\item [SCBI\_<CONFIG>\_BUILD\_TYPE] Build kind for the builder kind.
+\end{description}
+
+And then this can be used in the \code{config} hook simply with:
+
+\begin{lstlisting}
+config: |
+  BUILD_TYPE = get-build-type CMAKE Release
+  cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=$BUILD_TYPE ../src
+\end{lstlisting}
+
+With the above example, if no variables are set in the environment to set the build type the default \code{Release} will be used. To force a \code{Debug} build one can set in the environment file or in the current shell:
+
+\begin{lstlisting}
+ export SCBI_CMAKE_BUILD_TYPE=Debug
+\end{lstlisting}
+
+Which will force a \code{Debug} build for all modules using \code{cmake}, or:
+
+\begin{lstlisting}
+ export SCBI_lcms2_BUILD_TYPE=Debug
+\end{lstlisting}
+
+With will force a \code{Debug} build for the \code{lcms2} plug-in only. In both cases, the corresponding plug-in must have been coded to use the \code{get-build-type} function as seen above. Note that the \code{export} must use \emph{underscores} instead of dashes in plug-in name as dashes are forbidden in variable name.
+
+\subsection{Checking installed tools}
+\index{helpers!check-tool}\index{check-tool}
+
+It may be needed to check for the existence of a tool installed on the machine. It may not be a direct dependency but a tool needed for a specific need. For example the need to have \code{makeself} installed to create a self installer.
+
+In a command hook the function \code{command-path} gives the path of a tool (empty if not found):
+
+\begin{lstlisting}
+wrapup: |
+  MS = command-path makeself
+  if empty($MS):
+      echo Required tool makeself missing
+      exit 1
+\end{lstlisting}
+
+\subsection{Checking dependency version}
+\index{helpers!get-module-version}\index{get-module-verson}
+\index{helpers!check-module-version}\index{check-module-verson}
+
+The version of a dependency in the build plan can be checked in a plug-in. This can be used for example to apply a patch for a specific version of a dependency.
+
+In a condition \code{version(<plug-in>)} is the version of the plug-in in the build plan, compared as versions with \code{<}, \code{<=}, \code{>}, \code{>=} or with a regular expression (\code{=\textasciitilde}):
+
+\begin{lstlisting}
+patches:
+  - if version(lib2) > 1.9: new-lib2.diff
+config: |
+  if version(lib2) =~ ^2.0:
+      ./configure --with-lib2-2.0
+  else:
+      ./configure
+\end{lstlisting}
+
+In a command hook \code{check-versions <v1> <op> <v2>} succeeds when the comparison is true.
+
+\subsection{Inheritance}
+\label{inheritance}
+\index{inheritance}\index{inherit-plugin}\index{helpers!inherit-plugin}
+
+It is possible to create a plug-in by inheriting from the definition
+of another plug-in. This is done with the key \code{inherit}, a list of
+inherited plug-ins:
+
+\begin{lstlisting}
+inherit:
+  - from: <name>
+    hooks: [<hook1>, <hook2>]
+    custom-hooks: [<hook1>, <hook2>]
+    no-variant: false
+    name: <name>
+\end{lstlisting}
+
+\begin{description}
+	\item[from] The name of an existing plug-in from which we want to inherit all the current hooks.
+	\item[no-variant] Whether to not inherit from any hook's variant (\code{true}): only the default variants will be inherited.
+	\item[hooks] The hooks to inherit from. If not specified all SCBI supported hooks are inherited.
+	\item[custom-hooks] The custom hooks (plug-in functions) to inherit from.
+	\item[name] The name to be used for the inherited plug-in instead of the default plug-in name. This makes it possible to inherit from multiple modules having the same hook and chain them manually.
+\end{description}
+
+The hooks defined by the plug-in itself take precedence over the
+inherited ones. This may be handy if a module need to redefine only
+the \code{vcs} or \code{proxy} hook for a specific context.
+
+\subsection{Native variant}
+\label{native variant}
+\index{native variant}\index{variant!native}
+\index{with-variant}\index{helpers!with-variant}
+
+For a plug-in it is sometimes needed to have a native variant to use the OS libraries instead of building from sources. It is possible to do so by creating the variant hooks manually. All hooks must be nop action except the \code{depends} hooks which may list the OS libraries and possible the \code{env} hook which may need to define some environment variables.
+
+The key \code{os-variants} can be used to automate this action:
+
+\begin{lstlisting}
+os-variants:
+  native:
+    packages: [pckA:[v], pckB]
+    env: [set-var ROOT_DIR /usr]
+\end{lstlisting}
+
+The variant name is the key (\code{native}). \code{packages} lists the OS package names or \code{NONE}, \code{env} the environment actions. The value \code{NONE} will create an empty \code{depends} hook and can be used if the actual OS dependency has been installed manually on the machine. A possible reason is that the library has not been packaged by the OS maintainers. The \code{[v]} tag can be used to check that install \code{<package>} has the version specified for the plug-in.
+
+With the example above, when \code{natv} has version \code{1.2} in the build plan, the variant \code{native} of \code{natv} has:
+
+\begin{itemize}
+	\item a \code{depends} hook listing \code{pckA:1.2} and \code{pckB};
+	\item an \code{env} hook with the actions of \code{env};
+	\item \code{prefix} set to \code{NONE};
+	\item empty \code{build-env}, \code{build-depends}, \code{config}, \code{build} and \code{install} hooks.
+\end{itemize}
+
+\subsection{Getting configuration options}
+\label{get config options}
+\index{get-config-options}\index{helpers!get-config-options}
+
+It is often needed to set configuration options based on the variant we want to build. This is for example to activate an external module.
+
+In a command hook:
+
+\begin{lstlisting}
+  OPTIONS = config-options
+\end{lstlisting}
+
+sets \code{OPTIONS} to the list of the values of the \code{config-options} hooks of the module: the \code{common} one, then those of each variant of the module reference.
+
+The \code{common} hook is designed to contain all the common options to be used regardless of the selected variant.
+
+For example:
+
+\begin{lstlisting}
+plugin: mod
+config-options:
+  common: [-DPREFIX=/my/path]
+  mpi: [-DMPI=ON]
+  openmp: [-DOpenMP=ON]
+config: |
+  OPTIONS = config-options
+  cmake $OPTIONS ../src
+\end{lstlisting}
+
+If the current module reference is \code{mod/mpi} the \code{cmake} command will be:
+
+\begin{lstlisting}
+	cmake -DPREFIX=/my/path -DMPI=ON ../src
+\end{lstlisting}
+
+And if the module reference is \code{mod/mpi.openmp} the \code{cmake} command will be:
+
+\begin{lstlisting}
+	cmake -DPREFIX=/my/path -DMPI=ON -DOpenMP=ON ../src
+\end{lstlisting}
+
+A list variable gives one word per element: an option containing spaces is kept as one argument.
+
+\subsection{OS dependencies}
+\label{OS dependencies}
+\index{os dependencies}
+
+The hook \code{depends} list dependencies to other plug-ins or external libraries/tools. As the name of the external dependency packages may be different depending on the Linux distribution and version it is possible to use an OS independent naming.
+
+\begin{lstlisting}
+	os@-<name>
+\end{lstlisting}
+
+The \code{os@-<name>} is then search against a table to find the corresponding OS package name.
+
+A distribution acronym is represented by a 3 letters name (deb, ubt, rhl for example). See output of the \code{\ddash{}stat} option for the currently supported distributions.
+
+An alias table is searched into the following places and in this specific order:
+
+\begin{enumerate}
+	\item \code{.pkgs-<distrib>[-<id>]} into \$SCBI\_PLUGINS (default \file{~/.config/scbi})
+	\item \code{.scbi-pkgs-<distrib>[-<id>]} into \$SCBI\_BDIR (build directory)
+	\item \code{.scbi-pkgs-<distrib>[-<id>]} into \$PWD (current directory)
+\end{enumerate}
+
+\begin{description}
+	\item [\code{<distrib>}] The acronym of one of the supported distribution. The \code{<distrib>} can also have appended the \emph{major} and \emph{minor} version of the distribution. The separator between the name and version is the tilde \textasciitilde{}.
+
+For example on \code{Debian 10.6} the searched files will be, and in that order:
+
+\begin{enumerate}
+	\item \code{.pkgs-deb}
+	\item \code{.pkgs-deb\textasciitilde{}10}
+	\item \code{.pkgs-deb\textasciitilde{}10.6}
+\end{enumerate}
+
+So \code{.pkgs-deb\textasciitilde{}10} can add new dependencies or override some dependencies that are set in \code{.pkgs-deb}.
+
+\item [\code{<id>}] An optional random string that can be added for project's specific aliases. Such a file is loaded after the default one (without the \code{<id>}) so can override some entries if needed.
+\end{description}
+
+\subsection{Private Store}
+\index{Private Store}
+\index{API|Private Store}
+
+See below (\ref{store}) how to handle the SCBI's private store. From a
+command hook the \code{scbi store} sub-command can be used:
+
+\begin{lstlisting}
+wrapup: |
+  scbi store LICKEY 89AXCDPPP6BGG
+  KEY = output scbi store LICKEY
+\end{lstlisting}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
-\section{The Python driver}
+\section{The driver}
 \label{python-driver}
 \index{Python driver}
 
-\emph{The Python driver is in development; the Bash driver remains the
-reference until the Python one replaces it.}
+The driver is written in Python (\file{src/scbi} in the SCBI
+repository). It replaces the former Bash driver, which is kept in the
+repository for its testsuite only (\seeref{bash-plugins}).
 
-\subsection{Running}
+\subsection{Installing and running}
+\index{install}
 
-The Python driver accepts the same command line, options, environment and
-ini files and build plans as the Bash driver, gives the same output and
-builds the same sandbox. From a checkout of SCBI it is run with:
+The driver needs \code{python3} (3.11 or later) and its YAML module
+(\code{python3-yaml} on Debian). From a checkout of SCBI:
+
+\cmd{make}
+
+copies the driver into \file{\$HOME/.local/lib/scbi}, writes the command
+\file{\$HOME/.local/bin/scbi}, and copies the plug-ins into
+\file{\$HOME/.config/scbi} and the completion support into
+\file{\$HOME/.bash\_completion.d}. From a checkout it can also be run
+directly with:
 
 \cmd{PYTHONPATH=<scbi>/src python3 -m scbi [options] module1 ...}
 
-The name of the command displayed in the messages (\code{\$0} of the Bash
-driver) is taken from the environment variable \code{SCBI\_ARGV0} when set
-(a wrapper script named \code{scbi} sets it).
+The name of the command displayed in the messages is taken from the
+environment variable \code{SCBI\_ARGV0} when set (the \code{scbi}
+command sets it).
 
-\subsection{Compatibility}
+\subsection{Compatibility with the Bash driver}
 
-The Python driver runs no Bash code: no runtime file, no Bash plug-in and
+The driver accepts the same command line, options, ini files and build
+plans as the former Bash driver, gives the same output and builds the
+same sandbox. It runs no Bash code: no runtime file, no Bash plug-in and
 no Bash environment file is read.
 
 \begin{itemize}
@@ -2170,8 +1941,8 @@ no Bash environment file is read.
 \label{python-env-files}
 \index{environment!file}
 
-The environment files of the Python driver are Python files, searched as
-the Bash ones (\seeref{cmdline}) with a \file{.py} suffix:
+The environment files are Python files, searched as described in
+\seeref{envfile}:
 \file{\$PWD/.scbi-env.py}, \file{\$PWD/../.scbi-env.py},
 \file{\$HOME/.scbi-env.py}, then \file{\$SCBI\_PLUGINS/.env.py}
 (\file{env-<name>} for \code{\ddash{}env=<name>}). A Bash environment file
@@ -2196,8 +1967,8 @@ variable, or \code{default} when it is empty, as
 	given to the hooks (see below);
 	\item[\code{define\_var(env, action, name, value)}] called for each
 	environment action (\code{ADD}, \code{SET}, \code{PREPEND},
-	\code{APPEND}, \code{REMOVE}, \code{UNSET}) of the YAML plug-ins
-	(the environment of each module, see above), instead of the default; \code{env.apply(action, name, value)} does the
+	\code{APPEND}, \code{REMOVE}, \code{UNSET}) of the plug-ins
+	(the environment of each module, \seeref{set-env}), instead of the default; \code{env.apply(action, name, value)} does the
 	default action, \code{env.get(name)} reads a variable;
 	\item[\code{rewrite\_vcs(record)}, \code{rewrite\_archive(record)}] the
 	fields of a \code{vcs} / \code{archive} hook (a list: proxy, options,
@@ -2209,8 +1980,7 @@ variable, or \code{default} when it is empty, as
 	\code{ctx} has the attributes \code{prefix}, \code{target},
 	\code{variant}, \code{module}, \code{formodule}, \code{modref},
 	\code{depends\_kind}, \code{is\_meta}, \code{is\_aggregated},
-	\code{is\_up\_to\_date} (the parameters of the Bash
-	\code{module-final-step}) and the methods \code{get(var)},
+	\code{is\_up\_to\_date} (\seeref{module-final-step}) and the methods \code{get(var)},
 	\code{is\_enabled(feature)}, \code{module\_ref(modref)} (module,
 	variant, kind, reference in the plan), \code{module\_name(modref)},
 	\code{target\_dir(module, variant)}, \code{ilog(...)} and
@@ -2256,6 +2026,7 @@ variables of the body, not environment variables (use \code{export VAR =
 ...} to give one to the commands).
 
 \subsection{Reproducing a step}
+\label{replay}
 \index{replay}
 
 For a command hook of a YAML plug-in the file
@@ -2290,9 +2061,10 @@ and output as with the Bash driver; \code{shell} spawns the user's
 \code{replay} reruns a step (see above). \code{lint} and \code{format}
 work on YAML plug-ins only (\seeref{linter}, \seeref{formatter}).
 
-A standalone source archive (\ddash{}standalone) contains the driver as
-installed, the plug-in definitions of the modules (YAML or Bash) and a
-Python environment file (\file{.scbi-env-std.py}).
+A standalone source archive (\ddash{}standalone) contains the driver
+(the Python package in \file{lib}, the command \file{bin/scbi}), the
+plug-ins of the modules and a Python environment file
+(\file{.scbi-env-std.py}).
 
 \subsection{Testsuite}
 \index{testsuite}
@@ -2417,7 +2189,7 @@ The following options are supported:
 
 	\item[\ddash{}stat] Display some statistics about of current setup.
 
-	\item[\ddash{}plugins=<directory>] Specify a non default location for the modules and plug-ins directory. This overrides the \code{SCBI\_DEFS} environment.
+	\item[\ddash{}plugins=<directory>] Specify a non default location for the modules and plug-ins directory. This overrides the \code{SCBI\_PLUGINS} environment.
 
 	\item[\ddash{}list-keys] List all registered keys.
 
@@ -2759,8 +2531,8 @@ make[1]: *** [CMakeFiles/Makefile2:87 : CMakeFiles/hello.dir/all] Erreur 2
 make: *** [Makefile:136 : all] Erreur 2
 2024/09/19 13:23:30 : h-handson-lib (FAILED) build failed with error 2
 2024/09/19 13:23:30 : h-handson-lib (FAILED) to reproduce:
-2024/09/19 13:23:30 : h-handson-lib (FAILED) bash /<...>/h-handson-lib/<...>/logs/build.cmd
-2024/09/19 13:23:30 : h-handson-lib (FAILED) use bash -x option for debug
+2024/09/19 13:23:30 : h-handson-lib (FAILED) scbi replay /<...>/h-handson-lib/<...>/logs/build.cmd
+2024/09/19 13:23:30 : h-handson-lib (FAILED) use --trace option for debug
 \end{verbatim}
 \end{footnotesize}
 
@@ -2779,11 +2551,11 @@ The files created in this directory are:
 \begin{description}[font=\file,style=standard]
 	\item[env.cmd] \tabto{3cm} The environment set to configure, build or install the module.
 	\item[build-plan] \tabto{3cm} The build plan with the variant and version of all modules.
-	\item[config.cmd] \tabto{3cm} The commands executed to configure.
+	\item[config.cmd] \tabto{3cm} The replay file of the configuration (\seeref{replay}).
 	\item[config.log] \tabto{3cm} The full log issued during the configuration.
-	\item[build.cmd] \tabto{3cm} The commands executed to build.
+	\item[build.cmd] \tabto{3cm} The replay file of the build.
 	\item[build.log] \tabto{3cm} The full log issued during the build.
-	\item[install.cmd] \tabto{3cm} The commands executed to install.
+	\item[install.cmd] \tabto{3cm} The replay file of the installation.
 	\item[install.log] \tabto{3cm} The full log issued during the installation.
 	\item[<plug-ins>] \tabto{3cm} The plug-ins needed for the build.
 \end{description}
@@ -2829,48 +2601,33 @@ Edit \file{<...>/h-handson-lib/build/src/hello.cpp} and replace \code{x} by \cod
 
 The compilation is now fixed using sources in the sandbox, be sure to apply the changes into the repository hosting the sources. For testing purpose you can then simply copy the artifacts (shared libraries for example) where the application is looking for them.
 
-\subsubsection{Use generated scripts}
+\subsubsection{Use the replay files}
 
-It is possible to replay the configure, build or install step just by running the corresponding \code{.cmd} file. Use the Bash \code{-x} option to display the commands as they are executed.
+It is possible to replay the configure, build or install step just by
+running the corresponding \code{.cmd} file with \code{scbi replay}
+(\seeref{replay}); the \ddash{}trace option displays the commands as they
+are executed.
 
 In case of failure \code{SCBI} output the command to use to replay:
 
 \begin{footnotesize}
 	\begin{verbatim}
-2024/09/19 13:23:30 : h-handson-lib (FAILED) bash /<...>/h-handson-lib/<...>/logs/build.cmd
-2024/09/19 13:23:30 : h-handson-lib (FAILED) use bash -x option for debug
+2024/09/19 13:23:30 : h-handson-lib (FAILED) scbi replay /<...>/h-handson-lib/<...>/logs/build.cmd
+2024/09/19 13:23:30 : h-handson-lib (FAILED) use --trace option for debug
     \end{verbatim}
 \end{footnotesize}
 
-As an example, the build command file \code{build.cmd} for \code{h-handson-lib} plug-in looks like this:
+The replay file holds the directory, the environment, the parameters and
+the body of the hook (which can be edited). The hook runs in its own
+environment and won't pollute the working shell environment.
 
-\begin{lstlisting}
-# h-handson-lib-build
-(
-   cd <...>/h-handson-lib/x86_64-linux-gnu-default/build
-   source <...>/.scbi.runtime
-   [[ -f ../logs/env.cmd ]] && source ../logs/env.cmd
-   [[ -f ../logs/build-plan ]] &&
-   load-runtime-module-plan ../logs/build-plan
+One can then edit the sources in the sandbox and replay the step:
 
-   source ../logs/h-handson-lib
-
-   h-handson-lib-build <...>/h-handson-lib/<...>/install \
-                       x86_64-linux-gnu default
-)
-\end{lstlisting}
-
-Note that this script is executed in a sub-shell and so won't pollute the working shell environment.
-
-To replay just execute the script:
-
-\cmd{bash /.../logs/build.cmd}
-
-One can then edit the sources in the sandbox and launch the command above to build again.
+\cmd{scbi replay /.../logs/build.cmd}
 
 Here just fix the syntax error by changing \code{x} by \code{return}.
 
-\cmd{bash /.../logs/build.cmd}
+\cmd{scbi replay /.../logs/build.cmd}
 
 This time the compilation complete without issue:
 
@@ -2975,153 +2732,76 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 
 Many scripts come with \code{scbi}, they are all good examples to learn about different features.
 
-As a complete example here, let's build latest GIMP version. The plug-in module script is called \file{gimp} (placed into \file{\$SCBI\_PLUGINS/.config/scbi}) and all hook functions in this script are prefixed by \code{gimp-}.
+As a complete example here, let's build latest GIMP version. The plug-in is the file \file{gimp.yaml} (placed into \file{\$SCBI\_PLUGINS}, \file{\$HOME/.config/scbi} by default).
 
-Note that this was compiling at the time this doc was written, but some dependencies on the OS may required the script to be updated.
+Note that this was compiling at the time this doc was written, but some dependencies on the OS may required the plug-in to be updated.
 
-\begin{itemize}
-	\item We describe the VCS, sources are handled in Git:
+\begin{lstlisting}
+plugin: gimp
 
-	\begin{lstlisting}
-	function gimp-vcs()
-	{
-		echo default
-		echo none
-		echo git
-		echo https://github.com/GNOME/gimp
-	}
-	\end{lstlisting}
+# the sources are handled in Git
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: https://github.com/GNOME/gimp
 
-	\item We won't build GIMP out-of-tree, that is the build will be done in the source directory:
+# all dependencies, most of them are standard Debian packages
+# except libmypaint, mypaint-brushes and libgegl
+depends:
+  - gtk-doc-tools
+  - libbabl-dev
+  - libgegl-dev
+  - libgexiv2-dev
+  - libpoppler-glib-dev
+  - python-gtk2-dev
+  - python-cairo-dev
+  - mypaint
+  - libmng-dev
+  - libxpm-dev
+  - libmypaint
+  - mypaint-brushes
+  - libgegl
 
-	\begin{lstlisting}
-	function gimp-out-of-tree()
-	{
-		echo false
-	}
-	\end{lstlisting}
+# the build is done in the source directory
+out-of-tree: false
 
-	\item We list all dependencies, most of them are standard Debian packages except \code{libmypaint}, \code{libmypaint-brushes} and \code{libegl}.
+# the environment of the three dependent modules is set by
+# their plug-ins
+config: ./autogen.sh --prefix=$PREFIX
 
-	\begin{lstlisting}
-	function gimp-depends()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-		local VARIANT=$3
+build: make -j$SCBI_JOBS
 
-		echo gtk-doc-tools
-		echo libbabl-dev
-		echo libgegl-dev
-		echo libgexiv2-dev
-		echo libpoppler-glib-dev
-		echo python-gtk2-dev
-		echo python-cairo-dev
-		echo mypaint
-		echo libmng-dev
-		echo libxpm-dev
+# installation into the sandbox install directory of the module
+install: make install
 
-		echo libmypaint
-		echo mypaint-brushes
-		echo libgegl
-	}
-	\end{lstlisting}
-
-	\item We configure GIMP, note that the environment for the three dependent modules are set in the corresponding plug-in module:
-
-	\begin{lstlisting}
-	function gimp-config()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-		local VARIANT=$3
-
-		./autogen.sh --prefix=$PREFIX
-	}
-	\end{lstlisting}
-
-	\item We build GIMP:
-
-	\begin{lstlisting}
-	function gimp-build()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-		local VARIANT=$3
-
-		make -j$SCBI_JOBS
-	}
-	\end{lstlisting}
-
-	\item We install it, this is the installation into the sandbox install directory for this module:
-
-	\begin{lstlisting}
-	function gimp-install()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-		local VARIANT=$3
-
-		make install
-	}
-	\end{lstlisting}
-
-	\item The global installation is set to point to \file{/opt/gimp}:
-
-	\begin{lstlisting}
-	function gimp-prefix()
-	{
-		echo /opt/gimp
-	}
-	\end{lstlisting}
-
-\end{itemize}
+# the global installation
+prefix: /opt/gimp
+\end{lstlisting}
 
 As seen above, \code{gimp} module depends on three other modules and we do need some configuration from those dependencies during the configuration. The exported environment for the three dependencies are:
 
 \begin{itemize}
-	\item Hook \code{libmypaint-env}:
+	\item Hook \code{env} of \file{libmypaint.yaml}:
 
 	\begin{lstlisting}
-	function libmypaint-env()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-		local VARIANT=$3
-
-		add-to-var PKG_CONFIG_PATH \
-					$PREFIX/lib/pkgconfig
-	}
+env:
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
 	\end{lstlisting}
 
-	\item Hook \code{mypaint-brushes-env}:
+	\item Hook \code{env} of \file{mypaint-brushes.yaml}:
 
 	\begin{lstlisting}
-	function mypaint-brushes-env()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-		local VARIANT=$3
-
-		add-to-var PKG_CONFIG_PATH \
-					$PREFIX/share/pkgconfig
-	}
+env:
+  - add-to-var PKG_CONFIG_PATH $PREFIX/share/pkgconfig
 	\end{lstlisting}
 
-	\item Hook \code{libegl-env}:
+	\item Hook \code{env} of \file{libgegl.yaml}:
 
 	\begin{lstlisting}
-	function libgegl-env()
-	{
-		local PREFIX=$1
-		local TARGET=$2
-		local VARIANT=$3
-
-		add-to-var PKG_CONFIG_PATH \
-					$PREFIX/lib/pkgconfig
-		add-to-var PATH            \
-					$PREFIX/bin
-	}
+env:
+  - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+  - add-to-var PATH $PREFIX/bin
 	\end{lstlisting}
 
 \end{itemize}
@@ -3140,6 +2820,113 @@ That is, we need version 1.3.0 of \code{libmypaint} and \code{mypaint-brushes}.
 At this point we can build GIMP with a simple:
 
 \cmd{scbi \ddash{}plan=gimpdev \ddash{}deps gimp}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% APPENDIX
+
+\appendix
+
+\section{Bash plug-ins and the Bash driver}
+\label{bash-plugins}
+\index{Bash plug-in}
+
+Before the Python driver, SCBI was a Bash driver (\file{scbi} and
+\file{scbi-*} in the repository, with the runtime files
+\file{scripts.d/[0-9]*}) and the plug-ins were Bash scripts. The Bash
+driver is kept in the repository for its testsuite (\code{make test}),
+which also serves as the reference for the Python driver; it is no longer
+installed.
+
+\subsection{Bash plug-in format}
+
+A Bash plug-in is a file named as the plug-in (no suffix) defining a Bash
+function per hook, named \code{<plug-in>[-<variant>|-common][-cross]-<hook>}.
+The parameters are given as positional parameters (\code{local
+PREFIX=\$1}, \code{local TARGET=\$2}, \code{local VARIANT=\$3}...), a
+value hook prints its values (\code{echo}, one per line), an environment
+hook calls the helpers \code{add-to-var}, \code{set-var}... and a command
+hook is Bash code:
+
+\begin{lstlisting}
+function lcms2-vcs()
+{
+	echo default
+	echo none
+	echo git
+	echo http://github.com/mm2/Little-CMS
+}
+
+function lcms2-env()
+{
+	local PREFIX=$1
+	add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
+}
+
+function lcms2-build()
+{
+	local PREFIX=$1
+	local TARGET=$2
+	local VARIANT=$3
+	make -j$SCBI_JOBS
+}
+\end{lstlisting}
+
+The YAML equivalents of the Bash constructs:
+
+\begin{description}
+	\item[\code{inherit-plugin [options] <name>}] the key \code{inherit} (\seeref{inheritance}).
+	\item[\code{with-variant native <packages> \ddash{}env ...}] the key \code{os-variants} (\seeref{native variant}).
+	\item[\code{get-config-options OPTIONS \$PREFIX \$TARGET \$VARIANT}] \code{OPTIONS = config-options} (\seeref{get config options}).
+	\item[\code{\$(get-build-type <kind> <default>)}] the same in values, \code{V = get-build-type ...} in command hooks.
+	\item[\code{check-tool}, \code{check-tools}] \code{command-path} in command hooks.
+	\item[\code{get-module-version}, \code{check-module-version}] \code{version(<plug-in>)} in conditions, \code{check-versions}.
+	\item[\code{scbi-store-set-key}, \code{scbi-store-get-key}] the \code{scbi store} sub-command.
+	\item[\code{scbi-rewrite-vcs}, \code{scbi-rewrite-archive}, \code{proxy-<name>}, \code{module-final-step}, a redefinition of \code{define-var}] the functions \code{rewrite\_vcs}, \code{rewrite\_archive}, \code{proxy}, \code{module\_final\_step} and \code{define\_var} of the Python environment file (\seeref{python-env-files}).
+	\item[\code{call-variant-hooks}] no equivalent: the hooks of the variants are selected by the qualifiers (\seeref{yaml-plugin}).
+\end{description}
+
+\subsection{Calling variant hooks (Bash plug-ins)}
+\label{call variant hooks}
+\index{call-variant-hooks}\index{helpers!call-variant-hooks}
+
+The support routine \code{call-variant-hook} can be used to call a set of hook in a module based on the variants.
+
+\begin{lstlisting}
+call-variant-hooks hname $PREFIX $TARGET $VARIANT \
+    [$P1 $P2...]
+\end{lstlisting}
+
+Will call all hooks in the current plug-in (<plugin>) with arguments \code{\$PREFIX}, \code{\$TARGET}, \code{\$VARIANT} and optional parameters \code{\$P<n>} in the form:
+
+\begin{lstlisting}
+   <plugin>-<variant>-hname
+\end{lstlisting}
+
+Where \code{<variant>} is all possible values found in \code{\$VARIANT}.
+
+\subsection{Converting Bash plug-ins}
+
+A Bash plug-in is converted with:
+
+\cmd{python3 -m scbi.convert [\ddash{}check] [\ddash{}output-dir=<dir>] <plug-in>...}
+
+Everything that cannot be expressed in the YAML format is reported and the
+plug-in is not converted; it must be fixed first. This is the case for hook
+parameters not matching the hook signature or values computed by arbitrary
+shell code.
+
+A hook of a variant which only calls the same hook of other variants (like
+\code{c-darktable-all-depends} calling the \code{depends} hooks of the
+\code{ai}, \code{hdr} and \code{jxl} variants) is converted into a
+variant including other variants (\seeref{yaml-variants}), after checking
+that the hooks selected are the same for every hook, variant and cross
+mode; otherwise it is reported.
+
+The converted plug-in is written as \file{<name>.yaml} next to the Bash
+plug-in (or into the \ddash{}output-dir directory); with \ddash{}check
+nothing is written. The exit status is 1 if a plug-in cannot be converted.
+
+The Bash environment files (\file{.env-<name>}) are converted with
+\code{python3 -m scbi.envconvert <file>} (\seeref{python-env-files}).
 
 \printindex
 
