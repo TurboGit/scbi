@@ -39,8 +39,7 @@ version: |-
       begin
          null;
       end main;
-  gprbuild-project prj.gpr
-  if status == 0:
+  if ok("gprbuild -p -q $(if cross then --target=$TARGET) prj.gpr -cargs -gnatwA 2> /dev/null"):
       echo $VERSION_OK
   else:
       echo $VERSION_ERROR

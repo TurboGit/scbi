@@ -41,8 +41,7 @@ version: |-
                & integer (gtk.major_version)
                & integer (gtk.minor_version)));
       end main;
-  gprbuild-project prj.gpr
-  if status == 0:
+  if ok("gprbuild -p -q $(if cross then --target=$TARGET) prj.gpr -cargs -gnatwA 2> /dev/null"):
       _S1 = output-words ./main
       echo $_S1
   else:
