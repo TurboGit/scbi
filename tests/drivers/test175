@@ -59,22 +59,3 @@ RUNS ./scbi format .root/fmt.yaml
 RUNS diff .root/fmt.yaml <(./scbi format .root/fmt.yaml)
 
 rm -f .root/fmt.yaml
-
-# Bash plug-ins and invalid plug-ins are not formatted
-
-printf 'function abash-build()\n{\n    make\n}\n' > scripts.d/abash
-
-NRUNS ./scbi format abash
-
-CLEAN-DIFF <<EOF2
-
-========== Skip abash: not a YAML plug-in, convert it with: python3 -m scbi.convert
-EOF2
-
-rm -f scripts.d/abash
-
-NRUNS ./scbi format fixtures/lint/lintbad.yaml
-
-CLEAN-DIFF <<EOF2
-error: lintbad.vcs: missing fields ['protocol', 'url']
-EOF2

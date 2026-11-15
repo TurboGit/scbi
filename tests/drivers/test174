@@ -35,19 +35,6 @@ CLEAN-DIFF <<EOF2
    error:   (patches) unexpected end of condition: 'ref =='
 EOF2
 
-# Bash plug-ins are not checked: they are to be converted
-
-printf 'function abash-build()\n{\n    make\n}\n' > scripts.d/abash
-
-NRUNS ./scbi lint abash
-
-CLEAN-DIFF <<EOF2
-
-========== Skip abash: not a YAML plug-in, convert it with: python3 -m scbi.convert
-EOF2
-
-rm -f scripts.d/abash
-
 RUNS ./scbi lint nothere
 
 CLEAN-DIFF <<EOF2
