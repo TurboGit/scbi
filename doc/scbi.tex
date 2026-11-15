@@ -963,8 +963,14 @@ version: |
 	\code{all-variants <variant>} (the list of the variants of a variant
 	string, empty for \code{default}), \code{uppercase <words>},
 	\code{lowercase <words>} and \code{if <condition> then <words> [else
-	<words>]} (as \code{\$(if ...)} in values). The functions of the values
-	are also usable in words: \code{echo \$(uppercase \$VARIANT)}.
+	<words>]} (as \code{\$(if ...)} in values). Each of these functions
+	is also usable in the words of a command as \code{\$(<function>
+	<args>)}, with the value \code{VAR = <function> <args>} would give:
+	an unquoted word made of the call only gives one word per element of
+	a list (an element with spaces stays one word, an empty result no
+	word), otherwise the elements are joined with spaces, e.g.
+	\code{cmake \$(config-options) ../src} or \code{echo \$(uppercase
+	\$VARIANT)}. A call cannot be nested in \code{\$(if ...)}.
 	\code{export VAR = ...}
 	also sets it in the environment of the following commands.
 	\item[built-in commands] \code{cd}, \code{echo [-n]}, \code{return

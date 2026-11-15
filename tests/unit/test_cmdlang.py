@@ -295,3 +295,22 @@ def test_ok_external_command(tmp_path):
     text = 'if ok("ls $(if cross then --nope) . 2> /dev/null"):\n    echo yes'
     assert run(tmp_path, text)[:2] == (0, "yes\n")  # empty word removed, redirection
     assert run(tmp_path, 'if ok("ls --nope 2> /dev/null"):\n    echo yes\nelse:\n    echo no')[:2] == (0, "no\n")
+
+
+def test_function_in_words(tmp_path):
+    def go(text):
+        out = []
+        state = State({}, {"PATH": os.environ["PATH"]}, str(tmp_path), out.append, out.append)
+        r = make(tmp_path, config_options=lambda: ["-DA=1", "-DB=x y"])
+        return r.run(parse(text, 10), state), "".join(out)
+    #  a list alone in an unquoted word: one argument per element
+    assert go('printf "<%s>" $(config-options) end') == (0, "<-DA=1><-DB=x y><end>")
+    #  in a larger word or quoted: joined with spaces
+    assert go('printf "<%s>" -D$(config-options)') == (0, "<-D-DA=1 -DB=x y>")
+    assert go('printf "<%s>" "$(all-variants a.b)" $(all-variants default) z') == (0, "<a b><z>")
+    assert go('printf "<%s>" $(output-words echo "u  v") $(output echo "u  v")') == (0, "<u><v><u  v>")
+    assert go('printf "<%s>" $(dirname /a/b/c)$(uppercase x)') == (0, "</a/bX>")
+    #  same value as an assignment
+    assert go('O = config-options\nprintf "<%s>" $O') == go('printf "<%s>" $(config-options)')
+    status, out = go("echo $(nope x)")
+    assert status == 1 and out.startswith("m.yaml: config: line 10: unknown function $(nope ...)")

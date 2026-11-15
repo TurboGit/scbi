@@ -59,6 +59,7 @@ from scbi.hooks import builtins as _builtins
 from scbi.hooks.context import HookContext
 from scbi.hooks.expand import ExpandError, expand
 from scbi.plugin import expr
+from scbi.plugin.model import BUILTINS
 from scbi.vercmp import check_versions
 
 #  Functions usable in an assignment (VAR = <function> args)
@@ -515,6 +516,8 @@ class Runner:
     #  called with a "_TRACE: ..." line for each command and assignment (as
     #  Bash xtrace does)
     trace: Callable[[str], None] | None = None
+    #  line of the step being run (messages of $(function ...) in words)
+    line: int = field(default=0, init=False)
 
     # ------------------------------------------------------------ entry
 
@@ -530,6 +533,16 @@ class Runner:
             self.step(step, state)
 
     def step(self, step, state: State) -> None:
+        saved, self.line = self.line, getattr(step, "line", self.line)
+        try:
+            self._step(step, state)
+        except ExpandError as e:
+            self.error(state, self.line, str(e))
+            state.status = 1
+        finally:
+            self.line = saved
+
+    def _step(self, step, state: State) -> None:
         if isinstance(step, AndOr):
             status = self.pipeline(step.first, state, step.line)
             for op, p in step.rest:
@@ -599,9 +612,19 @@ class Runner:
                     if isinstance(value, list):
                         out += value
                         continue
+            #  unquoted $(function ...) alone: a list gives several words
+            if len(w.parts) == 1 and w.parts[0][1] == "":
+                calls = self._calls(w.parts[0][0])
+                if len(calls) == 1 and calls[0][:2] == (0, len(w.parts[0][0])):
+                    value = self.call(calls[0][2], state)
+                    if isinstance(value, list):
+                        out += value
+                    elif value:
+                        out.append(value)
+                    continue
             text, pattern, globbing, quoted = [], [], False, False
             for part, quote in w.parts:
-                v = part if quote == "'" else expand(part, ctx)
+                v = part if quote == "'" else self.expand_part(part, state, ctx)
                 text.append(v)
                 if quote:
                     quoted = True
@@ -618,6 +641,53 @@ class Runner:
             else:
                 out.append(value)
         return out
+
+    @staticmethod
+    def _calls(text: str) -> list[tuple[int, int, str]]:
+        """(start, end, inner text) of the $(<function> ...) of ``text``
+        whose function is an assignment function not known to the value
+        expansion (the others are expanded by scbi.hooks.expand)."""
+        calls, i = [], 0
+        while (i := text.find("$(", i)) >= 0:
+            depth, j = 0, i + 1
+            while j < len(text):
+                if text[j] == "(":
+                    depth += 1
+                elif text[j] == ")":
+                    depth -= 1
+                    if depth == 0:
+                        break
+                j += 1
+            if j >= len(text):
+                break
+            inner = text[i + 2 : j]
+            name = inner.split(None, 1)[:1]
+            if name and name[0] in FUNCTIONS and name[0] not in BUILTINS:
+                calls.append((i, j + 1, inner))
+            i = j + 1
+        return calls
+
+    def call(self, inner: str, state: State):
+        """The value of ``$(<function> args...)`` in a command word, as
+        ``VAR = <function> args...``."""
+        try:
+            words = tuple(w for w in tokenize(inner, self.line) if isinstance(w, Word))
+        except CmdSyntaxError as e:
+            self.error(state, self.line, str(e))
+            return ""
+        return self.function(words[0].parts[0][0], Assign(self.line, "", False, words, inner), state)
+
+    def expand_part(self, part: str, state: State, ctx: HookContext) -> str:
+        """Expansion of a part of a word; the $(<function> ...) calls give
+        their value (a list joined with spaces)."""
+        out, last = [], 0
+        for start, end, inner in self._calls(part):
+            out.append(expand(part[last:start], ctx))
+            value = self.call(inner, state)
+            out.append(" ".join(value) if isinstance(value, list) else value or "")
+            last = end
+        out.append(expand(part[last:], ctx))
+        return "".join(out)
 
     # ------------------------------------------------------- conditions
 
