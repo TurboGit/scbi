@@ -94,3 +94,16 @@ def test_cp_lifted_to_copy(bash, lifted):
 def test_loop_in_pipeline_unliftable():
     with pytest.raises(CmdUnliftable, match="while"):
         lift_commands(["cat MANIFEST | while read file; do", "    cp $file .", "done"])
+
+
+@pytest.mark.parametrize("name, key", [
+    ("m-build-runtime", ("build-runtime", "", False)),
+    ("m-cross-build-runtime", ("build-runtime", "", True)),
+    ("m-vcs-build-runtime", ("build-runtime", "vcs", False)),
+    ("m-vcs-cross-build-runtime", ("build-runtime", "vcs", True)),
+    ("m-build-env", ("build-env", "", False)),
+])
+def test_build_target_hook_names(name, key):
+    from scbi.plugin.lift import parse_hook_name
+    k = parse_hook_name("m", name)
+    assert (k.hook, k.qualifier, k.cross) == key

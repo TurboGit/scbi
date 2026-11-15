@@ -69,6 +69,7 @@ USAGE_OPTIONS = """
    -s | --setup             do setup
    -c | --config            do config
    -b | --build             do build
+        --build-target=<t>  build with the build-<t> hook
    -i | --install           do install
    -w | --wrapup            do wrapup
       | --clean-install     clean installation directory

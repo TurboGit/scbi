@@ -627,6 +627,10 @@ The following options are supported:
 
 	\item[-b | \ddash{}build]  Do the build step (default)
 
+	\item[\ddash{}build-target=<target>] \index{build-target}The build step
+	runs the \code{build-<target>} hook of the module instead of
+	\code{build} (see \emph{Hooks}).
+
 	\item[-i | \ddash{}install] Do the install step (default)
 
 	\item[\ddash{}clean-install] Clean installation directory
@@ -1372,6 +1376,18 @@ only-explicit-build: false
 		\begin{enumerate}
 			\item make
 		\end{enumerate}
+		\item[return] \tabto{2cm} NONE
+	\end{description}
+	\item[build-<target> {[}<variant>{]}] \index{hook!build-<target>}The
+	command run instead of \code{build} when the option
+	\code{\ddash{}build-target=<target>} is given, e.g. a \code{build-runtime}
+	hook to rebuild only the runtime of a compiler. It is resolved as
+	\code{build} (variants, \code{cross:}); \code{build} is only replaced
+	when the module has a \code{build} hook, and it is an error if it has no
+	\code{build-<target>} hook. \code{<target>} is made of letters, digits,
+	\code{\_} and \code{-} (and is not \code{env} or \code{depends}).
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 

@@ -73,6 +73,15 @@ def parse_hook_name(plugin: str, name: str) -> HookKey | None:
             return HookKey(step, rest[: -len(step) - 7], True)
         if rest.endswith(f"-{step}"):
             return HookKey(step, rest[: -len(step) - 1])
+    #  [<qualifier>-][cross-]build-<target>
+    i = rest.rfind("build-")
+    if i >= 0 and (i == 0 or rest[i - 1] == "-") and catalog.is_build_target(rest[i:]):
+        head, hook = rest[: max(i - 1, 0)], rest[i:]
+        if head == "cross":
+            return HookKey(hook, PLAIN, True)
+        if head.endswith("-cross"):
+            return HookKey(hook, head[: -len("-cross")], True)
+        return HookKey(hook, head) if head else HookKey(hook)
     return None
 
 

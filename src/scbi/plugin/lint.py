@@ -187,7 +187,7 @@ class Linter:
             key = str(key)
             if key in yamlfmt.RESERVED:
                 continue
-            if key not in names:
+            if not catalog.is_hook(key):
                 close = difflib.get_close_matches(key, names + list(yamlfmt.RESERVED), n=1)
                 hint = f", did you mean {close[0]!r}?" if close else ""
                 self.error(key, f"unknown hook {key!r}{hint}")

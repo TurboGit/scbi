@@ -118,3 +118,8 @@ env:
     #  a syntax error of $(if ...) is reported
     bad = issues("config-options:\n  - -DA=$(if variant == x ON)\n")
     assert bad and bad[0][0] == ERROR
+
+
+def test_build_target_hook():
+    assert issues("build: make\nbuild-runtime: make rts\n") == []
+    assert issues("build-env: [system-compiler]\nbuild-x-build-y: make\n")[0][0] == ERROR

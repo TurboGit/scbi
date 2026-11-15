@@ -15,6 +15,7 @@ and runtime, doc/scbi.tex section "Hooks".
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 #  Canonical order (SCBI_ALL_HOOKS, also used by scbi-format)
@@ -123,11 +124,38 @@ def step_names() -> list[str]:
     return names
 
 
+#  build-<target>: the build step run for --build-target=<target>
+_BUILD_TARGET = re.compile(r"build-[A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)*")
+
+
+def is_build_target(hook: str) -> bool:
+    """``build-<target>`` (not an existing hook such as build-env; the
+    target name does not contain ``build-``)."""
+    return (bool(_BUILD_TARGET.fullmatch(hook)) and hook not in HOOKS
+            and "build-" not in hook[len("build-"):])
+
+
+def is_hook(name: str) -> bool:
+    """A hook name a plug-in can define."""
+    return name in step_names() or is_build_target(name)
+
+
+def format_rank(hook: str) -> float:
+    """Position of ``hook`` in the canonical order (FORMAT_ORDER), the
+    build-<target> hooks just after build."""
+    if is_build_target(hook):
+        return FORMAT_ORDER.index("build") + 0.5
+    return FORMAT_ORDER.index(hook) if hook in FORMAT_ORDER else len(FORMAT_ORDER)
+
+
 def spec(hook: str) -> HookSpec:
-    """Spec of ``hook``, pre-/post- step hooks share the step spec."""
+    """Spec of ``hook``, pre-/post- step hooks and build-<target> share
+    the step spec."""
     for prefix in ("pre-", "post-"):
         if hook.startswith(prefix) and hook[len(prefix):] in STEPS:
             return HOOKS[hook[len(prefix):]]
+    if is_build_target(hook):
+        return HOOKS["build"]
     return HOOKS[hook]
 
 

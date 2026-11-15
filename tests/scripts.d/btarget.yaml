@@ -1,0 +1,17 @@
+plugin: btarget
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/test1.bundle
+
+out-of-tree: false
+
+config: echo config
+
+build: echo build all
+
+build-runtime: echo build runtime
+
+install: echo install

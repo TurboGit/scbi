@@ -82,3 +82,15 @@ def test_round_trip(text):
 def test_invalid_plugin_not_formatted():
     with pytest.raises(yamlfmt.FormatError):
         format_text("p", "confg: make\n")
+
+
+def test_build_target_hooks():
+    assert catalog.is_build_target("build-runtime") and catalog.is_build_target("build-a-b")
+    assert not any(catalog.is_build_target(h) for h in ("build-env", "build-depends", "build-", "pre-build-x",
+                                                        "build-x-build-y"))
+    assert catalog.spec("build-runtime") is catalog.spec("build")
+    text = "install: make install\nbuild-runtime:\n  _: make rts\n  cross:\n    _: make -C gcc rts\nbuild: make\n"
+    out = format_text("p", text)
+    assert out.index("build:") < out.index("build-runtime:") < out.index("install:")
+    keys = {(k.hook, k.cross) for k in yamlfmt.from_data("p", load_data(out)).hooks}
+    assert {("build-runtime", False), ("build-runtime", True)} <= keys

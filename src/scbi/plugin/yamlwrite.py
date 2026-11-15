@@ -134,8 +134,7 @@ def collect_comments(text: str) -> Comments:
 
 
 def _top_rank(key: str) -> tuple:
-    order = {k: i for i, k in enumerate(catalog.FORMAT_ORDER)}
-    return (order.get(key, len(order)), key)
+    return (catalog.format_rank(key), key)
 
 
 def _qualifier_rank(key: str) -> tuple:
@@ -169,7 +168,7 @@ def _keys_order(path: tuple, value: dict):
         return _field_order(INHERIT_ORDER)
     if construct.is_record(top, value):
         return _field_order(construct.RECORDS[top])
-    if top in catalog.step_names() and yamlfmt._is_qualifier_map(top, value):
+    if catalog.is_hook(top) and yamlfmt._is_qualifier_map(top, value):
         return _qualifier_rank
     return None
 

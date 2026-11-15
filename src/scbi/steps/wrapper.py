@@ -21,7 +21,8 @@ import sys
 from collections import deque
 from pathlib import Path
 
-from scbi.plugin import formats
+from scbi.plugin import catalog, formats
+from scbi.plugin.lift import parse_hook_name
 from scbi.plugin.model import Commands
 from scbi.plugin.resolve import get_hook
 from scbi.steps import interp
@@ -61,6 +62,20 @@ class _Sink:
                 f.write(text)
 
 
+def build_target_hook(d, module: str, variant: str, fct: str) -> tuple[str, str]:
+    """With --build-target=<target>, the build-<target> hook replacing the
+    build hook ``fct``: (hook function or "", hook name); ("", "") when
+    the option is not given or ``fct`` is not a build hook."""
+    target = d.get("BUILD_SCBI_TARGET")
+    key = parse_hook_name(module, fct) if target and fct else None
+    if key is None or key.hook != "build":
+        return "", ""
+    hook = f"build-{target}"
+    if not catalog.is_build_target(hook):
+        return "", hook
+    return get_hook(d.registry, module, variant, hook, d.runner().cross), hook
+
+
 class StepWrapper:
     def __init__(self, builder, module: str, variant: str):
         self.b = builder
@@ -77,6 +92,12 @@ class StepWrapper:
         """``module-variant-wrapper PREFIX MODULE VARIANT STEP``."""
         d = self.d
         fct = get_hook(d.registry, self.module, self.variant, step, d.runner().cross)
+        if fct and not is_nop(d.registry.functions.get(fct)):
+            tfct, hook = build_target_hook(d, self.module, self.variant, fct)
+            if hook and not tfct:
+                self.b.elog(self.module, "build", "failed:", "no", hook, "hook")
+                return 1
+            fct = tfct or fct
         return self.internal(prefix, fct)
 
     def internal(self, prefix: str, fct: str) -> int:
@@ -97,8 +118,6 @@ class StepWrapper:
         if variant not in step and variant != "default":
             dvariant = f" [{variant.replace('.', ' ')}]"
         mstep = step
-        if step == "build" and self.get("BUILD_SCBI_TARGET"):
-            mstep = f"build-{self.get('BUILD_SCBI_TARGET')}"
 
         log = f"{self.get('SCBI_LOGS')}/{self.get('TODAY')}/{self.get('SCBI_TARGET')}-{module}-{variant}-{mstep}.log"
         tvdir = b.target_dir(module, variant)

@@ -958,6 +958,12 @@ class Builder:
             fct = get_hook(d.registry, module, variant, step, d.runner().cross)
             if not fct or step_wrapper.is_nop(d.registry.functions.get(fct)):
                 return 0
+            #  --build-target=<target>: the build-<target> hook
+            tfct, hook = step_wrapper.build_target_hook(d, module, variant, fct)
+            if hook and not tfct:
+                self.elog(module, "build", "failed:", "no", hook, "hook")
+                return 1
+            fct = tfct or fct
             return step_wrapper.StepWrapper(self, module, variant).internal(f"{tvdir}/install", fct)
 
         for step in words(self.get("STEPS")):

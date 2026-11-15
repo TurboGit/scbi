@@ -1,0 +1,42 @@
+
+#  build-<target> hooks run by --build-target=<target>
+
+TVDIR=.root/builds/btarget/x86_64-linux-gnu-default
+
+RUNS ./scbi -s -c -b btarget
+
+RUNS cat $TVDIR/logs/build.log
+
+CLEAN-DIFF <<EOF2
+build all
+EOF2
+
+RUNS ./scbi -f -b --build-target=runtime btarget
+
+CLEAN-DIFF <<EOF2
+xxxx/xx/xx xx:xx:xx : Building btarget [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: build
+xxxx/xx/xx xx:xx:xx : trigger: forced
+xxxx/xx/xx xx:xx:xx : build-runtime starting
+xxxx/xx/xx xx:xx:xx : build-runtime completed
+xxxx/xx/xx xx:xx:xx : End Building btarget [default] (master)
+EOF2
+
+RUNS cat $TVDIR/logs/build-runtime.log
+
+CLEAN-DIFF <<EOF2
+build runtime
+EOF2
+
+#  no build-<target> hook
+
+NRUNS ./scbi -f -b --build-target=docs btarget
+
+CLEAN-DIFF <<EOF2
+xxxx/xx/xx xx:xx:xx : Building btarget [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: build
+xxxx/xx/xx xx:xx:xx : trigger: forced
+xxxx/xx/xx xx:xx:xx : btarget (FAILED) build failed: no build-docs hook
+EOF2

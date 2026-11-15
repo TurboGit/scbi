@@ -273,11 +273,10 @@ def from_data(name: str, data: dict, where: str = "") -> PluginDef:
         pdef.functions[str(fname)] = _built(f"{w}.run", construct.function, _as_list(f.get("params"), w),
                                            run, _LINES.get(f"{w}.run", 1))
 
-    names = set(catalog.step_names())
     for key, value in data.items():
         if key in RESERVED:
             continue
-        if key not in names:
+        if not catalog.is_hook(key):
             raise _err(where, f"unknown hook {key!r}")
         _hooks(key, value, f"{where}.{key}", False, pdef.hooks)
     return pdef
@@ -346,10 +345,9 @@ def to_data(pdef: PluginDef) -> dict:
             for v in pdef.with_variants
         }
 
-    order = {h: i for i, h in enumerate(catalog.FORMAT_ORDER)}
     by_hook: dict[str, dict[HookKey, object]] = {}
     rank = {PLAIN: 0, "common": 1, "default": 2}
-    for key in sorted(pdef.hooks, key=lambda k: (order[k.hook], k.cross, rank.get(k.qualifier, 3), k.qualifier)):
+    for key in sorted(pdef.hooks, key=lambda k: (catalog.format_rank(k.hook), k.hook, k.cross, rank.get(k.qualifier, 3), k.qualifier)):
         by_hook.setdefault(key.hook, {})[key] = pdef.hooks[key]
 
     for hook, entries in by_hook.items():
