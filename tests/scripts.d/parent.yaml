@@ -8,5 +8,4 @@ config-options:
 
 config: |-
   OPTIONS =
-  OPTIONS = config-options
-  echo OPTIONS: $OPTIONS
+  echo OPTIONS: $(config-options)

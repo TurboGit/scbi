@@ -11,5 +11,4 @@ config-options:
 
 build: |-
   OPTIONS =
-  OPTIONS = config-options
-  echo @@@ make $OPTIONS
+  echo @@@ make $(config-options)

@@ -12,8 +12,5 @@ config-options:
 config:
   opta: |-
     #  one option per line, prefixed by a letter: A, B, C...
-    OPTIONS = config-options
-    printf '%s\n' $OPTIONS | awk '{printf "%c %s\n", 64 + NR, $0}'
-  optb: |-
-    OPTIONS = config-options
-    printf '%s\n' $OPTIONS | awk '{printf "%c %s\n", 64 + NR, $0}'
+    printf '%s\n' $(config-options) | awk '{printf "%c %s\n", 64 + NR, $0}'
+  optb: printf '%s\n' $(config-options) | awk '{printf "%c %s\n", 64 + NR, $0}'
