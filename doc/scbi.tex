@@ -878,8 +878,35 @@ unquoted glob patterns):
 \code{\$(get-version)}, \code{\$(get-build-type <kind> <default>)},
 \code{\$(is-enabled <feature> [then] [else])},
 \code{\$(last-modified-directory <glob>)}, \code{\$(get-os-inc-dir <glob>)},
-\code{\$(basename <path>)} and \code{\$(ls <glob>)}. A default value is given
+\code{\$(basename <path>)}, \code{\$(ls <glob>)}, \code{\$(uppercase
+<words>)} and \code{\$(lowercase <words>)}. A default value is given
 with \code{\$\{VAR:-default\}}.
+
+\index{if (in values)}
+\code{\$(if <condition> then <words> [else <words>])} gives the words after
+\code{then} when the condition is true, else the words after \code{else}
+(nothing when there is no \code{else}). The condition is written as the
+guards of the list items (\seeref{yaml-conditions}); \code{then} and
+\code{else} are keywords only outside quotes and parentheses.
+
+\index{local variable (in values)}
+An item \code{NAME = <value>} of a value hook or of an environment hook
+sets a variable for the following items of the hook (it gives no value
+and is not part of the environment). The value is the result of a
+function when it starts with one (\code{BT = get-build-type CMAKE
+Release} is \code{BT = \$(get-build-type CMAKE Release)}), else a text
+expanded as a value. For example:
+
+\begin{lstlisting}
+config-options:
+  - BT = get-build-type CMAKE Release
+  - -DLLVM_ENABLE_ASSERTIONS=$(if $BT == Debug then ON else OFF)
+  - -DOPT=$(uppercase $VARIANT)
+\end{lstlisting}
+
+The same result without a variable:
+\code{-DLLVM\_ENABLE\_ASSERTIONS=\$(if build-type(CMAKE,Release) == Debug
+then ON else OFF)}.
 
 \subsubsection{Command language}
 \label{yaml-command-language}
@@ -934,7 +961,11 @@ version: |
 	\code{first-line <value>}, \code{status} (of the previous step),
 	\code{basename}, \code{dirname}, \code{command-path <tool>},
 	\code{all-variants <variant>} (the list of the variants of a variant
-	string, empty for \code{default}). \code{export VAR = ...}
+	string, empty for \code{default}), \code{uppercase <words>},
+	\code{lowercase <words>} and \code{if <condition> then <words> [else
+	<words>]} (as \code{\$(if ...)} in values). The functions of the values
+	are also usable in words: \code{echo \$(uppercase \$VARIANT)}.
+	\code{export VAR = ...}
 	also sets it in the environment of the following commands.
 	\item[built-in commands] \code{cd}, \code{echo [-n]}, \code{return
 	[N]}, \code{exit [N]}, \code{true}, \code{false}, \code{export NAME},
@@ -1568,6 +1599,54 @@ env:
   - prepend-to-var PATH /priority/dir/bin
 \end{lstlisting}
 
+\subsubsection{Overriding define\_var}
+\label{define-var-override}
+\index{define\_var}\index{environment!define\_var}
+
+All the actions above end in a single function, \code{define\_var}. An
+environment file (\seeref{python-env-files}) can define its own
+\code{define\_var} to change how the environment of the modules is set,
+for all the plug-ins at once:
+
+\begin{lstlisting}
+def define_var(env, action, name, value):
+    ...
+\end{lstlisting}
+
+It is called for each action of the \code{env}, \code{build-env} and
+\code{tests-env} hooks, in order, with:
+
+\begin{description}
+	\item[\code{env}] the environment being built: \code{env.apply(action,
+	name, value)} does the default action (as described above, with the
+	recording in the \file{env.cmd} file of the module), \code{env.get(name)}
+	gives the current value of a variable;
+	\item[\code{action}] \code{ADD}, \code{SET}, \code{PREPEND},
+	\code{APPEND}, \code{REMOVE} or \code{UNSET} (the short form
+	\code{S}, \code{P}... when a plug-in uses it with \code{define-var});
+	\item[\code{name}, \code{value}] the variable and the value, expanded.
+\end{description}
+
+The action is done only if the function calls \code{env.apply}: it can
+change the value or the variable, call \code{env.apply} several times, or
+ignore an action (it is then not recorded in \file{env.cmd} either). For
+example, to keep \code{LD\_LIBRARY\_PATH} unchanged and use
+\file{/opt/local} instead of \file{/usr/local}:
+
+\begin{lstlisting}
+def define_var(env, action, name, value):
+    #  no module may change LD_LIBRARY_PATH
+    if name == "LD_LIBRARY_PATH":
+        return
+    #  the packages are installed in /opt/local, not /usr/local
+    value = value.replace("/usr/local", "/opt/local")
+    env.apply(action, name, value)
+\end{lstlisting}
+
+To get the actions of a module without changing the build environment
+(to write a launch script for example), use \code{ctx.env\_actions()} in
+\code{module\_final\_step} instead (\seeref{python-env-files}).
+
 \subsection{Setting a proxy}
 \label{proxy}
 \index{proxy}
@@ -1973,8 +2052,9 @@ variable, or \code{default} when it is empty, as
 	\item[\code{define\_var(env, action, name, value)}] called for each
 	environment action (\code{ADD}, \code{SET}, \code{PREPEND},
 	\code{APPEND}, \code{REMOVE}, \code{UNSET}) of the plug-ins
-	(the environment of each module, \seeref{set-env}), instead of the default; \code{env.apply(action, name, value)} does the
-	default action, \code{env.get(name)} reads a variable;
+	(the environment of each module), instead of the default;
+	\code{env.apply(action, name, value)} does the default action,
+	\code{env.get(name)} reads a variable (\seeref{define-var-override});
 	\item[\code{rewrite\_vcs(record)}, \code{rewrite\_archive(record)}] the
 	fields of a \code{vcs} / \code{archive} hook (a list: proxy, options,
 	protocol, url, [file,] dir); the function returns the fields to use;
