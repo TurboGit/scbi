@@ -1,6 +1,6 @@
 plugin: c-exiv2
 
-os-variants:
+with-variants:
   native:
     packages:
       - os@-exiv2:[v]

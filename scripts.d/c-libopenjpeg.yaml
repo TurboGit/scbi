@@ -1,6 +1,6 @@
 plugin: c-libopenjpeg
 
-os-variants:
+with-variants:
   native:
     packages:
       - libopenjp2-7-dev:[v]

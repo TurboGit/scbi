@@ -1,6 +1,6 @@
 plugin: c-cmake
 
-os-variants:
+with-variants:
   native:
     packages:
       - os@-cmake:[v]

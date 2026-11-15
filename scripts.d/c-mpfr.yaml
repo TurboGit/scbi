@@ -1,6 +1,6 @@
 plugin: c-mpfr
 
-os-variants:
+with-variants:
   native:
     packages:
       - os@-mpfr-dev:[v]

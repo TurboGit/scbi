@@ -1,6 +1,6 @@
 plugin: c-gmp
 
-os-variants:
+with-variants:
   native:
     packages:
       - os@-gmp-dev:[v]

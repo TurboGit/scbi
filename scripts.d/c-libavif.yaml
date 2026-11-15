@@ -1,6 +1,6 @@
 plugin: c-libavif
 
-os-variants:
+with-variants:
   native:
     packages:
       - os@-avif-dev:[v]

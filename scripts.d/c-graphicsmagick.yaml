@@ -1,6 +1,6 @@
 plugin: c-graphicsmagick
 
-os-variants:
+with-variants:
   native:
     packages:
       - libgraphicsmagick1-dev:[v]
