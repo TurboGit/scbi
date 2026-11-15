@@ -28,12 +28,12 @@ out-of-tree: false
 
 pre-config: |-
   MKD = ${SCBI_MODULES_DIR[c-markdown@src]}
-  cp -r $MKD subprojects/markdown
+  copy $MKD subprojects/markdown
 
 build: make INSTALL_DIR=$PREFIX
 
 install: |-
   mkdir -p $PREFIX
-  cp -r bin $PREFIX && cp -r .objs $PREFIX && cp -r source $PREFIX && cp -r gnat $PREFIX
+  copy bin $PREFIX && copy .objs $PREFIX && copy source $PREFIX && copy gnat $PREFIX
 
 prefix: NONE

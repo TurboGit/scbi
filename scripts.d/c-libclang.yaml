@@ -45,6 +45,6 @@ build: ninja -j$SCBI_JOBS
 
 install: cmake --install . --strip
 
-post-install: cp -r ../src/clang/tools/libclang $PREFIX/include/.
+post-install: copy ../src/clang/tools/libclang $PREFIX/include/.
 
 prefix: NONE

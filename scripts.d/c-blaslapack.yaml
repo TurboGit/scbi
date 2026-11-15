@@ -17,4 +17,4 @@ install: |-
       TPREFIX = $PREFIX/$TARGET
       $TARGET-ranlib lib/*.a
   mkdir -p $TPREFIX/lib
-  cp lib/*.a $TPREFIX/lib
+  copy lib/*.a $TPREFIX/lib

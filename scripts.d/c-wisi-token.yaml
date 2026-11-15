@@ -24,8 +24,8 @@ build: gprbuild -p -j$SCBI_JOBS wisi.gpr wisitoken-bnf-generate -cargs:ada -gnat
 
 install: |-
   mkdir -p ../install/bin
-  cp wisitoken-bnf-generate ../install/bin
+  copy wisitoken-bnf-generate ../install/bin
   mkdir -p ../install/include
-  cp *.ad* *.gpr *.c ../install/include
+  copy *.ad* *.gpr *.c ../install/include
 
 prefix: none

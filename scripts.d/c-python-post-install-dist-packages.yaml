@@ -2,10 +2,10 @@ plugin: c-python-post-install-dist-packages
 
 post-install: |-
   if is-dir($PREFIX/local/lib):
-      cp -r $PREFIX/local/* $PREFIX/
+      copy $PREFIX/local/* $PREFIX/
       rm -fr $PREFIX/local
   LDIR = last-modified-directory $PREFIX/lib/python*
   if is-dir($LDIR/dist-packages):
       mkdir -p $LDIR/site-packages
-      cp -r $LDIR/dist-packages/* $LDIR/site-packages/.
+      copy $LDIR/dist-packages/* $LDIR/site-packages/.
       rm -fr $LDIR/dist-packages
