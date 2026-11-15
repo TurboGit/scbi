@@ -1,0 +1,7 @@
+plugin: utp5
+
+depends:
+  _:
+    - usethisplgx
+  utp:
+    - usethisplg

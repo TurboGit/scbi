@@ -1,0 +1,14 @@
+plugin: mcrossc
+
+depends:
+  _:
+    - not-cross
+  cross:
+    _:
+      - crossc-general
+    common:
+      - crossc-common
+    opta:
+      - crossc-opta
+    optb:
+      - crossc-optb

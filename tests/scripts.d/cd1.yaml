@@ -1,0 +1,10 @@
+plugin: cd1
+
+depends:
+  default:
+    - cd2
+    - cd3
+
+build-depends:
+  default:
+    - cdb

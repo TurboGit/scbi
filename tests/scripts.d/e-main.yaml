@@ -1,0 +1,5 @@
+plugin: e-main
+
+modules: e-mod-std
+
+wrapup: echo wrapup

@@ -1,7 +1,0 @@
-
-inherit-plugin lib2
-
-function libdeps-depends()
-{
-    echo unknown-lib
-}

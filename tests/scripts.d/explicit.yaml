@@ -1,0 +1,8 @@
+plugin: explicit
+
+depends:
+  - exp
+
+config: echo config
+
+build: echo config

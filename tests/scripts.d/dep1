@@ -1,5 +1,0 @@
-
-function dep1-build-depends()
-{
-    echo lib1
-}

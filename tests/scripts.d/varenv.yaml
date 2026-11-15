@@ -1,0 +1,27 @@
+plugin: varenv
+
+env:
+  _:
+    - add-to-var VENV NONE
+  common:
+    - add-to-var VENV common
+  default:
+    - add-to-var VENV default
+  another:
+    - add-to-var VENV another
+
+build-env:
+  _:
+    - add-to-var VBENV NONE
+  common:
+    - add-to-var VBENV common
+  default:
+    - add-to-var VBENV default
+  another:
+    - add-to-var VBENV another
+  fast:
+    - add-to-var VBENV fast
+
+build: |-
+  echo VENV $VENV
+  echo VBENV $VBENV

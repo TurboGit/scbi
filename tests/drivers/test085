@@ -5,13 +5,11 @@ for PLG in mv-common1 mv-common2 mv-var1 mv-var2 \
            mv-new1 mv-new2 mv-new3 \
            mv-default1 mv-default2 mv-default-ex1 mv-default-ex2;
 do
-cat <<EOF > scripts.d/$PLG
-function $PLG-config()
-{
-    echo $PLG
-}
+cat <<EOF > scripts.d/$PLG.yaml
+plugin: $PLG
+
+config: echo $PLG
 EOF
-PLG-UPDATE $PLG
 done
 
 RUNS ./scbi --deps metavar
@@ -346,6 +344,5 @@ for PLG in mv-common1 mv-common2 mv-var1 mv-var2 \
            mv-new1 mv-new2 mv-new3 \
            mv-default1 mv-default2 mv-default-ex1 mv-default-ex2;
 do
-   rm -f scripts.d/$PLG
-   PLG-UPDATE $PLG
+   rm -f scripts.d/$PLG.yaml
 done

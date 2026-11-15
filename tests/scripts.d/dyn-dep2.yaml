@@ -1,0 +1,7 @@
+plugin: dyn-dep2
+
+inherit:
+  - from: lib1
+
+env:
+  - set-var DEP2 two

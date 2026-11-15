@@ -1,0 +1,19 @@
+plugin: mautov2
+
+os-variants:
+  native:
+    packages:
+      - gcc:[v]
+      - coreutils
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/mautov.bundle
+
+config: echo mautov-config
+
+build: echo mautov-config
+
+install: echo mautov-config

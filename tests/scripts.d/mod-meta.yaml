@@ -1,0 +1,12 @@
+plugin: mod-meta
+
+depends:
+  - supermod
+
+config: echo "@@@ CONFIG"
+
+build: echo "@@@ BUILD"
+
+install: echo "@@@ INSTALL"
+
+wrapup: echo "@@@ WRAPUP"

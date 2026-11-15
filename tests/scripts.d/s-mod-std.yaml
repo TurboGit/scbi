@@ -1,0 +1,12 @@
+plugin: s-mod-std
+
+depends:
+  - lib2
+
+config: return 0
+
+build: return 0
+
+install: return 0
+
+prefix: NONE

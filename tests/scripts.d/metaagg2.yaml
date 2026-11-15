@@ -1,0 +1,6 @@
+plugin: metaagg2
+
+modules:
+  - dep1
+
+aggregate: direct

@@ -1,0 +1,5 @@
+plugin: meta
+
+modules:
+  - m1
+  - m2

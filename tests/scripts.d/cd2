@@ -1,5 +1,0 @@
-
-function cd2-build-depends()
-{
-    echo cdb
-}

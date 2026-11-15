@@ -1,0 +1,9 @@
+plugin: metadeps
+
+modules:
+  common:
+    - dep1
+  _:
+    - lib1
+
+wrapup: echo wrapup

@@ -1,0 +1,18 @@
+plugin: dltar
+
+archive:
+  proxy: default
+  options: none
+  protocol: cp
+  url: $ROOTDIR/.root/.store
+  file: dltar-src.tar.bz2
+
+out-of-tree: false
+
+install: |-
+  mkdir -p $PREFIX/bin
+  cp script $PREFIX/bin
+
+tests: |-
+  ./script
+  return 0

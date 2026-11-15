@@ -1,0 +1,4 @@
+plugin: m-lib1
+
+#  the environment of lib1/dv is dumped by the final step of .env-dump.py
+wrapup: echo wrapup

@@ -1,0 +1,7 @@
+plugin: iset-supermod
+
+inherit:
+  - from: supermod
+    hooks:
+      - setup
+      - wrapup

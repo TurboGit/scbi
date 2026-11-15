@@ -1,0 +1,7 @@
+plugin: malias
+
+depends:
+  - ma-d
+
+build-depends:
+  - ma-bd

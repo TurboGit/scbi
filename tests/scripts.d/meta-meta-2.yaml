@@ -1,0 +1,6 @@
+plugin: meta-meta-2
+
+modules:
+  - dmod
+
+propagate-version: false

@@ -2,31 +2,11 @@
 
 #  Set version for rsync (see osdeps)
 
+#  installed packages of the fake OS "test" of the testsuite
 export SCBI_TEST_V=1
-#  Same for the Python driver (fake OS "test" of the testsuite)
 export SCBI_TEST_PKGS="rsync=${SCBI_TEST_V}"
 
 export SCBI_OS_NAME=test
-
-function init-test-pkg()
-{
-    SCBI_PKGS["rsync"]=${SCBI_TEST_V}
-}
-
-function check-test-pkg()
-{
-    check-deb-pkg $1 $2
-}
-
-function get-test-install-md5()
-{
-    local -n _SIG=$1
-    _SIG=toto
-}
-
-declare -fx init-test-pkg
-declare -fx check-test-pkg
-declare -fx get-test-install-md5
 
 RUNS ./scbi osdeps
 

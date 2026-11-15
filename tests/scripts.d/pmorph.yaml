@@ -1,0 +1,7 @@
+plugin: pmorph
+
+config:
+  _: echo "CONFIG (none)"
+  default: echo CONFIG default
+  a: echo CONFIG a
+  b: echo CONFIG b

@@ -1,224 +1,47 @@
-#  Test inherit no variant
+#  Test inherit with --no-variant and --hooks: the hooks run (@@@ lines of
+#  the step logs, sorted by log file name)
 
-RUNS ./scbi inv-test19
+LOGS=.root/builds/.logs
+
+#  --no-variant: only the hooks without variant are inherited
+RUNS ./scbi inv-test19/alt
+
+RUNS grep -h '^@@@' $LOGS/*inv-test19*
 
 CLEAN-DIFF <<EOF
-inv-test19-build is a function
-inv-test19-build ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-inv-test19-config is a function
-inv-test19-config ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ CONFIG " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-inv-test19-install is a function
-inv-test19-install ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ INSTALL " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-inv-test19-out-of-tree is a function
-inv-test19-out-of-tree ()
-{
-    echo false
-}
-inv-test19-post-build is a function
-inv-test19-post-build ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ POST-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-inv-test19-post-config is a function
-inv-test19-post-config ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ POST-CONFIG " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-inv-test19-pre-build is a function
-inv-test19-pre-build ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ PRE-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-inv-test19-pre-install is a function
-inv-test19-pre-install ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ PRE-INSTALL " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-inv-test19-pre-setup is a function
-inv-test19-pre-setup ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    mkdir \$TARGET-default/src;
-    echo "@@@ PRE-SETUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-inv-test19-pre-wrapup is a function
-inv-test19-pre-wrapup ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ PRE-WRAPUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-inv-test19-vcs is a function
-inv-test19-vcs ()
-{
-    echo default;
-    echo none;
-    echo git;
-    echo \${TESTREPOS}/lib1.bundle
-}
-inv-test19-wrapup is a function
-inv-test19-wrapup ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ WRAPUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-xxxx/xx/xx xx:xx:xx : Building inv-test19 [default] (master)
-xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : get sources from git
-xxxx/xx/xx xx:xx:xx : trigger: not yet built
-xxxx/xx/xx xx:xx:xx : pre-setup starting
-xxxx/xx/xx xx:xx:xx : pre-setup completed
-xxxx/xx/xx xx:xx:xx : config starting
-xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : post-config starting
-xxxx/xx/xx xx:xx:xx : post-config completed
-xxxx/xx/xx xx:xx:xx : pre-build starting
-xxxx/xx/xx xx:xx:xx : pre-build completed
-xxxx/xx/xx xx:xx:xx : build starting
-xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : post-build starting
-xxxx/xx/xx xx:xx:xx : post-build completed
-xxxx/xx/xx xx:xx:xx : pre-install starting
-xxxx/xx/xx xx:xx:xx : pre-install completed
-xxxx/xx/xx xx:xx:xx : install starting
-xxxx/xx/xx xx:xx:xx : install completed
-xxxx/xx/xx xx:xx:xx : pre-wrapup starting
-xxxx/xx/xx xx:xx:xx : pre-wrapup completed
-xxxx/xx/xx xx:xx:xx : wrapup starting
-xxxx/xx/xx xx:xx:xx : wrapup completed
-xxxx/xx/xx xx:xx:xx : End Building inv-test19 [default] (master)
+@@@ BUILD  inv-test19/x86_64-linux-gnu-alt/src
+@@@ CONFIG  inv-test19/x86_64-linux-gnu-alt/src
+@@@ INSTALL  inv-test19/x86_64-linux-gnu-alt/src
+@@@ POST-BUILD  inv-test19/x86_64-linux-gnu-alt/src
+@@@ POST-CONFIG  inv-test19/x86_64-linux-gnu-alt/src
+@@@ PRE-BUILD  inv-test19/x86_64-linux-gnu-alt/src
+@@@ PRE-INSTALL  inv-test19/x86_64-linux-gnu-alt/src
+@@@ PRE-SETUP  inv-test19
+@@@ PRE-WRAPUP  inv-test19
+@@@ WRAPUP  inv-test19
 EOF
 
-#  Test inherit of limited set of hook
+#  --no-variant --hooks=build,setup: build and setup steps only (with their
+#  pre/post hooks), not out-of-tree (built in build)
+RUNS ./scbi invset-test19/alt
 
-RUNS ./scbi iset-test19
+RUNS grep -h '^@@@' $LOGS/*invset-test19*
 
 CLEAN-DIFF <<EOF
-iset-test19-alt-pre-setup is a function
-iset-test19-alt-pre-setup ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    mkdir \$TARGET-alt/src;
-    echo "@@@ ALT/PRE-SETUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-iset-test19-build is a function
-iset-test19-build ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-iset-test19-post-build is a function
-iset-test19-post-build ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ POST-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-iset-test19-pre-build is a function
-iset-test19-pre-build ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ PRE-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-iset-test19-pre-setup is a function
-iset-test19-pre-setup ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    mkdir \$TARGET-default/src;
-    echo "@@@ PRE-SETUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-xxxx/xx/xx xx:xx:xx : Building iset-test19 [default] (n/a)
-xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : trigger: not yet built
-xxxx/xx/xx xx:xx:xx : pre-setup starting
-xxxx/xx/xx xx:xx:xx : pre-setup completed
-xxxx/xx/xx xx:xx:xx : pre-build starting
-xxxx/xx/xx xx:xx:xx : pre-build completed
-xxxx/xx/xx xx:xx:xx : build starting
-xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : post-build starting
-xxxx/xx/xx xx:xx:xx : post-build completed
-xxxx/xx/xx xx:xx:xx : End Building iset-test19 [default] (n/a)
+@@@ BUILD  invset-test19/x86_64-linux-gnu-alt/build
+@@@ POST-BUILD  invset-test19/x86_64-linux-gnu-alt/build
+@@@ PRE-BUILD  invset-test19/x86_64-linux-gnu-alt/build
+@@@ PRE-SETUP  invset-test19
 EOF
 
-#  Test inherit of limited set of hook and without variant
+#  --hooks=build,setup with the variants
+RUNS ./scbi iset-test19/alt
 
-RUNS ./scbi invset-test19
+RUNS grep -h '^@@@' $LOGS/*iset-test19-alt*
 
 CLEAN-DIFF <<EOF
-invset-test19-build is a function
-invset-test19-build ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-invset-test19-post-build is a function
-invset-test19-post-build ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ POST-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-invset-test19-pre-build is a function
-invset-test19-pre-build ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    echo "@@@ PRE-BUILD " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-invset-test19-pre-setup is a function
-invset-test19-pre-setup ()
-{
-    local PREFIX=\$1;
-    local TARGET=\$2;
-    mkdir \$TARGET-default/src;
-    echo "@@@ PRE-SETUP " \$(realpath --relative-to=\$SCBI_BDIR \$PWD)
-}
-xxxx/xx/xx xx:xx:xx : Building invset-test19 [default] (n/a)
-xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
-xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
-xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : trigger: not yet built
-xxxx/xx/xx xx:xx:xx : pre-setup starting
-xxxx/xx/xx xx:xx:xx : pre-setup completed
-xxxx/xx/xx xx:xx:xx : pre-build starting
-xxxx/xx/xx xx:xx:xx : pre-build completed
-xxxx/xx/xx xx:xx:xx : build starting
-xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : post-build starting
-xxxx/xx/xx xx:xx:xx : post-build completed
-xxxx/xx/xx xx:xx:xx : End Building invset-test19 [default] (n/a)
+@@@ ALT/PRE-SETUP  iset-test19
+@@@ BUILD  iset-test19/x86_64-linux-gnu-alt/build
+@@@ POST-BUILD  iset-test19/x86_64-linux-gnu-alt/build
+@@@ PRE-BUILD  iset-test19/x86_64-linux-gnu-alt/build
 EOF

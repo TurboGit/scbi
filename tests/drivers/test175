@@ -1,4 +1,4 @@
-# scbi format on YAML plug-ins (Python driver only, see python-only.txt)
+# scbi format on YAML plug-ins
 
 RUNS ./scbi format fixtures/format/fmt.yaml
 
@@ -62,12 +62,16 @@ rm -f .root/fmt.yaml
 
 # Bash plug-ins and invalid plug-ins are not formatted
 
-NRUNS ./scbi format wrong
+printf 'function abash-build()\n{\n    make\n}\n' > scripts.d/abash
+
+NRUNS ./scbi format abash
 
 CLEAN-DIFF <<EOF2
 
-========== Skip wrong: not a YAML plug-in, convert it with: python3 -m scbi.convert
+========== Skip abash: not a YAML plug-in, convert it with: python3 -m scbi.convert
 EOF2
+
+rm -f scripts.d/abash
 
 NRUNS ./scbi format fixtures/lint/lintbad.yaml
 

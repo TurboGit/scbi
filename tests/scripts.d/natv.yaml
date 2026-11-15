@@ -1,0 +1,16 @@
+plugin: natv
+
+os-variants:
+  native:
+    packages:
+      - libA
+      - libB
+    env:
+      - add-to-var ROOT_DIR /usr
+
+build-env:
+  - set-var NATV_ENV env
+
+build: echo build
+
+install: echo install

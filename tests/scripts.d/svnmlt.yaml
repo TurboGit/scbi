@@ -1,0 +1,27 @@
+plugin: svnmlt
+
+vcs:
+  prj1:
+    proxy: none
+    options: none
+    protocol: svn
+    url: file://$TESTREPOS/repomlt
+    dir: prj1
+  prj2:
+    proxy: none
+    options: none
+    protocol: subversion
+    url: file://$TESTREPOS/repomlt
+    dir: prj2
+
+out-of-tree: false
+
+build: gcc -o main main.c
+
+install: |-
+  mkdir ../install
+  cp main ../install
+
+tests: ./main
+
+prefix: none

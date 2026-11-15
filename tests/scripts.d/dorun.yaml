@@ -1,0 +1,7 @@
+plugin: dorun
+
+run:
+  _: echo default
+  common: echo dorun
+  one: echo one
+  two: echo two

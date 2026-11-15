@@ -1,0 +1,4 @@
+plugin: dep1
+
+build-depends:
+  - lib1

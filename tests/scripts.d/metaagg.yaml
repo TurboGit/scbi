@@ -1,0 +1,7 @@
+plugin: metaagg
+
+modules:
+  - lib1
+  - libenv
+
+aggregate: direct

@@ -1,0 +1,7 @@
+plugin: checkvcs
+
+vcs:
+  proxy: proxy
+  options: opt
+  protocol: git
+  url: /this.is.path/some/dir

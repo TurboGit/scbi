@@ -1,0 +1,10 @@
+plugin: recb
+
+depends:
+  - recc
+
+config: true
+
+build: true
+
+install: echo NONE

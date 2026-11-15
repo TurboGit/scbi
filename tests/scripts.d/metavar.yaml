@@ -1,0 +1,19 @@
+plugin: metavar
+
+modules:
+  _:
+    - mv-default1
+    - mv-default2
+  common:
+    - mv-common1
+    - mv-common2
+  default:
+    - mv-default-ex1
+    - mv-default-ex2
+  new:
+    - mv-new1
+    - mv-new2
+    - mv-new3
+  var:
+    - mv-var1
+    - mv-var2

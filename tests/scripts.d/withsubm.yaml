@@ -1,0 +1,11 @@
+plugin: withsubm
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/withsubm.bundle
+
+build: echo BUILD
+
+install: echo INSTALL

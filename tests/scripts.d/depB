@@ -1,4 +1,0 @@
-function depB-config()
-{
-    echo depB
-}

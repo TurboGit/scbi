@@ -1,0 +1,30 @@
+plugin: mainmult
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/mainmult.bundle
+
+depends:
+  - lib1
+  - lib2
+
+env:
+  - prepend-to-var PATH $PREFIX/bin
+
+out-of-tree: false
+
+build: |-
+  rm -f *.o
+  make --no-print-directory
+
+install: |-
+  mkdir -p $PREFIX/bin
+  cp mainmult $PREFIX/bin
+
+tests: |-
+  ./mainmult
+  return 0
+
+run: mainmult

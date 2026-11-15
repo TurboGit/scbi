@@ -1,0 +1,7 @@
+plugin: meta-mod-ver
+
+modules:
+  - liba
+  - libb
+
+propagate-version: version

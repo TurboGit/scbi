@@ -1,0 +1,19 @@
+plugin: failsteps
+
+config:
+  _: echo config
+  conferr: |-
+    echo config error
+    false
+
+build:
+  _: echo build
+  builderr: |-
+    echo build error
+    false
+
+install:
+  _: echo install
+  installerr: |-
+    echo install error
+    false

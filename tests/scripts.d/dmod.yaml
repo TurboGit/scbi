@@ -1,0 +1,10 @@
+plugin: dmod
+
+modules:
+  - depA
+  - oot
+
+propagate-version:
+  both: both
+  none: false
+  variant: variant

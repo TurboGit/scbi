@@ -1,0 +1,43 @@
+plugin: noarchive
+
+os-variants:
+  ng:
+    packages: []
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+archive:
+  proxy: default
+  options: none
+  protocol: none
+  url: none
+  file: noarchive-$VERSION-src.tar.bz2
+
+patches:
+  - noarchive-0-fix.patch
+
+env:
+  - add-to-var C_INCLUDE_PATH $PREFIX/include
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var LIBRARY_PATH $PREFIX/lib
+
+build-env:
+  - set-var C_INCLUDE_PATH $PWD/include:$C_INCLUDE_PATH
+  - set-var LIBRARY_PATH .:$PWD/lib:$LIBRARY_PATH
+  - set-var LD_LIBRARY_PATH .:$PWD/lib:$LD_LIBRARY_PATH
+
+out-of-tree: false
+
+build: |-
+  rm -f *.o
+  make
+
+install: |-
+  mkdir -p $PREFIX/include
+  mkdir -p $PREFIX/lib
+  cp liblib1.so $PREFIX/lib
+  cp lib1.h $PREFIX/include

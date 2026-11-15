@@ -1,0 +1,11 @@
+plugin: metaagg-inst
+
+prefix:
+  _: $AINST
+  noinst: NONE
+
+modules:
+  - lib1
+  - libenv
+
+aggregate: direct

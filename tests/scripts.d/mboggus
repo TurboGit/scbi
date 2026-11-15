@@ -1,5 +1,0 @@
-
-function mboggus-modules()
-{
-    echo boggus
-}

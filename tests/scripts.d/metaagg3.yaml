@@ -1,0 +1,10 @@
+plugin: metaagg3
+
+prefix:
+  agg: NONE
+
+modules:
+  - mainlib
+
+aggregate:
+  agg: direct

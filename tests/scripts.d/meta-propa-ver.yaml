@@ -1,0 +1,6 @@
+plugin: meta-propa-ver
+
+modules:
+  - lib1a
+
+propagate-version: version

@@ -1,0 +1,17 @@
+plugin: modver
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+config: echo config
+
+build: echo build
+
+install: echo install
+
+version:
+  _: echo 1
+  var: echo v0.5

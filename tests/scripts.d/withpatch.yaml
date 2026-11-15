@@ -1,0 +1,21 @@
+plugin: withpatch
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+patches:
+  _:
+    - withpatch-0-fix.patch
+  common:
+    - withpatch-com-fix.patch
+  default:
+    - withpatch-def-fix.patch
+  var:
+    - withpatch-var-fix.patch
+
+build: ''
+
+install: ''

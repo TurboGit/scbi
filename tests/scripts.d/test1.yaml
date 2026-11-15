@@ -1,0 +1,11 @@
+plugin: test1
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/test1.bundle
+
+out-of-tree: false
+
+config: ./configure

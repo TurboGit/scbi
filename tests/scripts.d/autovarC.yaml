@@ -1,0 +1,15 @@
+plugin: autovarC
+
+os-variants:
+  native:
+    packages:
+      - shouldnotexist-dev
+
+depends:
+  - lib1
+
+config: echo config autovarB
+
+build: echo build autovarB
+
+prefix: NONE

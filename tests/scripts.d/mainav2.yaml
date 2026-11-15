@@ -1,0 +1,4 @@
+plugin: mainav2
+
+inherit:
+  - from: mainav

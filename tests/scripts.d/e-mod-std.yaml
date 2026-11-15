@@ -1,0 +1,7 @@
+plugin: e-mod-std
+
+inherit:
+  - from: s-mod-std
+
+depends:
+  - e-mod

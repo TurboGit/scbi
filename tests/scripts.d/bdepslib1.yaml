@@ -1,0 +1,7 @@
+plugin: bdepslib1
+
+depends:
+  - lib2
+
+build-depends:
+  - lib1

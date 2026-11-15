@@ -1,0 +1,7 @@
+plugin: iset-test19
+
+inherit:
+  - from: test19
+    hooks:
+      - build
+      - setup

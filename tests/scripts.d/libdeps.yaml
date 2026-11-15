@@ -1,0 +1,7 @@
+plugin: libdeps
+
+inherit:
+  - from: lib2
+
+depends:
+  - unknown-lib

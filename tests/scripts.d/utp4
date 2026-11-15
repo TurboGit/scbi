@@ -1,5 +1,0 @@
-
-function utp4-common-depends()
-{
-    echo usethisplg
-}

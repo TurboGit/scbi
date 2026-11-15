@@ -1,0 +1,6 @@
+plugin: test-driver
+
+env:
+  - prepend-to-var PATH $PREFIX/bin
+
+install: "BDIR = $PREFIX/bin\nFILE = $BDIR/testdriver\nmkdir -p $BDIR\nwrite $FILE:\n    #!/bin/sh\n    \n    echo Runing \\$1\n    \\$1\nchmod a+x $FILE"

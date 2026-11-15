@@ -91,129 +91,27 @@ export CDPATH=
 
 rm -f scripts.d/.store
 
-# copy scripts
-cp ../scbi .
-for tools in lint source-archive store show shell format; do
-    cp ../scbi-$tools .
-done
-
-cp ../scripts.d/0_runtime scripts.d/
-cp ../scripts.d/_os_* scripts.d/
-cp ../scripts.d/[2-9]* scripts.d/
-cp ../scripts.d/.pkgs-* scripts.d/
+# the packages of the distributions, and the Bash support files given to
+# the users sourcing env.cmd (copied to $SCBI_BDIR/.scbi.runtime)
+cp ../scripts.d/.pkgs-* ../scripts.d/0_runtime ../scripts.d/_os_* scripts.d/
 
 export PATH="$PWD:$PATH"
 
-# Implementation of the driver under test:
-#   SCBI_IMPL=bash   (default) the reference Bash driver
-#   SCBI_IMPL=python the Python port (src/scbi)
-
-SCBI_IMPL=${SCBI_IMPL:-bash}
-
-case $SCBI_IMPL in
-    bash)
-        # patch scbi driver to avoid loading $HOME/.scbi ini file
-        sed -i 's,\(.*ini-load-file \$HOME/.scbi\),#\1,g' scbi
-        ;;
-    python)
-        # The Python driver applies the same adjustments as the sed
-        # patches done here on the Bash driver and runtime (no $HOME/.scbi,
-        # rsync checksum mode, sync messages logged with ilog) when
-        # SCBI_TESTSUITE is set.
-        export SCBI_TESTSUITE=yes
-        # The runtime files are not read by the Python driver: the
-        # settings of the test runtime file scripts.d/1_setup
-        export SCBI_ROOT=$PWD/.root
-        export SCBI_ARCHIVES=$SCBI_ROOT/.archives
-        export SCBI_PATCH=$SCBI_ROOT/.patches
-        export SCBI_GIT_REPO=$SCBI_ROOT/git
-        export SCBI_SVN_REPO= SCBI_HG_REPO= TODAY=
-        cat > scbi <<EOF
+# The Python driver (src/scbi). With SCBI_TESTSUITE set it does not load
+# $HOME/.scbi, uses the rsync checksum mode and logs the sync messages
+# with ilog; the defaults below are the testsuite settings (SCBI_SVN_REPO
+# and SCBI_HG_REPO kept empty, TODAY empty: logs directly in .logs).
+export SCBI_TESTSUITE=yes
+export SCBI_ROOT=$PWD/.root
+export SCBI_ARCHIVES=$SCBI_ROOT/.archives
+export SCBI_PATCH=$SCBI_ROOT/.patches
+export SCBI_GIT_REPO=$SCBI_ROOT/git
+export SCBI_SVN_REPO= SCBI_HG_REPO= TODAY=
+cat > scbi <<EOF
 #!/bin/bash
 SCBI_ARGV0="\$0" PYTHONPATH=$PWD/../src\${PYTHONPATH:+:\$PYTHONPATH} exec python3 -m scbi "\$@"
 EOF
-        chmod +x scbi
-        ;;
-    *)
-        echo "unknown SCBI_IMPL=$SCBI_IMPL (bash|python)"
-        exit 1
-        ;;
-esac
-
-# Plug-ins format: the Bash driver reads the Bash plug-ins of scripts.d,
-# the Python driver their YAML versions, generated here with the converter
-# (scripts.d/<name>.yaml). The plug-ins which cannot be converted stay
-# Bash ones: the drivers using them are listed in python-deferred.txt.
-
-if [[ $SCBI_IMPL == python ]]; then
-    SCBI_PLUGIN_FORMAT=yaml
-else
-    SCBI_PLUGIN_FORMAT=legacy
-fi
-
-rm -f scripts.d/*.yaml
-
-function plugin-sources()
-{
-    local f
-    for f in scripts.d/*; do
-        [[ -f $f ]] || continue
-        case $(basename $f) in
-            [0-9]*|_*|*~|*.yaml) ;;
-            *) echo $f ;;
-        esac
-    done
-}
-
-#  The YAML versions of plug-ins changed by a driver (legacy format: nothing
-#  to do): PLG-UPDATE name...
-function PLG-UPDATE()
-{
-    [[ $SCBI_PLUGIN_FORMAT == yaml ]] || return 0
-    local p
-    for p in "$@"; do
-        rm -f scripts.d/$p.yaml
-        [[ -f scripts.d/$p ]] &&
-            PYTHONPATH=$ROOTDIR/../src python3 -m scbi.convert \
-                       --output-dir scripts.d scripts.d/$p > /dev/null 2>&1
-    done
-    PYTHONPATH=$ROOTDIR/../src python3 -m scbi.convert --closure scripts.d > /dev/null 2>&1
-    true
-}
-
-#  Run the reproduction file of a step: a Bash script (legacy hooks) or a
-#  replay file (hooks in the command language): REPRODUCE file
-function REPRODUCE()
-{
-    if [[ $(head -1 $1) == "# scbi replay "* ]]; then
-        ./scbi replay $1
-    else
-        source $1
-    fi
-}
-export -f REPRODUCE
-
-#  Change a plug-in without changing what it does (its YAML version too):
-#  PLG-TOUCH name
-function PLG-TOUCH()
-{
-    echo >> scripts.d/$1
-    [[ -f scripts.d/$1.yaml ]] && echo "# touched" >> scripts.d/$1.yaml
-    true
-}
-
-if [[ $SCBI_PLUGIN_FORMAT == yaml ]]; then
-    PYTHONPATH=$PWD/../src python3 -m scbi.convert --output-dir scripts.d \
-              $(plugin-sources) > /dev/null 2>&1
-    #  a Bash plug-in does not inherit a YAML one
-    PYTHONPATH=$PWD/../src python3 -m scbi.convert --closure scripts.d > /dev/null 2>&1
-fi
-
-# patch rsync to use safe mode (checksum) as the tests repositories are small,
-# and has some files with same time-stamp.
-
-sed -i 's/$OPT --exclude/$OPT -c --exclude/g' scripts.d/7_modgen
-sed -i 's/dlog/ilog/g' scripts.d/7_modgen
+chmod +x scbi
 
 mkdir -p .root/.patches
 
@@ -228,35 +126,16 @@ mkdir -p $PWD/logs
 
 . osht
 
-#  The generated YAML plug-ins are removed at the end (before the osht
-#  report, which exits)
-[[ $SCBI_PLUGIN_FORMAT == yaml ]] &&
-    trap 'rm -f $ROOTDIR/scripts.d/*.yaml; _osht_cleanup' INT TERM EXIT
-
-#  Drivers specific to one implementation: skipped with the other one;
-#  with the Python driver, the drivers needing a test plug-in that does not
-#  convert to YAML are skipped too (python-deferred.txt)
-case $SCBI_IMPL in
-    python) SKIP_LISTS="bash-only.txt python-deferred.txt" ;;
-    *)      SKIP_LISTS=python-only.txt ;;
-esac
-
 cd drivers
 if [ -z "$1" ]; then
-    TESTS=()
-    for t in test???; do
-        (cd .. && grep -q "^$t\b" $SKIP_LISTS) || TESTS+=( $t )
-    done
+    TESTS=( test??? )
 else
     TESTS=( $* )
 fi
 cd ..
 
 #  The plan is only known when running the whole testsuite
-case $SCBI_IMPL in
-    python) [ -z "$1" ] && PLAN 1199 ;;
-    *)      [ -z "$1" ] && PLAN 1380 ;;
-esac
+[ -z "$1" ] && PLAN 1389
 
 export SCBI_CACHE_DIR="no"
 

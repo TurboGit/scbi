@@ -1,0 +1,3 @@
+plugin: four
+
+config: echo FOUR

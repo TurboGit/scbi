@@ -1,0 +1,22 @@
+plugin: dltar2
+
+archive:
+  proxy: default
+  options: none
+  protocol: cp
+  url: $ROOTDIR/.root/.store
+  file: dltar-$VERSION-src.tar.bz2
+
+env:
+  - set-var E_VERSION $(get-version)
+
+out-of-tree: false
+
+install: |-
+  echo I_VERSION $(get-version)
+  mkdir -p $PREFIX/bin
+  cp script $PREFIX/bin
+
+tests: |-
+  ./script
+  return 0

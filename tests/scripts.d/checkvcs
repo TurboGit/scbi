@@ -1,8 +1,0 @@
-
-function checkvcs-vcs()
-{
-    echo proxy
-    echo opt
-    echo git
-    echo /this.is.path/some/dir
-}

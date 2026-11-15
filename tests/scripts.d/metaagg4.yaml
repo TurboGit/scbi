@@ -1,0 +1,6 @@
+plugin: metaagg4
+
+modules:
+  - mainlib
+
+aggregate: recursive

@@ -1,0 +1,14 @@
+plugin: lvl4
+
+env:
+  - add-to-var LVL4 four
+
+build-env:
+  - add-to-var LVL4 build-four
+
+build: |-
+  echo 40 ${LVL0}x
+  echo 41 ${LVL1}x
+  echo 42 ${LVL2}x
+  echo 43 ${LVL3}x
+  echo 44 ${LVL4}x

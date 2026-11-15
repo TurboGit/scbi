@@ -1,4 +1,0 @@
-function depA-config()
-{
-    echo depA
-}

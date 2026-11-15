@@ -1,0 +1,23 @@
+plugin: testenv
+
+env:
+  - add-to-var PATH $PREFIX/bin
+
+tests-env:
+  - add-to-var PATH $PREFIX/tbin
+
+build: |-
+  write bscript.sh:
+      echo BUILD \$1
+  write tescript.sh:
+      bscript.sh "TEST \$1"
+
+install: |-
+  mkdir -p $PREFIX/bin
+  cp bscript.sh $PREFIX/bin
+  chmod u+x $PREFIX/bin/bscript.sh
+  mkdir -p $PREFIX/tbin
+  cp tescript.sh $PREFIX/tbin
+  chmod u+x $PREFIX/tbin/tescript.sh
+
+tests: tescript.sh "ok"

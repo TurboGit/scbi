@@ -1,0 +1,7 @@
+plugin: btype
+
+config: echo CONFIG $(get-build-type CMAKE Release)
+
+build: echo BUILD
+
+install: echo INSTALL

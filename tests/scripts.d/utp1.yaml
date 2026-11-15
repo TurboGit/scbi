@@ -1,0 +1,5 @@
+plugin: utp1
+
+depends:
+  - usethisplg
+  - no

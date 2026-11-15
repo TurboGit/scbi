@@ -1,0 +1,15 @@
+plugin: autovarB
+
+os-variants:
+  native:
+    packages:
+      - squid-cgi
+
+depends:
+  - lib1
+
+config: echo config autovarB
+
+build: echo build autovarB
+
+prefix: NONE

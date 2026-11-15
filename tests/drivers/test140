@@ -62,4 +62,12 @@ xxxx/xx/xx xx:xx:xx : wrapup completed
 xxxx/xx/xx xx:xx:xx : End metamodule e-main [default] wrapup
 EOF
 
-NGREP "^CPMOD f:e-mod-std m:lib2" .root/builds/.logs/*wrapup.log
+#  the dependencies of the meta-module (lib2 is not one)
+RUNS ./scbi show --depends e-main
+
+DIFF <<EOF
+e-main
+e-mod
+e-mod-std
+lib1
+EOF

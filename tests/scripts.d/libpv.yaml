@@ -1,0 +1,35 @@
+plugin: libpv
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+archive:
+  proxy: default
+  options: none
+  protocol: none
+  url: none
+  file: lib1-$VERSION-src.tar.bz2
+
+build-env:
+  - set-var VERSIONBE $(get-version)
+
+config: |-
+  echo VERSION-C $(get-version)
+  echo VERSION-BE $VERSIONBE
+
+build: |-
+  version = get-version
+  echo VERSION-B $version
+  echo VERSION-BE $VERSIONBE
+  check-versions $version ">" 1
+  if status == 0:
+      echo GT 1
+  else:
+      echo LE 1
+
+install: |-
+  echo VERSION-I $(get-version)
+  echo VERSION-BE $VERSIONBE

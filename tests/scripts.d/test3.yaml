@@ -1,0 +1,17 @@
+plugin: test3
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/test1.bundle
+
+out-of-tree: false
+
+config: ./configure
+
+build: make
+
+install: |-
+  mkdir -p $PREFIX/bin
+  cp main $PREFIX/bin

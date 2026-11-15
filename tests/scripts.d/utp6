@@ -1,6 +1,0 @@
-function utp6-modules()
-{
-    echo toto
-    echo usethisplg
-    echo titi
-}

@@ -1,6 +1,0 @@
-
-function m1-env()
-{
-    add-to-var LIST  m1
-    set-var    NAME1 m1
-}

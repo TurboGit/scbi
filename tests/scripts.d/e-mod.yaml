@@ -1,0 +1,4 @@
+plugin: e-mod
+
+inherit:
+  - from: s-mod

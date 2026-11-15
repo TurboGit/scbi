@@ -1,0 +1,45 @@
+plugin: extenv
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+archive:
+  proxy: default
+  options: none
+  protocol: none
+  url: none
+  file: extenv-$VERSION-src.tar.bz2
+
+env:
+  - add-to-var C_INCLUDE_PATH $PREFIX/include
+  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+  - add-to-var LIBRARY_PATH $PREFIX/lib
+
+build-env:
+  - add-to-var C_INCLUDE_PATH $PWD/include
+  - add-to-var LIBRARY_PATH .
+  - add-to-var LIBRARY_PATH $PWD/lib
+  - add-to-var LD_LIBRARY_PATH .
+  - add-to-var LD_LIBRARY_PATH $PWD/lib
+
+external-env:
+  - $EXTENV_VAR
+
+out-of-tree: false
+
+build: |-
+  rm -f *.o
+  make
+
+install: |-
+  mkdir -p $PREFIX/include
+  mkdir -p $PREFIX/lib
+  cp liblib1.so $PREFIX/lib
+  cp lib1.h $PREFIX/include
+
+tests: |-
+  ./main
+  return 0

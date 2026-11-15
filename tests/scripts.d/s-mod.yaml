@@ -1,0 +1,13 @@
+plugin: s-mod
+
+depends:
+  default:
+    - lib1
+
+config: return 0
+
+build: return 0
+
+install: return 0
+
+prefix: NONE

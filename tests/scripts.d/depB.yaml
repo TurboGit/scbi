@@ -1,0 +1,3 @@
+plugin: depB
+
+config: echo depB

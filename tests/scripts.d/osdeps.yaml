@@ -1,0 +1,8 @@
+plugin: osdeps
+
+depends:
+  - rsync
+
+config: echo CONFIG
+
+build: echo BUILD

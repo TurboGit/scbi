@@ -1,0 +1,23 @@
+plugin: ondeps
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+depends:
+  _:
+    - os@-mylualib
+  2:
+    - os@-mynotfound
+
+build-depends:
+  default:
+    - liblua5.2-dev
+
+config: echo CONFIG
+
+build: echo CONFIG
+
+prefix: none

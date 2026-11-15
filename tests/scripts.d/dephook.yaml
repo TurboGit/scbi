@@ -1,0 +1,18 @@
+plugin: dephook
+
+depends:
+  common:
+    - depA
+  varb:
+    - depB
+
+config-options:
+  common:
+    - -DOnlyCommon
+  vara:
+    - -DA=yes
+
+config: |-
+  OPTIONS =
+  OPTIONS = config-options
+  echo call $OPTIONS

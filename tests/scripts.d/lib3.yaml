@@ -1,0 +1,38 @@
+plugin: lib3
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+archive:
+  proxy: default
+  options: none
+  protocol: none
+  url: none
+  file: lib1-$VERSION-src.tar.bz2
+
+depends:
+  - inhnat/native
+
+build-env:
+  - export C_INCLUDE_PATH $PWD/include:$C_INCLUDE_PATH
+  - export LIBRARY_PATH .:$PWD/lib:$LIBRARY_PATH
+  - export LD_LIBRARY_PATH .:$PWD/lib:$LD_LIBRARY_PATH
+
+out-of-tree: false
+
+build: |-
+  rm -f *.o
+  make
+
+install: |-
+  mkdir -p $PREFIX/include
+  mkdir -p $PREFIX/lib
+  cp liblib1.so $PREFIX/lib
+  cp lib1.h $PREFIX/include
+
+tests: |-
+  ./main
+  return 0

@@ -1,0 +1,11 @@
+plugin: metapoly
+
+modules:
+  _:
+    - lib1
+  bd:
+    - bdepslib1
+
+aggregate:
+  _: direct
+  noagg: no

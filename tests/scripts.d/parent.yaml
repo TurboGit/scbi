@@ -1,0 +1,12 @@
+plugin: parent
+
+inherit:
+  - from: grandparent
+
+config-options:
+  - p:$(get-version)
+
+config: |-
+  OPTIONS =
+  OPTIONS = config-options
+  echo OPTIONS: $OPTIONS

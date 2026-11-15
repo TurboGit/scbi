@@ -1,0 +1,11 @@
+plugin: intmod
+
+modules:
+  common:
+    - lib1
+  default:
+    - lib2
+  varA:
+    - gcc
+  varB:
+    - dmod

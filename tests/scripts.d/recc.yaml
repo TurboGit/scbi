@@ -1,0 +1,10 @@
+plugin: recc
+
+depends:
+  - reca
+
+config: true
+
+build: true
+
+install: echo NONE

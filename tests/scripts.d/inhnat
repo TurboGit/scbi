@@ -1,3 +1,0 @@
-inherit-plugin lib1
-
-with-variant native os@-cmake

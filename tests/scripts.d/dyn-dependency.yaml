@@ -1,0 +1,7 @@
+plugin: dyn-dependency
+
+depends:
+  #  dyn-dep2 needed only when the dyn-dep1 sources contain a Makefile
+  dyndep2:
+    - if exists($SCBI_BDIR/dyn-dep1/src/Makefile): dyn-dep2
+    - if exists($SCBI_BDIR/dyn-dep1/src/notthere): should-not-be-run

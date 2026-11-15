@@ -1,4 +1,0 @@
-function two-config()
-{
-    echo TWO
-}

@@ -1,0 +1,6 @@
+plugin: utp6
+
+modules:
+  - toto
+  - usethisplg
+  - titi

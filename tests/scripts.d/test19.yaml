@@ -1,0 +1,81 @@
+plugin: test19
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+pre-setup:
+  _: |-
+    mkdir $TARGET-default/src
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ PRE-SETUP " $_S1
+  alt: |-
+    mkdir $TARGET-alt/src
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ ALT/PRE-SETUP " $_S1
+
+out-of-tree: false
+
+config:
+  _: |-
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ CONFIG " $_S1
+  alt: |-
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ ALT/CONFIG " $_S1
+
+post-config:
+  _: |-
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ POST-CONFIG " $_S1
+  alt: |-
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ ALT/POST-CONFIG " $_S1
+
+pre-build: |-
+  _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+  echo "@@@ PRE-BUILD " $_S1
+
+build: |-
+  _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+  echo "@@@ BUILD " $_S1
+
+post-build: |-
+  _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+  echo "@@@ POST-BUILD " $_S1
+
+pre-install: |-
+  _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+  echo "@@@ PRE-INSTALL " $_S1
+
+install:
+  _: |-
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ INSTALL " $_S1
+  alt: |-
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ ALT/INSTALL " $_S1
+
+post-install:
+  alt: |-
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ POST-INSTALL " $_S1
+
+pre-wrapup: |-
+  _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+  echo "@@@ PRE-WRAPUP " $_S1
+
+wrapup:
+  _: |-
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ WRAPUP " $_S1
+  alt: |-
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ ALT/WRAPUP " $_S1
+
+post-wrapup:
+  alt: |-
+    _S1 = output-words realpath --relative-to=$SCBI_BDIR $PWD
+    echo "@@@ ALT/POST-WRAPUP " $_S1

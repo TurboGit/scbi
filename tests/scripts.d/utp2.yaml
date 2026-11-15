@@ -1,0 +1,5 @@
+plugin: utp2
+
+build-depends:
+  - yes
+  - usethisplg

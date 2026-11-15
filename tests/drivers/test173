@@ -1,5 +1,5 @@
 
-RUNS scbi m-lib1
+RUNS ./scbi --env=dump m-lib1
 
 CLEAN-DIFF <<EOF
 xxxx/xx/xx xx:xx:xx : Building m-lib1 [default] (n/a)
@@ -9,6 +9,8 @@ xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
 xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : wrapup starting
 xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : final step starting
+xxxx/xx/xx xx:xx:xx : final step completed
 xxxx/xx/xx xx:xx:xx : End Building m-lib1 [default] (n/a)
 EOF
 

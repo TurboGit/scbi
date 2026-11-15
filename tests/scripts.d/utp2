@@ -1,5 +1,0 @@
-function utp2-build-depends()
-{
-    echo yes
-    echo usethisplg
-}

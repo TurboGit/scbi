@@ -1,9 +1,0 @@
-function listDA-depends()
-{
-    echo listDB
-}
-
-function listDA-build-depends()
-{
-    echo buildA
-}

@@ -1,248 +1,9 @@
-# test for the native variants creation
+# test for the native variants (os-variants): the default variant builds,
+# the native one runs no step and depends on the given modules
 
 RUNS ./scbi natv
 
 CLEAN-DIFF <<EOF
-natv-native-archive is a function
-natv-native-archive ()
-{
-    echo NONE;
-    echo NONE;
-    echo NONE;
-    echo NONE;
-    echo NONE
-}
-natv-native-build is a function
-natv-native-build ()
-{
-    true
-}
-natv-native-build-depends is a function
-natv-native-build-depends ()
-{
-    true
-}
-natv-native-build-env is a function
-natv-native-build-env ()
-{
-    true
-}
-natv-native-common-build-depends is a function
-natv-native-common-build-depends ()
-{
-    true
-}
-natv-native-common-build-env is a function
-natv-native-common-build-env ()
-{
-    true
-}
-natv-native-common-cross-build-depends is a function
-natv-native-common-cross-build-depends ()
-{
-    true
-}
-natv-native-common-cross-build-env is a function
-natv-native-common-cross-build-env ()
-{
-    true
-}
-natv-native-common-cross-env is a function
-natv-native-common-cross-env ()
-{
-    true
-}
-natv-native-common-cross-patches is a function
-natv-native-common-cross-patches ()
-{
-    true
-}
-natv-native-common-env is a function
-natv-native-common-env ()
-{
-    true
-}
-natv-native-common-patches is a function
-natv-native-common-patches ()
-{
-    true
-}
-natv-native-config is a function
-natv-native-config ()
-{
-    true
-}
-natv-native-cross-build is a function
-natv-native-cross-build ()
-{
-    true
-}
-natv-native-cross-build-depends is a function
-natv-native-cross-build-depends ()
-{
-    true
-}
-natv-native-cross-build-env is a function
-natv-native-cross-build-env ()
-{
-    true
-}
-natv-native-cross-config is a function
-natv-native-cross-config ()
-{
-    true
-}
-natv-native-cross-env is a function
-natv-native-cross-env ()
-{
-    true
-}
-natv-native-cross-install is a function
-natv-native-cross-install ()
-{
-    true
-}
-natv-native-cross-patches is a function
-natv-native-cross-patches ()
-{
-    true
-}
-natv-native-cross-post-build is a function
-natv-native-cross-post-build ()
-{
-    true
-}
-natv-native-cross-post-config is a function
-natv-native-cross-post-config ()
-{
-    true
-}
-natv-native-cross-post-install is a function
-natv-native-cross-post-install ()
-{
-    true
-}
-natv-native-cross-pre-build is a function
-natv-native-cross-pre-build ()
-{
-    true
-}
-natv-native-cross-pre-config is a function
-natv-native-cross-pre-config ()
-{
-    true
-}
-natv-native-cross-pre-install is a function
-natv-native-cross-pre-install ()
-{
-    true
-}
-natv-native-default-build-depends is a function
-natv-native-default-build-depends ()
-{
-    true
-}
-natv-native-default-build-env is a function
-natv-native-default-build-env ()
-{
-    true
-}
-natv-native-default-cross-build-depends is a function
-natv-native-default-cross-build-depends ()
-{
-    true
-}
-natv-native-default-cross-build-env is a function
-natv-native-default-cross-build-env ()
-{
-    true
-}
-natv-native-default-cross-env is a function
-natv-native-default-cross-env ()
-{
-    true
-}
-natv-native-default-cross-patches is a function
-natv-native-default-cross-patches ()
-{
-    true
-}
-natv-native-default-env is a function
-natv-native-default-env ()
-{
-    true
-}
-natv-native-default-patches is a function
-natv-native-default-patches ()
-{
-    true
-}
-natv-native-depends is a function
-natv-native-depends ()
-{
-    echo libA;
-    echo libB;
-    true
-}
-natv-native-env is a function
-natv-native-env ()
-{
-    add-to-var ROOT_DIR /usr;
-    true
-}
-natv-native-install is a function
-natv-native-install ()
-{
-    true
-}
-natv-native-patches is a function
-natv-native-patches ()
-{
-    true
-}
-natv-native-post-build is a function
-natv-native-post-build ()
-{
-    true
-}
-natv-native-post-config is a function
-natv-native-post-config ()
-{
-    true
-}
-natv-native-post-install is a function
-natv-native-post-install ()
-{
-    true
-}
-natv-native-pre-build is a function
-natv-native-pre-build ()
-{
-    true
-}
-natv-native-pre-config is a function
-natv-native-pre-config ()
-{
-    true
-}
-natv-native-pre-install is a function
-natv-native-pre-install ()
-{
-    true
-}
-natv-native-prefix is a function
-natv-native-prefix ()
-{
-    echo NONE
-}
-natv-native-vcs is a function
-natv-native-vcs ()
-{
-    echo NONE;
-    echo NONE;
-    echo NONE;
-    echo NONE
-}
 xxxx/xx/xx xx:xx:xx : Building natv [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
@@ -255,4 +16,16 @@ xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : End Building natv [default] (n/a)
 EOF
 
-GREP env .root/builds/natv/build/logs/env.cmd
+GREP 'define-var SET NATV_ENV "env"' .root/builds/natv/build/logs/env.cmd
+
+RUNS ./scbi natv/native
+
+CLEAN-DIFF <<EOF
+xxxx/xx/xx xx:xx:xx : Building natv [native] (os)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+error: libA not found
+error: libB not found
+xxxx/xx/xx xx:xx:xx : skip global install
+xxxx/xx/xx xx:xx:xx : End Building natv [native] (os)
+EOF

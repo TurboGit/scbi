@@ -30,8 +30,7 @@ EOF
 
 #  Change parent, should rebuild
 
-sed -i 's/OPTIONS/OOOPTIONS/g' scripts.d/parent
-PLG-UPDATE parent
+sed -i 's/OPTIONS/OOOPTIONS/g' scripts.d/parent.yaml
 
 RUNS ./scbi child
 
@@ -61,8 +60,7 @@ EOF
 
 #  Change grandparent, should rebuild
 
-sed -i 's/REPLACEME/REPLACED/g' scripts.d/grandparent
-PLG-UPDATE grandparent
+sed -i 's/REPLACEME/REPLACED/g' scripts.d/grandparent.yaml
 
 RUNS ./scbi child
 
@@ -92,9 +90,8 @@ EOF
 
 #  Back to initial version, should rebuild
 
-sed -i 's/REPLACED/REPLACEME/g' scripts.d/grandparent
-sed -i 's/OOOPTIONS/OPTIONS/g' scripts.d/parent
-PLG-UPDATE parent grandparent
+sed -i 's/REPLACED/REPLACEME/g' scripts.d/grandparent.yaml
+sed -i 's/OOOPTIONS/OPTIONS/g' scripts.d/parent.yaml
 
 RUNS ./scbi child
 

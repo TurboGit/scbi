@@ -1,4 +1,4 @@
-# scbi lint on YAML plug-ins (Python driver only, see python-only.txt)
+# scbi lint on YAML plug-ins
 
 RUNS ./scbi lint fixtures/lint/lintok.yaml
 
@@ -37,12 +37,16 @@ EOF2
 
 # Bash plug-ins are not checked: they are to be converted
 
-NRUNS ./scbi lint wrong
+printf 'function abash-build()\n{\n    make\n}\n' > scripts.d/abash
+
+NRUNS ./scbi lint abash
 
 CLEAN-DIFF <<EOF2
 
-========== Skip wrong: not a YAML plug-in, convert it with: python3 -m scbi.convert
+========== Skip abash: not a YAML plug-in, convert it with: python3 -m scbi.convert
 EOF2
+
+rm -f scripts.d/abash
 
 RUNS ./scbi lint nothere
 

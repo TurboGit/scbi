@@ -1,5 +1,0 @@
-function utp1-depends()
-{
-    echo usethisplg
-    echo no
-}

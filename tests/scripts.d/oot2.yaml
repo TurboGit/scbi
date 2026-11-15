@@ -1,0 +1,19 @@
+plugin: oot2
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+out-of-tree:
+  _: true
+  no: false
+
+build: |-
+  gcc -I../src -c ../src/lib1.c -o lib1.o
+  gcc -I../src ../src/main.c lib1.o -o main
+
+install: |-
+  mkdir -p $PREFIX
+  cp lib1.o main $PREFIX

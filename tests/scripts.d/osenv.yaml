@@ -1,0 +1,10 @@
+plugin: osenv
+
+build-env:
+  - set-var BOSENV benv-val
+  - add-to-var PATH /tmp
+
+build: |-
+  echo BOSENV $BOSENV
+  #  the element of PATH whose base name is tmp
+  printf '%s\n' "$PATH" | tr : '\n' | grep -m1 '/tmp$' | sed 's/^/PATH /'

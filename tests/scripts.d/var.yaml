@@ -1,0 +1,29 @@
+plugin: var
+
+depends:
+  four:
+    - four
+  one:
+    - one
+  three:
+    - three
+  two:
+    - two
+
+config: |-
+  echo "@@@ config var: $VARIANT"
+  _S1 = all-variants $VARIANT
+  for v in $_S1:
+      echo "@@@ config      $v"
+
+build: |-
+  echo "@@@ build var: $VARIANT"
+  _S1 = all-variants $VARIANT
+  for v in $_S1:
+      echo "@@@ build      $v"
+
+install: |-
+  echo "@@@ install var: $VARIANT"
+  _S1 = all-variants $VARIANT
+  for v in $_S1:
+      echo "@@@ install      $v"

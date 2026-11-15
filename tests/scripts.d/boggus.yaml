@@ -1,0 +1,33 @@
+plugin: boggus
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+archive:
+  proxy: default
+  options: none
+  protocol: none
+  url: none
+  file: boggus-$VERSION-src.tar.bz2
+
+depends:
+  - doesnotexists
+
+out-of-tree: false
+
+build: |-
+  rm -f *.o
+  make
+
+install: |-
+  mkdir -p $PREFIX/include
+  mkdir -p $PREFIX/lib
+  cp liblib1.so $PREFIX/lib
+  cp lib1.h $PREFIX/include
+
+tests: |-
+  ./main
+  return 0

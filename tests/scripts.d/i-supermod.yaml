@@ -1,0 +1,4 @@
+plugin: i-supermod
+
+inherit:
+  - from: supermod

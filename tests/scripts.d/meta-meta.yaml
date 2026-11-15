@@ -1,0 +1,10 @@
+plugin: meta-meta
+
+modules:
+  - dmod
+
+propagate-version:
+  both: both
+  none: false
+  variant: variant
+  version: version

@@ -1,0 +1,12 @@
+plugin: gentool
+
+env:
+  - add-to-var PATH $PREFIX/bin
+
+install: |-
+  mkdir -p $PREFIX/bin
+  echo "#!/bin/bash" > $PREFIX/bin/gentool
+  echo "echo -n \"#define TOOLVER \\\"\$1\\\"\"" >> $PREFIX/bin/gentool
+  chmod u+x $PREFIX/bin/gentool
+
+prefix: $SCBI_BDIR/local-install

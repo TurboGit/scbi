@@ -1,0 +1,7 @@
+plugin: stest
+
+tests: |-
+  if empty($OPTIONS):
+      echo stest: none
+  else:
+      echo stest: $OPTIONS

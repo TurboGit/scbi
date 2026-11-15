@@ -1,0 +1,17 @@
+plugin: lvl0
+
+build-depends:
+  - lvl1
+
+env:
+  - add-to-var LVL0 zero
+
+build-env:
+  - add-to-var LVL0 build-zero
+
+build: |-
+  echo 00 ${LVL0}x
+  echo 01 ${LVL1}x
+  echo 02 ${LVL2}x
+  echo 03 ${LVL3}x
+  echo 04 ${LVL4}x

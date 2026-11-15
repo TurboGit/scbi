@@ -1,0 +1,15 @@
+plugin: autovarA
+
+os-variants:
+  whatever:
+    packages:
+      - squid-dbg
+
+depends:
+  - lib1
+
+config: echo config autovarA
+
+build: echo build autovarA
+
+prefix: NONE

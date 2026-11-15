@@ -1,0 +1,5 @@
+plugin: cdb
+
+build-depends:
+  - os@-make:[v]
+  - os@-openssl-dev

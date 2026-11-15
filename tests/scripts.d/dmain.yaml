@@ -1,0 +1,7 @@
+plugin: dmain
+
+depends:
+  - depA
+  - depB
+  - dmod
+  - libaws-dev

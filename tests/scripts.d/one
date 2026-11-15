@@ -1,4 +1,0 @@
-function one-config()
-{
-    echo ONE
-}

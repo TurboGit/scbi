@@ -1,0 +1,7 @@
+plugin: dyn-dep1
+
+inherit:
+  - from: lib1
+
+env:
+  - set-var DEP1 one

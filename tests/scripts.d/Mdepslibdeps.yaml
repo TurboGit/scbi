@@ -1,0 +1,8 @@
+plugin: Mdepslibdeps
+
+depends:
+  _:
+    - depslibdeps
+  next:
+    - lib1
+    - depslibdeps

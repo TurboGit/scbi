@@ -1,0 +1,17 @@
+plugin: varhook
+
+config-options:
+  mpi:
+    - MPI
+  openmp:
+    - OpenMP
+
+config: |-
+  OPTIONS =
+  OPTIONS = config-options
+  for O in $OPTIONS:
+      echo "@@@ $O"
+
+build: echo build
+
+install: echo install

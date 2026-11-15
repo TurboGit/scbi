@@ -1,0 +1,4 @@
+plugin: depslibdeps
+
+depends:
+  - libdeps

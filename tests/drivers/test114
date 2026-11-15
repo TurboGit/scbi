@@ -23,10 +23,10 @@ GREP "PATH /tmp"                        $LDIR/build.log
 GREP "define-var SET BOSENV \"benv-val" $LDIR/env.cmd
 GREP "define-var ADD PATH \"/tmp\""     $LDIR/env.cmd
 
-cp scbi scbi.keep
-sed -i 's/^SCBI_OS_MODULE=.*/SCBI_OS_MODULE=windows/g' scbi
-#  Same for the Python driver (ignored by the Bash driver)
+#  the Windows OS module (testsuite knob), with a fake cygpath
 export SCBI_OS_MODULE=windows
+printf '#!/bin/sh\necho /path/osenv$2\n' > cygpath
+chmod +x cygpath
 
 RUNS ./scbi -f osenv
 
@@ -37,23 +37,16 @@ GREP "PATH /path/osenv/tmp"             $LDIR/build.log
 GREP "define-var SET BOSENV \"benv-val" $LDIR/env.cmd
 GREP "define-var ADD PATH \"/tmp\""     $LDIR/env.cmd
 
-mv scbi.keep ./scbi
 unset SCBI_OS_MODULE
 
-# Test that running build.cmd is fully equivalent and properly using the
-# OS dependant routines.
+# Test that replaying build.cmd is fully equivalent (the environment
+# recorded with the OS dependant transformations).
 
-function cygpath()
-{
-    echo /path/osenv$2
-}
-declare -fx cygpath
-
-RUNS source $LDIR/build.cmd
+RUNS ./scbi replay $LDIR/build.cmd
 
 CLEAN-DIFF <<EOF
 BOSENV benv-val
 PATH /path/osenv/tmp
 EOF
 
-unset -f cygpath
+rm -f cygpath

@@ -1,0 +1,12 @@
+plugin: mcross
+
+depends:
+  _:
+    - not-cross
+  cross:
+    _:
+      - cross-general
+    opta:
+      - cross-opta
+    optb:
+      - cross-optb

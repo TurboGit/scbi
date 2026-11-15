@@ -1,0 +1,11 @@
+plugin: test20
+
+setup: mkdir -p $TARGET-default/src
+
+out-of-tree: false
+
+config: echo "@@@ CONFIG $SCBI_JOBS"
+
+build: echo "@@@ BUILD $SCBI_JOBS"
+
+install: echo "@@@ INSTALL $SCBI_JOBS"

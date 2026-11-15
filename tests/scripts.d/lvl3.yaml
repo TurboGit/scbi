@@ -1,0 +1,14 @@
+plugin: lvl3
+
+env:
+  - add-to-var LVL3 three
+
+build-env:
+  - add-to-var LVL3 build-three
+
+build: |-
+  echo 30 ${LVL0}x
+  echo 31 ${LVL1}x
+  echo 32 ${LVL2}x
+  echo 33 ${LVL3}x
+  echo 34 ${LVL4}x

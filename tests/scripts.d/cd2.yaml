@@ -1,0 +1,4 @@
+plugin: cd2
+
+build-depends:
+  - cdb

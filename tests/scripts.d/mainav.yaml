@@ -1,0 +1,8 @@
+plugin: mainav
+
+depends:
+  - mautov
+
+config: echo config
+
+build: echo build

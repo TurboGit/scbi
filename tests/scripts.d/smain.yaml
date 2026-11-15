@@ -1,0 +1,13 @@
+plugin: smain
+
+depends:
+  _:
+    - lib1
+    - dmod
+  two:
+    - lib1
+    - meta-meta
+
+config: echo CONFIG
+
+build: echo BUILD

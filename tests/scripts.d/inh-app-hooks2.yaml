@@ -1,0 +1,13 @@
+plugin: inh-app-hooks2
+
+inherit:
+  - from: inh-specific
+    hooks:
+      - config
+    custom-hooks:
+      - shared
+
+config: |-
+  echo @@@ CONFIG
+  #  the inherited custom hook (generic is not inherited)
+  inh-app-hooks2-shared

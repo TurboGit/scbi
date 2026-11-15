@@ -1,0 +1,17 @@
+plugin: test4
+
+vcs:
+  proxy: default
+  options: none
+  protocol: mercurial
+  url: ${TESTREPOS}/simple.mercurial.bundle
+
+out-of-tree: false
+
+config: ./configure
+
+build: make
+
+tests: |-
+  ./main
+  return 0

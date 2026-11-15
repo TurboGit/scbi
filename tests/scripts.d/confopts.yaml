@@ -1,0 +1,16 @@
+plugin: confopts
+
+config-options:
+  common:
+    - -DcommonX
+    - -DcommonY
+  vara:
+    - -DvaraA
+  varb:
+    - -DvarbA
+    - -DvarbB
+
+config: |-
+  OPTIONS =
+  OPTIONS = config-options
+  echo call $OPTIONS

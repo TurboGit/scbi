@@ -1,0 +1,24 @@
+plugin: usemetaagg
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/mainlib.bundle
+
+depends:
+  - metaagg
+
+out-of-tree: false
+
+build: |-
+  rm -f *.o
+  make
+
+install: |-
+  mkdir -p $PREFIX/bin
+  cp mainlib $PREFIX/bin
+
+tests: |-
+  ./mainlib
+  return 0

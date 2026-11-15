@@ -1,0 +1,19 @@
+plugin: svnstd
+
+vcs:
+  proxy: none
+  options: none
+  protocol: subversion
+  url: file://$TESTREPOS/repostd
+
+out-of-tree: false
+
+build: gcc -o main main.c
+
+install: |-
+  mkdir ../install
+  cp main ../install
+
+tests: ./main
+
+prefix: none

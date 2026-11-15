@@ -1,0 +1,9 @@
+plugin: usemetaagg3
+
+depends:
+  - metaagg3
+
+tests: |-
+  which mainlib
+  mainlib
+  return 0

@@ -1,4 +1,0 @@
-function buildA-depends()
-{
-    echo listDC
-}

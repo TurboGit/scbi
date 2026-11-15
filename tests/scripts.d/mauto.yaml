@@ -1,0 +1,12 @@
+plugin: mauto
+
+os-variants:
+  native:
+    packages:
+      - gcc:4.3.1
+
+config: echo mauto-config
+
+build: echo mauto-config
+
+install: echo mauto-config

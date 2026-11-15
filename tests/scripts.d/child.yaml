@@ -1,0 +1,7 @@
+plugin: child
+
+inherit:
+  - from: parent
+
+config-options:
+  - p:$(get-version)

@@ -1,0 +1,10 @@
+plugin: reca
+
+depends:
+  - recb
+
+config: true
+
+build: true
+
+install: echo NONE

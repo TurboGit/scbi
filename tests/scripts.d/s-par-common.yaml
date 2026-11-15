@@ -1,0 +1,29 @@
+plugin: s-par-common
+
+config-options:
+  _:
+    - opt-std
+  common:
+    - opt-common
+  default:
+    - opt-default
+  var:
+    - opt-var
+
+config:
+  _: |-
+    OPTIONS =
+    OPTIONS = config-options
+    echo CONF-STD $OPTIONS
+  default: |-
+    OPTIONS =
+    OPTIONS = config-options
+    echo CONF-DEF $OPTIONS
+  var: |-
+    OPTIONS =
+    OPTIONS = config-options
+    echo CONF-VAR $OPTIONS
+
+build:
+  _: echo BUILD-STD
+  var: echo BUILD-VAR

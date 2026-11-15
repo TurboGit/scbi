@@ -122,9 +122,9 @@ EOF
 # change depA, check that depA is rebuilt and also smain
 # which is depending on depA via a meta-module.
 
-cp scripts.d/depA scripts.d/depA.keep
+cp scripts.d/depA.yaml scripts.d/depA.keep
 
-PLG-TOUCH depA
+echo "# touched" >> scripts.d/depA.yaml
 
 RUNS ./scbi --deps smain
 
@@ -184,8 +184,7 @@ xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : End Building smain [default] (n/a)
 EOF
 
-mv scripts.d/depA.keep scripts.d/depA
-PLG-UPDATE depA
+mv scripts.d/depA.keep scripts.d/depA.yaml
 
 # Now check for a dependency on a two level metamodule
 
@@ -258,9 +257,9 @@ xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : End Building smain [two] (n/a)
 EOF
 
-cp scripts.d/depA scripts.d/depA.keep
+cp scripts.d/depA.yaml scripts.d/depA.keep
 
-PLG-TOUCH depA
+echo "# touched" >> scripts.d/depA.yaml
 
 # And now that depA and smain are recompiled
 
@@ -340,5 +339,4 @@ xxxx/xx/xx xx:xx:xx : build [two] completed
 xxxx/xx/xx xx:xx:xx : End Building smain [two] (n/a)
 EOF
 
-mv scripts.d/depA.keep scripts.d/depA
-PLG-UPDATE depA
+mv scripts.d/depA.keep scripts.d/depA.yaml

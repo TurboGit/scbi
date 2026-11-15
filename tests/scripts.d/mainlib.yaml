@@ -1,0 +1,33 @@
+plugin: mainlib
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/mainlib.bundle
+
+depends:
+  - lib1
+
+env:
+  - add-to-var PATH $PREFIX/bin
+
+post-setup:
+  depdir: |-
+    echo @@@LIB1-INS ${SCBI_MODULES_DIR[lib1]}
+    echo @@@LIB1-SRC ${SCBI_MODULES_DIR[lib1@src]}
+    echo @@@LIB1-BLD ${SCBI_MODULES_DIR[lib1@build]}
+
+out-of-tree: false
+
+build: |-
+  rm -f *.o
+  make
+
+install: |-
+  mkdir -p $PREFIX/bin
+  cp mainlib $PREFIX/bin
+
+tests: |-
+  ./mainlib
+  return 0

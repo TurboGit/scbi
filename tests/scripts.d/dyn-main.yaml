@@ -1,0 +1,6 @@
+plugin: dyn-main
+
+depends:
+  - dyn
+
+config: echo "@@@ $DENV"

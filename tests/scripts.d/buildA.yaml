@@ -1,0 +1,4 @@
+plugin: buildA
+
+depends:
+  - listDC

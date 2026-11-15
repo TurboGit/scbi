@@ -1,0 +1,15 @@
+plugin: crossmod
+
+config-options:
+  _:
+    - BUILD=native
+  common:
+    - prefix=/toto
+  cross:
+    _:
+      - BUILD=cross
+
+build: |-
+  OPTIONS =
+  OPTIONS = config-options
+  echo @@@ make $OPTIONS

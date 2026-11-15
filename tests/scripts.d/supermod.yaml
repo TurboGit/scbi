@@ -1,0 +1,14 @@
+plugin: supermod
+
+setup: |-
+  mkdir -p $PREFIX
+  echo do setup >> $PREFIX/supermod
+
+wrapup: echo do wrapup >> $PREFIX/supermod
+
+modules:
+  - lib1
+  - lib2
+
+plan:
+  best: var

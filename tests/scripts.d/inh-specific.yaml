@@ -1,0 +1,13 @@
+plugin: inh-specific
+
+functions:
+  inh-specific-generic:
+    run: echo @@@ GENERIC-inh-specific
+  inh-specific-shared:
+    run: echo @@@ SHARED-inh-specific
+  inh-specific-whatever:
+    run: echo @@@ WHATEVER-inh-specific
+
+config: echo @@@ CONFIG-inh-specific
+
+install: echo @@@ INSTALL-inh-specific

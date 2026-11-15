@@ -1,0 +1,7 @@
+plugin: test22
+
+config: |-
+  if not empty("$(is-enabled light)"):
+      echo "@@@ LIGHT is enabled"
+  else:
+      echo "@@@ LIGHT is not enabled"

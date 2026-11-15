@@ -1,0 +1,7 @@
+plugin: listDA
+
+depends:
+  - listDB
+
+build-depends:
+  - buildA

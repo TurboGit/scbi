@@ -1,0 +1,39 @@
+plugin: libarch
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+archive:
+  bz2:
+    proxy: default
+    options: none
+    protocol: none
+    url: none
+    file: libarch-$VERSION.tar.bz2
+  gz:
+    proxy: default
+    options: none
+    protocol: none
+    url: none
+    file: libarch-$VERSION-src.tar.gz
+  tar:
+    proxy: default
+    options: none
+    protocol: none
+    url: none
+    file: LIBARCH-$VERSION-nocomp.tar
+  xz:
+    proxy: default
+    options: none
+    protocol: none
+    url: none
+    file: libarch-$VERSION.tar.xz
+  zip:
+    proxy: default
+    options: none
+    protocol: none
+    url: none
+    file: libarch-$VERSION.zip

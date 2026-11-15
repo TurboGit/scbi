@@ -1,0 +1,23 @@
+plugin: checkenv
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/usetool.bundle
+
+out-of-tree: false
+
+config: |-
+  BT = get-build-type CMAKE Release
+  echo "#define TOOLVER \"$BT\"" > version.h
+
+build: |-
+  rm -f *.o
+  make
+
+install: make PREFIX=$PREFIX install
+
+tests: |-
+  ./toolbin
+  return 0

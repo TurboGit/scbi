@@ -1,0 +1,6 @@
+plugin: varenvmain
+
+depends:
+  - varenv
+
+build: echo VENV $VENV

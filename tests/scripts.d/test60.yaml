@@ -1,0 +1,12 @@
+plugin: test60
+
+config: |-
+  echo @@@OPT1=$(is-enabled safe-arch)
+  echo @@@OPT2=$(is-enabled safe-arch amd)
+  echo @@@OPT3=$(is-enabled safe-arch i686 native)
+  if not empty("$(is-enabled safe-arch)"):
+      echo "@@@OPT4 : ENABLED"
+  if not (not empty("$(is-enabled safe-arch)")):
+      echo "@@@OPT4 : NOT ENABLED"
+  if not (not empty("$(is-enabled unknown-opt)")):
+      echo "@@@OPT5 : UNKNOWN"

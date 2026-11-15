@@ -1,0 +1,16 @@
+plugin: inh-specific-name
+
+inherit:
+  - from: postinst
+    name: call
+  - from: postinst
+    name: toto
+
+config: echo @@@ CONFIG-inh-specific-name
+
+build: echo @@@ BUILD-inh-specific-name
+
+post-install: |-
+  echo @@@ POST-INSTALL-inh-specific-name
+  call-post-install
+  toto-post-install

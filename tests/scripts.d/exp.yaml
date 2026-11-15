@@ -1,0 +1,7 @@
+plugin: exp
+
+only-explicit-build: true
+
+config: echo config
+
+build: echo config

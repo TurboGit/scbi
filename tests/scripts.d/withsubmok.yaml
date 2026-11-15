@@ -1,0 +1,11 @@
+plugin: withsubmok
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/withsubmok-main
+
+build: cat ../src/subm/sub.txt
+
+install: echo INSTALL

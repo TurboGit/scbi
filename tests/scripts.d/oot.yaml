@@ -1,0 +1,21 @@
+plugin: oot
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+out-of-tree: true
+
+build: |-
+  gcc -I../src -c ../src/lib1.c -o lib1.o
+  gcc -I../src ../src/main.c lib1.o -o main
+
+tests: |-
+  if is-file(../src/lib1.o):
+      echo OOT NOK
+  else:
+      echo OOT OK
+  ./main
+  return 0

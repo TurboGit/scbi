@@ -1,0 +1,11 @@
+plugin: wrongnat
+
+depends:
+  - libenv
+
+build-depends:
+  - gcc:999999
+
+config: echo config
+
+build: echo config

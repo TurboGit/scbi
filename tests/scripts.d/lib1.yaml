@@ -1,0 +1,61 @@
+plugin: lib1
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/lib1.bundle
+
+archive:
+  proxy: default
+  options: none
+  protocol: none
+  url: none
+  file: lib1-$VERSION-src.tar.bz2
+
+patches:
+  _:
+    - lib1-0-fix.patch
+  variant-no-patch:
+    - ''
+
+env:
+  _:
+    - add-to-var C_INCLUDE_PATH $PREFIX/include
+    - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+    - add-to-var LIBRARY_PATH $PREFIX/lib
+  dv:
+    - add-to-var C_INCLUDE_PATH a
+    - prepend-to-var LD_LIBRARY_PATH b
+    - append-to-var LIBRARY_PATH c
+
+build-env:
+  _:
+    - set-var C_INCLUDE_PATH $PWD/include:$C_INCLUDE_PATH
+    - set-var LIBRARY_PATH .:$PWD/lib:$LIBRARY_PATH
+    - set-var LD_LIBRARY_PATH .:$PWD/lib:$LD_LIBRARY_PATH
+  dv:
+    - set-var C_INCLUDE_PATH be:a
+    - set-var LIBRARY_PATH be:.:b
+    - set-var LD_LIBRARY_PATH be:.:c
+
+out-of-tree: false
+
+build: |-
+  rm -f *.o
+  make --no-print-directory
+
+install: |-
+  mkdir -p $PREFIX/include
+  mkdir -p $PREFIX/lib
+  mkdir -p $PREFIX/bin
+  cp liblib1.so $PREFIX/lib
+  cp lib1.h $PREFIX/include
+  cp main $PREFIX/bin
+
+tests: |-
+  ./main
+  if is-file(main):
+      return 0
+  else:
+      return 1

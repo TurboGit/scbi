@@ -1,0 +1,10 @@
+plugin: dyn
+
+depends:
+  - dyn-dep1
+  - dyn-dependency/dyndep2
+
+env:
+  - set-var DYN main
+  - add-to-var DENV $DEP1
+  - add-to-var DENV $DEP2

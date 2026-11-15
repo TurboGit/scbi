@@ -1,0 +1,7 @@
+plugin: metadepserr
+
+modules:
+  - metawitherr
+  - lib3
+
+aggregate: recursive

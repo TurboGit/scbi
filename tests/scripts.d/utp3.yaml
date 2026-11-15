@@ -1,0 +1,7 @@
+plugin: utp3
+
+depends:
+  test:
+    - yes
+    - usethisplg
+    - no

@@ -1,0 +1,27 @@
+plugin: testme
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/usetool.bundle
+
+build-depends:
+  - gentool
+
+tests-depends:
+  - test-driver
+
+out-of-tree: false
+
+config: gentool vA > version.h
+
+build: |-
+  rm -f *.o
+  make
+
+install: make PREFIX=$PREFIX install
+
+tests: |-
+  testdriver ./toolbin
+  return 0

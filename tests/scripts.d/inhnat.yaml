@@ -1,0 +1,9 @@
+plugin: inhnat
+
+inherit:
+  - from: lib1
+
+os-variants:
+  native:
+    packages:
+      - os@-cmake
