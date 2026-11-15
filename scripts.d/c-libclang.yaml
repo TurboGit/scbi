@@ -27,8 +27,8 @@ config-options:
   - -DLLVM_INCLUDE_BENCHMARKS=OFF
   - -DLLVM_INCLUDE_EXAMPLES=OFF
   - -DLLVM_INSTALL_UTILS=ON
-  - if build-type(CMAKE,Release) == Debug: -DLLVM_ENABLE_ASSERTIONS=ON
-  - if build-type(CMAKE,Release) != Debug: -DLLVM_ENABLE_ASSERTIONS=OFF
+  - BT = get-build-type CMAKE Release
+  - -DLLVM_ENABLE_ASSERTIONS=$(if $BT == Debug then ON else OFF)
   - -DCLANG_DEFAULT_LINKER=lld
   - -DCLANG_DEFAULT_UNWINDLIB=libunwind
   - -DCLANG_DEFAULT_CXX_STDLIB=libc++
