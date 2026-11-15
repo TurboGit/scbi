@@ -316,9 +316,6 @@ class Builder:
         path = Path(logs_dir, "env.cmd")
         path.unlink(missing_ok=True)
         out: list[str] = []
-        osfile = self.get("SCBI_OS_MODULE_FILE")
-        if osfile:
-            out += ["", "# OS specific support", Path(osfile).read_text().rstrip("\n")]
         if os.path.isdir(tvdir):
             out += ["", "# SCBI global settings"]
             for name, value in self.d.base_env().items():

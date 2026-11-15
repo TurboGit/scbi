@@ -91,9 +91,8 @@ export CDPATH=
 
 rm -f scripts.d/.store
 
-# the packages of the distributions, and the Bash support files given to
-# the users sourcing env.cmd (copied to $SCBI_BDIR/.scbi.runtime)
-cp ../scripts.d/.pkgs-* ../scripts.d/0_runtime ../scripts.d/_os_* scripts.d/
+# the packages of the distributions
+cp ../scripts.d/.pkgs-* scripts.d/
 
 export PATH="$PWD:$PATH"
 
@@ -135,7 +134,7 @@ fi
 cd ..
 
 #  The plan is only known when running the whole testsuite
-[ -z "$1" ] && PLAN 1383
+[ -z "$1" ] && PLAN 1367
 
 export SCBI_CACHE_DIR="no"
 

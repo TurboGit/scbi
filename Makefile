@@ -40,8 +40,8 @@ LIB_DIR=$(HOME)/.local/lib/scbi
 BASH_TOOLS=scbi-lint scbi-format scbi-store scbi-source-archive scbi-show scbi-shell
 
 #  Get SHA-1 of last commit in core SCBI
-CORE_SHA1=$(shell git log -1 --format="%h" -- src/scbi pyproject.toml scripts.d/0_runtime \
-	scripts.d/_os_* scripts.d/.pkgs-* bash_completion.d/*)
+CORE_SHA1=$(shell git log -1 --format="%h" -- src/scbi pyproject.toml scripts.d/.pkgs-* \
+	bash_completion.d/*)
 CORE_VER=$(shell git describe $(CORE_SHA1))
 
 PLG_SHA1=$(shell git log -1 --format="%h" -- scripts.d/c-* scripts.d/patches)

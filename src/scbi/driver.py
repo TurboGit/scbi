@@ -172,7 +172,6 @@ class Driver:
         s("SCBI_BINARY", os.path.realpath(self.argv0), export=True)
         s("SCBI_IS_WINDOWS", "no", export=True)
         s("SCBI_OS_MODULE", "")
-        s("SCBI_OS_MODULE_FILE", "")
         missing = [t for t in ("rsync", "sed", "diff") if not self.which(t)]
         uname = " ".join(os.uname())
         if re.search("Cygwin", uname):
@@ -528,7 +527,6 @@ class Driver:
         runtime files are not read)."""
         from scbi import setup
 
-        plugins = Path(self.get("SCBI_PLUGINS"))
         forced_os = bool(self.get("SCBI_OS_NAME"))
         #  1_setup, 2_log, 5_tools, 8_mail
         for name, value in setup.defaults(self.get).items():
@@ -566,8 +564,6 @@ class Driver:
 
         #  the define-var of _os_windows
         env_mod.WINDOWS_DEFINE_VAR = self.get("SCBI_OS_MODULE") == "windows"
-        if self.get("SCBI_OS_MODULE"):
-            self.set("SCBI_OS_MODULE_FILE", str(plugins / f"_os_{self.get('SCBI_OS_MODULE')}"))
 
     def check_tools_abort(self, *tools: str) -> None:
         missing = [t for t in tools if not self.which(t)]
@@ -1006,10 +1002,6 @@ class Driver:
 
         bdir = Path(self.get("SCBI_BDIR"))
         bdir.mkdir(parents=True, exist_ok=True)
-        #  for the users sourcing env.cmd
-        runtime = Path(self.get("SCBI_PLUGINS")) / "0_runtime"
-        if runtime.is_file():
-            shutil.copy(runtime, bdir / ".scbi.runtime")
 
         from scbi.build import Builder
 

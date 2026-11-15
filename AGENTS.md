@@ -14,7 +14,6 @@ former Bash driver is on the master branch only.
 | `scripts.d/c-*.yaml` | **Plug-ins**: one YAML file per buildable project/module. |
 | `scripts.d/patches/` | Patches referenced by plug-ins' `patches` hooks. |
 | `scripts.d/.env.py`, `.plan-default`, `.pkgs-<distrib>` | Default environment (Python), default build plan, mapping of `os@-<name>` dependencies to distribution packages. |
-| `scripts.d/0_runtime`, `scripts.d/_os_*` | Bash helpers (`define-var`...) for the users sourcing a module's `env.cmd` (copied to `$SCBI_BDIR/.scbi.runtime`); not read by the driver. |
 | `bash_completion.d/scbi` | Bash completion. |
 | `doc/scbi.tex` | Reference manual (LaTeX). The authoritative spec for hooks, options, env variables, plans and ini files. |
 | `tests/` | Regression testsuite (see below). |
@@ -85,7 +84,7 @@ cd tests && ./run test001 test092   # some drivers
 ```
 
 - `tests/run` writes a `tests/scbi` wrapper running the driver of
-  `src/scbi`, copies `.pkgs-*`, `0_runtime` and `_os_*` into
+  `src/scbi`, copies `.pkgs-*` into
   `tests/scripts.d/` (git-ignored copies, never edit them), exports the
   testsuite settings (`SCBI_TESTSUITE=yes`, `SCBI_ROOT=tests/.root`...),
   then sources each `tests/drivers/testNNN`.
@@ -161,8 +160,8 @@ directive or sub-command needs a matching update there (also check
   scoped, e.g. `c-polyorb: Disable global install.`, `scbi lint: Add more
   hook checks.`, `test104: Update expected output (archive hook).`
 - The `Makefile` derives the core version from the last commit touching
-  `src/scbi`, `pyproject.toml`, `scripts.d/0_runtime`, `scripts.d/_os_*`,
-  `scripts.d/.pkgs-*` and the completion file, and the plug-in version
+  `src/scbi`, `pyproject.toml`, `scripts.d/.pkgs-*` and the completion
+  file, and the plug-in version
   from `scripts.d/c-*` and `scripts.d/patches`. Keep core and plug-in
   changes in separate commits.
 

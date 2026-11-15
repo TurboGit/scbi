@@ -2672,7 +2672,6 @@ We describe in this section the sandbox structure. Yet, it is generally not need
 {\scriptsize
 \dirtree{%
 	.1 \textbf{[\$SCBI\_BDIR]}.
-	.2 .scbi.runtime \des{scbi runtime}.
 	.2 \textbf{[n]}\des{optional, simple number used in flat mode}.
 	.2 \textbf{[.vcs]}.
 	.3 \textbf{[<module>]} \des{sources checkout}.
@@ -2814,10 +2813,7 @@ At this point we can build GIMP with a simple:
 Before the Python driver, SCBI was a Bash driver (\file{scbi} and
 \file{scbi-*}, with the runtime files \file{scripts.d/[0-9]*}) and the
 plug-ins were Bash scripts. The Bash driver is no longer part of SCBI; the
-Bash plug-ins are converted to YAML once (see below). Only the helpers of
-\file{scripts.d/0\_runtime} are still installed, for the users sourcing
-the \file{env.cmd} file of a module (copied to
-\file{\$SCBI\_BDIR/.scbi.runtime}).
+Bash plug-ins are converted to YAML once (see below).
 
 \subsection{Bash plug-in format}
 
