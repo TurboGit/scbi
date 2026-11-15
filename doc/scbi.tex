@@ -1862,8 +1862,7 @@ wrapup: |
 \index{Python driver}
 
 The driver is written in Python (\file{src/scbi} in the SCBI
-repository). It replaces the former Bash driver, which is kept in the
-repository for its testsuite only (\seeref{bash-plugins}).
+repository). It replaces the former Bash driver (\seeref{bash-plugins}).
 
 \subsection{Installing and running}
 \index{install}
@@ -2055,7 +2054,7 @@ trace (lines starting with \code{\_TRACE:}) unless
 
 The sub-commands are implemented by the Python driver. \code{show},
 \code{shell}, \code{store} and \code{source-archive} have the same options
-and output as with the Bash driver; \code{shell} spawns the user's
+and output as with the former Bash driver; \code{shell} spawns the user's
 \code{\$SHELL} in the environment computed by the driver (and runs the
 \code{run} hooks of the module for \ddash{}run without a command).
 \code{replay} reruns a step (see above). \code{lint} and \code{format}
@@ -2070,37 +2069,20 @@ plug-ins of the modules and a Python environment file
 \index{testsuite}
 
 \begin{description}
-	\item[\code{make test}] The regression testsuite with the Bash driver.
-	\item[\code{SCBI\_IMPL=python ./run testNNN}] (in \file{tests}) A test
-	driver with the Python driver. \file{tests/run} converts the test
-	plug-ins (\file{tests/scripts.d}) to \file{<name>.yaml} files, removed
-	at the end.
-	\item[\code{make test-py}] Each test driver with the Python driver; the
-	ones known to pass are listed in \file{tests/python-pass.txt} and a
-	regression is an error.
-	\item[\code{make unit}, \code{make oracle}] The unit tests of the Python
-	driver and the tests comparing it with the Bash implementation.
+	\item[\code{make test}] The regression testsuite: each test driver
+	(\file{tests/drivers/testNNN}) builds the test plug-ins
+	(\file{tests/scripts.d}, YAML) and checks the output. \code{./run
+	testNNN...} in \file{tests} runs some of them.
+	\item[\code{make unit}] The unit tests of the driver (pytest).
 \end{description}
 
-A test driver changing a plug-in calls \code{PLG-UPDATE <name>} after the
-change (the YAML version is generated again) or uses \code{PLG-TOUCH
-<name>} (a change of the file only, both formats).
-
-Some test drivers are skipped with one of the drivers:
-\file{tests/python-only.txt} (features of the Python driver, e.g.
-\code{scbi lint} on YAML plug-ins), \file{tests/bash-only.txt} (Bash tools
-replaced, e.g. \code{scbi lint} on Bash plug-ins) and
-\file{tests/python-deferred.txt} (drivers using a test plug-in which does
-not convert to YAML, to be reviewed).
-
-When run by the testsuite (\code{SCBI\_TESTSUITE=yes}) the Python driver
-does not load \file{\$HOME/.scbi} and takes \code{SCBI\_OS\_MODULE} from
-the environment, as the testsuite does with the Bash driver by patching it.
-\file{tests/run} gives it the settings of the test runtime file
-\file{tests/scripts.d/1\_setup} through the environment. With
-\code{SCBI\_OS\_NAME=test} the installed packages are those of
-\code{SCBI\_TEST\_PKGS} (\code{"name=version ..."}), checked as Debian
-packages.
+When run by the testsuite (\code{SCBI\_TESTSUITE=yes}) the driver does not
+load \file{\$HOME/.scbi}, takes \code{SCBI\_OS\_MODULE} and \code{TODAY}
+from the environment, uses the rsync checksum mode and logs the sync
+messages; \file{tests/run} gives it the test directories (\code{SCBI\_ROOT}
+\ldots) through the environment. With \code{SCBI\_OS\_NAME=test} the
+installed packages are those of \code{SCBI\_TEST\_PKGS} (\code{"name=version
+..."}), checked as Debian packages.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
@@ -2224,7 +2206,7 @@ All keys are stored into the file \file{\$SCBI\_PLUGINS/.store} (if using the de
 \label{linter}
 \index{linter}
 
-The tool \code{scbi-lint} can be used to check for common plug-in errors.
+The sub-command \code{scbi lint} can be used to check for common plug-in errors.
 
 For example:
 
@@ -2272,7 +2254,7 @@ The exit status is 1 when an error is found.
 \index{formatted}
 \index{format}
 
-The tool \code{scbi-format} can be used to format plug-ins by reordering the hooks in a canonical order. It also removes the trailing white-spaces and the duplicate blank lines.
+The sub-command \code{scbi format} can be used to format plug-ins by reordering the hooks in a canonical order. It also removes the trailing white-spaces and the duplicate blank lines.
 
 For example:
 
@@ -2830,11 +2812,12 @@ At this point we can build GIMP with a simple:
 \index{Bash plug-in}
 
 Before the Python driver, SCBI was a Bash driver (\file{scbi} and
-\file{scbi-*} in the repository, with the runtime files
-\file{scripts.d/[0-9]*}) and the plug-ins were Bash scripts. The Bash
-driver is kept in the repository for its testsuite (\code{make test}),
-which also serves as the reference for the Python driver; it is no longer
-installed.
+\file{scbi-*}, with the runtime files \file{scripts.d/[0-9]*}) and the
+plug-ins were Bash scripts. The Bash driver is no longer part of SCBI; the
+Bash plug-ins are converted to YAML once (see below). Only the helpers of
+\file{scripts.d/0\_runtime} are still installed, for the users sourcing
+the \file{env.cmd} file of a module (copied to
+\file{\$SCBI\_BDIR/.scbi.runtime}).
 
 \subsection{Bash plug-in format}
 
