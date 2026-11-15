@@ -57,7 +57,7 @@ from dataclasses import dataclass, field
 from scbi.bashenv import quote
 from scbi.hooks import builtins as _builtins
 from scbi.hooks.context import HookContext
-from scbi.hooks.expand import ExpandError, expand
+from scbi.hooks.expand import ExpandError, _split_if, expand
 from scbi.plugin import expr
 from scbi.plugin.model import BUILTINS
 from scbi.vercmp import check_versions
@@ -66,7 +66,7 @@ from scbi.vercmp import check_versions
 FUNCTIONS = (
     "get-build-type", "config-options", "last-modified-directory", "is-enabled", "get-version",
     "output", "output-words", "first-line", "status", "basename", "dirname", "command-path",
-    "all-variants", "uppercase", "lowercase", "if",
+    "all-variants", "uppercase", "lowercase", "if", "all-modules", "hook-output",
 )
 #  Built-in commands
 COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset",
@@ -513,6 +513,17 @@ class Runner:
     config_options: Callable[[], list[str]] = list
     #  plug-in functions: name -> (params, body)
     functions: dict[str, tuple[tuple[str, ...], tuple]] = field(default_factory=dict)
+    #  the modules of the build of the module (all-modules): name -> status
+    #  (depends-kind, is-meta, is-aggregate, is-aggregated)
+    all_modules: Callable[[], dict[str, dict[str, str]]] = dict
+    modules_status: dict[str, dict[str, str]] = field(default_factory=dict)
+    #  hook-output MODULE HOOK: the function of the hook of another module
+    #  ("" if none) and the functions once modules are loaded
+    hook_function: Callable[[str, str], str] = lambda module, hook: ""
+    #  hook-output MODULE HOOK of a value hook: its values (None: not a
+    #  value hook)
+    hook_values: Callable[[str, str, list[str]], list[str] | None] = lambda module, hook, args: None
+    refresh_functions: Callable[[], dict] | None = None
     #  called with a "_TRACE: ..." line for each command and assignment (as
     #  Bash xtrace does)
     trace: Callable[[str], None] | None = None
@@ -645,8 +656,8 @@ class Runner:
     @staticmethod
     def _calls(text: str) -> list[tuple[int, int, str]]:
         """(start, end, inner text) of the $(<function> ...) of ``text``
-        whose function is an assignment function not known to the value
-        expansion (the others are expanded by scbi.hooks.expand)."""
+        whose function is an assignment function (the others are expanded
+        by scbi.hooks.expand)."""
         calls, i = [], 0
         while (i := text.find("$(", i)) >= 0:
             depth, j = 0, i + 1
@@ -662,7 +673,7 @@ class Runner:
                 break
             inner = text[i + 2 : j]
             name = inner.split(None, 1)[:1]
-            if name and name[0] in FUNCTIONS and name[0] not in BUILTINS:
+            if name and name[0] in FUNCTIONS:
                 calls.append((i, j + 1, inner))
             i = j + 1
         return calls
@@ -714,6 +725,11 @@ class Runner:
                     return os.path.lexists(path)
                 if name == "empty":
                     return arg == ""
+                if name in ("depends-kind", "is-meta", "is-aggregate", "is-aggregated"):
+                    status = runner.modules_status.get(arg)
+                    if status is None:
+                        raise expr.ExprError(f"{name}({arg}): not a module of all-modules")
+                    return status[name] if name == "depends-kind" else status[name] == "true"
                 if name == "ok":
                     saved = state.status
                     body = parse(arg, line)
@@ -760,12 +776,18 @@ class Runner:
             #  output-words: the words of the output (unquoted $(...))
             return text.split() if name == "output-words" else text
         if name == "if":
-            #  as $(if <condition> then A [else B]) in a value
+            #  if <condition> then A [else B]: the conditions of the command
+            #  hooks; the words of A or B as the words of a command
+            text = step.text.strip()
             try:
-                return expand(f"$({step.text.strip()})", self.hook_ctx(state))
-            except ExpandError as e:
+                cond, then, other = _split_if(text, text)
+                chosen = then if self.condition(cond, state, step.line) else other
+                values = self.expand_words(
+                    tuple(w for w in tokenize(chosen, step.line) if isinstance(w, Word)), state)
+            except (ExpandError, CmdSyntaxError) as e:
                 self.error(state, step.line, str(e))
                 return ""
+            return values[0] if len(values) == 1 else values
         args = self.expand_words(step.words[1:], state)
         ctx = self.hook_ctx(state)
         if name == "get-build-type":
@@ -792,11 +814,47 @@ class Runner:
             return " ".join(args).upper()
         if name == "lowercase":
             return " ".join(args).lower()
+        if name == "all-modules":
+            self.modules_status = dict(self.all_modules())
+            return list(self.modules_status)
+        if name == "hook-output":
+            return self.hook_output(args, state, step.line)
         if name == "all-variants":
             #  the variants of a variant string (a.b -> [a, b]), none for default
             v = " ".join(args)
             return [] if v == "default" else v.replace(".", " ").split()
         return None
+
+    def hook_output(self, args: list[str], state: State, line: int) -> str | list[str]:
+        """``hook-output MODULE HOOK ARGS...``: the output of the hook of
+        another module (empty when it has none), the list of the values of
+        a value hook."""
+        if len(args) < 2:
+            self.error(state, line, "hook-output: module and hook expected")
+            return ""
+        values = self.hook_values(args[0], args[1], args[2:])
+        if values is not None:
+            return values
+        fct = self.hook_function(args[0], args[1])
+        if not fct:
+            return ""
+        if fct not in self.functions and self.refresh_functions is not None:
+            self.functions = self.refresh_functions()
+        if fct not in self.functions:
+            return ""
+        params, body = self.functions[fct]
+        chunks: list[str] = []
+        saved = {p: state.vars.get(p) for p in params}
+        for p, v in zip(params, args[2:] + [""] * len(params)):
+            state.vars[p] = v
+        sink = State(state.vars, state.env, state.cwd, chunks.append, state.err, state.status)
+        self.run(body, sink)
+        for p, v in saved.items():
+            if v is None:
+                state.vars.pop(p, None)
+            else:
+                state.vars[p] = v
+        return "".join(chunks).rstrip("\n")
 
     # --------------------------------------------------------- commands
 

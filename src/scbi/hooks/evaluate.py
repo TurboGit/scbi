@@ -44,7 +44,12 @@ class GuardContext:
         if name == "variant":
             return c.params.get("VARIANT") or c.variant
         if name == "kind":
-            return c.params.get("KIND", "")
+            #  the KIND parameter (patches), else the kind of the module
+            #  version in the build plan (DEV, BRANCH, VERSION...)
+            if c.params.get("KIND"):
+                return c.params["KIND"]
+            info = c.plan.module_ref(c.module) if c.plan is not None else []
+            return info[2] if len(info) > 2 else ""
         if name == "cross":
             return c.host != c.target
         raise EvalError(f"unknown condition variable {name}")
@@ -58,6 +63,8 @@ class GuardContext:
             return builtins.get_build_type(c, kind, default)
         if name == "enabled":
             return builtins.is_enabled(c, arg)[0]
+        if name == "empty":
+            return arg == ""
         if name == "exists":
             return os.path.lexists(arg if os.path.isabs(arg) else c.cwd / arg)
         if name == "dir":

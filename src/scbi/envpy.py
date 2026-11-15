@@ -11,7 +11,8 @@ It is searched, in order, as (``<ename>``: ``env`` or ``env-<name>`` for
 
 What it defines, all optional:
 
-- settings: module-level variables in upper case holding a string, e.g.
+- settings: module-level variables starting with an upper case letter
+  (``SCBI_c_gmp_BUILD_TYPE`` too) holding a string, e.g.
   ``SCBI_PLAN = getvar("SCBI_PLAN", "default")`` (``getvar(name,
   default)``: the driver variable, or ``default`` when empty, as
   ``${NAME:-default}``); they become exported driver variables, given to
@@ -42,7 +43,8 @@ from pathlib import Path
 from scbi.envfile import env_file_name, find_env_file
 
 HOOKS = ("define_var", "rewrite_vcs", "rewrite_archive", "proxy", "module_final_step")
-_SETTING = re.compile(r"^[A-Z][A-Z0-9_]*$")
+#  SCBI_c_gmp_BUILD_TYPE: module names in lower case
+_SETTING = re.compile(r"^[A-Z][A-Za-z0-9_]*$")
 
 
 class EnvFileError(Exception):

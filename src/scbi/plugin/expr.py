@@ -40,7 +40,9 @@ OPERATORS = ("==", "!=", "<=", ">=", "<", ">", "=~")
 VARIABLES = ("ref", "target", "host", "variant", "kind", "cross", "status")
 FUNCTIONS = ("version", "build-type", "enabled", "exists", "dir",
              #  command hooks (scbi.hooks.cmdlang)
-             "is-dir", "is-file", "is-link", "empty", "ok")
+             "is-dir", "is-file", "is-link", "empty", "ok",
+             #  status of a module of all-modules (command hooks)
+             "depends-kind", "is-meta", "is-aggregate", "is-aggregated")
 
 
 class ExprError(Exception):

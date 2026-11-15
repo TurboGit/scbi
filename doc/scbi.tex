@@ -875,14 +875,27 @@ variables in the body; they are not declared in the plug-in.
 Values and environment actions are not shell code: they may only refer to
 variables (\code{\$VAR}, \code{\$\{VAR\}}, with the suffix and prefix
 removal forms \code{\$\{VAR\%pattern\}}, \code{\$\{VAR\%\%pattern\}},
-\code{\$\{VAR\#pattern\}}, \code{\$\{VAR\#\#pattern\}}), to
+\code{\$\{VAR\#pattern\}}, \code{\$\{VAR\#\#pattern\}}, the replacement
+forms \code{\$\{VAR/pattern/string\}} (first match) and
+\code{\$\{VAR//pattern/string\}} (all matches, \code{\textbackslash/} is a
+\code{/}), and \code{\$\{VAR:+word\}}, \code{word} when the variable is
+not empty), to
 \code{\$\{SCBI\_MODULES\_DIR[<module>[@src|@build]]\}} and to the
 following functions (the arguments are expanded as in a shell, including
 unquoted glob patterns):
 \code{\$(get-version)}, \code{\$(get-build-type <kind> <default>)},
 \code{\$(is-enabled <feature> [then] [else])},
 \code{\$(last-modified-directory <glob>)}, \code{\$(get-os-inc-dir <glob>)},
-\code{\$(basename <path>)}, \code{\$(ls <glob>)}, \code{\$(uppercase
+\code{\$(get-os-lib <file>)}, \code{\$(get-os-lib-dir <file>)} (a
+library of the system, as \code{serial/libhdf5.so}, and its directory),
+\code{\$(get-os-bin <program>)}, \code{\$(get-os-bin-dir <program>)} (a
+program of the system and its directory),
+\code{\$(command-path <tool>)} (the tool found in \code{PATH}, empty when
+none, as \code{command -v}), \code{\$(store-key <key>)} (the value of
+the key in \file{\$SCBI\_PLUGINS/.store}, lines \code{<key> <value>}),
+\code{\$(output <command> <args>)} (the standard output of the command,
+run without shell),
+\code{\$(basename <path>)}, \code{\$(dirname <path>)}, \code{\$(ls <glob>)}, \code{\$(uppercase
 <words>)} and \code{\$(lowercase <words>)}. A default value is given
 with \code{\$\{VAR:-default\}}.
 
@@ -1002,7 +1015,22 @@ in \code{\$(if ...)}.
 	lower case.
 	\item[if <condition> then <words> {[else <words>]}] the first words when
 	the condition is true, else the second ones (empty without
-	\code{else}), as \code{\$(if ...)} in values (\seeref{yaml-conditions}).
+	\code{else}), as \code{\$(if ...)} in values; the condition is one of
+	the \code{if} blocks below.
+	\item[all-modules] \index{all-modules}the list of the modules of the
+	build of the module, in build order: its dependencies (all kinds),
+	the meta-modules and the modules they aggregate, and the module
+	itself. The status of each one is given by the conditions
+	\code{depends-kind(\$M)}, \code{is-meta(\$M)}, \code{is-aggregate(\$M)}
+	and \code{is-aggregated(\$M)} (see \emph{Blocks} below), e.g. to keep
+	the modules installed on their own:
+	\code{if depends-kind(\$M) == default and not is-aggregated(\$M):}.
+	\item[hook-output <module> <hook> {[<args>]}] \index{hook-output}the
+	output of a hook of another module (variant from the build plan),
+	called with the arguments, e.g. a custom hook (a function
+	\code{<module>-<hook>} of the plug-in), empty when the module has no
+	such hook; for a value hook (\code{modules}, \code{depends}...) the
+	list of its values.
 \end{description}
 
 \textbf{Built-in commands.} \index{YAML plug-in!built-in commands}
@@ -1062,6 +1090,11 @@ indented more than it.
 		redirected, e.g. \code{2> /dev/null};
 		\item[status] the exit status of the previous step, e.g.
 		\code{status == 0};
+		\item[depends-kind(\$M), is-meta(\$M), is-aggregate(\$M), is-aggregated(\$M)]
+		the status of a module of \code{all-modules}: the kind of
+		dependency (\code{default}, \code{build} or \code{tests}), a
+		meta-module, a meta-module aggregating its modules, a module
+		installed in an aggregate;
 		\item[\$VAR, "text"] variables and quoted strings as operands.
 	\end{description}
 	\item[for NAME in <words>:] runs its body once for each word, the
@@ -1109,10 +1142,12 @@ A condition compares operands with \code{==}, \code{!=}, \code{=\textasciitilde}
 (regular expression) or \code{<}, \code{<=}, \code{>}, \code{>=} (versions, as
 \code{check-module-version}), combined with \code{not}, \code{and}, \code{or}
 and parentheses. The operands are \code{ref} (the module version),
-\code{target}, \code{host}, \code{variant}, \code{kind}, \code{cross} (true
+\code{target}, \code{host}, \code{variant}, \code{kind} (the kind of the
+module version: \code{DEV}, \code{BRANCH}, \code{VERSION}...), \code{cross} (true
 when the target is not the host), \code{version(<plug-in>)} (version in the
 build plan), \code{build-type(<kind>[,<default>])}, \code{enabled(<feature>)},
-\code{exists(<path>)}, \code{on <discriminants>} (as in build plans,
+\code{exists(<path>)}, \code{empty(<value>)} (e.g. \code{empty(\$VAR)},
+\code{not empty(\$VAR)}), \code{on <discriminants>} (as in build plans,
 \seeref{discriminants}), and literal strings. Conditions never select
 between variants, this is done with the qualifiers.
 
@@ -2147,9 +2182,13 @@ variable, or \code{default} when it is empty, as
 \code{\$\{name:-default\}}). It may define:
 
 \begin{description}
-	\item[settings] module variables in upper case holding a string, e.g.
-	\code{SCBI\_PLAN = getvar("SCBI\_PLAN", "default")}: driver variables,
-	given to the hooks;
+	\item[settings] module variables starting with an upper case letter
+	and holding a string, e.g. \code{SCBI\_PLAN = getvar("SCBI\_PLAN",
+	"default")} or \code{SCBI\_c\_gmp\_BUILD\_TYPE = "Debug"}: driver
+	variables, given to the hooks. Use a name starting with \code{\_} for
+	a variable of the file only. Another environment file can be included
+	with \code{exec(compile(open(path).read(), path, "exec"))}, e.g. with
+	\code{path = os.path.join(SCBI\_ENV\_DIR, ".env-shared.py")};
 	\item[\code{PASSTHROUGH}] a list of variables of the user's environment
 	given to the hooks (see below);
 	\item[\code{define\_var(env, action, name, value)}] called for each

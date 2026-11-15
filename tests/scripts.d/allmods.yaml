@@ -1,0 +1,38 @@
+plugin: allmods
+
+functions:
+  allmods-test-dir:
+    params:
+      - DIR
+    run: echo $DIR/tests
+
+vcs:
+  proxy: default
+  options: none
+  protocol: git
+  url: ${TESTREPOS}/test1.bundle
+
+depends:
+  - metaagg
+  - test2
+
+build-depends:
+  - lib3
+
+out-of-tree: false
+
+config: echo config
+
+build: echo build
+
+wrapup: |-
+  for M in $(all-modules):
+      if is-meta($M):
+          echo $M: depends-kind=$(if depends-kind($M) == default then default else other) meta aggregate=$(if is-aggregate($M) then yes else no)
+      elif is-aggregated($M):
+          echo $M: aggregated
+      else:
+          echo $M: depends-kind=$(if depends-kind($M) == build then build else default)
+  echo modules of metaagg: $(hook-output metaagg modules)
+  echo test-dir: $(hook-output allmods test-dir EDF/x)
+  echo no hook: [$(hook-output test2 test-dir x)]

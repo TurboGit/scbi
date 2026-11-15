@@ -31,7 +31,7 @@ from scbi.plugin.model import BUILTINS
 _NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 _BRACED = re.compile(
     r"(?P<name>[A-Za-z_][A-Za-z0-9_]*)"
-    r"(?:\[(?P<key>[^\]]+)\]|(?P<op>%%|%|##|#|:-)(?P<arg>[^{}$]*))?"
+    r"(?:\[(?P<key>[^\]]+)\]|(?P<op>%%|%|##|#|:-|:\+|//|/)(?P<arg>[^{}$]*))?"
 )
 
 
@@ -199,11 +199,44 @@ def _parse(text: str) -> list:
     return segs
 
 
+def _replace(value: str, arg: str, every: bool) -> str:
+    """${VAR/pattern/replacement} (first match, longest) and ${VAR//...}
+    (every match); ``\\/`` is a / in the pattern."""
+    i, pat = 0, []
+    while i < len(arg) and arg[i] != "/":
+        if arg[i] == "\\" and i + 1 < len(arg):
+            pat.append(arg[i + 1])
+            i += 2
+            continue
+        pat.append(arg[i])
+        i += 1
+    pattern, repl = "".join(pat), re.sub(r"\\(.)", r"\1", arg[i + 1:])
+    if not pattern:
+        return value
+    out, i, n = [], 0, len(value)
+    while i < n:
+        for j in range(n, i, -1):
+            if fnmatchcase(value[i:j], pattern):
+                out.append(repl)
+                i = j
+                if not every:
+                    return "".join(out) + value[i:]
+                break
+        else:
+            out.append(value[i])
+            i += 1
+    return "".join(out)
+
+
 def _trim(value: str, op: str, pattern: str) -> str:
     """${VAR%pat} (shortest suffix), %% (longest), # and ## for prefixes,
     ${VAR:-default}."""
     if op == ":-":
         return value or pattern
+    if op == ":+":
+        return pattern if value else ""
+    if op in ("/", "//"):
+        return _replace(value, pattern, op == "//")
     n = len(value)
     if op in ("%", "%%"):
         starts = range(n, -1, -1) if op == "%" else range(0, n + 1)

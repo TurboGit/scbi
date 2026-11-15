@@ -17,6 +17,8 @@ from __future__ import annotations
 import glob as _glob
 import os
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 from scbi.bashcompat import GLOB_CHARS, words
@@ -141,6 +143,84 @@ def get_os_inc_dir(ctx: HookContext, f: str = "") -> str:
     return echo_expand(r, ctx.cwd)
 
 
+_LIB_DIRS = ("/usr/lib*/{t}", "/usr/lib*/{t}/*", "/usr/lib*", "/usr/lib*/*", "/usr/lib*/*/lib*")
+
+
+def get_os_lib(ctx: HookContext, f: str = "") -> str:
+    """Port of ``get-os-lib FILE``: the library in the system directories
+    (``serial/libhdf5.so`` or ``libGL.so``), else FILE."""
+    dirs = [d.format(t=ctx.target) for d in _LIB_DIRS]
+    bn = f.rsplit("/", 1)[-1]
+    r = get_os_file(ctx, f, *dirs)
+    if r != f or bn == f:
+        return r
+    return get_os_file(ctx, bn, *dirs)
+
+
+def get_os_lib_dir(ctx: HookContext, f: str = "") -> str:
+    """Port of ``get-os-lib-dir FILE``: the directory of get-os-lib."""
+    r = get_os_lib(ctx, f)
+    return r.rsplit("/", 1)[0] if "/" in r else r
+
+
+def get_os_bin(ctx: HookContext, f: str = "") -> str:
+    """Port of ``get-os-bin FILE``: the program in /usr/bin* or
+    /usr/lib*/*/bin, else FILE."""
+    return get_os_file(ctx, f, "/usr/bin*", "/usr/lib*/*/bin")
+
+
+def output(ctx: HookContext, *argv: str) -> str:
+    """``output COMMAND ARGS...``: the standard output of the command (run
+    without shell, in the environment of the hook), without its final
+    newlines."""
+    if not argv:
+        return ""
+    try:
+        proc = subprocess.run(list(argv), capture_output=True, text=True, cwd=ctx.cwd,
+                              env=ctx.env.vars.environ())
+    except OSError as e:
+        raise BuiltinError(f"output {argv[0]}: {e.strerror}") from None
+    return proc.stdout.rstrip("\n")
+
+
+def get_os_bin_dir(ctx: HookContext, f: str = "") -> str:
+    """Port of ``get-os-bin-dir FILE``: the directory of get-os-bin."""
+    r = get_os_bin(ctx, f)
+    return r.rsplit("/", 1)[0] if "/" in r else r
+
+
+def dirname(ctx: HookContext, path: str = "") -> str:
+    """The dirname command (``.`` when there is no directory)."""
+    p = path.rstrip("/")
+    if not p:
+        return "/" if path else "."
+    d = p.rsplit("/", 1)[0] if "/" in p else "."
+    return d.rstrip("/") or "/"
+
+
+def command_path(ctx: HookContext, tool: str = "") -> str:
+    """``command -v TOOL``: the path of the tool found in PATH, empty if
+    not found."""
+    if not tool:
+        return ""
+    return shutil.which(tool, path=ctx.env.get("PATH") or None) or ""
+
+
+def store_key(ctx: HookContext, key: str = "") -> str:
+    """Port of ``scbi-store-get-key KEY``: the value of KEY in
+    ``$SCBI_PLUGINS/.store`` (lines ``KEY VALUE``), empty if not found."""
+    store = Path(ctx.env.get("SCBI_PLUGINS") or "") / ".store"
+    try:
+        lines = store.read_text().splitlines()
+    except OSError:
+        return ""
+    for line in lines:
+        k, _, v = line.partition(" ")
+        if k == key:
+            return v.strip()
+    return ""
+
+
 def basename(ctx: HookContext, *args: str) -> str:
     """The basename command (one name, optionally a suffix)."""
     if not args or len(args) > 2:
@@ -188,6 +268,22 @@ def call(ctx: HookContext, name: str, args: list[str]) -> str:
         return last_modified_directory(ctx, *args[:1])
     if name == "get-os-inc-dir":
         return get_os_inc_dir(ctx, *args[:1])
+    if name == "get-os-lib":
+        return get_os_lib(ctx, *args[:1])
+    if name == "get-os-lib-dir":
+        return get_os_lib_dir(ctx, *args[:1])
+    if name == "get-os-bin":
+        return get_os_bin(ctx, *args[:1])
+    if name == "output":
+        return output(ctx, *args)
+    if name == "get-os-bin-dir":
+        return get_os_bin_dir(ctx, *args[:1])
+    if name == "dirname":
+        return dirname(ctx, *args[:1])
+    if name == "command-path":
+        return command_path(ctx, *args[:1])
+    if name == "store-key":
+        return store_key(ctx, *args[:1])
     if name == "basename":
         return basename(ctx, *args)
     if name == "ls":

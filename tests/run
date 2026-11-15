@@ -134,7 +134,7 @@ fi
 cd ..
 
 #  The plan is only known when running the whole testsuite
-[ -z "$1" ] && PLAN 1376
+[ -z "$1" ] && PLAN 1379
 
 export SCBI_CACHE_DIR="no"
 

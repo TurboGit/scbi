@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from pathlib import Path
 
+from scbi.bashcompat import words
 from scbi.bashenv import ShellVars
 from scbi.env import Environment
 from scbi.hooks.cmdlang import Runner, State
@@ -76,6 +77,64 @@ class Hook:
                 funcs[name] = (params, obj.ast)
         return funcs
 
+    def all_modules(self) -> dict[str, dict[str, str]]:
+        """``all-modules``: the modules of the build of the module, in
+        build order (for-all-modules-with-meta: dependencies, meta-modules
+        and the modules they aggregate) with their status: depends-kind
+        (default, build, tests), is-meta, is-aggregate (a meta-module
+        aggregating its modules), is-aggregated (installed in an
+        aggregate). A module met several times keeps its first status,
+        except that a default dependency wins over a build/tests one."""
+        from scbi.walker import Walker
+
+        walker = Walker(self.b)
+        result: dict[str, dict[str, str]] = {}
+
+        def callback(argv: list[str]) -> int:
+            a = argv + [""] * 7
+            formodule, modref, _level, kind, _ext, is_meta, is_agg = a[:7]
+            module = walker.module_info(modref, formodule)[0]
+            aggregate = "true" if is_meta == "true" and walker.aggregate_mode(modref) else "false"
+            status = {"depends-kind": kind, "is-meta": is_meta, "is-aggregate": aggregate,
+                      "is-aggregated": is_agg}
+            old = result.get(module)
+            if old is None or (old["depends-kind"] != "default" and kind == "default"):
+                result[module] = status
+            return 0
+
+        walker.walk("for-all-modules-with-meta", callback, self.module)
+        return result
+
+    def hook_values(self, module: str, hook: str, args: list[str]) -> list[str] | None:
+        """The values of value hook ``hook`` of ``module`` (all qualifiers,
+        as plugin-call-variant-hooks), None when ``hook`` is not a value
+        hook."""
+        try:
+            if catalog.spec(hook).kind != catalog.VALUE:
+                return None
+        except KeyError:
+            return None
+        info = self.d.plan.module_ref(module)
+        name, variant = (info + ["", ""])[:2]
+        variant = variant or "default"
+        if not self.d.registry.load_module(name):
+            return []
+        prefix, target = self.d.get("SCBI_PREFIX"), self.d.get("SCBI_TARGET")
+        values = self.d.runner().variant_values(name, variant, hook, args or [prefix, target, variant],
+                                                self.d.plan, self.b.modules_list)
+        return words("\n".join(values))
+
+    def hook_function(self, module: str, hook: str) -> str:
+        """The function of hook ``hook`` of ``module`` (variant from the
+        build plan), "" when it has none."""
+        from scbi.plugin.resolve import get_hook
+
+        info = self.d.plan.module_ref(module)
+        name, variant = (info + ["", ""])[:2]
+        if not self.d.registry.load_module(name):
+            return ""
+        return get_hook(self.d.registry, name, variant or "default", hook, self.d.runner().cross)
+
     def environment(self) -> dict[str, str]:
         return hook_environment(self.sv.environ(), self.d.environ, self.d.envfile.passthrough)
 
@@ -94,7 +153,9 @@ class Hook:
         ctx.params = dict(self.params)
         ctx.cwd = Path(self.cwd)
         runner = Runner(ctx, self.where(), config_options=self.config_options,
-                        functions=self.functions(), trace=trace)
+                        functions=self.functions(), trace=trace, all_modules=self.all_modules,
+                        hook_function=self.hook_function, hook_values=self.hook_values,
+                        refresh_functions=self.functions)
         state = State(dict(self.d.registry.variables), self.environment(), self.cwd, out,
                       out if err is None else err)
         return runner.run(self.body.ast, state)

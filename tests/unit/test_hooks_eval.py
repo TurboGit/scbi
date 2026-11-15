@@ -18,7 +18,7 @@ from scbi.hooks.expand import ExpandError, check, expand
 from scbi.plan import PlanState
 from scbi.plugin import catalog
 from scbi.plugin.lift import lift
-from scbi.plugin.model import EnvOps, Values
+from scbi.plugin.model import EnvOps, Guarded, Values
 from scbi.plugin.registry import Registry
 
 HOST = "x86_64-linux-gnu"
@@ -260,3 +260,32 @@ else
   printf '\x1d%s' "$(< $SCBI_ENV_MODULE)"
 fi
 """
+
+
+def test_new_operators_and_builtins(tmp_path):
+    (tmp_path / "bin").mkdir()
+    tool = tmp_path / "bin" / "mytool"
+    tool.write_text("#!/bin/sh\necho out $1\n")
+    tool.chmod(0o755)
+    plugins = tmp_path / "plugins"
+    plugins.mkdir()
+    (plugins / ".store").write_text("PYPIURL https://pypi.example/simple\nOTHER x\n")
+    sv = ShellVars({"D": "1", "E": "", "V": "3.12", "U": "C:/x", "PATH": f"{tmp_path}/bin:/usr/bin",
+                    "SCBI_PLUGINS": str(plugins)}, {"PATH"})
+    c = ctx(tmp_path, env=Environment(sv))
+    assert expand("${D:+-DX=ON}|${E:+-DX=ON}|${NOPE:+x}", c) == "-DX=ON||"
+    assert expand("${V/./}|${V//1/9}|${U/C:/\\/c}", c) == "312|3.92|/c/x"
+    assert expand("$(command-path mytool)", c) == f"{tool}"
+    assert expand("$(command-path nope-tool)", c) == ""
+    assert expand("$(output mytool a)", c) == "out a"
+    assert expand("$(store-key PYPIURL)|$(store-key NOPE)", c) == "https://pypi.example/simple|"
+    assert expand("$(dirname /a/b/c)|$(dirname c)", c) == "/a/b|."
+    #  as the Bash version: the base name when not found
+    assert builtins.get_os_lib(c, "nope/libnope.so") == "libnope.so"
+
+
+def test_empty_condition(tmp_path):
+    c = ctx(tmp_path, env=Environment(ShellVars({"A": "x", "B": ""})))
+    values = Values(("a", Guarded("empty($B)", ("b",)), Guarded("not empty($A)", ("c",)),
+                     Guarded("empty($A)", ("d",))))
+    assert eval_values(values, c) == ["a", "b", "c"]
