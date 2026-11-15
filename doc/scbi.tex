@@ -923,13 +923,12 @@ indentation:
 \begin{lstlisting}
 config: |
   BT = get-build-type CMAKE Release
-  OPTS = config-options
   if not is-link(../src/.git):
       ln -s ../../src/.git ../src/.git
   if cross:
-      cmake -DCMAKE_BUILD_TYPE=$BT -DTARGET=$TARGET $OPTS ../src
+      cmake -DCMAKE_BUILD_TYPE=$BT -DTARGET=$TARGET $(config-options) ../src
   else:
-      cmake -DCMAKE_BUILD_TYPE=$BT $OPTS ../src
+      cmake -DCMAKE_BUILD_TYPE=$BT $(config-options) ../src
 version: |
   write prj.gpr:
       with "aunit";
@@ -951,56 +950,127 @@ version: |
 	\code{|} and the redirections \code{>}, \code{>>}, \code{<},
 	\code{2>}, \code{2>>}, \code{2>\&1}, \code{\&>} work as in a shell.
 	\item[assignments] \code{VAR = <words>} sets a variable of the hook
-	(one word: a value, several: a list), \code{VAR = <function> <args>}
-	sets it to the result of a function: \code{get-build-type <kind>
-	<default>}, \code{config-options} (the list of the
-	\code{config-options} hooks of the module), \code{last-modified-directory
-	<glob>}, \code{is-enabled <feature> [then] [else]}, \code{get-version},
-	\code{output <command line>} (its standard output), \code{output-words
-	<command line>} (the words of its standard output, a list),
-	\code{first-line <value>}, \code{status} (of the previous step),
-	\code{basename}, \code{dirname}, \code{command-path <tool>},
-	\code{all-variants <variant>} (the list of the variants of a variant
-	string, empty for \code{default}), \code{uppercase <words>},
-	\code{lowercase <words>} and \code{if <condition> then <words> [else
-	<words>]} (as \code{\$(if ...)} in values). Each of these functions
-	is also usable in the words of a command as \code{\$(<function>
-	<args>)}, with the value \code{VAR = <function> <args>} would give:
-	an unquoted word made of the call only gives one word per element of
-	a list (an element with spaces stays one word, an empty result no
-	word), otherwise the elements are joined with spaces, e.g.
-	\code{cmake \$(config-options) ../src} or \code{echo \$(uppercase
-	\$VARIANT)}. A call cannot be nested in \code{\$(if ...)}.
-	\code{export VAR = ...}
-	also sets it in the environment of the following commands.
-	\item[built-in commands] \code{cd}, \code{echo [-n]}, \code{return
-	[N]}, \code{exit [N]}, \code{true}, \code{false}, \code{export NAME},
-	\code{unset NAME},
-	\code{check-versions <v1> <op> <v2>} (succeeds when the version
-	comparison is true), \code{copy <source>... <destination>} (see
-	below) and the functions
-	of the plug-in (\code{functions:}, called with their parameters).
-	\item[copy] \index{copy}\code{copy <source>... <destination>} copies
-	files and directories, directories always recursively (symbolic links
-	are copied as links), as \code{cp -r}: into \code{<destination>} when
-	it is an existing directory (it must be one for several sources),
-	else to \code{<destination>}; existing files are replaced, existing
+	(one word: a value, several: a list); \code{VAR = <function> <args>}
+	sets it to the result of a function (see \emph{Functions} below).
+	Variables are local to the hook call; \code{export VAR = ...} also
+	sets it in the environment of the following commands.
+\end{description}
+
+\textbf{Functions.} \index{YAML plug-in!functions of commands}
+A function gives a value or a list. It is used in an assignment,
+\code{VAR = <function> <args>}, or in the words of a command as
+\code{\$(<function> <args>)}, which gives the same value: an unquoted
+word made of the call only gives one word per element of a list (an
+element with spaces stays one word, an empty result no word), otherwise
+the elements are joined with spaces, e.g. \code{cmake \$(config-options)
+../src} or \code{echo \$(uppercase \$VARIANT)}. A call cannot be nested
+in \code{\$(if ...)}.
+
+\begin{description}
+	\item[config-options] the list of the values of the
+	\code{config-options} hooks of the module for its variant.
+	\item[get-build-type <kind> <default>] the build type of the module:
+	\code{SCBI\_<module>\_BUILD\_TYPE}, else
+	\code{SCBI\_<kind>\_BUILD\_TYPE}, else \code{<default>}.
+	\item[get-version] the version of the module in the build plan.
+	\item[is-enabled <feature> {[<then>]} {[<else>]}] \code{<then>}
+	(default \code{yes}) when the feature is enabled for the module, else
+	\code{<else>} (default empty).
+	\item[last-modified-directory <glob>] the most recently modified file
+	or directory matching the pattern, empty when none matches.
+	\item[output <command line>] the standard output of the command,
+	without its final newlines; the status of the command is the status of
+	the step.
+	\item[output-words <command line>] the words of the standard output of
+	the command, as a list.
+	\item[first-line <value>] the first line of the value.
+	\item[status] the exit status of the previous step (\code{\$?} in a
+	shell).
+	\item[basename <path>] the last component of the path.
+	\item[dirname <path>] the path without its last component
+	(\code{.} when there is none).
+	\item[command-path <tool>] the full path of the tool found in
+	\code{PATH} of the hook environment, empty when not found.
+	\item[all-variants <variant>] the list of the variants of a variant
+	string (\code{a.b} gives \code{a} and \code{b}), empty for
+	\code{default}.
+	\item[uppercase <words>, lowercase <words>] the words in upper or
+	lower case.
+	\item[if <condition> then <words> {[else <words>]}] the first words when
+	the condition is true, else the second ones (empty without
+	\code{else}), as \code{\$(if ...)} in values (\seeref{yaml-conditions}).
+\end{description}
+
+\textbf{Built-in commands.} \index{YAML plug-in!built-in commands}
+They run in the driver; any other command is an external program or a
+function of the plug-in.
+
+\begin{description}
+	\item[cd {[<dir>]}] \index{cd} changes the current directory of the
+	hook (\code{\$HOME} without argument); fails when the directory does
+	not exist.
+	\item[echo {[-n]} <words>] \index{echo} writes the words separated by
+	a space, followed by a newline unless \code{-n} is given. It is the
+	output of a hook giving a value (\code{version}...).
+	\item[return {[N]}, exit {[N]}] \index{return}\index{exit} end the
+	hook (or the plug-in function) with the status \code{N} modulo 256
+	(\code{return -1} is 255), or with the status of the previous step.
+	\item[true, :, false] succeed (\code{true},
+	\code{:}) or fail (\code{false}), doing nothing.
+	\item[export NAME{[=value]}...] \index{export} puts the variables in
+	the environment of the following commands, setting them first when a
+	value is given.
+	\item[unset NAME...] \index{unset} removes the variables from the hook
+	and from its environment.
+	\item[check-versions <v1> <op> <v2>] \index{check-versions} succeeds
+	when the comparison of the two versions is true; \code{<op>} is one of
+	\code{=}, \code{==}, \code{!=}, \code{<}, \code{<=}, \code{>},
+	\code{>=}.
+	\item[copy <source>... <destination>] \index{copy} copies files and
+	directories, directories always recursively (symbolic links are
+	copied as links), as \code{cp -r}: into \code{<destination>} when it
+	is an existing directory (it must be one for several sources), else to
+	\code{<destination>}; existing files are replaced, existing
 	directories merged. It has no option. The converter of Bash plug-ins
 	turns \code{cp} and \code{cp -r} into \code{copy}; the system
 	\code{cp} is still available for other options (\code{cp -a}...).
-	\item[blocks] \code{if <condition>:}, \code{elif <condition>:},
-	\code{else:} (the conditions of values, \seeref{yaml-conditions}, plus
-	\code{is-dir(path)}, \code{is-file(path)}, \code{is-link(path)},
-	\code{empty(\$VAR)}, \code{ok("<command line>")} true when the command
-	succeeds (any external command or built-in, with its arguments and
-	redirections; its standard output is discarded, its error output is
-	shown unless redirected, e.g. \code{2> /dev/null}), \code{status} of the previous step, and \code{\$VAR} or
-	quoted strings as operands); \code{for NAME in <words>:};
-	\code{write FILE:} (the indented text, expanded, written to the file),
-	\code{append FILE:}, \code{write-raw FILE:}, \code{append-raw FILE:}
-	(not expanded). In the expanded forms, \code{\textbackslash\$},
-	\code{\textbackslash`} and \code{\textbackslash\textbackslash} give the
-	character, as in a here-document.
+	\item[<function> <args>] a function of the plug-in
+	(\code{functions:}), its parameters set to the arguments.
+\end{description}
+
+\textbf{Blocks.} \index{YAML plug-in!blocks of commands}
+A block line ends with \code{:}; its body is the following lines
+indented more than it.
+
+\begin{description}
+	\item[if <condition>:] runs its body when the condition is true;
+	followed by any number of \code{elif <condition>:} and an optional
+	\code{else:}, the first branch whose condition is true is run. The
+	conditions are the ones of values (\seeref{yaml-conditions}) plus:
+	\begin{description}
+		\item[is-dir(path), is-file(path), is-link(path)]
+		the path is a directory, a regular file, a symbolic link;
+		\item[empty(\$VAR)] the value is empty (\code{not empty(\$VAR)}: it
+		is not);
+		\item[ok("<command line>")] the command succeeds: any external
+		command or built-in, with its arguments and redirections; its
+		standard output is discarded, its error output is shown unless
+		redirected, e.g. \code{2> /dev/null};
+		\item[status] the exit status of the previous step, e.g.
+		\code{status == 0};
+		\item[\$VAR, "text"] variables and quoted strings as operands.
+	\end{description}
+	\item[for NAME in <words>:] runs its body once for each word, the
+	words being expanded as the ones of a command (a list variable gives
+	its elements, glob patterns their matches), with \code{NAME} set to
+	the word.
+	\item[write FILE:] writes the body, expanded, to the file (created or
+	truncated); \code{\textbackslash\$}, \code{\textbackslash`} and
+	\code{\textbackslash\textbackslash} give the character, as in a
+	here-document.
+	\item[append FILE:] as \code{write}, appending to the file.
+	\item[write-raw FILE:, append-raw FILE:] as \code{write} and
+	\code{append}, the body not expanded.
 \end{description}
 
 The status of a body is the status of its last step: a failing command
