@@ -160,6 +160,34 @@ _VARS = {
 }
 
 
+#  runtime functions of the Bash plug-ins and their built-in
+_FUNCTION_MAP = {"scbi-store-get-key": "store-key"}
+
+
+def map_functions(text: str) -> str:
+    """Command substitutions of runtime functions or commands having a
+    built-in: $(command -v X) / $(which X) -> $(command-path X),
+    $(scbi-store-get-key K) -> $(store-key K); ${V:+"word"} -> ${V:+word}."""
+    text = re.sub(r'\$\{([A-Za-z_]\w*):\+"([^"$\s{}]*)"\}', r"${\1:+\2}", text)
+    text = re.sub(r"\$\((?:command\s+-v|which)\s+([^\s()]+)\s*\)", r"$(command-path \1)", text)
+    return re.sub(r"\$\((" + "|".join(map(re.escape, _FUNCTION_MAP)) + r")(?=[\s)])",
+                  lambda m: "$(" + _FUNCTION_MAP[m.group(1)], text)
+
+
+def _commands_output(text: str) -> str:
+    """$(cmd args) of an external command in a value: $(output cmd args)."""
+    from scbi.plugin.model import BUILTINS
+    from scbi.plugin.runtimefuncs import RUNTIME_FUNCTIONS
+
+    def repl(m: re.Match) -> str:
+        name = m.group(1)
+        if name in BUILTINS or name in RUNTIME_FUNCTIONS:
+            return m.group(0)
+        return f"$(output {name}"
+
+    return re.sub(r"\$\(\s*([A-Za-z0-9_./+-]+)(?=[\s)])", repl, text)
+
+
 def _cond_operand(text: str, locals_: dict[str, str]) -> str:
     t = _unquote(text)
     m = re.fullmatch(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?", t)
@@ -194,6 +222,12 @@ def translate_cond(cond: str, locals_: dict[str, str]) -> str:
     if not m:
         raise _Unliftable(f"unsupported condition: {cond}")
     inner = m.group(1)
+    m = re.fullmatch(r"!\s+(.*)", inner)
+    if m:
+        return f"not ({translate_cond(f'[[ {m.group(1)} ]]', locals_)})"
+    m = re.fullmatch(r"-([zn])\s+(\$\([^)]*\)|\"[^\"]*\"|\S+)", inner)
+    if m:
+        return _empty_test(m.group(1) == "z", _unquote(m.group(2)), locals_, cond)
     m = re.fullmatch(r"-[fde]\s+(\S+)", inner)
     if m:
         arg = _unquote(m.group(1))
@@ -217,20 +251,45 @@ def translate_cond(cond: str, locals_: dict[str, str]) -> str:
     return result
 
 
+def _empty_test(empty: bool, arg: str, locals_: dict[str, str], cond: str) -> str:
+    """``[[ -z ARG ]]`` (``empty``) or ``[[ -n ARG ]]``."""
+    m = re.fullmatch(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?", arg)
+    if m and m.group(1) in locals_:
+        arg = _unquote(locals_[m.group(1)])
+    m = re.fullmatch(r"\$\(is-enabled\s+(\S+)\)", arg)
+    if m:
+        return f"not enabled({m.group(1)})" if empty else f"enabled({m.group(1)})"
+    m = re.fullmatch(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?", arg)
+    if not m:
+        raise _Unliftable(f"unsupported condition: {cond}")
+    return f"empty(${m.group(1)})" if empty else f"not empty(${m.group(1)})"
+
+
 def _inline(text: str, locals_: dict[str, str]) -> str:
     for name, value in locals_.items():
         text = re.sub(r"\$\{" + name + r"\}|\$" + name + r"(?![A-Za-z0-9_])", lambda _: value, text)
     return text
 
 
-_ASSIGN = re.compile(r"^(?:local\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
+_ASSIGN = re.compile(r"^(?:local\s+)?([A-Za-z_][A-Za-z0-9_]*)(\+?)=(.*)$")
+
+
+def _join_substitutions(lines: list[str]) -> list[str]:
+    """A $( ... ) spanning several lines joined on one line."""
+    out: list[str] = []
+    for ln in lines:
+        if out and out[-1].count("$(") > out[-1].count(")"):
+            out[-1] += " " + ln
+        else:
+            out.append(ln)
+    return out
 
 
 class _BodyLifter:
     """Shared structure of value and env bodies: items, guards, locals."""
 
     def __init__(self, lines: list[str], item, local_op=None):
-        self.lines = [_strip(ln) for ln in lines if _strip(ln)]
+        self.lines = _join_substitutions([_strip(ln) for ln in lines if _strip(ln)])
         self.item = item  # callable(line, locals) -> item or None (skip)
         #  callable(name, value) -> item: assignments kept as items (env)
         #  instead of being inlined (values)
@@ -263,6 +322,16 @@ class _BodyLifter:
                     items.append(Guarded(f"not ({cond})", tuple(other)))
                 i += 1
                 continue
+            m = re.fullmatch(r"(\[\[ .* \]\]) && \{", line)
+            if m:
+                cond = translate_cond(m.group(1), self.locals)
+                group, i = self.block(i + 1, ("}",))
+                if i >= len(self.lines):
+                    raise _Unliftable(f"unterminated group: {line}")
+                if group:
+                    items.append(Guarded(cond, tuple(group)))
+                i += 1
+                continue
             m = re.fullmatch(r"(\[\[ .* \]\]) && (.*)", line)
             if m:
                 cond = translate_cond(m.group(1), self.locals)
@@ -277,7 +346,7 @@ class _BodyLifter:
                 self.pending_check = translate_cond(line, self.locals)
                 i += 1
                 continue
-            if line in ("true", ":"):
+            if line in ("true", ":") or line.startswith("false && "):
                 i += 1
                 continue
             item = self.item(line, self.locals)
@@ -288,13 +357,18 @@ class _BodyLifter:
             m = _ASSIGN.match(line)
             if m and not line.startswith("export "):
                 if self.local_op is not None:
-                    value = _words(m.group(2))
+                    if m.group(2):
+                        raise _Unliftable(f"+= in an environment hook: {line}")
+                    value = _words(_commands_output(map_functions(m.group(3))))
                     if len(value) > 1:
                         raise _Unliftable(f"assignment of several words: {line}")
                     items.append(self.local_op(line.startswith("local "), m.group(1),
                                                value[0] if value else ""))
                 else:
-                    self.locals[m.group(1)] = _inline(_unquote(m.group(2)), self.locals)
+                    value = _inline(_unquote(m.group(3)), self.locals)
+                    if m.group(2):
+                        value = self.locals.get(m.group(1), "") + value
+                    self.locals[m.group(1)] = value
                 i += 1
                 continue
             raise _Unliftable(f"unsupported line: {line}")
@@ -313,7 +387,7 @@ def _value_item(line: str, locals_: dict[str, str]):
     m = re.fullmatch(r"echo(?: (.*))?", line)
     if not m:
         return None
-    text = _inline(m.group(1) or "", locals_)
+    text = _commands_output(map_functions(_inline(m.group(1) or "", locals_)))
     if "`" in text:
         raise _Unliftable(f"backquotes in value: {line}")
     #  the item is the line printed by echo (quote removal, words joined)
@@ -321,13 +395,18 @@ def _value_item(line: str, locals_: dict[str, str]):
 
 
 def _env_item(line: str, locals_: dict[str, str]):
-    line = _inline(line, locals_)
+    line = map_functions(_inline(line, locals_))
+    if not line.startswith("eval "):
+        line = _commands_output(line)
     m = re.fullmatch(r"export ([A-Za-z_][A-Za-z0-9_]*)=(.*)", line)
     if m:
         value = _words(m.group(2))
         if len(value) > 1:
             raise _Unliftable(f"export of several words: {line}")
         return EnvOp("export", (m.group(1), value[0] if value else ""))
+    m = re.fullmatch(r"unset ([A-Za-z_][A-Za-z0-9_]*)", line)
+    if m:
+        return EnvOp("unset-var", (m.group(1),))
     m = re.fullmatch(r"mkdir(?: -p)? (\S+)", line)
     if m:
         return EnvOp("mkdir", tuple(_words(m.group(1))))

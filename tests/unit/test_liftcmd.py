@@ -56,8 +56,8 @@ def test_function_parameters():
 
 
 @pytest.mark.parametrize("bash", [
-    "eval x", "while true; do", "( cd a\nmake )\nmake", "echo ${PATH//:/ }", "echo $((1 + 2))",
-    "echo `date`", "read X", "echo $1", "X+=1", "if [[ $X == *a* ]]; then\n    true\nfi",
+    "eval x", "while true; do", "( cd a\nmake )\nmake", "echo $((1 + 2))",
+    "echo `date`", "read X", "echo $1", "if [[ $X == *a* ]]; then\n    true\nfi",
     "cmd <<EOF\nx\nEOF",
 ])
 def test_not_liftable(bash):
@@ -107,3 +107,59 @@ def test_build_target_hook_names(name, key):
     from scbi.plugin.lift import parse_hook_name
     k = parse_hook_name("m", name)
     assert (k.hook, k.qualifier, k.cross) == key
+
+
+def test_salome_idioms():
+    lifted = lift_commands([
+        'CXXFLAGS+=" -w" cmake "${OPTIONS[@]}" ../src',
+        'F=""', 'F+=" --a=x"', './configure $F',
+        'cmake ${CDEBUG:+"-DX=ON"} ..',
+        'P=$(scbi-store-get-key PYPIURL)',
+        'echo $(get-os-lib libGL.so)',
+        'X="a b" make',
+    ])
+    assert lifted.splitlines() == [
+        'CXXFLAGS="$CXXFLAGS -w" cmake $OPTIONS ../src',
+        'F = ""', "F = $F  --a=x", "./configure $F",
+        "cmake ${CDEBUG:+-DX=ON} ..",
+        "P = $(store-key PYPIURL)",
+        "echo $(get-os-lib libGL.so)",
+        'X="a b" make',
+    ]
+
+
+def test_and_group_lifted():
+    assert lift_commands(["[[ -d $P/x ]] &&", "    {", "        mkdir -p a", "    } || true"]) == \
+        "if is-dir($P/x):\n    mkdir -p a\n"
+    assert lift_commands(['[[ -d "$PREFIX"/lib ]] && {', "rmdir b", "}"]) == "if is-dir($PREFIX/lib):\n    rmdir b\n"
+
+
+def test_value_lifting_salome_idioms():
+    from scbi.plugin.lift import lift_env, lift_values
+    from scbi.plugin.model import EnvOp, Guarded
+
+    items = lift_values([
+        "local DISDOC=$(is-enabled no-doc)",
+        "[[ -z ${DISDOC} ]] && echo os@-sphinx",
+        "[[ ! $REF =~ 6.28 ]] && {", "echo a.patch", "echo b.patch", "}",
+        "[[ -n $SCOTCH_DIR ]] && echo -DS=$SCOTCH_DIR",
+        "echo -DPY=$(command -v python3) ${CDEBUG:+\"-DX=ON\"}",
+        "echo -DSWIG_DIR=$(swig -swiglib)",
+        "local F=-Wa",
+        "local F+=\" -Wb\"",
+        "echo $F",
+        "false && echo never",
+        "echo -DVTK=$(last-modified-directory", "\"$P/lib/cmake/paraview-*\")",
+    ]).items
+    assert items == (
+        Guarded("not enabled(no-doc)", ("os@-sphinx",)),
+        Guarded("not (ref =~ 6.28)", ("a.patch", "b.patch")),
+        Guarded("not empty($SCOTCH_DIR)", ("-DS=$SCOTCH_DIR",)),
+        "-DPY=$(command-path python3) ${CDEBUG:+-DX=ON}",
+        "-DSWIG_DIR=$(output swig -swiglib)",
+        "-Wa -Wb",
+        '-DVTK=$(last-modified-directory "$P/lib/cmake/paraview-*")',
+    )
+    ops = lift_env(["unset PYTHONHOME", "local W=$(cygpath -w $PREFIX)", "set-var X $W"]).ops
+    assert ops == (EnvOp("unset-var", ("PYTHONHOME",)), EnvOp("local", ("W", "$(output cygpath -w $PREFIX)")),
+                   EnvOp("set-var", ("X", "$W")))

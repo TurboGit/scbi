@@ -16,11 +16,12 @@ from scbi.plugin.runtimefuncs import RUNTIME_FUNCTIONS
 
 #  $(...) kept inline (scbi.hooks.expand built-ins)
 INLINE = ("get-version", "get-build-type", "is-enabled", "last-modified-directory", "get-os-inc-dir",
-          "basename", "ls")
+          "get-os-lib", "get-os-lib-dir", "get-os-bin", "get-os-bin-dir", "store-key", "basename", "ls")
 #  runtime functions lifted (built-ins of the command language, or
 #  gprbuild-project rewritten as the gprbuild command line)
 RUNTIME_BUILTINS = frozenset(("get-version", "get-build-type", "is-enabled", "last-modified-directory",
-                              "get-os-inc-dir", "get-config-options", "gprbuild-project", "all-variants",
+                              "get-os-inc-dir", "get-os-lib", "get-os-lib-dir", "get-os-bin", "get-os-bin-dir",
+                              "get-config-options", "gprbuild-project", "all-variants",
                               "check-versions"))
 #  shell built-ins with no equivalent
 UNSUPPORTED = ("eval", "source", ".", "set", "shift", "declare", "typeset", "read", "pushd", "popd",
@@ -29,8 +30,18 @@ UNSUPPORTED = ("eval", "source", ".", "set", "shift", "declare", "typeset", "rea
 _ASSIGN = re.compile(r"^(local\s+|export\s+)?([A-Za-z_][A-Za-z0-9_]*)(\+?)=(.*)$")
 _HEREDOC = re.compile(r"^cat\s+(?:(>>?)\s*(\S+)\s+)?<<(-?)\s*(['\"]?)(\w+)\4(?:\s+(>>?)\s*(\S+))?$")
 _ARRAY_ALL = re.compile(r'"?\$\{([A-Za-z_]\w*)\[[@*]\]\}"?')
-_SUPPORTED_BRACE = re.compile(r"\$\{[A-Za-z_]\w*(?:(?:%%|%|##|#|:-)[^{}$]*|\[[^\]\"']+\])?\}")
+_SUPPORTED_BRACE = re.compile(r"\$\{[A-Za-z_]\w*(?:(?:%%|%|##|#|:-|:\+|//|/)[^{}$]*|\[[^\]\"']+\])?\}")
 _ARRAY_KEY = re.compile(r"""\$\{([A-Za-z_]\w*)\[["']([^"'\]]+)["']\]\}""")
+
+
+def _single_word(text: str) -> bool:
+    """``text`` is one shell word (VAR="a b" alone, not VAR="a b" cmd)."""
+    from scbi.bashcompat import ShellSyntaxError, shell_words
+
+    try:
+        return len(shell_words(text)) <= 1
+    except ShellSyntaxError:
+        return True
 
 
 class CmdUnliftable(Exception):
@@ -55,6 +66,9 @@ class _Lifter:
 
     def words_text(self, text: str, depth: int) -> str:
         """A command line or value with its substitutions converted."""
+        from scbi.plugin.lift import map_functions
+
+        text = map_functions(text)
         text = _ARRAY_ALL.sub(lambda m: f"${m.group(1)}", text)
         text = _ARRAY_KEY.sub(lambda m: f"${{{m.group(1)}[{m.group(2)}]}}", text)
         #  an escaped \$1 stays as it is (literal text)
@@ -111,8 +125,11 @@ class _Lifter:
         elif first == "command" and len(words) == 3 and words[1] == "-v":
             self.emit(depth, f"{var} = command-path {words[2]}")
         elif first in ("get-build-type", "last-modified-directory", "is-enabled", "get-version", "basename",
-                       "all-variants"):
+                       "all-variants", "command-path"):
             self.emit(depth, f"{var} = {self.substitutions(inner, depth)}")
+        elif first in INLINE:
+            #  a function of values only
+            self.emit(depth, f"{var} = $({self.substitutions(inner, depth)})")
         else:
             self.check_command(inner)
             self.emit(depth, f"{var} = {'output-words' if split else 'output'} {self.substitutions(inner, depth)}")
@@ -153,8 +170,15 @@ class _Lifter:
             return
         if s.startswith("local ") and "=" not in s:
             return  # declaration only
+        #  NAME+=" more" cmd: environment of the command only
+        m = re.fullmatch(r"""([A-Za-z_]\w*)\+=("[^"]*"|'[^']*'|[^\s"']\S*)\s+(\S.*)""", s)
+        if m:
+            value = m.group(2)[1:-1] if m.group(2)[0] in "\"'" else m.group(2)
+            self.command(f'{m.group(1)}="${m.group(1)}{value}" {m.group(3)}', depth)
+            return
         m = _ASSIGN.match(s)
-        if m and not re.search(r"\s", m.group(4).strip()) or (m and m.group(4).startswith(("(", '"', "'", "$("))):
+        if m and (not re.search(r"\s", m.group(4).strip()) or m.group(4).startswith("(")
+                  or (m.group(4).startswith(('"', "'", "$(")) and _single_word(m.group(4)))):
             self.assignment(m, depth)
             return
         if s.startswith("local ") or s.startswith("export "):
@@ -173,14 +197,21 @@ class _Lifter:
     def assignment(self, m: re.Match, depth: int) -> None:
         prefix, name, append, value = m.group(1) or "", m.group(2), m.group(3), m.group(4)
         export = "export " if prefix.startswith("export") else ""
-        v = value.strip()
+        from scbi.plugin.lift import map_functions
+
+        v = map_functions(value.strip())
         if v.startswith("(") and v.endswith(")"):
             items = v[1:-1].strip()
             value_text = (f"${name} " if append else "") + self.words_text(items, depth)
             self.emit(depth, f"{export}{name} = {value_text}".rstrip())
             return
         if append:
-            raise CmdUnliftable(f"+= on a scalar in {m.group(0)!r}")
+            #  X+=" a b": X becomes the list of its words and the new ones
+            #  (as the unquoted $X a Bash command would use)
+            if v[:1] in "\"'" and v[-1:] == v[:1]:
+                v = v[1:-1]
+            self.emit(depth, f"{export}{name} = ${name} {self.words_text(v, depth)}".rstrip())
+            return
         whole = re.fullmatch(r'"?\$\((.*)\)"?', v)
         if whole and whole.group(1).count("$(") == 0:
             if whole.group(1).split()[0] in INLINE or whole.group(1).startswith(("get-config-options", "command -v")):
@@ -263,6 +294,9 @@ class _Lifter:
         t = text.strip()
         if len(t) >= 2 and t[0] == t[-1] and t[0] in "\"'":
             t = t[1:-1]
+        elif '"' in t and "'" not in t and "\\" not in t and not re.search(r'"[^"]*\s[^"]*"', t):
+            #  partly quoted word without blanks: "$PREFIX"/lib
+            t = t.replace('"', "")
         t = self.words_text(t, depth)
         if t == "" or re.search(r"[\s()\"'<>=!]", t):
             return '"' + _escape(t) + '"'
@@ -457,11 +491,48 @@ def _escape(text: str) -> str:
     return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
+def _and_groups(lines: list[str]) -> list[str]:
+    """``COND && {`` ... ``}`` [``|| true``] as ``if COND; then`` ... ``fi``
+    (the group on its own lines, the ``{`` on the COND line or the next
+    one)."""
+    out: list[str] = []
+    i = 0
+    while i < len(lines):
+        s = lines[i].strip()
+        indent = lines[i][: len(lines[i]) - len(lines[i].lstrip())]
+        cond = None
+        if s.endswith("&& {"):
+            cond, body = s[: -len("&& {")].strip(), i + 1
+        elif s.endswith("&&") and i + 1 < len(lines) and lines[i + 1].strip() == "{":
+            cond, body = s[:-2].strip(), i + 2
+        if cond is None:
+            out.append(lines[i])
+            i += 1
+            continue
+        depth, j = 1, body
+        while j < len(lines):
+            t = lines[j].strip()
+            if t == "{" or t.endswith("&& {"):
+                depth += 1
+            elif re.fullmatch(r"\}(\s*\|\|\s*(true|:))?;?", t):
+                depth -= 1
+                if depth == 0:
+                    break
+            j += 1
+        if j >= len(lines):
+            raise CmdUnliftable(f"unterminated group after {s!r}")
+        out.append(f"{indent}if {cond}; then")
+        out += _and_groups(lines[body:j])
+        out.append(f"{indent}fi")
+        i = j + 1
+    return out
+
+
 def lift_commands(lines: list[str], params: dict[int, str] | None = None) -> str:
     """The command language text of a Bash body (``body_lines`` without
     the parameter declarations); ``params``: $n -> name for functions."""
     lifter = _Lifter({str(n): name for n, name in (params or {}).items()})
-    lifter.body(lines)
+    lifter.body(_and_groups(lines))
     text = "\n".join(lifter.out) + ("\n" if lifter.out else "")
     try:
         parse(text)
