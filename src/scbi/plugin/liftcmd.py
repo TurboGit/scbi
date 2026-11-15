@@ -17,7 +17,8 @@ from scbi.plugin.runtimefuncs import RUNTIME_FUNCTIONS
 #  $(...) kept inline (scbi.hooks.expand built-ins)
 INLINE = ("get-version", "get-build-type", "is-enabled", "last-modified-directory", "get-os-inc-dir",
           "basename", "ls")
-#  runtime functions available as built-ins of the command language
+#  runtime functions lifted (built-ins of the command language, or
+#  gprbuild-project rewritten as the gprbuild command line)
 RUNTIME_BUILTINS = frozenset(("get-version", "get-build-type", "is-enabled", "last-modified-directory",
                               "get-os-inc-dir", "get-config-options", "gprbuild-project", "all-variants",
                               "check-versions"))
@@ -161,7 +162,7 @@ class _Lifter:
         if "$?" in s:
             self.emit(depth, "_STATUS = status")
         self.check_command(s)
-        text = _cp_to_copy(self.words_text(s, depth))
+        text = _gprbuild_project(_cp_to_copy(self.words_text(s, depth)))
         if text.startswith("return $_STATUS"):
             text = "return"
         self.emit(depth, text)
@@ -427,6 +428,17 @@ def _cp_to_copy(text: str) -> str:
         if m and not re.search(r"(^|\s)-|[<>]", m.group(1)):
             parts[i] = f"copy {m.group(1)}"
     return "".join(parts)
+
+
+_GPRBUILD_PROJECT = re.compile(r"(^|&&|\|\||\|)(\s*)gprbuild-project\s+(\S+)")
+
+
+def _gprbuild_project(text: str) -> str:
+    """The Bash runtime function ``gprbuild-project PRJ`` as the external
+    command it runs (the built-in was removed)."""
+    return _GPRBUILD_PROJECT.sub(
+        lambda m: f"{m[1]}{m[2]}gprbuild -p -q $(if cross then --target=$TARGET) {m[3]}"
+                  " -cargs -gnatwA > /dev/null 2>&1", text)
 
 
 def _glob_regex(pattern: str) -> str:

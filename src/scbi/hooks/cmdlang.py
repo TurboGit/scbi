@@ -36,8 +36,8 @@ Steps:
   hook (``export VAR = ...``: also in the environment of the commands);
   one word gives a scalar, several a list;
 - built-in commands: ``cd``, ``echo``, ``return [N]``, ``exit [N]``,
-  ``true``, ``false``, ``export NAME``, ``unset NAME``,
-  ``gprbuild-project PRJ`` and the plug-in functions.
+  ``true``, ``false``, ``export NAME``, ``unset NAME``, ``copy`` and the
+  plug-in functions.
 
 The status of a body is the status of its last step (as Bash): a failing
 step does not stop it, unless chained with ``&&``.
@@ -68,7 +68,7 @@ FUNCTIONS = (
     "all-variants", "uppercase", "lowercase", "if",
 )
 #  Built-in commands
-COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset", "gprbuild-project",
+COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset",
             "check-versions", "copy")
 
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
@@ -813,14 +813,6 @@ class Runner:
                 return 0 if check_versions(a, op, b) else 1
             if name == "copy":
                 return self.copy(args, state, lambda m: err(f"{self.where}: line {line}: copy: {m}\n"))
-            if name == "gprbuild-project":
-                target = self.ctx.params.get("TARGET") or self.ctx.target
-                argv = ["gprbuild", "-p", "-q"]
-                if self.ctx.host != target:
-                    argv.append(f"--target={target}")
-                argv += [*args[:1], "-cargs", "-gnatwA"]
-                return self.external([(Simple((), ()), env_extra, argv)], State(
-                    state.vars, state.env, state.cwd, lambda t: None, lambda t: None), line)
             #  a plug-in function
             params, body = self.functions[name]
             saved = {p: state.vars.get(p) for p in params}

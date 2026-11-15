@@ -286,3 +286,12 @@ def test_copy_errors(tmp_path, text, message):
     (tmp_path / "out").mkdir()
     status, out, _ = run(tmp_path, text)
     assert status == 1 and out == f"m.yaml: config: line 10: {message}\n"
+
+
+def test_ok_external_command(tmp_path):
+    text = ('if ok("sh -c \'echo out; exit {}\'"):\n    echo yes\nelse:\n    echo no')
+    assert run(tmp_path, text.format(0))[:2] == (0, "yes\n")  # stdout discarded
+    assert run(tmp_path, text.format(3))[:2] == (0, "no\n")
+    text = 'if ok("ls $(if cross then --nope) . 2> /dev/null"):\n    echo yes'
+    assert run(tmp_path, text)[:2] == (0, "yes\n")  # empty word removed, redirection
+    assert run(tmp_path, 'if ok("ls --nope 2> /dev/null"):\n    echo yes\nelse:\n    echo no')[:2] == (0, "no\n")

@@ -34,7 +34,8 @@ def lift(text, params=None):
     ('if [[ "$(command -v $TOOL)" = "" ]]; then\n    echo no\nfi',
      '_S1 = command-path $TOOL\nif $_S1 == "":\n    echo no\n'),
     ("gprbuild-project prj.gpr\nif [[ $? = 0 ]]; then\n    echo ok\nfi",
-     "gprbuild-project prj.gpr\nif status == 0:\n    echo ok\n"),
+     "gprbuild -p -q $(if cross then --target=$TARGET) prj.gpr -cargs -gnatwA > /dev/null 2>&1\n"
+     "if status == 0:\n    echo ok\n"),
     ("if grep -q x f; then\n    echo found\nfi", 'if ok("grep -q x f"):\n    echo found\n'),
     ("[[ -f x ]] && rm x", "if is-file(x):\n    rm x\n"),
     ("for M in a b;\ndo\n    echo $M >> list\ndone", "for M in a b:\n    echo $M >> list\n"),

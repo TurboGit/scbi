@@ -934,7 +934,7 @@ version: |
   write prj.gpr:
       with "aunit";
       project prj is end prj;
-  if ok("gprbuild-project prj.gpr"):
+  if ok("gprbuild -p -q $(if cross then --target=$TARGET) prj.gpr 2> /dev/null"):
       echo $VERSION_OK
   else:
       echo $VERSION_ERROR
@@ -969,7 +969,7 @@ version: |
 	also sets it in the environment of the following commands.
 	\item[built-in commands] \code{cd}, \code{echo [-n]}, \code{return
 	[N]}, \code{exit [N]}, \code{true}, \code{false}, \code{export NAME},
-	\code{unset NAME}, \code{gprbuild-project <project>},
+	\code{unset NAME},
 	\code{check-versions <v1> <op> <v2>} (succeeds when the version
 	comparison is true), \code{copy <source>... <destination>} (see
 	below) and the functions
@@ -986,7 +986,9 @@ version: |
 	\code{else:} (the conditions of values, \seeref{yaml-conditions}, plus
 	\code{is-dir(path)}, \code{is-file(path)}, \code{is-link(path)},
 	\code{empty(\$VAR)}, \code{ok("<command line>")} true when the command
-	succeeds, \code{status} of the previous step, and \code{\$VAR} or
+	succeeds (any external command or built-in, with its arguments and
+	redirections; its standard output is discarded, its error output is
+	shown unless redirected, e.g. \code{2> /dev/null}), \code{status} of the previous step, and \code{\$VAR} or
 	quoted strings as operands); \code{for NAME in <words>:};
 	\code{write FILE:} (the indented text, expanded, written to the file),
 	\code{append FILE:}, \code{write-raw FILE:}, \code{append-raw FILE:}
