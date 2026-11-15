@@ -14,7 +14,6 @@ config-options:
 
 install: |-
   MODULES_LIST =
-  MODULES_LIST = config-options
-  pip3 install $MODULES_LIST --prefix $PREFIX
+  pip3 install $(config-options) --prefix $PREFIX
 
 prefix: NONE

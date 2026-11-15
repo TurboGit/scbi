@@ -41,7 +41,6 @@ config-options:
 
 build: |-
   OPTIONS =
-  OPTIONS = config-options
-  make $OPTIONS
+  make $(config-options)
 
 install: make NORMALIZED_TARGET=$TARGET prefix=$PREFIX install

@@ -34,13 +34,11 @@ config-options:
 config:
   _: |-
     OPTIONS =
-    OPTIONS = config-options
-    rm -f makefile.setup && make $OPTIONS setup
+    rm -f makefile.setup && make $(config-options) setup
   cross:
     _: |-
       OPTIONS =
-      OPTIONS = config-options
-      rm -f makefile.setup && make LAL=false ZLIB=false TARGET=$TARGET $OPTIONS setup
+      rm -f makefile.setup && make LAL=false ZLIB=false TARGET=$TARGET $(config-options) setup
 
 build:
   _: make build-lib-native

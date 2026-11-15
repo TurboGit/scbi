@@ -46,8 +46,7 @@ config-options:
 
 config: |-
   OPTIONS =
-  OPTIONS = config-options
-  ../src/configure $OPTIONS
+  ../src/configure $(config-options)
 
 build: |-
   DEBUG = get-build-type MAKE false

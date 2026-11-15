@@ -20,8 +20,7 @@ config-options:
 
 config: |-
   OPTIONS =
-  OPTIONS = config-options
-  ../src/configure $OPTIONS
+  ../src/configure $(config-options)
 
 build: make -j$SCBI_JOBS
 

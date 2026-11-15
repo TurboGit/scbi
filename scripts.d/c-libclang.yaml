@@ -38,8 +38,7 @@ config-options:
 
 config: |-
   OPTIONS =
-  OPTIONS = config-options
-  cmake $OPTIONS ../src/llvm
+  cmake $(config-options) ../src/llvm
 
 build: ninja -j$SCBI_JOBS
 

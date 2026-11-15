@@ -123,8 +123,7 @@ config: |-
   if not (is-link(../src/.git)):
       ln -s ../../src/.git ../src/.git
   OPTIONS =
-  OPTIONS = config-options
-  cmake $OPTIONS ../src
+  cmake $(config-options) ../src
 
 build: make -j$SCBI_HALF_JOBS
 

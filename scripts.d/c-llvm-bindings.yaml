@@ -25,8 +25,7 @@ config-options:
 
 config: |-
   OPTIONS =
-  OPTIONS = config-options
-  cd clang-bindings && make $OPTIONS setup
+  cd clang-bindings && make $(config-options) setup
 
 build: cd clang-bindings && make
 

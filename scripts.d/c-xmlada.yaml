@@ -24,13 +24,11 @@ config-options:
 config:
   _: |-
     OPTIONS =
-    OPTIONS = config-options
-    ./configure $OPTIONS
+    ./configure $(config-options)
   cross:
     _: |-
       OPTIONS =
-      OPTIONS = config-options
-      ./configure $OPTIONS --target=$TARGET
+      ./configure $(config-options) --target=$TARGET
 
 build: make PROCESSORS=$SCBI_JOBS -j2
 

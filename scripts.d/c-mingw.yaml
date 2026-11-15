@@ -34,8 +34,7 @@ config-options:
 
 config: |-
   OPTIONS =
-  OPTIONS = config-options
-  ../src/mingw-w64-crt/configure $OPTIONS
+  ../src/mingw-w64-crt/configure $(config-options)
 
 build: |-
   sed -i 's/^winrt32_DATA/#winrt32_DATA/' Makefile
