@@ -125,6 +125,9 @@ class _Lifter:
             raise CmdUnliftable(f"unsupported shell command {first!r}")
         for part in re.split(r"&&|\|\||\||;", line):
             words = [w for w in part.split() if not re.match(r"^\w+=", w)]
+            #  a loop or block after a pipe or a ';' (cat f | while read x; do)
+            if words and words[0] in UNSUPPORTED + ("do", "done", "then", "fi", "esac"):
+                raise CmdUnliftable(f"unsupported shell command {words[0]!r}")
             if words and words[0] in RUNTIME_FUNCTIONS and words[0] not in RUNTIME_BUILTINS:
                 raise CmdUnliftable(f"runtime function {words[0]!r} is not a built-in")
         if first == "echo" and len(line.split()) > 1 and line.split()[1] in ("-e", "-ne", "-en"):

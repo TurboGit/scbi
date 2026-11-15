@@ -89,3 +89,8 @@ def test_cp_lifted_to_copy(bash, lifted):
     from scbi.plugin.liftcmd import _cp_to_copy
 
     assert _cp_to_copy(bash) == lifted
+
+
+def test_loop_in_pipeline_unliftable():
+    with pytest.raises(CmdUnliftable, match="while"):
+        lift_commands(["cat MANIFEST | while read file; do", "    cp $file .", "done"])
