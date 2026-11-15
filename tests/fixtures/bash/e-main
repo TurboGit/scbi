@@ -1,0 +1,34 @@
+
+function e-main-modules()
+{
+    echo e-mod-std
+}
+
+function lst-modules()
+{
+    function mod-callback()
+    {
+        local FORMODULE=$1
+        local MODREF=$2
+        local LEVEL=$3
+        local DEPENDS_KIND=$4
+        local IS_EXT=$5
+        local IS_META=$6
+        local IS_AGGREGATED=$7
+
+        echo CPMOD f:$FORMODULE m:$MODREF
+    }
+
+    for-all-modules-with-meta mod-callback e-main
+}
+
+function e-main-wrapup()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    lst-modules
+
+    lst-modules
+}

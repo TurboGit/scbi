@@ -1,0 +1,20 @@
+
+function wrongnat-build-depends()
+{
+    echo gcc:999999
+}
+
+function wrongnat-depends()
+{
+    echo libenv
+}
+
+function wrongnat-config()
+{
+    echo config
+}
+
+function wrongnat-build()
+{
+    echo config
+}

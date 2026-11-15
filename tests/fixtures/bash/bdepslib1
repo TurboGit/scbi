@@ -1,0 +1,10 @@
+
+function bdepslib1-build-depends()
+{
+    echo lib1
+}
+
+function bdepslib1-depends()
+{
+    echo lib2
+}

@@ -1,0 +1,6 @@
+
+function meta-modules()
+{
+    echo m1
+    echo m2
+}

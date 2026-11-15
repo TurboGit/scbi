@@ -1,0 +1,15 @@
+
+function usemetaagg3-depends()
+{
+    echo metaagg3
+}
+
+function usemetaagg3-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    which mainlib
+    mainlib
+    return 0
+}

@@ -1,0 +1,21 @@
+
+function dyn-depends()
+{
+    #  Handle the dependency dyn-dep1
+    echo dyn-dep1
+
+    #  Then, we will check if we need dyn-dep2
+    #  by looking a dyn-dep1 sources. For this
+    #  here we reference the dependency only
+    #  so it will be handled after having gone
+    #  through dyn-dep1.
+    echo dyn-dependency/dyndep2
+}
+
+function dyn-env()
+{
+    set-var DYN main
+
+    add-to-var DENV $DEP1
+    add-to-var DENV $DEP2
+}

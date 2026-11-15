@@ -1,0 +1,37 @@
+
+function test20-setup()
+{
+   local PREFIX=$1
+   local TARGET=$2
+
+   mkdir -p $TARGET-default/src
+}
+
+function test20-out-of-tree()
+{
+    echo false
+}
+
+function test20-config()
+{
+   local PREFIX=$1
+   local TARGET=$2
+
+   echo "@@@ CONFIG $SCBI_JOBS"
+}
+
+function test20-build()
+{
+   local PREFIX=$1
+   local TARGET=$2
+
+    echo "@@@ BUILD $SCBI_JOBS"
+}
+
+function test20-install()
+{
+   local PREFIX=$1
+   local TARGET=$2
+
+   echo "@@@ INSTALL $SCBI_JOBS"
+}

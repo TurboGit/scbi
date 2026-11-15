@@ -1,0 +1,20 @@
+
+function metapoly-modules()
+{
+    echo lib1
+}
+
+function metapoly-bd-modules()
+{
+    echo bdepslib1
+}
+
+function metapoly-aggregate()
+{
+    echo direct
+}
+
+function metapoly-noagg-aggregate()
+{
+    echo no
+}

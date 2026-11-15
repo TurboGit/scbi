@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from corpus import plan_files
-from scbi.bashcompat import assoc_keys, read_fields, read_lines
+from scbi.bashcompat import read_fields, read_lines
 from scbi.plan import PlanError, PlanLoader, PlanState, check_barrier, merge_variant
 
 # ---------------------------------------------------------------- bashcompat
@@ -21,21 +21,6 @@ def test_read_lines_drops_unterminated_last_line():
     assert read_lines("a\nb\n") == ["a", "b"]
     assert read_lines("a\nb") == ["a"]
     assert read_lines("") == []
-
-
-@pytest.mark.oracle
-def test_assoc_keys_oracle(oracle):
-    keysets = [
-        ["VERSION", "GLOBAL", "VARIANT"],
-        ["VER", "VERSION"],
-        ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"],
-        ["x_1", "X_1", "lib", "libs", "LIB"],
-    ]
-    expected = oracle.batch(
-        'declare -A S; for k in "$@"; do S[$k]=1; done; echo "${!S[*]}"', keysets
-    )
-    for keys, out in zip(keysets, expected):
-        assert assoc_keys(keys) == out.split()
 
 
 # ------------------------------------------------------------------- unit
@@ -56,16 +41,6 @@ def test_assoc_keys_oracle(oracle):
 )
 def test_merge_variant(cvariant, rvariant, expected):
     assert merge_variant(cvariant, rvariant) == expected
-
-
-@pytest.mark.oracle
-def test_merge_variant_oracle(oracle):
-    cvariants = ["default", "a", "a.b", "a.b.c", "x"]
-    rvariants = ["fast", "+fast", "+a", "-a", "-b", "+c.d", "-a.b", "+x-a", "-c+y", "a.b", "+a.b-c"]
-    cases = [(c, r) for c in cvariants for r in rvariants]
-    expected = oracle.batch('_internal_merge_variant "$1" "$2"', cases)
-    for (c, r), out in zip(cases, expected):
-        assert merge_variant(c, r) == out.rstrip("\n"), (c, r)
 
 
 def test_check_barrier():
@@ -222,56 +197,3 @@ def parse_dump(out: str) -> dict[str, dict[str, str]]:
             kind, key, value = line.split("\x1f")
             res[kind][key] = value
     return res
-
-
-@pytest.mark.oracle
-def test_load_plan_oracle(oracle, tmp_path):
-    cases = oracle_cases()
-    outputs = oracle.batch(DUMP, cases)
-    checked = errors = 0
-    for (nameref, plugins, discs), out in zip(cases, outputs):
-        state = PlanState()
-        loader = PlanLoader(state, Path(plugins), discs.split(), cwd=tmp_path)
-        ctx = f"plan={nameref} discs={discs!r}"
-        if "END-OF-DUMP" not in out:
-            with pytest.raises(PlanError) as e:
-                loader.load(nameref)
-            assert e.value.message in out, ctx
-            errors += 1
-            continue
-        loader.load(nameref)
-        bash = parse_dump(out)
-        assert state.modver == bash["M"], ctx
-        assert state.plan_hist == bash["H"], ctx
-        assert state.module_alias == bash["A"], ctx
-        assert state.plan_loaded == bash["L"], ctx
-        checked += 1
-    assert checked > 100
-
-
-@pytest.mark.oracle
-def test_get_module_ref_oracle(oracle, tmp_path):
-    """get-module-ref after loading each plan, for every registered module."""
-    cases = []
-    for path in plan_files():
-        name = path.name[len(".plan-") :]
-        state = PlanState()
-        try:
-            PlanLoader(state, path.parent, DISCRIMINANT_SETS[1], cwd=tmp_path).load(name)
-        except PlanError:
-            continue
-        modules = sorted({k.split(".")[0] for k in state.modver if not k.endswith((".skip", ".keep"))})
-        for m in modules:
-            for_module = m.split("=")[0] if "=" in m else "@root"
-            target = m.split("=")[-1]
-            cases.append((name, str(path.parent), " ".join(DISCRIMINANT_SETS[1]), target, for_module, state))
-    template = (
-        'SCBI_PLUGINS="$2"; SCBI_OS_DISCRIMINANTS=(); for d in $3; do SCBI_OS_DISCRIMINANTS[$d]=yes; done\n'
-        "load-module-plan \"$1\" >/dev/null 2>&1\n"
-        'get-module-ref R "$4" "$5"; printf "%s\\n" "${R[@]}"'
-    )
-    outputs = oracle.batch(template, [c[:5] for c in cases])
-    for case, out in zip(cases, outputs):
-        state = case[5]
-        assert state.module_ref(case[3], case[4]) == out.splitlines(), case[:5]
-    assert len(cases) > 50

@@ -4,8 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from corpus import plugin_files
-from oracle import REPO_ROOT
+from corpus import REPO_ROOT, plugin_files
 from scbi.convert import convert
 from scbi.plugin import catalog, yamlfmt
 from scbi.plugin.yamlwrite import format_text, load_data

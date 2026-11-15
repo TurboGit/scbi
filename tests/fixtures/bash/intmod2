@@ -1,0 +1,19 @@
+function intmod2-common-modules()
+{
+    echo lib1
+}
+
+function intmod2-default-modules()
+{
+    echo lib2
+}
+
+function intmod2-varA-modules()
+{
+    echo two
+}
+
+function intmod2-varB-modules()
+{
+    echo dmod
+}

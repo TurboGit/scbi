@@ -1,0 +1,74 @@
+
+function s-par-common-common-config-options()
+{
+    echo opt-common
+}
+
+function s-par-common-default-config-options()
+{
+    echo opt-default
+}
+
+function s-par-common-var-config-options()
+{
+    echo opt-var
+}
+
+function s-par-common-config-options()
+{
+    echo opt-std
+}
+
+function s-par-common-default-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    echo CONF-DEF ${OPTIONS[*]}
+}
+
+function s-par-common-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    echo CONF-STD ${OPTIONS[*]}
+}
+
+function s-par-common-var-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local OPTIONS=()
+    get-config-options OPTIONS $PREFIX $TARGET $VARIANT
+
+    echo CONF-VAR ${OPTIONS[*]}
+}
+
+function s-par-common-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo BUILD-STD
+}
+
+function s-par-common-var-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo BUILD-VAR
+}

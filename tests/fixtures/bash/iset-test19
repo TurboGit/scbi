@@ -1,0 +1,6 @@
+inherit-plugin --hooks=build,setup test19
+
+# dump created routines
+declare -F | grep iset-test19 | while read d1 d1 n; do
+    type $n | sed 's/ $//g'
+done

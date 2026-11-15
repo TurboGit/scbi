@@ -1,0 +1,21 @@
+
+inherit-plugin --name=call postinst
+inherit-plugin --name toto postinst
+
+function inh-specific-name-config()
+{
+    echo @@@ CONFIG-inh-specific-name
+}
+
+function inh-specific-name-build()
+{
+    echo @@@ BUILD-inh-specific-name
+}
+
+function inh-specific-name-post-install()
+{
+    echo @@@ POST-INSTALL-inh-specific-name
+
+    call-post-install
+    toto-post-install
+}

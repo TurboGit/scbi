@@ -1,0 +1,33 @@
+
+function varhook-mpi-options()
+{
+    echo MPI
+}
+
+function varhook-openmp-options()
+{
+    echo OpenMP
+}
+
+function varhook-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local OPTIONS="$(call-variant-hooks options /usr lin $VARIANT)"
+
+    for O in $OPTIONS; do
+        echo "@@@ $O"
+    done
+}
+
+function varhook-build()
+{
+    echo build
+}
+
+function varhook-install()
+{
+    echo install
+}

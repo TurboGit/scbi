@@ -1,0 +1,14 @@
+
+function metaenv-depends()
+{
+    echo meta
+    echo m3
+}
+
+function metaenv-config()
+{
+    echo "LIST  ${LIST}"
+    echo "NAME1 ${NAME1}"
+    echo "NAME2 ${NAME2}"
+    echo "NAME3 ${NAME3}"
+}

@@ -1,0 +1,6 @@
+
+function m2-env()
+{
+    add-to-var LIST  m2
+    set-var    NAME2 m2
+}

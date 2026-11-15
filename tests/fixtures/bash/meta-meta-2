@@ -1,0 +1,10 @@
+
+function meta-meta-2-modules()
+{
+    echo dmod
+}
+
+function meta-meta-2-propagate-version()
+{
+    echo false
+}

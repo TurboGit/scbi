@@ -1,0 +1,15 @@
+
+function stest-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    local OPTIONS=$4
+
+    if [[ -z $OPTIONS ]]; then
+        echo stest: none
+    else
+        echo stest: $OPTIONS
+    fi
+}

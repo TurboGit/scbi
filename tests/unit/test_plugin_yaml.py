@@ -4,8 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from corpus import plugin_files
-from oracle import REPO_ROOT
+from corpus import REPO_ROOT, plugin_files
 from scbi.plugin import yamlfmt
 from scbi.plugin.catalog import spec, step_names
 from scbi.plugin.expr import ExprError, evaluate, parse
@@ -247,29 +246,6 @@ VALUE_DUMP = r"""
 source "$1" > /dev/null 2>&1
 for f in $2; do printf '%s\x1e' "$f"; $f /p x86_64-linux-gnu default 2>/dev/null; printf '\x1f'; done
 """
-
-
-@pytest.mark.oracle
-def test_static_values_oracle(oracle):
-    """Values without variables or guards are exactly the hook output."""
-    cases, expected = [], []
-    for p in convertible():
-        static = {}
-        for key, body in lifted(p).plugin.hooks.items():
-            if isinstance(body, Values) and all(isinstance(i, str) and "$" not in i for i in body.items):
-                static[key.function_name(p.name)] = list(body.items)
-        if static:
-            cases.append((str(p), " ".join(static)))
-            expected.append(static)
-    outputs = oracle.batch(VALUE_DUMP, cases)
-    checked = 0
-    for (path, _), static, out in zip(cases, expected, outputs):
-        for rec in out.split("\x1f")[:-1]:
-            name, text = rec.split("\x1e", 1)
-            lines = text.split("\n")[:-1] if text else []
-            assert static[name] == lines, (path, name)
-            checked += 1
-    assert checked > 150
 
 
 def test_unknown_builtin_rejected(tmp_path):

@@ -1,0 +1,24 @@
+
+function withsubm-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/withsubm.bundle
+}
+
+function withsubm-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo BUILD
+}
+
+function withsubm-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo INSTALL
+}

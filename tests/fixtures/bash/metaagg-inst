@@ -1,0 +1,22 @@
+# This is an aggregate meta module
+
+function metaagg-inst-modules()
+{
+    echo lib1
+    echo libenv
+}
+
+function metaagg-inst-aggregate()
+{
+    echo direct
+}
+
+function metaagg-inst-prefix()
+{
+    echo $AINST
+}
+
+function metaagg-inst-noinst-prefix()
+{
+    echo NONE
+}

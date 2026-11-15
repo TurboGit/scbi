@@ -1,0 +1,19 @@
+
+function lvl2-build-depends()
+{
+    echo lvl4
+}
+
+function lvl2-env()
+{
+    set-var LVL2 two
+}
+
+function lvl2-build()
+{
+    echo 20 ${LVL0}x
+    echo 21 ${LVL1}x
+    echo 22 ${LVL2}x
+    echo 23 ${LVL3}x
+    echo 24 ${LVL4}x
+}

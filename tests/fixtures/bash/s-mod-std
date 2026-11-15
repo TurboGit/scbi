@@ -1,0 +1,35 @@
+
+
+function s-mod-std-depends()
+{
+    echo lib2
+}
+
+function s-mod-std-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    return 0
+}
+
+function s-mod-std-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    return 0
+}
+
+function s-mod-std-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    return 0
+}
+
+function s-mod-std-prefix()
+{
+    echo NONE
+}

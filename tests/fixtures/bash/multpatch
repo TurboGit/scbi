@@ -1,0 +1,41 @@
+
+function multpatch-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function multpatch-patches()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+    local KIND=$4
+    local REF=$5
+
+    if [[ $(get-module-version lib2) =~ "2.0" ]]; then
+        echo patch-for-v2
+    else
+        echo patch-for-v1
+    fi
+
+    check-module-version "lib2" ">" "1.9"
+    if [[ $? == 0 ]]; then
+        echo patch-for-v2.2
+    else
+        echo patch-for-v1.2
+    fi
+
+    if check-module-version "lib2" ">" "1.9"; then
+        echo patch-for-v2.3
+    else
+        echo patch-for-v1.3
+    fi
+}
+
+function multpatch-depends()
+{
+    echo lib2
+}

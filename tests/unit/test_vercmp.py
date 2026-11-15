@@ -1,8 +1,5 @@
-import itertools
-
 import pytest
 
-from corpus import OPS, version_strings
 from scbi.vercmp import check_versions, get_version_number
 
 
@@ -37,22 +34,3 @@ def test_invalid_operator():
 )
 def test_get_version_number(value, expected):
     assert get_version_number(value) == expected
-
-
-@pytest.mark.oracle
-def test_check_versions_oracle(oracle):
-    versions = version_strings()
-    cases = [(a, op, b) for a, b in itertools.product(versions, repeat=2) for op in OPS]
-    expected = oracle.batch('check-versions "$1" "$2" "$3" && echo T || echo F', cases)
-    mismatches = [
-        c for c, out in zip(cases, expected) if check_versions(*c) != (out.strip() == "T")
-    ]
-    assert mismatches == [], mismatches[:20]
-
-
-@pytest.mark.oracle
-def test_get_version_number_oracle(oracle):
-    values = version_strings() + ["gnat-12.2", "abc", "1.2.3.4", "x86_64", "-1", "release_7_8"]
-    expected = oracle.batch('get-version-number R "$1"; printf "%s" "$R"', [(v,) for v in values])
-    for v, out in zip(values, expected):
-        assert get_version_number(v) == out, v

@@ -1,0 +1,47 @@
+
+function var-depends()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    for v in $(all-variants $VARIANT); do
+        echo $v
+    done
+}
+
+function var-config()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo "@@@ config var: $VARIANT"
+    for v in $(all-variants $VARIANT); do
+        echo "@@@ config      $v"
+    done
+}
+
+function var-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo "@@@ build var: $VARIANT"
+    for v in $(all-variants $VARIANT); do
+        echo "@@@ build      $v"
+    done
+}
+
+function var-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    echo "@@@ install var: $VARIANT"
+    for v in $(all-variants $VARIANT); do
+        echo "@@@ install      $v"
+    done
+}

@@ -1,0 +1,56 @@
+
+function svnmlt-prj1-vcs()
+{
+    echo none
+    echo none
+    echo svn
+    echo file://$TESTREPOS/repomlt
+    echo prj1
+}
+
+function svnmlt-prj2-vcs()
+{
+    echo none
+    echo none
+    echo subversion
+    echo file://$TESTREPOS/repomlt
+    echo prj2
+}
+
+function svnmlt-out-of-tree()
+{
+    echo false
+}
+
+function svnmlt-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    gcc -o main main.c
+}
+
+function svnmlt-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    mkdir ../install
+    cp main ../install
+}
+
+function svnmlt-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./main
+}
+
+function svnmlt-prefix()
+{
+    echo none
+}

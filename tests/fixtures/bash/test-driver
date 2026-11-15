@@ -1,0 +1,28 @@
+
+function test-driver-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    prepend-to-var PATH $PREFIX/bin
+}
+
+function test-driver-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    local BDIR=$PREFIX/bin
+    local FILE=$BDIR/testdriver
+
+    mkdir -p $BDIR
+
+cat <<EOF > $FILE
+#!/bin/sh
+
+echo Runing \$1
+\$1
+EOF
+
+    chmod a+x $FILE
+}

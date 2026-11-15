@@ -1,0 +1,15 @@
+
+function btype-config()
+{
+    echo CONFIG $(get-build-type CMAKE Release)
+}
+
+function btype-build()
+{
+    echo BUILD
+}
+
+function btype-install()
+{
+    echo INSTALL
+}

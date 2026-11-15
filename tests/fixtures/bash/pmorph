@@ -1,0 +1,20 @@
+
+function pmorph-a-config()
+{
+    echo CONFIG a
+}
+
+function pmorph-b-config()
+{
+    echo CONFIG b
+}
+
+function pmorph-config()
+{
+    echo "CONFIG (none)"
+}
+
+function pmorph-default-config()
+{
+    echo CONFIG default
+}

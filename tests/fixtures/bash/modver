@@ -1,0 +1,33 @@
+
+function modver-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/lib1.bundle
+}
+
+function modver-config()
+{
+    echo config
+}
+
+function modver-build()
+{
+    echo build
+}
+
+function modver-install()
+{
+    echo install
+}
+
+function modver-version()
+{
+    echo 1
+}
+
+function modver-var-version()
+{
+    echo v0.5
+}

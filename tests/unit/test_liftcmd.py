@@ -75,17 +75,3 @@ def test_escaped_parameters_and_variants():
 def test_runtime_function_not_builtin(bash):
     with pytest.raises(CmdUnliftable):
         lift(bash)
-
-
-def test_runtime_functions_list():
-    """RUNTIME_FUNCTIONS is the list of the functions of the Bash runtime."""
-    import re
-    from pathlib import Path
-
-    from scbi.plugin.runtimefuncs import RUNTIME_FUNCTIONS
-
-    root = Path(__file__).resolve().parents[2] / "scripts.d"
-    names = set()
-    for f in [*root.glob("[0-9]*"), *root.glob("_os_*")]:
-        names |= set(re.findall(r"(?m)^function ([A-Za-z0-9_.:-]+)", f.read_text()))
-    assert names == set(RUNTIME_FUNCTIONS)

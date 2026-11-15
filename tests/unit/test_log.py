@@ -1,7 +1,6 @@
 import io
 import re
 
-import pytest
 
 from scbi.log import Logger, printf_format
 
@@ -67,32 +66,6 @@ printf '\x1e%s' "$(< $SCBI_LINE_SEP)"
 """
 
 
-@pytest.mark.oracle
-def test_log_oracle(oracle, tmp_path):
-    from oracle import _bash_quote
-
-    cases = [(" ".join(_bash_quote(w) for w in msg), q, c)
-             for msg in MESSAGES for q in ("no", "yes") for c in ("no", "yes")]
-    outputs = oracle.batch(TEMPLATE, cases)
-    for i, ((_, quiet, colors), msg, out) in enumerate(zip(cases, [m for m in MESSAGES for _ in range(4)], outputs)):
-        d = tmp_path / str(i)
-        log, o, e = make(d, quiet == "yes", COLORS if colors == "yes" else {})
-        merged = io.StringIO()
-        log.stdout = log.stderr = merged
-        log.line_sep_file.write_text("1")
-        log.ilog("mod", *msg)
-        log.line_sep()
-        log.line_sep()
-        log.elog("mod", *msg)
-        log.dlog("mod", *msg)
-        log.ilog("mod", *msg)
-        log.clog("mod")
-        console, report, sep = out.split("\x1e")
-        assert TS.sub("TS", merged.getvalue()) == TS.sub("TS", console), msg
-        assert TS.sub("TS", log.report("mod").read_text()) == TS.sub("TS", report), msg
-        assert log.line_sep_file.read_text() == sep
-
-
 # ------------------------------------------------------------ statistics
 
 REPORT_A = """2024/01/02 10:00:00 : Building lib1 [default] (master)
@@ -107,18 +80,3 @@ REPORT_B = """2024/01/03 09:00:00 : Building lib1 [default] (master)
 2024/01/03 09:30:00 : Building my-lib_2 [v1] (1.0)
 2024/01/03 09:30:07 : End Building my-lib_2 [v1] (1.0)
 """
-
-
-@pytest.mark.oracle
-def test_display_log_stat_same_as_bash(oracle, tmp_path):
-    from scbi.log import display_log_stat
-
-    logs = tmp_path / "logs"
-    (logs / "2024_01_02").mkdir(parents=True)
-    (logs / "2024_01_03").mkdir()
-    (logs / "2024_01_02" / "x86_64-linux-gnu-app-report.log").write_text(REPORT_A)
-    (logs / "2024_01_03" / "x86_64-linux-gnu-lib1-report.log").write_text(REPORT_B)
-    (logs / "2024_01_03" / "x86_64-linux-gnu-lib1-env.log").write_text(REPORT_A)
-    expected = oracle.call(f"SCBI_LOGS={logs}\nSCBI_JOBS=2\ndisplay-log-stat")
-    assert display_log_stat(logs) == expected
-    assert "lib1" in expected

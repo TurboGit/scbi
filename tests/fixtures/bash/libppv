@@ -1,0 +1,5 @@
+
+function libppv-depends()
+{
+    echo dltar2
+}

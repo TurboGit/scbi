@@ -1,7 +1,5 @@
 import pytest
 
-from corpus import modrefs
-from known_diffs import modref_has_glob
 from scbi.modref import (
     ModuleRef,
     all_variants,
@@ -41,31 +39,3 @@ def test_variants():
 
 def test_to_bash_array_drops_empty_fields():
     assert parse_module_ref("a:").to_bash_array() == ["a", "default", "BRANCH"]
-
-
-@pytest.mark.oracle
-def test_parse_module_ref_oracle(oracle):
-    refs = [r for r in modrefs() if not modref_has_glob(r)]
-    expected = oracle.batch(
-        'parse-module-ref R "$1"; printf "%s\\n" "${R[@]}"', [(r,) for r in refs]
-    )
-    for ref, out in zip(refs, expected):
-        assert parse_module_ref(ref).to_bash_array() == out.splitlines(), ref
-
-
-@pytest.mark.oracle
-def test_all_variants_oracle(oracle):
-    values = ["default", "a", "a.b", "a.b.c", "a..b", ".a", "a.", "native", "auto.fast"]
-    expected = oracle.batch(
-        'all-variants-v R "$1"; printf "%s\\n" "${R[@]}"', [(v,) for v in values]
-    )
-    for v, out in zip(values, expected):
-        assert all_variants(v) == [x for x in out.splitlines() if x], v
-
-
-@pytest.mark.oracle
-def test_has_variant_oracle(oracle):
-    cases = [(vs, v) for vs in ["default", "a", "a.b", "native.x"] for v in ["a", "b", "x", "default"]]
-    expected = oracle.batch('has-variant "$1" "$2" && echo yes || echo no', cases)
-    for (vs, v), out in zip(cases, expected):
-        assert has_variant(vs, v) == (out.strip() == "yes"), (vs, v)

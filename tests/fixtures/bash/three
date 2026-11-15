@@ -1,0 +1,4 @@
+function three-config()
+{
+    echo THREE
+}

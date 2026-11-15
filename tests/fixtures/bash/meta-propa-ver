@@ -1,0 +1,10 @@
+
+function meta-propa-ver-modules()
+{
+    echo lib1a
+}
+
+function meta-propa-ver-propagate-version()
+{
+    echo version
+}

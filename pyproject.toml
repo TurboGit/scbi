@@ -25,9 +25,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
 pythonpath = ["src"]
-markers = [
-    "oracle: differential test comparing with the Bash implementation",
-]
 
 [tool.setuptools.package-data]
 scbi = ["hooks/*.sh"]

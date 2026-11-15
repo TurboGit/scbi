@@ -1,0 +1,6 @@
+function utp3-test-depends()
+{
+    echo yes
+    echo usethisplg
+    echo no
+}

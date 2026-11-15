@@ -1,0 +1,20 @@
+inherit-plugin test17
+
+function test37-out-of-tree()
+{
+    echo true
+}
+
+function test37-config()
+{
+    echo "in config (overriding)"
+    echo "# ROOT_DIR $ROOT_DIR"
+    echo "# ABC_ROOT $ABC_ROOT"
+    echo "# PATH     $PATH"
+    echo "# CONF17   $CONF17"
+}
+
+function test37-install()
+{
+    echo "in install (overriding)"
+}

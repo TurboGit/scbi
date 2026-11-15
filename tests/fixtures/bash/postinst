@@ -1,0 +1,5 @@
+
+function postinst-post-install()
+{
+    echo @@@ POST-INSTALL-postinst
+}

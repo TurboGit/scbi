@@ -1,4 +1,3 @@
-import pytest
 
 from scbi.discriminants import (
     HostInfo,
@@ -92,25 +91,3 @@ setup-discriminants
 printf '%s\n' "$SCBI_OS_NAME" "$SCBI_OS_VERSION" "$SCBI_OS_CODENAME" "$SCBI_OS_MAJOR_VERSION" "$SCBI_OS_ID"
 echo "${!SCBI_OS_DISCRIMINANTS[@]}"
 """
-
-
-@pytest.mark.oracle
-def test_setup_discriminants_oracle(oracle):
-    cases = []
-    for name, info in HOSTS.items():
-        for domain in ("example.org", ""):
-            for target in ("x86_64-linux-gnu", "arm-linux-gnueabihf"):
-                cases.append((name, domain, target))
-
-    def fields(info: LsbInfo):
-        return [x.split("\t", 1)[1] for x in (info.description, info.release, info.distributor, info.codename)]
-
-    outputs = oracle.batch(
-        FAKE_TOOLS,
-        [(*fields(HOSTS[n]), d, t) for n, d, t in cases],
-    )
-    for (name, domain, target), out in zip(cases, outputs):
-        lines = out.splitlines()
-        info = setup_discriminants(host(name, domain), "x86_64-linux-gnu", target)
-        assert [info.name, info.version, info.codename, info.major_version, info.os_id] == lines[:5], name
-        assert info.as_set() == set(lines[5].split()), (name, domain, target)

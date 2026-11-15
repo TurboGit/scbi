@@ -1,0 +1,22 @@
+
+with-variant native shouldnotexist-dev
+
+function autovarC-depends()
+{
+    echo lib1
+}
+
+function autovarC-config()
+{
+    echo config autovarB
+}
+
+function autovarC-build()
+{
+    echo build autovarB
+}
+
+function autovarC-prefix()
+{
+    echo NONE
+}

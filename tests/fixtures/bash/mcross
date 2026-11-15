@@ -1,0 +1,20 @@
+
+function mcross-depends()
+{
+    echo not-cross
+}
+
+function mcross-cross-depends()
+{
+    echo cross-general
+}
+
+function mcross-opta-cross-depends()
+{
+    echo cross-opta
+}
+
+function mcross-optb-cross-depends()
+{
+    echo cross-optb
+}

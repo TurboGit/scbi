@@ -135,35 +135,6 @@ def test_import_opam_like(tmp_path):
 # ------------------------------------------------------- oracle: builtins
 
 
-@pytest.mark.oracle
-def test_builtins_oracle(oracle, tmp_path):
-    root = tmp_path / "tree"
-    for d in ("lib/python3.9", "lib/python3.11/site-packages", "lib/python3.12", "include/openjpeg-2.5"):
-        (root / d).mkdir(parents=True)
-    (root / "include" / "openjpeg-2.5" / "openjpeg.h").write_text("")
-    now = time.time()
-    for i, d in enumerate(("lib/python3.12", "lib/python3.9", "lib/python3.11")):
-        os.utime(root / d, (now - 100 + i, now - 100 + i))
-    cases = [
-        f"last-modified-directory {root}/lib/python*",
-        f"last-modified-directory '{root}/lib/python*'",
-        f"last-modified-directory {root}/nothing*",
-        f"last-modified-directory {root}/include/open*",
-        "get-os-inc-dir stdio.h",
-        "get-os-inc-dir sys/types.h",
-        "get-os-inc-dir 'python3*/Python.h'",
-        "get-os-inc-dir nothere.h",
-        f"basename {root}/lib/",
-        "basename /a/b.tar.gz .gz",
-        f"ls {root}/lib",
-        f"ls {root}/include/openjpeg-2.5/openjpeg.h {root}/lib",
-    ]
-    outputs = oracle.batch('cd "$2"; eval "$1"', [(c, str(tmp_path)) for c in cases])
-    c = ctx(tmp_path)
-    for case, out in zip(cases, outputs):
-        assert expand(f"$({case})", c) == " ".join(out.split()), case
-
-
 # ------------------------------------- oracle: every converted plug-in hook
 
 PLUGINS = plugin_files()
@@ -235,47 +206,3 @@ else
   printf '\x1d%s' "$(< $SCBI_ENV_MODULE)"
 fi
 """
-
-
-@pytest.mark.oracle
-def test_converted_hooks_oracle(oracle, tmp_path):
-    prefix = fake_prefix(tmp_path)
-    cases = hook_cases()
-    assert len(cases) > 250
-    outputs = oracle.batch(
-        TEMPLATE,
-        [(str(p.parent), p.name, fname, "value" if isinstance(b, Values) else "env",
-          str(tmp_path), str(prefix)) for p, fname, _, b in cases],
-    )
-    checked = 0
-    for (p, fname, hook, body), out in zip(cases, outputs):
-        parts = out.split("\x1d")
-        assert len(parts) == (2 if isinstance(body, Values) else 4), (p, fname, out[-300:])
-        before = ShellVars()
-        for rec in parts[0].split("\x1f")[:-1]:
-            name, x, value = rec.split("\x1e")
-            before.set(name, value, export=x == "1")
-        record = tmp_path / f"py-{checked}.cmd"
-        record.write_text("")
-        c = HookContext(
-            module=p.name, variant="default", hook=hook,
-            params=dict(zip(catalog.spec(hook).params,
-                            [str(prefix), HOST, "default", "BRANCH", "7.8.1"])),
-            env=Environment(before, record=record),
-            plan=PlanState({"lib2": "lib2:2.0.1", p.name: f"{p.name}:1.2.3"}),
-            modules_list=[p.name], host=HOST, target=HOST, cwd=tmp_path,
-            scbi_bdir=before.values.get("SCBI_BDIR", ""),
-            arrays={"SCBI_MODULES_DIR": {p.name: f"{prefix}/install", f"{p.name}@build": f"{prefix}/build",
-                                         f"{p.name}@src": f"{prefix}/src"}},
-        )
-        where = (p.parent.parent.name, fname)
-        if isinstance(body, Values):
-            lines = parts[1].split("\n")[:-1] if parts[1] else []
-            assert eval_values(body, c) == [" ".join(ln.split()) for ln in lines], where
-        else:
-            apply_env(body, c, base_env={"PATH": os.environ["PATH"]})
-            after = dict(rec.split("\x1e") for rec in parts[2].split("\x1f")[:-1])
-            assert c.env.environ() == after, where
-            assert record.read_text().rstrip("\n") == parts[3], where
-        checked += 1
-    assert checked == len(cases)

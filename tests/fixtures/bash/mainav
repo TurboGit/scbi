@@ -1,0 +1,15 @@
+
+function mainav-depends()
+{
+    echo mautov
+}
+
+function mainav-config()
+{
+    echo config
+}
+
+function mainav-build()
+{
+    echo build
+}

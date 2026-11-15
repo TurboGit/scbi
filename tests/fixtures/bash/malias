@@ -1,0 +1,10 @@
+
+function malias-build-depends()
+{
+    echo ma-bd
+}
+
+function malias-depends()
+{
+    echo ma-d
+}

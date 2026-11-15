@@ -1,0 +1,20 @@
+
+function wrong2-vcs()
+{
+    echo 1
+    echo 2
+    echo 3
+    echo 4
+}
+
+function cpwrong2-build()
+{
+    local PREFIX=$2
+}
+
+function wrong2-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$4
+}

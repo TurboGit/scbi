@@ -1,0 +1,31 @@
+
+function metavar-common-modules()
+{
+    echo mv-common1
+    echo mv-common2
+}
+
+function metavar-modules()
+{
+    echo mv-default1
+    echo mv-default2
+}
+
+function metavar-default-modules()
+{
+    echo mv-default-ex1
+    echo mv-default-ex2
+}
+
+function metavar-var-modules()
+{
+    echo mv-var1
+    echo mv-var2
+}
+
+function metavar-new-modules()
+{
+    echo mv-new1
+    echo mv-new2
+    echo mv-new3
+}

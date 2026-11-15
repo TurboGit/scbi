@@ -1,0 +1,27 @@
+
+function gentool-env()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    add-to-var PATH $PREFIX/bin
+}
+
+function gentool-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $PREFIX/bin
+    echo "#!/bin/bash" > $PREFIX/bin/gentool
+    echo "echo -n \"#define TOOLVER \\\"\$1\\\"\"" >> $PREFIX/bin/gentool
+    chmod u+x $PREFIX/bin/gentool
+}
+
+function gentool-prefix()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    echo $SCBI_BDIR/local-install
+}

@@ -1,0 +1,51 @@
+
+function varenv-common-env()
+{
+    add-to-var VENV common
+}
+
+function varenv-default-env()
+{
+    add-to-var VENV default
+}
+
+function varenv-another-env()
+{
+    add-to-var VENV another
+}
+
+function varenv-env()
+{
+    add-to-var VENV NONE
+}
+
+function varenv-common-build-env()
+{
+    add-to-var VBENV common
+}
+
+function varenv-default-build-env()
+{
+    add-to-var VBENV default
+}
+
+function varenv-another-build-env()
+{
+    add-to-var VBENV another
+}
+
+function varenv-fast-build-env()
+{
+    add-to-var VBENV fast
+}
+
+function varenv-build-env()
+{
+    add-to-var VBENV NONE
+}
+
+function varenv-build()
+{
+    echo VENV $VENV
+    echo VBENV $VBENV
+}

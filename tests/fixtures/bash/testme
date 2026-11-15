@@ -1,0 +1,54 @@
+
+function testme-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/usetool.bundle
+}
+
+function testme-build-depends()
+{
+    echo gentool
+}
+
+function testme-tests-depends()
+{
+    echo test-driver
+}
+
+function testme-out-of-tree()
+{
+    echo false
+}
+
+function testme-config()
+{
+    gentool vA > version.h
+}
+
+function testme-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f *.o
+    make
+}
+
+function testme-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    make PREFIX=$PREFIX install
+}
+
+function testme-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    testdriver ./toolbin
+    return 0
+}

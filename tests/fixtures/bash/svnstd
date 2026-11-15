@@ -1,0 +1,46 @@
+
+function svnstd-vcs()
+{
+    echo none
+    echo none
+    echo subversion
+    echo file://$TESTREPOS/repostd
+}
+
+function svnstd-out-of-tree()
+{
+    echo false
+}
+
+function svnstd-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    gcc -o main main.c
+}
+
+function svnstd-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    mkdir ../install
+    cp main ../install
+}
+
+function svnstd-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+    local VARIANT=$3
+
+    ./main
+}
+
+function svnstd-prefix()
+{
+    echo none
+}

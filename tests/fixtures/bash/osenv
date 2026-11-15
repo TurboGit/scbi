@@ -1,0 +1,29 @@
+
+function cygpath()
+{
+    echo /path/osenv$2
+}
+
+function osenv-build-env()
+{
+    set-var    BOSENV benv-val
+    add-to-var PATH   /tmp
+}
+
+function osenv-build()
+{
+    local ALLPATH=( ${PATH//:/ } )
+
+    local P=""
+
+    for E in ${ALLPATH[*]}; do
+        local B=$(basename $E)
+        if [[ $B == "tmp" ]]; then
+            P=$E
+            break
+        fi
+    done
+
+    echo BOSENV $BOSENV
+    echo PATH   $P
+}

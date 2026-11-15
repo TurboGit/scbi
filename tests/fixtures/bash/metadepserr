@@ -1,0 +1,11 @@
+
+function metadepserr-modules()
+{
+    echo metawitherr
+    echo lib3
+}
+
+function metadepserr-aggregate()
+{
+    echo recursive
+}

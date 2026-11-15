@@ -1,0 +1,22 @@
+
+with-variant whatever squid-dbg
+
+function autovarA-depends()
+{
+    echo lib1
+}
+
+function autovarA-config()
+{
+    echo config autovarA
+}
+
+function autovarA-build()
+{
+    echo build autovarA
+}
+
+function autovarA-prefix()
+{
+    echo NONE
+}

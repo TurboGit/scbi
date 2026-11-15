@@ -1,0 +1,12 @@
+
+function test22-config()
+{
+   local PREFIX=$1
+   local TARGET=$2
+
+   if [ $(is-enabled light) ]; then
+       echo "@@@ LIGHT is enabled"
+   else
+       echo "@@@ LIGHT is not enabled"
+   fi
+}

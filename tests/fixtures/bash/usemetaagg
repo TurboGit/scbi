@@ -1,0 +1,45 @@
+
+function usemetaagg-vcs()
+{
+    echo default
+    echo none
+    echo git
+    echo ${TESTREPOS}/mainlib.bundle
+}
+
+function usemetaagg-depends()
+{
+    echo metaagg
+}
+
+function usemetaagg-out-of-tree()
+{
+    echo false
+}
+
+function usemetaagg-build()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    rm -f *.o
+    make
+}
+
+function usemetaagg-install()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    mkdir -p $PREFIX/bin
+    cp mainlib $PREFIX/bin
+}
+
+function usemetaagg-tests()
+{
+    local PREFIX=$1
+    local TARGET=$2
+
+    ./mainlib
+    return 0
+}

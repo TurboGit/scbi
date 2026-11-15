@@ -1,0 +1,10 @@
+
+function dyn-main-depends()
+{
+    echo dyn
+}
+
+function dyn-main-config()
+{
+    echo "@@@ $DENV"
+}

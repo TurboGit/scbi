@@ -1,0 +1,16 @@
+# This is an aggregate meta module
+
+function metaagg3-modules()
+{
+    echo mainlib
+}
+
+function metaagg3-agg-aggregate()
+{
+    echo direct
+}
+
+function metaagg3-agg-prefix()
+{
+    echo NONE
+}

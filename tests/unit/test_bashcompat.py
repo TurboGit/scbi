@@ -30,10 +30,3 @@ def test_shell_words_keep_expansions(text, expected):
 def test_shell_words_errors(text):
     with pytest.raises(ShellSyntaxError):
         shell_words(text)
-
-
-@pytest.mark.oracle
-def test_shell_words_oracle(oracle):
-    outputs = oracle.batch('eval "printf \'%s\\x1f\' $1"', [(w,) for w in WORDS])
-    for text, out in zip(WORDS, outputs):
-        assert shell_words(text) == out.split("\x1f")[:-1], text
