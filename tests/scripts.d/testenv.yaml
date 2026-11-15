@@ -14,10 +14,10 @@ build: |-
 
 install: |-
   mkdir -p $PREFIX/bin
-  cp bscript.sh $PREFIX/bin
+  copy bscript.sh $PREFIX/bin
   chmod u+x $PREFIX/bin/bscript.sh
   mkdir -p $PREFIX/tbin
-  cp tescript.sh $PREFIX/tbin
+  copy tescript.sh $PREFIX/tbin
   chmod u+x $PREFIX/tbin/tescript.sh
 
 tests: tescript.sh "ok"

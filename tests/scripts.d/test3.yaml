@@ -14,4 +14,4 @@ build: make
 
 install: |-
   mkdir -p $PREFIX/bin
-  cp main $PREFIX/bin
+  copy main $PREFIX/bin

@@ -29,5 +29,5 @@ build: make
 install: |-
   mkdir -p $PREFIX/include
   mkdir -p $PREFIX/lib
-  cp liblib2.so $PREFIX/lib
-  cp lib2.h $PREFIX/include
+  copy liblib2.so $PREFIX/lib
+  copy lib2.h $PREFIX/include

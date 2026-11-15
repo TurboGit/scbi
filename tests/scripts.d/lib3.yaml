@@ -30,8 +30,8 @@ build: |-
 install: |-
   mkdir -p $PREFIX/include
   mkdir -p $PREFIX/lib
-  cp liblib1.so $PREFIX/lib
-  cp lib1.h $PREFIX/include
+  copy liblib1.so $PREFIX/lib
+  copy lib1.h $PREFIX/include
 
 tests: |-
   ./main

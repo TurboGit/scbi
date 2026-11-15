@@ -69,7 +69,7 @@ FUNCTIONS = (
 )
 #  Built-in commands
 COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset", "gprbuild-project",
-            "check-versions")
+            "check-versions", "copy")
 
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _ASSIGN = re.compile(r"^(export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+=(?:\s+(.*)|\s*)$")
@@ -480,6 +480,27 @@ class State:
     status: int = 0
 
 
+def _copy_file(src: str, dst: str) -> None:
+    """A file or symbolic link (kept as a link), replacing ``dst``."""
+    if os.path.lexists(dst) and (os.path.islink(dst) or not os.path.isdir(dst)):
+        os.unlink(dst)
+    shutil.copy(src, dst, follow_symlinks=False)
+
+
+def _copy_tree(src: str, dst: str) -> None:
+    """A directory, recursively, merged into ``dst`` if it exists."""
+    if os.path.lexists(dst) and (os.path.islink(dst) or not os.path.isdir(dst)):
+        os.unlink(dst)
+    os.makedirs(dst, exist_ok=True)
+    shutil.copymode(src, dst)
+    for entry in os.scandir(src):
+        target = os.path.join(dst, entry.name)
+        if entry.is_dir(follow_symlinks=False):
+            _copy_tree(entry.path, target)
+        else:
+            _copy_file(entry.path, target)
+
+
 @dataclass
 class Runner:
     """Runs bodies; ``where`` names them in the messages (the plug-in
@@ -790,6 +811,8 @@ class Runner:
             if name == "check-versions":
                 a, op, b = (args + ["", "", ""])[:3]
                 return 0 if check_versions(a, op, b) else 1
+            if name == "copy":
+                return self.copy(args, state, lambda m: err(f"{self.where}: line {line}: copy: {m}\n"))
             if name == "gprbuild-project":
                 target = self.ctx.params.get("TARGET") or self.ctx.target
                 argv = ["gprbuild", "-p", "-q"]
@@ -813,6 +836,49 @@ class Runner:
             return status
         finally:
             close()
+
+    def copy(self, args: list[str], state: State, error) -> int:
+        """``copy SOURCE... DEST``: files and directories (recursively,
+        symbolic links kept as links) copied as ``cp -r`` does: into DEST
+        when it is a directory (or for several sources), else to DEST.
+        Existing files are replaced, existing directories merged."""
+        if any(a.startswith("-") for a in args):
+            error(f"no option supported: {' '.join(a for a in args if a.startswith('-'))}")
+            return 1
+        if len(args) < 2:
+            error("missing destination" if args else "missing file operand")
+            return 1
+        *sources, dest = args
+        dpath = self._path(dest, state)
+        into = os.path.isdir(dpath)
+        if len(sources) > 1 and not into:
+            error(f"target '{dest}' is not a directory")
+            return 1
+        status = 0
+        for src in sources:
+            spath = self._path(src, state)
+            if not os.path.lexists(spath):
+                error(f"cannot stat '{src}': No such file or directory")
+                status = 1
+                continue
+            target = os.path.join(dpath, os.path.basename(os.path.normpath(spath))) if into else dpath
+            if os.path.realpath(spath) == os.path.realpath(target):
+                error(f"'{src}' and '{dest}' are the same file")
+                status = 1
+                continue
+            try:
+                if os.path.isdir(spath) and not os.path.islink(spath):
+                    if os.path.realpath(target).startswith(os.path.realpath(spath) + os.sep):
+                        error(f"cannot copy a directory, '{src}', into itself, '{dest}'")
+                        status = 1
+                        continue
+                    _copy_tree(spath, target)
+                else:
+                    _copy_file(spath, target)
+            except OSError as e:
+                error(f"cannot copy '{src}' to '{dest}': {e.strerror or e}")
+                status = 1
+        return status
 
     def _sinks(self, cmd: Simple, state: State, line: int):
         """Output functions of a built-in with its redirections."""

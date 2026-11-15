@@ -12,7 +12,7 @@ build: gcc -o main main.c
 
 install: |-
   mkdir ../install
-  cp main ../install
+  copy main ../install
 
 tests: ./main
 

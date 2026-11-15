@@ -75,3 +75,16 @@ def test_escaped_parameters_and_variants():
 def test_runtime_function_not_builtin(bash):
     with pytest.raises(CmdUnliftable):
         lift(bash)
+
+
+@pytest.mark.parametrize("bash, lifted", [
+    ("cp main $PREFIX/bin", "copy main $PREFIX/bin"),
+    ("cp -r bin $PREFIX && cp -R lib $PREFIX", "copy bin $PREFIX && copy lib $PREFIX"),
+    ("cp -a x y", "cp -a x y"),
+    ("cp a b | tee log", "cp a b | tee log"),
+    ("cp a b > log", "cp a b > log"),
+])
+def test_cp_lifted_to_copy(bash, lifted):
+    from scbi.plugin.liftcmd import _cp_to_copy
+
+    assert _cp_to_copy(bash) == lifted

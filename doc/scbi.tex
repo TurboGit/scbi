@@ -971,8 +971,17 @@ version: |
 	[N]}, \code{exit [N]}, \code{true}, \code{false}, \code{export NAME},
 	\code{unset NAME}, \code{gprbuild-project <project>},
 	\code{check-versions <v1> <op> <v2>} (succeeds when the version
-	comparison is true) and the functions
+	comparison is true), \code{copy <source>... <destination>} (see
+	below) and the functions
 	of the plug-in (\code{functions:}, called with their parameters).
+	\item[copy] \index{copy}\code{copy <source>... <destination>} copies
+	files and directories, directories always recursively (symbolic links
+	are copied as links), as \code{cp -r}: into \code{<destination>} when
+	it is an existing directory (it must be one for several sources),
+	else to \code{<destination>}; existing files are replaced, existing
+	directories merged. It has no option. The converter of Bash plug-ins
+	turns \code{cp} and \code{cp -r} into \code{copy}; the system
+	\code{cp} is still available for other options (\code{cp -a}...).
 	\item[blocks] \code{if <condition>:}, \code{elif <condition>:},
 	\code{else:} (the conditions of values, \seeref{yaml-conditions}, plus
 	\code{is-dir(path)}, \code{is-file(path)}, \code{is-link(path)},

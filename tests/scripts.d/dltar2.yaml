@@ -15,7 +15,7 @@ out-of-tree: false
 install: |-
   echo I_VERSION $(get-version)
   mkdir -p $PREFIX/bin
-  cp script $PREFIX/bin
+  copy script $PREFIX/bin
 
 tests: |-
   ./script

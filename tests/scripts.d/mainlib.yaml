@@ -26,7 +26,7 @@ build: |-
 
 install: |-
   mkdir -p $PREFIX/bin
-  cp mainlib $PREFIX/bin
+  copy mainlib $PREFIX/bin
 
 tests: |-
   ./mainlib

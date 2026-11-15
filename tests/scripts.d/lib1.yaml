@@ -49,9 +49,9 @@ install: |-
   mkdir -p $PREFIX/include
   mkdir -p $PREFIX/lib
   mkdir -p $PREFIX/bin
-  cp liblib1.so $PREFIX/lib
-  cp lib1.h $PREFIX/include
-  cp main $PREFIX/bin
+  copy liblib1.so $PREFIX/lib
+  copy lib1.h $PREFIX/include
+  copy main $PREFIX/bin
 
 tests: |-
   ./main

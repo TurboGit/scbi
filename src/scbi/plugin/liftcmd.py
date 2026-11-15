@@ -161,7 +161,7 @@ class _Lifter:
         if "$?" in s:
             self.emit(depth, "_STATUS = status")
         self.check_command(s)
-        text = self.words_text(s, depth)
+        text = _cp_to_copy(self.words_text(s, depth))
         if text.startswith("return $_STATUS"):
             text = "return"
         self.emit(depth, text)
@@ -411,6 +411,22 @@ class _Lifter:
             self.command(s, depth)
         if stack:
             raise CmdUnliftable("unterminated block")
+
+
+_CP = re.compile(r"cp(?:\s+-[rR])?\s+(\S.*)")
+
+
+def _cp_to_copy(text: str) -> str:
+    """``cp [-r|-R] SOURCE... DEST`` commands of a lifted line (not in a
+    pipeline, no other option, no redirection) as the built-in ``copy``."""
+    if re.search(r"(?<!\|)\|(?!\|)", text):
+        return text
+    parts = re.split(r"(\s*(?:&&|\|\|)\s*)", text)
+    for i in range(0, len(parts), 2):
+        m = _CP.fullmatch(parts[i])
+        if m and not re.search(r"(^|\s)-|[<>]", m.group(1)):
+            parts[i] = f"copy {m.group(1)}"
+    return "".join(parts)
 
 
 def _glob_regex(pattern: str) -> str:

@@ -16,4 +16,4 @@ build: |-
 
 install: |-
   mkdir -p $PREFIX
-  cp lib1.o main $PREFIX
+  copy lib1.o main $PREFIX

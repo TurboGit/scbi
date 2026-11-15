@@ -21,7 +21,7 @@ build: |-
 
 install: |-
   mkdir -p $PREFIX/bin
-  cp mainmult $PREFIX/bin
+  copy mainmult $PREFIX/bin
 
 tests: |-
   ./mainmult

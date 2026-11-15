@@ -11,7 +11,7 @@ out-of-tree: false
 
 install: |-
   mkdir -p $PREFIX/bin
-  cp script $PREFIX/bin
+  copy script $PREFIX/bin
 
 tests: |-
   ./script

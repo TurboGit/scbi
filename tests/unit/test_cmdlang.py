@@ -243,3 +243,46 @@ echo -DX=$(if $BT == Debug then yes) $(uppercase $L)
 def test_if_assign_syntax_error():
     with pytest.raises(CmdSyntaxError):
         parse("A = if $BT == Debug ON else OFF", 1)
+
+
+def test_copy(tmp_path):
+    (tmp_path / "d" / "sub").mkdir(parents=True)
+    (tmp_path / "d" / "sub" / "f").write_text("f")
+    (tmp_path / "d" / "lnk").symlink_to("sub/f")
+    (tmp_path / "a.h").write_text("a")
+    (tmp_path / "b.h").write_text("b")
+    (tmp_path / "out").mkdir()
+    text = """
+copy a.h one.h
+copy *.h out
+copy d out
+copy d out
+copy d newdir
+copy d newdir
+"""
+    status, out, _ = run(tmp_path, text)
+    assert (status, out) == (0, "")
+    assert (tmp_path / "one.h").read_text() == "a"
+    assert sorted(p.name for p in (tmp_path / "out").iterdir()) == ["a.h", "b.h", "d", "one.h"]
+    #  recursive, links kept as links, an existing directory is merged
+    assert (tmp_path / "out" / "d" / "sub" / "f").read_text() == "f"
+    assert os.readlink(tmp_path / "out" / "d" / "lnk") == "sub/f"
+    #  as cp -r: the first copy creates newdir, the second one copies into it
+    assert (tmp_path / "newdir" / "sub" / "f").is_file() and (tmp_path / "newdir" / "d" / "sub" / "f").is_file()
+    #  existing file replaced
+    (tmp_path / "one.h").write_text("old")
+    assert run(tmp_path, "copy b.h one.h")[0] == 0 and (tmp_path / "one.h").read_text() == "b"
+
+
+@pytest.mark.parametrize("text, message", [
+    ("copy -r a.h out", "copy: no option supported: -r"),
+    ("copy a.h", "copy: missing destination"),
+    ("copy nothere out", "copy: cannot stat 'nothere': No such file or directory"),
+    ("copy a.h b.h nodir", "copy: target 'nodir' is not a directory"),
+])
+def test_copy_errors(tmp_path, text, message):
+    (tmp_path / "a.h").write_text("a")
+    (tmp_path / "b.h").write_text("b")
+    (tmp_path / "out").mkdir()
+    status, out, _ = run(tmp_path, text)
+    assert status == 1 and out == f"m.yaml: config: line 10: {message}\n"
