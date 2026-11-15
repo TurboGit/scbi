@@ -14,7 +14,7 @@ from scbi.hooks import builtins
 from scbi.hooks.context import HookContext
 from scbi.hooks.expand import expand
 from scbi.plugin import expr
-from scbi.plugin.model import EnvOp, EnvOps, Guarded, Values
+from scbi.plugin.model import EnvOp, EnvOps, Guarded, LocalAssign, Values
 
 
 class EvalError(Exception):
@@ -85,8 +85,15 @@ def _select(items, ctx: HookContext):
 
 
 def eval_values(values: Values, ctx: HookContext) -> list[str]:
-    """Output lines of a value hook."""
-    return [expand(it, ctx) for it in _select(values.items, ctx)]
+    """Output lines of a value hook (a LocalAssign sets a variable of the
+    following items)."""
+    out: list[str] = []
+    for it in _select(values.items, ctx):
+        if isinstance(it, LocalAssign):
+            ctx.locals[it.name] = expand(it.text, ctx)
+        else:
+            out.append(expand(it, ctx))
+    return out
 
 
 def apply_env(ops: EnvOps | tuple, ctx: HookContext, base_env: dict[str, str] | None = None) -> None:
@@ -94,6 +101,9 @@ def apply_env(ops: EnvOps | tuple, ctx: HookContext, base_env: dict[str, str] | 
     env = ctx.env
     items = ops.ops if isinstance(ops, EnvOps) else ops
     for op in _select(items, ctx):
+        if isinstance(op, LocalAssign):
+            ctx.locals[op.name] = expand(op.text, ctx)
+            continue
         assert isinstance(op, EnvOp)
         verb = op.verb
         if verb == "import":

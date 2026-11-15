@@ -12,6 +12,8 @@ key, line).
 
 from __future__ import annotations
 
+import re
+
 from collections.abc import Callable, Iterable
 
 from scbi.plugin import catalog
@@ -23,9 +25,13 @@ from scbi.plugin.model import (
     EnvOp,
     Function,
     Guarded,
+    LocalAssign,
     Values,
     unknown_builtins,
 )
+
+#  NAME = <value>: a local variable of a value or environment list
+_LOCAL = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s+=(?:\s+(.*)|\s*)$", re.S)
 
 #  Fields of the record hooks, in order, and the count of mandatory ones
 RECORDS = {
@@ -67,13 +73,26 @@ def check_builtins(text: str) -> str:
     return text
 
 
-def value(text: str) -> str:
+def local_assign(text: str) -> LocalAssign | None:
+    """``NAME = <value>`` (None: not an assignment)."""
+    m = _LOCAL.match(text)
+    if not m:
+        return None
+    a = LocalAssign(m.group(1), (m.group(2) or "").strip())
+    check_builtins(a.text)
+    return a
+
+
+def value(text: str) -> str | LocalAssign:
     """An item of a value hook."""
-    return check_builtins(text)
+    return local_assign(text) or check_builtins(text)
 
 
-def env_action(text: str) -> EnvOp:
-    """An environment action "<verb> <args>"."""
+def env_action(text: str) -> EnvOp | LocalAssign:
+    """An environment action "<verb> <args>" or a local variable."""
+    a = local_assign(text)
+    if a:
+        return a
     words = text.split(None, 1)
     verb = words[0] if words else ""
     if verb not in ENV_VERBS:

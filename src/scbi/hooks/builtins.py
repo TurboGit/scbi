@@ -4,7 +4,9 @@ Ports of the runtime helpers of scripts.d/0_runtime callable as ``$(...)``:
 get-version, get-build-type, is-enabled, last-modified-directory,
 get-os-inc-dir, and of the commands basename and ls. Each returns the
 standard output of the Bash version (without the trailing newline, as a
-command substitution would).
+command substitution would). Also the string functions uppercase and
+lowercase; ``$(if <condition> then A [else B])`` is evaluated by
+scbi.hooks.expand.
 
 Arguments are given after expansion (including pathname expansion of
 unquoted globs, done by the caller as Bash does when calling a function).
@@ -190,4 +192,8 @@ def call(ctx: HookContext, name: str, args: list[str]) -> str:
         return basename(ctx, *args)
     if name == "ls":
         return ls(ctx, *args)
+    if name == "uppercase":
+        return " ".join(args).upper()
+    if name == "lowercase":
+        return " ".join(args).lower()
     raise BuiltinError(f"unknown function {name}")

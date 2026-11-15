@@ -101,3 +101,20 @@ def test_yaml_errors():
 def test_helpers():
     assert referenced("$A ${B} ${#C} \\$D $E1") == ["A", "B", "C", "E1"]
     assert assigned("A=1; local B C=2; read -r D E; for F in x; do :; done; X[1]=2") >= {"A", "B", "C", "D", "E", "F", "X"}
+
+
+def test_local_variables_and_if():
+    text = """
+config-options:
+  _:
+    - BT = get-build-type CMAKE Release
+    - -DA=$(if $BT == Debug then ON else OFF)
+    - -DB=$(uppercase $VARIANT)
+env:
+  - L = lowercase $VARIANT
+  - set-var LIBNAME lib$L
+"""
+    assert issues(text) == []
+    #  a syntax error of $(if ...) is reported
+    bad = issues("config-options:\n  - -DA=$(if variant == x ON)\n")
+    assert bad and bad[0][0] == ERROR

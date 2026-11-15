@@ -224,3 +224,22 @@ def test_trace_and_script_without_shebang(tmp_path):
     status = runner.run(parse("X = a 'b c'\nA=1 ./configure --prefix=$PREFIX"), state)
     assert status == 0 and "".join(out) == "configured --prefix=/p\n"
     assert lines == ["_TRACE: X=a 'b c'", "_TRACE: A=1 ./configure --prefix=/p"]
+
+
+def test_string_functions_and_if(tmp_path):
+    text = """
+BT = get-build-type CMAKE Release
+A = if $BT == Debug then ON else OFF
+B = if build-type(CMAKE,Release) != Debug then ON else OFF
+U = uppercase $VARIANT
+L = lowercase ABC
+echo $A $B $U $L
+echo -DX=$(if $BT == Debug then yes) $(uppercase $L)
+"""
+    status, out, _ = run(tmp_path, text)
+    assert (status, out) == (0, "ON OFF DEFAULT abc\n-DX=yes ABC\n")
+
+
+def test_if_assign_syntax_error():
+    with pytest.raises(CmdSyntaxError):
+        parse("A = if $BT == Debug ON else OFF", 1)

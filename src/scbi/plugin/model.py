@@ -65,8 +65,29 @@ _ASTS: dict[tuple[str, int], tuple] = {}
 
 @dataclass(frozen=True)
 class Values:
-    #  str (a line, may use $VAR and built-in $(function ...)) or Guarded
+    #  str (a line, may use $VAR and built-in $(function ...)), Guarded or
+    #  LocalAssign
     items: tuple
+
+
+@dataclass(frozen=True)
+class LocalAssign:
+    """``NAME = <value>`` in a value or environment list: a variable for the
+    following items of the hook (no output, not in the environment). The
+    value is a built-in function call (``get-build-type CMAKE Release``)
+    or a text expanded as a value."""
+
+    name: str
+    value: str  # as written
+
+    @property
+    def text(self) -> str:
+        """The value to expand: ``$(<call>)`` for a built-in call."""
+        first = self.value.split(None, 1)[0] if self.value.strip() else ""
+        return f"$({self.value.strip()})" if first in BUILTINS else self.value
+
+    def __str__(self) -> str:
+        return f"{self.name} = {self.value}".rstrip()
 
 
 #  Command substitutions allowed in values and environment actions; they are
@@ -79,6 +100,9 @@ BUILTINS = (
     "get-os-inc-dir",
     "basename",
     "ls",
+    "uppercase",
+    "lowercase",
+    "if",
 )
 
 _SUBST = re.compile(r"\$\(\s*([^\s)]*)")

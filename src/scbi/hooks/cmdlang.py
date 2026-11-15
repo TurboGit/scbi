@@ -65,7 +65,7 @@ from scbi.vercmp import check_versions
 FUNCTIONS = (
     "get-build-type", "config-options", "last-modified-directory", "is-enabled", "get-version",
     "output", "output-words", "first-line", "status", "basename", "dirname", "command-path",
-    "all-variants",
+    "all-variants", "uppercase", "lowercase", "if",
 )
 #  Built-in commands
 COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset", "gprbuild-project",
@@ -421,6 +421,13 @@ def _block(lines, pos: int, indent: int) -> tuple[tuple, int]:
             if any(not isinstance(t, Word) for t in tokenize(rhs, number)) and \
                     not (words and _word_text(words[0]) in ("output", "output-words")):
                 raise CmdSyntaxError(number, f"operators are only allowed after 'output' in {s!r}")
+            if words and _word_text(words[0]) == "if":
+                from scbi.hooks.expand import check
+
+                try:
+                    check(f"$({rhs.strip()})")
+                except ExpandError as e:
+                    raise CmdSyntaxError(number, str(e)) from None
             steps.append(Assign(number, a.group(2), bool(a.group(1)), words, rhs))
             pos += 1
             continue
@@ -661,6 +668,13 @@ class Runner:
             text = "".join(chunks).rstrip("\n")
             #  output-words: the words of the output (unquoted $(...))
             return text.split() if name == "output-words" else text
+        if name == "if":
+            #  as $(if <condition> then A [else B]) in a value
+            try:
+                return expand(f"$({step.text.strip()})", self.hook_ctx(state))
+            except ExpandError as e:
+                self.error(state, step.line, str(e))
+                return ""
         args = self.expand_words(step.words[1:], state)
         ctx = self.hook_ctx(state)
         if name == "get-build-type":
@@ -683,6 +697,10 @@ class Runner:
             return os.path.dirname(args[0].rstrip("/")) or "." if args else "."
         if name == "command-path":
             return shutil.which(args[0], path=state.env.get("PATH")) or "" if args else ""
+        if name == "uppercase":
+            return " ".join(args).upper()
+        if name == "lowercase":
+            return " ".join(args).lower()
         if name == "all-variants":
             #  the variants of a variant string (a.b -> [a, b]), none for default
             v = " ".join(args)

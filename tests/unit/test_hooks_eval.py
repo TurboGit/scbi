@@ -109,6 +109,60 @@ def test_values_and_env_actions(tmp_path):
     assert (tmp_path / "out" / "dir").is_dir()
 
 
+def test_string_functions_and_if(tmp_path):
+    e = Environment(ShellVars({"SCBI_CMAKE_BUILD_TYPE": "Debug"}))
+    c = ctx(tmp_path, params={"VARIANT": "mpi"}, env=e)
+    assert expand("$(uppercase $VARIANT)-$(lowercase ABC Def)", c) == "MPI-abc def"
+    assert expand("-DA=$(if build-type(CMAKE,Release) == Debug then ON else OFF)", c) == "-DA=ON"
+    assert expand("-DA=$(if build-type(CMAKE,Release) != Debug then ON else OFF)", c) == "-DA=OFF"
+    #  else is optional, the values are words (quotes removed, expanded)
+    assert expand("[$(if variant == other then x)]", c) == "[]"
+    assert expand('$(if $VARIANT == mpi then "a  b" $VARIANT else c)', c) == "a  b mpi"
+    #  conditions with parentheses, and/or; nested functions
+    assert expand("$(if (variant == mpi and cross) or variant == x then 1 else $(uppercase no))", c) == "NO"
+    #  then/else inside quotes are not keywords
+    assert expand('$(if variant == mpi then "if then else")', c) == "if then else"
+
+
+@pytest.mark.parametrize("text", ["$(if variant == x)", "$(if then a)", "$(if variant == then a else b else c)",
+                                  "$(if variant === x then a)"])
+def test_if_syntax_errors(text):
+    with pytest.raises(ExpandError):
+        check(text)
+
+
+def test_local_assign_in_values_and_env(tmp_path):
+    from scbi.plugin import construct
+    from scbi.plugin.model import LocalAssign
+
+    e = Environment(ShellVars({"SCBI_CMAKE_BUILD_TYPE": "Debug"}))
+    c = ctx(tmp_path, params={"PREFIX": "/p"}, env=e)
+    items = [construct.value(t) for t in (
+        "BT = get-build-type CMAKE Release",
+        "-DLLVM_ENABLE_ASSERTIONS=$(if $BT == Debug then ON else OFF)",
+        "N = $PREFIX/lib",
+        "-L$N",
+        "E =",
+        "[$E]",
+    )]
+    assert items[0] == LocalAssign("BT", "get-build-type CMAKE Release")
+    assert items[0].text == "$(get-build-type CMAKE Release)" and items[2].text == "$PREFIX/lib"
+    assert eval_values(Values(tuple(items)), c) == ["-DLLVM_ENABLE_ASSERTIONS=ON", "-L/p/lib", "[]"]
+    #  a guard can use the variable
+    c = ctx(tmp_path, env=e)
+    from scbi.plugin.model import Guarded
+    vals = Values((construct.value("BT = get-build-type CMAKE Release"), Guarded("$BT == Debug", ("dbg",))))
+    assert eval_values(vals, c) == ["dbg"]
+    #  environment list
+    c = ctx(tmp_path, env=Environment(ShellVars({}, set())), params={"VARIANT": "mpi"})
+    apply_env(EnvOps((construct.env_action("U = uppercase $VARIANT"),
+                      construct.env_action("set-var LIBNAME lib$U"))), c)
+    assert c.env.get("LIBNAME") == "libMPI" and "U" not in c.env.vars.values
+    #  an unknown function is refused when the plug-in is loaded
+    with pytest.raises(construct.DefinitionError):
+        construct.value("X = $(cat file)")
+
+
 def test_import(tmp_path):
     c = ctx(tmp_path, env=Environment(ShellVars({"PATH": os.environ["PATH"]}, {"PATH"})))
     apply_env(EnvOps((__import__("scbi.plugin.model").plugin.model.EnvOp(

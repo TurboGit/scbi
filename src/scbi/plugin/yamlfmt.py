@@ -295,7 +295,7 @@ def _dump_items(items) -> list:
         elif isinstance(it, EnvOp):
             out.append(" ".join((it.verb,) + it.args))
         else:
-            out.append(it)
+            out.append(str(it))
     return out
 
 

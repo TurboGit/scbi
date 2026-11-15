@@ -276,7 +276,10 @@ def definition_depends_hooks(module: str, path: Path, found: list[str]) -> None:
     def values(items) -> list[str]:
         out: list[str] = []
         for it in items:
-            out += values(it.items) if isinstance(it, Guarded) else [it]
+            if isinstance(it, Guarded):
+                out += values(it.items)
+            elif isinstance(it, str):
+                out.append(it)
         return out
 
     plg = pdef.name

@@ -19,7 +19,7 @@ from dataclasses import dataclass
 import yaml
 
 from scbi.plugin import catalog, yamlfmt
-from scbi.plugin.model import EnvOp, EnvOps, Guarded, Commands, Values
+from scbi.plugin.model import EnvOp, EnvOps, Guarded, Commands, LocalAssign, Values
 
 ERROR = "error"
 WARNING = "warning"
@@ -237,6 +237,18 @@ class Linter:
                     parts.append((f"{hook}.{q}", {hook: {q: body}}))
         else:
             parts = [(hook, {hook: value})]
+        #  the local variables (NAME = ...) of the hook, known by all its
+        #  items
+        self.hook_locals: set[str] = set()
+        for _, section in parts:
+            try:
+                pdef = yamlfmt.from_data(self.name, section, self.name)
+            except yamlfmt.FormatError:
+                continue
+            for body in pdef.hooks.values():
+                if isinstance(body, (Values, EnvOps)):
+                    items = body.items if isinstance(body, Values) else body.ops
+                    self.hook_locals |= {a.name for a in _locals(items)}
         #  the items of a list one by one: an error does not hide the next
         #  ones
         expanded = []
@@ -270,8 +282,9 @@ class Linter:
             for it in items:
                 if isinstance(it, str) and "$" not in it and it.lower() not in CHOICES[hook]:
                     self.error(label, f"{it!r} is not one of {'/'.join(CHOICES[hook])}")
+        local = {a.name for a in _locals(items)} | getattr(self, "hook_locals", set())
         for text in _texts(items):
-            self.check_names(label, referenced(text), known, set(), other_params=True, hook=hook)
+            self.check_names(label, referenced(text), known, local, other_params=True, hook=hook)
 
     def check_shell(self, label: str, script: str, known: set[str], other_params: bool,
                     hook: str = "") -> None:
@@ -318,7 +331,19 @@ def _texts(items) -> list[str]:
             out += [a for a in it.args if it.verb != "import"] or []
             if it.verb == "import" and it.args:
                 out.append(it.args[0])
+        elif isinstance(it, LocalAssign):
+            out.append(it.text)
         elif isinstance(it, str):
+            out.append(it)
+    return out
+
+
+def _locals(items) -> list[LocalAssign]:
+    out: list[LocalAssign] = []
+    for it in items:
+        if isinstance(it, Guarded):
+            out += _locals(it.items)
+        elif isinstance(it, LocalAssign):
             out.append(it)
     return out
 
