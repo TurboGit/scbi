@@ -163,7 +163,7 @@ def _keys_order(path: tuple, value: dict):
         return None
     if top == "functions":
         return _field_order(FUNCTION_ORDER) if len(path) == 2 else None
-    if top == "os-variants":
+    if top == "with-variants":
         return _field_order(OS_VARIANT_ORDER) if len(path) == 2 else None
     if top == "inherit":
         return _field_order(INHERIT_ORDER)

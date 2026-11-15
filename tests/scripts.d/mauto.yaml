@@ -1,6 +1,6 @@
 plugin: mauto
 
-os-variants:
+with-variants:
   native:
     packages:
       - gcc:4.3.1

@@ -1,6 +1,6 @@
 plugin: autovarA
 
-os-variants:
+with-variants:
   whatever:
     packages:
       - squid-dbg

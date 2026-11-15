@@ -90,7 +90,7 @@ FINAL_STEP = HookSpec(
 #  Canonical order of the keys of a YAML plug-in (scbi format and the
 #  converter): header, sources, dependencies, environment, steps (each one
 #  between its pre- and post- hooks), others, meta-modules
-HEADER_KEYS = ("plugin", "inherit", "vars", "functions", "variants", "os-variants")
+HEADER_KEYS = ("plugin", "inherit", "vars", "functions", "variants", "with-variants")
 _ORDER = (
     "vcs", "archive", "patches",
     "depends", "build-depends", "tests-depends",

@@ -1,4 +1,4 @@
-# test for the native variants (os-variants): the default variant builds,
+# test for the native variants (with-variants): the default variant builds,
 # the native one runs no step and depends on the given modules
 
 RUNS ./scbi natv

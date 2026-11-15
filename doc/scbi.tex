@@ -759,7 +759,9 @@ are hook names (including \code{pre-<step>} and \code{post-<step>}):
 	\item[inherit] List of inherited plug-ins (\seeref{inheritance}), each
 	one a mapping with the keys \code{from}, \code{hooks},
 	\code{custom-hooks}, \code{no-variant} and \code{name}.
-	\item[os-variants] Variants using OS packages (\seeref{native variant}):
+	\item[with-variants] Variants with no build step, which only depend on
+	other modules or OS packages (e.g. a \code{native} variant using the OS
+	libraries, \seeref{native variant}):
 	\code{\{native: \{packages: [...], env: [...]\}\}}.
 	\item[functions] Custom functions callable from the other hooks (or used
 	as custom hooks for \code{inherit}): \code{\{name: \{params: [A, B], run: <shell>\}\}}.
@@ -781,7 +783,7 @@ like \code{depends} or \code{config-options}.
 
 \begin{lstlisting}
 plugin: c-gmp
-os-variants:
+with-variants:
   native:
     packages: [os@-gmp-dev:[v]]
     env: [set-var GMP_INCLUDE_DIR /usr/include]
@@ -1734,23 +1736,27 @@ The hooks defined by the plug-in itself take precedence over the
 inherited ones. This may be handy if a module need to redefine only
 the \code{vcs} or \code{proxy} hook for a specific context.
 
-\subsection{Native variant}
+\subsection{Variants without build (with-variants)}
 \label{native variant}
 \index{native variant}\index{variant!native}
-\index{with-variant}\index{helpers!with-variant}
+\index{with-variants}
 
 For a plug-in it is sometimes needed to have a native variant to use the OS libraries instead of building from sources. It is possible to do so by creating the variant hooks manually. All hooks must be nop action except the \code{depends} hooks which may list the OS libraries and possible the \code{env} hook which may need to define some environment variables.
 
-The key \code{os-variants} can be used to automate this action:
+The key \code{with-variants} can be used to automate this action, for
+a native variant or any variant which only depends on other modules or
+packages:
 
 \begin{lstlisting}
-os-variants:
+with-variants:
   native:
     packages: [pckA:[v], pckB]
     env: [set-var ROOT_DIR /usr]
 \end{lstlisting}
 
-The variant name is the key (\code{native}). \code{packages} lists the OS package names or \code{NONE}, \code{env} the environment actions. The value \code{NONE} will create an empty \code{depends} hook and can be used if the actual OS dependency has been installed manually on the machine. A possible reason is that the library has not been packaged by the OS maintainers. The \code{[v]} tag can be used to check that install \code{<package>} has the version specified for the plug-in.
+The variant name is the key (\code{native}, any variant name can be
+used). \code{packages} lists the modules or OS packages the variant
+depends on, or \code{NONE}, \code{env} the environment actions. The value \code{NONE} will create an empty \code{depends} hook and can be used if the actual OS dependency has been installed manually on the machine. A possible reason is that the library has not been packaged by the OS maintainers. The \code{[v]} tag can be used to check that install \code{<package>} has the version specified for the plug-in.
 
 With the example above, when \code{natv} has version \code{1.2} in the build plan, the variant \code{native} of \code{natv} has:
 
@@ -2270,7 +2276,7 @@ canonical form is:
 
 \begin{itemize}
 	\item the keys in this order: \code{plugin}, \code{inherit},
-	\code{vars}, \code{functions}, \code{variants}, \code{os-variants};
+	\code{vars}, \code{functions}, \code{variants}, \code{with-variants};
 	the sources \code{vcs}, \code{archive}, \code{patches}; the
 	dependencies \code{depends}, \code{build-depends},
 	\code{tests-depends}; the environment \code{env}, \code{build-env},
@@ -2853,7 +2859,7 @@ The YAML equivalents of the Bash constructs:
 
 \begin{description}
 	\item[\code{inherit-plugin [options] <name>}] the key \code{inherit} (\seeref{inheritance}).
-	\item[\code{with-variant native <packages> \ddash{}env ...}] the key \code{os-variants} (\seeref{native variant}).
+	\item[\code{with-variant native <packages> \ddash{}env ...}] the key \code{with-variants} (\seeref{native variant}).
 	\item[\code{get-config-options OPTIONS \$PREFIX \$TARGET \$VARIANT}] \code{OPTIONS = config-options} (\seeref{get config options}).
 	\item[\code{\$(get-build-type <kind> <default>)}] the same in values, \code{V = get-build-type ...} in command hooks.
 	\item[\code{check-tool}, \code{check-tools}] \code{command-path} in command hooks.

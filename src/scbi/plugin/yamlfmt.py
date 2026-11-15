@@ -7,7 +7,7 @@ A plug-in ``<name>.yaml`` is a mapping. Reserved keys:
     variants:     variants including other variants {all: [ai, hdr, jxl]}
     inherit:      [{from: P, hooks: [..], custom-hooks: [..], no-variant: true,
                     name: N}]
-    os-variants:  {native: {packages: [os@-x:[v], ...], env: [<env op>...]}}
+    with-variants:  {native: {packages: [os@-x:[v], ...], env: [<env op>...]}}
     functions:    {name: {params: [A, B], run: <shell>}}
 
 Every other key is a hook of the catalog (scbi.plugin.catalog), including
@@ -51,12 +51,12 @@ from scbi.plugin.model import (
     Guarded,
     HookKey,
     Inherit,
-    OsVariant,
+    WithVariant,
     PluginDef,
     Values,
 )
 
-RESERVED = ("plugin", "vars", "variants", "inherit", "os-variants", "functions")
+RESERVED = ("plugin", "vars", "variants", "inherit", "with-variants", "functions")
 PLAIN_KEY = "_"
 CROSS_KEY = "cross"
 
@@ -251,11 +251,11 @@ def from_data(name: str, data: dict, where: str = "") -> PluginDef:
             )
         )
 
-    for vname, v in (data.get("os-variants") or {}).items():
-        w = f"{where}.os-variants.{vname}"
+    for vname, v in (data.get("with-variants") or {}).items():
+        w = f"{where}.with-variants.{vname}"
         v = v or {}
-        pdef.os_variants.append(
-            OsVariant(
+        pdef.with_variants.append(
+            WithVariant(
                 str(vname),
                 tuple("" if p is None else str(p) for p in _as_list(v.get("packages"), w)),
                 tuple(_env_item(i, w) for i in _as_list(v.get("env"), w)),
@@ -340,10 +340,10 @@ def to_data(pdef: PluginDef) -> dict:
         }
     if pdef.variants:
         data["variants"] = {v: list(m) for v, m in pdef.variants.items()}
-    if pdef.os_variants:
-        data["os-variants"] = {
+    if pdef.with_variants:
+        data["with-variants"] = {
             v.name: {"packages": list(v.packages), **({"env": _dump_items(v.env)} if v.env else {})}
-            for v in pdef.os_variants
+            for v in pdef.with_variants
         }
 
     order = {h: i for i, h in enumerate(catalog.FORMAT_ORDER)}

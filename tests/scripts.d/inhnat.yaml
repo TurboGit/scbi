@@ -3,7 +3,7 @@ plugin: inhnat
 inherit:
   - from: lib1
 
-os-variants:
+with-variants:
   native:
     packages:
       - os@-cmake

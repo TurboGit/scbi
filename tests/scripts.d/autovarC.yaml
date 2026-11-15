@@ -1,6 +1,6 @@
 plugin: autovarC
 
-os-variants:
+with-variants:
   native:
     packages:
       - shouldnotexist-dev

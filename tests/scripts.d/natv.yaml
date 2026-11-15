@@ -1,6 +1,6 @@
 plugin: natv
 
-os-variants:
+with-variants:
   native:
     packages:
       - libA

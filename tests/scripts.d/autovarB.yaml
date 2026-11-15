@@ -1,6 +1,6 @@
 plugin: autovarB
 
-os-variants:
+with-variants:
   native:
     packages:
       - squid-cgi

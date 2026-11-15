@@ -22,7 +22,7 @@ from pathlib import Path
 from scbi.plugin.catalog import ALL_HOOKS
 from scbi.plugin.legacy import Call, PluginTrace, trace_plugin
 from scbi.plugin import formats
-from scbi.plugin.model import EnvOps, OsVariant, PluginDef, Commands, Values
+from scbi.plugin.model import EnvOps, WithVariant, PluginDef, Commands, Values
 
 ALL_HOOKS_RE = "|".join(ALL_HOOKS)
 
@@ -41,7 +41,7 @@ def copy_function(definition, new_name: str):
     return f"{new_name} ({definition.split('(', 1)[1]}"
 
 
-def os_variant_functions(plugin: str, variant: OsVariant) -> dict[str, object]:
+def with_variants_functions(plugin: str, variant: WithVariant) -> dict[str, object]:
     """Model equivalent of ``with-variant``: same names, model bodies."""
     vname = variant.name
     funcs: dict[str, object] = {}
@@ -247,8 +247,8 @@ class Registry:
                 hooks += "|" + "|".join(inh.custom_hooks)
             self.inherits.setdefault(pdef.name, []).append(inh.parent)
             self._inherit(inh.no_variant, hooks, inh.parent, inh.name or pdef.name)
-        for variant in pdef.os_variants:
-            self.functions.update(os_variant_functions(pdef.name, variant))
+        for variant in pdef.with_variants:
+            self.functions.update(with_variants_functions(pdef.name, variant))
         if pdef.variants:
             self.variant_aliases.setdefault(pdef.name, {}).update(pdef.variants)
         for key, body in pdef.hooks.items():

@@ -16,7 +16,7 @@ from scbi.plugin.resolve import get_hook, variant_hooks
 
 GMP = """
 plugin: c-gmp
-os-variants:
+with-variants:
   native:
     packages: ["os@-gmp-dev:[v]"]
     env: [set-var GMP_INCLUDE_DIR /usr/include]
@@ -63,7 +63,7 @@ def test_load_yaml(tmp_path):
     ))
     assert d.hooks[HookKey("config", "vcs", True)].script.endswith("--host=$TARGET")
     assert d.hooks[HookKey("pre-config", "vcs")] == Commands("./.bootstrap")
-    assert d.os_variants[0].packages == ("os@-gmp-dev:[v]",)
+    assert d.with_variants[0].packages == ("os@-gmp-dev:[v]",)
     assert d.function_names() >= {"c-gmp-config", "c-gmp-vcs-cross-config", "c-gmp-vcs-depends"}
 
 

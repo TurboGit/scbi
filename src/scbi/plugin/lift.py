@@ -27,7 +27,7 @@ from scbi.plugin.model import (
     Guarded,
     HookKey,
     Inherit,
-    OsVariant,
+    WithVariant,
     PluginDef,
     Commands,
     Values,
@@ -421,8 +421,8 @@ def lift(trace: PluginTrace, names: set[str] | None = None) -> LiftResult:
             except _Unliftable as e:
                 res.issues.append(Issue(f"with-variant {vname}", str(e)))
                 env = ()
-            pdef.os_variants.append(
-                OsVariant(vname, tuple("" if p.upper() == "NONE" else p for p in packages), env)
+            pdef.with_variants.append(
+                WithVariant(vname, tuple("" if p.upper() == "NONE" else p for p in packages), env)
             )
             #  own functions defined before with-variant are overwritten
             for name in defined_before:

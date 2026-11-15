@@ -144,7 +144,7 @@ class Inherit:
 
 
 @dataclass(frozen=True)
-class OsVariant:
+class WithVariant:
     """Variant using OS packages (legacy ``with-variant``)."""
 
     name: str
@@ -173,7 +173,7 @@ class PluginDef:
     name: str
     variables: dict[str, str] = field(default_factory=dict)
     inherits: list[Inherit] = field(default_factory=list)
-    os_variants: list[OsVariant] = field(default_factory=list)
+    with_variants: list[WithVariant] = field(default_factory=list)
     #  Variants including other variants: {"all": ("ai", "hdr", "jxl")}.
     #  Only the hook lookup is affected (see scbi.plugin.resolve), the
     #  variant keeps its own name (sandbox, build id, logs, plans).

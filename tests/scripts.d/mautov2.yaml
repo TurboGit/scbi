@@ -1,6 +1,6 @@
 plugin: mautov2
 
-os-variants:
+with-variants:
   native:
     packages:
       - gcc:[v]

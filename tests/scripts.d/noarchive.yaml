@@ -1,6 +1,6 @@
 plugin: noarchive
 
-os-variants:
+with-variants:
   ng:
     packages: []
 
