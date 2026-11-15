@@ -1,6 +1,6 @@
-"""Functions of the Bash runtime (scripts.d/[0-9]*, _os_*): a command
-hook calling one which is not a built-in of the command language does
-not convert (checked against the runtime files by test_liftcmd.py)."""
+"""Functions of the former Bash runtime (scripts.d/[0-9]*, _os_*): a
+command hook of a Bash plug-in calling one which is not a built-in of the
+command language does not convert."""
 
 RUNTIME_FUNCTIONS = frozenset("""
 add-to-list add-to-var add-to-var-sep all-variants all-variants-v

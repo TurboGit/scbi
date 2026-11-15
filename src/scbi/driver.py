@@ -114,6 +114,11 @@ def md5_echo(text: str) -> str:
     return hashlib.md5((" ".join(words(text)) + "\n").encode()).hexdigest()
 
 
+def is_plugins_dir(path: str) -> bool:
+    """A directory holding plug-in definitions."""
+    return os.path.isdir(path) and any(formats.format_of(p) for p in Path(path).iterdir())
+
+
 class Driver:
     def __init__(self, argv0: str, environ: dict[str, str] | None = None):
         self.argv0 = argv0
@@ -359,7 +364,7 @@ class Driver:
             elif a.startswith("--plugins"):
                 val = a.split("=", 1)[1] if "=" in a else a
                 c["SCBI_PLUGINS"] = val
-                if not os.path.isdir(val) or not list(Path(val).glob("[0-9]*")):
+                if not is_plugins_dir(val):
                     self.echo(f"{self.argv0}: no plugins found in {val}")
                     raise Exit(1)
             elif a.startswith("--enable-"):
@@ -723,9 +728,7 @@ class Driver:
         self.setup_colors()
 
         plugins = self.get("SCBI_PLUGINS")
-        #  a plug-ins directory: runtime files or plug-in definitions
-        if not os.path.isdir(plugins) or not (any(Path(plugins).glob("[0-9]*"))
-                                               or any(formats.format_of(p) for p in Path(plugins).iterdir())):
+        if not is_plugins_dir(plugins):
             self.set("SCBI_PLUGINS", f"{self.get('HOME')}/.config/scbi", export=True)
         if not os.path.isdir(self.get("SCBI_PLUGINS")):
             self.echo(f"{self.argv0}: cannot find module definition files")

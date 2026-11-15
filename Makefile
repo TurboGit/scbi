@@ -26,9 +26,9 @@
 #     $ make doc
 #
 
-.SILENT: test test-py sort-pkgs sync-os-deps
+.SILENT: test sort-pkgs sync-os-deps
 
-.PHONY: unit oracle test-py
+.PHONY: unit
 
 SHELL=/bin/bash
 
@@ -36,12 +36,11 @@ SCRDIR=$(HOME)/.config/scbi
 INSTALL_DIR=$(HOME)/.local/bin
 LIB_DIR=$(HOME)/.local/lib/scbi
 
-#  The Bash driver and tools (scbi, scbi-*) are kept in the repository for
-#  the Bash testsuite only; they are not installed anymore.
+#  The tools of the former Bash driver, removed from old installations
 BASH_TOOLS=scbi-lint scbi-format scbi-store scbi-source-archive scbi-show scbi-shell
 
 #  Get SHA-1 of last commit in core SCBI
-CORE_SHA1=$(shell git log -1 --format="%h" -- src/scbi pyproject.toml scripts.d/[0-9]* \
+CORE_SHA1=$(shell git log -1 --format="%h" -- src/scbi pyproject.toml scripts.d/0_runtime \
 	scripts.d/_os_* scripts.d/.pkgs-* bash_completion.d/*)
 CORE_VER=$(shell git describe $(CORE_SHA1))
 
@@ -97,21 +96,11 @@ test:
 test-clean:
 	make -C tests clean
 
-#  Python port
-
+#  Unit tests of the driver
 PYTEST=python3 -m pytest
 
-#  Unit tests of the Python driver
 unit:
-	$(PYTEST) -q -m "not oracle"
-
-#  Differential tests: Python port vs Bash reference implementation
-oracle:
-	$(PYTEST) -q -m oracle
-
-#  Regression ratchet: testsuite drivers run with the Python driver
-test-py:
-	make -C tests ratchet
+	$(PYTEST) -q tests/unit
 
 doc: force
 	make CORE_VER=$(CORE_VER) -C doc
