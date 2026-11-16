@@ -268,6 +268,14 @@ An environment is a set of shell variables used to control the build environment
 
 	\item[SCBI\_CACHE\_DIR] A variable pointing to the build's cache dir. Setting this variable to \emph{no} disables the cache. The cache makes it possible to reuse a previous build instead of rebuilding a module. Default is \file{\$HOME/.cache/scbi}.
 
+	\item[SCBI\_PROGRESS] \index{progress}When the output is a terminal,
+	\code{scbi} shows the progress of the build as the last line of the
+	console, \code{[<n>/<total>] <module>}: the module being handled and the
+	number of modules to handle (with \ddash{}deps, all the dependencies).
+	The line is redrawn after each output line and erased at the end; it is
+	never written to the logs. Set to \code{no} to disable it (it is also
+	disabled with \ddash{}quiet). \\Default is \code{yes}.
+
 	\item[SCBI\_PREFIX] The default global install directory. Each module after being installed into the sandbox are copied into this global installation directory. \\Default is \file{\$SCBI\_BDIR/install}. Each module can disable global installation (\seeref{global-install}).
 
 	\item[SCBI\_GIT\_REPO] The directories where the user's Git checkouts are to be found. \\ Default is \file{\$SCBI\_ROOT/repositories/git}.

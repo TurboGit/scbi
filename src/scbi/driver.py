@@ -1007,14 +1007,86 @@ class Driver:
         from scbi.build import Builder
 
         builder = Builder(self)
-        for module in self.modules:
-            builder.handle_module("@root", module, "default", "no")
+        restore = self.start_progress(builder)
+        try:
+            for module in self.modules:
+                builder.handle_module("@root", module, "default", "no")
+        finally:
+            self.progress.close()
+            restore()
 
         if self.get("DO_STANDALONE") == "yes":
             from scbi.standalone import Standalone
 
             Standalone(builder).create(self.modules)
         return 0
+
+    # ------------------------------------------------------------ progress
+
+    def start_progress(self, builder):
+        """The build progress ``[n/N] module`` as the last line of the
+        terminal (scbi.log.StatusLine), only when the output is a terminal
+        (not with --quiet, SCBI_PROGRESS=no or in the testsuite). Returns
+        the function restoring the console streams."""
+        from scbi.log import Progress, StatusLine, StatusStream
+
+        out = sys.stdout
+        if (not out.isatty() or self.testsuite or self.get("DO_QUIET") == "yes"
+                or self.get("SCBI_PROGRESS") == "no"):
+            self.progress = Progress()
+            return lambda: None
+        status = StatusLine(out)
+        saved = (sys.stdout, sys.stderr, self.log.stdout, self.log.stderr)
+        sys.stdout = self.log.stdout = StatusStream(out, status)
+        if sys.stderr.isatty():
+            sys.stderr = self.log.stderr = StatusStream(sys.stderr, status)
+
+        def restore() -> None:
+            sys.stdout, sys.stderr, self.log.stdout, self.log.stderr = saved
+
+        self.progress = Progress(status, self.progress_total(builder))
+        return restore
+
+    def progress_total(self, builder) -> int:
+        """The number of modules the build will handle: the modules of the
+        command line, the modules of their meta-modules and, with --deps,
+        their dependencies (plug-ins only, not the skipped ones)."""
+        from scbi.walker import Walker
+
+        keys: set[str] = set()
+        prefix, target = self.get("SCBI_PREFIX"), self.get("SCBI_TARGET")
+
+        def metas(walker: Walker, modref: str, formodule: str) -> None:
+            module, variant, _kind, ref = walker.module_info(modref, formodule)
+            key = f"{module}+{variant}+{ref}"
+            if ref == "skip" or key in keys or not walker.load_module(modref):
+                return
+            keys.add(key)
+            for m in words("\n".join(self.runner().variant_values(
+                    module, variant, "modules", [prefix, target, variant], self.plan, builder.modules_list))):
+                metas(walker, m, module)
+
+        try:
+            for module in self.modules:
+                walker = Walker(builder)
+                if self.get("DEPS") == "no":
+                    metas(walker, module, "@root")
+                    continue
+
+                def callback(argv: list[str], walker=walker) -> int:
+                    a = argv + [""] * 5
+                    if a[4] == "true":  # an external package
+                        return 0
+                    m, v, _kind, ref = walker.module_info(a[1], a[0])
+                    if ref != "skip":
+                        keys.add(f"{m}+{v}+{ref}")
+                    return 0
+
+                walker.walk("for-all-modules-with-meta-ext", callback, module)
+        except Exit:
+            #  reported when the module is built
+            pass
+        return len(keys)
 
     def clean_up(self) -> None:
         for v in ("SCBI_HANDLED", "SCBI_LINE_SEP"):

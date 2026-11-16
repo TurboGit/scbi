@@ -80,3 +80,29 @@ REPORT_B = """2024/01/03 09:00:00 : Building lib1 [default] (master)
 2024/01/03 09:30:00 : Building my-lib_2 [v1] (1.0)
 2024/01/03 09:30:07 : End Building my-lib_2 [v1] (1.0)
 """
+
+
+def test_status_line():
+    import io
+
+    from scbi.log import Progress, StatusLine, StatusStream
+
+    term = io.StringIO()
+    status = StatusLine(term)
+    out = StatusStream(term, status)
+    progress = Progress(status, total=3)
+    progress.next("c-gmp")
+    assert term.getvalue() == "[1/3] c-gmp\r"
+    out.write("2026/11/16 : Building c-gmp\n")
+    #  erased, the line written, the status drawn again
+    assert term.getvalue() == "[1/3] c-gmp\r\r\x1b[K2026/11/16 : Building c-gmp\n[1/3] c-gmp\r"
+    out.write("partial")
+    assert term.getvalue().endswith("\r\x1b[Kpartial")
+    progress.next("c-mpfr")
+    progress.next("c-mpc")
+    progress.next("c-gcc")  # more modules than expected: the total follows
+    assert term.getvalue().endswith("[4/4] c-gcc\r")
+    progress.close()
+    assert term.getvalue().endswith("[4/4] c-gcc\r\r\x1b[K")
+    #  disabled: nothing written
+    Progress().next("x")

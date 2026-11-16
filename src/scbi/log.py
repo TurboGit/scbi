@@ -269,3 +269,94 @@ def display_log_stat(logs: Path, module: str = "") -> str:
     if text:
         text = subprocess.run(["sort"], input=text, capture_output=True, text=True).stdout
     return "\nbuild times (min, average, max):\n\n" + text + "\n"
+
+
+# ------------------------------------------------------------- progress
+
+
+class StatusLine:
+    """A transient last line of the terminal (the build progress): every
+    write to the console first erases it, it is drawn again after a
+    complete line. The text is followed by a carriage return so that the
+    output of a sub-process writing to the terminal starts on it."""
+
+    ERASE = "\r\x1b[K"
+
+    def __init__(self, stream: TextIO):
+        self.stream = stream
+        self.text = ""
+        self.shown = False
+
+    def width(self) -> int:
+        try:
+            columns = os.get_terminal_size(self.stream.fileno()).columns
+        except (OSError, ValueError, AttributeError):
+            columns = 0
+        #  unknown size (some pseudo-terminals report 0)
+        return columns if columns >= 20 else 80
+
+    def erase(self) -> None:
+        if self.shown:
+            self.stream.write(self.ERASE)
+            self.shown = False
+
+    def draw(self) -> None:
+        if self.text and not self.shown:
+            self.stream.write(self.text[: max(self.width() - 1, 1)] + "\r")
+            self.stream.flush()
+            self.shown = True
+
+    def set(self, text: str) -> None:
+        self.erase()
+        self.text = text
+        self.draw()
+
+    def clear(self) -> None:
+        self.erase()
+        self.text = ""
+        self.stream.flush()
+
+
+class StatusStream:
+    """A console stream writing through a StatusLine."""
+
+    def __init__(self, stream: TextIO, status: StatusLine):
+        self._stream = stream
+        self._status = status
+
+    def write(self, text: str) -> int:
+        if not text:
+            return 0
+        self._status.erase()
+        n = self._stream.write(text)
+        if text.endswith("\n"):
+            self._stream.flush()
+            self._status.draw()
+        return n
+
+    def flush(self) -> None:
+        self._stream.flush()
+
+    def __getattr__(self, name):
+        return getattr(self._stream, name)
+
+
+class Progress:
+    """``[n/N] module`` on a StatusLine while the driver builds; does
+    nothing when disabled (not a terminal...)."""
+
+    def __init__(self, status: StatusLine | None = None, total: int = 0):
+        self.status = status
+        self.total = total
+        self.count = 0
+
+    def next(self, name: str) -> None:
+        self.count += 1
+        if self.status is None:
+            return
+        self.total = max(self.total, self.count)
+        self.status.set(f"[{self.count}/{self.total}] {name}")
+
+    def close(self) -> None:
+        if self.status is not None:
+            self.status.clear()

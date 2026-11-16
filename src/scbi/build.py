@@ -409,6 +409,10 @@ class Builder:
             self.ilog(module, "%BModule", f"%t{module}%c", "marked to be skipped")
             return
 
+        progress = getattr(d, "progress", None)
+        if progress is not None:
+            progress.next(module if variant == "default" else f"{module}/{variant}")
+
         log = f"{self.get('SCBI_LOGS')}/{self.get('TODAY')}/{self.get('SCBI_TARGET')}-{module}-{variant}-report.log"
         d.set("log", log)
         os.chdir(self.get("SCBI_ROOT"))
