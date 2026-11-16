@@ -426,7 +426,7 @@ Some specific actions are supported with the following syntax:
 
 	\begin{description}
 		\item[prefix] If present, a simple string that will be added as prefix.
-		\item[regpat] A regular expression parttern where the first and second match will be use for creating the final version.
+		\item[regpat] A regular expression pattern where the first and second match will be use for creating the final version.
 		\item[suffix] If present, a simple string that will be added as suffix.
 	\end{description}
 
@@ -442,7 +442,7 @@ Some specific actions are supported with the following syntax:
 		module2/var:v1.2
 	\end{lstlisting}
 
-	\item[\code{@on <discriminants> use <module-reference>}] To set a module reference only if the running OS is matching the discriminants (\seeref{discriminants}). If all discriminant are matching the module reference will overwrite previous definitions.
+	\item[\code{@on <discriminants> use <module-reference>}] To set a module reference only if the running OS is matching the discriminants (\seeref{discriminants}). If all discriminants are matching the module reference will overwrite previous definitions.
 
 	\begin{lstlisting}
 	#  Skip lcms2 on Debian-9
@@ -480,7 +480,7 @@ Some specific actions are supported with the following syntax:
 
 		All of them must be set for the barrier to be true.
 
-		Finally the barrier can have two groups of values. For a \code{=} condition only one of the group can match (OR) for the barrier to evaluate to TRUE. For a \code{/=} condition all groups must match (AND) for the barrier to evaluate to TRUE. Examples:
+		Finally the barrier can have three groups of values. For a \code{=} condition only one of the group can match (OR) for the barrier to evaluate to TRUE. For a \code{/=} condition all groups must match (AND) for the barrier to evaluate to TRUE. Examples:
 
 		\begin{itemize}
 		\item {[} = deb,9 deb,11
