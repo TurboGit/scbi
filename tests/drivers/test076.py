@@ -1,0 +1,342 @@
+def test(t):
+    # test rebuild with meta-module
+
+    # all build
+
+    t.runs('./scbi --deps smain')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
+
+xxxx/xx/xx xx:xx:xx : Building smain [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building smain [default] (n/a)
+""")
+
+    # nothing build
+
+    t.runs('./scbi --deps smain')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
+
+xxxx/xx/xx xx:xx:xx : Building smain [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building smain [default] (n/a)
+""")
+
+    # change depA, check that depA is rebuilt and also smain
+    # which is depending on depA via a meta-module.
+
+    t.sh('cp scripts.d/depA.yaml scripts.d/depA.keep')
+
+    t.sh('echo "# touched" >> scripts.d/depA.yaml')
+
+    t.runs('./scbi --deps smain')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx :   ↳ depA changed
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
+
+xxxx/xx/xx xx:xx:xx : Building smain [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx :   ↳ dmod changed
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building smain [default] (n/a)
+""")
+
+    t.sh('mv scripts.d/depA.keep scripts.d/depA.yaml')
+
+    # Now check for a dependency on a two level metamodule
+
+    t.runs('./scbi --deps smain/two')
+
+    # Check nothing is recompiled
+
+    t.runs('./scbi --deps smain/two')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule meta-meta [default] setup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : End metamodule meta-meta [default] setup
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ meta-meta
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx :   ↳ meta-meta
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx :   ↳ meta-meta
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ meta-meta
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
+
+xxxx/xx/xx xx:xx:xx : Metamodule meta-meta [default] wrapup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : End metamodule meta-meta [default] wrapup
+
+xxxx/xx/xx xx:xx:xx : Building smain [two] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building smain [two] (n/a)
+""")
+
+    t.sh('cp scripts.d/depA.yaml scripts.d/depA.keep')
+
+    t.sh('echo "# touched" >> scripts.d/depA.yaml')
+
+    # And now that depA and smain are recompiled
+
+    t.runs('./scbi --deps smain/two')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule meta-meta [default] setup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : End metamodule meta-meta [default] setup
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ meta-meta
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx :   ↳ meta-meta
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx :   ↳ meta-meta
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ meta-meta
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx :   ↳ depA changed
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
+
+xxxx/xx/xx xx:xx:xx : Metamodule meta-meta [default] wrapup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ smain/two
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx :   ↳ dmod changed
+xxxx/xx/xx xx:xx:xx : End metamodule meta-meta [default] wrapup
+
+xxxx/xx/xx xx:xx:xx : Building smain [two] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx :   ↳ meta-meta changed
+xxxx/xx/xx xx:xx:xx : config [two] starting
+xxxx/xx/xx xx:xx:xx : config [two] completed
+xxxx/xx/xx xx:xx:xx : build [two] starting
+xxxx/xx/xx xx:xx:xx : build [two] completed
+xxxx/xx/xx xx:xx:xx : End Building smain [two] (n/a)
+""")
+
+    t.sh('mv scripts.d/depA.keep scripts.d/depA.yaml')

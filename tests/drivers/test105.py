@@ -1,0 +1,47 @@
+def test(t):
+    t.runs('./scbi supermod')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
+""")
+
+    t.runs('./scbi dmod')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building depA [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building depA [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
+""")

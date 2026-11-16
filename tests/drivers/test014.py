@@ -1,0 +1,170 @@
+def test(t):
+    # check for super-module
+    #
+
+    t.runs('./scbi --purge:only lib1')
+    t.runs('./scbi --purge:only lib2')
+
+    # echo ========== build supermod
+    t.runs('./scbi --no-patch --tests --deps supermod')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+libb.B master (default)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
+""")
+
+    # echo ========== build supermod plan sm1
+    t.runs('./scbi --no-patch --tests --plan=sm1 --deps supermod')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: sources changed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.A br_a
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+libb.B master (default)
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx :   ↳ lib1 changed
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
+""")
+
+    # echo ========== build supermod variant best (plan var)
+    t.runs('./scbi --no-patch --tests --deps supermod/best')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [best] setup
+xxxx/xx/xx xx:xx:xx : setup [best] starting
+xxxx/xx/xx xx:xx:xx : setup [best] completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [best] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod/best
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.A br_a
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [variant1] (v2.0)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod/best
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : variant1-config starting
+xxxx/xx/xx xx:xx:xx : variant1-config completed
+xxxx/xx/xx xx:xx:xx : build [variant1] starting
+xxxx/xx/xx xx:xx:xx : build [variant1] completed
+xxxx/xx/xx xx:xx:xx : install [variant1] starting
+xxxx/xx/xx xx:xx:xx : install [variant1] completed
+xxxx/xx/xx xx:xx:xx : tests [variant1] starting
+main
+libb.B v2 (variant1)
+xxxx/xx/xx xx:xx:xx : tests [variant1] completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [variant1] (v2.0)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [best] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : wrapup [best] starting
+xxxx/xx/xx xx:xx:xx : wrapup [best] completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [best] wrapup
+""")
+
+    t.ok('-f .root/builds/install/supermod')
+
+    t.runs('cat .root/builds/install/supermod')
+
+    t.clean_diff("""\
+do setup
+do wrapup
+do setup
+do wrapup
+do setup
+do wrapup
+""")

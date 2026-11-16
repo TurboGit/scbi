@@ -1,0 +1,50 @@
+def test(t):
+    # check that a native deps does not force a recompilation
+
+    # echo ============ run one : build
+    t.runs('./scbi --deps lib3:#v1.2')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building inhnat [native] (os)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ lib3
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : skip global install
+xxxx/xx/xx xx:xx:xx : End Building inhnat [native] (os)
+
+xxxx/xx/xx xx:xx:xx : Building lib3 [default] (v1.2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from archive
+xxxx/xx/xx xx:xx:xx : extract archive lib1-v1.2-src.tar.bz2
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib3 [default] (v1.2)
+""")
+
+    # echo ============ run two : nothing to do
+    t.runs('./scbi --deps lib3:#v1.2')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
+xxxx/xx/xx xx:xx:xx : Building inhnat [native] (os)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ lib3
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : skip global install
+xxxx/xx/xx xx:xx:xx : End Building inhnat [native] (os)
+
+xxxx/xx/xx xx:xx:xx : Building lib3 [default] (v1.2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib3 [default] (v1.2)
+""")

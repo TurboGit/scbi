@@ -1,0 +1,130 @@
+def test(t):
+    # check for log on failures only
+
+    t.runs('./scbi --force failsteps')
+
+    t.clean_diff("""\
+2021/11/27 09:50:05 : Building failsteps [default] (n/a)
+2021/11/27 09:50:05 : native x86_64-linux-gnu
+2021/11/27 09:50:05 : steps: setup config build install wrapup
+2021/11/27 09:50:05 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
+2021/11/27 09:50:05 : config starting
+2021/11/27 09:50:05 : config completed
+2021/11/27 09:50:05 : build starting
+2021/11/27 09:50:05 : build completed
+2021/11/27 09:50:05 : install starting
+2021/11/27 09:50:05 : install completed
+2021/11/27 09:50:05 : End Building failsteps [default] (n/a)
+""")
+
+    t.runs('./scbi --force --log failsteps')
+
+    t.clean_diff("""\
+2021/11/27 09:50:19 : Building failsteps [default] (n/a)
+2021/11/27 09:50:19 : native x86_64-linux-gnu
+2021/11/27 09:50:19 : steps: setup config build install wrapup
+2021/11/27 09:50:19 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
+2021/11/27 09:50:19 : config starting
+config
+2021/11/27 09:50:19 : config completed
+2021/11/27 09:50:19 : build starting
+build
+2021/11/27 09:50:19 : build completed
+2021/11/27 09:50:19 : install starting
+install
+2021/11/27 09:50:19 : install completed
+2021/11/27 09:50:19 : End Building failsteps [default] (n/a)
+""")
+
+    t.nruns('./scbi --force --log:no failsteps/conferr')
+
+    t.clean_diff("""\
+2021/11/27 09:53:01 : Building failsteps [conferr] (n/a)
+2021/11/27 09:53:01 : native x86_64-linux-gnu
+2021/11/27 09:53:01 : steps: setup config build install wrapup
+2021/11/27 09:53:01 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
+2021/11/27 09:53:01 : conferr-config starting
+2021/11/27 09:53:01 : failsteps (FAILED) conferr-config failed with error 1
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) <reproduce> <pwd>/.root/builds/failsteps/x86_64-linux-gnu-conferr/logs/conferr-config.cmd
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) use <debug> option for debug
+""")
+
+    t.nruns('./scbi --force --log:no failsteps/builderr')
+
+    t.clean_diff("""\
+2021/11/27 09:53:52 : Building failsteps [builderr] (n/a)
+2021/11/27 09:53:52 : native x86_64-linux-gnu
+2021/11/27 09:53:52 : steps: setup config build install wrapup
+2021/11/27 09:53:52 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
+2021/11/27 09:53:52 : config [builderr] starting
+2021/11/27 09:53:52 : config [builderr] completed
+2021/11/27 09:53:52 : builderr-build starting
+2021/11/27 09:53:52 : failsteps (FAILED) builderr-build failed with error 1
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) <reproduce> <pwd>/.root/builds/failsteps/x86_64-linux-gnu-builderr/logs/builderr-build.cmd
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) use <debug> option for debug
+""")
+
+    t.nruns('./scbi --force --log:no failsteps/installerr')
+
+    t.clean_diff("""\
+2021/11/27 09:54:19 : Building failsteps [installerr] (n/a)
+2021/11/27 09:54:19 : native x86_64-linux-gnu
+2021/11/27 09:54:19 : steps: setup config build install wrapup
+2021/11/27 09:54:19 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
+2021/11/27 09:54:19 : config [installerr] starting
+2021/11/27 09:54:19 : config [installerr] completed
+2021/11/27 09:54:19 : build [installerr] starting
+2021/11/27 09:54:19 : build [installerr] completed
+2021/11/27 09:54:19 : installerr-install starting
+2021/11/27 09:54:19 : failsteps (FAILED) installerr-install failed with error 1
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) <reproduce> <pwd>/.root/builds/failsteps/x86_64-linux-gnu-installerr/logs/installerr-install.cmd
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) use <debug> option for debug
+""")
+
+    t.nruns('./scbi --force --log:yes failsteps/conferr')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
+2021/11/27 09:55:05 : Building failsteps [conferr] (n/a)
+2021/11/27 09:55:05 : native x86_64-linux-gnu
+2021/11/27 09:55:05 : steps: setup config build install wrapup
+2021/11/27 09:55:05 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
+2021/11/27 09:55:05 : conferr-config starting
+config error
+2021/11/27 09:55:05 : failsteps (FAILED) conferr-config failed with error 1
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) <reproduce> <pwd>/.root/builds/failsteps/x86_64-linux-gnu-conferr/logs/conferr-config.cmd
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) use <debug> option for debug
+""")
+
+    t.nruns('./scbi --force --log:on-failure failsteps/installerr')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
+2021/11/27 09:55:40 : Building failsteps [installerr] (n/a)
+2021/11/27 09:55:40 : native x86_64-linux-gnu
+2021/11/27 09:55:40 : steps: setup config build install wrapup
+2021/11/27 09:55:40 : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
+2021/11/27 09:55:40 : config [installerr] starting
+2021/11/27 09:55:40 : config [installerr] completed
+2021/11/27 09:55:40 : build [installerr] starting
+2021/11/27 09:55:40 : build [installerr] completed
+2021/11/27 09:55:40 : installerr-install starting
+install error
+2021/11/27 09:55:40 : failsteps (FAILED) installerr-install failed with error 1
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) to reproduce:
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) <reproduce> <pwd>/.root/builds/failsteps/x86_64-linux-gnu-installerr/logs/installerr-install.cmd
+xxxx/xx/xx xx:xx:xx : failsteps (FAILED) use <debug> option for debug
+""")

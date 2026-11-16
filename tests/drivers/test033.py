@@ -1,0 +1,64 @@
+def test(t):
+    # check for tar rebuild if module script has changed
+    #
+
+    t.runs('./scbi --no-patch --tests lib1:#v1.2')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1.2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from archive
+xxxx/xx/xx xx:xx:xx : extract archive lib1-v1.2-src.tar.bz2
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+lib from tar
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1.2)
+""")
+
+    t.runs('./scbi --no-patch --tests lib1:#v1.2')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1.2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+lib from tar
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1.2)
+""")
+
+    t.sh("sed -i 's/return 0/return 00/g' scripts.d/lib1.yaml")
+
+    t.runs('./scbi --no-patch --tests lib1:#v1.2')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1.2)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+lib from tar
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1.2)
+""")
+
+    t.sh("sed -i 's/return 00/return 0/g' scripts.d/lib1.yaml")

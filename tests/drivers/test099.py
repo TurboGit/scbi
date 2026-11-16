@@ -1,0 +1,154 @@
+def test(t):
+    t.runs('./scbi show --plan=plgv1 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 4 module(s) in the plan
+plg1
+plg2/exp
+plg3:v1
+plg4/new:v1
+""")
+
+    t.runs('./scbi show --plan=plgv2 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 4 module(s) in the plan
+plg1
+plg2/exp2
+plg3:v2
+plg4/new2:v2
+""")
+
+    t.runs('./scbi show --plan=plgv3 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 4 module(s) in the plan
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+""")
+
+    t.runs('./scbi show --plan=plgv4 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 8 module(s) in the plan
+plg1/ng
+plg2/ng
+plg3/ng:vx
+plg4/ng:v1
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+""")
+
+    t.runs('./scbi show --plan=plgv5 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 8 module(s) in the plan
+plg1/ng
+plg2/exp:v7
+plg3/ng:v1
+plg4/ng:v5
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+""")
+
+    t.runs('./scbi show --plan=plgv6 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 8 module(s) in the plan
+plg1/ng
+plg2/ng
+plg3/ng:v1
+plg4/ng:v1
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+""")
+
+    t.runs('./scbi show --plan=plgv7 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 9 module(s) in the plan
+plg1/ng
+plg2/ng
+plg3/ng:v2
+plg4/ng:v2
+plg5
+plg6/exp
+plg7:v1
+plg8/new:v1
+plg9/ng
+""")
+
+    t.runs('./scbi show --plan=plgv8 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 9 module(s) in the plan
+plg1/ng
+plg2/azerty.ng.xx
+plg3/ng:v2
+plg4/ng.new2:v2
+plg5
+plg6/exp
+plg7:v1
+plg8/azerty.new:v1
+plg9/ng
+""")
+
+    t.runs('./scbi show --plan=plgv9 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 9 module(s) in the plan
+plg1/ng
+plg2/newxx.azerty.ng
+plg3/ng:v2
+plg4/ng:v2
+plg5
+plg6/exp
+plg7:v1
+plg8/newazerty.new:v1
+plg9/ng
+""")
+
+    t.runs('./scbi show --plan=plgv10 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 1 module(s) in the plan
+module/2.four.one.three
+""")
+
+    t.runs('./scbi show --plan=plgv11 --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 2 module(s) in the plan
+titi
+toto/one:v7
+""")

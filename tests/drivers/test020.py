@@ -1,0 +1,59 @@
+def test(t):
+    t.runs('./scbi -j1 test20')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building test20 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End Building test20 [default] (n/a)
+""")
+
+    t.runs('./scbi -f --jobs=7 test20')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building test20 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: forced
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : End Building test20 [default] (n/a)
+""")
+
+    t.runs("grep -h '@@@' .root/builds/.logs/*test20*config*")
+
+    t.clean_diff("""\
+@@@ CONFIG 1
+@@@ CONFIG 7
+""")
+
+    t.runs("grep -h '@@@' .root/builds/.logs/*test20*build*")
+
+    t.clean_diff("""\
+@@@ BUILD 1
+@@@ BUILD 7
+""")
+
+    t.runs("grep -h '@@@' .root/builds/.logs/*test20*install*")
+
+    t.clean_diff("""\
+@@@ INSTALL 1
+@@@ INSTALL 7
+""")

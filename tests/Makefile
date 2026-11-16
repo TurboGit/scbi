@@ -1,10 +1,9 @@
-
 .SILENT: test clean
 
 force:
 
 test:
-	./run
+	make -C .. test
 
 clean: force
-	./clean
+	make -C .. test-clean

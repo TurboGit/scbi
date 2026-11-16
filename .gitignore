@@ -12,6 +12,7 @@ doc/*.ilg
 doc/*.ind
 doc/version.tex
 doc/*.dvi
+tests/junit.xml
 tests/.root/local-install
 tests/.root/git
 tests/.root/builds

@@ -1,0 +1,11 @@
+def test(t):
+    t.nruns('./scbi withsubm')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building withsubm [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : error: cannot get sources from <pwd>/.root/repos/withsubm.bundle
+xxxx/xx/xx xx:xx:xx : error: see <pwd>/.root/builds/.logs//x86_64-linux-gnu-withsubm-default-report.log
+""")

@@ -1,0 +1,21 @@
+def test(t):
+    # check that OOT (Out Of Tree) build
+
+    # echo ========== lib1 patched version
+    t.runs('./scbi --tests oot')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : tests starting
+OOT OK
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+""")

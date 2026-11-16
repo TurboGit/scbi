@@ -28,7 +28,7 @@
 
 .SILENT: test sort-pkgs sync-os-deps
 
-.PHONY: unit
+.PHONY: unit test
 
 SHELL=/bin/bash
 
@@ -90,14 +90,20 @@ lint:
 	PYTHONPATH=src python3 -m scbi lint --error scripts.d/c-*.yaml
 	echo No problem detected
 
-test:
-	make -C tests test
-
-test-clean:
-	make -C tests clean
-
 #  Unit tests of the driver
 PYTEST=python3 -m pytest
+
+#  Regression testsuite (tests/drivers/testNNN.py, see tests/harness.py),
+#  in parallel when pytest-xdist is installed; T="test001 test092" runs
+#  some drivers. JUnit XML report in tests/junit.xml.
+XDIST := $(shell python3 -c 'import xdist' 2>/dev/null && echo "-n auto")
+DRIVERS = $(if $(T),$(foreach d,$(T),tests/drivers/$(d).py),tests/drivers)
+
+test:
+	$(PYTEST) -q -p no:cacheprovider $(XDIST) --junitxml=tests/junit.xml $(DRIVERS)
+
+test-clean:
+	rm -f tests/junit.xml
 
 unit:
 	$(PYTEST) -q tests/unit

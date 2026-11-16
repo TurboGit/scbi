@@ -1,0 +1,116 @@
+def test(t):
+    t.sh('rm -f .root/builds/.logs/*test19*')
+
+    # echo ====================== test19
+    t.runs('./scbi test19')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building test19 [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : pre-setup starting
+xxxx/xx/xx xx:xx:xx : pre-setup completed
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : post-config starting
+xxxx/xx/xx xx:xx:xx : post-config completed
+xxxx/xx/xx xx:xx:xx : pre-build starting
+xxxx/xx/xx xx:xx:xx : pre-build completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : post-build starting
+xxxx/xx/xx xx:xx:xx : post-build completed
+xxxx/xx/xx xx:xx:xx : pre-install starting
+xxxx/xx/xx xx:xx:xx : pre-install completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : pre-wrapup starting
+xxxx/xx/xx xx:xx:xx : pre-wrapup completed
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End Building test19 [default] (master)
+""")
+
+    # echo ====================== test19/alt
+    t.runs('./scbi test19/alt')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building test19 [alt] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : alt-pre-setup starting
+xxxx/xx/xx xx:xx:xx : alt-pre-setup completed
+xxxx/xx/xx xx:xx:xx : alt-config starting
+xxxx/xx/xx xx:xx:xx : alt-config completed
+xxxx/xx/xx xx:xx:xx : alt-post-config starting
+xxxx/xx/xx xx:xx:xx : alt-post-config completed
+xxxx/xx/xx xx:xx:xx : pre-build [alt] starting
+xxxx/xx/xx xx:xx:xx : pre-build [alt] completed
+xxxx/xx/xx xx:xx:xx : build [alt] starting
+xxxx/xx/xx xx:xx:xx : build [alt] completed
+xxxx/xx/xx xx:xx:xx : post-build [alt] starting
+xxxx/xx/xx xx:xx:xx : post-build [alt] completed
+xxxx/xx/xx xx:xx:xx : pre-install [alt] starting
+xxxx/xx/xx xx:xx:xx : pre-install [alt] completed
+xxxx/xx/xx xx:xx:xx : alt-install starting
+xxxx/xx/xx xx:xx:xx : alt-install completed
+xxxx/xx/xx xx:xx:xx : alt-post-install starting
+xxxx/xx/xx xx:xx:xx : alt-post-install completed
+xxxx/xx/xx xx:xx:xx : pre-wrapup [alt] starting
+xxxx/xx/xx xx:xx:xx : pre-wrapup [alt] completed
+xxxx/xx/xx xx:xx:xx : alt-wrapup starting
+xxxx/xx/xx xx:xx:xx : alt-wrapup completed
+xxxx/xx/xx xx:xx:xx : alt-post-wrapup starting
+xxxx/xx/xx xx:xx:xx : alt-post-wrapup completed
+xxxx/xx/xx xx:xx:xx : End Building test19 [alt] (master)
+""")
+
+    t.runs("grep -h '@@@' .root/builds/.logs/*test19*config*")
+
+    t.clean_diff("""\
+@@@ ALT/CONFIG  test19/x86_64-linux-gnu-alt/src
+@@@ ALT/POST-CONFIG  test19/x86_64-linux-gnu-alt/src
+@@@ CONFIG  test19/x86_64-linux-gnu-default/src
+@@@ POST-CONFIG  test19/x86_64-linux-gnu-default/src
+""")
+
+    t.runs("grep -h '@@@' .root/builds/.logs/*test19*setup*")
+
+    t.clean_diff("""\
+@@@ ALT/PRE-SETUP  test19
+@@@ PRE-SETUP  test19
+""")
+
+    t.runs("grep -h '@@@' .root/builds/.logs/*test19*build*")
+
+    t.clean_diff("""\
+@@@ BUILD  test19/x86_64-linux-gnu-alt/src
+@@@ POST-BUILD  test19/x86_64-linux-gnu-alt/src
+@@@ PRE-BUILD  test19/x86_64-linux-gnu-alt/src
+@@@ BUILD  test19/x86_64-linux-gnu-default/src
+@@@ POST-BUILD  test19/x86_64-linux-gnu-default/src
+@@@ PRE-BUILD  test19/x86_64-linux-gnu-default/src
+""")
+
+    t.runs("grep -h '@@@' .root/builds/.logs/*test19*install*")
+
+    t.clean_diff("""\
+@@@ ALT/INSTALL  test19/x86_64-linux-gnu-alt/src
+@@@ POST-INSTALL  test19/x86_64-linux-gnu-alt/src
+@@@ PRE-INSTALL  test19/x86_64-linux-gnu-alt/src
+@@@ INSTALL  test19/x86_64-linux-gnu-default/src
+@@@ PRE-INSTALL  test19/x86_64-linux-gnu-default/src
+""")
+
+    t.runs("grep -h '@@@' .root/builds/.logs/*test19*wrapup*")
+
+    t.clean_diff("""\
+@@@ ALT/POST-WRAPUP  test19
+@@@ ALT/WRAPUP  test19
+@@@ PRE-WRAPUP  test19
+@@@ PRE-WRAPUP  test19
+@@@ WRAPUP  test19
+""")

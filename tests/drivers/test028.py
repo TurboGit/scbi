@@ -1,0 +1,35 @@
+def test(t):
+    # test build plan
+
+    t.runs('./scbi --purge:only depA')
+    t.runs('./scbi --purge:only oot')
+
+    # =================== plan var (skip lib1)
+    t.runs('./scbi --tests --plan=var --deps depA:skip dmod')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Module depA marked to be skipped
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] setup
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building oot [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ dmod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : tests starting
+OOT OK
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : End Building oot [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule dmod [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : End metamodule dmod [default] wrapup
+""")

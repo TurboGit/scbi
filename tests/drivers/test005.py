@@ -1,0 +1,90 @@
+def test(t):
+    # check that dependents versions are properly built
+    #
+
+    t.runs('./scbi --no-patch lib1')
+
+    # ============ build mainlib + deps (no compilation of lib1 expected)
+    t.runs('./scbi --no-patch --tests --deps mainlib')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ mainlib
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main on master
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
+""")
+
+    # ============ re-build lib1 on v1
+    t.runs('./scbi --no-patch --archive lib1:v1')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: sources changed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
+""")
+
+    # ============ build mainlib + deps (compilation of lib1 expected)
+    t.runs('./scbi --no-patch --tests --deps mainlib')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ mainlib
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: sources changed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : tests starting
+main
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building mainlib [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : tests starting
+main on master
+liba.C master
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building mainlib [default] (master)
+""")

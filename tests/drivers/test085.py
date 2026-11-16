@@ -1,0 +1,352 @@
+def test(t):
+    # check for meta modules with variants
+
+    t.sh("""\
+for PLG in mv-common1 mv-common2 mv-var1 mv-var2 \\
+           mv-new1 mv-new2 mv-new3 \\
+           mv-default1 mv-default2 mv-default-ex1 mv-default-ex2;
+do
+cat <<EOF > scripts.d/$PLG.yaml
+plugin: $PLG
+
+config: echo $PLG
+EOF
+done
+""")
+
+    t.runs('./scbi --deps metavar')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [default] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building mv-common1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-common1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-common2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-common2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-default-ex1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-default-ex1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-default-ex2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-default-ex2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-default1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-default1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-default2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-default2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [default] wrapup
+""")
+
+    t.runs('./scbi --deps metavar/var')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [var] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [var] setup
+
+xxxx/xx/xx xx:xx:xx : Building mv-common1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-common1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-common2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-common2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-var1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-var1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-var2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-var2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [var] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [var] wrapup
+""")
+
+    t.runs('./scbi --deps metavar/var.new')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [var new] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [var new] setup
+
+xxxx/xx/xx xx:xx:xx : Building mv-common1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-common1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-common2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-common2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-var1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-var1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-var2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-var2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-new1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-new1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-new2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-new2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-new3 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/var.new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : End Building mv-new3 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [var new] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [var new] wrapup
+""")
+
+    t.runs('./scbi --deps metavar/new')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [new] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [new] setup
+
+xxxx/xx/xx xx:xx:xx : Building mv-common1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-common1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-common2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-common2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-new1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-new1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-new2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-new2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-new3 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar/new
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-new3 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [new] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [new] wrapup
+""")
+
+    t.runs('./scbi --deps metavar/default')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [default] setup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building mv-common1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-common1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-common2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-common2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-default-ex1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-default-ex1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-default-ex2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-default-ex2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-default1 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-default1 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Building mv-default2 [default] (n/a)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metavar
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : End Building mv-default2 [default] (n/a)
+
+xxxx/xx/xx xx:xx:xx : Metamodule metavar [default] wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule metavar [default] wrapup
+""")
+
+    t.sh("""\
+for PLG in mv-common1 mv-common2 mv-var1 mv-var2 \\
+           mv-new1 mv-new2 mv-new3 \\
+           mv-default1 mv-default2 mv-default-ex1 mv-default-ex2;
+do
+rm -f scripts.d/$PLG.yaml
+done
+""")

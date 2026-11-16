@@ -1,0 +1,72 @@
+def test(t):
+    # check standalone package
+
+    t.runs('./scbi --deps --standalone mainmult')
+
+    t.cd('/tmp')
+    t.sh("""\
+tar xf sa-builds.tgz
+cd sa-builds
+export TESTREPOS=$PWD/builds/.vcs
+""")
+
+    t.runs('./build')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ mainmult
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ mainmult
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building mainmult [default] (master)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building mainmult [default] (master)
+""")
+
+    t.set('LD_LIBRARY_PATH', 'builds/install/lib')
+
+    # NRUNS because the mainmult bin does not set exit status
+    t.nruns('builds/install/bin/mainmult')
+
+    t.diff("""\
+main on master
+liba.C patched version
+libb.B master (default)
+""")
+
+    t.unset('LD_LIBRARY_PATH')
+    t.unset('TESTREPOS')

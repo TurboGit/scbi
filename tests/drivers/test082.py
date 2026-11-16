@@ -1,0 +1,56 @@
+def test(t):
+    # check for tests options
+
+    t.runs('./scbi --tests:only=opt1 stest')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building stest [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: tests
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : tests starting
+stest: opt1
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : End Building stest [default] (n/a)
+""")
+
+    t.runs('./scbi --tests="opt2*" stest')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building stest [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : tests starting
+stest: opt2*
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : End Building stest [default] (n/a)
+""")
+
+    t.runs('./scbi --tests stest')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building stest [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : tests starting
+stest: none
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : End Building stest [default] (n/a)
+""")
+
+    t.runs('./scbi --tests:only stest')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building stest [default] (n/a)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: tests
+xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
+xxxx/xx/xx xx:xx:xx : tests starting
+stest: none
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : End Building stest [default] (n/a)
+""")

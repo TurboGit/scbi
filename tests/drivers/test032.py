@@ -1,0 +1,12 @@
+def test(t):
+    # Note that we transform all 1 to A and 2 to B to have a better check
+    # of the final output.
+    t.runs('./scbi show --plan=inherit --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 2 module(s) in the plan
+lib1:v2
+lib2/variant1:v2.0
+""")

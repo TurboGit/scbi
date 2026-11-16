@@ -1,0 +1,20 @@
+def test(t):
+    # Test a group plan with a tar version
+
+    t.runs('./scbi show --plan=grouptar --build-plan lib1')
+
+    t.trim_output()
+
+    t.diff("""\
+There is 10 module(s) in the plan
+modA
+modB:vA
+modC/new:vB
+modD:#12
+modE:#56
+modF/speed:#14:xx
+modG:9
+modH/new:#1
+modI/new:1
+modJ/red:#6
+""")

@@ -1,0 +1,189 @@
+def test(t):
+    t.runs('./scbi --deps supermod')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
+""")
+
+    t.runs('./scbi --deps supermod')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
+""")
+
+    t.runs('./scbi --deps --force supermod')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : trigger: forced
+xxxx/xx/xx xx:xx:xx : apply patch lib1-0-fix.patch
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : trigger: forced
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: forced
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
+""")
+
+    t.runs('./scbi --deps supermod')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
+""")
+
+    t.runs('./scbi --deps --no-patch --plan=sm1 supermod')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] setup
+xxxx/xx/xx xx:xx:xx : setup starting
+xxxx/xx/xx xx:xx:xx : setup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] setup
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (v1)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : get sources from git
+xxxx/xx/xx xx:xx:xx : trigger: sources changed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (v1)
+
+xxxx/xx/xx xx:xx:xx : Building lib2 [default] (master)
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ supermod
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : no build needed: versions matching
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
+
+xxxx/xx/xx xx:xx:xx : Metamodule supermod [default] wrapup
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx :   ↳ lib1 changed
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
+xxxx/xx/xx xx:xx:xx : End metamodule supermod [default] wrapup
+""")

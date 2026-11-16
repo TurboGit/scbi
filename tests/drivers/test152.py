@@ -1,0 +1,62 @@
+def test(t):
+    # check that just --install do not count as rebuild of non up-to-date module.
+
+    t.sh("""\
+(
+    mkdir -p .root/git
+    cd .root/git
+    rm -fr lib1.bundle
+    git clone ../repos/lib1.bundle lib1.bundle &> /dev/null
+)
+""")
+
+    t.runs('./scbi --no-patch lib1:dev')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (dev)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (dev)
+""")
+
+    t.sh("sed -i 's/master/master mod/' .root/git/lib1.bundle/lib1.c")
+
+    t.runs('./scbi --no-patch --install lib1:dev')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (dev)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: install
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (dev)
+""")
+
+    #  Following MUST rebuild
+
+    t.runs('./scbi --no-patch lib1:dev')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Using cached module plan (xxxxxxxxxxxxxxxxxxxx)
+
+xxxx/xx/xx xx:xx:xx : Building lib1 [default] (dev)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
+xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
+xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (dev)
+""")

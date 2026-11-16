@@ -1,0 +1,17 @@
+def test(t):
+    t.nruns('./scbi --deps metadepserr')
+
+    t.clean_diff("""\
+2024/06/25 09:56:00 : Metamodule metadepserr [default] setup
+2024/06/25 09:56:00 : End metamodule metadepserr [default] setup
+
+2024/06/25 09:56:00 : Metamodule metawitherr [default] setup
+xxxx/xx/xx xx:xx:xx : needed by:
+xxxx/xx/xx xx:xx:xx :   ↳ metadepserr
+2024/06/25 09:56:00 : End metamodule metawitherr [default] setup
+
+error: missing dependencies for building wrongnat
+error    required by metawitherr
+error    required by metadepserr
+error: gcc:999999 should be installed
+""")

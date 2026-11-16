@@ -1,0 +1,24 @@
+def test(t):
+    # simple check for mercurial repository
+
+    t.set('REP', '$PWD/.root/builds/test4')
+
+    t.runs('./scbi --tests test4')
+
+    t.clean_diff("""\
+xxxx/xx/xx xx:xx:xx : Building test4 [default] (default)
+xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
+xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
+xxxx/xx/xx xx:xx:xx : get sources from mercurial
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : tests starting
+hello scbi in mercurial
+xxxx/xx/xx xx:xx:xx : tests completed
+xxxx/xx/xx xx:xx:xx : End Building test4 [default] (default)
+""")
+
+    t.grep(*t.words('"test4 mercurial default revision e6a1a52e9fb5" $REP/source-ref'))
