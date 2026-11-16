@@ -84,6 +84,7 @@ USAGE_OPTIONS = """
       | --safe              clean-up build directory before configure
       | --dry-run           only list modules handled
       | --stat[:short|full] display some status of current setup
+      | --progress[:bar|line|no]  build progress on the terminal (bar)
    -n | --no-patch          do not apply patches
       | --clear-cache       remove cached module's versions"""
 
@@ -107,6 +108,7 @@ GETOPT_LONG = [
     "prefix:,deps,deps:warning,archive,force,env:,no-patch",
     "no-wrapup,wrapup,safe,standalone",
     "dry-run,jobs:,list-plan:",
+    "progress,progress:bar,progress:line,progress:no",
 ]
 
 
@@ -357,6 +359,12 @@ class Driver:
                 c["DO_STAT"] = "short"
             elif a == "--stat":
                 c["DO_STAT"] = "yes"
+            elif a in ("--progress", "--progress:bar"):
+                c["SCBI_PROGRESS"] = "bar"
+            elif a == "--progress:line":
+                c["SCBI_PROGRESS"] = "line"
+            elif a == "--progress:no":
+                c["SCBI_PROGRESS"] = "no"
             elif a == "--flat":
                 c["DO_FLAT"] = "yes"
             elif a.startswith("--build-dir"):
@@ -1030,9 +1038,9 @@ class Driver:
     def start_progress(self, builder):
         """The build progress ``[n/N] module``, only when the output is a
         terminal (not with --quiet, SCBI_PROGRESS=no or in the testsuite):
-        SCBI_PROGRESS=line (default) a transient last line
-        (scbi.log.StatusLine), bar a status bar on the last row with the
-        elapsed time (scbi.log.StatusBar). Returns the function restoring
+        --progress[:bar|line|no] or SCBI_PROGRESS: bar (default) a status
+        bar on the last row with the elapsed time (scbi.log.StatusBar),
+        line a transient last line (scbi.log.StatusLine). Returns the function restoring
         the console streams."""
         from scbi.log import Progress, StatusBar, StatusLine, StatusStream
 
@@ -1041,7 +1049,7 @@ class Driver:
         if (not out.isatty() or self.testsuite or self.get("DO_QUIET") == "yes" or mode == "no"):
             self.progress = Progress()
             return lambda: None
-        status = StatusBar(out) if mode == "bar" else StatusLine(out)
+        status = StatusLine(out) if mode == "line" else StatusBar(out)
         saved = (sys.stdout, sys.stderr, self.log.stdout, self.log.stderr)
         sys.stdout = self.log.stdout = StatusStream(out, status)
         if sys.stderr.isatty():

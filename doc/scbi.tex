@@ -272,14 +272,14 @@ An environment is a set of shell variables used to control the build environment
 	\code{scbi} shows the progress of the build, \code{[<n>/<total>]
 	<module>}: the module being handled and the number of modules to
 	handle (with \ddash{}deps, all the dependencies). It is never written
-	to the logs. The values are:
+	to the logs. The values (also given by the option
+	\ddash{}progress:{[}bar|line|no{]}, which takes precedence) are:
 	\begin{description}
-		\item[line] (default) a transient line after an empty line, at the
-		end of the output, redrawn after each output line and erased at
-		the end;
-		\item[bar] a status bar on the last row of the terminal (the
-		output scrolls above it) with also the time elapsed since the
+		\item[bar] (default) a status bar on the last row of the terminal
+		(the output scrolls above it) with also the time elapsed since the
 		start of the build, refreshed every second;
+		\item[line] a transient line after an empty line, at the end of
+		the output, redrawn after each output line and erased at the end;
 		\item[no] no progress (also with \ddash{}quiet).
 	\end{description}
 
@@ -678,6 +678,10 @@ The following options are supported:
 	\item[-p | \ddash{}purge{[:only]}] Remove module build directory, then if \code{only} is not specified build the module. The simple \code{-p} option corresponds on \code{--purge}.
 
 	\item[\ddash{}dry-run] Only list modules to be handled.
+
+	\item[\ddash{}progress:{[}bar|line|no{]}] \index{progress}How the progress of
+	the build is shown on a terminal (\code{bar} without argument and by
+	default, see \code{SCBI\_PROGRESS}).
 
 	\item[\ddash{}stat:{[}short|full{]}] Display some statistics about current setup. With sub-option \code{short} only displays the environment status. With sub-option \code{full} also gives stats about module's build time.
 
