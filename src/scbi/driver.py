@@ -45,7 +45,7 @@ USAGE_OPTIONS = """
    modulen  <name>           build from repository main branch
    modulen  <name>/<variant> build <variant> from repository version
    modulen  <name>:<branch>  build from repository version <branch>
-   modulen  <name>:#<ver>    build from tarbal version <ver>
+   modulen  <name>:#<ver>    build from tarball version <ver>
    modulen  <name>:dev       build from user's repository current branch
 
    -h | --help              this help message
@@ -53,10 +53,10 @@ USAGE_OPTIONS = """
    -q | --quiet             do not display information log
       | --color:[n]         use colored output (no, dark, light)
       | --ini=<section>     load ini file given section
-   -t | --prefix=<dir>      the global install directory
+      | --prefix=<dir>      the global install directory
       | --build-dir=<dir>   the root build directory.
       | --flat              use a flatter directory structure
-   -e | --env=<name>        environment file ~/.scbi-<name>
+   -e | --env=<name>        environment file .env-<name>.py
       | --plan=<name>       a build plan for modules
       | --enable-<name>     enable feature name
    -t | --target=<name>     the target to build for ({target})

@@ -56,6 +56,7 @@ BODIES = [
     "check-versions 1.10 '>' 1.9 && echo newer",
     "if version(m) >= 1.0:\n    echo v\nif ref == 1.2:\n    echo ref",
     "echo $(uppercase $VARIANT) $(basename /a/b/c)",
+    "Z = dirname /a/b\necho $Z\nU = uppercase $VARIANT x\necho $U",
     "cd inst-not-there || echo nocd\nmkdir -p w\ncd w\npwd",
     "X = $(if cross then a else b)\necho $X",
     "echo one\nreturn 3\necho never",

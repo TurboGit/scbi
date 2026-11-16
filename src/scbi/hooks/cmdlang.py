@@ -750,7 +750,7 @@ class Runner:
     def assign(self, step: Assign, state: State) -> None:
         name = step.words and _word_text(step.words[0])
         quoted = step.words and any(q for _, q in step.words[0].parts)
-        if name in FUNCTIONS and not quoted:
+        if (name in FUNCTIONS or name in BUILTINS) and not quoted:
             value = self.function(name, step, state)
         else:
             values = self.expand_words(step.words, state)
@@ -829,6 +829,13 @@ class Runner:
             #  the variants of a variant string (a.b -> [a, b]), none for default
             v = " ".join(args)
             return [] if v == "default" else v.replace(".", " ").split()
+        if name in BUILTINS:
+            #  the other functions of the values (get-os-lib, store-key...)
+            try:
+                return expand(f"$({step.text.strip()})", ctx)
+            except (ExpandError, _builtins.BuiltinError) as e:
+                self.error(state, step.line, str(e))
+                return ""
         return None
 
     def hook_output(self, args: list[str], state: State, line: int) -> str | list[str]:

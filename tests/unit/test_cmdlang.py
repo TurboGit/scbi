@@ -368,3 +368,9 @@ def test_replace(tmp_path):
     assert (status, out) == (0, "3_12_1 abc\na:b\n")
     status, out, _ = run(tmp_path, "echo $(replace abc ab x)")
     assert status == 0 and "do not have the same length" in out
+
+
+def test_value_functions_in_assignments(tmp_path):
+    (tmp_path / "f1").write_text("")
+    status, out, _ = run(tmp_path, "Y = ls f1\necho [$Y]\nZ = dirname /a/b\necho [$Z]")
+    assert (status, out) == (0, "[f1]\n[/a]\n")

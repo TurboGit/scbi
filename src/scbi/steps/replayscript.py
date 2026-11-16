@@ -280,7 +280,7 @@ class _Translator:
         first = cmdlang._word_text(s.words[0]) if s.words else ""
         quoted = s.words and any(qt for _, qt in s.words[0].parts)
         lines: list[str] = []
-        if first in FUNCTIONS and not quoted:
+        if (first in FUNCTIONS or first in BUILTINS) and not quoted:
             rest = s.text.strip()[len(first):].strip()
             if first == "config-options":
                 lines.append(f'{name}=("${{CONFIG_OPTIONS[@]}}")')
