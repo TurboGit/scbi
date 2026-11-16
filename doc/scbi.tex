@@ -2322,18 +2322,20 @@ plug-ins of the modules and a Python environment file
 \index{testsuite}
 
 \begin{description}
-	\item[\code{make test}] The regression testsuite: each test driver
-	(\file{tests/drivers/testNNN}) builds the test plug-ins
-	(\file{tests/scripts.d}, YAML) and checks the output. \code{./run
-	testNNN...} in \file{tests} runs some of them.
+	\item[\code{make test}] The regression testsuite (pytest): each test
+	driver (\file{tests/drivers/testNNN.py}) builds the test plug-ins
+	(\file{tests/scripts.d}, YAML) in its own copy of the test directories
+	and checks the output; the drivers run in parallel when pytest-xdist
+	is installed, the JUnit report is \file{tests/junit.xml}.
+	\code{make test T="testNNN..."} runs some of them.
 	\item[\code{make unit}] The unit tests of the driver (pytest).
 \end{description}
 
 When run by the testsuite (\code{SCBI\_TESTSUITE=yes}) the driver does not
 load \file{\$HOME/.scbi}, takes \code{SCBI\_OS\_MODULE} and \code{TODAY}
 from the environment, uses the rsync checksum mode and logs the sync
-messages; \file{tests/run} gives it the test directories (\code{SCBI\_ROOT}
-\ldots) through the environment. With \code{SCBI\_OS\_NAME=test} the
+messages; the harness (\file{tests/harness.py}) gives it the test
+directories (\code{SCBI\_ROOT}\ldots) through the environment. With \code{SCBI\_OS\_NAME=test} the
 installed packages are those of \code{SCBI\_TEST\_PKGS} (\code{"name=version
 ..."}), checked as Debian packages.
 

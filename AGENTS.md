@@ -65,7 +65,7 @@ PYTHONPATH=src python3 -m scbi format --replace scripts.d/c-foo.yaml
 
 ```bash
 make              # install the driver (~/.local/lib/scbi + ~/.local/bin/scbi), plug-ins to ~/.config/scbi
-make test         # full regression testsuite (tests/run)
+make test         # full regression testsuite (pytest, tests/drivers)
 make doc          # build doc/scbi.pdf (latex, bibtex, makeindex, pdflatex)
 make sync-os-deps # propagate/sort .pkgs-* files across distributions
 ```
@@ -78,30 +78,40 @@ user asks (`make HOME=<tmp>` installs into a temporary directory).
 ### Testsuite
 
 ```bash
-make test      # all the drivers (tests/run)
-make unit      # pytest unit tests (tests/unit)
-cd tests && ./run test001 test092   # some drivers
+make test                    # all the drivers, JUnit report tests/junit.xml
+make test T="test001 test092"   # some drivers (or tests/run test001 ...)
+make unit                    # pytest unit tests (tests/unit)
+python3 -m pytest tests/drivers/test001.py   # one driver directly
 ```
 
-- `tests/run` writes a `tests/scbi` wrapper running the driver of
-  `src/scbi`, copies `.pkgs-*` into
-  `tests/scripts.d/` (git-ignored copies, never edit them), exports the
-  testsuite settings (`SCBI_TESTSUITE=yes`, `SCBI_ROOT=tests/.root`...),
-  then sources each `tests/drivers/testNNN`.
-- Tests use the `osht` TAP framework (`RUNS`, `IS`, `DIFF`, ...). Expected
-  output is inline in the driver as a heredoc passed to `CLEAN-DIFF`, which
-  masks time-stamps, `$PWD`, and hashes.
+- The regression drivers are pytest tests, `tests/drivers/testNNN.py`,
+  one test function `test(t)` each, with the harness `tests/harness.py`
+  (fixture `t` in `tests/drivers/conftest.py`). Each driver runs in its
+  own copy of the test root (`scripts.d`, `.root/repos`...) in a
+  temporary directory, so drivers are independent; they run in parallel
+  when pytest-xdist is installed (`-n auto`).
+- `t.runs("./scbi ...")` / `t.nruns(...)` run a command (status 0 / not
+  0); `./scbi` runs the driver in the test process
+  (`SCBI_TEST_SUBPROCESS=1` runs it as a process, to debug), other
+  commands with bash. Checks on the output of the last command:
+  `t.clean_diff("""...""")` (masks time-stamps, the directory of the
+  test, hashes), `t.diff`, `t.grep`, `t.ngrep`; on values: `t.ok`,
+  `t.nok` (as `test`), `t.is_`, `t.isnt`. Output filters:
+  `t.trim_output()`, `t.sort_output()`... Shell steps: `t.sh("...")`
+  (variables, exported functions and directory kept, the output as the
+  file `$TEST_OUTPUT`), `t.set`, `t.unset`, `t.cd`; `t.text("...")`
+  expands a text as an unquoted here-document.
+- A failing check does not stop the driver: all failures are reported at
+  the end with their line and a diff.
 - `tests/scripts.d/` holds the test-only YAML plug-ins (no `c-` prefix),
   plans and Python environment files; `tests/.root/repos` holds the small
   Git/SVN/Mercurial repositories and archives they build from. A driver
-  changing a plug-in edits its `.yaml` file (and restores it).
+  may change the plug-ins of its copy freely.
 - Test knobs of the driver are under `SCBI_TESTSUITE=yes`: no
   `$HOME/.scbi`, `SCBI_OS_MODULE`, fake OS `SCBI_OS_NAME=test` with
   `SCBI_TEST_PKGS`, `TODAY` from the environment.
-- When adding a test, create `tests/drivers/testNNN` with the next free
-  number and bump the `PLAN <n>` count in `tests/run` by the number of new
-  assertions. The `PLAN` count is only applied when running the whole
-  suite.
+- When adding a test, create `tests/drivers/testNNN.py` with the next free
+  number.
 - A behavior change in the driver usually changes expected output in
   several drivers; update them and say which in the commit.
 - `tests/fixtures/` holds the inputs of the YAML tools (`lint`, `format`)
@@ -154,8 +164,8 @@ directive or sub-command needs a matching update there (also check
 - Python driver: Python >= 3.11, PyYAML only, no shell (`subprocess` with
   argument lists); report through `scbi.log` (`ilog`, `elog`...) so
   messages reach the build logs.
-- Test drivers (Bash, osht): `#!/bin/bash` style, 4-space indentation,
-  `[[ ... ]]` tests.
+- Test drivers: Python (pytest, `tests/harness.py`), expected outputs as
+  triple-quoted strings; Bash code given to `t.sh` uses `[[ ... ]]` tests.
 - Commit messages: short imperative subject, prefixed by the component when
   scoped, e.g. `c-polyorb: Disable global install.`, `scbi lint: Add more
   hook checks.`, `test104: Update expected output (archive hook).`
