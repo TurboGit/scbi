@@ -17,14 +17,21 @@ def test(t):
 
     t.runs('grep -E -e "^(PREFIX=|cd |mkdir|cp|#!)" $TVDIR/install.sh')
 
-    t.clean_diff(t.text("""\
+    #  the parameters and driver variables replaced by their values
+    t.clean_diff("""\
 #!/bin/bash
-PREFIX=<pwd>/.root/builds/test2/x86_64-linux-gnu-default/install
 cd <pwd>/.root/builds/test2/x86_64-linux-gnu-default/src || exit 1
-mkdir -p "\\$PREFIX"/bin "\\$PREFIX"/include
-cp -r main "\\$PREFIX"/bin
-cp -r incl.h "\\$PREFIX"/include
-"""))
+mkdir -p <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/bin <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/include
+cp -r main <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/bin
+cp -r incl.h <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/include
+""")
+
+    #  --script:inline: a single line, in a sub-shell
+    t.runs('./scbi replay --script:inline $TVDIR/logs/install.cmd')
+    t.runs("./scbi replay --script:inline $TVDIR/logs/install.cmd | sed -e 's/; export [^;]*;/; export ...;/'")
+    t.clean_diff("""\
+( cd <pwd>/.root/builds/test2/x86_64-linux-gnu-default/src || exit 1; export ...; mkdir -p <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/bin <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/include; cp -r main <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/bin; cp -r incl.h <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/include )
+""")
 
     #  the script installs the module again, with an empty environment
 

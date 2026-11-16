@@ -302,7 +302,7 @@ _scbi()
     #  scbi replay: the replay files (<step>.cmd)
     if [[ ${_SCBI_MODE} == rpl ]]; then
         if [[ $cur == -* ]]; then
-            COMPREPLY=( $(compgen -W "--trace --script --help" -- "$cur") )
+            COMPREPLY=( $(compgen -W "--trace --script --script:inline --help" -- "$cur") )
         else
             COMPREPLY=( $(compgen -f -X '!*.cmd' -- "$cur") $(compgen -d -- "$cur") )
         fi

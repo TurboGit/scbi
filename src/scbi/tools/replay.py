@@ -17,8 +17,9 @@ SCBI-REPLAY {version}
    -h | --help             this help message
    -v | --version          display driver & plug-ins versions
       | --trace            display each command before running it
-      | --script           display a Bash script running the step by hand
-                           (environment, parameters, commands), run nothing
+      | --script[:inline]  display a Bash script running the step by hand
+                           (environment, commands), run nothing; inline:
+                           on a single line, in a sub-shell
 
 Reruns a step from its replay file (in the logs directory of the module)."""
 
@@ -34,11 +35,11 @@ def main(driver, args: list[str]) -> int:
         sys.stderr.write("scbi replay: one replay file expected\n")
         return 1
     try:
-        if "--script" in argv:
+        if "--script" in argv or "--script:inline" in argv:
             from scbi.steps.replayscript import ScriptError, script
 
             try:
-                sys.stdout.write(script(replay.load(files[0])))
+                sys.stdout.write(script(replay.load(files[0]), inline="--script:inline" in argv))
             except ScriptError as e:
                 sys.stderr.write(f"scbi replay: {e}\n")
                 return 1

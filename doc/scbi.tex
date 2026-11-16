@@ -2362,18 +2362,27 @@ the same trace (lines starting with \code{\_TRACE:}), except with
 \cmd{scbi replay \ddash{}script <step>.cmd > step.sh}
 
 runs nothing but displays a Bash script doing the step by hand: the
-environment of the hook (exported), the driver variables, the parameters
+environment of the hook (exported), the plug-in functions called, the
+directory of the hook and its body translated to Bash. What is known when
+the script is generated is written as its value: the parameters
 (\code{PREFIX}, \code{TARGET}, \code{VARIANT}...), the plug-in variables,
-the configuration options of the module (array \code{CONFIG\_OPTIONS}),
-the plug-in functions called, the directory of the hook and its body
-translated to Bash. What is known when the script is generated is
-resolved (\code{cross}, \code{variant}, \code{enabled()},
-\code{build-type()}, the functions with known arguments such as
-\code{get-build-type}); file tests, \code{ok(...)}, command status and the
-variables set by the hook stay Bash. The script can be edited and run with
-\code{bash step.sh} (\code{env -i bash step.sh} for an environment as
-isolated as the hook's). \code{all-modules} and \code{hook-output} are not
+the driver variables (\code{SCBI\_*}), the configuration options, the
+conditions on the build (\code{cross}, \code{variant}, \code{enabled()},
+\code{build-type()}...) and the functions with known arguments (such as
+\code{get-build-type}). File tests, \code{ok(...)}, command status and the
+variables set by the hook stay Bash. The variables of the user's terminal
+(\code{HOME}, \code{USER}, \code{LOGNAME}, \code{SHELL}, \code{TERM},
+\code{LANG}, \code{DISPLAY}, \code{CDPATH}) and of the driver
+(\code{SCBI\_*}, \code{DO\_*}) are not exported by the script: the ones of
+the shell running it are used. The script can be edited and run with
+\code{bash step.sh}. \code{all-modules} and \code{hook-output} are not
 available in a replay.
+
+\cmd{scbi replay \ddash{}script:inline <step>.cmd}
+
+displays the same commands on a single line, run in a sub-shell, to be
+pasted in a terminal: \code{( cd <dir> || exit 1; export A=... B=...;
+<commands> )}. The \code{write} blocks are written with \code{printf}.
 
 \subsection{Standalone archives}
 

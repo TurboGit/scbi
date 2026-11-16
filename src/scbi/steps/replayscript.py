@@ -51,15 +51,15 @@ _DELETE_HELPER = """\
 _scbi_delete()
 {
     #  [-r] PATH...: rm -f (rm -fr with -r), only when each path is in the
-    #  sandbox ($SCBI_BDIR), a directory only with -r
-    local sandbox p name real opt=-f
+    #  sandbox, a directory only with -r
+    local bdir=@SANDBOX@ sandbox p name real opt=-f
     local reals=()
     if [[ $1 == -r ]]; then
         opt=-fr
         shift
     fi
-    sandbox=$(realpath -m -- "$SCBI_BDIR") || return 1
-    [[ -n $SCBI_BDIR ]] || { echo "delete: no sandbox, nothing deleted" >&2; return 1; }
+    [[ -n $bdir ]] || { echo "delete: no sandbox, nothing deleted" >&2; return 1; }
+    sandbox=$(realpath -m -- "$bdir") || return 1
     for p in "$@"; do
         name=$(basename -- "$p")
         if [[ $name == . || $name == .. ]]; then
@@ -109,6 +109,8 @@ class _Translator:
         self.helpers: set[str] = set()
         self.called: set[str] = set()
         self.in_function = False
+        #  --script:inline: the commands on one line
+        self.inline = False
 
     # ------------------------------------------------------------ static
 
@@ -118,6 +120,22 @@ class _Translator:
     def state(self) -> State:
         return State(dict(self.r.variables), dict(self.r.environment), self.r.cwd, lambda t: None,
                      lambda t: None)
+
+    def is_static_var(self, name: str) -> bool:
+        """A variable whose value is known when the script is generated:
+        a hook parameter, a plug-in variable, a driver variable (SCBI_*),
+        not set by the hook. Its value is written in the script."""
+        r = self.r
+        if name in self.dynamic:
+            return False
+        return name in r.params or name in r.variables or name in r.driver or name.startswith("SCBI_")
+
+    def static_value(self, ref: str) -> str:
+        """The value of a reference to a static variable ($V, ${V%x}...)."""
+        try:
+            return expand(ref, self.ctx)
+        except ExpandError as e:
+            raise ScriptError(str(e)) from None
 
     def uses_dynamic(self, text: str) -> bool:
         for m in re.finditer(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)", text):
@@ -132,6 +150,9 @@ class _Translator:
         if len(w.parts) == 1 and w.parts[0][1] == "":
             text = w.parts[0][0]
             m = re.fullmatch(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?", text)
+            if m and self.is_static_var(m.group(1)) and isinstance(self.r.variables.get(m.group(1)), list):
+                #  a plug-in variable holding a list: its elements
+                return " ".join(q(v) for v in self.r.variables[m.group(1)])
             if m and m.group(1) in self.lists:
                 return f'"${{{m.group(1)}[@]}}"'
             m = re.fullmatch(r"\$\((.*)\)", text, re.S)
@@ -165,6 +186,11 @@ class _Translator:
                 if m:
                     ref = m.group(0)
                     name = re.match(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)", ref).group(1)
+                    if self.is_static_var(name):
+                        value = self.static_value(ref)
+                        out.append(re.sub(r'(["$`\\])', r"\\\1", value) if quoted else q(value) if value else "")
+                        i = m.end()
+                        continue
                     if name in self.lists and ref in (f"${name}", f"${{{name}}}"):
                         ref = f"${{{name}[*]}}"
                     out.append(ref if quoted else f'"{ref}"')
@@ -193,7 +219,8 @@ class _Translator:
         name = words[0] if words else ""
         rest = words[1] if len(words) > 1 else ""
         if name == "config-options":
-            return '"${CONFIG_OPTIONS[*]}"' if quoted else '"${CONFIG_OPTIONS[@]}"'
+            opts = self.r.config_options
+            return q(" ".join(opts)) if quoted else " ".join(q(o) for o in opts)
         if name not in FUNCTIONS and name not in BUILTINS:
             raise ScriptError(f"unknown function $({name} ...)")
         if name in ("all-modules", "hook-output"):
@@ -283,7 +310,7 @@ class _Translator:
         if (first in FUNCTIONS or first in BUILTINS) and not quoted:
             rest = s.text.strip()[len(first):].strip()
             if first == "config-options":
-                lines.append(f'{name}=("${{CONFIG_OPTIONS[@]}}")')
+                lines.append(f"{name}=(" + " ".join(q(o) for o in self.r.config_options) + ")")
                 self.lists.add(name)
             elif first == "output":
                 lines.append(f"{name}=$({self.command_line(rest)})")
@@ -416,7 +443,7 @@ class _Translator:
                 for k, (cond, body) in enumerate(s.branches):
                     c = self.condition(cond)
                     #  resolved when generated: the condition as a comment
-                    note = f"  # {cond}" if c in ("true", "false") else ""
+                    note = f"  # {cond}" if c in ("true", "false") and not self.inline else ""
                     out.append(f"{ind}{'if' if k == 0 else 'elif'} {c}; then{note}")
                     out += self.body(body, depth + 1) or [ind + "    :"]
                 if s.orelse is not None:
@@ -429,6 +456,15 @@ class _Translator:
                 self.lists.discard(s.name)
                 out += self.body(s.body, depth + 1) or [ind + "    :"]
                 out.append(ind + "done")
+            elif isinstance(s, Write) and self.inline:
+                #  on one line: printf of the lines (no here-document)
+                op = ">>" if s.append else ">"
+                lines = s.text.rstrip("\n").split("\n")
+                if s.raw:
+                    args = " ".join(q(ln) for ln in lines)
+                else:
+                    args = " ".join('"' + self.heredoc_text(ln).replace('"', '\\"') + '"' for ln in lines)
+                out.append(f"{ind}printf '%s\\n' {args} {op} {self.word(s.path)}")
             elif isinstance(s, Write):
                 op = ">>" if s.append else ">"
                 text = s.text if s.raw else self.heredoc_text(s.text)
@@ -455,6 +491,11 @@ class _Translator:
                 out.append(self.dq(text[i + 2 : j]))
                 i = j + 1
                 continue
+            m = re.compile(r"\$(?:\{[^}]*\}|[A-Za-z_][A-Za-z0-9_]*)").match(text, i)
+            if m and self.is_static_var(re.match(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)", m.group(0)).group(1)):
+                out.append(re.sub(r"([$`\\])", r"\\\1", self.static_value(m.group(0))))
+                i = m.end()
+                continue
             out.append(text[i])
             i += 1
         return "".join(out)
@@ -480,30 +521,62 @@ class _Translator:
             functions += [f"    local {p}=${k + 1}" for k, p in enumerate(params)]
             functions += (fbody or ["    :"]) + ["}", ""]
 
+        env = {k: v for k, v in sorted(r.environment.items()) if _exported(k)}
+        helpers: list[str] = []
+        if "versions" in self.helpers:
+            helpers += _VERSIONS_HELPER.rstrip("\n").split("\n")
+        if "delete" in self.helpers:
+            sandbox = r.driver.get("SCBI_BDIR") or r.environment.get("SCBI_BDIR", "")
+            helpers += _DELETE_HELPER.replace("@SANDBOX@", q(sandbox)).rstrip("\n").split("\n")
+        if self.inline:
+            parts = [f"cd {q(r.cwd)} || exit 1"]
+            if env:
+                parts.append("export " + " ".join(f"{k}={q(v)}" for k, v in env.items()))
+            return "( " + _one_line(parts + helpers + functions + body) + " )\n"
+
         head = ["#!/bin/bash", "",
                 f"#  {r.module} [{r.variant}] {r.hook}: the {r.function} hook of",
                 f"#  {r.plugin_file}, line {r.line}",
                 "#  (generated by scbi replay --script)", "",
                 "#  Environment of the hook"]
-        head += [f"export {k}={q(v)}" for k, v in sorted(r.environment.items())]
-        head += ["", "#  Driver variables"]
-        head += [f"{k}={q(v)}" for k, v in sorted(r.driver.items()) if k not in r.environment]
-        head += ["", "#  Parameters of the hook"]
-        head += [f"{k}={q(v)}" for k, v in r.params.items()]
-        if r.variables:
-            head += ["", "#  Plug-in variables"]
-            for k, v in r.variables.items():
-                head.append(f"{k}=(" + " ".join(q(x) for x in v) + ")" if isinstance(v, list) else f"{k}={q(v)}")
-        head += ["", "#  Configuration options of the module",
-                 "CONFIG_OPTIONS=(" + " ".join(q(o) for o in r.config_options) + ")", ""]
-        if "versions" in self.helpers:
-            head += [_VERSIONS_HELPER]
-        if "delete" in self.helpers:
-            head += [_DELETE_HELPER]
+        head += [f"export {k}={q(v)}" for k, v in env.items()]
+        head.append("")
+        if helpers:
+            head += helpers + [""]
         if functions:
             head += ["#  Plug-in functions", ""] + functions
         head += [f"cd {q(r.cwd)} || exit 1", ""]
         return "\n".join(head + body) + "\n"
+
+
+#  not written in the script: the variables of the user's terminal and
+#  of the driver (the driver variables used by the hook are replaced by
+#  their values)
+_TERMINAL = frozenset(("DISPLAY", "CDPATH", "LOGNAME", "LANG", "HOME", "SHELL", "TERM", "USER", "color", "root"))
+
+
+def _exported(name: str) -> bool:
+    """A variable of the hook environment exported by the script."""
+    return name not in _TERMINAL and not name.startswith(("SCBI_", "DO_"))
+
+
+def _one_line(lines: list[str]) -> str:
+    """Bash lines joined on one line: comments and blank lines dropped,
+    ``;`` between the commands but after the keywords opening a block."""
+    out = ""
+    for ln in lines:
+        s = ln.strip()
+        if not s or s.startswith("#"):
+            continue
+        if out:
+            prev = out.rstrip()
+            last = prev.rsplit("; ", 1)[-1]
+            opening = (prev.endswith((" then", " do", " in", ";;", "{")) or last in ("then", "do", "else")
+                       or re.fullmatch(r"[A-Za-z_][\w-]*\(\)", last) is not None
+                       or prev.endswith((";", "&&", "||", "|")) or prev.endswith(" else"))
+            out = prev + (" " if opening else "; ")
+        out += s
+    return out
 
 
 def _closing(text: str, open_paren: int) -> int:
@@ -529,6 +602,9 @@ def _balanced(text: str) -> bool:
     return depth == 0
 
 
-def script(r: replay.Replay) -> str:
-    """The Bash script of the replay file ``r``."""
-    return _Translator(r).script()
+def script(r: replay.Replay, inline: bool = False) -> str:
+    """The Bash script of the replay file ``r``; ``inline``: a single
+    line running the commands in a sub-shell."""
+    tr = _Translator(r)
+    tr.inline = inline
+    return tr.script()

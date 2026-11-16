@@ -30,9 +30,10 @@ def interpreted(r: replay.Replay) -> tuple[int, str]:
     return status, "".join(out)
 
 
-def scripted(r: replay.Replay) -> tuple[int, str]:
+def scripted(r: replay.Replay, inline: bool = False) -> tuple[int, str]:
     #  standard output and status (the error messages differ)
-    proc = subprocess.run(["/bin/bash", "-c", script(r)], capture_output=True, text=True, cwd="/", env={})
+    proc = subprocess.run(["/bin/bash", "-c", script(r, inline=inline)], capture_output=True, text=True, cwd="/",
+                          env={})
     return proc.returncode, proc.stdout
 
 
@@ -68,7 +69,8 @@ BODIES = [
 
 
 @pytest.mark.parametrize("body", BODIES)
-def test_script_same_as_interpreter(tmp_path, body):
+@pytest.mark.parametrize("inline", [False, True], ids=["script", "inline"])
+def test_script_same_as_interpreter(tmp_path, body, inline):
     (tmp_path / "inst").mkdir()
     a = tmp_path / "a"
     b = tmp_path / "b"
@@ -77,7 +79,7 @@ def test_script_same_as_interpreter(tmp_path, body):
     ra, rb = make(a, body), make(b, body)
     rb.params["PREFIX"] = str(b / "inst")
     sa, outa = interpreted(ra)
-    sb, outb = scripted(rb)
+    sb, outb = scripted(rb, inline)
     assert (sb, outb.replace(str(b), "@")) == (sa, outa.replace(str(a), "@"))
 
 
@@ -85,9 +87,22 @@ def test_functions_and_header(tmp_path):
     r = make(tmp_path, "greet world", functions={"greet": {"params": ["WHO"], "run": "echo hello $WHO\nreturn 0\n"}})
     text = script(r)
     assert text.startswith("#!/bin/bash\n")
-    assert "export LANG=C" in text and "SCBI_JOBS=4" in text and "CONFIG_OPTIONS=(-DA=1 '-DB=x y')" in text
+    #  only the environment: the other variables are replaced by their value
+    assert "export PATH=" in text and "SCBI_" not in text and "CONFIG_OPTIONS" not in text
+    #  the variables of the user's terminal are not written
+    assert "HOME=" not in text and "LANG=" not in text
     assert "greet()\n{\n    local WHO=$1\n" in text
-    assert scripted(r) == interpreted(r) == (0, "hello world\n")
+    assert scripted(r) == scripted(r, inline=True) == interpreted(r) == (0, "hello world\n")
+
+
+def test_values_written(tmp_path):
+    r = make(tmp_path, "cmake -DP=$PREFIX $(config-options) -j$SCBI_JOBS ../src\nX = output date\necho $X")
+    lines = script(r).splitlines()
+    assert f"cmake -DP={tmp_path}/inst -DA=1 '-DB=x y' -j4 ../src" in lines
+    assert 'echo "$X"' in lines
+    inline = script(r, inline=True)
+    assert inline.startswith(f"( cd {tmp_path} || exit 1; export ") and inline.endswith(" )\n")
+    assert inline.count("\n") == 1
 
 
 def test_not_available(tmp_path):
