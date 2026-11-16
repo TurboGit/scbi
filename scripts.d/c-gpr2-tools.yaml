@@ -7,7 +7,7 @@ functions:
       - TARGET
       - BUILD
     run: |-
-      rm -fr .build/kb
+      delete-tree .build/kb
       mkdir .build
       ln -s ${SCBI_MODULES_DIR[c-gpr2-lib@build]}/.build/kb .build/kb
       make $BUILD GPR2KBDIR=${SCBI_MODULES_DIR[c-gprconfig-kb@src]}/db prefix=$PREFIX setup

@@ -30,9 +30,9 @@ tests-env:
 out-of-tree: false
 
 config:
-  _: rm -f makefile.setup && make prefix=$PREFIX setup
+  _: delete makefile.setup && make prefix=$PREFIX setup
   cross:
-    _: rm -f makefile.setup && make prefix=$PREFIX TARGET=$TARGET setup
+    _: delete makefile.setup && make prefix=$PREFIX TARGET=$TARGET setup
 
 build: make
 

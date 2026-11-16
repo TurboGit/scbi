@@ -25,7 +25,7 @@ out-of-tree: false
 
 config: |-
   cd lkt
-  rm -f build
+  delete build
   ln -s bootstrap build
 
 build: python3 -m langkit.scripts.lkm build -c lkt/langkit.yaml --library-types=static,static-pic,relocatable --disable-all-mains

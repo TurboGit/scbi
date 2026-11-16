@@ -13,7 +13,7 @@ setup: |-
 
 out-of-tree: false
 
-config: cd build && rm mk.install
+config: cd build && delete mk.install
 
 build: |-
   export AWS_BUILD = relocatable

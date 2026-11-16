@@ -33,11 +33,11 @@ build-env:
 out-of-tree: false
 
 config: |-
-  rm -fr gnat
+  delete-tree gnat
   ln -s $SCBI_BDIR/p-gnat/$TARGET-default/src/gcc/ada/doc/gnat_ugn gnat
-  rm -f laltools
+  delete laltools
   ln -s $SCBI_BDIR/c-libadalang-tools/$TARGET-default/src laltools
-  rm -f ada_language_server
+  delete ada_language_server
   ln -s $SCBI_BDIR/c-ada-language-server/$TARGET-default/build ada_language_server
   ./configure --prefix=$PREFIX --with-gtk=$SCBI_GTK_VERSION --with-sqlite=embedded --with-gnatcoll=$SCBI_BDIR/install --with-clang=/usr/lib/llvm-11/lib
 

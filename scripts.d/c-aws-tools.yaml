@@ -42,11 +42,11 @@ config-options:
 config:
   _: |-
     OPTIONS =
-    rm -f makefile.setup && make $(config-options) setup
+    delete makefile.setup && make $(config-options) setup
   cross:
     _: |-
       OPTIONS =
-      rm -f makefile.setup && make LAL=false ZLIB=false TARGET=$TARGET $(config-options) setup
+      delete makefile.setup && make LAL=false ZLIB=false TARGET=$TARGET $(config-options) setup
 
 build:
   _: make build-tools-native
@@ -60,4 +60,4 @@ install:
 
 tests: |-
   OPTIONS = "$OPTIONS"
-  cd regtests && rm -fr results && mkdir results && ./gen_system_tags.py ../$TARGET/makefile.setup ../$TARGET/testsuite.tags && ./testsuite.py --jobs=$SCBI_JOBS --temp-dir=$PWD/results --target-dir=../$TARGET $OPTIONS
+  cd regtests && delete-tree results && mkdir results && ./gen_system_tags.py ../$TARGET/makefile.setup ../$TARGET/testsuite.tags && ./testsuite.py --jobs=$SCBI_JOBS --temp-dir=$PWD/results --target-dir=../$TARGET $OPTIONS

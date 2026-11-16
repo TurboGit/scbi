@@ -17,7 +17,7 @@ depends:
 out-of-tree: false
 
 config: |-
-  rm -f gnat2why/gnat_src
+  delete gnat2why/gnat_src
   ln -s $SCBI_BDIR/p-gnat/src gnat2why/gnat_src
   make setup
 
@@ -25,4 +25,4 @@ build: make
 
 install: |-
   mkdir -p $PREFIX
-  make install-all && copy install/* $PREFIX/ && rm -fr install
+  make install-all && copy install/* $PREFIX/ && delete-tree install

@@ -41,7 +41,7 @@ config-options:
   - --enable-large-address-aware
   - --enable-languages=c
 
-pre-config: rm -fr ../src/gcc/ada
+pre-config: delete-tree ../src/gcc/ada
 
 config:
   cross:

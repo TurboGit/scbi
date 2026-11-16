@@ -129,7 +129,7 @@ build: make -j$SCBI_HALF_JOBS
 
 install: |-
   make install
-  rm -f ../src/.git
+  delete ../src/.git
 
 tests: |-
   OPTIONS = "$OPTIONS"
