@@ -294,3 +294,9 @@ def test_empty_condition(tmp_path):
 def test_replace_in_values(tmp_path):
     c = ctx(tmp_path, env=Environment(ShellVars({"V": "3.12"})))
     assert expand("libpython$(replace $V . '')|$(replace $V .3 _4)", c) == "libpython312|4_12"
+
+
+def test_get_version_of_a_plugin(tmp_path):
+    c = ctx(tmp_path, plan=PlanState({"lib2": "lib2:2.0.1", "m": "m:1.2"}))
+    #  not in the build plan: NONE (as the condition version())
+    assert expand("$(get-version lib2)|$(get-version nope)", c) == "2.0.1|NONE"

@@ -799,7 +799,7 @@ class Runner:
         if name == "is-enabled":
             return _builtins.is_enabled(ctx, *(args + ["", "", ""])[:3])[1]
         if name == "get-version":
-            return _builtins.get_version(ctx)
+            return _builtins.get_module_version(ctx, args[0]) if args else _builtins.get_version(ctx)
         if name == "first-line":
             return " ".join(args).split("\n", 1)[0]
         if name == "status":

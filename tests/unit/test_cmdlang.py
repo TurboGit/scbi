@@ -374,3 +374,14 @@ def test_value_functions_in_assignments(tmp_path):
     (tmp_path / "f1").write_text("")
     status, out, _ = run(tmp_path, "Y = ls f1\necho [$Y]\nZ = dirname /a/b\necho [$Z]")
     assert (status, out) == (0, "[f1]\n[/a]\n")
+
+
+def test_get_version_of_a_plugin_in_commands(tmp_path):
+    from scbi.plan import PlanState
+
+    r = make(tmp_path)
+    r.ctx.plan = PlanState({"lib2": "lib2:2.0.1"})
+    out = []
+    state = State({}, {"PATH": os.environ["PATH"]}, str(tmp_path), out.append, out.append)
+    assert r.run(parse("V = get-version lib2\necho $V $(get-version lib2)", 10), state) == 0
+    assert "".join(out) == "2.0.1 2.0.1\n"

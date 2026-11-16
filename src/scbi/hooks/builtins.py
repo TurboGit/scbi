@@ -274,7 +274,8 @@ def ls(ctx: HookContext, *args: str) -> str:
 def call(ctx: HookContext, name: str, args: list[str]) -> str:
     """Run built-in ``name`` with ``args``, return its output."""
     if name == "get-version":
-        return get_version(ctx)
+        #  get-version [PLUG-IN]: the version of the module, or of a plug-in
+        return get_module_version(ctx, args[0]) if args else get_version(ctx)
     if name == "get-build-type":
         return get_build_type(ctx, *args[:2])
     if name == "is-enabled":

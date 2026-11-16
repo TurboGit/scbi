@@ -983,7 +983,7 @@ spaces, e.g. \code{cmake \$(config-options) ../src}.
 \textbf{Information on the build.}
 
 \begin{description}
-	\item[get-version] The version of the module in the build plan.
+	\item[get-version {[<plug-in>]}] The version of the module in the build plan, or with an argument the version of the given plug-in (for this module, as the condition \code{version(<plug-in>)}). \code{NONE} when the build plan gives no version.
 	\item[get-build-type <kind> <default>] The build type of the module
 	(\seeref{build-kind}): \code{\$SCBI\_<module>\_BUILD\_TYPE}, else
 	\code{\$SCBI\_<kind>\_BUILD\_TYPE}, else \code{<default>}.
@@ -1100,7 +1100,7 @@ parentheses. The operands are:
 	\item[variant] The variant of the module.
 	\item[kind] The kind of the module version (\code{DEV}, \code{BRANCH},
 	\code{VERSION}...).
-	\item[version(<plug-in>)] The version of a module in the build plan.
+	\item[version(<plug-in>)] The version of a module in the build plan (as \code{\$(get-version <plug-in>)}).
 	\item[build-type(<kind>{[,<default>]})] As the function
 	\code{get-build-type}.
 	\item[enabled(<feature>)] True when the feature is enabled.
@@ -3186,7 +3186,7 @@ The YAML equivalents of the Bash constructs:
 	\item[\code{get-config-options OPTIONS \$PREFIX \$TARGET \$VARIANT}] \code{\$(config-options)} or \code{OPTIONS = config-options} (\seeref{get config options}).
 	\item[\code{\$(get-build-type <kind> <default>)}] the same function (\seeref{yaml-functions}).
 	\item[\code{check-tool}, \code{check-tools}, \code{command -v}] \code{command-path}.
-	\item[\code{get-module-version}, \code{check-module-version}] \code{version(<plug-in>)} in conditions, \code{check-versions}.
+	\item[\code{get-module-version}, \code{check-module-version}] \code{\$(get-version <plug-in>)}, \code{version(<plug-in>)} in conditions, \code{check-versions}.
 	\item[\code{scbi-store-get-key}, \code{scbi-store-set-key}] \code{\$(store-key <key>)}, the \code{scbi store} sub-command.
 	\item[\code{cp -r}, \code{rm -f}, \code{rm -fr}] the built-in commands \code{copy}, \code{delete} and \code{delete-tree}.
 	\item[\code{\$(command args)}] \code{\$(output command args)}.
