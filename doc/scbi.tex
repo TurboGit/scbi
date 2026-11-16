@@ -2278,6 +2278,23 @@ before running it, as \code{bash -x} does. The step logs contain the same
 trace (lines starting with \code{\_TRACE:}) unless
 \code{SCBI\_DLOG=yes}.
 
+\index{replay!script}
+\cmd{scbi replay \ddash{}script <step>.cmd > step.sh}
+
+runs nothing but displays a Bash script doing the step by hand: the
+environment of the hook (exported), the driver variables, the parameters
+(\code{PREFIX}, \code{TARGET}, \code{VARIANT}...), the plug-in variables,
+the configuration options of the module (array \code{CONFIG\_OPTIONS}),
+the plug-in functions called, the directory of the hook and its body
+translated to Bash. What is known when the script is generated is
+resolved (\code{cross}, \code{variant}, \code{enabled()},
+\code{build-type()}, the functions with known arguments such as
+\code{get-build-type}); file tests, \code{ok(...)}, command status and the
+variables set by the hook stay Bash. The script can be edited and run with
+\code{bash step.sh} (\code{env -i bash step.sh} for an environment as
+isolated as the hook's). \code{all-modules} and \code{hook-output} are not
+available in a replay.
+
 \subsection{Sub-commands}
 
 The sub-commands are implemented by the Python driver. \code{show},
@@ -2830,6 +2847,10 @@ In case of failure \code{SCBI} output the command to use to replay:
 The replay file holds the directory, the environment, the parameters and
 the body of the hook (which can be edited). The hook runs in its own
 environment and won't pollute the working shell environment.
+
+To run the step by hand, outside \code{scbi}, the replay file can be
+turned into a shell script: \code{scbi replay \ddash{}script
+/.../logs/build.cmd > build.sh}.
 
 One can then edit the sources in the sandbox and replay the step:
 

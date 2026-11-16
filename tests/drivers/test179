@@ -1,0 +1,37 @@
+
+#  scbi replay --script: a Bash script running a step by hand
+
+TVDIR=.root/builds/test2/x86_64-linux-gnu-default
+
+RUNS ./scbi -s -c -b -i test2
+
+RUNS ./scbi replay --script $TVDIR/logs/install.cmd
+
+./scbi replay --script $TVDIR/logs/install.cmd > $TVDIR/install.sh
+
+RUNS grep -E -e "^(PREFIX=|cd |mkdir|cp|#!)" $TVDIR/install.sh
+
+CLEAN-DIFF <<EOF2
+#!/bin/bash
+PREFIX=<pwd>/.root/builds/test2/x86_64-linux-gnu-default/install
+cd <pwd>/.root/builds/test2/x86_64-linux-gnu-default/src || exit 1
+mkdir -p "\$PREFIX"/bin "\$PREFIX"/include
+cp -r main "\$PREFIX"/bin
+cp -r incl.h "\$PREFIX"/include
+EOF2
+
+#  the script installs the module again, with an empty environment
+
+rm -fr $TVDIR/install
+
+RUNS env -i /bin/bash $TVDIR/install.sh
+
+RUNS ls $TVDIR/install/bin $TVDIR/install/include
+
+CLEAN-DIFF <<EOF2
+$TVDIR/install/bin:
+main
+
+$TVDIR/install/include:
+incl.h
+EOF2
