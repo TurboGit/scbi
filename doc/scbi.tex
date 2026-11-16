@@ -918,7 +918,8 @@ none, as \code{command -v}), \code{\$(store-key <key>)} (the value of
 the key in \file{\$SCBI\_PLUGINS/.store}, lines \code{<key> <value>}),
 \code{\$(output <command> <args>)} (the standard output of the command,
 run without shell),
-\code{\$(basename <path>)}, \code{\$(dirname <path>)}, \code{\$(ls <glob>)}, \code{\$(uppercase
+\code{\$(basename <path>)}, \code{\$(dirname <path>)}, \code{\$(replace <value> <chars1>
+[<chars2>])} (see below), \code{\$(ls <glob>)}, \code{\$(uppercase
 <words>)} and \code{\$(lowercase <words>)}. A default value is given
 with \code{\$\{VAR:-default\}}.
 
@@ -1034,6 +1035,12 @@ in \code{\$(if ...)}.
 	\item[all-variants <variant>] the list of the variants of a variant
 	string (\code{a.b} gives \code{a} and \code{b}), empty for
 	\code{default}.
+	\item[replace <value> <chars1> {[<chars2>]}] \index{replace}the value with
+	each character of \code{<chars1>} replaced by the character at the same
+	position in \code{<chars2>} (both of the same length), or removed when
+	\code{<chars2>} is empty or not given, e.g. \code{\$(replace
+	\$PYTHON\_VERSION . '')} gives \code{312} for \code{3.12}; a value with
+	blanks is quoted.
 	\item[uppercase <words>, lowercase <words>] the words in upper or
 	lower case.
 	\item[if <condition> then <words> {[else <words>]}] the first words when
@@ -1089,6 +1096,21 @@ function of the plug-in.
 	directories merged. It has no option. The converter of Bash plug-ins
 	turns \code{cp} and \code{cp -r} into \code{copy}; the system
 	\code{cp} is still available for other options (\code{cp -a}...).
+	\item[delete <path>...] \index{delete} deletes files and symbolic links,
+	as \code{rm -f}: a directory is an error (use \code{delete-tree}), so
+	that a path turning out to be a directory (an empty variable in
+	\code{\$DIR/\$NAME}...) does not delete it.
+	\item[delete-tree <path>...] \index{delete-tree} deletes files and
+	directories, directories recursively, as \code{rm -fr}.
+
+	Both delete only in the sandbox (\code{\$SCBI\_BDIR}): the location of
+	each path (its directory with \code{..} and symbolic links resolved,
+	then its name) must be under the sandbox. All the paths are checked
+	first: on an error nothing is deleted and the command fails. A symbolic
+	link is deleted, not its target; a missing path is not an error. They
+	have no option. The converter of Bash plug-ins turns \code{rm} and
+	\code{rm -f} into \code{delete}, \code{rm -fr} (\code{-rf}, \code{-r})
+	into \code{delete-tree}.
 	\item[<function> <args>] a function of the plug-in
 	(\code{functions:}), its parameters set to the arguments.
 \end{description}

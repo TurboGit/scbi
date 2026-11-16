@@ -103,6 +103,7 @@ BUILTINS = (
     "get-os-bin",
     "get-os-bin-dir",
     "dirname",
+    "replace",
     "output",
     "command-path",
     "store-key",

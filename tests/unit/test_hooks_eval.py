@@ -289,3 +289,8 @@ def test_empty_condition(tmp_path):
     values = Values(("a", Guarded("empty($B)", ("b",)), Guarded("not empty($A)", ("c",)),
                      Guarded("empty($A)", ("d",))))
     assert eval_values(values, c) == ["a", "b", "c"]
+
+
+def test_replace_in_values(tmp_path):
+    c = ctx(tmp_path, env=Environment(ShellVars({"V": "3.12"})))
+    assert expand("libpython$(replace $V . '')|$(replace $V .3 _4)", c) == "libpython312|4_12"

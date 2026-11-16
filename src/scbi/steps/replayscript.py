@@ -46,6 +46,41 @@ _scbi_check_versions()
 }
 """
 
+#  delete: rm -fr only in the sandbox ($SCBI_BDIR), as the built-in
+_DELETE_HELPER = """\
+_scbi_delete()
+{
+    #  [-r] PATH...: rm -f (rm -fr with -r), only when each path is in the
+    #  sandbox ($SCBI_BDIR), a directory only with -r
+    local sandbox p name real opt=-f
+    local reals=()
+    if [[ $1 == -r ]]; then
+        opt=-fr
+        shift
+    fi
+    sandbox=$(realpath -m -- "$SCBI_BDIR") || return 1
+    [[ -n $SCBI_BDIR ]] || { echo "delete: no sandbox, nothing deleted" >&2; return 1; }
+    for p in "$@"; do
+        name=$(basename -- "$p")
+        if [[ $name == . || $name == .. ]]; then
+            real=$(realpath -m -- "$p")
+        else
+            real=$(realpath -m -- "$(dirname -- "$p")")/$name
+        fi
+        if [[ $real != "$sandbox"/* ]]; then
+            echo "delete: '$p' ($real) is not in the sandbox $sandbox, nothing deleted" >&2
+            return 1
+        fi
+        if [[ $opt == -f && -d $real && ! -L $real ]]; then
+            echo "delete: '$p' is a directory (use delete-tree), nothing deleted" >&2
+            return 1
+        fi
+        reals+=("$real")
+    done
+    rm $opt -- "${reals[@]}"
+}
+"""
+
 #  conditions on the state when the script runs
 _FILE_TESTS = {"exists": "-e", "is-dir": "-d", "is-file": "-f", "is-link": "-L"}
 _DYNAMIC_CALLS = set(_FILE_TESTS) | {"empty", "ok"}
@@ -177,6 +212,12 @@ class _Translator:
             return f'"$(command -v {self.words_of(rest)})"'
         if name in ("basename", "dirname"):
             return f'"$({name} {self.words_of(rest)})"'
+        if name == "replace":
+            ws = self.words_of(rest).split(" ")
+            if len(ws) not in (2, 3):
+                raise ScriptError(f"$({inner}): a value, the characters and their replacements expected")
+            tr = f"-d {ws[1]}" if len(ws) == 2 or ws[2] in ("''", '""') else f"{ws[1]} {ws[2]}"
+            return f'"$(printf %s {ws[0]} | tr {tr})"'
         if name in ("uppercase", "lowercase"):
             tr = "'[:lower:]' '[:upper:]'" if name == "uppercase" else "'[:upper:]' '[:lower:]'"
             return f'"$(echo {self.words_of(rest)} | tr {tr})"'
@@ -212,6 +253,9 @@ class _Translator:
             words[0] = "return" if self.in_function and first == "return" else "exit"
         elif first == "copy":
             words[0] = "cp -r"
+        elif first in ("delete", "delete-tree"):
+            self.helpers.add("delete")
+            words[0] = "_scbi_delete" + (" -r" if first == "delete-tree" else "")
         elif first == "check-versions":
             self.helpers.add("versions")
             words[0] = "_scbi_check_versions"
@@ -454,6 +498,8 @@ class _Translator:
                  "CONFIG_OPTIONS=(" + " ".join(q(o) for o in r.config_options) + ")", ""]
         if "versions" in self.helpers:
             head += [_VERSIONS_HELPER]
+        if "delete" in self.helpers:
+            head += [_DELETE_HELPER]
         if functions:
             head += ["#  Plug-in functions", ""] + functions
         head += [f"cd {q(r.cwd)} || exit 1", ""]

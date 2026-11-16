@@ -13,7 +13,7 @@ config: |-
   echo "#define TOOLVER \"$BT\"" > version.h
 
 build: |-
-  rm -f *.o
+  delete *.o
   make
 
 install: make PREFIX=$PREFIX install

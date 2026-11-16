@@ -66,11 +66,11 @@ from scbi.vercmp import check_versions
 FUNCTIONS = (
     "get-build-type", "config-options", "last-modified-directory", "is-enabled", "get-version",
     "output", "output-words", "first-line", "status", "basename", "dirname", "command-path",
-    "all-variants", "uppercase", "lowercase", "if", "all-modules", "hook-output",
+    "all-variants", "uppercase", "lowercase", "replace", "if", "all-modules", "hook-output",
 )
 #  Built-in commands
 COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset",
-            "check-versions", "copy")
+            "check-versions", "copy", "delete", "delete-tree")
 
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _ASSIGN = re.compile(r"^(export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+=(?:\s+(.*)|\s*)$")
@@ -814,6 +814,12 @@ class Runner:
             return " ".join(args).upper()
         if name == "lowercase":
             return " ".join(args).lower()
+        if name == "replace":
+            try:
+                return _builtins.replace(ctx, *args)
+            except _builtins.BuiltinError as e:
+                self.error(state, step.line, str(e))
+                return ""
         if name == "all-modules":
             self.modules_status = dict(self.all_modules())
             return list(self.modules_status)
@@ -941,6 +947,9 @@ class Runner:
                 return 0 if check_versions(a, op, b) else 1
             if name == "copy":
                 return self.copy(args, state, lambda m: err(f"{self.where}: line {line}: copy: {m}\n"))
+            if name in ("delete", "delete-tree"):
+                return self.delete(args, state, lambda m: err(f"{self.where}: line {line}: {name}: {m}\n"),
+                                   tree=name == "delete-tree")
             #  a plug-in function
             params, body = self.functions[name]
             saved = {p: state.vars.get(p) for p in params}
@@ -956,6 +965,54 @@ class Runner:
             return status
         finally:
             close()
+
+    def delete(self, args: list[str], state: State, error, tree: bool = False) -> int:
+        """``delete PATH...``: files and symbolic links removed (as ``rm
+        -f``, a directory is an error); ``delete-tree PATH...``: files and
+        directories removed recursively (as ``rm -fr``). Only under the
+        sandbox ($SCBI_BDIR): the location of each path (its directory
+        with ``..`` and symbolic links resolved, then its name) must be in
+        the sandbox. All the paths are checked first: on an error nothing
+        is deleted. A symbolic link is removed, not its target. A missing
+        path is not an error."""
+        if any(a.startswith("-") for a in args):
+            error(f"no option supported: {' '.join(a for a in args if a.startswith('-'))}")
+            return 1
+        if not args:
+            error("missing operand")
+            return 1
+        bdir = self.ctx.env.get("SCBI_BDIR") if self.ctx.env is not None else ""
+        if not bdir:
+            error("no sandbox (SCBI_BDIR not set), nothing deleted")
+            return 1
+        sandbox = os.path.realpath(bdir)
+        paths = []
+        for a in args:
+            p = self._path(a, state).rstrip(os.sep) or os.sep
+            name = os.path.basename(p)
+            if name in ("", ".", ".."):
+                #  delete dir/.. or dir/.: the directory itself
+                real = os.path.realpath(p)
+            else:
+                real = os.path.join(os.path.realpath(os.path.dirname(p)), name)
+            if not real.startswith(sandbox + os.sep):
+                error(f"'{a}' ({real}) is not in the sandbox {sandbox}, nothing deleted")
+                return 1
+            if not tree and os.path.isdir(real) and not os.path.islink(real):
+                error(f"'{a}' is a directory (use delete-tree), nothing deleted")
+                return 1
+            paths.append(real)
+        status = 0
+        for a, real in zip(args, paths):
+            try:
+                if os.path.isdir(real) and not os.path.islink(real):
+                    shutil.rmtree(real)
+                elif os.path.lexists(real):
+                    os.unlink(real)
+            except OSError as e:
+                error(f"cannot delete '{a}': {e.strerror or e}")
+                status = 1
+        return status
 
     def copy(self, args: list[str], state: State, error) -> int:
         """``copy SOURCE... DEST``: files and directories (recursively,

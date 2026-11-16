@@ -31,7 +31,7 @@ external-env:
 out-of-tree: false
 
 build: |-
-  rm -f *.o
+  delete *.o
   make
 
 install: |-

@@ -17,7 +17,7 @@ def make(tmp_path, run, **kw) -> replay.Replay:
     data = dict(module="m", variant="default", hook="build", function="m-build", plugin_file="m.yaml",
                 cwd=str(tmp_path), host="x86_64-linux-gnu", target="x86_64-linux-gnu", run=run,
                 params={"PREFIX": str(tmp_path / "inst"), "TARGET": "x86_64-linux-gnu", "VARIANT": "default"},
-                variables={"V": "plugin-var"}, driver={"SCBI_JOBS": "4", "SCBI_CMAKE_BUILD_TYPE": "Debug"},
+                variables={"V": "plugin-var"}, driver={"SCBI_JOBS": "4", "SCBI_CMAKE_BUILD_TYPE": "Debug", "SCBI_BDIR": str(tmp_path)},
                 environment=env, config_options=["-DA=1", "-DB=x y"], version="1.2")
     data.update(kw)
     return replay.Replay(**data)
@@ -60,6 +60,9 @@ BODIES = [
     "X = $(if cross then a else b)\necho $X",
     "echo one\nreturn 3\necho never",
     r"""echo 'single $V' "double $V" a\;b""",
+    "mkdir -p d/e\ntouch d/f\ndelete d/e || echo dir\ndelete-tree d/e d/nope\nls d\ndelete d/f\nls d\n"
+    "delete-tree /tmp || echo refused\nls -d d",
+    "echo $(replace 3.12 . _) $(replace a-b -)\nX = output echo 1.2\necho $(replace $X . _) $(replace $X .)",
 ]
 
 

@@ -189,7 +189,7 @@ class _Lifter:
         if "$?" in s:
             self.emit(depth, "_STATUS = status")
         self.check_command(s)
-        text = _gprbuild_project(_cp_to_copy(self.words_text(s, depth)))
+        text = _gprbuild_project(_rm_to_delete(_cp_to_copy(self.words_text(s, depth))))
         if text.startswith("return $_STATUS"):
             text = "return"
         self.emit(depth, text)
@@ -452,6 +452,24 @@ class _Lifter:
 
 
 _CP = re.compile(r"cp(?:\s+-[rR])?\s+(\S.*)")
+
+
+_RM = re.compile(r"rm(?:\s+-(fr|rf|r|R|Rf|fR|f))?\s+(\S.*)")
+
+
+def _rm_to_delete(text: str) -> str:
+    """``rm [-f] PATH...`` and ``rm -fr PATH...`` commands of a lifted line
+    (not in a pipeline, no other option, no redirection) as the built-ins
+    ``delete`` and ``delete-tree`` (which only delete in the sandbox)."""
+    if re.search(r"(?<!\|)\|(?!\|)", text):
+        return text
+    parts = re.split(r"(\s*(?:&&|\|\|)\s*)", text)
+    for i in range(0, len(parts), 2):
+        m = _RM.fullmatch(parts[i])
+        if m and not re.search(r"(^|\s)-|[<>]", m.group(2)):
+            cmd = "delete" if m.group(1) in (None, "f") else "delete-tree"
+            parts[i] = f"{cmd} {m.group(2)}"
+    return "".join(parts)
 
 
 def _cp_to_copy(text: str) -> str:

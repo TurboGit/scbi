@@ -221,6 +221,21 @@ def store_key(ctx: HookContext, key: str = "") -> str:
     return ""
 
 
+def replace(ctx: HookContext, *args: str) -> str:
+    """``replace VALUE CHARS1 [CHARS2]``: each character of CHARS1 in VALUE
+    replaced by the character at the same position in CHARS2, removed when
+    CHARS2 is empty or not given."""
+    if len(args) not in (2, 3):
+        raise BuiltinError("replace: a value, the characters to replace and their replacements expected"
+                           " (quote a value with blanks)")
+    value, chars1, chars2 = (*args, "")[:3]
+    if chars2 and len(chars2) != len(chars1):
+        raise BuiltinError(f"replace: '{chars1}' and '{chars2}' do not have the same length")
+    if not chars2:
+        return value.translate({ord(c): None for c in chars1})
+    return value.translate({ord(a): b for a, b in zip(chars1, chars2)})
+
+
 def basename(ctx: HookContext, *args: str) -> str:
     """The basename command (one name, optionally a suffix)."""
     if not args or len(args) > 2:
@@ -288,6 +303,8 @@ def call(ctx: HookContext, name: str, args: list[str]) -> str:
         return basename(ctx, *args)
     if name == "ls":
         return ls(ctx, *args)
+    if name == "replace":
+        return replace(ctx, *args)
     if name == "uppercase":
         return " ".join(args).upper()
     if name == "lowercase":

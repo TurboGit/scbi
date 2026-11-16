@@ -314,3 +314,57 @@ def test_function_in_words(tmp_path):
     assert go('O = config-options\nprintf "<%s>" $O') == go('printf "<%s>" $(config-options)')
     status, out = go("echo $(nope x)")
     assert status == 1 and out.startswith("m.yaml: config: line 10: unknown function $(nope ...)")
+
+
+def test_delete_only_in_the_sandbox(tmp_path):
+    sandbox = tmp_path / "bdir"
+    (sandbox / "m" / "install" / "lib").mkdir(parents=True)
+    (sandbox / "m" / "install" / "lib" / "a.la").write_text("x")
+    (sandbox / "m" / "install" / "lib" / "b.la").write_text("x")
+    (sandbox / "m" / "install" / "bin").mkdir()
+    outside = tmp_path / "outside"
+    (outside / "keep").mkdir(parents=True)
+    (outside / "keep" / "f").write_text("x")
+    #  a link in the sandbox to a directory outside, and a link to a file
+    (sandbox / "m" / "link").symlink_to(outside / "keep")
+    env = {"SCBI_BDIR": str(sandbox)}
+
+    def go(text, cwd=sandbox / "m"):
+        out = []
+        state = State({}, {"PATH": os.environ["PATH"]}, str(cwd), out.append, out.append)
+        return make(tmp_path, env).run(parse(text, 10), state), "".join(out)
+
+    #  globs, files and directories (recursively), missing paths ignored
+    #  delete: a directory is an error (nothing deleted)
+    status, out = go("delete install/lib/a.la install/bin")
+    assert status == 1 and "is a directory (use delete-tree)" in out
+    assert (sandbox / "m" / "install" / "lib" / "a.la").exists()
+    assert go("delete-tree install/lib/*.la install/bin nope") == (0, "")
+    assert not (sandbox / "m" / "install" / "bin").exists()
+    assert list((sandbox / "m" / "install" / "lib").iterdir()) == []
+    #  a symbolic link is removed, not its target
+    assert go("delete link") == (0, "")
+    assert not (sandbox / "m" / "link").exists() and (outside / "keep" / "f").exists()
+    (sandbox / "m" / "link").symlink_to(outside / "keep")
+    #  outside the sandbox: refused, nothing deleted
+    for path in (str(outside / "keep"), "../../outside/keep", "link/f", "link/../keep", "..",
+                 str(sandbox), f"{sandbox}/m/..", "/"):
+        status, out = go(f"delete-tree install {path}")
+        assert status == 1 and "is not in the sandbox" in out and "nothing deleted" in out, path
+        assert (outside / "keep" / "f").exists() and (sandbox / "m" / "install").exists(), path
+    #  inside: a directory reached through .. but still in the sandbox
+    assert go("delete-tree ../m/install") == (0, "")
+    assert not (sandbox / "m" / "install").exists()
+    #  no option, no operand, no sandbox
+    assert go("delete -fr x")[0] == 1 and go("delete")[0] == 1
+    out = []
+    state = State({}, {"PATH": os.environ["PATH"]}, str(sandbox), out.append, out.append)
+    assert make(tmp_path).run(parse("delete m", 10), state) == 1 and "SCBI_BDIR" in "".join(out)
+    assert (sandbox / "m").exists()
+
+
+def test_replace(tmp_path):
+    status, out, _ = run(tmp_path, "echo $(replace 3.12.1 . _) $(replace a-b_c -_)\nX = replace 'a b' ' ' :\necho $X")
+    assert (status, out) == (0, "3_12_1 abc\na:b\n")
+    status, out, _ = run(tmp_path, "echo $(replace abc ab x)")
+    assert status == 0 and "do not have the same length" in out

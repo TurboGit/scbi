@@ -37,7 +37,7 @@ def lift(text, params=None):
      "gprbuild -p -q $(if cross then --target=$TARGET) prj.gpr -cargs -gnatwA > /dev/null 2>&1\n"
      "if status == 0:\n    echo ok\n"),
     ("if grep -q x f; then\n    echo found\nfi", 'if ok("grep -q x f"):\n    echo found\n'),
-    ("[[ -f x ]] && rm x", "if is-file(x):\n    rm x\n"),
+    ("[[ -f x ]] && rm x", "if is-file(x):\n    delete x\n"),
     ("for M in a b;\ndo\n    echo $M >> list\ndone", "for M in a b:\n    echo $M >> list\n"),
     ("cat <<EOF > prj.gpr\n   project p is\n   end p;\nEOF", "write prj.gpr:\n    project p is\n    end p;\n"),
     ("cat <<'EOF' >> f\n$X\nEOF", "append-raw f:\n    $X\n"),
@@ -163,3 +163,10 @@ def test_value_lifting_salome_idioms():
     ops = lift_env(["unset PYTHONHOME", "local W=$(cygpath -w $PREFIX)", "set-var X $W"]).ops
     assert ops == (EnvOp("unset-var", ("PYTHONHOME",)), EnvOp("local", ("W", "$(output cygpath -w $PREFIX)")),
                    EnvOp("set-var", ("X", "$W")))
+
+
+def test_rm_lifted_to_delete():
+    assert lift_commands(["rm -fr build/kb", "rm -rf a b && make", "rm -f x", "rm y *.o", "rm -fr -v y",
+                          "rm -r z | cat", "rm -i w"]) == (
+        "delete-tree build/kb\ndelete-tree a b && make\ndelete x\ndelete y *.o\nrm -fr -v y\nrm -r z | cat\n"
+        "rm -i w\n")
