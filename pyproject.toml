@@ -25,6 +25,9 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
 pythonpath = ["src"]
+#  the unit tests and the regression drivers (tests/drivers/testNNN.py)
+python_files = ["test_*.py", "test[0-9][0-9][0-9].py"]
+junit_family = "xunit2"
 
 [tool.setuptools.package-data]
 scbi = ["hooks/*.sh"]

@@ -118,8 +118,10 @@ class Logger:
     line_sep_file: Path  # SCBI_LINE_SEP
     quiet: bool = False  # DO_QUIET
     colors: dict[str, str] = field(default_factory=dict)  # CBOLD... -> escape
-    stdout: TextIO = sys.stdout
-    stderr: TextIO = sys.stderr
+    #  the streams of the process when the logger is made (not when this
+    #  module is imported)
+    stdout: TextIO = field(default_factory=lambda: sys.stdout)
+    stderr: TextIO = field(default_factory=lambda: sys.stderr)
     #  dlog: written to the terminal when there is one (/dev/tty)
     tty: Callable[[], TextIO | None] | None = None
     clock: Callable[[], float] = time.time

@@ -1,6 +1,0 @@
-NRUNS ./scbi --deps boggus lib1
-
-DIFF <<EOF
-error: missing dependencies for building boggus
-error: doesnotexists not found
-EOF

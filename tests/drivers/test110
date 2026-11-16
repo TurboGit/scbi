@@ -1,9 +1,0 @@
-
-RUNS ./scbi show --depends cd1
-
-DIFF <<EOF
-cd1
-cd2
-cd3
-cdb
-EOF
