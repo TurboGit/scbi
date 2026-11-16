@@ -1028,18 +1028,20 @@ class Driver:
     # ------------------------------------------------------------ progress
 
     def start_progress(self, builder):
-        """The build progress ``[n/N] module`` as the last line of the
-        terminal (scbi.log.StatusLine), only when the output is a terminal
-        (not with --quiet, SCBI_PROGRESS=no or in the testsuite). Returns
-        the function restoring the console streams."""
-        from scbi.log import Progress, StatusLine, StatusStream
+        """The build progress ``[n/N] module``, only when the output is a
+        terminal (not with --quiet, SCBI_PROGRESS=no or in the testsuite):
+        SCBI_PROGRESS=line (default) a transient last line
+        (scbi.log.StatusLine), bar a status bar on the last row with the
+        elapsed time (scbi.log.StatusBar). Returns the function restoring
+        the console streams."""
+        from scbi.log import Progress, StatusBar, StatusLine, StatusStream
 
         out = sys.stdout
-        if (not out.isatty() or self.testsuite or self.get("DO_QUIET") == "yes"
-                or self.get("SCBI_PROGRESS") == "no"):
+        mode = self.get("SCBI_PROGRESS")
+        if (not out.isatty() or self.testsuite or self.get("DO_QUIET") == "yes" or mode == "no"):
             self.progress = Progress()
             return lambda: None
-        status = StatusLine(out)
+        status = StatusBar(out) if mode == "bar" else StatusLine(out)
         saved = (sys.stdout, sys.stderr, self.log.stdout, self.log.stderr)
         sys.stdout = self.log.stdout = StatusStream(out, status)
         if sys.stderr.isatty():
@@ -1048,6 +1050,8 @@ class Driver:
         def restore() -> None:
             sys.stdout, sys.stderr, self.log.stdout, self.log.stderr = saved
 
+        if isinstance(status, StatusBar):
+            status.begin()
         self.progress = Progress(status, self.progress_total(builder))
         return restore
 

@@ -87,22 +87,55 @@ def test_status_line():
 
     from scbi.log import Progress, StatusLine, StatusStream
 
+    erase = "\r\x1b[K\x1b[1A\r\x1b[K"
     term = io.StringIO()
     status = StatusLine(term)
     out = StatusStream(term, status)
     progress = Progress(status, total=3)
     progress.next("c-gmp")
-    assert term.getvalue() == "[1/3] c-gmp\r"
+    #  an empty line, then the progress
+    assert term.getvalue() == "\n[1/3] c-gmp\r"
     out.write("2026/11/16 : Building c-gmp\n")
-    #  erased, the line written, the status drawn again
-    assert term.getvalue() == "[1/3] c-gmp\r\r\x1b[K2026/11/16 : Building c-gmp\n[1/3] c-gmp\r"
+    #  both erased, the line written, drawn again
+    assert term.getvalue() == f"\n[1/3] c-gmp\r{erase}2026/11/16 : Building c-gmp\n\n[1/3] c-gmp\r"
     out.write("partial")
-    assert term.getvalue().endswith("\r\x1b[Kpartial")
+    assert term.getvalue().endswith(f"{erase}partial")
+    #  not at the start of a line: not drawn (it could not be erased)
     progress.next("c-mpfr")
+    assert term.getvalue().endswith(f"{erase}partial")
+    out.write(" end\n")
+    assert term.getvalue().endswith(" end\n\n[2/3] c-mpfr\r")
     progress.next("c-mpc")
     progress.next("c-gcc")  # more modules than expected: the total follows
-    assert term.getvalue().endswith("[4/4] c-gcc\r")
+    assert term.getvalue().endswith("\n[4/4] c-gcc\r")
     progress.close()
-    assert term.getvalue().endswith("[4/4] c-gcc\r\r\x1b[K")
+    assert term.getvalue().endswith(f"[4/4] c-gcc\r{erase}")
     #  disabled: nothing written
     Progress().next("x")
+
+
+def test_status_bar():
+    import io
+
+    from scbi.log import Progress, StatusBar, StatusStream
+
+    now = [100.0]
+    term = io.StringIO()
+    bar = StatusBar(term, clock=lambda: now[0])
+    out = StatusStream(term, bar)
+    bar.begin(timer=False)
+    rows = bar.rows
+    #  the scroll region excludes the last row, the bar drawn on it
+    assert term.getvalue().startswith(f"\n\x1b7\x1b[1;{rows - 1}r\x1b8\x1b[1A")
+    assert term.getvalue().endswith(f"\x1b7\x1b[{rows};1H\x1b[2K\x1b[7m elapsed 0s \x1b[0m\x1b8")
+    now[0] += 192
+    Progress(bar, total=2).next("c-gmp")
+    assert term.getvalue().endswith("\x1b[7m [1/2] c-gmp  elapsed 3m12s \x1b[0m\x1b8")
+    #  the output is written as is (it scrolls above the bar)
+    size = len(term.getvalue())
+    out.write("a line\n")
+    assert term.getvalue()[size:] == "a line\n"
+    now[0] += 3600
+    assert bar.elapsed() == "1h03m12s"
+    bar.clear()
+    assert term.getvalue().endswith(f"\x1b7\x1b[r\x1b[{rows};1H\x1b[2K\x1b8")

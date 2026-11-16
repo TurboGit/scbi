@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import sys
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -277,25 +278,26 @@ def display_log_stat(logs: Path, module: str = "") -> str:
 
 
 class StatusLine:
-    """A transient last line of the terminal (the build progress): every
-    write to the console first erases it, it is drawn again after a
-    complete line. The text is followed by a carriage return so that the
-    output of a sub-process writing to the terminal starts on it."""
+    """The ``line`` mode of the build progress: a transient last line of
+    the terminal, after an empty line. Every write to the console first
+    erases them, they are drawn again after a complete line. The text is
+    followed by a carriage return so that the output of a sub-process
+    writing to the terminal starts on it."""
 
-    ERASE = "\r\x1b[K"
+    #  the progress line, then the empty line before it
+    ERASE = "\r\x1b[K\x1b[1A\r\x1b[K"
 
     def __init__(self, stream: TextIO):
         self.stream = stream
         self.text = ""
         self.shown = False
+        #  the cursor is at the start of a line (only then the empty line
+        #  and the progress can be drawn and erased)
+        self.at_line_start = True
+        self.lock = threading.RLock()
 
     def width(self) -> int:
-        try:
-            columns = os.get_terminal_size(self.stream.fileno()).columns
-        except (OSError, ValueError, AttributeError):
-            columns = 0
-        #  unknown size (some pseudo-terminals report 0)
-        return columns if columns >= 20 else 80
+        return _width(self.stream)
 
     def erase(self) -> None:
         if self.shown:
@@ -303,37 +305,153 @@ class StatusLine:
             self.shown = False
 
     def draw(self) -> None:
-        if self.text and not self.shown:
-            self.stream.write(self.text[: max(self.width() - 1, 1)] + "\r")
+        if self.text and not self.shown and self.at_line_start:
+            self.stream.write("\n" + self.text[: max(self.width() - 1, 1)] + "\r")
             self.stream.flush()
             self.shown = True
 
     def set(self, text: str) -> None:
-        self.erase()
-        self.text = text
-        self.draw()
+        with self.lock:
+            self.erase()
+            self.text = text
+            self.draw()
 
     def clear(self) -> None:
-        self.erase()
+        with self.lock:
+            self.erase()
+            self.text = ""
+            self.stream.flush()
+
+
+class StatusBar:
+    """The ``bar`` mode of the build progress: a status bar on the last
+    row of the terminal, the output scrolling above it (scroll region),
+    with the time elapsed since the start of the build, refreshed every
+    second by a thread. The terminal being resized (SIGWINCH) sets the
+    region again."""
+
+    def __init__(self, stream: TextIO, clock: Callable[[], float] = time.monotonic, interval: float = 1.0):
+        self.stream = stream
+        self.clock = clock
+        self.start = clock()
         self.text = ""
+        self.at_line_start = True
+        self.lock = threading.RLock()
+        self.rows = 0
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+        self._old_winch = None
+        self.interval = interval
+
+    def width(self) -> int:
+        return _width(self.stream)
+
+    def _rows(self) -> int:
+        try:
+            rows = os.get_terminal_size(self.stream.fileno()).lines
+        except (OSError, ValueError, AttributeError):
+            rows = 0
+        return rows if rows >= 3 else 24
+
+    def elapsed(self) -> str:
+        s = int(self.clock() - self.start)
+        h, rest = divmod(s, 3600)
+        m, s = divmod(rest, 60)
+        return f"{h}h{m:02d}m{s:02d}s" if h else f"{m}m{s:02d}s" if m else f"{s}s"
+
+    def begin(self, timer: bool = True) -> None:
+        """Set the scroll region, draw the bar, start the timer."""
+        with self.lock:
+            self._region()
+            self._draw()
+        if timer:
+            self._thread = threading.Thread(target=self._tick, name="scbi-status-bar", daemon=True)
+            self._thread.start()
+            try:
+                import signal
+
+                self._old_winch = signal.signal(signal.SIGWINCH, lambda *_: self.resize())
+            except (ValueError, AttributeError, OSError):
+                #  not the main thread, or no SIGWINCH
+                self._old_winch = None
+
+    def _region(self) -> None:
+        self.rows = self._rows()
+        #  a new line keeps the last output line visible above the bar,
+        #  the region excludes the last row, the cursor back above it
+        self.stream.write(f"\n\x1b7\x1b[1;{self.rows - 1}r\x1b8\x1b[1A")
         self.stream.flush()
+
+    def _draw(self) -> None:
+        text = f" {self.text}  elapsed {self.elapsed()} " if self.text else f" elapsed {self.elapsed()} "
+        text = text[: max(self.width() - 1, 1)]
+        self.stream.write(f"\x1b7\x1b[{self.rows};1H\x1b[2K\x1b[7m{text}\x1b[0m\x1b8")
+        self.stream.flush()
+
+    def _tick(self) -> None:
+        while not self._stop.wait(self.interval):
+            with self.lock:
+                self._draw()
+
+    def resize(self) -> None:
+        with self.lock:
+            self._region()
+            self._draw()
+
+    #  the output scrolls above the bar: nothing to erase or redraw
+    def erase(self) -> None:
+        pass
+
+    def draw(self) -> None:
+        pass
+
+    def set(self, text: str) -> None:
+        with self.lock:
+            self.text = text
+            self._draw()
+
+    def clear(self) -> None:
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join()
+            self._thread = None
+        if self._old_winch is not None:
+            import signal
+
+            signal.signal(signal.SIGWINCH, self._old_winch)
+            self._old_winch = None
+        with self.lock:
+            #  the region reset, the bar row cleared
+            self.stream.write(f"\x1b7\x1b[r\x1b[{self.rows};1H\x1b[2K\x1b8")
+            self.stream.flush()
+
+
+def _width(stream: TextIO) -> int:
+    try:
+        columns = os.get_terminal_size(stream.fileno()).columns
+    except (OSError, ValueError, AttributeError):
+        columns = 0
+    #  unknown size (some pseudo-terminals report 0)
+    return columns if columns >= 20 else 80
 
 
 class StatusStream:
-    """A console stream writing through a StatusLine."""
+    """A console stream writing through a StatusLine or a StatusBar."""
 
-    def __init__(self, stream: TextIO, status: StatusLine):
+    def __init__(self, stream: TextIO, status):
         self._stream = stream
         self._status = status
 
     def write(self, text: str) -> int:
         if not text:
             return 0
-        self._status.erase()
-        n = self._stream.write(text)
-        if text.endswith("\n"):
-            self._stream.flush()
-            self._status.draw()
+        with self._status.lock:
+            self._status.erase()
+            n = self._stream.write(text)
+            self._status.at_line_start = text.endswith("\n")
+            if text.endswith("\n"):
+                self._stream.flush()
+                self._status.draw()
         return n
 
     def flush(self) -> None:
@@ -344,10 +462,10 @@ class StatusStream:
 
 
 class Progress:
-    """``[n/N] module`` on a StatusLine while the driver builds; does
-    nothing when disabled (not a terminal...)."""
+    """``[n/N] module`` on a StatusLine or a StatusBar while the driver
+    builds; does nothing when disabled (not a terminal...)."""
 
-    def __init__(self, status: StatusLine | None = None, total: int = 0):
+    def __init__(self, status: StatusLine | StatusBar | None = None, total: int = 0):
         self.status = status
         self.total = total
         self.count = 0
