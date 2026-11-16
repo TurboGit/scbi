@@ -980,7 +980,8 @@ unquoted word gives one word per element (an element with blanks stays one
 word, an empty list no word); elsewhere the elements are joined with
 spaces, e.g. \code{cmake \$(config-options) ../src}.
 
-\textbf{Information on the build.}
+\begin{itemize}
+	\item Information on the build:
 
 \begin{description}
 	\item[get-version {[<plug-in>]}] The version of the module in the build plan, or with an argument the version of the given plug-in (for this module, as the condition \code{version(<plug-in>)}). \code{NONE} when the build plan gives no version.
@@ -1013,7 +1014,7 @@ spaces, e.g. \code{cmake \$(config-options) ../src}.
 	\code{depends}...) the list of its values.
 \end{description}
 
-\textbf{Files and the system.}
+\item Files and the system:
 
 \begin{description}
 	\item[last-modified-directory <glob>] The most recently modified file
@@ -1035,7 +1036,7 @@ spaces, e.g. \code{cmake \$(config-options) ../src}.
 	(\seeref{store}), empty when not found.
 \end{description}
 
-\textbf{Commands.}
+\item Commands:
 
 \begin{description}
 	\item[output <command line>] The standard output of the command (run
@@ -1047,7 +1048,7 @@ spaces, e.g. \code{cmake \$(config-options) ../src}.
 	(\code{\$?} in a shell).
 \end{description}
 
-\textbf{Text.}
+\item Text:
 
 \begin{description}
 	\item[uppercase <words>, lowercase <words>] The words in upper or lower
@@ -1067,6 +1068,7 @@ spaces, e.g. \code{cmake \$(config-options) ../src}.
 	parentheses. The words may contain other function calls:
 	\code{\$(if cross then \$(config-options) else -DNATIVE=ON)}.
 \end{description}
+\end{itemize}
 
 \subsubsection{Conditions}
 \label{yaml-conditions}
