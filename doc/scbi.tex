@@ -1380,6 +1380,12 @@ env:
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
+	Example:
+\begin{lstlisting}
+build-env:
+	- set-var PATH /some/path/bin
+\end{lstlisting}
+
 	\item[setup {[}<variant>{]}] \index{hook!setup}To put in place the sources just before configuration step. This is generally not needed as the sources are setup by \code{scbi} using the information provided by the archive or vcs hook. This may be needed in some complex case or if the sources are generated based on the running environment.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
@@ -1416,6 +1422,11 @@ only-explicit-build: false
 		\end{enumerate}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
+	Example:
+\begin{lstlisting}
+config: |-
+  cmake $(config-options) ../src
+\end{lstlisting}
 
 	\item[config-options {[}common|<variant>{]}] \index{hook!config-options}Returns a list of options for the configuration step. The config (see above) hook gets them with \code{OPTIONS = config-options} and passes the options to pass to the configuration tools like \code{cmake} or \code{configure} (\seeref{get config options}).
 	\begin{description}[font=\textit,style=standard]
@@ -1427,6 +1438,16 @@ only-explicit-build: false
 			\item ...
 		\end{enumerate}
 	\end{description}
+	Example:
+\begin{lstlisting}
+config-options:
+  common:
+    - -DCMAKE_INSTALL_PREFIX=$PREFIX
+    - -DCMAKE_C_COMPILER=$CMAKE_C_COMPILER
+    - -DCMAKE_CXX_COMPILER=$CMAKE_CXX_COMPILER
+  default:
+    - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+\end{lstlisting}
 
 	\item[build {[}<variant>{]}] \index{hook!build}The command to build the application. This is most of the case a simple call to \code{make}.
 	\begin{description}[font=\textit,style=standard]
@@ -1436,6 +1457,11 @@ only-explicit-build: false
 		\end{enumerate}
 		\item[return] \tabto{2cm} NONE
 	\end{description}
+	Example:
+\begin{lstlisting}
+	build: make -j$SCBI_JOBS
+\end{lstlisting}
+
 	\item[build-<target> {[}<variant>{]}] \index{hook!build-<target>}The
 	command run instead of \code{build} when the option
 	\code{\ddash{}build-target=<target>} is given, e.g. a \code{build-runtime}
@@ -1451,7 +1477,7 @@ only-explicit-build: false
 
 	Example:
 	\begin{lstlisting}
-build: make -j$SCBI_JOBS
+build-<target>: make -j$SCBI_JOBS
 \end{lstlisting}
 
 	\item[install {[}<variant>{]}] \index{hook!install}The command to install the application. This is most of the case a simple call to \code{make} with target \code{install}.
@@ -1584,8 +1610,8 @@ A module defining the hook \code{modules} (possibly with variants) becomes a met
 			\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET [\$VARIANT]}
 			\item[return] \tabto{2cm} array
 				\begin{enumerate}
-					\item echo <module1>
-					\item echo <module2>
+					\item <module1>
+					\item <module2>
 		\end{enumerate}
 	\end{description}
 
@@ -2696,8 +2722,8 @@ make[1]: *** [CMakeFiles/Makefile2:87: CMakeFiles/hello.dir/all] Error 2
 make: *** [Makefile:136: all] Error 2
 2024/10/07 15:40:43 : h-handson-lib (FAILED) build failed with error 2
 2024/10/07 15:40:43 : h-handson-lib (FAILED) to reproduce:
-2024/10/07 15:40:43 : h-handson-lib (FAILED) bash /<...>/<...>/logs/build.cmd
-2024/10/07 15:40:43 : h-handson-lib (FAILED) use bash -x option for debug
+2024/10/07 15:40:43 : h-handson-lib (FAILED) scbi replay /<...>/h-handson-lib/<...>/logs/build.cmd
+2024/10/07 15:40:43 : h-handson-lib (FAILED) use --trace option for debug
 \end{verbatim}
 \end{footnotesize}
 
