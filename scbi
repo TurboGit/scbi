@@ -1151,7 +1151,7 @@ function handle-depends()
         fi
     fi
 
-    handle-module $fmodule $MODREF $DEPENDS_KIND  $IS_AGGREGATED || return 1
+    handle-module $fmodule $MODREF $DEPENDS_KIND $IS_AGGREGATED || return 1
 
     record-dref $module $variant $DREFS
 }
@@ -1805,11 +1805,14 @@ function handle-module()
 
     #  Check if meta-module, if so call handle-module for each one
 
+    local AMODE=$IS_AGGREGATED
+    [[ $AMODE == direct ]] && AMODE=no
+
     is-meta-module $MODREF > /dev/null &&
         {
             (
                 handle-meta-module $FORMODULE $module $variant \
-                                   $ref $DEPENDS_KIND $IS_AGGREGATED
+                                   $ref $DEPENDS_KIND $AMODE
             )
             res=$?
             unset SCBI_MODULES_LIST[-1]
@@ -1826,7 +1829,7 @@ function handle-module()
         (
             for dmodule in $(get-all-depends $module $variant build-depends); do
                 handle-depends $MODREF $dmodule \
-                               build $IS_AGGREGATED || exit 1
+                               build $AMODE || exit 1
             done
 
             [[ $DRY_RUN == no ]] && line-sep
@@ -1834,7 +1837,7 @@ function handle-module()
             #  And then we check for standard dependencies
             for dmodule in $(get-all-depends $module $variant depends); do
                 handle-depends $MODREF $dmodule \
-                               default $IS_AGGREGATED || exit 1
+                               default $AMODE || exit 1
             done
 
             [[ $DRY_RUN == no ]] && line-sep
@@ -1846,7 +1849,7 @@ function handle-module()
                         $(get-all-depends $module $variant tests-depends);
                     do
                         handle-depends $MODREF $dmodule \
-                                       tests $IS_AGGREGATED || exit 1
+                                       tests $AMODE || exit 1
                     done
 
                     [[ $DRY_RUN == no ]] && line-sep
