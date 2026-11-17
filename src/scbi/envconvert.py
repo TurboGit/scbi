@@ -1,27 +1,36 @@
 """Converter of Bash environment files (``.env``, ``.env-<name>``,
-``.scbi-env-<name>``) to Python environment files (scbi.envpy).
+``.scbi-env-<name>``) to YAML environment files (scbi.envyaml).
 
     python3 -m scbi.envconvert [--check] FILE...
 
-The settings are converted: ``NAME=value``, ``export NAME=value``,
-``NAME=${NAME:-default}`` and references to other variables in values
-(``$X``, ``${X}``, ``${X:-d}``) become calls of ``getvar``. Comments are
-kept. Anything else (functions such as ``module-final-step``,
-``scbi-rewrite-vcs``, ``define-var``, commands) is reported: the file is
-not written and these parts are converted by hand (see the hooks of
-scbi.envpy). The output is ``FILE.py``.
+Converted:
+
+- the settings ``NAME=value``, ``export NAME=value``,
+  ``NAME=${NAME:-default}`` (``vars``: the same ``$X``, ``${X:-d}``...
+  syntax); ``$(command args)`` becomes ``$(output command args)`` (a
+  function of the values is kept as it is);
+- the inclusion of another environment file, ``source
+  ${SCBI_ENV_DIR}/.env-<x>`` (possibly guarded by ``[[ -f ... ]] &&``),
+  becomes ``inherit: [<x>]``;
+- the comments.
+
+Anything else (functions such as ``module-final-step``,
+``scbi-rewrite-vcs``, ``define-var``, commands, pipes in a value) is
+reported: the file is not written and these parts are converted by hand
+(the functions of scbi.envyaml). The output is ``FILE.yaml``.
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import re
-import shlex
 import sys
 from pathlib import Path
 
 _ASSIGN = re.compile(r"^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
-_REF = re.compile(r"\$(?:\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\}|([A-Za-z_][A-Za-z0-9_]*))")
+_SOURCE = re.compile(r"^(?:\[\[\s+-f\s+(\S+)\s+\]\]\s+&&\s+)?(?:source|\.)\s+(\S+)$")
+_ENV_NAME = re.compile(r"(?:^|/)\.(?:scbi-)?env-([\w.-]+?)(?:\.yaml)?$")
 
 
 class Unconvertible(Exception):
@@ -29,47 +38,62 @@ class Unconvertible(Exception):
 
 
 def _value(text: str) -> str:
-    """Python expression of a Bash value (the right side of NAME=...)."""
+    """The value of a Bash assignment (right side of NAME=...), in the
+    syntax of the values of the YAML files."""
+    from scbi.plugin.model import BUILTINS
+
     if text.startswith("'") and text.endswith("'") and len(text) >= 2 and "'" not in text[1:-1]:
-        return repr(text[1:-1])
+        if "$" in text:
+            raise Unconvertible(f"literal $ not supported: {text}")
+        return text[1:-1]
     if text.startswith('"') and text.endswith('"') and len(text) >= 2:
         text = text[1:-1]
-    elif any(c in text for c in " \t;|&<>()`'\"\\"):
+    elif any(c in re.sub(r"\$\([^()]*\)", "", text) for c in " \t;&<>`'\"\\"):
         raise Unconvertible(f"value not supported: {text}")
-    if "$(" in text or "`" in text:
+    if "`" in text:
         raise Unconvertible(f"command substitution not supported: {text}")
-    rest = _REF.sub("", text)
-    if "$" in rest or any("$" in (m.group(2) or "") or "{" in (m.group(2) or "") for m in _REF.finditer(text)):
-        raise Unconvertible(f"expansion not supported: {text}")
-    parts: list[str] = []
-    pos = 0
-    for m in _REF.finditer(text):
-        if m.start() > pos:
-            parts.append(repr(text[pos:m.start()]))
-        name = m.group(1) or m.group(3)
-        default = m.group(2)
-        parts.append(f"getvar({name!r}, {_value(default)})" if default else f"getvar({name!r})")
-        pos = m.end()
-    if pos < len(text) or not parts:
-        parts.append(repr(text[pos:]))
-    return " + ".join(parts)
+
+    def command(m: re.Match) -> str:
+        inner = m.group(1).strip()
+        if re.search(r"[|;&<>]", inner):
+            raise Unconvertible(f"pipe or redirection in $( ) not supported: {text}")
+        name = inner.split()[0] if inner.split() else ""
+        return f"$({inner})" if name in BUILTINS else f"$(output {inner})"
+
+    if "$(" in re.sub(r"\$\([^()]*\)", "", text):
+        raise Unconvertible(f"nested $( ) not supported: {text}")
+    return re.sub(r"\$\(([^()]*)\)", command, text)
+
+
+def _scalar(value: str) -> str:
+    """A YAML scalar (quoted when needed)."""
+    if value == "" or re.search(r"""^[-?:,\[\]{}#&*!|>'"%@`\s]|[:#]\s|\s$|^(true|false|null|yes|no|on|off)$""",
+                                value, re.I):
+        return json.dumps(value)
+    return value
 
 
 def convert_text(text: str) -> tuple[str, list[str]]:
-    """The Python text of a Bash environment file and the lines which could
+    """The YAML text of a Bash environment file and the lines which could
     not be converted."""
-    out = ['"""Environment file (converted from Bash by scbi.envconvert)."""', ""]
+    head = ["#  Environment file (converted from Bash by scbi.envconvert)"]
+    inherit: list[str] = []
+    body: list[str] = []
     issues: list[str] = []
     lines = text.split("\n")
     i = 0
     while i < len(lines):
         line = lines[i].strip()
         i += 1
+        #  [[ -f FILE ]] && \n source FILE
+        while line.endswith("&&") and i < len(lines):
+            line = line + " " + lines[i].strip()
+            i += 1
         if not line:
-            out.append("")
+            body.append("")
             continue
         if line.startswith("#"):
-            out.append(line)
+            body.append("  " + line)
             continue
         if re.match(r"^(function\s+)?[A-Za-z_][\w:.-]*\s*\(\)", line):
             #  a function: up to its closing brace at the start of a line
@@ -78,23 +102,34 @@ def convert_text(text: str) -> tuple[str, list[str]]:
                 i += 1
             i += 1
             issues.append(f"line {start}: function {line.split('(')[0].replace('function', '').strip()}: "
-                          "convert it by hand (hooks of scbi.envpy)")
+                          "convert it by hand (functions of scbi.envyaml)")
+            continue
+        m = _SOURCE.match(line)
+        if m:
+            name = _ENV_NAME.search(m.group(2))
+            if name:
+                inherit.append(name.group(1))
+                continue
+            issues.append(f"line {i}: source of a file which is not an environment file: {line}")
             continue
         m = _ASSIGN.match(line)
         if m:
             try:
-                out.append(f"{m.group(1)} = {_value(m.group(2))}")
+                body.append(f"  {m.group(1)}: {_scalar(_value(m.group(2)))}")
             except Unconvertible as e:
                 issues.append(f"line {i}: {e}")
             continue
-        try:
-            words = shlex.split(line)
-        except ValueError:
-            words = []
-        issues.append(f"line {i}: not supported: {line}" if words else f"line {i}: syntax: {line}")
-    while out and out[-1] == "":
-        out.pop()
-    return "\n".join(out) + "\n", issues
+        issues.append(f"line {i}: not supported: {line}")
+    while body and body[-1] == "":
+        body.pop()
+    while body and body[0] == "":
+        body.pop(0)
+    out = head + [""]
+    if inherit:
+        out += ["inherit: [" + ", ".join(inherit) + "]", ""]
+    if body:
+        out += ["vars:"] + body
+    return "\n".join(out).rstrip("\n") + "\n", issues
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -111,7 +146,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"{path}: {issue}")
             continue
         if not args.check:
-            out = path.with_name(path.name + ".py")
+            out = path.with_name(path.name + ".yaml")
             out.write_text(text)
             print(f"{path}: written {out}")
     return status

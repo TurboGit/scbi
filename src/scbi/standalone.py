@@ -5,7 +5,7 @@ The archive ``$SCBI_TMP/sa-<bdir>.tgz`` holds the driver (the Python
 package in ``lib/`` and the ``bin/scbi`` wrapper), the runtime files, the
 plan, the plug-in definitions (any format) and the sources
 (VCS checkouts, archives, patches) of the modules and of their
-dependencies, an environment file (``.scbi-env-std.py``) and a ``build``
+dependencies, an environment file (``.scbi-env-std.yaml``) and a ``build``
 script. The archive is built with this driver: the environment file is
 the Python one.
 """
@@ -27,17 +27,15 @@ D=$(cd "$(dirname "$0")/.." && pwd)
 SCBI_ARGV0="$0" PYTHONPATH=$D/lib${PYTHONPATH:+:$PYTHONPATH} exec python3 -m scbi "$@"
 """
 
-ENV_FILE = '''"""Environment of the standalone package."""
-
-import os
-
-SCBI_ROOT = os.getcwd()
-SCBI_BDIR = SCBI_ROOT + "/builds"
-SCBI_PREFIX = SCBI_BDIR + "/install"
-SCBI_ARCHIVES = SCBI_BDIR + "/.archives"
-SCBI_PATCH = SCBI_BDIR + "/.patches"
-SCBI_LOGS = SCBI_BDIR + "/.logs"
-SCBI_PLAN = {plan!r}
+ENV_FILE = '''#  Environment of the standalone package
+vars:
+  SCBI_ROOT: $PWD
+  SCBI_BDIR: $SCBI_ROOT/builds
+  SCBI_PREFIX: $SCBI_BDIR/install
+  SCBI_ARCHIVES: $SCBI_BDIR/.archives
+  SCBI_PATCH: $SCBI_BDIR/.patches
+  SCBI_LOGS: $SCBI_BDIR/.logs
+  SCBI_PLAN: '{plan}'
 '''
 
 
@@ -138,7 +136,7 @@ class Standalone:
                 Walker(self.b).walk("for-all-modules-with-meta-ext",
                                     lambda argv: self.copy_module(argv, dest), module, str(dest),
                                     name="copy-module-src-callback")
-            (dest / ".scbi-env-std.py").write_text(ENV_FILE.format(plan=plan))
+            (dest / ".scbi-env-std.yaml").write_text(ENV_FILE.format(plan=plan.replace("'", "''")))
             mods = " ".join(words(" ".join(modules)))
             (dest / "build").write_text(
                 "#!/bin/bash\n"

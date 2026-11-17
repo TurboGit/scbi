@@ -1,7 +1,7 @@
-"""The final step of a module with a Python environment file:
-``module_final_step(ctx)`` (scbi.envpy) is called after each module, as
-the Bash ``module-final-step PREFIX TARGET VARIANT MODULE DEPENDS_KIND
-IS_META IS_AGGREGATED IS_UP_TO_DATE``.
+"""The final step of a module: the ``module-final-step`` function of the
+environment file (scbi.envyaml) is run after each module with the
+information of this context (its variables PREFIX, TARGET, VARIANT...
+and functions env-actions, module-ref...).
 """
 
 from __future__ import annotations

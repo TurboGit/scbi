@@ -4,7 +4,7 @@
 ``plugin-call-env-hooks`` / ``plugin-call-variant-hooks`` (0_runtime).
 
 The environment actions of the plug-in definitions are applied by Python
-(scbi.env): a ``define_var`` of the Python environment file sees each of
+(scbi.env): the ``define-var`` function of the environment file sees each of
 them.
 """
 

@@ -75,13 +75,13 @@ class Run:
 
 def command_env(builder, module: str, variant: str, proxy: str) -> dict[str, str]:
     """The environment of the commands: the driver environment, changed
-    by ``proxy(name, env)`` of the Python environment file for a vcs or
+    by ``proxy(name, env)`` of the environment file for a vcs or
     archive record with a proxy."""
     ctx = builder.ctx(module, variant)
     hook = builder.d.envfile.hook("proxy")
     env = dict(builder.d.base_env())
     env.update(ctx.env.environ())
     if proxy and hook is not None:
-        #  proxy(name, env) of the Python environment file
+        #  proxy(name, env) of the environment file
         hook(proxy, env)
     return env

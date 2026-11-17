@@ -1,6 +1,6 @@
-"""Search of the Bash environment files of the Bash driver (port of
-``load-module-env``): the Python driver uses the Python ones
-(scbi.envpy) and reports a Bash file found without a Python version.
+"""Search of the environment files (port of ``load-module-env``): the
+driver reads the YAML ones (scbi.envyaml, suffix ``.yaml``) and reports a
+Bash or Python file found without a YAML version.
 
 For the default environment the name is ``env``, for ``--env=<name>`` it
 is ``env-<name>``. It is searched, in order, as:

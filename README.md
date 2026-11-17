@@ -249,13 +249,14 @@ checkouts. The default as listed above is:
 
       user's Git repository : $HOME/dev/repositories/git
 
-The default configuration file (a Python file) can be found in:
+The default configuration file (a YAML file) can be found in:
 
-      $ vi $HOME/.config/scbi/.env.py
+      $ vi $HOME/.config/scbi/.env.yaml
 
-So we need to set SCBI_GIT_REPO to point to $HOME/dev.
+So we need to set SCBI_GIT_REPO to point to $HOME/dev, in its vars:
 
-      SCBI_GIT_REPO = getvar("HOME") + "/dev"
+      vars:
+        SCBI_GIT_REPO: $HOME/dev
 
 We can now start hacking the project from our local checkout:
 

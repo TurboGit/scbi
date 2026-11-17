@@ -13,7 +13,7 @@ former Bash driver is on the master branch only.
 | `src/scbi/` | **The driver** (Python package, `python3 -m scbi`), installed by `make` as `~/.local/bin/scbi`. See *Python driver* below. |
 | `scripts.d/c-*.yaml` | **Plug-ins**: one YAML file per buildable project/module. |
 | `scripts.d/patches/` | Patches referenced by plug-ins' `patches` hooks. |
-| `scripts.d/.env.py`, `.plan-default`, `.pkgs-<distrib>` | Default environment (Python), default build plan, mapping of `os@-<name>` dependencies to distribution packages. |
+| `scripts.d/.env.yaml`, `.plan-default`, `.pkgs-<distrib>` | Default environment file (YAML), default build plan, mapping of `os@-<name>` dependencies to distribution packages. |
 | `bash_completion.d/scbi` | Bash completion. |
 | `doc/scbi.tex` | Reference manual (LaTeX). The authoritative spec for hooks, options, env variables, plans and ini files. |
 | `tests/` | Regression testsuite (see below). |
@@ -104,7 +104,7 @@ python3 -m pytest tests/drivers/test001.py   # one driver directly
 - A failing check does not stop the driver: all failures are reported at
   the end with their line and a diff.
 - `tests/scripts.d/` holds the test-only YAML plug-ins (no `c-` prefix),
-  plans and Python environment files; `tests/.root/repos` holds the small
+  plans and YAML environment files; `tests/.root/repos` holds the small
   Git/SVN/Mercurial repositories and archives they build from. A driver
   may change the plug-ins of its copy freely.
 - Test knobs of the driver are under `SCBI_TESTSUITE=yes`: no
@@ -121,7 +121,7 @@ python3 -m pytest tests/drivers/test001.py   # one driver directly
 ### Python driver
 
 The driver (`src/scbi/`) runs no Bash at all: it reads YAML plug-ins and
-Python environment files only (start-up settings in `src/scbi/setup.py`).
+YAML environment files only (start-up settings in `src/scbi/setup.py`).
 
 - With the Python driver `scbi lint` and `scbi format` handle YAML
   plug-ins only (`plugin/lint.py`, `plugin/yamlwrite.py`, canonical key
@@ -137,9 +137,10 @@ Python environment files only (start-up settings in `src/scbi/setup.py`).
   (`steps/interp.py`, isolated environment `steps/hookenv.py`, replay
   files `steps/replay.py` / `scbi replay`). Steps are run by
   `steps/wrapper.py` and `steps/generic.py`.
-- The environment files are Python (`.env-<name>.py`,
-  `src/scbi/envpy.py`: settings, `PASSTHROUGH`, hooks `define_var`,
-  `rewrite_vcs`, `rewrite_archive`, `proxy`, `module_final_step` with
+- The environment files are YAML (`.env-<name>.yaml`,
+  `src/scbi/envyaml.py`: `inherit`, `vars`, `passthrough`, `functions`
+  `define-var`, `rewrite-vcs`, `rewrite-archive`, `proxy`,
+  `module-final-step` in the command language, the final step context
   `steps/final.py`); Bash ones are converted with
   `python3 -m scbi.envconvert`.
 - The module environment is `steps/modenv.py`, the OS packages and auto

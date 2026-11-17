@@ -109,7 +109,7 @@ class Builder:
         )
 
     def final_step(self, hook, ctx) -> None:
-        """``module_final_step(ctx)`` of the Python environment file (an
+        """``module-final-step`` of the environment file (an
         error in it is reported, the build goes on as with Bash)."""
         sys.stdout.flush()
         try:

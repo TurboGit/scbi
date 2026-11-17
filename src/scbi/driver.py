@@ -24,7 +24,7 @@ import time
 from pathlib import Path
 
 from scbi import env as env_mod
-from scbi import envpy
+from scbi import envyaml
 from scbi.bashcompat import assoc_keys, read_fields, read_lines, words
 from scbi.bashenv import ShellVars
 from scbi.discriminants import forced_discriminants, probe_host, setup_discriminants
@@ -56,7 +56,7 @@ USAGE_OPTIONS = """
       | --prefix=<dir>      the global install directory
       | --build-dir=<dir>   the root build directory.
       | --flat              use a flatter directory structure
-   -e | --env=<name>        environment file .env-<name>.py
+   -e | --env=<name>        environment file .env-<name>.yaml
       | --plan=<name>       a build plan for modules
       | --enable-<name>     enable feature name
    -t | --target=<name>     the target to build for ({target})
@@ -136,8 +136,8 @@ class Driver:
         self.ini_modules: list[str] = []
         self.ini_options: list[str] = []
         self.ini_subcmd = ""
-        #  the Python environment file (settings and hooks)
-        self.envfile = envpy.EnvFile()
+        #  the YAML environment file (settings and functions)
+        self.envfile = envyaml.EnvFile()
         self.plan = PlanState()
         self.discriminants: list[str] = []
         self.log: Logger | None = None
@@ -740,17 +740,18 @@ class Driver:
             raise Exit(1)
 
         #  the environment file (ENV_NAME as given, see load-module-env): a
-        #  Python file (scbi.envpy)
+        #  YAML file (scbi.envyaml)
         try:
-            self.envfile = envpy.load(self.get("ENV_NAME"), Path.cwd(), Path(self.get("HOME") or "/"),
-                                      Path(self.get("SCBI_PLUGINS")), self.get)
-        except envpy.EnvFileError as e:
+            self.envfile = envyaml.load(self.get("ENV_NAME"), Path.cwd(), Path(self.get("HOME") or "/"),
+                                        Path(self.get("SCBI_PLUGINS")), dict(self.sv.values))
+        except envyaml.EnvFileError as e:
             self.echo(str(e))
             raise Exit(1) from None
         if self.envfile.path is not None:
             self.set("SCBI_ENV_DIR", str(self.envfile.path.parent), export=True)
         for name, value in self.envfile.settings.items():
             self.set(name, value, export=True)
+        self.envfile.bind(self)
         env_mod.USER_DEFINE_VAR = self.envfile.hook("define_var")
 
         if self.cmdline.get("SCBI_BDIR"):

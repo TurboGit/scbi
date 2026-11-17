@@ -31,7 +31,7 @@ def _call(builder, function: str, module: str, variant: str, args: list[str], re
     out = d.runner().call_value(function, module, variant, args, d.plan, builder.modules_list)
     hook = d.envfile.hook(rewrite.replace("scbi-", "").replace("-", "_"))
     if hook is not None:
-        #  rewrite_vcs / rewrite_archive of the Python environment file
+        #  rewrite_vcs / rewrite_archive of the environment file (functions rewrite-vcs, rewrite-archive)
         return [str(f) for f in hook(words("\n".join(out)))]
     return words("\n".join(out))
 

@@ -52,20 +52,24 @@ _SHELL_CHARS = re.compile(r"[$`*?\[\]'\"\\{}~]")
 _SHELL_OPS = re.compile(r"[|&;<>()]")
 
 
-def _git_files(path: Path) -> list[Path] | None:
-    """The tracked files under ``path`` (None when not in a git tree)."""
+def _git_files(path: Path, new: bool = False) -> list[Path] | None:
+    """The tracked files under ``path``, and the new (not ignored) ones
+    with ``new`` (None when not in a git tree)."""
+    cmd = ["git", "ls-files", "-z", "--cached"] + (["--others", "--exclude-standard"] if new else [])
     try:
-        proc = subprocess.run(["git", "ls-files", "-z", "--", str(path)], cwd=REPO, capture_output=True,
-                              check=True)
+        proc = subprocess.run([*cmd, "--", str(path)], cwd=REPO, capture_output=True, check=True)
     except (OSError, subprocess.CalledProcessError):
         return None
     files = [REPO / f for f in proc.stdout.decode().split("\0") if f]
+    #  a nested repository is listed as a directory: not a file to copy
+    files = [f for f in files if f.is_file() or f.is_symlink()]
     return files or None
 
 
-def _copy_tree(src: Path, dst: Path) -> None:
-    """Copy the tracked files of ``src`` (everything when not in git)."""
-    files = _git_files(src)
+def _copy_tree(src: Path, dst: Path, new: bool = False) -> None:
+    """Copy the tracked files of ``src`` (and the new ones with ``new``;
+    everything when not in git)."""
+    files = _git_files(src, new)
     if files is None:
         if src.is_dir():
             shutil.copytree(src, dst, symlinks=True, dirs_exist_ok=True)
@@ -78,7 +82,8 @@ def _copy_tree(src: Path, dst: Path) -> None:
 
 def make_root(root: Path) -> None:
     """The test root: the layout of tests/ the drivers expect."""
-    _copy_tree(TESTS / "scripts.d", root / "scripts.d")
+    #  the test plug-ins being written are used before being committed
+    _copy_tree(TESTS / "scripts.d", root / "scripts.d", new=True)
     for pkgs in (REPO / "scripts.d").glob(".pkgs-*"):
         shutil.copy2(pkgs, root / "scripts.d" / pkgs.name)
     for d in ("repos", ".archives", ".store"):

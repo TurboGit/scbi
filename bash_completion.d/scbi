@@ -124,15 +124,15 @@ _scbi_env()
 {
     local IFS=$'\n'
 
-    #  the Python environment files (.env-<name>.py)
-    for r in $(ls $HOME/.config/scbi/.env-*.py 2>/dev/null); do
+    #  the environment files (.env-<name>.yaml)
+    for r in $(ls $HOME/.config/scbi/.env-*.yaml 2>/dev/null); do
         r=${r#$HOME/.config/scbi/.env-}
-        printf %s$'\n' "${r%.py} "
+        printf %s$'\n' "${r%.yaml} "
     done
 
-    for r in $(ls $PWD/.env-*.py 2>/dev/null); do
+    for r in $(ls $PWD/.env-*.yaml 2>/dev/null); do
         r=${r#$PWD/.env-}
-        printf %s$'\n' "${r%.py} "
+        printf %s$'\n' "${r%.yaml} "
     done
 }
 

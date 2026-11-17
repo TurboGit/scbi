@@ -71,8 +71,8 @@ def _remove_from_list(items: list[str], value: str) -> list[str]:
     return [e for e in items if not _match(e, value)]
 
 
-#  define_var(env, action, name, value) of the Python environment file
-#  (scbi.envpy), set by the driver
+#  define_var(env, action, name, value): the define-var function of the
+#  environment file (scbi.envyaml), set by the driver
 USER_DEFINE_VAR: Callable | None = None
 
 #  define-var of the Windows OS module (scripts.d/_os_windows) in effect:
@@ -137,7 +137,7 @@ class Environment:
 
     def define_var(self, action: str, var: str, value: str = "") -> None:
         """Port of ``define-var ACTION VAR VALUE``; with a ``define_var`` in
-        the Python environment file, that function is called instead (it
+        the environment file (define-var), that function is called instead (it
         may apply the action with ``env.apply``)."""
         if USER_DEFINE_VAR is not None and not self._in_user:
             self._in_user = True
