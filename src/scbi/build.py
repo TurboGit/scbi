@@ -582,10 +582,10 @@ class Builder:
                 d.plan, self.modules_list) or ""
 
         if self.get("DEPS") == "yes":
-            #  $IS_AGGREDATED (sic) is always empty
-            amode = agg_mode if agg_mode != "no" else ""
+            #  The build dependencies of the meta-module are not in its
+            #  modules: never aggregated
             for dmodule in self.get_all_depends(meta, variant, "build-depends"):
-                if self.handle_depends(meta, dmodule, "build", amode) != 0:
+                if self.handle_depends(meta, dmodule, "build", "no") != 0:
                     return 1
 
         start = time.monotonic()
@@ -701,6 +701,11 @@ class Builder:
     def handle_all_depends(self, modref: str, module: str, variant: str, is_aggregated: str) -> None:
         """Dependencies of a module (handle-module with --deps)."""
         dry = self.get("DRY_RUN") == "yes"
+        #  In a direct aggregate only the modules of the meta-module are
+        #  aggregated, not their dependencies (a recursive aggregate
+        #  includes them), as the walker does (scbi.walker)
+        if is_aggregated == "direct":
+            is_aggregated = "no"
         for dmodule in self.get_all_depends(module, variant, "build-depends"):
             if self.handle_depends(modref, dmodule, "build", is_aggregated) != 0:
                 raise Exit(1)

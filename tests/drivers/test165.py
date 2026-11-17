@@ -112,7 +112,7 @@ xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : no build needed: versions matching
 xxxx/xx/xx xx:xx:xx : final step starting
-R m:lib1 v:default d:build m:no a:direct i:yes
+R m:lib1 v:default d:build m:no a:no i:yes
 Copy <pwd>/.root/builds/lib1/x86_64-linux-gnu-default/install
 To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
 xxxx/xx/xx xx:xx:xx : final step completed
@@ -134,7 +134,7 @@ xxxx/xx/xx xx:xx:xx : build completed
 xxxx/xx/xx xx:xx:xx : install starting
 xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : final step starting
-R m:lib2 v:default d:default m:no a:direct i:no
+R m:lib2 v:default d:default m:no a:no i:no
 Copy <pwd>/.root/builds/lib2/x86_64-linux-gnu-default/install
 To <pwd>/.root/builds/metaagg/x86_64-linux-gnu-toto/app
 xxxx/xx/xx xx:xx:xx : final step completed

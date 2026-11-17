@@ -1805,7 +1805,7 @@ language (\seeref{yaml-command-language}), with these variables:
 	\item [MODREF] The module reference, as found in the dependencies.
 	\item [DEPENDS\_KIND] The kind of dependency: \code{default}, \code{build} or \code{tests}.
 	\item [IS\_META] \code{no}, \code{yes} (a meta-module) or \code{aggregate} (an aggregate meta-module).
-	\item [IS\_AGGREGATED] \code{yes} when the module is aggregated in a meta-module, else \code{no}.
+	\item [IS\_AGGREGATED] The aggregate mode of the meta-module aggregating the module (\code{direct} or \code{recursive}), else \code{no}. In a \code{direct} aggregate only the modules of the meta-module are aggregated, their dependencies are not (\code{no}); in a \code{recursive} one the dependencies are aggregated too. The build dependencies of a meta-module (its \code{build-depends}) are never aggregated.
 	\item [IS\_UP\_TO\_DATE] \code{yes} when the module was up-to-date (not rebuilt), else \code{no}.
 \end{description}
 

@@ -1,0 +1,9 @@
+plugin: metaaggbd
+
+build-depends:
+  - lib1
+
+modules:
+  - lib2
+
+aggregate: direct
