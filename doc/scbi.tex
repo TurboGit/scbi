@@ -976,7 +976,9 @@ The functions below are evaluated by the driver. They are called as
 of commands, or as \code{NAME = <function> <args>} in an assignment (a
 local variable of a value list, \seeref{yaml-expansion}, or a variable of a
 command hook, \seeref{yaml-command-language}). The functions marked
-\emph{(commands)} are only available in command hooks.
+\emph{(commands)} are only available in command hooks, the ones marked
+\emph{(final step)} only in the function \code{module-final-step} of an
+environment file (\seeref{module-final-step}).
 
 A function gives a value or a list. In a command, a list alone in an
 unquoted word gives one word per element (an element with blanks stays one
@@ -1070,6 +1072,26 @@ spaces, e.g. \code{cmake \$(config-options) ../src}.
 	\code{then} and \code{else} are keywords only outside quotes and
 	parentheses. The words may contain other function calls:
 	\code{\$(if cross then \$(config-options) else -DNATIVE=ON)}.
+\end{description}
+
+\item The final step of a module (\seeref{module-final-step}):
+
+\begin{description}
+	\item[env-actions {[<hook> [<modref>]]}] \index{env-actions}
+	\emph{(final step)} The environment actions of the \code{env} hook (or
+	of \code{<hook>}) of the module (or of \code{<modref>}), and of the
+	modules it aggregates for a meta-module: a list of triples, action
+	(\code{ADD}, \code{SET}...), variable and value (possibly empty), to use
+	with a \code{for} with three names: \code{for A V X in
+	\$(env-actions):}.
+	\item[module-ref <modref>] \index{module-ref}\emph{(final step)} The
+	module, variant, kind and reference of a module in the build plan (a
+	list of four words).
+	\item[module-name <modref>] \index{module-name}\emph{(final step)} The
+	name of the module (for a meta-module, its full name).
+	\item[target-dir <module> <variant> {[<sub>]}] \index{target-dir}
+	\emph{(final step)} The install directory of the module variant, with
+	the sub-directory.
 \end{description}
 \end{itemize}
 
@@ -1787,22 +1809,9 @@ language (\seeref{yaml-command-language}), with these variables:
 	\item [IS\_UP\_TO\_DATE] \code{yes} when the module was up-to-date (not rebuilt), else \code{no}.
 \end{description}
 
-and these functions, available in this function only:
-
-\begin{description}
-	\item[env-actions {[<hook> [<modref>]]}] \index{env-actions}The
-	environment actions of the \code{env} hook (or of \code{<hook>}) of the
-	module (or of \code{<modref>}), and of the modules it aggregates for a
-	meta-module: a list of triples, action (\code{ADD}, \code{SET}...),
-	variable and value (possibly empty), to use with a \code{for} with three
-	names.
-	\item[module-ref <modref>] \index{module-ref}The module, variant, kind
-	and reference of a module in the build plan (a list of four words).
-	\item[module-name <modref>] \index{module-name}The name of the module
-	(for a meta-module, its full name).
-	\item[target-dir <module> <variant> {[<sub>]}] \index{target-dir}The
-	install directory of the module variant, with the sub-directory.
-\end{description}
+and the functions \code{env-actions}, \code{module-ref},
+\code{module-name} and \code{target-dir}, available in this function only
+(\seeref{yaml-functions}).
 
 The output of the function goes to the console. A failing function is
 reported and the build goes on. Example:
