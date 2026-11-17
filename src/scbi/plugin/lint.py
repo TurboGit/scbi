@@ -60,7 +60,7 @@ _REF = re.compile(r"\$(?:\{[#!]?)?([A-Za-z_][A-Za-z0-9_]*)")
 _ASSIGN = re.compile(r"(?:^|[\s;&|(`])([A-Za-z_][A-Za-z0-9_]*)(?:\[[^\]]*\])?\+?=")
 _DECL = re.compile(r"(?:^|[\s;&|(])(?:local|export|declare|readonly|typeset)((?:\s+-\w+)*)\s+([^;&|\n]*)")
 _READ = re.compile(r"(?:^|[\s;&|(])read((?:\s+-[A-Za-z]+)*)\s+([A-Za-z_][A-Za-z0-9_ \t]*)")
-_FOR = re.compile(r"(?:^|[\s;&|(])(?:for|select)\s+([A-Za-z_][A-Za-z0-9_]*)\s+in\b")
+_FOR = re.compile(r"(?:^|[\s;&|(])(?:for|select)\s+((?:[A-Za-z_][A-Za-z0-9_]*\s+)+)in\b")
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*")
 #  command language: VAR = value, export VAR = value
 _CMD_ASSIGN = re.compile(r"(?m)^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+=(?:\s|$)")
@@ -122,7 +122,7 @@ def assigned(script: str) -> set[str]:
                 names.add(nm.group(0))
     for m in _READ.finditer(script):
         names.update(m.group(2).split())
-    names.update(m.group(1) for m in _FOR.finditer(script))
+    names.update(n for m in _FOR.finditer(script) for n in m.group(1).split())
     return names
 
 

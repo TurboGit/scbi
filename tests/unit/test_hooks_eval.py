@@ -300,3 +300,12 @@ def test_get_version_of_a_plugin(tmp_path):
     c = ctx(tmp_path, plan=PlanState({"lib2": "lib2:2.0.1", "m": "m:1.2"}))
     #  not in the build plan: NONE (as the condition version())
     assert expand("$(get-version lib2)|$(get-version nope)", c) == "2.0.1|NONE"
+
+
+def test_variables_in_patterns(tmp_path):
+    c = ctx(tmp_path, params={"PREFIX": "/opt/x"},
+            env=Environment(ShellVars({"V": "/opt/x/lib/a.so", "E": "", "D": "dflt"})))
+    assert expand("${V#$PREFIX/}|${V/$PREFIX/@}|${V//\\//:}|${E:-$D}|${V%/$(basename $V)}", c) == \
+        "lib/a.so|@/lib/a.so|:opt:x:lib:a.so|dflt|/opt/x/lib"
+    #  \$: a literal $, as in Bash
+    assert expand("${V/$PREFIX/\\$ROOT}|${E:-\\$D}", c) == "$ROOT/lib/a.so|$D"

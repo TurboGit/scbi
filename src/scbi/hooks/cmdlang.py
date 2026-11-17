@@ -67,17 +67,46 @@ FUNCTIONS = (
     "get-build-type", "config-options", "last-modified-directory", "is-enabled", "get-version",
     "output", "output-words", "first-line", "status", "basename", "dirname", "command-path",
     "all-variants", "uppercase", "lowercase", "replace", "if", "all-modules", "hook-output",
+    #  in the module-final-step of an environment file
+    "env-actions", "module-ref", "module-name", "target-dir",
 )
 #  Built-in commands
 COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset",
-            "check-versions", "copy", "delete", "delete-tree")
+            "check-versions", "copy", "delete", "delete-tree", "apply-var")
 
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _ASSIGN = re.compile(r"^(export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+=(?:\s+(.*)|\s*)$")
 _ENV_WORD = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$", re.S)
-_HEADER = re.compile(r"^(if|elif)\s+(.+):$|^else\s*:$|^for\s+([A-Za-z_]\w*)\s+in\s+(.*):$|"
+_HEADER = re.compile(r"^(if|elif)\s+(.+):$|^else\s*:$|^for\s+([A-Za-z_]\w*(?:\s+[A-Za-z_]\w*)*)\s+in\s+(.*):$|"
                      r"^(write|append|write-raw|append-raw)\s+(.+):$")
 _GLOB = re.compile(r"[*?\[]")
+
+
+def _heredoc_pieces(text: str) -> list[str]:
+    """The text of a write block split as re.split(r"\\\\([$`\\\\])"): text
+    to expand and escaped characters alternately; an escape inside
+    ${...} is left to the expansion (${V/p/\\$X})."""
+    pieces, buf, depth, i = [], [], 0, 0
+    while i < len(text):
+        c = text[i]
+        if c == "\\" and i + 1 < len(text) and text[i + 1] in "$`\\":
+            if depth:
+                buf.append(text[i : i + 2])
+            else:
+                pieces += ["".join(buf), text[i + 1]]
+                buf = []
+            i += 2
+            continue
+        if c == "$" and text[i + 1 : i + 2] == "{":
+            depth += 1
+            buf.append("${")
+            i += 2
+            continue
+        if c == "}" and depth:
+            depth -= 1
+        buf.append(c)
+        i += 1
+    return pieces + ["".join(buf)]
 
 
 def _xq(word: str) -> str:
@@ -145,9 +174,13 @@ class If:
 @dataclass(frozen=True)
 class For:
     line: int
-    name: str
+    name: str  # the names separated with blanks (for A B C in ...)
     words: tuple[Word, ...]
     body: tuple
+
+    @property
+    def names(self) -> list[str]:
+        return self.name.split()
 
 
 @dataclass(frozen=True)
@@ -524,6 +557,11 @@ class Runner:
     #  value hook)
     hook_values: Callable[[str, str, list[str]], list[str] | None] = lambda module, hook, args: None
     refresh_functions: Callable[[], dict] | None = None
+    #  functions given by the caller (module-final-step of an environment
+    #  file: env-actions, module-ref...): name -> callable(args)
+    extra: dict[str, Callable[[list[str]], str | list[str]]] = field(default_factory=dict)
+    #  apply-var ACTION NAME VALUE (define-var of an environment file)
+    apply_var: Callable[[str, str, str], None] | None = None
     #  called with a "_TRACE: ..." line for each command and assignment (as
     #  Bash xtrace does)
     trace: Callable[[str], None] | None = None
@@ -574,8 +612,12 @@ class Runner:
         elif isinstance(step, For):
             values = self.expand_words(step.words, state)
             state.status = 0
-            for v in values:
-                state.vars[step.name] = v
+            #  for A B C in ...: the words taken 3 by 3 (missing ones empty)
+            names = step.names
+            for k in range(0, len(values), len(names)):
+                group = values[k : k + len(names)]
+                for name, v in zip(names, group + [""] * (len(names) - len(group))):
+                    state.vars[name] = v
                 self.block(step.body, state)
         elif isinstance(step, Write):
             path = self._path(self.expand_words((step.path,), state, glob=False)[0], state)
@@ -605,7 +647,7 @@ class Runner:
         \\\\ give the character."""
         try:
             ctx = self.hook_ctx(state)
-            pieces = re.split(r"\\([$`\\])", text)
+            pieces = _heredoc_pieces(text)
             return "".join(expand(piece, ctx) if k % 2 == 0 else piece for k, piece in enumerate(pieces))
         except ExpandError as e:
             self.error(state, line, str(e))
@@ -790,6 +832,11 @@ class Runner:
             return values[0] if len(values) == 1 else values
         args = self.expand_words(step.words[1:], state)
         ctx = self.hook_ctx(state)
+        if name in self.extra:
+            return self.extra[name](args)
+        if name in ("env-actions", "module-ref", "module-name", "target-dir"):
+            self.error(state, step.line, f"{name}: only in the module-final-step of an environment file")
+            return ""
         if name == "get-build-type":
             return _builtins.get_build_type(ctx, *(args + ["", ""])[:2])
         if name == "config-options":
@@ -954,6 +1001,15 @@ class Runner:
                 return 0 if check_versions(a, op, b) else 1
             if name == "copy":
                 return self.copy(args, state, lambda m: err(f"{self.where}: line {line}: copy: {m}\n"))
+            if name == "apply-var":
+                if self.apply_var is None:
+                    err(f"{self.where}: line {line}: apply-var: only in the define-var of an environment file\n")
+                    return 1
+                if len(args) not in (2, 3):
+                    err(f"{self.where}: line {line}: apply-var: ACTION NAME [VALUE] expected\n")
+                    return 1
+                self.apply_var(*(args + [""])[:3])
+                return 0
             if name in ("delete", "delete-tree"):
                 return self.delete(args, state, lambda m: err(f"{self.where}: line {line}: {name}: {m}\n"),
                                    tree=name == "delete-tree")

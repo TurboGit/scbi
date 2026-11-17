@@ -191,6 +191,13 @@ class _Translator:
                         out.append(re.sub(r'(["$`\\])', r"\\\1", value) if quoted else q(value) if value else "")
                         i = m.end()
                         continue
+                    if ref.startswith("${") and "$" in ref[2:]:
+                        #  a variable of the hook with a pattern using known
+                        #  variables: their values, quoted (literal)
+                        ref = "${" + re.sub(
+                            r"\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?",
+                            lambda v: ('"' + re.sub(r'(["$`\\])', r"\\\1", self.static_value(v.group(0))) + '"')
+                            if self.is_static_var(v.group(1)) else v.group(0), ref[2:])
                     if name in self.lists and ref in (f"${name}", f"${{{name}}}"):
                         ref = f"${{{name}[*]}}"
                     out.append(ref if quoted else f'"{ref}"')
@@ -451,11 +458,23 @@ class _Translator:
                     out += self.body(s.orelse, depth + 1) or [ind + "    :"]
                 out.append(ind + "fi")
             elif isinstance(s, For):
-                out.append(f"{ind}for {s.name} in {' '.join(self.word(w) for w in s.words)}; do")
-                self.dynamic.add(s.name)
-                self.lists.discard(s.name)
-                out += self.body(s.body, depth + 1) or [ind + "    :"]
-                out.append(ind + "done")
+                words = " ".join(self.word(w) for w in s.words)
+                for name in s.names:
+                    self.dynamic.add(name)
+                    self.lists.discard(name)
+                if len(s.names) == 1:
+                    out.append(f"{ind}for {s.name} in {words}; do")
+                    out += self.body(s.body, depth + 1) or [ind + "    :"]
+                    out.append(ind + "done")
+                else:
+                    #  for A B in ...: the words taken by groups
+                    n = len(s.names)
+                    out.append(f"{ind}set -- {words}")
+                    out.append(f"{ind}while (( $# > 0 )); do")
+                    out += [f"{ind}    {name}=${{{k + 1}-}}" for k, name in enumerate(s.names)]
+                    out.append(f"{ind}    shift {n} 2> /dev/null || set --")
+                    out += self.body(s.body, depth + 1)
+                    out.append(ind + "done")
             elif isinstance(s, Write) and self.inline:
                 #  on one line: printf of the lines (no here-document)
                 op = ">>" if s.append else ">"

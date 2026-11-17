@@ -31,7 +31,7 @@ from scbi.plugin.model import BUILTINS
 _NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 _BRACED = re.compile(
     r"(?P<name>[A-Za-z_][A-Za-z0-9_]*)"
-    r"(?:\[(?P<key>[^\]]+)\]|(?P<op>%%|%|##|#|:-|:\+|//|/)(?P<arg>[^{}$]*))?"
+    r"(?:\[(?P<key>[^\]]+)\]|(?P<op>%%|%|##|#|:-|:\+|//|/)(?P<arg>[^{}]*))?"
 )
 
 
@@ -180,6 +180,10 @@ def _parse(text: str) -> list:
             if m.group("key") is not None:
                 segs.append(_Op(name, "[]", m.group("key")))
             elif op:
+                #  the argument may refer to variables ($V): checked here,
+                #  expanded when evaluated
+                for part in (_split_replace(arg) if op in ("/", "//") else (arg,)):
+                    _parse(part)
                 segs.append(_Op(name, op, arg))
             else:
                 segs.append(_Var(name))
@@ -199,18 +203,35 @@ def _parse(text: str) -> list:
     return segs
 
 
-def _replace(value: str, arg: str, every: bool) -> str:
-    """${VAR/pattern/replacement} (first match, longest) and ${VAR//...}
-    (every match); ``\\/`` is a / in the pattern."""
+def _split_replace(arg: str) -> tuple[str, str]:
+    """``pattern/replacement`` of ${VAR/...}: split at the first unescaped
+    /, ``\\/`` giving a / (and \\x x in the replacement); ``\\$`` is kept,
+    for _expand_arg (a literal $)."""
     i, pat = 0, []
     while i < len(arg) and arg[i] != "/":
         if arg[i] == "\\" and i + 1 < len(arg):
-            pat.append(arg[i + 1])
+            pat.append(arg[i : i + 2] if arg[i + 1] == "$" else arg[i + 1])
             i += 2
             continue
         pat.append(arg[i])
         i += 1
-    pattern, repl = "".join(pat), re.sub(r"\\(.)", r"\1", arg[i + 1:])
+    return "".join(pat), re.sub(r"\\([^$])", r"\1", arg[i + 1:])
+
+
+def _expand_arg(text: str, ctx: HookContext) -> str:
+    """The pattern or word of ${VAR<op>...} expanded, ``\\$`` giving a
+    literal $ (as in Bash)."""
+    if "$" not in text:
+        return text
+    return "$".join(_eval(_parse(piece), ctx) if "$" in piece else piece for piece in text.split("\\$"))
+
+
+def _replace(value: str, arg: str, every: bool, pattern: str | None = None, repl: str = "") -> str:
+    """${VAR/pattern/replacement} (first match, longest) and ${VAR//...}
+    (every match); ``\\/`` is a / in the pattern. ``pattern`` and ``repl``
+    given: already split (and expanded)."""
+    if pattern is None:
+        pattern, repl = _split_replace(arg)
     if not pattern:
         return value
     out, i, n = [], 0, len(value)
@@ -266,8 +287,12 @@ def _eval(segs, ctx: HookContext) -> str:
         elif isinstance(s, _Op):
             if s.op == "[]":
                 out.append(ctx.arrays.get(s.name, {}).get(s.arg, ""))
+            elif s.op in ("/", "//"):
+                pattern, repl = (_expand_arg(x, ctx) for x in _split_replace(s.arg))
+                out.append(_replace(ctx.lookup(s.name), "", s.op == "//", pattern, repl))
             else:
-                out.append(_trim(ctx.lookup(s.name), s.op, s.arg))
+                arg = _expand_arg(s.arg, ctx)
+                out.append(_trim(ctx.lookup(s.name), s.op, arg))
         elif isinstance(s, _If):
             from scbi.hooks.evaluate import GuardContext
             from scbi.plugin import expr

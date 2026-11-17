@@ -199,6 +199,9 @@ return -1
     assert out == f"a $PREFIX /p $X\n{tmp_path}\n"
     assert (tmp_path / "f").read_text() == "run $1 in /p \\ `x`\n"
     assert status == 255  # modulo 256, as Bash
+    #  an escape inside ${...} is the one of its pattern or word
+    status, _, _ = run(tmp_path, 'X = /p/lib\nwrite g:\n    ${X/$PREFIX/\\$R} \\$X ${X#\\$}')
+    assert (tmp_path / "g").read_text() == "$R/lib $X /p/lib\n" and status == 0
 
 
 def test_variant_builtins(tmp_path):
@@ -385,3 +388,8 @@ def test_get_version_of_a_plugin_in_commands(tmp_path):
     state = State({}, {"PATH": os.environ["PATH"]}, str(tmp_path), out.append, out.append)
     assert r.run(parse("V = get-version lib2\necho $V $(get-version lib2)", 10), state) == 0
     assert "".join(out) == "2.0.1 2.0.1\n"
+
+
+def test_for_several_names(tmp_path):
+    status, out, _ = run(tmp_path, "L = a 1 b 2 c\nfor N V in $L:\n    echo $N=$V")
+    assert (status, out) == (0, "a=1\nb=2\nc=\n")
