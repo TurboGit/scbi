@@ -1,0 +1,17 @@
+plugin: resbase
+
+vars:
+  BASEV: base
+
+functions:
+  helper:
+    params: [X]
+    run: echo helper $X
+
+depends:
+  - dep1
+
+env:
+  - add-to-var PATH $PREFIX/bin
+
+install: make install

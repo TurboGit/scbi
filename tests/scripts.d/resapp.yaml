@@ -1,0 +1,58 @@
+plugin: resapp
+
+inherit:
+  - from: resbase
+
+vars:
+  APPV: app
+
+variants:
+  all: [gui, net]
+
+with-variants:
+  native:
+    packages: [os@-resapp]
+    env:
+      - set-var RESAPP_NATIVE yes
+
+depends:
+  common:
+    - lib1
+    - if variant == gui: lib2
+  gui:
+    - gtk
+  net:
+    - curl
+    - if target =~ mingw: winsock
+
+env:
+  common:
+    - set-var RESAPP_ROOT $PREFIX
+    - if cross: set-var RESAPP_CROSS yes
+    - if not cross: set-var RESAPP_CROSS no
+  gui:
+    - if enabled(feat): set-var RESAPP_FEAT on
+
+config-options:
+  _:
+    - --plain
+  common:
+    - --prefix=$PREFIX
+  gui:
+    - --with-gui
+  net:
+    - --with-net
+  cross:
+    _:
+      - --host=$TARGET
+
+config:
+  _: ../src/configure $(config-options)
+  gui: |-
+    ../src/configure --gui $(config-options)
+    if cross:
+        echo cross
+  cross:
+    _: ../src/configure --cross $(config-options)
+
+build: make

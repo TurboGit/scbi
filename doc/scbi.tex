@@ -2487,6 +2487,12 @@ The following options are supported:
 
 	\item[\ddash{}module-ref:{[}version|variant|full{]} ] Displays the variant, the version or both of the modules, from the command line or the build plan.
 
+	\item[\ddash{}resolved] \index{resolved plug-in}Displays the plug-in of each module resolved for its module reference (the variant and version of the command line, else of the build plan) and the target: the plug-in the driver actually uses, without variants. Each hook is written once, as a plain hook: the one selected for the variant (variants including others, \code{common}, \code{cross}, inheritance and OS variants applied), or for a cumulative hook (\code{depends}, \code{env}, \code{config-options}...) the items of all the selected ones, in order. In the value and environment lists the \code{if} guards are evaluated (an item whose guard cannot be evaluated outside a build is kept with it); the command bodies, the functions and the variables are kept as written. The hooks doing nothing (the placeholders of the OS variants) are left out. The output is a valid YAML plug-in, preceded by a comment giving the module reference, the target and the plan. For example:
+
+	\cmd{scbi show \ddash{}resolved c-darktable/all}
+
+	\cmd{scbi \ddash{}target=x86\_64-w64-mingw32 show \ddash{}resolved c-gmp}
+
 	\item[\ddash{}stat] Displays the setup (see the \ddash{}stat option).
 \end{description}
 

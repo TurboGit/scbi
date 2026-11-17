@@ -3,7 +3,7 @@ scbi-show).
 
 Ported: --build-plan[:history][=regex], --module-ref[:version|:variant|
 :full], --depends[:direct|:full], --externals[:only], --filter:*,
---no-version, --rdepends, usage.
+--no-version, --rdepends, usage; --resolved (scbi.tools.resolved).
 """
 
 from __future__ import annotations
@@ -34,6 +34,7 @@ SCBI-SHOW {version}
       | --filter:n         filter depends/external for dev or runtime
       | --build-plan:n     list current plan
       | --module-ref:n     display variant/version of specific module
+      | --resolved         display the plug-in resolved for the module
       | --stat             display some status of current setup"""
 
 
@@ -44,7 +45,7 @@ def main(driver, args: list[str]) -> int | None:
          "-l", "depends:direct,depends:full,depends,rdepends,build-plan::",
          "-l", "build-plan:history::,externals,externals:only,no-version",
          "-l", "filter:all,filter:dev,filter:runtime,module-ref",
-         "-l", "module-ref:version,module-ref:variant,module-ref:full",
+         "-l", "module-ref:version,module-ref:variant,module-ref:full,resolved",
          "--", *words(" ".join(args))],
         capture_output=True, text=True, env=driver.base_env())
     if proc.returncode != 0:
@@ -54,7 +55,7 @@ def main(driver, args: list[str]) -> int | None:
     opts = words(proc.stdout)
 
     do_deps, do_ext, do_rdeps, list_ver, filt = driver.get("DO_DEPS") or "no", "no", "true", "yes", "all"
-    do_plan, plan_filter, do_mod_ver = "no", "", "no"
+    do_plan, plan_filter, do_mod_ver, do_resolved = "no", "", "no", False
     i = 0
     while i < len(opts):
         a = opts[i]
@@ -77,6 +78,8 @@ def main(driver, args: list[str]) -> int | None:
             do_plan = "history" if a.endswith("history") else "yes"
             if nxt != "--":
                 plan_filter = nxt
+        elif a == "--resolved":
+            do_resolved = True
         elif a in ("--module-ref", "--module-ref:version", "--module-ref:variant", "--module-ref:full"):
             do_mod_ver = {"--module-ref": "full", "--module-ref:version": "ver",
                           "--module-ref:variant": "var", "--module-ref:full": "full"}[a]
@@ -97,6 +100,11 @@ def main(driver, args: list[str]) -> int | None:
 
     if do_rdeps == "yes":
         return show_rdepends(driver)
+
+    if do_resolved:
+        from scbi.tools import resolved
+
+        return resolved.show(driver, words(" ".join(driver.modules)))
 
     plan = driver.plan
     if do_mod_ver != "no":
