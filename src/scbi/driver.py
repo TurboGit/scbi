@@ -1020,6 +1020,15 @@ class Driver:
         from scbi.build import Builder
 
         builder = Builder(self)
+        if self.get("DEPS") != "yes" and len(self.modules) > 1:
+            #  without --deps the modules are built in the order of the
+            #  command line: a module after its dependencies
+            from scbi.walker import build_order
+
+            order = build_order(builder, self.modules)
+            if order != self.modules:
+                self.log.ilog("build", "build order:", *order)
+                self.modules = order
         restore = self.start_progress(builder)
         try:
             for module in self.modules:

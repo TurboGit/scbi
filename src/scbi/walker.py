@@ -238,3 +238,55 @@ def _int(value: str) -> int:
         return int(value)
     except ValueError:
         return 0
+
+
+def build_order(builder, modrefs: list[str]) -> list[str]:
+    """The modules of the command line in an order where none is a
+    dependency (direct or not: dependencies, build dependencies, modules
+    of meta-modules) of a module before it: the given order is kept
+    except where a module must come later. Used without --deps, the
+    dependencies are then not built by the driver. On an error of the
+    walk (a recursive dependency...) the given order is returned."""
+    d = builder.d
+    if len(modrefs) < 2:
+        return list(modrefs)
+
+    def name(modref: str, formodule: str = "@root") -> str:
+        return (d.plan.module_ref(modref, formodule) + [""])[0]
+
+    names = [name(m) for m in modrefs]
+    deps: dict[int, set[str]] = {}
+    for i, modref in enumerate(modrefs):
+        found: set[str] = set()
+
+        def callback(argv: list[str]) -> None:
+            a = argv + [""] * max(0, 5 - len(argv))
+            formodule, dep, is_ext = a[0], a[1], a[4]
+            if is_ext != "true":
+                found.add(name(dep, formodule))
+
+        try:
+            if Walker(builder).walk("for-all-modules-with-meta-ext", callback, modref,
+                                    name="build-order-callback") != 0:
+                return list(modrefs)
+        except Exit:
+            return list(modrefs)
+        found.discard(names[i])
+        deps[i] = found
+
+    #  stable topological sort: the first module (in the given order) whose
+    #  dependencies among the remaining modules are all placed
+    order: list[int] = []
+    remaining = list(range(len(modrefs)))
+    while remaining:
+        left = {names[j] for j in remaining}
+        for i in remaining:
+            if not (deps[i] & (left - {names[i]})):
+                break
+        else:
+            #  a cycle between modules of the command line: as given
+            order += remaining
+            break
+        order.append(i)
+        remaining.remove(i)
+    return [modrefs[i] for i in order]

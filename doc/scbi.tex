@@ -689,7 +689,7 @@ The following options are supported:
 
 	\item[\ddash{}tests{[:only]}{[=OPTIONS]}] Builds the module and runs its testsuite if any. With \code{only} the testsuite is run without building. \code{OPTIONS} is given to the \code{tests} hook (parameter \code{OPTIONS}, \seeref{tests-hook}).
 
-	\item[-d | \ddash{}deps{[:warning]}] Checks all the dependencies and builds them if needed. With \code{warning}, a missing external dependency is reported but does not stop the build.
+	\item[-d | \ddash{}deps{[:warning]}] Checks all the dependencies and builds them if needed. With \code{warning}, a missing external dependency is reported but does not stop the build. Without this option only the modules of the command line are built: when there are several, they are built in an order where none comes before one of its dependencies (direct or not, through the modules of a meta-module too), the given order being kept otherwise, and the new order is displayed (\code{build order: ...}).
 
 	\item[-a | \ddash{}create-archive] Creates a binary archive when the build succeeds.
 
