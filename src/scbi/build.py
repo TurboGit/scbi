@@ -409,10 +409,6 @@ class Builder:
             self.ilog(module, "%BModule", f"%t{module}%c", "marked to be skipped")
             return
 
-        progress = getattr(d, "progress", None)
-        if progress is not None:
-            progress.next(module if variant == "default" else f"{module}/{variant}")
-
         log = f"{self.get('SCBI_LOGS')}/{self.get('TODAY')}/{self.get('SCBI_TARGET')}-{module}-{variant}-report.log"
         d.set("log", log)
         os.chdir(self.get("SCBI_ROOT"))
@@ -428,6 +424,7 @@ class Builder:
             d.set("SCBI_ISOOT", "false")
 
         if formodule != "@root" and self.is_hook_true(module, variant, "only-explicit-build", "FALSE"):
+            self.progress_next(module, variant)
             self.ilog(module, "%BModule", f"%t{module}%c", "built only if explitly specified")
             return
 
@@ -437,6 +434,14 @@ class Builder:
                                 module, variant, kind, ref, log)
         finally:
             self.modules_list.pop()
+
+    def progress_next(self, module: str, variant: str) -> None:
+        """The progress ``[n/N] module`` (scbi.log.Progress) when the module
+        starts its own work: after its dependencies, so the module shown is
+        the one being built."""
+        progress = getattr(self.d, "progress", None)
+        if progress is not None:
+            progress.next(module if variant == "default" else f"{module}/{variant}")
 
     def _handle_module(self, formodule, modref, depends_kind, is_aggregated,
                        module, variant, kind, ref, log) -> None:
@@ -474,6 +479,8 @@ class Builder:
             finally:
                 d.sv, cwd = saved
                 os.chdir(cwd)
+
+        self.progress_next(module, variant)
 
         if self.get("DRY_RUN") == "yes":
             self.out(modref)
@@ -588,6 +595,7 @@ class Builder:
                 if self.handle_depends(meta, dmodule, "build", "no") != 0:
                     return 1
 
+        self.progress_next(meta, variant)
         start = time.monotonic()
         d.log.line_sep()
         self.ilog(meta, "%BMetamodule", f"%t{meta}%c", f"[%g{vdisp}%c]", "setup", tee=log)

@@ -109,7 +109,8 @@ python3 -m pytest tests/drivers/test001.py   # one driver directly
   may change the plug-ins of its copy freely.
 - Test knobs of the driver are under `SCBI_TESTSUITE=yes`: no
   `$HOME/.scbi`, `SCBI_OS_MODULE`, fake OS `SCBI_OS_NAME=test` with
-  `SCBI_TEST_PKGS`, `TODAY` from the environment.
+  `SCBI_TEST_PKGS`, `TODAY` from the environment, `SCBI_TEST_PROGRESS=yes`
+  (the build progress printed as lines `progress [n/N] module`).
 - When adding a test, create `tests/drivers/testNNN.py` with the next free
   number.
 - A behavior change in the driver usually changes expected output in

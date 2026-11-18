@@ -1056,6 +1056,17 @@ class Driver:
 
         out = sys.stdout
         mode = self.get("SCBI_PROGRESS")
+        if self.testsuite and self.environ.get("SCBI_TEST_PROGRESS") == "yes":
+            #  testsuite: each step of the progress printed on a line
+            class Lines:
+                def set(self, text: str) -> None:
+                    print(f"progress {text}", file=sys.stdout, flush=True)
+
+                def clear(self) -> None:
+                    pass
+
+            self.progress = Progress(Lines(), self.progress_total(builder))
+            return lambda: None
         if (not out.isatty() or self.testsuite or self.get("DO_QUIET") == "yes" or mode == "no"):
             self.progress = Progress()
             return lambda: None
