@@ -45,7 +45,7 @@ xxxx/xx/xx xx:xx:xx : lib1 (FAILED) generic module setup failed with error 1
 xxxx/xx/xx xx:xx:xx : Building lib1 [default] (master)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
-xxxx/xx/xx xx:xx:xx : trigger: build not up-to-date
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
 xxxx/xx/xx xx:xx:xx : lib1 (FAILED) patch lib1-0-fix.patch not found
 xxxx/xx/xx xx:xx:xx : lib1 (FAILED) generic module setup failed with error 1
 """)

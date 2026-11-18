@@ -1,0 +1,6 @@
+plugin: rbidmeta
+
+modules:
+  - rbid
+
+wrapup: test ! -f $SCBI_BDIR/rbidmeta-fail

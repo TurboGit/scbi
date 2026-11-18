@@ -650,7 +650,10 @@ class Builder:
             build_id(self, self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), formodule, meta, variant))
         if _same(Path(f"build-id-{variant}"), Path(tvdir, "build-id")) and self.get("DO_FORCE") == "no":
             is_utd = "yes"
-        shutil.copy(f"build-id-{variant}", f"{tvdir}/build-id")
+        else:
+            #  written when the wrapup completed: an interrupted or failed
+            #  wrapup is run again at the next run
+            Path(tvdir, "build-id").unlink(missing_ok=True)
 
         d.log.line_sep()
         self.ilog(meta, "%BMetamodule", f"%t{meta}%c", f"[%g{vdisp}%c]", "wrapup", tee=log)
@@ -667,6 +670,7 @@ class Builder:
                 self.ilog(leaked, "trigger: not yet built")
             if internal_wrapper(fct_wrapup) != 0:
                 return 1
+            shutil.copy(f"build-id-{variant}", f"{tvdir}/build-id")
 
         if Path(f"build-deps-{variant}").is_file():
             shutil.copy(f"build-deps-{variant}", f"{tvdir}/build-deps")
@@ -942,6 +946,11 @@ class Builder:
                 self.ilog(module, *msg.split(" "))
             d.set("STEPS", "tests" if self.get("DO_TEST") != "no" else "")
         else:
+            #  The sandbox is about to change: the build id of the previous
+            #  build is removed first, the generic install writes the new
+            #  one when the build completes. An interrupted or failed build
+            #  is then redone at the next run, even with the same build id.
+            Path(tvdir, "build-id").unlink(missing_ok=True)
             if msg:
                 self.ilog(module, *msg.split(" "))
             if status == B_NOT_UPTODATE and Path(tvdir, "build-deps").is_file():
@@ -957,7 +966,6 @@ class Builder:
             if (self.get("SAFE_MODE") == "yes" and self.get("SCBI_ISOOT") == "true"
                     and self.get("DO_BUILD") == "yes"):
                 _rm(f"{tvdir}/build{lnk}")
-                Path(tvdir, "build-id").unlink(missing_ok=True)
         envtmp.unlink(missing_ok=True)
 
         append = self.get("SCBI_DLOG") != "yes"

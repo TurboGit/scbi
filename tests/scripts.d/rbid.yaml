@@ -1,0 +1,10 @@
+plugin: rbid
+
+out-of-tree: true
+
+config: echo config
+
+install: |-
+  mkdir -p $PREFIX/bin
+  write $PREFIX/bin/rbid:
+      rbid
