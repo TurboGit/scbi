@@ -1,11 +1,11 @@
 plugin: c-e3
 
-only-explicit-build: true
-
-prefix: NONE
-
 modules:
   - c-e3-core
   - c-e3-testsuite
 
 aggregate: direct
+
+only-explicit-build: true
+
+prefix: NONE

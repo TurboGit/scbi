@@ -1,9 +1,9 @@
 plugin: c-aws
 
-prefix: NONE
-
 modules:
   - c-aws-lib
   - c-aws-tools
 
 aggregate: direct
+
+prefix: NONE
