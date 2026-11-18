@@ -1,0 +1,9 @@
+plugin: rsha
+
+inherit:
+  - from: rshabase
+
+env:
+  - set-var RSHA_ROOT $PREFIX
+
+config: echo rsha

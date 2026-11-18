@@ -1,0 +1,6 @@
+plugin: rshadep
+
+depends:
+  - rsha
+
+config: echo rshadep

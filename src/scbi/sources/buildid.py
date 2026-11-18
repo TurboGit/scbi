@@ -2,9 +2,11 @@
 get-patch-md5 and the md5 helpers of scripts.d/5_tools).
 
 A build id is the md5 of everything a build depends on: the sources id
-(vid), the module reference, target and OS, the plug-in files (and the
-inherited ones), the build types, the patches, the build ids of the
-direct dependencies and the external-env values.
+(vid), the module reference, target and OS, the plug-in resolved for the
+module reference without its env hook (scbi.plugin.resolved: comments,
+formatting, other variants and unused hooks do not count), the build
+types, the patches, the build ids and the env hooks of the direct
+dependencies and the external-env values.
 """
 
 from __future__ import annotations
@@ -48,8 +50,11 @@ def patch_md5(builder, patch: str) -> str:
 
 def depends_build_id(builder, modref: str) -> str:
     """``get-depends-build-id MODREF``: md5 of the build ids of the direct
-    dependencies (of the modules of a meta-module); run in a sub-shell in
-    Bash, so an exit of the walker only ends the list."""
+    dependencies (of the modules of a meta-module) and of their env hooks
+    (resolved: the environment they give to this build; the env hooks of
+    the deeper dependencies are in the build ids of the direct ones); run
+    in a sub-shell in Bash, so an exit of the walker only ends the list."""
+    from scbi.plugin.resolved import env_md5
     from scbi.walker import Walker
 
     d = builder.d
@@ -75,6 +80,7 @@ def depends_build_id(builder, modref: str) -> str:
                         out.append(f.read())
                 else:
                     out.append(time.strftime("%c").encode())
+                out.append(f"env {m} {env_md5(d, m, v)}\n".encode())
 
     name = "get-meta-build-id-callback" if is_meta else "get-build-id-callback"
     try:
@@ -87,27 +93,16 @@ def depends_build_id(builder, modref: str) -> str:
 def build_id(builder, prefix: str, target: str, formodule: str, modref: str, vid: str) -> str:
     """``get-build-id PREFIX TARGET FORMODULE MODREF VID`` (output, no
     newline)."""
+    from scbi.plugin.resolved import resolved_md5
+
     d = builder.d
     module, variant, kind, ref = (d.plan.module_ref(modref, formodule) + [""] * 4)[:4]
-    plugins = d.get("SCBI_PLUGINS")
     mid = f"{variant}:{ref},{target},{d.get('SCBI_OS_VERSION')},{d.get('SCBI_OS_CODENAME')}"
-    #  the plug-in file in use (its definition file)
-    pfile = d.registry.plugin_file(module)
-    if pfile is not None:
-        mid += f",{file_md5(str(pfile))}"
-
-    #  hash of the inherited plug-ins, recursively
-    loaded = d.registry.scbi_loaded()
+    #  the plug-in resolved for the module reference (its inherited
+    #  plug-ins included), without its env hook
     hid = ""
-
-    def inh_md5(m: str) -> None:
-        nonlocal hid
-        for h in words(loaded.get(f"{m}.inh", "")):
-            hfile = d.registry.plugin_file(h)
-            hid += f",{file_md5(str(hfile) if hfile else f'{plugins}/{h}')}"
-            inh_md5(h)
-
-    inh_md5(module)
+    if d.registry.plugin_file(module) is not None:
+        hid = resolved_md5(d, module, variant, kind, ref)
 
     value = d.get(f"SCBI_{module.replace('-', '_')}_BUILD_TYPE")
     if value:

@@ -1,0 +1,9 @@
+plugin: rshabase
+
+functions:
+  rsha-helper:
+    run: echo helper
+
+install:
+  _: echo install
+  other: echo install other

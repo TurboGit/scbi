@@ -124,7 +124,7 @@ xxxx/xx/xx xx:xx:xx : End Building smain [default] (n/a)
 
     t.sh('cp scripts.d/depA.yaml scripts.d/depA.keep')
 
-    t.sh('echo "# touched" >> scripts.d/depA.yaml')
+    t.sh("sed -i 's/echo depA/echo depA touched/' scripts.d/depA.yaml")
 
     t.runs('./scbi --deps smain')
 
@@ -259,7 +259,7 @@ xxxx/xx/xx xx:xx:xx : End Building smain [two] (n/a)
 
     t.sh('cp scripts.d/depA.yaml scripts.d/depA.keep')
 
-    t.sh('echo "# touched" >> scripts.d/depA.yaml')
+    t.sh("sed -i 's/echo depA/echo depA touched/' scripts.d/depA.yaml")
 
     # And now that depA and smain are recompiled
 

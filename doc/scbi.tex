@@ -699,6 +699,8 @@ The following options are supported:
 
 	\item[-f | \ddash{}force] Rebuilds, without checking whether the build id has changed.
 
+	\index{build id}A module is rebuilt only when its build id changes. The build id is computed from the sources (the revision of the checkout, the archive), the module reference, the target and the OS, the build types, the patches, the values of the \code{external-env} hook, the build ids of the direct dependencies, and the plug-in \emph{resolved} for the module reference (as displayed by \code{scbi show \ddash{}resolved}, \seeref{show}). So a comment, a change of formatting, a hook of another variant or a guarded item not selected do not rebuild the module, while a change of a hook it uses, of a function or of a variable does, in its plug-in or in the ones it inherits. The \code{env} hook of a module is not part of its own build id: it sets the environment of the modules depending on it, so a change rebuilds these modules (it is part of their build id), not the module itself.
+
 	\item[-p | \ddash{}purge{[:only]}] Removes the build directory of the module, then builds it unless \code{only} is given.
 
 	\item[\ddash{}dry-run] Only lists the modules to handle.
@@ -2496,7 +2498,7 @@ The following options are supported:
 
 	\item[\ddash{}module-ref:{[}version|variant|full{]} ] Displays the variant, the version or both of the modules, from the command line or the build plan.
 
-	\item[\ddash{}resolved] \index{resolved plug-in}Displays the plug-in of each module resolved for its module reference (the variant and version of the command line, else of the build plan) and the target: the plug-in the driver actually uses, without variants. Each hook is written once, as a plain hook: the one selected for the variant (variants including others, \code{common}, \code{cross}, inheritance and OS variants applied), or for a cumulative hook (\code{depends}, \code{env}, \code{config-options}...) the items of all the selected ones, in order. In the value and environment lists the \code{if} guards are evaluated (an item whose guard cannot be evaluated outside a build is kept with it); the command bodies, the functions and the variables are kept as written. The hooks doing nothing (the placeholders of the OS variants) are left out. The output is a valid YAML plug-in, preceded by a comment giving the module reference, the target and the plan. For example:
+	\item[\ddash{}resolved] \index{resolved plug-in}Displays the plug-in of each module resolved for its module reference (the variant and version of the command line, else of the build plan) and the target: the plug-in the driver actually uses, without variants. Each hook is written once, as a plain hook: the one selected for the variant (variants including others, \code{common}, \code{cross}, inheritance and OS variants applied), or for a cumulative hook (\code{depends}, \code{env}, \code{config-options}...) the items of all the selected ones, in order. In the value and environment lists the \code{if} guards are evaluated (an item whose guard cannot be evaluated outside a build is kept with it); the command bodies, the functions and the variables are kept as written. The hooks doing nothing (the placeholders of the OS variants) are left out. The output is a valid YAML plug-in, preceded by a comment giving the module reference, the target and the plan. It is what the build id of the module compares (without its \code{env} hook, \seeref{options}). For example:
 
 	\cmd{scbi show \ddash{}resolved c-darktable/all}
 
