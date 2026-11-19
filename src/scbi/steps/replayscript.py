@@ -490,7 +490,10 @@ class _Translator:
                 delim = "SCBI_EOF"
                 while delim in text:
                     delim += "_"
-                out.append(f"{ind}cat {op} {self.word(s.path)} <<{f"'{delim}'" if s.raw else delim}")
+                quoted_delim = f"'{delim}'" if s.raw else delim
+                out.append(
+                    f"{ind}cat {op} {self.word(s.path)} <<{quoted_delim}"
+                )
                 out += text.rstrip("\n").split("\n") + [delim]
             else:
                 raise ScriptError(f"unsupported step {s!r}")

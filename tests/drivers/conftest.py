@@ -21,7 +21,8 @@ def t(request, tmp_path) -> Driver:
     return Driver(root, str(request.path))
 
 
-@pytest.hookimpl(wrapper=True)
+#@pytest.hookimpl(wrapper=True)
+@pytest.hookimpl(hookwrapper=True)
 def pytest_pyfunc_call(pyfuncitem):
     result = yield
     driver = pyfuncitem.funcargs.get("t")
