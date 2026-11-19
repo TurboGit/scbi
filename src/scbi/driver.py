@@ -924,11 +924,13 @@ class Driver:
             if e == "0":
                 self.plan.register(["auto", *words(k), *words(v)], self.is_built)
             elif e == "1":
+                #  the report log of the module (k: <formodule>=<module>
+                #  for a module referenced with @for)
                 if not quiet:
-                    self.log.ilog(k, v)
+                    self.log.ilog(k.rsplit("=", 1)[-1], v)
             else:
                 #  an error (stderr) is shown even when quiet (> /dev/null)
-                self.log.elog(k, v)
+                self.log.elog(k.rsplit("=", 1)[-1], v)
                 eres = 1
         res = propagate_meta_versions(self)
         return eres or res

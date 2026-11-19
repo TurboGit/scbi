@@ -4,8 +4,9 @@ scripts.d/5_tools).
 
 Output as in Bash, where it runs as ``get-archive ... 2>>$log | tee -a
 $log``: the standard output (``out``) goes to the console and the log,
-the error messages (elog, tools) are appended to the log; some commands
-write the log with ``> $log`` (truncated), as in Bash.
+the error messages (elog, tools) are appended to the log. The log is the
+report log of the module (the whole day): it is never truncated (Bash
+truncated its per-variant log with ``> $log`` for some commands).
 """
 
 from __future__ import annotations
@@ -32,11 +33,9 @@ class _Io:
         self.log = log
         self.env = env
 
-    def run(self, args: list[str], cwd: str, truncate: bool = False, stdout_to_stderr: bool = False) -> int:
-        """A command: ``> $log 2>&1`` (truncate) or its stderr (and stdout
-        with ``1>&2``) appended to the log."""
-        mode = "w" if truncate else "a"
-        with open(self.log, mode) as f:
+    def run(self, args: list[str], cwd: str, stdout_to_stderr: bool = False) -> int:
+        """A command, its output appended to the log."""
+        with open(self.log, "a") as f:
             try:
                 return subprocess.run(args, cwd=cwd, env=self.env, stdin=subprocess.DEVNULL,
                                       stdout=f, stderr=subprocess.STDOUT).returncode
@@ -98,11 +97,9 @@ def _get_archive(builder, module, variant, tar, proxy, options, tarcp, tarurl, t
         out(line)
 
     if not os.path.isdir(mdir):
-        io.run(["mkdir", "-p", mdir], cwd, truncate=True)
+        io.run(["mkdir", "-p", mdir], cwd)
     for name in ("tarsrc", "tar", "tar-sha1", "archive-src", "archive", "archive-sha1", "archivetmp"):
         _rm_rf(os.path.join(mdir, name))
-    with open(log, "w"):
-        pass
     os.makedirs(f"{mdir}/archivetmp", exist_ok=True)
     tmp = f"{mdir}/archivetmp"
 
@@ -134,9 +131,9 @@ def _download(io: _Io, cwd: str, tarcp: str, options: str, tarurl: str, tarsrc: 
     tmp_sha1 = f"/tmp/{tarsrc}.sha1"
     do_download = 0
 
-    #  the SHA-1 if present (> $log)
+    #  the SHA-1 if present
     if proto is not None:
-        rc = io.run(proto.command(tarcp, options, f"{tarurl}/{tarsrc}.sha1", tmp_sha1), cwd, truncate=True)
+        rc = io.run(proto.command(tarcp, options, f"{tarurl}/{tarsrc}.sha1", tmp_sha1), cwd)
     else:
         rc = 1
     if rc == 0:
@@ -146,8 +143,7 @@ def _download(io: _Io, cwd: str, tarcp: str, options: str, tarurl: str, tarsrc: 
     if do_download == 1 or not os.path.isfile(f"{archives}/{tarsrc}"):
         do_download = 1
         if proto is not None:
-            rc = io.run(proto.command(tarcp, options, f"{tarurl}/{tarsrc}", f"{archives}/{tarsrc}"), cwd,
-                        truncate=True)
+            rc = io.run(proto.command(tarcp, options, f"{tarurl}/{tarsrc}", f"{archives}/{tarsrc}"), cwd)
         else:
             elog("unknown", "tar", "protocol", *words(tarcp))
             rc = 1

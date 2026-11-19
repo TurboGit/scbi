@@ -380,7 +380,8 @@ class Builder:
             if not os.access(idir, os.W_OK):
                 sudo = ["sudo"]
             subprocess.run([*sudo, "mkdir", "-p", f"{idir}/"])
-            with open(log, "w") as f:
+            #  appended to the report log (not truncated)
+            with open(log, "a") as f:
                 rc = subprocess.run([*sudo, "rsync", "-a", "--force", f"{tvdir}/install/.", f"{idir}/."],
                                     stdout=f, stderr=f).returncode
             return rc == 0, idir
@@ -409,7 +410,9 @@ class Builder:
             self.ilog(module, "%BModule", f"%t{module}%c", "marked to be skipped")
             return
 
-        log = f"{self.get('SCBI_LOGS')}/{self.get('TODAY')}/{self.get('SCBI_TARGET')}-{module}-{variant}-report.log"
+        #  the report log of the module (the driver messages, the output of
+        #  the VCS and generic commands): one file per module and day
+        log = str(d.log.report(module))
         d.set("log", log)
         os.chdir(self.get("SCBI_ROOT"))
 
@@ -449,7 +452,6 @@ class Builder:
         bdir = self.get("SCBI_BDIR")
         tvdir = self.target_dir(module, variant)
         os.makedirs(f"{tvdir}/logs", exist_ok=True)
-        open(log, "w").close()
         if self.get("DO_FLAT") == "yes":
             os.makedirs(f"{bdir}/{module}", exist_ok=True)
 
@@ -511,7 +513,7 @@ class Builder:
 
         d.log.line_sep()
         self.ilog(module, "%BBuilding", f"%t{module}%c", f"[%g{' '.join(variant.split('.'))}%c]",
-                  f"(%g{disp}%c)", tee=log)
+                  f"(%g{disp}%c)")
 
         start = time.monotonic()
 
@@ -519,9 +521,9 @@ class Builder:
             self.needed_by(module, log)
 
         if self.get("SCBI_HOST") == self.get("SCBI_TARGET"):
-            self.ilog(module, "native", self.get("SCBI_TARGET"), tee=log)
+            self.ilog(module, "native", self.get("SCBI_TARGET"))
         else:
-            self.ilog(module, "cross", self.get("SCBI_TARGET"), tee=log)
+            self.ilog(module, "cross", self.get("SCBI_TARGET"))
 
         os.makedirs(tvdir, exist_ok=True)
 
@@ -549,9 +551,9 @@ class Builder:
 
         secs = int(time.monotonic() - start)
         if secs >= 5:
-            self.ilog(module, "timing:", time.strftime("%H:%M:%S", time.gmtime(secs)), tee=log)
+            self.ilog(module, "timing:", time.strftime("%H:%M:%S", time.gmtime(secs)))
 
-        self.ilog(module, "End", "Building", module, f"[{' '.join(variant.split('.'))}]", f"({disp})", tee=log)
+        self.ilog(module, "End", "Building", module, f"[{' '.join(variant.split('.'))}]", f"({disp})")
         d.log.line_sep()
 
     # -------------------------------------------------------- meta-module
@@ -598,7 +600,7 @@ class Builder:
         self.progress_next(meta, variant)
         start = time.monotonic()
         d.log.line_sep()
-        self.ilog(meta, "%BMetamodule", f"%t{meta}%c", f"[%g{vdisp}%c]", "setup", tee=log)
+        self.ilog(meta, "%BMetamodule", f"%t{meta}%c", f"[%g{vdisp}%c]", "setup")
         if formodule != "@root":
             self.needed_by(formodule, log)
 
@@ -609,13 +611,11 @@ class Builder:
 
         if internal_wrapper(fct_setup) != 0:
             return 1
-        self.ilog(meta, "End", "metamodule", meta, f"[{vdisp}]", "setup", tee=log)
+        self.ilog(meta, "End", "metamodule", meta, f"[{vdisp}]", "setup")
         d.log.line_sep()
 
         do_agg_prefix = False
         tvmdir = ""
-        #  $module: local of handle-module, assigned by the loop below
-        leaked = meta
         if self.get("DEPS") == "yes" or (not fct_setup and not fct_wrapup):
             Path(mdir, "source-ref").unlink(missing_ok=True)
             tvmdir = self.target_dir(meta, variant)
@@ -626,7 +626,6 @@ class Builder:
                 meta, variant, "modules", [self.get("SCBI_PREFIX"), self.get("SCBI_TARGET"), variant],
                 d.plan, self.modules_list)
             for m in words("\n".join(mods)):
-                leaked = m
                 self.handle_module(meta, m, "default", agg_mode)
                 info = (d.plan.module_ref(m, meta) + [""] * 4)[:4]
                 mvariant, mref = info[1], info[3]
@@ -656,18 +655,18 @@ class Builder:
             Path(tvdir, "build-id").unlink(missing_ok=True)
 
         d.log.line_sep()
-        self.ilog(meta, "%BMetamodule", f"%t{meta}%c", f"[%g{vdisp}%c]", "wrapup", tee=log)
+        self.ilog(meta, "%BMetamodule", f"%t{meta}%c", f"[%g{vdisp}%c]", "wrapup")
         if formodule != "@root":
             self.needed_by(formodule, log)
 
         if is_utd == "no":
             if self.get("DO_FORCE") == "yes":
-                self.ilog(leaked, "trigger: forced")
+                self.ilog(meta, "trigger: forced")
             elif Path(tvdir, "build-deps").is_file():
-                self.ilog(leaked, "trigger: build not up-to-date")
-                self.triggered_by(leaked, Path(f"build-deps-{variant}"), Path(tvdir, "build-deps"))
+                self.ilog(meta, "trigger: build not up-to-date")
+                self.triggered_by(meta, Path(f"build-deps-{variant}"), Path(tvdir, "build-deps"))
             elif Path(f"build-deps-{variant}").is_file():
-                self.ilog(leaked, "trigger: not yet built")
+                self.ilog(meta, "trigger: not yet built")
             if internal_wrapper(fct_wrapup) != 0:
                 return 1
             shutil.copy(f"build-id-{variant}", f"{tvdir}/build-id")
@@ -681,15 +680,15 @@ class Builder:
         final = self.d.envfile.hook("module_final_step")
         if final is not None:
             mmode = "aggregate" if agg_mode != "no" else "yes"
-            self.ilog(meta, "final", "step", "starting", tee=log)
+            self.ilog(meta, "final", "step", "starting")
             self.final_step(final, FinalStep(self, f"{tvmdir}/install", self.get("SCBI_TARGET"), variant, meta,
                                              formodule, meta, depends_kind, mmode, is_aggregated, is_utd))
-            self.ilog(meta, "final", "step", "completed", tee=log)
+            self.ilog(meta, "final", "step", "completed")
 
         secs = int(time.monotonic() - start)
         if secs >= 5:
-            self.ilog(meta, "timing:", time.strftime("%H:%M:%S", time.gmtime(secs)), tee=log)
-        self.ilog(meta, "End", "metamodule", meta, f"[{vdisp}]", "wrapup", tee=log)
+            self.ilog(meta, "timing:", time.strftime("%H:%M:%S", time.gmtime(secs)))
+        self.ilog(meta, "End", "metamodule", meta, f"[{vdisp}]", "wrapup")
         d.log.line_sep()
         return 0
 
@@ -842,9 +841,9 @@ class Builder:
 
     def needed_by(self, module: str, log: str) -> None:
         if len(self.modules_list) > 1:
-            self.ilog(module, "needed by:", tee=log)
+            self.ilog(module, "needed by:")
             for m in reversed(self.modules_list[:-1]):
-                self.ilog(module, f"  ↳ {m}", tee=log)
+                self.ilog(module, f"  ↳ {m}")
 
     def module_subshell(self, formodule, modref, depends_kind, is_aggregated,
                         module, variant, kind, ref, log, tvdir) -> tuple[int, str]:
@@ -859,7 +858,7 @@ class Builder:
             for v in ("DO_SETUP", "DO_CONFIG", "DO_BUILD", "DO_INSTALL", "DO_WRAPUP"):
                 d.set(v, "no")
 
-        self.ilog(module, "steps:", *words(self.get("STEPS")), tee=log)
+        self.ilog(module, "steps:", *words(self.get("STEPS")))
 
         if keep:
             self.ilog(module, "no update, keep current build")
@@ -968,14 +967,13 @@ class Builder:
                 _rm(f"{tvdir}/build{lnk}")
         envtmp.unlink(missing_ok=True)
 
-        append = self.get("SCBI_DLOG") != "yes"
-
         def generic(step: str) -> int:
             if step not in generic_steps.STEPS:
                 return 0
             sys.stdout.flush()
+            #  appended to the report log of the module (never truncated)
             return generic_steps.Generic(self, formodule, module, variant, tvdir).step(
-                step, self.get("log"), append=append)
+                step, self.get("log"), append=True)
 
         def wrapper(step: str) -> int:
             #  module-variant-wrapper does nothing without a hook or for a
@@ -1017,10 +1015,10 @@ class Builder:
 
         final = self.d.envfile.hook("module_final_step")
         if final is not None:
-            self.ilog(module, "final", "step", "starting", tee=log)
+            self.ilog(module, "final", "step", "starting")
             self.final_step(final, FinalStep(self, f"{tvdir}/install", self.get("SCBI_TARGET"), variant, module,
                                              formodule, modref, depends_kind, "no", is_aggregated, is_uptodate))
-            self.ilog(module, "final", "step", "completed", tee=log)
+            self.ilog(module, "final", "step", "completed")
         return 0, is_uptodate
 
 

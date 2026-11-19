@@ -9,7 +9,7 @@ xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps: setup tests
 xxxx/xx/xx xx:xx:xx : get sources from git
 xxxx/xx/xx xx:xx:xx : error: cannot get sources from /this.is.path/some/dir
-xxxx/xx/xx xx:xx:xx : error: see <pwd>/.root/builds/.logs//x86_64-linux-gnu-checkvcs-default-report.log
+xxxx/xx/xx xx:xx:xx : error: see <pwd>/.root/builds/.logs/x86_64-linux-gnu-checkvcs-report.log
 """)
 
     #  the vcs records are rewritten by the environment (.env-rewrite)

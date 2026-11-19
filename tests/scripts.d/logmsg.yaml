@@ -1,0 +1,5 @@
+plugin: logmsg
+
+config: echo config
+
+wrapup: echo plain

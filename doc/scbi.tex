@@ -3045,7 +3045,9 @@ This section describes the structure of the sandbox. It is generally not needed 
 	.3 <module>-<version>-src.tar.gz.
 	.2 \textbf{[.logs]} \des{global log directory with history}.
 	.3 \textbf{[YYYY-MM-DD]}.
-	.4 *.log.
+	.4 <target>-<module>-report.log \des{the messages of the driver for the module (all its variants, all the runs of the day, without colors) and the output of the VCS, archive and generic commands}.
+	.4 <target>-<module>-<variant>-<step>.log \des{the output of a step (also in <target>-<variant>/logs/<step>.log)}.
+	.4 <target>-<module>-<variant>-env.log \des{the environment of the build}.
 	.2 \textbf{[<module>]}.
 	.3 build $\rightarrow$ \des{symlink to current/latest target build dir}.
 	.3 build-id-<variant> \des{build id to check for changes}.

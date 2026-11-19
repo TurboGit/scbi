@@ -2,7 +2,9 @@
 line-sep).
 
 Messages go to the console and to the module report log
-``$SCBI_LOGS/$TODAY/$SCBI_TARGET-<module>-report.log``. As in Bash the
+``$SCBI_LOGS/$TODAY/$SCBI_TARGET-<module>-report.log`` (one file per
+module and day, all its variants; the colors on the console only). As in
+Bash the
 message is used as a printf format: ``%`` directives (without arguments)
 and backslash escapes are interpreted. The "line separator" state is kept
 in the file SCBI_LINE_SEP shared with the hook shells (they log with the
@@ -148,35 +150,48 @@ class Logger:
         except OSError:
             pass
 
-    def message(self, *words: str) -> str:
-        """Port of ``c-log-message``: color codes replaced."""
+    def message(self, *words: str, colors: bool = True) -> str:
+        """Port of ``c-log-message``: color codes replaced (by nothing
+        without ``colors``, for the log files)."""
         msg = " ".join(words)
         for code, name in COLOR_CODES.items():
-            msg = msg.replace(code, self.colors.get(name, ""))
+            msg = msg.replace(code, self.colors.get(name, "") if colors else "")
         return msg
 
     def ilog(self, module: str, *words: str, tee: str | None = None) -> None:
-        """``tee``: ``ilog ... | tee -a FILE``, the console line is also
-        appended to FILE."""
-        ts, msg = self._ts(), self.message(*words)
-        line = printf_format(f"{ts} : {msg}\n")
+        """``tee``: ``ilog ... | tee -a FILE``, the line is also appended
+        to FILE (not when FILE is the report log: written once)."""
+        ts = self._ts()
+        line = printf_format(f"{ts} : {self.message(*words)}\n")
+        plain = printf_format(f"{ts} : {self.message(*words, colors=False)}\n")
         if not self.quiet:
             self.stdout.write(line)
             self.stdout.flush()
-            if tee:
+            if tee and Path(tee) != self.report(module):
                 with open(tee, "a") as f:
-                    f.write(line)
-        self._append(module, line)
+                    f.write(plain)
+        self._append(module, plain)
         self._set_sep("0")
 
+    def ilog_raw(self, module: str, text: str) -> str:
+        """A message as given (no color codes, no printf escapes), to the
+        console (unless quiet) and the report log; returns the line."""
+        line = f"{self._ts()} : {text}\n"
+        if not self.quiet:
+            self.stdout.write(line)
+            self.stdout.flush()
+        self._append(module, line)
+        self._set_sep("0")
+        return line
+
     def dlog(self, module: str, *words: str) -> None:
-        ts, msg = self._ts(), self.message(*words)
-        line = printf_format(f"{ts} :   {msg}\n")
+        ts = self._ts()
+        line = printf_format(f"{ts} :   {self.message(*words)}\n")
         out = self.tty() if self.tty else _open_tty()
         if out is not None:
             out.write(line)
             out.flush()
-        self._append(module, line)
+        self._append(module, printf_format(f"{ts} :   {self.message(*words, colors=False)}\n"))
         self._set_sep("0")
 
     def elog(self, module: str, *words: str) -> None:
@@ -189,7 +204,7 @@ class Logger:
         )
         self.stderr.write(line)
         self.stderr.flush()
-        self._append(module, printf_format(f"{ts} : {msg}\n"))
+        self._append(module, printf_format(f"{ts} : {self.message(*words, colors=False)}\n"))
         self._set_sep("0")
 
     def clog(self, module: str) -> None:

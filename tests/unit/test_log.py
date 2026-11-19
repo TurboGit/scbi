@@ -139,3 +139,22 @@ def test_status_bar():
     assert bar.elapsed() == "1h03m12s"
     bar.clear()
     assert term.getvalue().endswith(f"\x1b7\x1b[r\x1b[{rows};1H\x1b[2K\x1b8")
+
+
+def test_report_plain_and_raw(tmp_path):
+    #  the colors on the console only; tee on the report log not doubled
+    log, out, _ = make(tmp_path, colors={"CBOLD": "<B>", "CCLEAR": "</B>"})
+    report = tmp_path / "logs" / "today" / "tgt-m-report.log"
+    log.ilog("m", "%Bm%c", "built", tee=str(report))
+    log.elog("m", "%Bm%c", "failed")
+    log.dlog("m", "%Bm%c", "detail")
+    assert TS.sub("TS", out.getvalue()) == "TS : <B>m</B> built\n"
+    assert TS.sub("TS", report.read_text()) == "TS : m built\nTS : m failed\nTS :   m detail\n"
+    #  raw: as given (no color codes, no printf escapes)
+    line = log.ilog_raw("m", "    50% done \\n %B")
+    assert TS.sub("TS", line) == "TS :     50% done \\n %B\n"
+    assert report.read_text().endswith(line)
+    assert out.getvalue().endswith(line)
+    quiet, qout, _ = make(tmp_path, quiet=True)
+    quiet.ilog_raw("m", "  q")
+    assert qout.getvalue() == "" and report.read_text().endswith(" :   q\n")

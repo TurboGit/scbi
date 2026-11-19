@@ -218,9 +218,9 @@ class Sources:
                     log = self.get("log")
 
                     def tee(line: str) -> None:
+                        #  the messages of get-archive (ilog): already in the
+                        #  report log, to the console only
                         self.out(line)
-                        with open(log, "a") as f:
-                            f.write(line + "\n")
 
                     if get_archive(self.b, module, variant, ref, log, tee) != 0:
                         #  grep FAILED $log
