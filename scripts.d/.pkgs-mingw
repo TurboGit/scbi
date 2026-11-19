@@ -1,120 +1,120 @@
-# OS name                           MSYS/MINGW pacman packages
+# OS name                           MSYS2 UCRT64 pacman packages
 # ------------------------------------------------------------
 os@-afterimage-dev
-os@-archive-dev
-os@-autoconf
-os@-automake
-os@-autotools-dev
-os@-avif-dev
+os@-archive-dev                     mingw-w64-ucrt-x86_64-libarchive
+os@-autoconf                        autoconf-wrapper
+os@-automake                        automake-wrapper
+os@-autotools-dev                   mingw-w64-ucrt-x86_64-autotools
+os@-avif-dev                        mingw-w64-ucrt-x86_64-libavif
 os@-bison                           bison
-os@-blas-dev                        mingw-w64-x86_64-openblas
-os@-boost-chrono-dev                mingw-w64-x86_64-boost
-os@-boost-date-time-dev             mingw-w64-x86_64-boost
-os@-boost-dev                       mingw-w64-x86_64-boost
-os@-boost-filestsystem-dev          mingw-w64-x86_64-boost
-os@-boost-filesystem-dev            mingw-w64-x86_64-boost
-os@-boost-graph-dev                 mingw-w64-x86_64-boost
-os@-boost-locale-dev                mingw-w64-x86_64-boost
+os@-blas-dev                        mingw-w64-ucrt-x86_64-openblas
+os@-boost-chrono-dev                mingw-w64-ucrt-x86_64-boost
+os@-boost-date-time-dev             mingw-w64-ucrt-x86_64-boost
+os@-boost-dev                       mingw-w64-ucrt-x86_64-boost
+os@-boost-filestsystem-dev          mingw-w64-ucrt-x86_64-boost
+os@-boost-filesystem-dev            mingw-w64-ucrt-x86_64-boost
+os@-boost-graph-dev                 mingw-w64-ucrt-x86_64-boost
+os@-boost-locale-dev                mingw-w64-ucrt-x86_64-boost
 os@-boost-mpi-python-dev
-os@-boost-python-dev                mingw-w64-x86_64-boost
-os@-boost-regex-dev                 mingw-w64-x86_64-boost
-os@-boost-serialization-dev         mingw-w64-x86_64-boost
+os@-boost-python-dev                mingw-w64-ucrt-x86_64-boost
+os@-boost-regex-dev                 mingw-w64-ucrt-x86_64-boost
+os@-boost-serialization-dev         mingw-w64-ucrt-x86_64-boost
 os@-boost-signals-dev
-os@-boost-thread-dev                mingw-w64-x86_64-boost
-os@-bz2-dev                         mingw-w64-x86_64-bzip2
+os@-boost-thread-dev                mingw-w64-ucrt-x86_64-boost
+os@-bz2-dev                         mingw-w64-ucrt-x86_64-bzip2
 os@-c6-dev
-os@-cairo-dev                       mingw-w64-x86_64-cairo
-os@-cfitsio-dev                     mingw-w64-x86_64-cfitsio
-os@-cgal-dev                        mingw-w64-x86_64-cgal
-os@-cgns-dev                        mingw-w64-x86_64-cgns
+os@-cairo-dev                       mingw-w64-ucrt-x86_64-cairo
+os@-cfitsio-dev                     mingw-w64-ucrt-x86_64-cfitsio
+os@-cgal-dev                        mingw-w64-ucrt-x86_64-cgal
+os@-cgns-dev                        mingw-w64-ucrt-x86_64-cgns
 os@-chrpath
-os@-clang                           mingw-w64-x86_64-clang
+os@-clang                           mingw-w64-ucrt-x86_64-clang
 os@-clang-10
 os@-clang-11
 os@-clang-14
 os@-clang-15
 os@-clang-16
 os@-clang-17
-os@-cli11                           mingw-w64-x86_64-cli11
-os@-cmake                           mingw-w64-x86_64-cmake
+os@-cli11                           mingw-w64-ucrt-x86_64-cli11
+os@-cmake                           mingw-w64-ucrt-x86_64-cmake
 os@-cminpack-dev
 os@-colord-dev
 os@-colord-gtk-dev
 os@-cos4-dev
-os@-cppunit-dev                     mingw-w64-x86_64-cppunit
-os@-crypto++                        mingw-w64-x86_64-crypto++
+os@-cppunit-dev                     mingw-w64-ucrt-x86_64-cppunit
+os@-crypto++                        mingw-w64-ucrt-x86_64-crypto++
 os@-cups2-dev
-os@-curl4                           mingw-w64-x86_64-curl
-os@-curl4-gnutls-dev                mingw-w64-x86_64-curl
-os@-curl4-openssl-dev               mingw-w64-x86_64-curl
+os@-curl4                           mingw-w64-ucrt-x86_64-curl
+os@-curl4-gnutls-dev                mingw-w64-ucrt-x86_64-curl
+os@-curl4-openssl-dev               mingw-w64-ucrt-x86_64-curl
 os@-doxygen                         doxygen
 os@-egl1-mesa-dev
-os@-eigen3-dev                      mingw-w64-x86_64-eigen3
-os@-exiv2-dev
-os@-fftw3-dev                       mingw-w64-x86_64-fftw
-os@-findbin
+os@-eigen3-dev                      mingw-w64-ucrt-x86_64-eigen3
+os@-exiv2-dev                       mingw-w64-ucrt-x86_64-exiv2
+os@-fftw3-dev                       mingw-w64-ucrt-x86_64-fftw
+os@-findbin                         perl
 os@-flex                            flex
-os@-fmt-dev                         mingw-w64-x86_64-fmt
-os@-freeimage-dev                   mingw-w64-x86_64-freeimage
-os@-freetype-dev                    mingw-w64-x86_64-freetype
-os@-freetype6-dev                   mingw-w64-x86_64-freetype
-os@-freexl-dev                      mingw-w64-x86_64-libfreexl
-os@-ftgl-dev
-os@-g++                             mingw-w64-x86_64-gcc
-os@-gcc                             mingw-w64-x86_64-gcc
-os@-gdal-dev                        mingw-w64-x86_64-gdal
-os@-geos-dev                        mingw-w64-x86_64-geos
-os@-gfortran                        mingw-w64-x86_64-gcc-fortran
-os@-gl2ps-dev                       mingw-w64-x86_64-gl2ps
-os@-glew-dev                        mingw-w64-x86_64-glew
-os@-glfw3-dev
+os@-fmt-dev                         mingw-w64-ucrt-x86_64-fmt
+os@-freeimage-dev                   mingw-w64-ucrt-x86_64-freeimage
+os@-freetype-dev                    mingw-w64-ucrt-x86_64-freetype
+os@-freetype6-dev                   mingw-w64-ucrt-x86_64-freetype
+os@-freexl-dev                      mingw-w64-ucrt-x86_64-libfreexl
+os@-ftgl-dev                        mingw-w64-ucrt-x86_64-ftgl
+os@-g++                             mingw-w64-ucrt-x86_64-gcc
+os@-gcc                             mingw-w64-ucrt-x86_64-gcc
+os@-gdal-dev                        mingw-w64-ucrt-x86_64-gdal
+os@-geos-dev                        mingw-w64-ucrt-x86_64-geos
+os@-gfortran                        mingw-w64-ucrt-x86_64-gcc-fortran
+os@-gl2ps-dev                       mingw-w64-ucrt-x86_64-gl2ps
+os@-glew-dev                        mingw-w64-ucrt-x86_64-glew
+os@-glfw3-dev                       mingw-w64-ucrt-x86_64-glfw
 os@-glu1-mesa-dev
-os@-gmic-dev
-os@-gmp-dev                         mingw-w64-x86_64-gmp
-os@-gomp1
-os@-gphoto2-dev
-os@-graphicsmagick1-dev
-os@-graphviz                        mingw-w64-x86_64-graphviz
-os@-graphviz-dev                    mingw-w64-x86_64-graphviz
-os@-haru-dev                        mingw-w64-x86_64-libharu
-os@-hdf5-dev                        mingw-w64-x86_64-hdf5
+os@-gmic-dev                        mingw-w64-ucrt-x86_64-gmic
+os@-gmp-dev                         mingw-w64-ucrt-x86_64-gmp
+os@-gomp1                           mingw-w64-ucrt-x86_64-gcc-libs
+os@-gphoto2-dev                     mingw-w64-ucrt-x86_64-libgphoto2
+os@-graphicsmagick1-dev             mingw-w64-ucrt-x86_64-graphicsmagick
+os@-graphviz                        mingw-w64-ucrt-x86_64-graphviz
+os@-graphviz-dev                    mingw-w64-ucrt-x86_64-graphviz
+os@-haru-dev                        mingw-w64-ucrt-x86_64-libharu
+os@-hdf5-dev                        mingw-w64-ucrt-x86_64-hdf5
 os@-hdf5-openmpi-dev
-os@-hdf5-tools
-os@-heif-dev
+os@-hdf5-tools                      mingw-w64-ucrt-x86_64-hdf5
+os@-heif-dev                        mingw-w64-ucrt-x86_64-libheif
 os@-image-exiftool-perl
 os@-intltool                        intltool
-os@-jpeg-dev
-os@-json-c-dev                      mingw-w64-x86_64-json-c
-os@-json-glib-dev                   mingw-w64-x86_64-json-glib
-os@-jxl-dev
-os@-lapack-dev                      mingw-w64-x86_64-lapack
-os@-lapacke-dev                     mingw-w64-x86_64-lapacke
-os@-lcms2-dev                       mingw-w64-x86_64-lcms2
-os@-lensfun-dev                     mingw-w64-x86_64-lensfun
-os@-libtool                         mingw-w64-x86_64-libtool
+os@-jpeg-dev                        mingw-w64-ucrt-x86_64-libjpeg-turbo
+os@-json-c-dev                      mingw-w64-ucrt-x86_64-json-c
+os@-json-glib-dev                   mingw-w64-ucrt-x86_64-json-glib
+os@-jxl-dev                         mingw-w64-ucrt-x86_64-libjxl
+os@-lapack-dev                      mingw-w64-ucrt-x86_64-lapack
+os@-lapacke-dev                     mingw-w64-ucrt-x86_64-lapacke
+os@-lcms2-dev                       mingw-w64-ucrt-x86_64-lcms2
+os@-lensfun-dev                     mingw-w64-ucrt-x86_64-lensfun
+os@-libtool                         mingw-w64-ucrt-x86_64-libtool
 os@-llvm-10
 os@-llvm-11
 os@-llvm-14
 os@-llvm-15
 os@-llvm-16
 os@-llvm-17
-os@-lua5.3-dev
-os@-lua5.4-dev
+os@-lua5.3-dev                      mingw-w64-ucrt-x86_64-lua53
+os@-lua5.4-dev                      mingw-w64-ucrt-x86_64-lua54
 os@-make                            make
-os@-makeinfo
-os@-meshio-tools
-os@-metis-dev                       mingw-w64-x86_64-metis
-os@-mpc-dev                         mingw-w64-x86_64-mpc
-os@-mpfr-dev                        mingw-w64-x86_64-mpfr
-os@-ncurses-dev                     mingw-w64-x86_64-ncurses
-os@-ninja                           mingw-w64-x86_64-ninja
-os@-nlohmann-json3-dev              mingw-w64-x86_64-nlohmann-json
-os@-nlopt                           mingw-w64-x86_64-nlopt
-os@-nlopt-cxx
-os@-nlopt-cxx-dev
-os@-nlopt-dev                       mingw-w64-x86_64-nlopt
-os@-nlopt0
-os@-ogg-dev                         mingw-w64-x86_64-libogg
+os@-makeinfo                        mingw-w64-ucrt-x86_64-texinfo
+os@-meshio-tools                    mingw-w64-ucrt-x86_64-python-meshio
+os@-metis-dev                       mingw-w64-ucrt-x86_64-metis
+os@-mpc-dev                         mingw-w64-ucrt-x86_64-mpc
+os@-mpfr-dev                        mingw-w64-ucrt-x86_64-mpfr
+os@-ncurses-dev                     mingw-w64-ucrt-x86_64-ncurses
+os@-ninja                           mingw-w64-ucrt-x86_64-ninja
+os@-nlohmann-json3-dev              mingw-w64-ucrt-x86_64-nlohmann-json
+os@-nlopt                           mingw-w64-ucrt-x86_64-nlopt
+os@-nlopt-cxx                       mingw-w64-ucrt-x86_64-nlopt
+os@-nlopt-cxx-dev                   mingw-w64-ucrt-x86_64-nlopt
+os@-nlopt-dev                       mingw-w64-ucrt-x86_64-nlopt
+os@-nlopt0                          mingw-w64-ucrt-x86_64-nlopt
+os@-ogg-dev                         mingw-w64-ucrt-x86_64-libogg
 os@-omniidl
 os@-omniorb
 os@-omniorb-dev
@@ -126,125 +126,125 @@ os@-omp-14
 os@-omp-15
 os@-omp-16
 os@-omp-17
-os@-onnxruntime-dev
-os@-openblas-dev                    mingw-w64-x86_64-openblas
-os@-opencv-core-dev
-os@-opencv-dev                      mingw-w64-x86_64-opencv
-os@-opencv-features2d-dev
-os@-opencv-flann-dev
-os@-opencv-imgproc-dev
-os@-openexr-dev                     mingw-w64-x86_64-openexr
-os@-openjp2-7-dev                   mingw-w64-x86_64-openjpeg2
-os@-openjp2-dev                     mingw-w64-x86_64-openjpeg2
-os@-openjph-dev                     mingw-w64-x86_64-openjph
+os@-onnxruntime-dev                 mingw-w64-ucrt-x86_64-onnxruntime
+os@-openblas-dev                    mingw-w64-ucrt-x86_64-openblas
+os@-opencv-core-dev                 mingw-w64-ucrt-x86_64-opencv
+os@-opencv-dev                      mingw-w64-ucrt-x86_64-opencv
+os@-opencv-features2d-dev           mingw-w64-ucrt-x86_64-opencv
+os@-opencv-flann-dev                mingw-w64-ucrt-x86_64-opencv
+os@-opencv-imgproc-dev              mingw-w64-ucrt-x86_64-opencv
+os@-openexr-dev                     mingw-w64-ucrt-x86_64-openexr
+os@-openjp2-7-dev                   mingw-w64-ucrt-x86_64-openjpeg2
+os@-openjp2-dev                     mingw-w64-ucrt-x86_64-openjpeg2
+os@-openjph-dev                     mingw-w64-ucrt-x86_64-openjph
 os@-openmpi-dev
 os@-osmesa-dev
 os@-osmesa6-dev
 os@-osmgpsmap-1.0-dev
-os@-pcre2-dev                       mingw-w64-x86_64-pcre2
-os@-pcre3-dev
-os@-png-dev                         mingw-w64-x86_64-libpng
+os@-pcre2-dev                       mingw-w64-ucrt-x86_64-pcre2
+os@-pcre3-dev                       mingw-w64-ucrt-x86_64-pcre
+os@-png-dev                         mingw-w64-ucrt-x86_64-libpng
 os@-po4a                            po4a
 os@-pod-parser-perl
-os@-postgresql                      mingw-w64-x86_64-postgresql
-os@-potrace-dev                     mingw-w64-x86_64-potrace
-os@-proj-dev                        mingw-w64-x86_64-proj
-os@-protobuf-dev                    mingw-w64-x86_64-protobuf
+os@-postgresql                      mingw-w64-ucrt-x86_64-postgresql
+os@-potrace-dev                     mingw-w64-ucrt-x86_64-potrace
+os@-proj-dev                        mingw-w64-ucrt-x86_64-proj
+os@-protobuf-dev                    mingw-w64-ucrt-x86_64-protobuf
 os@-ptscotch-dev
-os@-pugixml-dev                     mingw-w64-x86_64-pugixml
+os@-pugixml-dev                     mingw-w64-ucrt-x86_64-pugixml
 os@-pypy-setuptools
 os@-pyqt-sip
-os@-pyqt5-dev
-os@-pyqt5-dev-tools
-os@-python3                         mingw-w64-x86_64-python
+os@-pyqt5-dev                       mingw-w64-ucrt-x86_64-python-pyqt5
+os@-pyqt5-dev-tools                 mingw-w64-ucrt-x86_64-python-pyqt5
+os@-python3                         mingw-w64-ucrt-x86_64-python
 os@-python3-cftime
-os@-python3-dev                     mingw-w64-x86_64-python
+os@-python3-dev                     mingw-w64-ucrt-x86_64-python
 os@-python3-distutils-extra
-os@-python3-docutils                mingw-w64-x86_64-python-docutils
+os@-python3-docutils                mingw-w64-ucrt-x86_64-python-docutils
 os@-python3-gitdb
 os@-python3-gitpython
-os@-python3-h5py                    mingw-w64-x86_64-python-h5py
-os@-python3-importlib-metadata      mingw-w64-x86_64-python-importlib-metadata
-os@-python3-jsonschema
-os@-python3-lark
-os@-python3-lxml                    mingw-w64-x86_64-python-lxml
-os@-python3-matplotlib              mingw-w64-x86_64-python-matplotlib
-os@-python3-meshio                  mingw-w64-x86_64-python-meshio
-os@-python3-mpi4py                  mingw-w64-x86_64-python-mpi4py
-os@-python3-msgpack                 mingw-w64-x86_64-python-msgpack
+os@-python3-h5py                    mingw-w64-ucrt-x86_64-python-h5py
+os@-python3-importlib-metadata      mingw-w64-ucrt-x86_64-python-importlib-metadata
+os@-python3-jsonschema              mingw-w64-ucrt-x86_64-python-jsonschema
+os@-python3-lark                    mingw-w64-ucrt-x86_64-python-lark-parser
+os@-python3-lxml                    mingw-w64-ucrt-x86_64-python-lxml
+os@-python3-matplotlib              mingw-w64-ucrt-x86_64-python-matplotlib
+os@-python3-meshio                  mingw-w64-ucrt-x86_64-python-meshio
+os@-python3-mpi4py                  mingw-w64-ucrt-x86_64-python-mpi4py
+os@-python3-msgpack                 mingw-w64-ucrt-x86_64-python-msgpack
 os@-python3-netcdf4
 os@-python3-nlopt
-os@-python3-numexpr                 mingw-w64-x86_64-python-numexpr
-os@-python3-numpy                   mingw-w64-x86_64-python-numpy
-os@-python3-pip                     mingw-w64-x86_64-python-pip
-os@-python3-psutil                  mingw-w64-x86_64-python-psutil
-os@-python3-pyperclip               mingw-w64-x86_64-python-pyperclip
+os@-python3-numexpr                 mingw-w64-ucrt-x86_64-python-numexpr
+os@-python3-numpy                   mingw-w64-ucrt-x86_64-python-numpy
+os@-python3-pip                     mingw-w64-ucrt-x86_64-python-pip
+os@-python3-psutil                  mingw-w64-ucrt-x86_64-python-psutil
+os@-python3-pyperclip               mingw-w64-ucrt-x86_64-python-pyperclip
 os@-python3-pytest-runner
 os@-python3-pytidylib
-os@-python3-rich                    mingw-w64-x86_64-python-rich
-os@-python3-scipy                   mingw-w64-x86_64-python-scipy
-os@-python3-setuptools              mingw-w64-x86_64-python-setuptools
+os@-python3-rich                    mingw-w64-ucrt-x86_64-python-rich
+os@-python3-scipy                   mingw-w64-ucrt-x86_64-python-scipy
+os@-python3-setuptools              mingw-w64-ucrt-x86_64-python-setuptools
 os@-python3-smmap
-os@-python3-sphinx                  mingw-w64-x86_64-python-sphinx
-os@-python3-sphinx-rtd-theme
-os@-python3-stemmer
-os@-python3-toml                    mingw-w64-x86_64-python-toml
-os@-python3-typing-extensions
+os@-python3-sphinx                  mingw-w64-ucrt-x86_64-python-sphinx
+os@-python3-sphinx-rtd-theme        mingw-w64-ucrt-x86_64-python-sphinx_rtd_theme
+os@-python3-stemmer                 mingw-w64-ucrt-x86_64-python-pystemmer
+os@-python3-toml                    mingw-w64-ucrt-x86_64-python-toml
+os@-python3-typing-extensions       mingw-w64-ucrt-x86_64-python-typing_extensions
 os@-python3-wand
-os@-python3-xlrd
+os@-python3-xlrd                    mingw-w64-ucrt-x86_64-python-xlrd
 os@-python3-xlwt
-os@-python3-yaml                    mingw-w64-x86_64-python-yaml
-os@-python3-zipp                    mingw-w64-x86_64-python-zipp
+os@-python3-yaml                    mingw-w64-ucrt-x86_64-python-yaml
+os@-python3-zipp                    mingw-w64-ucrt-x86_64-python-zipp
 os@-qt5-default
-os@-qt5help5
-os@-qt5opengl5-dev
-os@-qt5printsupport5
-os@-qt5svg5-dev                     mingw-w64-x86_64-qt5-svg
+os@-qt5help5                        mingw-w64-ucrt-x86_64-qt5-tools
+os@-qt5opengl5-dev                  mingw-w64-ucrt-x86_64-qt5-base
+os@-qt5printsupport5                mingw-w64-ucrt-x86_64-qt5-base
+os@-qt5svg5-dev                     mingw-w64-ucrt-x86_64-qt5-svg
 os@-qt5x11extras5-dev
-os@-qtbase5-dev                     mingw-w64-x86_64-qt5-base
-os@-qttools5-dev
-os@-qtxmlpatterns5-dev-tools
-os@-qwt-qt5-dev
-os@-rapidjson-dev                   mingw-w64-x86_64-rapidjson
-os@-rav1e-dev                       mingw-w64-x86_64-rav1e
-os@-rsvg2-dev
-os@-scotch-dev
-os@-secret-dev
-os@-sfcgal-dev                      mingw-w64-x86_64-sfcgal
+os@-qtbase5-dev                     mingw-w64-ucrt-x86_64-qt5-base
+os@-qttools5-dev                    mingw-w64-ucrt-x86_64-qt5-tools
+os@-qtxmlpatterns5-dev-tools        mingw-w64-ucrt-x86_64-qt5-xmlpatterns
+os@-qwt-qt5-dev                     mingw-w64-ucrt-x86_64-qwt-qt5
+os@-rapidjson-dev                   mingw-w64-ucrt-x86_64-rapidjson
+os@-rav1e-dev                       mingw-w64-ucrt-x86_64-rav1e
+os@-rsvg2-dev                       mingw-w64-ucrt-x86_64-librsvg
+os@-scotch-dev                      mingw-w64-ucrt-x86_64-scotch
+os@-secret-dev                      mingw-w64-ucrt-x86_64-libsecret
+os@-sfcgal-dev                      mingw-w64-ucrt-x86_64-sfcgal
 os@-sip-dev
 os@-soup-dev
 os@-soup2-dev
-os@-soup3-dev
-os@-sphinx-common                   mingw-w64-x86_64-python-sphinx
+os@-soup3-dev                       mingw-w64-ucrt-x86_64-libsoup3
+os@-sphinx-common                   mingw-w64-ucrt-x86_64-python-sphinx
 os@-sphinx-intl
-os@-sqlite3-dev                     mingw-w64-x86_64-sqlite
-os@-ssl-dev                         mingw-w64-x86_64-openssl
-os@-svtav1enc-dev
-os@-swig                            mingw-w64-x86_64-swig
-os@-tbb-dev                         mingw-w64-x86_64-tbb
-os@-tcl-dev                         mingw-w64-x86_64-tcl
-os@-texlive
-os@-texlive-latex-extra
-os@-theora-dev                      mingw-w64-x86_64-libtheora
-os@-tiff-dev
+os@-sqlite3-dev                     mingw-w64-ucrt-x86_64-sqlite
+os@-ssl-dev                         mingw-w64-ucrt-x86_64-openssl
+os@-svtav1enc-dev                   mingw-w64-ucrt-x86_64-svt-av1
+os@-swig                            mingw-w64-ucrt-x86_64-swig
+os@-tbb-dev                         mingw-w64-ucrt-x86_64-tbb
+os@-tcl-dev                         mingw-w64-ucrt-x86_64-tcl
+os@-texlive                         mingw-w64-ucrt-x86_64-texlive-core
+os@-texlive-latex-extra             mingw-w64-ucrt-x86_64-texlive-latex-extra
+os@-theora-dev                      mingw-w64-ucrt-x86_64-libtheora
+os@-tiff-dev                        mingw-w64-ucrt-x86_64-libtiff
 os@-tirpc-dev
-os@-tk-dev                          mingw-w64-x86_64-tk
-os@-utf8cpp                         mingw-w64-x86_64-utf8cpp
+os@-tk-dev                          mingw-w64-ucrt-x86_64-tk
+os@-utf8cpp                         mingw-w64-ucrt-x86_64-utf8cpp
 os@-uuid-dev
-os@-webp-dev
+os@-webp-dev                        mingw-w64-ucrt-x86_64-libwebp
 os@-x11-dev
 os@-xcursor-dev
 os@-xext-dev
 os@-xft-dev
 os@-xi-dev
 os@-xinerama-dev
-os@-xml2-dev                        mingw-w64-x86_64-libxml2
-os@-xml2-utils                      mingw-w64-x86_64-libxml2
+os@-xml2-dev                        mingw-w64-ucrt-x86_64-libxml2
+os@-xml2-utils                      mingw-w64-ucrt-x86_64-libxml2
 os@-xmu-dev
-os@-xpm-dev
+os@-xpm-dev                         mingw-w64-ucrt-x86_64-xpm-nox
 os@-xrandr-dev
-os@-xsltproc
+os@-xsltproc                        mingw-w64-ucrt-x86_64-libxslt
 os@-xt-dev
-os@-xxhash-dev                      mingw-w64-x86_64-xxhash
-os@-yuv-dev
-os@-zlib1g-dev                      mingw-w64-x86_64-zlib
+os@-xxhash-dev                      mingw-w64-ucrt-x86_64-xxhash
+os@-yuv-dev                         mingw-w64-ucrt-x86_64-libyuv
+os@-zlib1g-dev                      mingw-w64-ucrt-x86_64-zlib

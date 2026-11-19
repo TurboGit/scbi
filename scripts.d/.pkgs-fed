@@ -1,6 +1,6 @@
 # OS name (Fedora 45)               Fedora packages
 # -------------------------------------------------
-os@-afterimage-dev
+os@-afterimage-dev                  libAfterImage-devel
 os@-archive-dev                     libarchive-devel
 os@-autoconf                        autoconf
 os@-automake                        automake
@@ -15,17 +15,17 @@ os@-boost-filestsystem-dev          boost-filesystem
 os@-boost-filesystem-dev            boost-filesystem
 os@-boost-graph-dev                 boost-graph
 os@-boost-locale-dev                boost-locale
-os@-boost-mpi-python-dev
-os@-boost-python-dev
+os@-boost-mpi-python-dev            boost-openmpi-python3-devel
+os@-boost-python-dev                boost-python3
 os@-boost-regex-dev                 boost-regex
-os@-boost-serialization-dev
+os@-boost-serialization-dev         boost-serialization
 os@-boost-signals-dev
 os@-boost-thread-dev                boost-thread
 os@-bz2-dev                         bzip2-devel
-os@-c6-dev
+os@-c6-dev                          glibc-devel
 os@-cairo-dev                       cairo-devel
 os@-cfitsio-dev                     cfitsio-devel
-os@-cgal-dev
+os@-cgal-dev                        CGAL-devel
 os@-cgns-dev                        cgnslib-devel
 os@-chrpath                         chrpath
 os@-clang                           clang
@@ -35,12 +35,12 @@ os@-clang-14
 os@-clang-15
 os@-clang-16
 os@-clang-17
-os@-cli11
+os@-cli11                           cli11-devel
 os@-cmake                           cmake
 os@-cminpack-dev                    cminpack-devel
 os@-colord-dev                      colord-devel
 os@-colord-gtk-dev                  colord-gtk-devel
-os@-cos4-dev
+os@-cos4-dev                        omniORB-devel
 os@-cppunit-dev                     cppunit-devel
 os@-crypto++                        cryptopp-devel
 os@-cups2-dev                       cups-devel
@@ -79,7 +79,7 @@ os@-graphviz-dev                    graphviz-devel
 os@-haru-dev                        libharu-devel
 os@-hdf5-dev                        hdf5-devel
 os@-hdf5-openmpi-dev                hdf5-openmpi-devel
-os@-hdf5-tools
+os@-hdf5-tools                      hdf5
 os@-heif-dev                        libheif-devel
 os@-image-exiftool-perl             perl-Image-ExifTool
 os@-intltool                        intltool
@@ -88,7 +88,7 @@ os@-json-c-dev                      json-c-devel
 os@-json-glib-dev                   json-glib-devel
 os@-jxl-dev                         libjxl-devel
 os@-lapack-dev                      lapack-devel
-os@-lapacke-dev
+os@-lapacke-dev                     lapack-devel
 os@-lcms2-dev                       lcms2-devel
 os@-lensfun-dev                     lensfun-devel
 os@-libtool                         libtool
@@ -107,19 +107,19 @@ os@-metis-dev                       metis-devel
 os@-mpc-dev                         libmpc-devel
 os@-mpfr-dev                        mpfr-devel
 os@-ncurses-dev                     ncurses-devel
-os@-ninja
-os@-nlohmann-json3-dev
-os@-nlopt
-os@-nlopt-cxx
-os@-nlopt-cxx-dev
-os@-nlopt-dev
-os@-nlopt0
+os@-ninja                           ninja-build
+os@-nlohmann-json3-dev              json-devel
+os@-nlopt                           NLopt
+os@-nlopt-cxx                       NLopt
+os@-nlopt-cxx-dev                   NLopt-devel
+os@-nlopt-dev                       NLopt-devel
+os@-nlopt0                          NLopt
 os@-ogg-dev                         libogg-devel
-os@-omniidl
+os@-omniidl                         omniORB-devel
 os@-omniorb                         omniORB
 os@-omniorb-dev                     omniORB-devel
-os@-omniorb-idl
-os@-omniorb-nameserver
+os@-omniorb-idl                     omniORB-devel
+os@-omniorb-nameserver              omniORB-servers
 os@-omniorb4-dev
 os@-omp-11
 os@-omp-14
@@ -128,11 +128,11 @@ os@-omp-16
 os@-omp-17
 os@-onnxruntime-dev                 onnxruntime-devel
 os@-openblas-dev                    openblas-devel
-os@-opencv-core-dev
+os@-opencv-core-dev                 opencv-devel
 os@-opencv-dev                      opencv-devel
-os@-opencv-features2d-dev
-os@-opencv-flann-dev
-os@-opencv-imgproc-dev
+os@-opencv-features2d-dev           opencv-devel
+os@-opencv-flann-dev                opencv-devel
+os@-opencv-imgproc-dev              opencv-devel
 os@-openexr-dev                     openexr-devel
 os@-openjp2-7-dev                   openjpeg-devel
 os@-openjp2-dev                     openjpeg-devel
@@ -153,7 +153,7 @@ os@-protobuf-dev                    protobuf-devel
 os@-ptscotch-dev                    ptscotch-openmpi-devel
 os@-pugixml-dev                     pugixml-devel
 os@-pypy-setuptools
-os@-pyqt-sip
+os@-pyqt-sip                        python3-pyqt5-sip
 os@-pyqt5-dev                       python3-qt5-devel
 os@-pyqt5-dev-tools                 python3-qt5-base
 os@-python3                         python3
@@ -173,7 +173,7 @@ os@-python3-meshio
 os@-python3-mpi4py                  python3-mpi4py-openmpi
 os@-python3-msgpack                 python3-msgpack
 os@-python3-netcdf4                 python3-netcdf4
-os@-python3-nlopt
+os@-python3-nlopt                   python3-NLopt
 os@-python3-numexpr                 python3-numexpr
 os@-python3-numpy                   python3-numpy
 os@-python3-pip                     python3-pip
@@ -193,15 +193,15 @@ os@-python3-typing-extensions       python3-typing-extensions
 os@-python3-wand                    python3-wand
 os@-python3-xlrd                    python3-xlrd
 os@-python3-xlwt                    python3-xlwt
-os@-python3-yaml
+os@-python3-yaml                    python3-pyyaml
 os@-python3-zipp                    python3-zipp
 os@-qt5-default
 os@-qt5help5                        qt5-qttools-libs-help
-os@-qt5opengl5-dev
-os@-qt5printsupport5
+os@-qt5opengl5-dev                  qt5-qtbase-devel
+os@-qt5printsupport5                qt5-qtbase-gui
 os@-qt5svg5-dev                     qt5-qtsvg-devel
 os@-qt5x11extras5-dev               qt5-qtx11extras-devel
-os@-qtbase5-dev                     qt5-qtbase-devel                     qt5-qtbase-devel qt-devel
+os@-qtbase5-dev                     qt5-qtbase-devel qt5-qtbase-devel qt-devel
 os@-qttools5-dev                    qt5-qttools-devel
 os@-qtxmlpatterns5-dev-tools        qt5-qtxmlpatterns qt5-qtxmlpatterns-devel
 os@-qwt-qt5-dev                     qwt-qt5-devel
@@ -210,21 +210,21 @@ os@-rav1e-dev                       rav1e-devel
 os@-rsvg2-dev                       librsvg2-devel
 os@-scotch-dev                      scotch-devel
 os@-secret-dev                      libsecret-devel
-os@-sfcgal-dev
-os@-sip-dev
+os@-sfcgal-dev                      SFCGAL-devel
+os@-sip-dev                         python3-sip-devel
 os@-soup-dev                        libsoup-devel
-os@-soup2-dev
+os@-soup2-dev                       libsoup-devel
 os@-soup3-dev                       libsoup3-devel
 os@-sphinx-common                   python3-sphinx
-os@-sphinx-intl
+os@-sphinx-intl                     python3-sphinx-intl
 os@-sqlite3-dev                     sqlite-devel
 os@-ssl-dev                         openssl-devel
-os@-svtav1enc-dev
+os@-svtav1enc-dev                   svt-av1-devel
 os@-swig                            swig
 os@-tbb-dev                         tbb-devel
 os@-tcl-dev                         tcl-devel
 os@-texlive                         texlive
-os@-texlive-latex-extra
+os@-texlive-latex-extra             texlive-collection-latexextra
 os@-theora-dev                      libtheora-devel
 os@-tiff-dev                        libtiff-devel
 os@-tirpc-dev                       libtirpc-devel
@@ -239,7 +239,7 @@ os@-xft-dev                         libXft-devel
 os@-xi-dev                          libXi-devel
 os@-xinerama-dev                    libXinerama-devel
 os@-xml2-dev                        libxml2-devel
-os@-xml2-utils
+os@-xml2-utils                      libxml2
 os@-xmu-dev                         libXmu-devel
 os@-xpm-dev                         libXpm-devel
 os@-xrandr-dev                      libXrandr-devel

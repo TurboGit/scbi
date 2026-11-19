@@ -1,7 +1,7 @@
 # OS name                           Red Hat packages (some may require EPEL)
 # --------------------------------------------------------------------------
 os@-afterimage-dev
-os@-archive-dev
+os@-archive-dev                     libarchive-devel
 os@-autoconf                        autoconf
 os@-automake                        automake
 os@-autotools-dev
@@ -11,21 +11,21 @@ os@-blas-dev                        blas-devel
 os@-boost-chrono-dev                boost-chrono
 os@-boost-date-time-dev             boost-date-time
 os@-boost-dev                       boost
-os@-boost-filestsystem-dev
+os@-boost-filestsystem-dev          boost-filesystem
 os@-boost-filesystem-dev            boost-filesystem
 os@-boost-graph-dev                 boost-graph
 os@-boost-locale-dev                boost-locale
-os@-boost-mpi-python-dev
-os@-boost-python-dev
+os@-boost-mpi-python-dev            boost-openmpi-python3
+os@-boost-python-dev                boost-python3
 os@-boost-regex-dev                 boost-regex
-os@-boost-serialization-dev
-os@-boost-signals-dev               boost-signals
+os@-boost-serialization-dev         boost-serialization
+os@-boost-signals-dev
 os@-boost-thread-dev                boost-thread
 os@-bz2-dev                         bzip2-devel
-os@-c6-dev
+os@-c6-dev                          glibc-devel
 os@-cairo-dev                       cairo-devel
 os@-cfitsio-dev                     cfitsio-devel
-os@-cgal-dev
+os@-cgal-dev                        CGAL-devel
 os@-cgns-dev                        cgnslib-devel
 os@-chrpath                         chrpath
 os@-clang                           clang
@@ -35,27 +35,27 @@ os@-clang-14
 os@-clang-15
 os@-clang-16
 os@-clang-17
-os@-cli11
+os@-cli11                           cli11-devel
 os@-cmake                           cmake
 os@-cminpack-dev
-os@-colord-dev
-os@-colord-gtk-dev
+os@-colord-dev                      colord-devel
+os@-colord-gtk-dev                  colord-gtk-devel
 os@-cos4-dev
 os@-cppunit-dev                     cppunit-devel
 os@-crypto++                        cryptopp-devel
-os@-cups2-dev
+os@-cups2-dev                       cups-devel
 os@-curl4                           libcurl-devel
 os@-curl4-gnutls-dev                libcurl-devel
 os@-curl4-openssl-dev               libcurl-devel
 os@-doxygen                         doxygen
-os@-egl1-mesa-dev
+os@-egl1-mesa-dev                   mesa-libEGL-devel
 os@-eigen3-dev                      eigen3-devel
-os@-exiv2-dev
+os@-exiv2-dev                       exiv2-devel
 os@-fftw3-dev                       fftw-devel
 os@-findbin                         perl-FindBin
 os@-flex                            flex
 os@-fmt-dev                         fmt-devel
-os@-freeimage-dev                   freeimage-devel
+os@-freeimage-dev
 os@-freetype-dev                    freetype-devel
 os@-freetype6-dev                   freetype-devel
 os@-freexl-dev                      freexl-devel
@@ -63,7 +63,7 @@ os@-ftgl-dev                        ftgl-devel
 os@-g++                             gcc-c++
 os@-gcc                             gcc
 os@-gdal-dev                        gdal-devel
-os@-geos-dev
+os@-geos-dev                        geos-devel
 os@-gfortran                        gcc-gfortran
 os@-gl2ps-dev                       gl2ps-devel
 os@-glew-dev                        glew-devel
@@ -72,23 +72,23 @@ os@-glu1-mesa-dev                   mesa-libGLU-devel
 os@-gmic-dev
 os@-gmp-dev                         gmp-devel
 os@-gomp1                           libgomp
-os@-gphoto2-dev
+os@-gphoto2-dev                     libgphoto2-devel
 os@-graphicsmagick1-dev             GraphicsMagick-devel
 os@-graphviz                        graphviz
 os@-graphviz-dev                    graphviz-devel
 os@-haru-dev                        libharu-devel
 os@-hdf5-dev                        hdf5-devel
 os@-hdf5-openmpi-dev                hdf5-openmpi-devel
-os@-hdf5-tools
+os@-hdf5-tools                      hdf5
 os@-heif-dev                        libheif-devel
 os@-image-exiftool-perl             perl-Image-ExifTool
-os@-intltool
+os@-intltool                        intltool
 os@-jpeg-dev                        libjpeg-turbo-devel
-os@-json-c-dev
-os@-json-glib-dev
+os@-json-c-dev                      json-c-devel
+os@-json-glib-dev                   json-glib-devel
 os@-jxl-dev                         libjxl-devel
 os@-lapack-dev                      lapack-devel
-os@-lapacke-dev
+os@-lapacke-dev                     lapack-devel
 os@-lcms2-dev                       lcms2-devel
 os@-lensfun-dev                     lensfun-devel
 os@-libtool                         libtool
@@ -98,23 +98,23 @@ os@-llvm-14
 os@-llvm-15
 os@-llvm-16
 os@-llvm-17
-os@-lua5.3-dev
-os@-lua5.4-dev
+os@-lua5.3-dev                      lua-devel
+os@-lua5.4-dev                      lua-devel
 os@-make                            make
-os@-makeinfo                        makeinfo
+os@-makeinfo                        texinfo
 os@-meshio-tools
 os@-metis-dev                       metis-devel
 os@-mpc-dev                         libmpc-devel
 os@-mpfr-dev                        mpfr-devel
 os@-ncurses-dev                     ncurses-devel
-os@-ninja
-os@-nlohmann-json3-dev
-os@-nlopt
-os@-nlopt-cxx
-os@-nlopt-cxx-dev
-os@-nlopt-dev
-os@-nlopt0
-os@-ogg-dev
+os@-ninja                           ninja-build
+os@-nlohmann-json3-dev              json-devel
+os@-nlopt                           NLopt
+os@-nlopt-cxx                       NLopt
+os@-nlopt-cxx-dev                   NLopt-devel
+os@-nlopt-dev                       NLopt-devel
+os@-nlopt0                          NLopt
+os@-ogg-dev                         libogg-devel
 os@-omniidl
 os@-omniorb
 os@-omniorb-dev
@@ -127,33 +127,33 @@ os@-omp-15
 os@-omp-16
 os@-omp-17
 os@-onnxruntime-dev
-os@-openblas-dev
-os@-opencv-core-dev
+os@-openblas-dev                    openblas-devel
+os@-opencv-core-dev                 opencv-devel
 os@-opencv-dev                      opencv-devel
-os@-opencv-features2d-dev
-os@-opencv-flann-dev
-os@-opencv-imgproc-dev
-os@-openexr-dev
-os@-openjp2-7-dev
-os@-openjp2-dev
+os@-opencv-features2d-dev           opencv-devel
+os@-opencv-flann-dev                opencv-devel
+os@-opencv-imgproc-dev              opencv-devel
+os@-openexr-dev                     openexr-devel
+os@-openjp2-7-dev                   openjpeg2-devel
+os@-openjp2-dev                     openjpeg2-devel
 os@-openjph-dev                     libopenjph-devel
 os@-openmpi-dev                     openmpi-bull-gnu
-os@-osmesa-dev
-os@-osmesa6-dev
+os@-osmesa-dev                      mesa-libOSMesa-devel
+os@-osmesa6-dev                     mesa-libOSMesa-devel
 os@-osmgpsmap-1.0-dev
 os@-pcre2-dev                       pcre2-devel
-os@-pcre3-dev                       pcre-devel
+os@-pcre3-dev
 os@-png-dev                         libpng-devel
-os@-po4a
-os@-pod-parser-perl
+os@-po4a                            po4a
+os@-pod-parser-perl                 perl-Pod-Parser
 os@-postgresql                      libpq-devel
 os@-potrace-dev                     potrace-devel
 os@-proj-dev                        proj
-os@-protobuf-dev
+os@-protobuf-dev                    protobuf-devel
 os@-ptscotch-dev                    ptscotch-openmpi-devel
 os@-pugixml-dev                     pugixml-devel
 os@-pypy-setuptools
-os@-pyqt-sip
+os@-pyqt-sip                        python3-pyqt5-sip
 os@-pyqt5-dev                       python3-qt5-devel
 os@-pyqt5-dev-tools                 python3-qt5-base
 os@-python3                         python3
@@ -166,14 +166,14 @@ os@-python3-gitpython               python3-GitPython
 os@-python3-h5py                    python3-h5py
 os@-python3-importlib-metadata      python3-importlib-metadata
 os@-python3-jsonschema              python3-jsonschema
-os@-python3-lark
+os@-python3-lark                    python3-lark
 os@-python3-lxml                    python3-lxml
 os@-python3-matplotlib              python3-matplotlib
 os@-python3-meshio
 os@-python3-mpi4py                  python3-mpi4py-openmpi
 os@-python3-msgpack                 python3-msgpack
 os@-python3-netcdf4                 python3-netcdf4
-os@-python3-nlopt
+os@-python3-nlopt                   python3-NLopt
 os@-python3-numexpr                 python3-numexpr
 os@-python3-numpy                   python3-numpy
 os@-python3-pip                     python3-pip
@@ -193,12 +193,12 @@ os@-python3-typing-extensions       python3-typing-extensions
 os@-python3-wand
 os@-python3-xlrd                    python3-xlrd
 os@-python3-xlwt
-os@-python3-yaml
+os@-python3-yaml                    python3-pyyaml
 os@-python3-zipp                    python3-zipp
 os@-qt5-default                     qt5-devel
 os@-qt5help5                        qt5-qttools-libs-help
-os@-qt5opengl5-dev
-os@-qt5printsupport5
+os@-qt5opengl5-dev                  qt5-qtbase-devel
+os@-qt5printsupport5                qt5-qtbase-gui
 os@-qt5svg5-dev                     qt5-qtsvg-devel
 os@-qt5x11extras5-dev               qt5-qtx11extras-devel
 os@-qtbase5-dev                     qt5-qtbase-devel
@@ -207,25 +207,25 @@ os@-qtxmlpatterns5-dev-tools        qt5-qtxmlpatterns qt5-qtxmlpatterns-devel
 os@-qwt-qt5-dev                     qwt-qt5-devel
 os@-rapidjson-dev                   rapidjson-devel
 os@-rav1e-dev                       rav1e-devel
-os@-rsvg2-dev
+os@-rsvg2-dev                       librsvg2-devel
 os@-scotch-dev                      scotch-devel
 os@-secret-dev                      libsecret-devel
-os@-sfcgal-dev
+os@-sfcgal-dev                      SFCGAL-devel
 os@-sip-dev
 os@-soup-dev
 os@-soup2-dev
-os@-soup3-dev
+os@-soup3-dev                       libsoup3-devel
 os@-sphinx-common                   python3-sphinx
-os@-sphinx-intl                     python-sphinx-locale
+os@-sphinx-intl
 os@-sqlite3-dev                     sqlite-devel
 os@-ssl-dev                         openssl-devel
-os@-svtav1enc-dev
+os@-svtav1enc-dev                   svt-av1-devel
 os@-swig                            swig
 os@-tbb-dev                         tbb-devel
 os@-tcl-dev                         tcl-devel
-os@-texlive
-os@-texlive-latex-extra
-os@-theora-dev
+os@-texlive                         texlive
+os@-texlive-latex-extra             texlive-collection-latexrecommended
+os@-theora-dev                      libtheora-devel
 os@-tiff-dev                        libtiff-devel
 os@-tirpc-dev                       libtirpc-devel
 os@-tk-dev                          tk-devel
@@ -233,16 +233,16 @@ os@-utf8cpp                         utf8cpp-devel
 os@-uuid-dev                        libuuid-devel
 os@-webp-dev                        libwebp-devel
 os@-x11-dev                         libX11-devel
-os@-xcursor-dev
+os@-xcursor-dev                     libXcursor-devel
 os@-xext-dev                        libXext-devel
 os@-xft-dev                         libXft-devel
 os@-xi-dev                          libXi-devel
-os@-xinerama-dev
+os@-xinerama-dev                    libXinerama-devel
 os@-xml2-dev                        libxml2-devel
-os@-xml2-utils
+os@-xml2-utils                      libxml2
 os@-xmu-dev                         libXmu-devel
 os@-xpm-dev                         libXpm-devel
-os@-xrandr-dev
+os@-xrandr-dev                      libXrandr-devel
 os@-xsltproc                        libxslt
 os@-xt-dev                          libXt-devel
 os@-xxhash-dev                      xxhash-devel
