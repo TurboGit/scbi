@@ -2,4 +2,10 @@ plugin: logmsg
 
 config: echo config
 
-wrapup: echo plain
+wrapup: |-
+  log 1 working on step 1
+  log 1 working on step 2
+  log 2 working on step 2.1
+  log 2 working on step 2.2
+  log 1 50% done
+  echo plain

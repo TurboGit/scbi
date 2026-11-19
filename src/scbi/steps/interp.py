@@ -144,10 +144,18 @@ class Hook:
 
     # ---------------------------------------------------------------- run
 
+    def log_message(self, level: int, message: str) -> str:
+        """``log LEVEL MESSAGE``: a message of the driver for the module
+        (time-stamp, indented by 2 x LEVEL spaces) to the console and the
+        report log; returns the line."""
+        return self.d.log.ilog_raw(self.module, "  " * level + message)
+
     def run(self, out: Callable[[str], None], trace: Callable[[str], None] | None = None,
-            err: Callable[[str], None] | None = None) -> int:
+            err: Callable[[str], None] | None = None,
+            log: Callable[[int, str], None] | None = None) -> int:
         """Run the hook, its output (text chunks) to ``out`` (and its errors
-        to ``err``, default ``out``)."""
+        to ``err``, default ``out``); the ``log`` command calls ``log``
+        (default: the driver message, log_message)."""
         ctx = self.b.ctx(self.module, self.variant, self.hook)
         ctx.env = Environment(ShellVars(dict(self.sv.values), set(self.sv.exported)))
         ctx.params = dict(self.params)
@@ -155,7 +163,8 @@ class Hook:
         runner = Runner(ctx, self.where(), config_options=self.config_options,
                         functions=self.functions(), trace=trace, all_modules=self.all_modules,
                         hook_function=self.hook_function, hook_values=self.hook_values,
-                        refresh_functions=self.functions)
+                        refresh_functions=self.functions,
+                        log=log if log is not None else self.log_message)
         state = State(dict(self.d.registry.variables), self.environment(), self.cwd, out,
                       out if err is None else err)
         return runner.run(self.body.ast, state)

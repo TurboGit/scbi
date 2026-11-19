@@ -290,6 +290,8 @@ class Linter:
                     hook: str = "") -> None:
         text = _strip_single_quotes(script)
         self.check_names(label, referenced(text), known, assigned(text), other_params, hook)
+        for line in _bad_log_levels(script):
+            self.error(label, f"line {line}: log: level must be an integer >= 1")
 
     def check_names(self, label: str, names: list[str], known: set[str], local: set[str],
                     other_params: bool, hook: str = "") -> None:
@@ -302,6 +304,39 @@ class Linter:
                 self.warning(label, f"{name} is a parameter of {hooks}, not of {hook}")
             else:
                 self.warning(label, f"variable {name} is not known in this hook")
+
+
+def _bad_log_levels(script: str) -> list[int]:
+    """The lines of the ``log`` commands whose level, given literally, is
+    not an integer >= 1 (a syntax error of the body is reported
+    elsewhere)."""
+    from scbi.hooks import cmdlang
+
+    try:
+        body = cmdlang.parse(script, 1)
+    except cmdlang.CmdSyntaxError:
+        return []
+    lines: list[int] = []
+
+    def walk(steps) -> None:
+        for step in steps or ():
+            if isinstance(step, cmdlang.AndOr):
+                for pipeline in (step.first, *(p for _, p in step.rest)):
+                    for cmd in pipeline.commands:
+                        texts = [cmdlang._word_text(w) for w in cmd.words]
+                        if texts[:1] == ["log"]:
+                            level = texts[1] if len(texts) > 1 else ""
+                            if "$" not in level and not (level.isdigit() and int(level) >= 1):
+                                lines.append(step.line)
+            elif isinstance(step, cmdlang.If):
+                for _, b in step.branches:
+                    walk(b)
+                walk(step.orelse)
+            elif isinstance(step, cmdlang.For):
+                walk(step.body)
+
+    walk(body)
+    return lines
 
 
 def _leaf(section: dict, hook: str):

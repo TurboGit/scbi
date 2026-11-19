@@ -46,6 +46,20 @@ _scbi_check_versions()
 }
 """
 
+#  log LEVEL MESSAGE: the message indented by 2 x LEVEL spaces (as the
+#  interpreter does without the driver: no time-stamp)
+_LOG_HELPER = r"""_scbi_log()
+{
+    local level=$1
+    shift
+    if ! [[ $level =~ ^[0-9]+$ ]] || (( level < 1 )); then
+        echo "log: level must be an integer >= 1" >&2
+        return 1
+    fi
+    printf '%*s%s\n' $(( 2 * level )) '' "$*"
+}
+"""
+
 #  delete: rm -fr only in the sandbox ($SCBI_BDIR), as the built-in
 _DELETE_HELPER = """\
 _scbi_delete()
@@ -290,6 +304,9 @@ class _Translator:
         elif first in ("delete", "delete-tree"):
             self.helpers.add("delete")
             words[0] = "_scbi_delete" + (" -r" if first == "delete-tree" else "")
+        elif first == "log":
+            self.helpers.add("log")
+            words[0] = "_scbi_log"
         elif first == "check-versions":
             self.helpers.add("versions")
             words[0] = "_scbi_check_versions"
@@ -547,6 +564,8 @@ class _Translator:
         helpers: list[str] = []
         if "versions" in self.helpers:
             helpers += _VERSIONS_HELPER.rstrip("\n").split("\n")
+        if "log" in self.helpers:
+            helpers += _LOG_HELPER.rstrip("\n").split("\n")
         if "delete" in self.helpers:
             sandbox = r.driver.get("SCBI_BDIR") or r.environment.get("SCBI_BDIR", "")
             helpers += _DELETE_HELPER.replace("@SANDBOX@", q(sandbox)).rstrip("\n").split("\n")

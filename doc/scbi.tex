@@ -1253,6 +1253,33 @@ function of the plug-in.
 	first: on an error nothing is deleted and the command fails. A symbolic
 	link is deleted, not its target; a missing path is not an error. They
 	have no option.
+	\item[log <level> <message>] \index{log}Displays a message for the
+	user, as a message of the driver: with the time-stamp and indented by
+	two spaces per level (\code{<level>}, an integer >= 1), on the console
+	(not with \ddash{}quiet), in the report log of the module and in the
+	logs of the step. It tells what a long hook is doing, for example in a
+	wrapup:
+
+\begin{lstlisting}
+wrapup: |-
+  log 1 working on step 1
+  ...
+  log 2 working on step 2.1
+\end{lstlisting}
+
+	gives
+
+\begin{lstlisting}
+2026/11/19 14:25:55 : wrapup starting
+2026/11/19 14:25:59 :   working on step 1
+2026/11/19 14:25:59 :     working on step 2.1
+2026/11/19 14:33:39 : wrapup completed
+\end{lstlisting}
+
+	The message is the other words, joined by a space. In the
+	\code{module-final-step} function of an environment file it is a
+	message for the module. Without the driver (\code{scbi replay}) the
+	message is written indented, without time-stamp.
 	\item[apply-var <action> <variable> {[<value>]}] Applies an environment
 	action, in the function \code{define-var} of an environment file only
 	(\seeref{define-var-override}).
@@ -2431,7 +2458,8 @@ variables set by the hook stay Bash. The variables of the user's terminal
 (\code{SCBI\_*}, \code{DO\_*}) are not exported by the script: the ones of
 the shell running it are used. The script can be edited and run with
 \code{bash step.sh}. \code{all-modules} and \code{hook-output} are not
-available in a replay.
+available in a replay; \code{log} writes its message indented, without
+time-stamp (as \code{scbi replay}).
 
 \cmd{scbi replay \ddash{}script:inline <step>.cmd}
 

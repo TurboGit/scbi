@@ -57,6 +57,10 @@ class _Sink:
         if self.console:
             sys.stdout.write(text)
             sys.stdout.flush()
+        self.files(text)
+
+    def files(self, text: str) -> None:
+        """To the log files only (not the console)."""
         for path in self.paths:
             with open(path, "a", errors="surrogateescape") as f:
                 f.write(text)
@@ -160,7 +164,13 @@ class StepWrapper:
         else:
             sink = _Sink([(mlog, "w"), (log, "a")], console=False)
         sys.stdout.flush()
-        res = hook.run(sink.text, trace=None if dlog else sink.line)
+
+        def log(level: int, message: str) -> None:
+            #  the log command: a driver message (console, report log),
+            #  also in the step logs
+            sink.files(hook.log_message(level, message))
+
+        res = hook.run(sink.text, trace=None if dlog else sink.line, log=log)
 
         if res != 0:
             if self.get("SCBI_DLOG") == "on-failure" and step != "tests":

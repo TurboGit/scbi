@@ -72,7 +72,7 @@ FUNCTIONS = (
 )
 #  Built-in commands
 COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset",
-            "check-versions", "copy", "delete", "delete-tree", "apply-var")
+            "check-versions", "copy", "delete", "delete-tree", "apply-var", "log")
 
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _ASSIGN = re.compile(r"^(export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+=(?:\s+(.*)|\s*)$")
@@ -562,6 +562,10 @@ class Runner:
     extra: dict[str, Callable[[list[str]], str | list[str]]] = field(default_factory=dict)
     #  apply-var ACTION NAME VALUE (define-var of an environment file)
     apply_var: Callable[[str, str, str], None] | None = None
+    #  log LEVEL MESSAGE: a message of the driver (time-stamp, indented by
+    #  2 x LEVEL spaces, console, report and step logs); None (no driver:
+    #  scbi replay): the indented message to the output
+    log: Callable[[int, str], None] | None = None
     #  called with a "_TRACE: ..." line for each command and assignment (as
     #  Bash xtrace does)
     trace: Callable[[str], None] | None = None
@@ -1009,6 +1013,17 @@ class Runner:
                     err(f"{self.where}: line {line}: apply-var: ACTION NAME [VALUE] expected\n")
                     return 1
                 self.apply_var(*(args + [""])[:3])
+                return 0
+            if name == "log":
+                level = args[0] if args else ""
+                if not (level.isdigit() and int(level) >= 1):
+                    err(f"{self.where}: line {line}: log: level must be an integer >= 1\n")
+                    return 1
+                message = " ".join(args[1:])
+                if self.log is not None:
+                    self.log(int(level), message)
+                else:
+                    out("  " * int(level) + message + "\n")
                 return 0
             if name in ("delete", "delete-tree"):
                 return self.delete(args, state, lambda m: err(f"{self.where}: line {line}: {name}: {m}\n"),

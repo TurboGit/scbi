@@ -393,3 +393,16 @@ def test_get_version_of_a_plugin_in_commands(tmp_path):
 def test_for_several_names(tmp_path):
     status, out, _ = run(tmp_path, "L = a 1 b 2 c\nfor N V in $L:\n    echo $N=$V")
     assert (status, out) == (0, "a=1\nb=2\nc=\n")
+
+
+def test_log(tmp_path):
+    #  with the driver: the callback (level, message)
+    logged = []
+    status, out, _ = run(tmp_path, "X = b\nlog 1 a $X\nlog 2 50% done\nlog 1", log=lambda n, m: logged.append((n, m)))
+    assert (status, out, logged) == (0, "", [(1, "a b"), (2, "50% done"), (1, "")])
+    #  without: the message indented, to the output (redirections apply)
+    status, out, _ = run(tmp_path, "log 1 a b\nlog 2 c > f\ncat f")
+    assert (status, out) == (0, "  a b\n    c\n")
+    for bad in ("log 0 x", "log x y", "log", "log -1 x"):
+        status, out, _ = run(tmp_path, bad)
+        assert status == 1 and "log: level must be an integer >= 1" in out, bad

@@ -123,3 +123,21 @@ env:
 def test_build_target_hook():
     assert issues("build: make\nbuild-runtime: make rts\n") == []
     assert issues("build-env: [system-compiler]\nbuild-x-build-y: make\n")[0][0] == ERROR
+
+
+def test_log_level():
+    text = """
+plugin: p
+functions:
+  f:
+    run: log x f
+build: |
+  log 1 ok
+  log $SCBI_JOBS from a variable
+  if cross:
+      log 0 bad
+  write f:
+      log 0 the text of a file
+"""
+    assert issues(text) == [(ERROR, "build", "line 4: log: level must be an integer >= 1"),
+                            (ERROR, "function f", "line 1: log: level must be an integer >= 1")]

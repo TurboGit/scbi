@@ -294,7 +294,9 @@ def _make_hooks(env: EnvFile) -> None:
                          "IS_AGGREGATED": ctx.is_aggregated, "IS_UP_TO_DATE": ctx.is_up_to_date}
             status, _ = _call(env, "module-final-step", [], out=lambda t: sys.stdout.write(t),
                               variables=variables, extra=extra,
-                              ctx={"module": ctx.module, "variant": ctx.variant})
+                              ctx={"module": ctx.module, "variant": ctx.variant},
+                              #  log LEVEL MESSAGE: a driver message for the module
+                              log=lambda level, msg: env.driver.log.ilog_raw(ctx.module, "  " * level + msg))
             if status != 0:
                 raise RuntimeError(f"module-final-step failed with status {status}")
         env.hooks["module_final_step"] = module_final_step

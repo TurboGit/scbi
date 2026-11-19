@@ -59,6 +59,7 @@ BODIES = [
     "echo $(uppercase $VARIANT) $(basename /a/b/c)",
     "X = output echo plugin-var/x/y\necho ${X#$V/} ${X/$V/@}",
     "L = a 1 b 2 c\nfor N W in $L:\n    echo $N=$W",
+    "log 1 step $V\nlog 2 50% done \\n\nlog 0 x 2> /dev/null || echo bad\nlog 1 a > f\ncat f",
     "X = output echo plugin-var/x\nwrite f:\n    ${X/$V/\\$R} \\$V ${X#\\$}\ncat f",
     "Z = dirname /a/b\necho $Z\nU = uppercase $VARIANT x\necho $U",
     "cd inst-not-there || echo nocd\nmkdir -p w\ncd w\npwd",
