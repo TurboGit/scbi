@@ -1,5 +1,8 @@
 plugin: logmsg
 
+vars:
+  STEPS: three
+
 config: echo config
 
 wrapup: |-
@@ -8,4 +11,5 @@ wrapup: |-
   log 2 working on step 2.1
   log 2 working on step 2.2
   log 1 50% done
+  log 1 $STEPS steps done for $VARIANT ($(uppercase $VARIANT))
   echo plain

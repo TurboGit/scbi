@@ -24,6 +24,7 @@ xxxx/xx/xx xx:xx:xx :   working on step 2
 xxxx/xx/xx xx:xx:xx :     working on step 2.1
 xxxx/xx/xx xx:xx:xx :     working on step 2.2
 xxxx/xx/xx xx:xx:xx :   50% done
+xxxx/xx/xx xx:xx:xx :   three steps done for default (DEFAULT)
 xxxx/xx/xx xx:xx:xx : wrapup completed
 xxxx/xx/xx xx:xx:xx : End Building logmsg [default] (n/a)
 """)
@@ -39,6 +40,7 @@ xxxx/xx/xx xx:xx:xx : End Building logmsg [default] (n/a)
  :     working on step 2.1
  :     working on step 2.2
  :   50% done
+ :   three steps done for default (DEFAULT)
 plain
 """)
     t.sh('grep -c " :     working on step 2.1$" $LOGS/x86_64-linux-gnu-logmsg-default-wrapup.log > $TEST_OUTPUT')

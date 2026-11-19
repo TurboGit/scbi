@@ -406,3 +406,21 @@ def test_log(tmp_path):
     for bad in ("log 0 x", "log x y", "log", "log -1 x"):
         status, out, _ = run(tmp_path, bad)
         assert status == 1 and "log: level must be an integer >= 1" in out, bad
+
+
+def test_log_expansion(tmp_path):
+    #  the words of the message are expanded as the ones of any command
+    (tmp_path / "a.so").write_text("")
+    logged = []
+    text = """\
+N = 2
+L = x y
+log $N step $N of $PREFIX
+log 1 ${VARIANT%ult} ${MISSING:-none} $(uppercase $VARIANT)
+log 1 "kept    spaces" $L
+log 1 glob *.so , quoted "*.so"
+"""
+    status, out, _ = run(tmp_path, text, log=lambda n, m: logged.append((n, m)))
+    assert status == 0 and out == ""
+    assert logged == [(2, "step 2 of /p"), (1, "defa none DEFAULT"), (1, "kept    spaces x y"),
+                      (1, "glob a.so , quoted *.so")]
