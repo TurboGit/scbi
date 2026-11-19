@@ -1,5 +1,5 @@
 # OS name                           Debian packages
-# --------------------------------------------------
+# -------------------------------------------------
 os@-afterimage-dev                  libafterimage-dev
 os@-archive-dev                     libarchive-dev
 os@-autoconf                        autoconf
@@ -28,21 +28,24 @@ os@-cfitsio-dev                     libcfitsio-dev
 os@-cgal-dev                        libcgal-dev
 os@-cgns-dev                        libcgns-dev
 os@-chrpath                         chrpath
+os@-clang                           clang
 os@-clang-10                        clang-10
 os@-clang-11                        clang-11
 os@-clang-14                        clang-14
 os@-clang-15                        clang-15
 os@-clang-16                        clang-16
 os@-clang-17                        clang-17
+os@-cli11                           libcli11-dev
 os@-cmake                           cmake
 os@-cminpack-dev                    libcminpack-dev
 os@-colord-dev                      libcolord-dev
 os@-colord-gtk-dev                  libcolord-gtk-dev
 os@-cos4-dev                        libcos4-dev
 os@-cppunit-dev                     libcppunit-dev
+os@-crypto++                        libcrypto++-dev
 os@-cups2-dev                       libcups2-dev
-os@-curl4-gnutls-dev                libcurl4-gnutls-dev
 os@-curl4                           libcurl4t64
+os@-curl4-gnutls-dev                libcurl4-gnutls-dev
 os@-curl4-openssl-dev               libcurl4-openssl-dev
 os@-doxygen                         doxygen
 os@-egl1-mesa-dev                   libegl1-mesa-dev
@@ -53,15 +56,15 @@ os@-findbin                         libfindbin-libs-perl
 os@-flex                            flex
 os@-fmt-dev                         libfmt-dev
 os@-freeimage-dev                   libfreeimage-dev
-os@-freetype6-dev                   libfreetype6-dev
 os@-freetype-dev                    libfreetype-dev
+os@-freetype6-dev                   libfreetype6-dev
 os@-freexl-dev                      libfreexl-dev
 os@-ftgl-dev                        libftgl-dev
+os@-g++                             g++
 os@-gcc                             gcc
 os@-gdal-dev                        libgdal-dev
 os@-geos-dev                        libgeos-dev
 os@-gfortran                        gfortran
-os@-g++                             g++
 os@-gl2ps-dev                       libgl2ps-dev
 os@-glew-dev                        libglew-dev
 os@-glfw3-dev                       libglfw3-dev
@@ -71,8 +74,9 @@ os@-gmp-dev                         libgmp-dev
 os@-gomp1                           libgomp1
 os@-gphoto2-dev                     libgphoto2-dev
 os@-graphicsmagick1-dev             libgraphicsmagick1-dev
-os@-graphviz-dev                    libgraphviz-dev
 os@-graphviz                        graphviz
+os@-graphviz-dev                    libgraphviz-dev
+os@-haru-dev                        libhpdf-dev
 os@-hdf5-dev                        libhdf5-dev
 os@-hdf5-openmpi-dev                libhdf5-openmpi-dev
 os@-hdf5-tools                      hdf5-tools
@@ -96,8 +100,8 @@ os@-llvm-16                         llvm-16
 os@-llvm-17                         llvm-17
 os@-lua5.3-dev                      liblua5.3-dev
 os@-lua5.4-dev                      liblua5.4-dev
-os@-makeinfo                        texinfo
 os@-make                            make
+os@-makeinfo                        texinfo
 os@-meshio-tools                    meshio-tools
 os@-metis-dev                       libmetis-dev
 os@-mpc-dev                         libmpc-dev
@@ -105,17 +109,18 @@ os@-mpfr-dev                        libmpfr-dev
 os@-ncurses-dev                     libncurses-dev
 os@-ninja                           ninja-build
 os@-nlohmann-json3-dev              nlohmann-json3-dev
-os@-nlopt0                          libnlopt0
-os@-nlopt-cxx-dev                   libnlopt-cxx-dev
-os@-nlopt-cxx                       libnlopt-cxx0
-os@-nlopt-dev                       libnlopt-dev
 os@-nlopt                           libnlopt0
+os@-nlopt-cxx                       libnlopt-cxx0
+os@-nlopt-cxx-dev                   libnlopt-cxx-dev
+os@-nlopt-dev                       libnlopt-dev
+os@-nlopt0                          libnlopt0
+os@-ogg-dev                         libogg-dev
 os@-omniidl                         omniidl
-os@-omniorb4-dev
+os@-omniorb                         omniorb
 os@-omniorb-dev                     libomniorb4-dev
 os@-omniorb-idl                     omniorb-idl
 os@-omniorb-nameserver              omniorb-nameserver
-os@-omniorb                         omniorb
+os@-omniorb4-dev
 os@-omp-11                          libomp-11-dev
 os@-omp-14                          libomp-14-dev
 os@-omp-15                          libomp-15-dev
@@ -133,8 +138,8 @@ os@-openjp2-7-dev
 os@-openjp2-dev                     libopenjp2-7-dev
 os@-openjph-dev                     libopenjph-dev
 os@-openmpi-dev                     libopenmpi-dev
-os@-osmesa6-dev
 os@-osmesa-dev                      libosmesa6-dev
+os@-osmesa6-dev
 os@-osmgpsmap-1.0-dev               libosmgpsmap-1.0-dev
 os@-pcre2-dev                       libpcre2-dev
 os@-pcre3-dev                       libpcre3-dev
@@ -144,12 +149,14 @@ os@-pod-parser-perl                 libpod-parser-perl
 os@-postgresql                      libpq-dev
 os@-potrace-dev                     libpotrace-dev
 os@-proj-dev                        libproj-dev
+os@-protobuf-dev                    libprotobuf-dev
 os@-ptscotch-dev                    libptscotch-dev
 os@-pugixml-dev                     libpugixml-dev
 os@-pypy-setuptools                 pypy-setuptools
+os@-pyqt-sip                        python3-pyqt5.sip
 os@-pyqt5-dev                       pyqt5-dev
 os@-pyqt5-dev-tools                 pyqt5-dev-tools
-os@-pyqt-sip                        python3-pyqt5.sip
+os@-python3                         python3
 os@-python3-cftime                  python3-cftime
 os@-python3-dev                     libpython3-dev
 os@-python3-distutils-extra         python3-distutils-extra
@@ -173,7 +180,6 @@ os@-python3-pip                     python3-pip
 os@-python3-psutil                  python3-psutil
 os@-python3-pyperclip               python3-pyperclip
 os@-python3-pytest-runner           python3-pytest-runner
-os@-python3                         python3
 os@-python3-pytidylib               python3-tidylib
 os@-python3-rich                    python3-rich
 os@-python3-scipy                   python3-scipy
@@ -206,9 +212,9 @@ os@-scotch-dev                      libscotch-dev
 os@-secret-dev                      libsecret-1-dev
 os@-sfcgal-dev                      libsfcgal-dev
 os@-sip-dev                         sip-dev
+os@-soup-dev
 os@-soup2-dev                       libsoup2.4-dev
 os@-soup3-dev                       libsoup-3.0-dev
-os@-soup-dev
 os@-sphinx-common                   sphinx-common
 os@-sphinx-intl                     sphinx-intl
 os@-sqlite3-dev                     libsqlite3-dev
@@ -217,11 +223,13 @@ os@-svtav1enc-dev                   libsvtav1enc-dev
 os@-swig                            swig
 os@-tbb-dev                         libtbb-dev
 os@-tcl-dev                         tcl-dev
-os@-texlive-latex-extra             texlive-latex-extra
 os@-texlive                         texlive
+os@-texlive-latex-extra             texlive-latex-extra
+os@-theora-dev                      libtheora-dev
 os@-tiff-dev                        libtiff-dev
 os@-tirpc-dev
 os@-tk-dev                          tk-dev
+os@-utf8cpp                         libutfcpp-dev
 os@-uuid-dev                        uuid-dev
 os@-webp-dev                        libwebp-dev
 os@-x11-dev                         libx11-dev

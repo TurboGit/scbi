@@ -1,5 +1,7 @@
 """Start-up settings (scbi/setup.py)."""
 
+from pathlib import Path
+
 from scbi import setup
 
 
@@ -16,3 +18,17 @@ def test_alias_files(tmp_path):
     alias = {}
     setup._read_alias(tmp_path / ".pkgs-xyz", alias)
     assert alias == {"os@-a": "other", "os@-b": "pc"}
+
+
+def test_distribution_package_aliases_match_debian():
+    plugins = Path(__file__).resolve().parents[2] / "scripts.d"
+
+    def aliases(dist):
+        lines = (plugins / f".pkgs-{dist}").read_text().splitlines()
+        names = [line.split()[0] for line in lines if line.startswith("os@-")]
+        assert len(names) == len(set(names)), f"duplicate aliases in {dist}"
+        return set(names)
+
+    debian = aliases("deb")
+    for dist in ("fed", "ubt", "cos", "rhl", "mingw"):
+        assert aliases(dist) == debian, dist
