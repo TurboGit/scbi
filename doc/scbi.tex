@@ -275,9 +275,10 @@ The build is controlled by a set of variables (the environment). SCBI comes with
 	to the logs. The values (also given by the option
 	\ddash{}progress:{[}bar|line|no{]}, which takes precedence) are:
 	\begin{description}
-		\item[bar] (default) a status bar on the last row of the terminal
-		(the output scrolls above it) with also the time elapsed since the
-		start of the build, refreshed every second;
+		\item[bar] (default) a status bar on the last row of the terminal,
+		the whole width of it (the output scrolls above it), with on the
+		right the time elapsed since the start of the build, refreshed
+		every second;
 		\item[line] a transient line after an empty line, at the end of
 		the output, redrawn after each output line and erased at the end;
 		\item[no] no progress (also with \ddash{}quiet).

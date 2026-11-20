@@ -127,10 +127,24 @@ def test_status_bar():
     rows = bar.rows
     #  the scroll region excludes the last row, the bar drawn on it
     assert term.getvalue().startswith(f"\n\x1b7\x1b[1;{rows - 1}r\x1b8\x1b[1A")
-    assert term.getvalue().endswith(f"\x1b7\x1b[{rows};1H\x1b[2K\x1b[7m elapsed 0s \x1b[0m\x1b8")
+    #  the whole width (80: not a terminal), the elapsed time on the right
+    width = bar.width()
+    assert term.getvalue().endswith(
+        f"\x1b7\x1b[{rows};1H\x1b[2K\x1b[7m{'  elapsed 0s ':>{width}}\x1b[0m\x1b8")
     now[0] += 192
     Progress(bar, total=2).next("c-gmp")
-    assert term.getvalue().endswith("\x1b[7m [1/2] c-gmp  elapsed 3m12s \x1b[0m\x1b8")
+    line = bar.line()
+    assert len(line) == width and line.startswith(" [1/2] c-gmp ") and line.endswith("  elapsed 3m12s ")
+    assert term.getvalue().endswith(f"\x1b[7m{line}\x1b[0m\x1b8")
+    #  the elapsed time at the same place whatever the progress text; a
+    #  long text cut before it
+    bar.set("[2/2] " + "m" * 200)
+    assert len(bar.line()) == width and bar.line().endswith("m  elapsed 3m12s ")
+    bar.set("[2/2] c")
+    assert bar.line().index("elapsed") == line.index("elapsed")
+    #  narrower than the elapsed time: its end only
+    bar.width = lambda: 10
+    assert bar.line() == "sed 3m12s "
     #  the output is written as is (it scrolls above the bar)
     size = len(term.getvalue())
     out.write("a line\n")

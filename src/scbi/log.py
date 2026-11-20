@@ -397,9 +397,22 @@ class StatusBar:
         self.stream.write(f"\n\x1b7\x1b[1;{self.rows - 1}r\x1b8\x1b[1A")
         self.stream.flush()
 
+    def line(self) -> str:
+        """The bar: the whole width of the terminal, the progress on the
+        left (cut when too long), the elapsed time on the right (its place
+        does not change with the progress text)."""
+        width = self.width()
+        right = f"  elapsed {self.elapsed()} "
+        left = f" {self.text}" if self.text else ""
+        room = width - len(right)
+        if room < 0:
+            return right[-width:]
+        return left[:room].ljust(room) + right
+
     def _draw(self) -> None:
-        text = f" {self.text}  elapsed {self.elapsed()} " if self.text else f" elapsed {self.elapsed()} "
-        text = text[: max(self.width() - 1, 1)]
+        #  the last column written too: the cursor saved and restored around
+        #  it, no scrolling (the wrap is deferred)
+        text = self.line()
         self.stream.write(f"\x1b7\x1b[{self.rows};1H\x1b[2K\x1b[7m{text}\x1b[0m\x1b8")
         self.stream.flush()
 
