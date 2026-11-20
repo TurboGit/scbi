@@ -16,6 +16,4 @@ c-libiconv:#1.18
 c-gmp:#6.2.1
 c-cmake/auto:v3.18.4
 c-exiv2/auto:v0.27.5
-# ICC on JP2 broken up to 2.5.3, we need at least 2.5.4
-# c-libopenjpeg/auto:v2.5.4
-c-libopenjpeg:master
+c-libopenjpeg/auto:2.5.4

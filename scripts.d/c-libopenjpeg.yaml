@@ -3,7 +3,7 @@ plugin: c-libopenjpeg
 with-variants:
   native:
     packages:
-      - libopenjp2-7-dev:[v]
+      - os@-openjp2-dev:[v]
 
 vcs:
   proxy: default
