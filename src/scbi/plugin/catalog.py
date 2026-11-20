@@ -80,6 +80,58 @@ _SPECS = [
 HOOKS: dict[str, HookSpec] = {s.name: s for s in _SPECS}
 assert tuple(HOOKS) == ALL_HOOKS
 
+#  What each hook is for (one sentence, from the doc, section "Hooks"):
+#  the help of the editors (scbi schema)
+DESCRIPTIONS = {
+    "plan": "The name of the build plan of the meta-module.",
+    "vcs": "The VCS of the module sources: proxy, options, protocol, url [, dir].",
+    "archive": "The archive of the module sources: proxy, options, protocol, url, file [, dir].",
+    "patches": "The patch files to apply (in $SCBI_PATCH); REF is the version of the module.",
+    "version": "Prints the version of the installed module.",
+    "only-explicit-build": "true: the module is only built when on the command line, not as a dependency"
+                           " (default false).",
+    "out-of-tree": "Whether the module is built out of its source tree (default true).",
+    "modules": "The modules of the meta-module.",
+    "aggregate": "direct or recursive: the installations of the modules are copied into the meta-module"
+                 " (default no).",
+    "propagate-version": "Whether the version and/or the variant of the meta-module are propagated to its"
+                         " modules: version, variant, both or no (default version).",
+    "build-depends": "The modules needed to build the module but not to use it (tools).",
+    "tests-depends": "The modules needed to run the testsuite of the module.",
+    "depends": "The modules needed to build and to use the module (os@-<name> for an OS package).",
+    "external-env": "Values added to the build identifier: the module is rebuilt when they change.",
+    "build-env": "The environment needed to build the module.",
+    "tests-env": "The environment needed to run the testsuite of the module.",
+    "env": "The environment needed to use the module: set for the modules depending on it.",
+    "setup": "Puts the sources in place before the configuration (generally not needed).",
+    "config-options": "The options of the configuration, given by $(config-options) in the config hook.",
+    "config": "Configures the sources (configure, cmake...); the sources are in ../src.",
+    "build": "Builds the module, generally with make.",
+    "install": "Installs the module in $PREFIX, generally with make install.",
+    "wrapup": "Whatever is needed after the installation.",
+    "prefix": "The global install directory of the module: NONE skips the global installation.",
+    "tests": "Runs the testsuite of the module (--tests).",
+    "run": "The command line run by scbi shell --run without argument.",
+    "plugin": "The name of the plug-in (optional): it must match the file name.",
+    "inherit": "Plug-ins whose hooks are inherited: from, hooks, custom-hooks, no-variant, name.",
+    "with-variants": "Variants using OS packages, with no build step: {<variant>: {packages: [...], env: [...]}}.",
+    "vars": "Variables of the plug-in, {NAME: value}, expanded in all its hooks.",
+    "functions": "Functions callable from the command hooks: {name: {params: [A, B], run: <commands>}}.",
+    "variants": "Variants including other variants: {all: [ai, hdr]}.",
+}
+
+
+def description(hook: str) -> str:
+    """What a hook (or a header key) is for: pre-/post- steps and
+    build-<target> included."""
+    for prefix in ("pre-", "post-"):
+        if hook.startswith(prefix) and hook[len(prefix):] in STEPS:
+            return f"Run {'before' if prefix == 'pre-' else 'after'} the {hook[len(prefix):]} step."
+    if is_build_target(hook):
+        return f"The build step run for --build-target={hook[len('build-'):]}."
+    return DESCRIPTIONS.get(hook, "")
+
+
 #  User defined hook (environment file), called by the driver at the end
 FINAL_STEP = HookSpec(
     "module-final-step",

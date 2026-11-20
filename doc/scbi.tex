@@ -617,6 +617,8 @@ The following sub-commands are available:
 
 	\item[format] Rewrites YAML plug-ins in their canonical form (\seeref{formatter}).
 
+	\item[schema] Displays the JSON Schema of the YAML plug-ins, for the editors (\seeref{schema}).
+
 	\item[replay] Reruns a step of a module from its replay file, or displays a script to run it by hand (\seeref{replay}).
 
 	\item[source-archive] Creates a source archive from the VCS of a plug-in (\seeref{createsourcearchive}).
@@ -2678,6 +2680,23 @@ e.g. the unsaved content of an editor buffer; the plug-in name or path
 given is used for its name and its dependencies:
 
 \cmd{scbi \ddash{}color:no lint \ddash{}json \ddash{}stdin lcms2 < buffer}
+
+\subsection{Schema}
+\label{schema}
+\index{schema}
+
+The \code{scbi schema} sub-command displays the JSON Schema (draft-07)
+of the YAML plug-ins, generated from the hooks known to the driver:
+
+\cmd{scbi \ddash{}color:no schema > scbi-plugin.schema.json}
+
+An editor using it (e.g. with the YAML language server) completes the
+names of the hooks, of their qualifiers (\code{common}, \code{\_},
+\code{default}, \code{cross}) and of the keys of the plug-in
+(\code{inherit}, \code{with-variants}, the fields of \code{vcs} and
+\code{archive}...), and displays their description. The schema is
+permissive: the bodies of the hooks are strings or lists, their content
+is checked by \code{scbi lint}.
 
 \subsection{Formatter}
 \label{formatter}

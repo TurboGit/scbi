@@ -401,7 +401,7 @@ _scbi()
                     return 0
                     ;;
                 *)
-                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*.yaml | sed 's/\.yaml$//') source-archive lint format shell show store replay"
+                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*.yaml | sed 's/\.yaml$//') source-archive lint format schema shell show store replay"
                     ;;
             esac
     esac

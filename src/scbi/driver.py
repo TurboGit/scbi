@@ -990,9 +990,10 @@ class Driver:
             self.set(name, value)
 
         if has_subcmd:
-            if subcmd == "replay" and {"--script", "--script:inline"} & set(self.scbiopts + self.modules):
-                #  the output is a script (redirected to a file): no stats
-                #  nor plan messages
+            if subcmd == "replay" and {"--script", "--script:inline"} & set(self.scbiopts + self.modules) \
+                    or subcmd == "schema":
+                #  the output is a script or a schema (redirected to a
+                #  file): no stats nor plan messages
                 self.set("DO_STAT", "no")
             self.setup_generic_tool_env()
             return self.run_tool(subcmd)
