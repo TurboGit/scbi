@@ -140,12 +140,15 @@ ALL_PARAMS = _all_params()
 
 
 class Linter:
-    def __init__(self, name: str, data: dict, where: str):
+    def __init__(self, name: str, data: dict, where: str, known: frozenset[str] = frozenset()):
         self.name = name
         self.data = data
         self.where = where
         self.issues: list[Issue] = []
         self.plugin_vars: set[str] = set()
+        #  the variables of the environment (settings of the environment
+        #  file, passthrough variables): known in every hook
+        self.known = known
 
     def error(self, where: str, msg: str) -> None:
         self.issues.append(Issue(ERROR, where, msg))
@@ -302,7 +305,7 @@ class Linter:
                     other_params: bool, hook: str = "") -> None:
         for name in names:
             if (name in known or name in local or name in self.plugin_vars or name.startswith("SCBI_")
-                    or name in STANDARD_VARS or name in DRIVER_VARS):
+                    or name in STANDARD_VARS or name in DRIVER_VARS or name in self.known):
                 continue
             if other_params and name in ALL_PARAMS:
                 hooks = ", ".join(ALL_PARAMS[name])
@@ -388,12 +391,13 @@ def _locals(items) -> list[LocalAssign]:
     return out
 
 
-def lint_text(name: str, text: str, where: str = "") -> list[Issue]:
-    """The issues of the YAML plug-in ``name`` (its text)."""
+def lint_text(name: str, text: str, where: str = "", known: frozenset[str] = frozenset()) -> list[Issue]:
+    """The issues of the YAML plug-in ``name`` (its text); ``known``: the
+    variables of the environment (settings of the environment file...)."""
     try:
         data = yaml.load(text, Loader=yamlfmt._Loader) or {}
     except yaml.YAMLError as e:
         return [Issue(ERROR, "yaml", " ".join(str(e).split()))]
     if not isinstance(data, dict):
         return [Issue(ERROR, "yaml", "a mapping is expected")]
-    return Linter(name, data, where or name).run()
+    return Linter(name, data, where or name, known).run()

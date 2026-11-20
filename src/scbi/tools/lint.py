@@ -55,7 +55,9 @@ def main(driver, args: list[str]) -> int:
             print()
             print(f"========== Handle {display(driver, path)}")
         plugin = path.name[: -len(".yaml")]
-        for issue in lint_text(plugin, path.read_text(errors="replace"), str(path)):
+        #  the variables given to the hooks by the environment file
+        known = frozenset(driver.envfile.settings) | frozenset(driver.envfile.passthrough)
+        for issue in lint_text(plugin, path.read_text(errors="replace"), str(path), known):
             if issue.level == ERROR:
                 print(f"   error:   ({issue.where}) {issue.message}")
                 status = 1

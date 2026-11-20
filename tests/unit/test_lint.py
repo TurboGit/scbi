@@ -149,3 +149,18 @@ def test_out_of_tree_in_meta_module():
     #  with sources (a meta-module for some variants only): not flagged
     assert issues(meta + "vcs: {proxy: none, options: none, protocol: git, url: /r/p.git}\n") == []
     assert issues("plugin: p\nout-of-tree: false\n") == []
+
+
+def test_environment_variables():
+    text = """
+plugin: p
+build-env:
+  - set-var LV 9
+config-options:
+  - -DVAR=${VAR}
+  - -DLV=$LV
+config: cmake $(config-options) ../src
+"""
+    assert issues(text) == [(WARNING, "config-options", "variable VAR is not known in this hook")]
+    #  set by the environment file
+    assert [(i.level, i.where, i.message) for i in lint_text("p", text, known=frozenset({"VAR"}))] == []
