@@ -3,7 +3,7 @@
 
 import * as path from "node:path";
 import * as vscode from "vscode";
-import { formatArgs, isPluginText, lintArgs, LintIssue, parseLintOutput, run, wordEnd } from "./core";
+import { formatArgs, isPluginText, lintArgs, LintIssue, parseLintOutput, run, schemaArgs, wordEnd } from "./core";
 
 let diagnostics: vscode.DiagnosticCollection;
 let output: vscode.OutputChannel;
@@ -125,6 +125,42 @@ async function format(doc: vscode.TextDocument): Promise<vscode.TextEdit[]> {
   }
 }
 
+//  The schema of the plug-ins given to the YAML extension (Red Hat): the
+//  completion and the help on hover of the hooks
+const SCHEMA_URI = "scbi://schema/plugin.schema.json";
+
+interface YamlApi {
+  registerContributor(id: string, requestSchema: (resource: string) => string | undefined,
+                      requestSchemaContent: (uri: string) => string | undefined): boolean;
+}
+
+async function registerSchema(): Promise<void> {
+  const yaml = vscode.extensions.getExtension("redhat.vscode-yaml");
+  if (!yaml) {
+    output.appendLine("The YAML extension (redhat.vscode-yaml) is not installed: no completion of the hooks.");
+    return;
+  }
+  let text: string;
+  try {
+    const folder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd();
+    const res = await run(command(), schemaArgs(), "", folder);
+    text = res.stdout.replace(/\x1b\[[0-9;?]*[A-Za-z]/g, "");
+    JSON.parse(text);
+  } catch (err) {
+    output.appendLine(`scbi schema: ${(err as Error).message}`);
+    return;
+  }
+  const api = (await yaml.activate()) as YamlApi | undefined;
+  api?.registerContributor(
+    "scbi",
+    (resource) => {
+      const doc = vscode.workspace.textDocuments.find((d) => d.uri.toString() === resource);
+      return doc && isPlugin(doc) ? SCHEMA_URI : undefined;
+    },
+    (uri) => (uri === SCHEMA_URI ? text : undefined),
+  );
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   diagnostics = vscode.languages.createDiagnosticCollection("scbi");
   output = vscode.window.createOutputChannel("SCBI");
@@ -174,6 +210,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   vscode.workspace.textDocuments.forEach(maybeLint);
+  void registerSchema();
 }
 
 export function deactivate(): void {

@@ -6,7 +6,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
-import { formatArgs, isPluginText, lintArgs, parseLintOutput, run, wordEnd } from "../src/core";
+import { formatArgs, isPluginText, lintArgs, parseLintOutput, run, schemaArgs, wordEnd } from "../src/core";
 
 test("parseLintOutput: the JSON list after other output", () => {
   const issues = parseLintOutput('\x1b[37m[\n {"file": "p.yaml", "line": 2, "column": 3, "level": "warning",'
@@ -55,4 +55,12 @@ test("lint and format with the driver", async () => {
   const bad = await driver(formatArgs(file), "config: [\n", dir);
   assert.equal(bad.status, 1);
   assert.equal(bad.stdout, "");
+});
+
+test("schema from the driver", async () => {
+  const res = await driver(schemaArgs(), "", tmpdir());
+  assert.equal(res.status, 0, res.stderr);
+  const schema = JSON.parse(res.stdout);
+  assert.equal(schema.title, "SCBI plug-in");
+  assert.ok(schema.properties.config.description.startsWith("Configures"));
 });

@@ -31,6 +31,10 @@ export function formatArgs(file: string): string[] {
   return [...GLOBAL, "format", "--stdin", file];
 }
 
+export function schemaArgs(): string[] {
+  return [...GLOBAL, "schema"];
+}
+
 /** The issues of the output of `scbi lint --json` (the JSON list may be
  * preceded by other output of the driver). */
 export function parseLintOutput(stdout: string): LintIssue[] {
