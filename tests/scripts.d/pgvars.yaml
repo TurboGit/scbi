@@ -9,9 +9,13 @@ build-env:
   - set-var PGDEBUG $ISDEB
 
 config-options:
+  - COPT1 = $(is-enabled debug ON OFF)
+  - COPT2 = is-enabled debug ON OFF
   - if not enabled(doc): -DBUILD_DOC=OFF
   - ${DEBOPT}
   - -DNEW_DEB=${ISDEB}
+  - -DCO_OPT1=$COPT1
+  - -DCO_OPT2=$COPT2
 
 config: |-
   CDEBUG = is-enabled debug ON OFF
