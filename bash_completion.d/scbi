@@ -15,9 +15,9 @@ _SCBI_ARGS="${_SCBI_COMMON} -t -S --no-setup -W --no-wrapup -I
 _SCBI_ARC_ARGS="${_SCBI_COMMON} -e --env= --plan=
 -c --clean-version -l --lower-case --sha1 --sha256 --md5"
 
-_SCBI_LNT_ARGS="${_SCBI_COMMON} --error  --stat --stat:"
+_SCBI_LNT_ARGS="${_SCBI_COMMON} --error --json --stdin  --stat --stat:"
 
-_SCBI_FMT_ARGS="${_SCBI_COMMON} --replace  --stat --stat:"
+_SCBI_FMT_ARGS="${_SCBI_COMMON} --replace --stdin  --stat --stat:"
 
 _SCBI_SHL_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --mode:use --mode:sandbox --mode:dev --mode:tests --run --stat --stat:"
 

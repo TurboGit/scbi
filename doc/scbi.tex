@@ -2668,6 +2668,17 @@ All the problems found are reported:
 
 The option \ddash{}error only reports the errors. The exit status is 1 when an error is found.
 
+For the editors, the option \ddash{}json reports the issues as a JSON
+list, each one an object with the keys \code{file}, \code{line} and
+\code{column} (1-based: the key of the hook, the line of a command body
+or the variable the issue is about), \code{level} (\code{error} or
+\code{warning}), \code{hook} and \code{message}. With \ddash{}stdin the
+text of the plug-in (a single one) is read from the standard input,
+e.g. the unsaved content of an editor buffer; the plug-in name or path
+given is used for its name and its dependencies:
+
+\cmd{scbi \ddash{}color:no lint \ddash{}json \ddash{}stdin lcms2 < buffer}
+
 \subsection{Formatter}
 \label{formatter}
 \index{format}
@@ -2678,7 +2689,10 @@ hooks in a canonical order, no trailing blanks, no duplicate blank lines.
 \cmd{scbi format lcms2}
 
 The formatted plug-in is displayed, or written back to the file with the
-option \ddash{}replace. An invalid plug-in is not formatted (see
+option \ddash{}replace. With \ddash{}stdin the text of the plug-in (a
+single one, whose name is given) is read from the standard input and
+the formatted text written to the standard output (an editor
+formatting an unsaved buffer). An invalid plug-in is not formatted (see
 \code{scbi lint}). The canonical form is:
 
 \begin{itemize}

@@ -215,3 +215,35 @@ def test_dependency_vars(tmp_path):
     #  and guards, the env of the with-variants), not their build-env; vars
     #  and env hooks of the parents
     assert dependency_vars("m", data, find) == {"A", "A_CROSS", "B", "B_V", "B_NATIVE", "PV", "PT"}
+
+
+def test_positions():
+    #  the line and column (1-based) of each issue in the file: the key of
+    #  the hook, the variable, the line of a command body
+    text = """plugin: p
+
+functions:
+  f:
+    run: |-
+      X = 1
+      echo x
+
+config-options:
+  common:
+    - -DA=$NOPE
+
+config: |-
+  CDEBUG = is-enabled cmake-debug
+  echo $VERSION
+  log 0 bad
+
+out-of-tre: true
+build:
+"""
+    lines = text.splitlines()
+    found = {(i.line, i.column): lines[i.line - 1][i.column - 1:].split()[0] for i in lint_text("p", text)}
+    assert found == {(11, 11): "$NOPE", (15, 8): "$VERSION", (16, 3): "log", (14, 3): "CDEBUG",
+                     (18, 1): "out-of-tre:", (19, 1): "build:", (6, 7): "X"}
+    #  YAML error: its own position
+    [issue] = lint_text("p", "a: [\n")
+    assert (issue.where, issue.line, issue.column) == ("yaml", 2, 1)

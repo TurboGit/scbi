@@ -31,6 +31,9 @@ class Issue:
     level: str
     where: str  # the hook (or section) concerned
     message: str
+    #  position in the file (1-based, 0: unknown): scbi.plugin.lintpos
+    line: int = 0
+    column: int = 0
 
 
 #  Values expected for some single-value hooks
@@ -525,10 +528,14 @@ def _locals(items) -> list[LocalAssign]:
 def lint_text(name: str, text: str, where: str = "", known: frozenset[str] = frozenset()) -> list[Issue]:
     """The issues of the YAML plug-in ``name`` (its text); ``known``: the
     variables of the environment (settings of the environment file...)."""
+    from scbi.plugin.lintpos import locate
+
     try:
         data = yaml.load(text, Loader=yamlfmt._Loader) or {}
     except yaml.YAMLError as e:
-        return [Issue(ERROR, "yaml", " ".join(str(e).split()))]
+        mark = getattr(e, "problem_mark", None) or getattr(e, "context_mark", None)
+        line, column = (mark.line + 1, mark.column + 1) if mark is not None else (1, 1)
+        return [Issue(ERROR, "yaml", " ".join(str(e).split()), line, column)]
     if not isinstance(data, dict):
-        return [Issue(ERROR, "yaml", "a mapping is expected")]
-    return Linter(name, data, where or name, known).run()
+        return [Issue(ERROR, "yaml", "a mapping is expected", 1, 1)]
+    return locate(text, Linter(name, data, where or name, known).run())
