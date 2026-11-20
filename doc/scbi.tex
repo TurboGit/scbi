@@ -2635,8 +2635,10 @@ All the problems found are reported:
 	\code{vcs} and \code{archive}), values of \code{out-of-tree},
 	\code{only-explicit-build} (true or false), \code{aggregate} (direct,
 	recursive or no) and \code{propagate-version} (version, variant, both
-	or no), conditions, functions in values and environment actions;
-	\item warnings: empty hooks, and variables used by a hook (shell code,
+	or no), conditions, functions in values and environment actions, a
+	literal level of \code{log} which is not an integer >= 1;
+	\item warnings: empty hooks, \code{out-of-tree} in a meta-module
+	(\code{modules} and no sources: it is not built), and variables used by a hook (shell code,
 	values, environment actions) which are not known there: not a
 	parameter of the hook (a parameter of another hook is named as such,
 	e.g. \code{VERSION} used in \code{config}), not set by the hook, the

@@ -194,6 +194,11 @@ class Linter:
                 continue
             self.check_hook(key, value)
 
+        #  a meta-module (modules, no sources) is not built: out-of-tree
+        #  has no use
+        if "modules" in data and "out-of-tree" in data and not ({"vcs", "archive"} & set(map(str, data))):
+            self.warning("out-of-tree", "not used by a meta-module (no sources)")
+
         fpdef = header.get("functions")
         if fpdef is not None:
             for fname, f in fpdef.functions.items():

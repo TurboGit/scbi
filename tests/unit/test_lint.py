@@ -141,3 +141,11 @@ build: |
 """
     assert issues(text) == [(ERROR, "build", "line 4: log: level must be an integer >= 1"),
                             (ERROR, "function f", "line 1: log: level must be an integer >= 1")]
+
+
+def test_out_of_tree_in_meta_module():
+    meta = "plugin: p\nmodules: [lib1]\nout-of-tree: false\n"
+    assert issues(meta) == [(WARNING, "out-of-tree", "not used by a meta-module (no sources)")]
+    #  with sources (a meta-module for some variants only): not flagged
+    assert issues(meta + "vcs: {proxy: none, options: none, protocol: git, url: /r/p.git}\n") == []
+    assert issues("plugin: p\nout-of-tree: false\n") == []
