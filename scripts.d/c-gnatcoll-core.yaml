@@ -40,7 +40,6 @@ config-options:
       - GNATCOLL_OS=windows
 
 build: |-
-  OPTIONS =
   make $(config-options)
 
 install: make NORMALIZED_TARGET=$TARGET prefix=$PREFIX install

@@ -19,7 +19,6 @@ config-options:
   - --enable-languages=c,c++
 
 config: |-
-  OPTIONS =
   ../src/configure $(config-options)
 
 build: make -j$SCBI_JOBS

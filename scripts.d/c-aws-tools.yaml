@@ -41,11 +41,9 @@ config-options:
 
 config:
   _: |-
-    OPTIONS =
     delete makefile.setup && make $(config-options) setup
   cross:
     _: |-
-      OPTIONS =
       delete makefile.setup && make LAL=false ZLIB=false TARGET=$TARGET $(config-options) setup
 
 build:

@@ -24,7 +24,6 @@ config-options:
   - ENABLE_SHARED=no
 
 config: |-
-  OPTIONS =
   cd clang-bindings && make $(config-options) setup
 
 build: cd clang-bindings && make

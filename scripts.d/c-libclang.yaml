@@ -37,7 +37,6 @@ config-options:
   - -DLLVM_ENABLE_LIBXML2=OFF
 
 config: |-
-  OPTIONS =
   cmake $(config-options) ../src/llvm
 
 build: ninja -j$SCBI_JOBS

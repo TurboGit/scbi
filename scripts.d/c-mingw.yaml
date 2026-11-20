@@ -33,7 +33,6 @@ config-options:
   - --enable-wildcard
 
 config: |-
-  OPTIONS =
   ../src/mingw-w64-crt/configure $(config-options)
 
 build: |-

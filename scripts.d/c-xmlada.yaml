@@ -23,11 +23,9 @@ config-options:
 
 config:
   _: |-
-    OPTIONS =
     ./configure $(config-options)
   cross:
     _: |-
-      OPTIONS =
       ./configure $(config-options) --target=$TARGET
 
 build: make PROCESSORS=$SCBI_JOBS -j2

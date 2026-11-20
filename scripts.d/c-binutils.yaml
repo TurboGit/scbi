@@ -45,7 +45,6 @@ config-options:
       - --target=$TARGET
 
 config: |-
-  OPTIONS =
   ../src/configure $(config-options)
 
 build: |-
