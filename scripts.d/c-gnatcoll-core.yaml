@@ -25,15 +25,15 @@ env:
 out-of-tree: false
 
 config-options:
-  _:
-    - GNATCOLL_MMAP=yes
-    - GNATCOLL_OS=unix
   common:
     - prefix=$PREFIX
     - PROCESSORS=$SCBI_JOBS
     - INTEGRATED=yes
     - TARGET=$TARGET
     - NORMALIZED_TARGET=$TARGET
+  _:
+    - GNATCOLL_MMAP=yes
+    - GNATCOLL_OS=unix
   cross:
     _:
       - GNATCOLL_MMAP=no

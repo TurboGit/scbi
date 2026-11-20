@@ -23,10 +23,6 @@ build-env:
 out-of-tree: true
 
 config-options:
-  _:
-    - --build=$SCBI_HOST
-    - --enable-gold
-    - --enable-plugins
   common:
     - --prefix=$PREFIX
     - --disable-nls
@@ -40,6 +36,10 @@ config-options:
     - --disable-readline
     - --disable-ld
     - --enable-install-libiberty
+  _:
+    - --build=$SCBI_HOST
+    - --enable-gold
+    - --enable-plugins
   cross:
     _:
       - --target=$TARGET

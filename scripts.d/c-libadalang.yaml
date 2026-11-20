@@ -10,8 +10,6 @@ vcs:
   url: https://github.com/AdaCore/libadalang
 
 depends:
-  _:
-    - c-langkit
   common:
     - c-gnatcoll-bindings-gmp
     - c-gnatcoll-core
@@ -19,6 +17,8 @@ depends:
     - libyaml-dev
     - python3-funcy
     - python3-mako
+  _:
+    - c-langkit
   stable:
     - c-langkit/stable:stable
 

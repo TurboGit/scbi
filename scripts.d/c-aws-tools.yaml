@@ -12,12 +12,12 @@ depends:
   - c-libadalang
 
 build-depends:
-  _:
-    - c-gprbuild
-    - c-libadalang-tools
   common:
     - p-gnat
     - c-sandbox
+  _:
+    - c-gprbuild
+    - c-libadalang-tools
 
 tests-depends:
   - c-sandbox
