@@ -2672,8 +2672,9 @@ option \ddash{}replace. An invalid plug-in is not formatted (see
 	hooks); then \code{run}, \code{version}, \code{prefix}; and the
 	meta-module hooks \code{modules}, \code{aggregate},
 	\code{propagate-version}, \code{plan};
-	\item inside a hook the qualifiers \code{\_}, \code{common},
-	\code{default}, the variants in alphabetical order, then \code{cross};
+	\item inside a hook the qualifiers \code{common} (always first),
+	\code{\_}, \code{default}, the variants in alphabetical order, then
+	\code{cross} (inside it the same order);
 	the fields of \code{vcs} and \code{archive} in their order;
 	\item block style, indented by 2, multi-line values as literal blocks
 	(\code{|}), quotes only where needed, a blank line between the hooks.

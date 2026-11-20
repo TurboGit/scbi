@@ -2,7 +2,7 @@
 
 The canonical form:
 - keys in the order of catalog.FORMAT_ORDER; inside a hook the
-  qualifiers ``_``, ``common``, ``default``, the variants (alphabetical),
+  qualifiers ``common``, ``_``, ``default``, the variants (alphabetical),
   then ``cross``; the fields of vcs/archive in their order;
 - block style, mappings indented by 2, list items "  - " under their key;
   multi-line strings as literal blocks; scalars quoted only when needed;
@@ -26,7 +26,8 @@ import yaml
 
 from scbi.plugin import catalog, construct, yamlfmt
 
-QUALIFIER_RANK = {yamlfmt.PLAIN_KEY: 0, "common": 1, "default": 2}
+#  common first (applied to all the variants), then the plain hook
+QUALIFIER_RANK = {"common": 0, yamlfmt.PLAIN_KEY: 1, "default": 2}
 INHERIT_ORDER = ("from", "hooks", "custom-hooks", "no-variant", "name")
 FUNCTION_ORDER = ("params", "run")
 OS_VARIANT_ORDER = ("packages", "env")

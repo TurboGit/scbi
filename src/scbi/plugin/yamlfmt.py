@@ -346,7 +346,7 @@ def to_data(pdef: PluginDef) -> dict:
         }
 
     by_hook: dict[str, dict[HookKey, object]] = {}
-    rank = {PLAIN: 0, "common": 1, "default": 2}
+    rank = {"common": 0, PLAIN: 1, "default": 2}  # as yamlwrite.QUALIFIER_RANK
     for key in sorted(pdef.hooks, key=lambda k: (catalog.format_rank(k.hook), k.hook, k.cross, rank.get(k.qualifier, 3), k.qualifier)):
         by_hook.setdefault(key.hook, {})[key] = pdef.hooks[key]
 

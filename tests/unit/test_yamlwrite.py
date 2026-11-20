@@ -94,3 +94,35 @@ def test_build_target_hooks():
     assert out.index("build:") < out.index("build-runtime:") < out.index("install:")
     keys = {(k.hook, k.cross) for k in yamlfmt.from_data("p", load_data(out)).hooks}
     assert {("build-runtime", False), ("build-runtime", True)} <= keys
+
+
+def test_common_first():
+    text = """\
+plugin: p
+depends:
+  v1: [f]
+  _: [a]
+  default: [b]
+  common: [c]
+  cross:
+    _: [d]
+    common: [e]
+"""
+    assert format_text("p", text) == """\
+plugin: p
+
+depends:
+  common:
+    - c
+  _:
+    - a
+  default:
+    - b
+  v1:
+    - f
+  cross:
+    common:
+      - e
+    _:
+      - d
+"""
