@@ -35,21 +35,55 @@ export function schemaArgs(): string[] {
   return [...GLOBAL, "schema"];
 }
 
-/** The issues of the output of `scbi lint --json` (the JSON list may be
- * preceded by other output of the driver). */
-export function parseLintOutput(stdout: string): LintIssue[] {
-  //  without the escape sequences (colors: their '[' is not the list)
+export function iniArgs(): string[] {
+  return [...GLOBAL, "ini", "--json"];
+}
+
+/** A section of the ini files (`scbi ini --json`), started with
+ * `scbi --ini=<name>`: a build of its modules, or its run command. */
+export interface Section {
+  name: string;
+  file: string;
+  modules: string;
+  run: string;
+  tests: string;
+}
+
+/** The JSON list of an output (without the escape sequences of the
+ * colors, other output before it). */
+function jsonList(stdout: string, what: string): unknown[] {
   stdout = stdout.replace(/\x1b\[[0-9;?]*[A-Za-z]/g, "");
   const start = stdout.indexOf("[");
   const end = stdout.lastIndexOf("]");
   if (start < 0 || end < start) {
-    throw new Error("no JSON list in the output of scbi lint");
+    throw new Error(`no JSON list in the output of ${what}`);
   }
   const data = JSON.parse(stdout.slice(start, end + 1));
   if (!Array.isArray(data)) {
-    throw new Error("the output of scbi lint is not a list");
+    throw new Error(`the output of ${what} is not a list`);
   }
-  return data as LintIssue[];
+  return data;
+}
+
+export function parseSections(stdout: string): Section[] {
+  return jsonList(stdout, "scbi ini") as Section[];
+}
+
+/** The command line of the task of a section. */
+export function sectionArgs(section: string, extra: string[] = []): string[] {
+  return [`--ini=${section}`, ...extra];
+}
+
+/** The arguments of a shell in the environment of a section: its modules
+ * (a section running a command gives no module: a plain scbi shell). */
+export function shellArgs(section: Section | undefined): string[] {
+  return section && !section.run && section.modules ? ["shell", ...section.modules.split(/\s+/)] : ["shell"];
+}
+
+/** The issues of the output of `scbi lint --json` (the JSON list may be
+ * preceded by other output of the driver). */
+export function parseLintOutput(stdout: string): LintIssue[] {
+  return jsonList(stdout, "scbi lint") as LintIssue[];
 }
 
 /** A YAML text with a top-level `plugin:` key: an SCBI plug-in. */

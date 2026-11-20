@@ -6,7 +6,8 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
-import { formatArgs, isPluginText, lintArgs, parseLintOutput, run, schemaArgs, wordEnd } from "../src/core";
+import { formatArgs, iniArgs, isPluginText, lintArgs, parseLintOutput, parseSections, run, schemaArgs,
+  sectionArgs, shellArgs, wordEnd } from "../src/core";
 
 test("parseLintOutput: the JSON list after other output", () => {
   const issues = parseLintOutput('\x1b[37m[\n {"file": "p.yaml", "line": 2, "column": 3, "level": "warning",'
@@ -63,4 +64,24 @@ test("schema from the driver", async () => {
   const schema = JSON.parse(res.stdout);
   assert.equal(schema.title, "SCBI plug-in");
   assert.ok(schema.properties.config.description.startsWith("Configures"));
+});
+
+test("sections: parse, task and shell arguments", () => {
+  const sections = parseSections('\x1b[37m[\n {"name": "aws", "file": "/w/.scbi", "modules": "c-aws c-x",'
+    + ' "run": "", "tests": ""},\n {"name": "app", "file": "/w/.scbi", "modules": "", "run": "app -v",'
+    + ' "tests": ""}\n]\n');
+  assert.deepEqual(sections.map((s) => s.name), ["aws", "app"]);
+  assert.deepEqual(sectionArgs("aws", ["--force"]), ["--ini=aws", "--force"]);
+  assert.deepEqual(shellArgs(sections[0]), ["shell", "c-aws", "c-x"]);
+  assert.deepEqual(shellArgs(sections[1]), ["shell"]);
+  assert.deepEqual(shellArgs(undefined), ["shell"]);
+});
+
+test("sections from the driver", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "scbi-vscode-"));
+  writeFileSync(path.join(dir, ".scbi"), "[libs]\n   modules = lib1\n[app]\n   run = app --version\n");
+  const res = await driver(iniArgs(), "", dir);
+  assert.equal(res.status, 0, res.stderr);
+  const found = parseSections(res.stdout).filter((s) => s.file === path.join(dir, ".scbi"));
+  assert.deepEqual(found.map((s) => [s.name, s.modules, s.run]), [["libs", "lib1", ""], ["app", "", "app --version"]]);
 });

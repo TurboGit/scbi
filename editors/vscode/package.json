@@ -1,7 +1,7 @@
 {
   "name": "scbi",
   "displayName": "SCBI",
-  "description": "SCBI (Source Code Build Infrastructure): lint and format the YAML plug-ins.",
+  "description": "SCBI (Source Code Build Infrastructure): lint, format and complete the YAML plug-ins; build or run the sections of the .scbi ini files.",
   "version": "0.1.0",
   "publisher": "scbi",
   "repository": {
@@ -13,10 +13,12 @@
   },
   "categories": [
     "Linters",
-    "Formatters"
+    "Formatters",
+    "Other"
   ],
   "activationEvents": [
-    "onLanguage:yaml"
+    "onLanguage:yaml",
+    "workspaceContains:.scbi"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -30,6 +32,17 @@
         "command": "scbi.format",
         "title": "Format Plug-in",
         "category": "SCBI"
+      },
+      {
+        "command": "scbi.selectSection",
+        "title": "Select Section",
+        "category": "SCBI"
+      },
+      {
+        "command": "scbi.runSection",
+        "title": "Build or Run the Selected Section",
+        "category": "SCBI",
+        "icon": "$(play)"
       }
     ],
     "configuration": {
@@ -42,17 +55,55 @@
         },
         "scbi.lint.mode": {
           "type": "string",
-          "enum": ["onType", "onSave", "off"],
+          "enum": [
+            "onType",
+            "onSave",
+            "off"
+          ],
           "default": "onType",
           "description": "When the plug-ins are linted: while typing (after a short delay), on save, or never (command only)."
         },
         "scbi.pluginPatterns": {
           "type": "array",
-          "items": { "type": "string" },
-          "default": ["**/scripts.d/[!.]*.yaml"],
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/scripts.d/[!.]*.yaml"
+          ],
           "description": "Glob patterns of the SCBI plug-ins. A YAML file with a top-level 'plugin:' key is a plug-in too."
         }
       }
+    },
+    "taskDefinitions": [
+      {
+        "type": "scbi",
+        "required": [
+          "section"
+        ],
+        "properties": {
+          "section": {
+            "type": "string",
+            "description": "The section of the ini files (scbi --ini=<section>)."
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "More options of scbi (e.g. --force)."
+          }
+        }
+      }
+    ],
+    "terminal": {
+      "profiles": [
+        {
+          "id": "scbi.shell",
+          "title": "SCBI Shell",
+          "icon": "tools"
+        }
+      ]
     }
   },
   "scripts": {
