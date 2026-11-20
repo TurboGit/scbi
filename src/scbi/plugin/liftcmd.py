@@ -546,12 +546,29 @@ def _and_groups(lines: list[str]) -> list[str]:
     return out
 
 
+def _drop_dead_empty(out: list[str]) -> list[str]:
+    """The lines without the empty assignments (``NAME =``, from
+    ``local NAME=()``) immediately replaced by the next line, at the same
+    indentation, without reading the variable (``NAME = config-options``
+    after ``local NAME=()``)."""
+    result: list[str] = []
+    for k, line in enumerate(out):
+        m = re.fullmatch(r"(\s*)([A-Za-z_]\w*) =", line)
+        nxt = out[k + 1] if k + 1 < len(out) else ""
+        if m and nxt.startswith(f"{m.group(1)}{m.group(2)} = ") and not re.search(
+                rf"\$\{{?{m.group(2)}\b", nxt):
+            continue
+        result.append(line)
+    return result
+
+
 def lift_commands(lines: list[str], params: dict[int, str] | None = None) -> str:
     """The command language text of a Bash body (``body_lines`` without
     the parameter declarations); ``params``: $n -> name for functions."""
     lifter = _Lifter({str(n): name for n, name in (params or {}).items()})
     lifter.body(_and_groups(lines))
-    text = "\n".join(lifter.out) + ("\n" if lifter.out else "")
+    out = _drop_dead_empty(lifter.out)
+    text = "\n".join(out) + ("\n" if out else "")
     try:
         parse(text)
     except CmdSyntaxError as e:

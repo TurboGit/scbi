@@ -18,7 +18,7 @@ def lift(text, params=None):
     ("local BT=$(get-build-type CMAKE Release)", "BT = get-build-type CMAKE Release\n"),
     ('local DEBUG="$(get-build-type MAKE false)"', "DEBUG = get-build-type MAKE false\n"),
     ("local OPTIONS=()\nget-config-options OPTIONS $PREFIX $TARGET $VARIANT\ncmake \"${OPTIONS[@]}\" ../src",
-     "OPTIONS =\nOPTIONS = config-options\ncmake $OPTIONS ../src\n"),
+     "OPTIONS = config-options\ncmake $OPTIONS ../src\n"),
     ("local L=$(last-modified-directory $PREFIX/lib/python*)", "L = last-modified-directory $PREFIX/lib/python*\n"),
     ("cmake -DCMAKE_BUILD_TYPE=$(get-build-type CMAKE Release) ../src",
      "cmake -DCMAKE_BUILD_TYPE=$(get-build-type CMAKE Release) ../src\n"),
@@ -170,3 +170,14 @@ def test_rm_lifted_to_delete():
                           "rm -r z | cat", "rm -i w"]) == (
         "delete-tree build/kb\ndelete-tree a b && make\ndelete x\ndelete y *.o\nrm -fr -v y\nrm -r z | cat\n"
         "rm -i w\n")
+
+
+def test_empty_list_replaced():
+    #  local X=() then X set: no empty assignment (never read); kept when
+    #  the next line reads it
+    assert lift_commands(["local OPTIONS=()", "get-config-options OPTIONS $PREFIX $TARGET $VARIANT",
+                          '../src/configure "${OPTIONS[@]}"']) == \
+        "OPTIONS = config-options\n../src/configure $OPTIONS\n"
+    assert lift_commands(["local L=()", 'L=("${L[@]}" a)', 'echo "${L[@]}"']) == "L =\nL = $L a\necho $L\n"
+    #  a value before an assignment is not the empty list
+    assert lift_commands(["X=a", "X=b", "echo $X"]) == "X = a\nX = b\necho $X\n"
