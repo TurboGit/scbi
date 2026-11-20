@@ -15,7 +15,7 @@ from pathlib import Path
 from scbi.bashcompat import words
 from scbi.env import ACTIONS, Environment
 from scbi.errors import Exit
-from scbi.hooks.evaluate import apply_env
+from scbi.hooks.evaluate import apply_env, set_plugin_vars
 from scbi.plugin import catalog
 from scbi.plugin.model import EnvOps
 from scbi.plugin.resolve import variant_hooks
@@ -95,6 +95,7 @@ class ModuleEnv:
             if not isinstance(obj, EnvOps):
                 raise TypeError(f"{fct}: not an environment hook")
             ctx.params = dict(zip(catalog.spec(hook).params, args))
+            set_plugin_vars(ctx, d.registry.plugin_variables(plugin))
             apply_env(obj, ctx, d.base_env())
 
     def call_env_hooks(self, formodule: str, modref: str, hook: str, out=None) -> None:

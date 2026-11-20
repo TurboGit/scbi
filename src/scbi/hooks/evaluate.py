@@ -91,6 +91,16 @@ def _select(items, ctx: HookContext):
             yield it
 
 
+def set_plugin_vars(ctx: HookContext, variables: dict[str, str]) -> dict[str, str]:
+    """Set the variables of the plug-in (``vars``) of the hook: each
+    value expanded in the context of the hook, in order (a value may use
+    the previous variables); returns them."""
+    ctx.plugin_vars = {}
+    for name, value in variables.items():
+        ctx.plugin_vars[name] = expand(value, ctx)
+    return ctx.plugin_vars
+
+
 def eval_values(values: Values, ctx: HookContext) -> list[str]:
     """Output lines of a value hook (a LocalAssign sets a variable of the
     following items)."""

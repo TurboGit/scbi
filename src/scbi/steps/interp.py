@@ -12,6 +12,8 @@ from scbi.bashcompat import words
 from scbi.bashenv import ShellVars
 from scbi.env import Environment
 from scbi.hooks.cmdlang import Runner, State
+from scbi.hooks.evaluate import set_plugin_vars
+from scbi.hooks.expand import ExpandError
 from scbi.plugin import catalog
 from scbi.plugin.lift import parse_hook_name
 from scbi.plugin.model import Commands, Function
@@ -60,8 +62,20 @@ class Hook:
 
     def config_options(self) -> list[str]:
         prefix, target, variant = (self.args + ["", "", ""])[:3]
-        return self.d.runner().variant_values(self.module, variant or self.variant, "config-options",
-                                              [prefix, target, variant], self.d.plan, self.b.modules_list)
+        #  an empty value is no option (as the word splitting of the Bash driver)
+        return [v for v in self.d.runner().variant_values(self.module, variant or self.variant, "config-options",
+                                                          [prefix, target, variant], self.d.plan, self.b.modules_list)
+                if v != ""]
+
+    def variables(self, ctx=None) -> dict[str, str]:
+        """The variables of the plug-in (``vars``) expanded in the context
+        of the hook (``ctx``, default: the one of the run)."""
+        if ctx is None:
+            ctx = self.b.ctx(self.module, self.variant, self.hook)
+            ctx.env = Environment(ShellVars(dict(self.sv.values), set(self.sv.exported)))
+            ctx.params = dict(self.params)
+            ctx.cwd = Path(self.cwd)
+        return dict(set_plugin_vars(ctx, self.d.registry.plugin_variables(self.module)))
 
     def functions(self) -> dict[str, tuple[tuple[str, ...], tuple]]:
         """The functions callable by name: the plug-in functions and the
@@ -160,12 +174,17 @@ class Hook:
         ctx.env = Environment(ShellVars(dict(self.sv.values), set(self.sv.exported)))
         ctx.params = dict(self.params)
         ctx.cwd = Path(self.cwd)
+        try:
+            variables = self.variables(ctx)
+        except ExpandError as e:
+            (out if err is None else err)(f"{self.where()}: vars: {e}\n")
+            return 1
         runner = Runner(ctx, self.where(), config_options=self.config_options,
                         functions=self.functions(), trace=trace, all_modules=self.all_modules,
                         hook_function=self.hook_function, hook_values=self.hook_values,
                         refresh_functions=self.functions,
                         log=log if log is not None else self.log_message)
-        state = State(dict(self.d.registry.variables), self.environment(), self.cwd, out,
+        state = State(variables, self.environment(), self.cwd, out,
                       out if err is None else err)
         return runner.run(self.body.ast, state)
 
@@ -189,7 +208,7 @@ class Hook:
             plugin_file=str(file) if file else "", cwd=self.cwd,
             host=self.d.get("SCBI_HOST"), target=self.d.get("SCBI_TARGET"),
             run=self.body.script, line=self.body.line, params=dict(self.params),
-            variables=dict(reg.variables),
+            variables=self.variables(),
             driver={k: v for k, v in self.sv.values.items() if k.startswith("SCBI_")},
             environment=self.environment(), config_options=self.config_options(),
             functions=functions, version=version)

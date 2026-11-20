@@ -13,12 +13,12 @@ from scbi.bashenv import ShellVars
 from scbi.env import Environment
 from scbi.hooks import builtins
 from scbi.hooks.context import HookContext
-from scbi.hooks.evaluate import apply_env, eval_values
+from scbi.hooks.evaluate import apply_env, eval_values, set_plugin_vars
 from scbi.hooks.expand import ExpandError, check, expand
 from scbi.plan import PlanState
 from scbi.plugin import catalog
 from scbi.plugin.lift import lift
-from scbi.plugin.model import EnvOps, Guarded, Values
+from scbi.plugin.model import EnvOp, EnvOps, Guarded, Values
 from scbi.plugin.registry import Registry
 
 HOST = "x86_64-linux-gnu"
@@ -309,3 +309,31 @@ def test_variables_in_patterns(tmp_path):
         "lib/a.so|@/lib/a.so|:opt:x:lib:a.so|dflt|/opt/x/lib"
     #  \$: a literal $, as in Bash
     assert expand("${V/$PREFIX/\\$ROOT}|${E:-\\$D}", c) == "$ROOT/lib/a.so|$D"
+
+
+def test_plugin_variables(tmp_path):
+    #  vars: expanded in the context of the hook, in order, seen by the
+    #  values and the environment actions; the own ones override the
+    #  inherited ones
+    plugins = tmp_path / "plugins"
+    plugins.mkdir()
+    (plugins / "base.yaml").write_text("vars:\n  A: base\n  B: b-$A\n")
+    (plugins / "m.yaml").write_text(
+        "inherit:\n  - from: base\n"
+        "vars:\n  A: own\n  DOC: $(is-enabled doc ON OFF)\n  OPT: -DDOC=$DOC\n")
+    reg = Registry(plugins)
+    assert reg.load_module("m")
+    assert reg.plugin_variables("m") == {"A": "own", "B": "b-$A", "DOC": "$(is-enabled doc ON OFF)",
+                                         "OPT": "-DDOC=$DOC"}
+    assert reg.plugin_variables("base") == {"A": "base", "B": "b-$A"}
+    c = ctx(tmp_path, env=Environment(ShellVars({"SCBI_doc_SET": "true"})))
+    assert set_plugin_vars(c, reg.plugin_variables("m")) == {
+        "A": "own", "B": "b-own", "DOC": "ON", "OPT": "-DDOC=ON"}
+    assert eval_values(Values(("$OPT", "${A:+-DA=$A}")), c) == ["-DDOC=ON", "-DA=own"]
+    apply_env(EnvOps((EnvOp("set-var", ("V", "$B")),)), c)
+    assert c.env.get("V") == "b-own"
+    #  a local variable or a parameter hides a plug-in variable
+    c.params = {"A": "param"}
+    assert expand("$A", c) == "param"
+    c = ctx(tmp_path)
+    assert set_plugin_vars(c, reg.plugin_variables("m"))["OPT"] == "-DDOC=OFF"

@@ -35,14 +35,18 @@ class HookContext:
     arrays: dict[str, dict[str, str]] = field(default_factory=dict)
     #  Variables local to the hook (``local`` environment action)
     locals: dict[str, str] = field(default_factory=dict)
+    #  Variables of the plug-in (``vars``, expanded: set_plugin_vars)
+    plugin_vars: dict[str, str] = field(default_factory=dict)
 
     def lookup(self, name: str) -> str:
         """Value of variable ``name``: local variable or hook parameter,
-        else shell variable."""
+        else variable of the plug-in, else shell variable."""
         if name in self.locals:
             return self.locals[name]
         if name in self.params:
             return self.params[name]
+        if name in self.plugin_vars:
+            return self.plugin_vars[name]
         if name == "PWD":
             #  maintained by Bash: the current directory of the hook
             return str(self.cwd)

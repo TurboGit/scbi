@@ -799,7 +799,14 @@ are hook names (including \code{pre-<step>} and \code{post-<step>}):
 
 \begin{description}[font=\texttt]
 	\item[plugin] The name of the plug-in (optional); it must match the file name.
-	\item[vars] Variables of the plug-in, \code{\{NAME: value\}}, available in all its hooks.
+	\item[vars] Variables of the plug-in, \code{\{NAME: value\}}, available in all its hooks
+	(command, value and environment hooks) and in the hooks of the
+	plug-ins inheriting it (their own variables override the inherited
+	ones). The values are expanded (\seeref{yaml-expansion}) each time a
+	hook runs, in the context of the hook and in order: a value may use
+	the previous variables, the hook parameters or the built-ins, e.g.
+	\code{DEBUG: \$(is-enabled debug ON OFF)}. A local variable or a hook
+	parameter of the same name hides a variable of the plug-in.
 	\item[variants] Variants including other variants
 	(\seeref{yaml-variants}), \code{\{all: [ai, hdr, jxl]\}}.
 	\item[inherit] List of inherited plug-ins (\seeref{inheritance}), each
@@ -2198,7 +2205,7 @@ With the example above, in a plug-in \code{natv} with version \code{1.2} in the 
 
 The configuration options often depend on the variant built, for example to enable an external module.
 
-In a command hook, \code{\$(config-options)} (or \code{OPTIONS = config-options}) gives the list of the values of the \code{config-options} hooks of the module: the \code{common} one, then those of each variant of the module reference.
+In a command hook, \code{\$(config-options)} (or \code{OPTIONS = config-options}) gives the list of the values of the \code{config-options} hooks of the module: the \code{common} one, then those of each variant of the module reference. A value which expands to an empty string is not an option (it is dropped).
 
 The \code{common} hook holds the options used whatever the variant.
 

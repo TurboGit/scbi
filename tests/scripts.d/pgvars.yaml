@@ -1,0 +1,23 @@
+plugin: pgvars
+
+vars:
+  ISDOC: $(is-enabled doc)
+  ISDEB: $(is-enabled debug ON OFF)
+  DEBOPT: -DDEBUG=${ISDEB}
+
+build-env:
+  - set-var PGDEBUG $ISDEB
+
+config-options:
+  - if not enabled(doc): -DBUILD_DOC=OFF
+  - ${DEBOPT}
+  - -DNEW_DEB=${ISDEB}
+
+config: |-
+  echo OPT1=$(is-enabled doc)
+  echo OPT2=$(is-enabled debug)
+  echo OPT3=$(is-enabled debug ON OFF)
+  echo OPT4=${ISDOC}
+  echo OPT5=${ISDEB}
+  echo CONF=$(config-options)
+  echo ENV=${PGDEBUG}

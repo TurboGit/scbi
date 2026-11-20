@@ -27,7 +27,7 @@ import json
 
 from scbi.hooks import expand as _expand
 from scbi.hooks.context import HookContext
-from scbi.hooks.evaluate import GuardContext
+from scbi.hooks.evaluate import GuardContext, set_plugin_vars
 from scbi.plugin import catalog, expr, yamlfmt, yamlwrite
 from scbi.plugin.lift import parse_hook_name
 from scbi.plugin.model import Commands, EnvOps, Guarded, HookKey, LocalAssign, PluginDef, Values
@@ -91,19 +91,6 @@ def _hook_names(registry, module: str) -> list[str]:
     return sorted(names, key=lambda h: (catalog.format_rank(h), h))
 
 
-def _chain(registry, module: str, seen: set[str] | None = None) -> list[PluginDef]:
-    """The definitions of the module and of the plug-ins it inherits
-    (recursively), the module first."""
-    seen = set() if seen is None else seen
-    if module in seen or module not in registry.definitions:
-        return []
-    seen.add(module)
-    result = [registry.definitions[module]]
-    for parent in registry.inherits.get(module, []):
-        result += _chain(registry, parent, seen)
-    return result
-
-
 def _hook_body(driver, module: str, variant: str, kind: str, ref: str, hook: str):
     """The resolved body of a hook of the module (None: no hook)."""
     registry = driver.registry
@@ -124,6 +111,10 @@ def _hook_body(driver, module: str, variant: str, kind: str, ref: str, hook: str
         prefix = f"{driver.get('SCBI_BDIR')}/{module}/{target}-{variant}/install"
         params = [prefix, target, variant] + ([kind, ref] if hook == "patches" else [])
         ctx = runner.context(module, variant, hook if spec is not None else "build", params, driver.plan)
+        try:
+            set_plugin_vars(ctx, registry.plugin_variables(module))
+        except Exception:  # noqa: BLE001 - not known here: the guards using them are kept
+            pass
         if isinstance(body, Values):
             body = Values(tuple(_select(body.items, ctx)))
         else:
@@ -141,7 +132,7 @@ def resolve_module(driver, module: str, variant: str, kind: str, ref: str) -> Pl
         raise ResolveError(f"{module}: plug-in not found")
     variant = variant or "default"
     pdef = PluginDef(name=module)
-    for d in reversed(_chain(registry, module)):
+    for d in reversed(registry.chain(module)):
         pdef.variables.update(d.variables)
         pdef.functions.update(d.functions)
     for hook in _hook_names(registry, module):

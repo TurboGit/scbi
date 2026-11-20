@@ -13,7 +13,7 @@ from pathlib import Path
 from scbi.bashenv import ShellVars
 from scbi.env import Environment
 from scbi.hooks.context import HookContext
-from scbi.hooks.evaluate import eval_values
+from scbi.hooks.evaluate import eval_values, set_plugin_vars
 from scbi.plan import PlanState
 from scbi.plugin import catalog
 from scbi.plugin.lift import parse_hook_name
@@ -66,6 +66,7 @@ class HookRunner:
         obj = self.registry.functions.get(function)
         if not isinstance(obj, Values):
             raise TypeError(f"{function}: not a value hook")
+        set_plugin_vars(ctx, self.registry.plugin_variables(module))
         return eval_values(obj, ctx)
 
     def hook_value(self, module: str, variant: str, hook: str, args: list[str],

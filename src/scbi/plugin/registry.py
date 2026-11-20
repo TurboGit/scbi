@@ -332,5 +332,32 @@ class Registry:
             res[f"{module}.inh"] = "".join(f"{p} " for p in parents)
         return res
 
+    def chain(self, module: str, seen: set[str] | None = None) -> list[PluginDef]:
+        """The definitions of the module and of the plug-ins it inherits
+        (recursively), the module first."""
+        seen = set() if seen is None else seen
+        if module in seen or module not in self.definitions:
+            return []
+        seen.add(module)
+        result = [self.definitions[module]]
+        for parent in self.inherits.get(module, []):
+            result += self.chain(parent, seen)
+        return result
+
+    def plugin_variables(self, module: str) -> dict[str, str]:
+        """The variables (``vars``, as written) of the plug-in of
+        ``module`` and of the plug-ins it inherits, the module's own ones
+        overriding the inherited ones (all the loaded ones for a module
+        without a plug-in definition)."""
+        if module not in self.definitions:
+            alias = self.module_alias.get(module, "")
+            if alias not in self.definitions:
+                return dict(self.variables)
+            module = alias
+        result: dict[str, str] = {}
+        for d in reversed(self.chain(module)):
+            result.update(d.variables)
+        return result
+
     def variant_members(self, module: str, variant: str) -> tuple[str, ...]:
         return self.variant_aliases.get(module, {}).get(variant, ())
