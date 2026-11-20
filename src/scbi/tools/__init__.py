@@ -16,7 +16,8 @@ TOOLS = {
     "format": "scbi.tools.format",
     "replay": "scbi.tools.replay",
     "schema": "scbi.tools.schema",
+    "ini": "scbi.tools.ini",
 }
 
 #  sub-commands without a Bash script (scbi-<sub-command>)
-PYTHON_ONLY = ("replay", "schema")
+PYTHON_ONLY = ("replay", "schema", "ini")

@@ -619,6 +619,8 @@ The following sub-commands are available:
 
 	\item[schema] Displays the JSON Schema of the YAML plug-ins, for the editors (\seeref{schema}).
 
+	\item[ini] Lists the sections of the ini files (\seeref{inifile}).
+
 	\item[replay] Reruns a step of a module from its replay file, or displays a script to run it by hand (\seeref{replay}).
 
 	\item[source-archive] Creates a source archive from the VCS of a plug-in (\seeref{createsourcearchive}).
@@ -754,6 +756,14 @@ The following keys are supported in the ini files:
 \end{itemize}
 
 Any other key is set as an exported variable (e.g. \code{SCBI\_PROGRESS = line}).
+
+The \code{scbi ini} sub-command lists the sections of the ini files, the
+ones activated with \ddash{}ini (not \code{common} nor
+\code{scbi-<sub-command>}), with their modules or the command they run.
+With \ddash{}json the list is a JSON list of objects with the keys
+\code{name}, \code{file} (the last ini file defining the section),
+\code{modules}, \code{run} and \code{tests} (as written): an editor
+proposes a task per section, started with \code{scbi \ddash{}ini=<section>}.
 
 Example:
 

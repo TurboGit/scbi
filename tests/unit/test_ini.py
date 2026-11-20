@@ -104,3 +104,21 @@ EXPAND_VALUES = [
     "pre$(printf %s x)post", "\\$SCBI_X", "a\\ b", "*.nomatch", "ini-*", "$HOME/x",
     '"$(echo a  b)"', "a#b", "a #comment",
 ]
+
+
+def test_section_list(tmp_path):
+    #  the sections in order, the last file defining one; scbi ini leaves
+    #  out common and scbi-<sub-command>
+    from scbi.tools.ini import sections
+
+    home, local = tmp_path / "home.scbi", tmp_path / "local.scbi"
+    home.write_text("jobs = 2\n[common]\njobs = 4\n[aws]\nmodules = c-aws\n[run-it]\nrun = app --x\n")
+    local.write_text("[scbi-show]\nstat = no\n[aws]\nmodules = c-aws-tools\n[gnat]\nmodules = p-gnat\n")
+    ini = IniDB()
+    ini.load_file(home)
+    ini.load_file(local)
+    assert list(ini.sections) == ["common", "run-it", "scbi-show", "aws", "gnat"]
+    assert [(s["name"], s["file"], s["modules"], s["run"]) for s in sections(ini)] == [
+        ("run-it", str(home), "", "app --x"),
+        ("aws", str(local), "c-aws c-aws-tools", ""),
+        ("gnat", str(local), "p-gnat", "")]

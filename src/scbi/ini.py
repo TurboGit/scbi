@@ -33,6 +33,8 @@ _KEYVAL = re.compile(r"^([^=]+)=([^=]+)$")
 class IniDB:
     def __init__(self) -> None:
         self.db: dict[str, str] = {}
+        #  the sections, in order, and the (last) file defining each one
+        self.sections: dict[str, Path] = {}
 
     def load_file(self, path: Path) -> None:
         """Port of ``ini-load-file``."""
@@ -45,6 +47,8 @@ class IniDB:
             m = _SECTION.match(line)
             if m:
                 section = m.group(2)
+                self.sections.pop(section, None)
+                self.sections[section] = Path(path)
                 continue
             m = _KEYVAL.match(line)
             if not m:

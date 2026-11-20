@@ -19,6 +19,8 @@ _SCBI_LNT_ARGS="${_SCBI_COMMON} --error --json --stdin  --stat --stat:"
 
 _SCBI_FMT_ARGS="${_SCBI_COMMON} --replace --stdin  --stat --stat:"
 
+_SCBI_INI_ARGS="--help --json"
+
 _SCBI_SHL_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --mode:use --mode:sandbox --mode:dev --mode:tests --run --stat --stat:"
 
 _SCBI_SHO_ARGS="${_SCBI_COMMON} --env= -e --depends: --rdepends --externals --externals:only --no-version --filter: --build-plan --build-plan:history --module-ref --module-ref:version --module-ref:variant --module-ref:full --resolved --stat --stat:"
@@ -284,6 +286,9 @@ _scbi()
             format)
                 _SCBI_MODE=fmt
                 ;;
+            ini)
+                _SCBI_MODE=ini
+                ;;
             show)
                 _SCBI_MODE=sho
                 ;;
@@ -384,6 +389,8 @@ _scbi()
                 _scbicomp "$_SCBI_LNT_ARGS"
             elif [[ ${_SCBI_MODE} == fmt ]]; then
                 _scbicomp "$_SCBI_FMT_ARGS"
+            elif [[ ${_SCBI_MODE} == ini ]]; then
+                _scbicomp "$_SCBI_INI_ARGS"
             elif [[ ${_SCBI_MODE} == str ]]; then
                 _scbicomp "$_SCBI_STR_ARGS"
             elif [[ ${_SCBI_MODE} == shl ]]; then
@@ -401,7 +408,7 @@ _scbi()
                     return 0
                     ;;
                 *)
-                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*.yaml | sed 's/\.yaml$//') source-archive lint format schema shell show store replay"
+                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*.yaml | sed 's/\.yaml$//') source-archive lint format schema ini shell show store replay"
                     ;;
             esac
     esac
