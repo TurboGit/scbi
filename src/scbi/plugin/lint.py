@@ -147,6 +147,7 @@ class Linter:
         self.where = where
         self.issues: list[Issue] = []
         self.plugin_vars: set[str] = set()
+        self.function_refs: set[str] = set()
         #  the variables of the environment (settings of the environment
         #  file, passthrough variables): known in every hook
         self.known = known
@@ -183,6 +184,11 @@ class Linter:
             if key in data and key != "plugin":
                 pdef = self.load({key: data[key]})
                 header[key] = pdef
+        fpdef = header.get("functions")
+        #  the variables read by the functions of the plug-in
+        self.function_refs: set[str] = set()
+        for f in (fpdef.functions.values() if fpdef is not None else ()):
+            self.function_refs.update(referenced(f.script))
         self.plugin_vars = set(str(k) for k in (data.get("vars") or {}))
         self.plugin_vars |= self._env_defined()
 
@@ -203,7 +209,6 @@ class Linter:
         if "modules" in data and "out-of-tree" in data and not ({"vcs", "archive"} & set(map(str, data))):
             self.warning("out-of-tree", "not used by a meta-module (no sources)")
 
-        fpdef = header.get("functions")
         if fpdef is not None:
             for fname, f in fpdef.functions.items():
                 known = set(f.params) | set(ALL_PARAMS)
@@ -281,6 +286,11 @@ class Linter:
         self.check_names(label, referenced(text), known, assigned(text), other_params, hook)
         for line in _bad_log_levels(script):
             self.error(label, f"line {line}: log: level must be an integer >= 1")
+        #  a variable set and never read (the functions of the plug-in see
+        #  the variables of their caller: one read there counts)
+        used = set(referenced(script)) | self.function_refs
+        for line, name in _unused_assignments(script, used):
+            self.warning(label, f"line {line}: variable {name} is set but never used")
 
     def check_names(self, label: str, names: list[str], known: set[str], local: set[str],
                     other_params: bool, hook: str = "") -> None:
@@ -293,6 +303,34 @@ class Linter:
                 self.warning(label, f"{name} is a parameter of {hooks}, not of {hook}")
             else:
                 self.warning(label, f"variable {name} is not known in this hook")
+
+
+def _unused_assignments(script: str, used: set[str]) -> list[tuple[int, str]]:
+    """(line, name) of the first assignment (``NAME = ...``, not
+    exported) of each variable of a body never read (``$NAME`` nowhere in
+    ``used``); none for a body with a syntax error (reported elsewhere)."""
+    from scbi.hooks import cmdlang
+
+    try:
+        body = cmdlang.parse(script, 1)
+    except cmdlang.CmdSyntaxError:
+        return []
+    found: dict[str, int] = {}
+
+    def walk(steps) -> None:
+        for step in steps or ():
+            if isinstance(step, cmdlang.Assign):
+                if not step.export and step.name not in used:
+                    found.setdefault(step.name, step.line)
+            elif isinstance(step, cmdlang.If):
+                for _, b in step.branches:
+                    walk(b)
+                walk(step.orelse)
+            elif isinstance(step, cmdlang.For):
+                walk(step.body)
+
+    walk(body)
+    return [(line, name) for name, line in found.items()]
 
 
 def _bad_log_levels(script: str) -> list[int]:

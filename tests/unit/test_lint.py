@@ -166,6 +166,37 @@ config: cmake $(config-options) ../src
     assert [(i.level, i.where, i.message) for i in lint_text("p", text, known=frozenset({"VAR"}))] == []
 
 
+def test_unused_variables():
+    text = """
+plugin: p
+functions:
+  show:
+    run: echo $FROMHOOK
+config: |-
+  CDEBUG = is-enabled cmake-debug
+  OPTIONS =
+  OPTIONS = config-options
+  USED = a
+  export EXPORTED = b
+  FROMHOOK = c
+  if exists(x):
+      INNER = d
+  for F in a b:
+      echo ${USED:-x} $F
+  show
+  write out.txt:
+      $OPTIONS
+"""
+    #  (the function reading a variable of its caller is reported as
+    #  using an unknown variable)
+    assert issues(text) == [(WARNING, "config", "line 1: variable CDEBUG is set but never used"),
+                            (WARNING, "config", "line 8: variable INNER is set but never used"),
+                            (WARNING, "function show", "variable FROMHOOK is not known in this hook")]
+    #  in a function too
+    text = "plugin: p\nfunctions:\n  f:\n    run: |-\n      X = 1\n      echo x\n"
+    assert issues(text) == [(WARNING, "function f", "line 1: variable X is set but never used")]
+
+
 def test_dependency_vars(tmp_path):
     from scbi.plugin.lint import dependency_vars
 

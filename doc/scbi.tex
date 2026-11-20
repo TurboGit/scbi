@@ -2655,7 +2655,13 @@ All the problems found are reported:
 	inherited plug-ins: all variants together), the environment file (its
 	\code{vars} and \code{passthrough}: the one of \ddash{}env, else the
 	default one, so the result depends on \ddash{}env), nor a driver
-	(\code{SCBI\_*}) or a usual environment variable.
+	(\code{SCBI\_*}) or a usual environment variable; and the variables
+	set in a command hook or a function (\code{NAME = ...}) and never
+	read (\code{\$NAME} nowhere in the body, nor in the functions of the
+	plug-in, which see the variables of their caller), e.g. the result of
+	\code{CDEBUG = is-enabled cmake-debug} not used; a variable set with
+	\code{export NAME = ...} is used by the commands run after it and is
+	not reported.
 \end{itemize}
 
 The option \ddash{}error only reports the errors. The exit status is 1 when an error is found.
