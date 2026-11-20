@@ -287,3 +287,9 @@ version to scbi:
 Building a dev version also supports the variant:
 
       $ scbi lcms/release:dev
+
+# License
+
+SCBI is free software, distributed under the GNU General Public
+License, version 3 or (at your option) any later version: see the
+[LICENSE](LICENSE) file.
