@@ -68,15 +68,15 @@ in a project) have their own language, *SCBI Plan*:
   `dev`/`keep`/`skip`/`force` after `:`, the `@set` variables after `$`.
 - `Ctrl+/` comments a line, `[` / `]` indent the groups.
 
-The colors come from your theme: the variant is a *type*
-(`entity.name.type.variant.scbi-plan`), the version a *string*
+The colors come from your theme: the variant is a *tag*
+(`entity.name.tag.variant.scbi-plan`), the version a *string*
 (`string.unquoted.version.scbi-plan`). To make them stand out more, in
 your settings:
 
 ```json
 "editor.tokenColorCustomizations": {
   "textMateRules": [
-    { "scope": "entity.name.type.variant.scbi-plan", "settings": { "foreground": "#4EC9B0", "fontStyle": "bold" } },
+    { "scope": "entity.name.tag.variant.scbi-plan", "settings": { "foreground": "#4EC9B0", "fontStyle": "bold" } },
     { "scope": "string.unquoted.version.scbi-plan", "settings": { "foreground": "#CE9178", "fontStyle": "bold" } }
   ]
 }

@@ -4,18 +4,18 @@
 # <------------------ comment.line.number-sign.scbi-plan
 
 @load base
-# <----- keyword.control.directive.scbi-plan
+# <----- keyword.other.directive.scbi-plan
 #     ^^^^ entity.name.plan.scbi-plan
 
   @set VER = v2.1   # shared version
-# ^^^^ keyword.control.directive.scbi-plan
+# ^^^^ keyword.other.directive.scbi-plan
 #      ^^^ variable.other.definition.scbi-plan
 #          ^ keyword.operator.assignment.scbi-plan
 #            ^^^^ string.unquoted.value.scbi-plan
 #                   ^^^^^^^^^^^^^^^^ comment.line.number-sign.scbi-plan
 
   @ref lib2 as lib1 version v/[0-9].[0-9]/
-# ^^^^ keyword.control.directive.scbi-plan
+# ^^^^ keyword.other.directive.scbi-plan
 #      ^^^^ entity.name.module.scbi-plan
 #           ^^ keyword.other.as.scbi-plan
 #              ^^^^ entity.name.module.scbi-plan
@@ -28,7 +28,7 @@
 #              ^^ keyword.other.as.scbi-plan
 
   @on deb,10.1 use os@-mylualib:skip
-# ^^^ keyword.control.directive.scbi-plan
+# ^^^ keyword.other.directive.scbi-plan
 #     ^^^ constant.other.condition.scbi-plan
 #        ^ punctuation.separator.condition.scbi-plan
 #         ^^^^ constant.other.condition.scbi-plan
@@ -38,7 +38,7 @@
 #                               ^^^^ constant.language.version.scbi-plan
 
   @for c-darktable use c-exiv2/auto:v0.27.5
-# ^^^^ keyword.control.directive.scbi-plan
+# ^^^^ keyword.other.directive.scbi-plan
 #      ^^^^^^^^^^^ entity.other.for-module.scbi-plan
 #                  ^^^ keyword.other.use.scbi-plan
 #                      ^^^^^^^ entity.name.module.scbi-plan
@@ -46,7 +46,7 @@
 #                                   ^^^^^^^ string.unquoted.version.scbi-plan
 
   @alias p-gnat use c-sandbox
-# ^^^^^^ keyword.control.directive.scbi-plan
+# ^^^^^^ keyword.other.directive.scbi-plan
 #        ^^^^^^ entity.name.module.scbi-plan
 #               ^^^ keyword.other.use.scbi-plan
 #                   ^^^^^^^^^ entity.name.module.scbi-plan
@@ -57,16 +57,16 @@
   lcms2/fast.mpi:#2.13   # native too recent
 # ^^^^^ entity.name.module.scbi-plan
 #      ^ punctuation.separator.variant.scbi-plan
-#       ^^^^ entity.name.type.variant.scbi-plan
+#       ^^^^ entity.name.tag.variant.scbi-plan
 #           ^ punctuation.separator.variant.scbi-plan
-#            ^^^ entity.name.type.variant.scbi-plan
+#            ^^^ entity.name.tag.variant.scbi-plan
 #               ^ punctuation.separator.version.scbi-plan
 #                ^ punctuation.definition.archive.scbi-plan
 #                 ^^^^ string.unquoted.version.scbi-plan
 #                        ^^^^^^^^^^^^^^^^^^^ comment.line.number-sign.scbi-plan
 
   libVR/variant-no-patch:dev
-#       ^^^^^^^^^^^^^^^^ entity.name.type.variant.scbi-plan
+#       ^^^^^^^^^^^^^^^^ entity.name.tag.variant.scbi-plan
 #                        ^^^ constant.language.version.scbi-plan
 
   libR:develop
@@ -77,7 +77,7 @@
 # ^^^^^^^ entity.other.for-module.scbi-plan
 #        ^ punctuation.separator.for-module.scbi-plan
 #         ^^^^ entity.name.module.scbi-plan
-#              ^^^^ entity.name.type.variant.scbi-plan
+#              ^^^^ entity.name.tag.variant.scbi-plan
 
   s-paraview/mingw.gdal:#$PV_VERSION
 #                        ^^^^^^^^^^^ variable.other.scbi-plan
@@ -95,15 +95,15 @@
   ] /+2.four:${VER}
 # ^ punctuation.section.group.end.scbi-plan
 #    ^ keyword.operator.variant.scbi-plan
-#     ^ entity.name.type.variant.scbi-plan
-#       ^^^^ entity.name.type.variant.scbi-plan
+#     ^ entity.name.tag.variant.scbi-plan
+#       ^^^^ entity.name.tag.variant.scbi-plan
 #           ^ punctuation.separator.version.scbi-plan
 #            ^^^^^^ variable.other.scbi-plan
 
   [ = mpi
 #     ^^^ constant.other.condition.scbi-plan
   ] /speed
-#    ^^^^^ entity.name.type.variant.scbi-plan
+#    ^^^^^ entity.name.tag.variant.scbi-plan
 
   ] :skip e-smesh
 #    ^^^^ constant.language.version.scbi-plan

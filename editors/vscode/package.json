@@ -2,7 +2,7 @@
   "name": "scbi",
   "displayName": "SCBI",
   "description": "SCBI (Source Code Build Infrastructure): lint, format and complete the YAML plug-ins; highlight and complete the build plans; build or run the sections of the .scbi ini files.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "turbogit",
   "license": "GPL-3.0-or-later",
   "icon": "images/icon.png",

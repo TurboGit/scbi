@@ -62,7 +62,7 @@
       "match": "^\\s*(@load)(?:\\s+(\\S+))?",
       "captures": {
         "1": {
-          "name": "keyword.control.directive.scbi-plan"
+          "name": "keyword.other.directive.scbi-plan"
         },
         "2": {
           "name": "entity.name.plan.scbi-plan"
@@ -73,7 +73,7 @@
       "begin": "^\\s*(@set)\\s+([A-Za-z_]\\w*)\\s*(=)\\s*",
       "beginCaptures": {
         "1": {
-          "name": "keyword.control.directive.scbi-plan"
+          "name": "keyword.other.directive.scbi-plan"
         },
         "2": {
           "name": "variable.other.definition.scbi-plan"
@@ -97,7 +97,7 @@
       "begin": "^\\s*(@ref)\\b",
       "beginCaptures": {
         "1": {
-          "name": "keyword.control.directive.scbi-plan"
+          "name": "keyword.other.directive.scbi-plan"
         }
       },
       "end": "$",
@@ -129,7 +129,7 @@
       "begin": "^\\s*(@on)(?:\\s+(\\S+))?",
       "beginCaptures": {
         "1": {
-          "name": "keyword.control.directive.scbi-plan"
+          "name": "keyword.other.directive.scbi-plan"
         },
         "2": {
           "patterns": [
@@ -156,7 +156,7 @@
       "begin": "^\\s*(@for)(?:\\s+(\\S+))?",
       "beginCaptures": {
         "1": {
-          "name": "keyword.control.directive.scbi-plan"
+          "name": "keyword.other.directive.scbi-plan"
         },
         "2": {
           "name": "entity.other.for-module.scbi-plan"
@@ -179,7 +179,7 @@
       "begin": "^\\s*(@alias)(?:\\s+(\\S+))?",
       "beginCaptures": {
         "1": {
-          "name": "keyword.control.directive.scbi-plan"
+          "name": "keyword.other.directive.scbi-plan"
         },
         "2": {
           "name": "entity.name.module.scbi-plan"
@@ -312,7 +312,7 @@
         }
       },
       "end": "(?=[:\\s]|$)",
-      "contentName": "entity.name.type.variant.scbi-plan",
+      "contentName": "entity.name.tag.variant.scbi-plan",
       "patterns": [
         {
           "include": "#variable"
@@ -336,7 +336,7 @@
         }
       },
       "end": "(?=[:\\s]|$)",
-      "contentName": "entity.name.type.variant.scbi-plan",
+      "contentName": "entity.name.tag.variant.scbi-plan",
       "patterns": [
         {
           "include": "#variable"

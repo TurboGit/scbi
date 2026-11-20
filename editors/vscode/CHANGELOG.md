@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- Build plans: the directives and the variants are highlighted with the
+  themes coloring `keyword` and not `keyword.control` (scopes
+  `keyword.other.directive`, `entity.name.tag.variant`).
+
 ## 0.2.0
 
 - Build plans (`.plan-<name>`, `.scbi-plan-<name>`): a language with its
