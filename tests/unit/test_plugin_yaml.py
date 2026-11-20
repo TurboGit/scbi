@@ -163,11 +163,66 @@ def test_most_plugins_convertible():
     assert len(convertible()) > 140
 
 
+#  The plug-ins the converter cannot convert, with the problems it must
+#  report (function: message), all of them in order
+TOP = "top-level: code at the top level of the plug-in (not only definitions)"
+SIG = "does not match the hook signature (PREFIX TARGET VARIANT)"
+NOT_CONVERTIBLE = {
+    "dephook": ["dephook-depends: unsupported line: call-variant-hooks depends-list $PREFIX $TARGET $VARIANT"],
+    "dyn-dependency": ["dyn-dependency-dyndep2-depends: unsupported line: get-target-dir TDIR dyn-dep1 default"],
+    "e-main": ["lst-modules: unsupported shell command 'function'"],
+    "fmt": [TOP],
+    "i-supermod": [TOP],
+    "inh-app-hooks": [TOP],
+    "inh-app-hooks2": [TOP],
+    "inv-test19": [TOP],
+    "invset-test19": [TOP],
+    "iset-supermod": [TOP],
+    "iset-test19": [TOP],
+    "m-lib1": ["m-lib1-wrapup: unsupported shell command 'function'"],
+    "metadeps": ["metadeps-wrapup: unsupported shell command 'function'"],
+    "mspace": ["display-opt: unsupported construct 'while'"],
+    "natv": [TOP, "natv-build-env: unsupported line: echo env"],
+    "osenv": ["cygpath: positional or special parameter in 'echo /path/osenv$2'"],
+    "testenv": [
+        f"testenv-build: parameter VARIANT=$2 {SIG}",
+        f"testenv-env: parameter VARIANT=$2 {SIG}",
+        f"testenv-install: parameter VARIANT=$2 {SIG}",
+        "testenv-tests: parameter VARIANT=$2 does not match the hook signature (PREFIX TARGET VARIANT OPTIONS)",
+        f"testenv-tests-env: parameter VARIANT=$2 {SIG}",
+    ],
+    "var": ["var-depends: unsupported line: for v in $(all-variants $VARIANT)"],
+    "varhook": ["varhook-config: runtime function 'call-variant-hooks' is not a built-in"],
+    "wrong": [
+        f"wrong-build: parameter PREFIX=$2 {SIG}",
+        f"wrong-install: parameter VARIANT=$4 {SIG}",
+        f"wrong-myvar-install: parameter VARIANT=$4 {SIG}",
+        "wrong-nok-archive: parameter VERSION=$6 does not match the hook signature (VERSION)",
+        "wrong-nok-patches: parameter REF=$3 does not match the hook signature (PREFIX TARGET VARIANT KIND REF)",
+        "wrong-nok-vcs: parameter PREFIX=$1 does not match the hook signature (no parameter)",
+        "wrong-opt-vcs: parameter PREFIX=$1 does not match the hook signature (no parameter)",
+        "wrong-par-vcs: parameter PREFIX=$1 does not match the hook signature (no parameter)",
+    ],
+    "wrong2": [
+        "cpwrong2-build: parameters not in order: [('PREFIX', 2)]",
+        f"wrong2-install: parameter VARIANT=$4 {SIG}",
+    ],
+}
+
+
+def test_not_convertible_known():
+    assert set(NOT_CONVERTIBLE) <= {p.name for p in PLUGINS}
+
+
 @pytest.mark.parametrize("path", PLUGINS, ids=lambda p: f"{p.parent.parent.name}/{p.name}")
 def test_yaml_round_trip(path, tmp_path):
+    """A convertible plug-in is read back as written; for the others the
+    converter reports the expected problems."""
     res = lifted(path)
-    if res.issues:
-        pytest.skip("; ".join(f"{i.function}: {i.message}" for i in res.issues)[:200])
+    issues = [f"{i.function}: {i.message}" for i in res.issues]
+    assert issues == NOT_CONVERTIBLE.get(path.name, [])
+    if issues:
+        return
     f = tmp_path / f"{path.name}.yaml"
     f.write_text(yamlfmt.dump(res.plugin))
     assert yamlfmt.load(f) == res.plugin

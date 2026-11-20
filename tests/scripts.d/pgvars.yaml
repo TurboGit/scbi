@@ -14,10 +14,12 @@ config-options:
   - -DNEW_DEB=${ISDEB}
 
 config: |-
+  CDEBUG = is-enabled debug ON OFF
   echo OPT1=$(is-enabled doc)
   echo OPT2=$(is-enabled debug)
   echo OPT3=$(is-enabled debug ON OFF)
   echo OPT4=${ISDOC}
   echo OPT5=${ISDEB}
+  echo OPT6=${CDEBUG}
   echo CONF=$(config-options)
   echo ENV=${PGDEBUG}
