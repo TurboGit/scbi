@@ -21,6 +21,7 @@
 \usepackage{tabto}
 \usepackage{dirtree}
 \usepackage{hyperref}
+\usepackage{xcolor}
 
 \widowpenalty=400
 \clubpenalty=400
@@ -64,6 +65,38 @@
 	morekeywords={},
 	otherkeywords={=,:},
 	keywordstyle={\color{black}\bfseries}
+}
+
+\lstdefinelanguage{yaml}
+{
+	alsoletter={-},
+	keywords={true,false,yes,no,plugin,depends,with-variants,vcs,build-depends,out-of-tree,options,protocol,packages,config-options,cross,variants,patches,for,in,if,then,else,version,write,append,setup,wrapup,archive,file,tests-depends,common,plan,modules,functions,params,run,proxy,inherit,hooks,name,from,no-variant,vars,passthrough,echo,prefix},
+	keywordstyle=\color{black}\bfseries,
+	sensitive=false,
+	comment=[l]{\#},
+	commentstyle=\color{gray}\itshape,
+	stringstyle=\color{red},
+	morestring=[b]',
+	morestring=[b]",
+	literate=
+	  {-}{{-}}{1}
+	  {:}{{\bfseries\textcolor{black}{:}}}{1}
+	  {=}{{\bfseries\textcolor{black}{=}}}{1}
+	  {only-explicit-build:}{{\bfseries\textcolor{black}{only-explicit-build:}}}{20}
+	  {out-of-tree:}{{\bfseries\textcolor{black}{out-of-tree:}}}{12}
+	  {build-env:}{{\bfseries\textcolor{black}{build-env:}}}{10}
+	  {build:}{{\bfseries\textcolor{black}{build:}}}{6}
+	  {env:}{{\bfseries\textcolor{black}{env:}}}{4}
+	  {url:}{{\bfseries\textcolor{black}{url:}}}{4}
+	  {config:}{{\bfseries\textcolor{black}{config:}}}{7}
+	  {config-options:}{{\bfseries\textcolor{black}{config-options:}}}{15}
+	  {config-options}{{\bfseries\textcolor{black}{config-options}}}{14}
+	  {rewrite-vcs:}{{\bfseries\textcolor{black}{rewrite-vcs:}}}{12}
+	  {rewrite-archive:}{{\bfseries\textcolor{black}{rewrite-archive:}}}{14}
+	  {module-final-step:}{{\bfseries\textcolor{black}{module-final-step:}}}{18}
+	  {custom-hooks:}{{\bfseries\textcolor{black}{config-hooks:}}}{13}
+	  {no-variant:}{{\bfseries\textcolor{black}{no-variant:}}}{11}
+	  {install:}{{\bfseries\textcolor{black}{install:}}}{8}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMMANDS
@@ -848,7 +881,7 @@ takes the first variant defined for a hook like \code{config} or
 \code{install}, and all of them for a cumulative hook like \code{depends}
 or \code{config-options} (\seeref{hooks}, \emph{Calling order}).
 
-\begin{lstlisting}
+\begin{lstlisting}[language=yaml]
 plugin: c-gmp
 with-variants:
   native:
@@ -882,7 +915,7 @@ install: make install
 A variant can be defined as including other variants, to share their
 definitions without repeating them:
 
-\begin{lstlisting}
+\begin{lstlisting}[language=yaml]
 variants:
   all: [ai, hdr, jxl]
 \end{lstlisting}
@@ -978,7 +1011,7 @@ the variable is the result of the function (\code{BT = get-build-type
 CMAKE Release} is \code{BT = \$(get-build-type CMAKE Release)}), else it
 is \code{<value>} expanded. For example:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 config-options:
   - BT = get-build-type CMAKE Release
   - -DLLVM_ENABLE_ASSERTIONS=$(if $BT == Debug then ON else OFF)
@@ -986,8 +1019,9 @@ config-options:
 \end{lstlisting}
 
 The same option without a variable:
-\code{-DLLVM\_ENABLE\_ASSERTIONS=\$(if build-type(CMAKE,Release) == Debug
-then ON else OFF)}.
+\begin{lstlisting}[language={yaml}]
+-DLLVM_ENABLE_ASSERTIONS=$(if build-type(CMAKE,Release) == Debug then ON else OFF).
+\end{lstlisting}
 
 \subsubsection{Functions}
 \label{yaml-functions}
@@ -1126,7 +1160,7 @@ Conditions are used to guard the items of value and environment lists, in
 a list is guarded with a mapping of a single key \code{if <condition>},
 whose value is an item or a list of items:
 
-\begin{lstlisting}
+\begin{lstlisting}[language=yaml]
 patches:
   - fix-common.diff
   - if ref =~ ^7.8: fix-7.8.diff
@@ -1193,7 +1227,7 @@ block, one step per line; \code{\#} starts a comment, blank lines are
 ignored and a line ending with \code{\textbackslash} continues on the next
 one. Blocks are given by indentation:
 
-\begin{lstlisting}
+\begin{lstlisting}[language=yaml]
 config: |
   BT = get-build-type CMAKE Release
   if not is-link(../src/.git):
@@ -1280,7 +1314,7 @@ function of the plug-in.
 	logs of the step. It tells what a long hook is doing, for example in a
 	wrapup:
 
-\begin{lstlisting}
+\begin{lstlisting}[language=yaml]
 wrapup: |-
   log 1 working on step 1
   ...
@@ -1314,7 +1348,7 @@ more than it.
 \begin{description}
 	\item[if <condition>:] Runs its body when the condition
 	(\seeref{yaml-conditions}) is true. It can be followed by any number of
-	\code{elif <condition>:} and by an \code{else:}: the first branch whose
+	\code{elif <condition>:} and by an \code{else:} : the first branch whose
 	condition is true is run.
 	\item[for NAME in <words>:] Runs its body once for each word, with
 	\code{NAME} set to the word. The words are expanded as the ones of a
@@ -1371,7 +1405,7 @@ of the hook body; the result of a value hook is its list of values.
 	\end{description}
 
 	Example:
-	\begin{lstlisting}
+	\begin{lstlisting}[language={yaml}]
 vcs:
   proxy: default
   options: none
@@ -1409,7 +1443,7 @@ vcs:
 	\end{description}
 
 	Example:
-	\begin{lstlisting}
+	\begin{lstlisting}[language={yaml}]
 archive:
   proxy: default
   options: --no-check-certificate
@@ -1477,7 +1511,7 @@ archive:
 	\end{description}
 
 	Example:
-	\begin{lstlisting}
+	\begin{lstlisting}[language={yaml}]
 build-depends: [gnat]
 \end{lstlisting}
 
@@ -1494,7 +1528,7 @@ build-depends: [gnat]
 	\end{description}
 
 	Example:
-	\begin{lstlisting}
+	\begin{lstlisting}[language={yaml}]
 tests-depends: [libcunit1]
 \end{lstlisting}
 
@@ -1511,7 +1545,7 @@ tests-depends: [libcunit1]
 	\end{description}
 
 	Example:
-	\begin{lstlisting}
+	\begin{lstlisting}[language={yaml}]
 depends:
   - xmlada
   - asis
@@ -1528,7 +1562,7 @@ depends:
 	\end{description}
 
 	Example:
-	\begin{lstlisting}
+	\begin{lstlisting}[language={yaml}]
 env:
   - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
   - add-to-var PATH $PREFIX/bin
@@ -1547,7 +1581,7 @@ env:
 	\end{description}
 
 	Example:
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 build-env:
   - set-var PATH /some/path/bin
 \end{lstlisting}
@@ -1571,7 +1605,7 @@ build-env:
 	\end{description}
 
 	Example:
-	\begin{lstlisting}
+	\begin{lstlisting}[language={yaml}]
 out-of-tree: false
 \end{lstlisting}
 
@@ -1582,7 +1616,7 @@ out-of-tree: false
 	\end{description}
 
 	Example:
-	\begin{lstlisting}
+	\begin{lstlisting}[language={yaml}]
 only-explicit-build: false
 \end{lstlisting}
 
@@ -1595,8 +1629,8 @@ only-explicit-build: false
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 	Example:
-\begin{lstlisting}
-config: |-
+\begin{lstlisting}[language={yaml}]
+config: 
   cmake $(config-options) ../src
 \end{lstlisting}
 
@@ -1611,7 +1645,7 @@ config: |-
 		\end{enumerate}
 	\end{description}
 	Example:
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 config-options:
   common:
     - -DCMAKE_INSTALL_PREFIX=$PREFIX
@@ -1648,7 +1682,7 @@ build: make -j$SCBI_JOBS
 	\end{description}
 
 	Example:
-	\begin{lstlisting}
+	\begin{lstlisting}[language={yaml}]
 build-runtime: make -C gcc -j$SCBI_JOBS gnatlib
 \end{lstlisting}
 
@@ -1810,7 +1844,7 @@ A meta-module can also give the build plan used to build its modules:
 
 Example:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 modules:
   - gnatcoll-core
   - gnatcoll-bindings
@@ -1865,7 +1899,7 @@ and the functions \code{env-actions}, \code{module-ref},
 The output of the function goes to the console. A failing function is
 reported and the build goes on. Example:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 functions:
   module-final-step:
     run: |-
@@ -1884,7 +1918,7 @@ functions:
 example to write a launch script setting the environment of an
 application:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 functions:
   module-final-step:
     run: |-
@@ -1952,7 +1986,7 @@ The other actions are:
 
 Example:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 build-env:
   - set-var MYMODULE_USE_CLANG no
 env:
@@ -1969,7 +2003,7 @@ environment file (\seeref{env-files}) can define its own
 \code{define-var} function to change how the environment of the modules
 is set, for all the plug-ins at once:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 functions:
   define-var:
     params: [ACTION, NAME, VALUE]
@@ -1995,7 +2029,7 @@ recorded in \file{env.cmd} either). For example, to keep
 \code{LD\_LIBRARY\_PATH} unchanged and use \file{/opt/local} instead of
 \file{/usr/local}:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 functions:
   define-var:
     params: [ACTION, NAME, VALUE]
@@ -2019,7 +2053,7 @@ Downloading an archive or a repository from the Web may need a proxy. The \code{
 
 A typical setting is:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 functions:
   proxy:
     params: [NAME]
@@ -2061,7 +2095,7 @@ or
 
 A feature check in a command hook:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 wrapup: |
   if enabled(installer) or enabled(appli):
       makeself ...
@@ -2069,7 +2103,7 @@ wrapup: |
 
 A compiler option depending on a feature, in a \code{config-options} hook:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 config-options:
   - -DCMAKE_CXX_FLAGS=-march=$(is-enabled safe-arch x86_64 native)
 \end{lstlisting}
@@ -2097,7 +2131,7 @@ The function gives the build kind of the module for this tool, from the first va
 
 or \code{<default>} when none is set. It is used in the \code{config} hook:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 config: |
   BUILD_TYPE = get-build-type CMAKE Release
   cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=$BUILD_TYPE ../src
@@ -2124,7 +2158,7 @@ A plug-in may need a tool which is not a dependency, for example \code{makeself}
 
 In a command hook the function \code{command-path} gives the path of a tool (empty if not found):
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 wrapup: |
   MS = command-path makeself
   if empty($MS):
@@ -2141,7 +2175,7 @@ A plug-in can check the version of a dependency in the build plan, for example t
 
 In a condition \code{version(<plug-in>)} is the version of the plug-in in the build plan, compared as versions with \code{<}, \code{<=}, \code{>}, \code{>=} or with a regular expression (\code{=\textasciitilde}):
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 patches:
   - if version(lib2) > 1.9: new-lib2.diff
 config: |
@@ -2160,7 +2194,7 @@ In a command hook \code{check-versions <v1> <op> <v2>} succeeds when the compari
 A plug-in can inherit the definitions of other plug-ins, listed with the
 key \code{inherit}:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 inherit:
   - from: <name>
     hooks: [<hook1>, <hook2>]
@@ -2191,7 +2225,7 @@ A plug-in often needs a native variant, using the libraries of the OS instead of
 The key \code{with-variants} defines such a variant, native or any other
 variant which only depends on other modules or packages:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 with-variants:
   native:
     packages: [pckA:[v], pckB]
@@ -2224,7 +2258,7 @@ The \code{common} hook holds the options used whatever the variant.
 
 For example:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 plugin: mod
 config-options:
   common: [-DPREFIX=/my/path]
@@ -2292,7 +2326,7 @@ So \code{.pkgs-deb\textasciitilde{}10} can add entries or override the ones of \
 
 The private store (\seeref{store}) keeps private values, such as license keys, out of the plug-ins. In a plug-in, \code{\$(store-key <key>)} gives the value of a key; a command hook can also run the \code{scbi store} sub-command:
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 config-options:
   - --license=$(store-key LICKEY)
 wrapup: |
@@ -2389,7 +2423,7 @@ The file is read once when the driver starts. All its keys are optional:
 	The other functions can be called by these ones.
 \end{description}
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 inherit: [shared]
 vars:
   SCBI_PLAN: ${SCBI_PLAN:-default}
@@ -3178,7 +3212,7 @@ As a complete example, let's build the latest version of GIMP. The plug-in is th
 
 This plug-in was working when this document was written, but changes in the dependencies of the OS may require updating it.
 
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 plugin: gimp
 
 # the sources are handled in Git
