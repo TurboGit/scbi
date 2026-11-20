@@ -99,3 +99,18 @@ PY''')
     t.runs('./scbi rsha')
     t.grep('no build needed: versions matching')
     t.ngrep('trigger: ')
+
+    # =================== the order of the dependencies does not count
+    t.sh("sed -i 's/^  - rsha$/  - rsha\\n  - depA/' scripts.d/rshadep.yaml")
+    t.runs('./scbi --deps rshadep')
+    t.grep('trigger: ')
+    t.sh("sed -i '/^  - rsha$/d; s/^  - depA$/  - depA\\n  - rsha/' scripts.d/rshadep.yaml")
+    t.sh('grep -A2 "^depends:" scripts.d/rshadep.yaml > $TEST_OUTPUT')
+    t.diff("""\
+depends:
+  - depA
+  - rsha
+""")
+    t.runs('./scbi --deps rshadep')
+    t.ngrep('trigger: ')
+    t.grep('Building rshadep')

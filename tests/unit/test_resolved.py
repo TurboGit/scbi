@@ -155,3 +155,15 @@ inherit:
     assert hashes(tmp_path, reordered, rbase) == ref
     #  a value changed: another build id
     assert hashes(tmp_path, reordered.replace("M1: a", "M1: c"), rbase)[0] != ref[0]
+
+
+def test_resolved_md5_depends_order(tmp_path):
+    #  the order of the dependencies does not count...
+    mod = MOD + "depends:\n  - a\n  - b\n  - if variant == default: c\nbuild-depends: [x, y]\n"
+    ref = hashes(tmp_path, mod)
+    swapped = MOD + "depends:\n  - if variant == default: c\n  - b\n  - a\nbuild-depends: [y, x]\n"
+    assert hashes(tmp_path, swapped) == ref
+    assert hashes(tmp_path, mod.replace("  - b\n", "  - d\n"))[0] != ref[0]
+    #  ... except with a local variable (its position counts)
+    local = MOD + "depends:\n  - V = a\n  - $V\n  - b\n"
+    assert hashes(tmp_path, MOD + "depends:\n  - b\n  - V = a\n  - $V\n")[0] != hashes(tmp_path, local)[0]

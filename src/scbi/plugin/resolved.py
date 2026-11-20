@@ -176,6 +176,13 @@ def resolved_md5(driver, module: str, variant: str, kind: str, ref: str) -> str:
         #  them must not change the build id
         pdef.variables = dict(sorted(pdef.variables.items()))
         pdef.functions = dict(sorted(pdef.functions.items()))
+        #  nor the order of the dependencies (unless a local variable is
+        #  set in the list: its position counts for the following items)
+        for hook in ("depends", "build-depends", "tests-depends"):
+            body = pdef.hooks.get(HookKey(hook))
+            if isinstance(body, Values) and not any(isinstance(i, LocalAssign) for i in body.items):
+                pdef.hooks[HookKey(hook)] = Values(tuple(sorted(
+                    body.items, key=lambda i: json.dumps(yamlfmt._dump_items([i])))))
         text = yamlwrite.write(yamlfmt.to_data(pdef))
         cache[key] = hashlib.md5(text.encode(errors="surrogateescape")).hexdigest()
     return cache[key]

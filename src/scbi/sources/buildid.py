@@ -52,7 +52,8 @@ def depends_build_id(builder, modref: str) -> str:
     """``get-depends-build-id MODREF``: md5 of the build ids of the direct
     dependencies (of the modules of a meta-module) and of their env hooks
     (resolved: the environment they give to this build; the env hooks of
-    the deeper dependencies are in the build ids of the direct ones); run
+    the deeper dependencies are in the build ids of the direct ones),
+    whatever the order of the dependencies (the chunks are sorted); run
     in a sub-shell in Bash, so an exit of the walker only ends the list."""
     from scbi.plugin.resolved import env_md5
     from scbi.walker import Walker
@@ -71,23 +72,25 @@ def depends_build_id(builder, modref: str) -> str:
         formodule, ref, level, _kind, is_ext, meta = a[:6]
         if _int(level) >= max_level and meta == "false":
             m, v = (d.plan.module_ref(ref, formodule) + ["", ""])[:2]
+            #  one chunk per dependency
             if is_ext == "true":
                 out.append((" ".join(words(pkgs.get(m, ""))) + "\n").encode())
             else:
                 path = f"{d.get('SCBI_BDIR')}/{m}/build-id-{v}"
                 if os.path.isfile(path):
                     with open(path, "rb") as f:
-                        out.append(f.read())
+                        chunk = f.read()
                 else:
-                    out.append(time.strftime("%c").encode())
-                out.append(f"env {m} {env_md5(d, m, v)}\n".encode())
+                    chunk = time.strftime("%c").encode()
+                out.append(chunk + f"env {m} {env_md5(d, m, v)}\n".encode())
 
     name = "get-meta-build-id-callback" if is_meta else "get-build-id-callback"
     try:
         walker.walk("for-all-direct-modules-with-meta-ext", callback, modref, name=name)
     except Exit:
         pass
-    return md5(b"".join(out))
+    #  the order of the dependencies does not count
+    return md5(b"".join(sorted(out)))
 
 
 def build_id(builder, prefix: str, target: str, formodule: str, modref: str, vid: str) -> str:
