@@ -73,3 +73,29 @@ trigger: build not up-to-date
          "scripts.d/rsha.yaml")
     t.runs('./scbi --deps rshadep')
     t.ngrep('trigger: ')
+
+    # =================== the order of the keys does not count: hooks,
+    # variables, functions and qualifiers reversed, no rebuild
+    t.sh("printf 'vars:\\n  RSHA_A: a\\n  RSHA_B: b\\n\\nfunctions:\\n  rsha-f1:\\n    run: echo 1\\n"
+         "  rsha-f2:\\n    run: echo 2\\n' >> scripts.d/rsha.yaml")
+    t.runs('./scbi lint --error scripts.d/rsha.yaml')
+    t.runs('./scbi rsha')
+    t.grep('trigger: build not up-to-date')
+    t.sh('''python3 - scripts.d/rsha.yaml scripts.d/rshabase.yaml <<'PY'
+import sys, yaml
+def rev(x):
+    if isinstance(x, dict):
+        return {k: rev(v) for k, v in reversed(list(x.items()))}
+    if isinstance(x, list):
+        return [rev(v) for v in x]
+    return x
+for path in sys.argv[1:]:
+    data = yaml.safe_load(open(path))
+    open(path, "w").write(yaml.safe_dump(rev(data), sort_keys=False))
+PY''')
+    t.runs('./scbi lint --error scripts.d/rsha.yaml scripts.d/rshabase.yaml')
+    t.sh('head -3 scripts.d/rsha.yaml > $TEST_OUTPUT')
+    t.ngrep('^plugin:')
+    t.runs('./scbi rsha')
+    t.grep('no build needed: versions matching')
+    t.ngrep('trigger: ')

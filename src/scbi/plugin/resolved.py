@@ -171,6 +171,11 @@ def resolved_md5(driver, module: str, variant: str, kind: str, ref: str) -> str:
     if key not in cache:
         pdef = resolve_module(driver, module, variant, kind, ref)
         pdef.hooks.pop(HookKey("env"), None)
+        #  the order of the variables and functions of the file has no
+        #  meaning (the hooks are already in the canonical order): moving
+        #  them must not change the build id
+        pdef.variables = dict(sorted(pdef.variables.items()))
+        pdef.functions = dict(sorted(pdef.functions.items()))
         text = yamlwrite.write(yamlfmt.to_data(pdef))
         cache[key] = hashlib.md5(text.encode(errors="surrogateescape")).hexdigest()
     return cache[key]

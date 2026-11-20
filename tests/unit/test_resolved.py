@@ -88,3 +88,70 @@ def test_env_md5(tmp_path):
     assert changed[0] == ref[0] and changed[1] != ref[1]
     #  ... an item for another variant changes nothing
     assert hashes(tmp_path, MOD + "  - if variant == other: set-var MOD_X 1\n") == ref
+
+
+def test_resolved_md5_order(tmp_path):
+    #  the order of the keys of the file has no meaning: hooks, vars,
+    #  functions and qualifiers in another order give the same build id
+    base = BASE.replace("functions:\n", "vars:\n  B1: x\n  B2: y\n\nfunctions:\n  zz:\n    run: echo zz\n")
+    mod = """\
+plugin: mod
+
+inherit:
+  - from: base
+
+vars:
+  M1: a
+  M2: b
+
+functions:
+  f1:
+    run: echo 1
+  f2:
+    params: [X]
+    run: echo $X
+
+depends:
+  common:
+    - lib0
+  _:
+    - lib1
+
+config: ../src/configure
+
+env:
+  - set-var MOD_ROOT $PREFIX
+"""
+    ref = hashes(tmp_path, mod, base)
+    reordered = """\
+plugin: mod
+
+config: ../src/configure
+
+functions:
+  f2:
+    run: echo $X
+    params: [X]
+  f1:
+    run: echo 1
+
+env:
+  - set-var MOD_ROOT $PREFIX
+
+depends:
+  _:
+    - lib1
+  common:
+    - lib0
+
+vars:
+  M2: b
+  M1: a
+
+inherit:
+  - from: base
+"""
+    rbase = base.replace("vars:\n  B1: x\n  B2: y\n", "vars:\n  B2: y\n  B1: x\n")
+    assert hashes(tmp_path, reordered, rbase) == ref
+    #  a value changed: another build id
+    assert hashes(tmp_path, reordered.replace("M1: a", "M1: c"), rbase)[0] != ref[0]
