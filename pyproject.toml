@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools>=64"]
+#  77: license as an SPDX expression (PEP 639)
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,6 +8,8 @@ name = "scbi"
 dynamic = ["version"]
 description = "Source Code Build Infrastructure (Python driver)"
 readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = ["PyYAML>=6.0"]
 
