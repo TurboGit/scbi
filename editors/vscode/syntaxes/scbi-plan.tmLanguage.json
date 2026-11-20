@@ -1,0 +1,381 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "SCBI Plan",
+  "scopeName": "source.scbi-plan",
+  "comment": "SCBI build plans (.plan-<name>, .scbi-plan-<name>): doc/scbi.tex, section Build plans.",
+  "patterns": [
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#load"
+    },
+    {
+      "include": "#set"
+    },
+    {
+      "include": "#ref"
+    },
+    {
+      "include": "#on"
+    },
+    {
+      "include": "#for"
+    },
+    {
+      "include": "#alias"
+    },
+    {
+      "include": "#unknown-directive"
+    },
+    {
+      "include": "#group-begin"
+    },
+    {
+      "include": "#group-end"
+    },
+    {
+      "include": "#modref"
+    }
+  ],
+  "repository": {
+    "comment": {
+      "comment": "# at the start of a line or after a blank (not the # of an archive version)",
+      "match": "(?:^|(?<=\\s))(#).*$",
+      "name": "comment.line.number-sign.scbi-plan",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.comment.scbi-plan"
+        }
+      }
+    },
+    "variable": {
+      "match": "(\\$)(?:\\{([A-Za-z_]\\w*)\\}|([A-Za-z_]\\w*))",
+      "name": "variable.other.scbi-plan",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.variable.scbi-plan"
+        }
+      }
+    },
+    "load": {
+      "match": "^\\s*(@load)(?:\\s+(\\S+))?",
+      "captures": {
+        "1": {
+          "name": "keyword.control.directive.scbi-plan"
+        },
+        "2": {
+          "name": "entity.name.plan.scbi-plan"
+        }
+      }
+    },
+    "set": {
+      "begin": "^\\s*(@set)\\s+([A-Za-z_]\\w*)\\s*(=)\\s*",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.directive.scbi-plan"
+        },
+        "2": {
+          "name": "variable.other.definition.scbi-plan"
+        },
+        "3": {
+          "name": "keyword.operator.assignment.scbi-plan"
+        }
+      },
+      "end": "$",
+      "contentName": "string.unquoted.value.scbi-plan",
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#variable"
+        }
+      ]
+    },
+    "ref": {
+      "begin": "^\\s*(@ref)\\b",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.directive.scbi-plan"
+        }
+      },
+      "end": "$",
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "match": "(?<=\\s)(version)\\s+(\\S+)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.version.scbi-plan"
+            },
+            "2": {
+              "name": "string.regexp.scbi-plan"
+            }
+          }
+        },
+        {
+          "match": "(?<=\\s)as(?=\\s|$)",
+          "name": "keyword.other.as.scbi-plan"
+        },
+        {
+          "include": "#modref"
+        }
+      ]
+    },
+    "on": {
+      "begin": "^\\s*(@on)(?:\\s+(\\S+))?",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.directive.scbi-plan"
+        },
+        "2": {
+          "patterns": [
+            {
+              "include": "#conditions"
+            }
+          ]
+        }
+      },
+      "end": "$",
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#use"
+        },
+        {
+          "include": "#modref"
+        }
+      ]
+    },
+    "for": {
+      "begin": "^\\s*(@for)(?:\\s+(\\S+))?",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.directive.scbi-plan"
+        },
+        "2": {
+          "name": "entity.other.for-module.scbi-plan"
+        }
+      },
+      "end": "$",
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#use"
+        },
+        {
+          "include": "#modref"
+        }
+      ]
+    },
+    "alias": {
+      "begin": "^\\s*(@alias)(?:\\s+(\\S+))?",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.directive.scbi-plan"
+        },
+        "2": {
+          "name": "entity.name.module.scbi-plan"
+        }
+      },
+      "end": "$",
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#use"
+        },
+        {
+          "include": "#modref"
+        }
+      ]
+    },
+    "use": {
+      "match": "(?<=\\s)use(?=\\s|$)",
+      "name": "keyword.other.use.scbi-plan"
+    },
+    "unknown-directive": {
+      "match": "^\\s*(@\\S*)",
+      "captures": {
+        "1": {
+          "name": "invalid.illegal.directive.scbi-plan"
+        }
+      }
+    },
+    "conditions": {
+      "comment": "discriminants or variants of the plan: deb,9 mpi",
+      "patterns": [
+        {
+          "match": ",",
+          "name": "punctuation.separator.condition.scbi-plan"
+        },
+        {
+          "include": "#variable"
+        },
+        {
+          "match": "[^\\s,#$]+",
+          "name": "constant.other.condition.scbi-plan"
+        }
+      ]
+    },
+    "group-begin": {
+      "begin": "^\\s*(\\[)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.section.group.begin.scbi-plan"
+        }
+      },
+      "end": "$",
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "match": "/=|=",
+          "name": "keyword.operator.comparison.scbi-plan"
+        },
+        {
+          "include": "#conditions"
+        }
+      ]
+    },
+    "group-end": {
+      "begin": "^\\s*(\\])",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.section.group.end.scbi-plan"
+        }
+      },
+      "end": "$",
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#group-variant"
+        },
+        {
+          "include": "#version"
+        },
+        {
+          "comment": "ignored by the driver after the variant and version of the group",
+          "match": "(?<=\\s)[^\\s#]\\S*",
+          "name": "invalid.illegal.ignored.scbi-plan"
+        }
+      ]
+    },
+    "modref": {
+      "comment": "[for_module=][os@-]name[/variant][:version]",
+      "begin": "(?:([\\w.+-]+)(=))?(os@-)?((?:[\\w.+-]|\\$\\{?\\w+\\}?)+)",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.other.for-module.scbi-plan"
+        },
+        "2": {
+          "name": "punctuation.separator.for-module.scbi-plan"
+        },
+        "3": {
+          "name": "support.type.os-package.scbi-plan"
+        },
+        "4": {
+          "name": "entity.name.module.scbi-plan",
+          "patterns": [
+            {
+              "include": "#variable"
+            }
+          ]
+        }
+      },
+      "end": "(?=\\s|$)",
+      "patterns": [
+        {
+          "include": "#variant"
+        },
+        {
+          "include": "#version"
+        }
+      ]
+    },
+    "variant": {
+      "begin": "(/)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.separator.variant.scbi-plan"
+        }
+      },
+      "end": "(?=[:\\s]|$)",
+      "contentName": "entity.name.type.variant.scbi-plan",
+      "patterns": [
+        {
+          "include": "#variable"
+        },
+        {
+          "match": "(?<=[/.])(?:native|auto)(?=[.:\\s]|$)",
+          "name": "support.constant.variant.scbi-plan"
+        },
+        {
+          "match": "\\.",
+          "name": "punctuation.separator.variant.scbi-plan"
+        }
+      ]
+    },
+    "group-variant": {
+      "comment": "the variant of a group: +v adds variants, -v removes them",
+      "begin": "(/)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.separator.variant.scbi-plan"
+        }
+      },
+      "end": "(?=[:\\s]|$)",
+      "contentName": "entity.name.type.variant.scbi-plan",
+      "patterns": [
+        {
+          "include": "#variable"
+        },
+        {
+          "match": "(?<=[/.])[+-]",
+          "name": "keyword.operator.variant.scbi-plan"
+        },
+        {
+          "match": "(?<=[/.+-])(?:native|auto)(?=[.:\\s]|$)",
+          "name": "support.constant.variant.scbi-plan"
+        },
+        {
+          "match": "\\.",
+          "name": "punctuation.separator.variant.scbi-plan"
+        }
+      ]
+    },
+    "version": {
+      "begin": "(:)(#)?",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.separator.version.scbi-plan"
+        },
+        "2": {
+          "name": "punctuation.definition.archive.scbi-plan"
+        }
+      },
+      "end": "(?=\\s|$)",
+      "contentName": "string.unquoted.version.scbi-plan",
+      "patterns": [
+        {
+          "include": "#variable"
+        },
+        {
+          "match": "(?<=[:#])(?:dev|keep|skip|force)(?=\\s|$)",
+          "name": "constant.language.version.scbi-plan"
+        }
+      ]
+    }
+  }
+}

@@ -1,8 +1,8 @@
 {
   "name": "scbi",
   "displayName": "SCBI",
-  "description": "SCBI (Source Code Build Infrastructure): lint, format and complete the YAML plug-ins; build or run the sections of the .scbi ini files.",
-  "version": "0.1.0",
+  "description": "SCBI (Source Code Build Infrastructure): lint, format and complete the YAML plug-ins; highlight and complete the build plans; build or run the sections of the .scbi ini files.",
+  "version": "0.2.0",
   "publisher": "turbogit",
   "license": "GPL-3.0-or-later",
   "icon": "images/icon.png",
@@ -15,16 +15,26 @@
     "url": "https://github.com/TurboGit/scbi",
     "directory": "editors/vscode"
   },
+  "keywords": [
+    "scbi",
+    "build",
+    "plug-in",
+    "build plan",
+    "yaml",
+    "lint"
+  ],
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
+    "Programming Languages",
     "Linters",
     "Formatters",
     "Other"
   ],
   "activationEvents": [
     "onLanguage:yaml",
+    "onLanguage:scbi-plan",
     "workspaceContains:.scbi"
   ],
   "main": "./out/src/extension.js",
@@ -111,12 +121,33 @@
           "icon": "tools"
         }
       ]
-    }
+    },
+    "languages": [
+      {
+        "id": "scbi-plan",
+        "aliases": [
+          "SCBI Plan",
+          "scbi-plan"
+        ],
+        "filenamePatterns": [
+          ".plan-*",
+          ".scbi-plan-*"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "scbi-plan",
+        "scopeName": "source.scbi-plan",
+        "path": "./syntaxes/scbi-plan.tmLanguage.json"
+      }
+    ]
   },
   "scripts": {
     "compile": "tsc -p .",
     "watch": "tsc -watch -p .",
-    "test": "tsc -p . && node --test out/test/*.test.js",
+    "test": "tsc -p . && node --test out/test/*.test.js && vscode-tmgrammar-test \"test/grammar/*.scbi-plan\"",
     "package": "tsc -p . && vsce package",
     "vscode:prepublish": "tsc -p .",
     "smoke": "tsc -p . && node out/test/smoke/run.js"
@@ -124,15 +155,9 @@
   "devDependencies": {
     "@types/node": "~22.20.5",
     "@types/vscode": "~1.90.0",
-    "typescript": "~5.9.3",
+    "@vscode/test-electron": "~3.1.0",
     "@vscode/vsce": "~3.9.2",
-    "@vscode/test-electron": "~3.1.0"
-  },
-  "keywords": [
-    "scbi",
-    "build",
-    "plug-in",
-    "yaml",
-    "lint"
-  ]
+    "typescript": "~5.9.3",
+    "vscode-tmgrammar-test": "^0.1.3"
+  }
 }

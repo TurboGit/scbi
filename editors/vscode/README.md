@@ -6,6 +6,9 @@ dependencies, variants and versions:
 
 - **write plug-ins**: the YAML plug-ins are checked while you type, formatted
   in their canonical form, and the hooks are completed with their help;
+- **write build plans**: the plans are highlighted (directives, groups and
+  their barriers, the variant and the version of each module) and
+  completed;
 - **build your projects**: the sections of your `.scbi` ini files are tasks,
   started from the status bar or with `Ctrl+Shift+B`.
 
@@ -44,6 +47,43 @@ has a top-level `plugin:` key.
   `archive`, and on hover what each hook is for, its parameters and its
   kind. The schema comes from your `scbi` (`scbi schema`): it follows its
   version.
+
+### Build plans
+
+The build plans (`.plan-<name>` beside the plug-ins, `.scbi-plan-<name>`
+in a project) have their own language, *SCBI Plan*:
+
+- **Highlighting**: the comments, the directives (`@load`, `@set`, `@ref`,
+  `@on`, `@for`, `@alias`) and their keywords (`use`, `as`, `version`),
+  the groups `[ ... ]` with their barrier (`= deb,9 mpi`, `/= ...`), the
+  variables (`$NAME`, `${NAME}`), and in each module reference the module,
+  its **variant** and its **version** (the special ones: `native`, `auto`,
+  `dev`, `keep`, `skip`, `force`). An unknown directive, or a word after
+  the variant and version of a group (ignored by SCBI), is shown as an
+  error.
+- **Completion**: the directives and a group at the start of a line, the
+  module names (the plug-ins beside the plan, else of `$SCBI_PLUGINS`,
+  else of `~/.config/scbi`), the plans after `@load`, the keyword that
+  follows (`use`, `as`, `version`), `native`/`auto` after `/`,
+  `dev`/`keep`/`skip`/`force` after `:`, the `@set` variables after `$`.
+- `Ctrl+/` comments a line, `[` / `]` indent the groups.
+
+The colors come from your theme: the variant is a *type*
+(`entity.name.type.variant.scbi-plan`), the version a *string*
+(`string.unquoted.version.scbi-plan`). To make them stand out more, in
+your settings:
+
+```json
+"editor.tokenColorCustomizations": {
+  "textMateRules": [
+    { "scope": "entity.name.type.variant.scbi-plan", "settings": { "foreground": "#4EC9B0", "fontStyle": "bold" } },
+    { "scope": "string.unquoted.version.scbi-plan", "settings": { "foreground": "#CE9178", "fontStyle": "bold" } }
+  ]
+}
+```
+
+All the scopes end with `.scbi-plan` (*Developer: Inspect Editor Tokens
+and Scopes* shows them).
 
 ### Builds
 

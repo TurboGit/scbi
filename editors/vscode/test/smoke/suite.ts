@@ -54,6 +54,21 @@ export async function run(): Promise<void> {
   assert.deepEqual(exec.args, ["--ini=smoke"]);
   console.log("ok: tasks");
 
+  //  a build plan: its language, the completion
+  const planUri = vscode.Uri.file(path.join(ws, "scripts.d", ".plan-smoke"));
+  const plan = await vscode.workspace.openTextDocument(planUri);
+  assert.equal(plan.languageId, "scbi-plan");
+  const labels = async (line: number, character: number) => {
+    const list = await vscode.commands.executeCommand<vscode.CompletionList>(
+      "vscode.executeCompletionItemProvider", planUri, new vscode.Position(line, character));
+    return list.items.map((i) => (typeof i.label === "string" ? i.label : i.label.label));
+  };
+  const atStart = await labels(1, 0);
+  assert.ok(atStart.includes("@ref") && atStart.includes("smoke"), atStart.join(" "));
+  assert.ok((await labels(0, 6)).includes("base"));
+  assert.ok((await labels(2, 6)).includes("native"));
+  console.log("ok: build plan");
+
   //  the commands are registered
   const commands = await vscode.commands.getCommands(true);
   for (const c of ["scbi.lint", "scbi.format", "scbi.selectSection", "scbi.runSection"]) {

@@ -4,6 +4,7 @@
 import * as path from "node:path";
 import * as vscode from "vscode";
 import { formatArgs, isPluginText, lintArgs, LintIssue, parseLintOutput, run, schemaArgs, wordEnd } from "./core";
+import { registerPlans } from "./plan";
 import { Sections } from "./tasks";
 
 let diagnostics: vscode.DiagnosticCollection;
@@ -213,6 +214,7 @@ export function activate(context: vscode.ExtensionContext): void {
   vscode.workspace.textDocuments.forEach(maybeLint);
   void registerSchema();
   new Sections(context, command, output, reportFailure);
+  registerPlans(context);
 }
 
 export function deactivate(): void {

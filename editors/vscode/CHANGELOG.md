@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+- Build plans (`.plan-<name>`, `.scbi-plan-<name>`): a language with its
+  highlighting (directives and their keywords, groups and barriers,
+  comments, the variant and the version of the module references) and
+  its completion (directives, modules, plans, keywords, special variants
+  and versions, variables).
+
 ## 0.1.0
 
 First version.

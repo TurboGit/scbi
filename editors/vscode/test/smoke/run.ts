@@ -23,6 +23,8 @@ async function main(): Promise<void> {
   writeFileSync(path.join(ws, ".vscode", "settings.json"), JSON.stringify({ "scbi.path": scbi }));
   writeFileSync(path.join(ws, "scripts.d", "smoke.yaml"),
     "config: |-\n  cmake $NOPE ../src\nplugin: smoke\n");
+  writeFileSync(path.join(ws, "scripts.d", ".plan-smoke"), "@load \n\nsmoke/\n");
+  writeFileSync(path.join(ws, "scripts.d", ".plan-base"), "smoke:v1\n");
   writeFileSync(path.join(ws, ".scbi"), "[smoke]\n   modules = smoke\n[run-smoke]\n   run = echo hi\n");
   const code = process.env.SCBI_VSCODE
     ?? realpathSync(execFileSync("sh", ["-c", "command -v code"]).toString().trim());
