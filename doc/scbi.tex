@@ -2650,8 +2650,9 @@ All the problems found are reported:
 	parameter of the hook (a parameter of another hook is named as such,
 	e.g. \code{VERSION} used in \code{config}), not set by the hook, the
 	plug-in variables or environment actions, the plug-ins it uses (the
-	\code{env} hooks of its dependencies, recursively, the modules of a
-	meta-module included; the variables and environment hooks of the
+	\code{env} hooks of its dependencies and the environment of their
+	\code{with-variants}, recursively, the modules of a meta-module
+	included; the variables and environment hooks of the
 	inherited plug-ins: all variants together), the environment file (its
 	\code{vars} and \code{passthrough}: the one of \ddash{}env, else the
 	default one, so the result depends on \ddash{}env), nor a driver

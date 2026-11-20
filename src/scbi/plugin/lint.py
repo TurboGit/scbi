@@ -368,7 +368,8 @@ def _bad_log_levels(script: str) -> list[int]:
 
 def env_vars(name: str, data: dict, keys) -> set[str]:
     """Variables set by the environment actions of the hooks ``keys`` of
-    a plug-in (all qualifiers, guarded actions included)."""
+    a plug-in (all qualifiers, guarded actions included; for ``env``, the
+    environment of the with-variants too)."""
     names: set[str] = set()
 
     def walk(items) -> None:
@@ -389,6 +390,15 @@ def env_vars(name: str, data: dict, keys) -> set[str]:
             for body in pdef.hooks.values():
                 if isinstance(body, EnvOps):
                     walk(body.ops)
+    #  the environment of the with-variants (native...) is the env of
+    #  the module for that variant
+    if "env" in keys and "with-variants" in data:
+        try:
+            pdef = yamlfmt.from_data(name, {"with-variants": data["with-variants"]}, name)
+        except yamlfmt.FormatError:
+            return names
+        for wv in pdef.with_variants:
+            walk(wv.env)
     return names
 
 
