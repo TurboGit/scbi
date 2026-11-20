@@ -45,10 +45,7 @@ pre-config: delete-tree ../src/gcc/ada
 
 config:
   cross:
-    _: |-
-      OPTIONS =
-      OPTIONS = config-options
-      CFLAGS = ""-O1" ../src/configure $OPTIONS"
+    _: CFLAGS=-O1 ../src/configure $(config-options)
 
 build: |-
   make -j$SCBI_JOBS
