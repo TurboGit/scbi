@@ -40,11 +40,9 @@ config-options:
     - SOCKET=openssl
 
 config:
-  _: |-
-    delete makefile.setup && make $(config-options) setup
+  _: delete makefile.setup && make $(config-options) setup
   cross:
-    _: |-
-      delete makefile.setup && make LAL=false ZLIB=false TARGET=$TARGET $(config-options) setup
+    _: delete makefile.setup && make LAL=false ZLIB=false TARGET=$TARGET $(config-options) setup
 
 build:
   _: make build-tools-native

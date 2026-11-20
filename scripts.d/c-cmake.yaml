@@ -21,8 +21,7 @@ env:
 config-options:
   - --prefix=$PREFIX
 
-config: |-
-  ../src/configure $(config-options)
+config: ../src/configure $(config-options)
 
 build: make -j$SCBI_JOBS
 

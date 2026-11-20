@@ -18,8 +18,7 @@ config-options:
   - --disable-nls
   - --enable-languages=c,c++
 
-config: |-
-  ../src/configure $(config-options)
+config: ../src/configure $(config-options)
 
 build: make -j$SCBI_JOBS
 

@@ -44,8 +44,7 @@ config-options:
     _:
       - --target=$TARGET
 
-config: |-
-  ../src/configure $(config-options)
+config: ../src/configure $(config-options)
 
 build: |-
   DEBUG = get-build-type MAKE false

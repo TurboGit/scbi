@@ -39,7 +39,6 @@ config-options:
       - GNATCOLL_MMAP=no
       - GNATCOLL_OS=windows
 
-build: |-
-  make $(config-options)
+build: make $(config-options)
 
 install: make NORMALIZED_TARGET=$TARGET prefix=$PREFIX install

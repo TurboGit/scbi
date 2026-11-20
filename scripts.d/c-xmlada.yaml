@@ -22,11 +22,9 @@ config-options:
     - --enable-build=$(get-build-type CONFIGURE Production)
 
 config:
-  _: |-
-    ./configure $(config-options)
+  _: ./configure $(config-options)
   cross:
-    _: |-
-      ./configure $(config-options) --target=$TARGET
+    _: ./configure $(config-options) --target=$TARGET
 
 build: make PROCESSORS=$SCBI_JOBS -j2
 

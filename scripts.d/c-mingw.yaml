@@ -32,8 +32,7 @@ config-options:
   - --build=$SCBI_HOST
   - --enable-wildcard
 
-config: |-
-  ../src/mingw-w64-crt/configure $(config-options)
+config: ../src/mingw-w64-crt/configure $(config-options)
 
 build: |-
   sed -i 's/^winrt32_DATA/#winrt32_DATA/' Makefile

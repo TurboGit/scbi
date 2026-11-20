@@ -23,8 +23,7 @@ config-options:
   - PROCESSORS=$SCBI_JOBS
   - ENABLE_SHARED=no
 
-config: |-
-  cd clang-bindings && make $(config-options) setup
+config: cd clang-bindings && make $(config-options) setup
 
 build: cd clang-bindings && make
 

@@ -36,8 +36,7 @@ config-options:
   - -DLIBCLANG_BUILD_STATIC=ON
   - -DLLVM_ENABLE_LIBXML2=OFF
 
-config: |-
-  cmake $(config-options) ../src/llvm
+config: cmake $(config-options) ../src/llvm
 
 build: ninja -j$SCBI_JOBS
 
