@@ -17,7 +17,7 @@ _SCBI_ARC_ARGS="${_SCBI_COMMON} -e --env= --plan=
 
 _SCBI_LNT_ARGS="${_SCBI_COMMON} --error  --stat --stat:"
 
-_SCBI_FMT_ARGS="${_SCBI_COMMON} --format  --stat --stat:"
+_SCBI_FMT_ARGS="${_SCBI_COMMON} --replace  --stat --stat:"
 
 _SCBI_SHL_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --mode:use --mode:sandbox --mode:dev --mode:tests --run --stat --stat:"
 
