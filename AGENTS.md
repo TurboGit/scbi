@@ -15,6 +15,7 @@ former Bash driver is on the master branch only.
 | `scripts.d/patches/` | Patches referenced by plug-ins' `patches` hooks. |
 | `scripts.d/.env.yaml`, `.plan-default`, `.pkgs-<distrib>` | Default environment file (YAML), default build plan, mapping of `os@-<name>` dependencies to distribution packages. |
 | `bash_completion.d/scbi` | Bash completion. |
+| `editors/vscode/` | VSCode extension (TypeScript): calls `scbi lint --json`, `format --stdin`, `schema`, `ini --json`. `make vscode` (tests + `.vsix`), `make vscode-smoke` (loaded in VSCode). |
 | `doc/scbi.tex` | Reference manual (LaTeX). The authoritative spec for hooks, options, env variables, plans and ini files. |
 | `tests/` | Regression testsuite (see below). |
 

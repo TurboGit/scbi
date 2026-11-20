@@ -28,7 +28,7 @@
 
 .SILENT: test sort-pkgs sync-os-deps
 
-.PHONY: unit test
+.PHONY: unit test vscode vscode-smoke
 
 SHELL=/bin/bash
 
@@ -110,6 +110,16 @@ unit:
 
 doc: force
 	make CORE_VER=$(CORE_VER) -C doc
+
+#  The VSCode extension (editors/vscode, needs Node.js): its tests, then
+#  the package scbi-<version>.vsix; vscode-smoke loads it in VSCode
+#  (the code command, xvfb-run without a display)
+vscode:
+	cd editors/vscode && npm ci --no-audit --no-fund && npm test && npm run package
+
+vscode-smoke:
+	cd editors/vscode && npx tsc -p . && \
+	  $(if $(DISPLAY),,xvfb-run -a) node out/test/smoke/run.js
 
 #  All .pkgs files but debian one
 ALLPKGS := $(wildcard scripts.d/.pkgs-*)

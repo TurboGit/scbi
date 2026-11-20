@@ -135,6 +135,10 @@ By default the scbi build directories can be displayed with --stat option (outpu
 
       `$ scbi lint lcms`
 
+   In Visual Studio Code, the SCBI extension (`editors/vscode`, see its
+   README) checks and formats the plug-ins while editing, completes the
+   hooks, and builds the sections of the `.scbi` ini files as tasks.
+
 
 ## Building lcms
 
