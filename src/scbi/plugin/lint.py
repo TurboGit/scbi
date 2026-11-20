@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import difflib
 import re
+from pathlib import Path
 from dataclasses import dataclass
 
 import yaml
@@ -211,27 +212,7 @@ class Linter:
 
     def _env_defined(self) -> set[str]:
         """Variables set by the environment actions of the plug-in."""
-        names: set[str] = set()
-
-        def walk(items) -> None:
-            for it in items:
-                if isinstance(it, Guarded):
-                    walk(it.items)
-                elif isinstance(it, EnvOp) and it.args and it.verb not in ("import", "mkdir"):
-                    nm = _NAME.match(it.args[0])
-                    if nm:
-                        names.add(nm.group(0))
-
-        for key in ("env", "build-env", "tests-env"):
-            if key in self.data:
-                try:
-                    pdef = yamlfmt.from_data(self.name, {key: self.data[key]}, self.name)
-                except yamlfmt.FormatError:
-                    continue
-                for body in pdef.hooks.values():
-                    if isinstance(body, EnvOps):
-                        walk(body.ops)
-        return names
+        return env_vars(self.name, self.data, ("env", "build-env", "tests-env"))
 
     def check_hook(self, hook: str, value) -> None:
         """Each qualifier on its own, then the content of the bodies."""
@@ -345,6 +326,108 @@ def _bad_log_levels(script: str) -> list[int]:
 
     walk(body)
     return lines
+
+
+def env_vars(name: str, data: dict, keys) -> set[str]:
+    """Variables set by the environment actions of the hooks ``keys`` of
+    a plug-in (all qualifiers, guarded actions included)."""
+    names: set[str] = set()
+
+    def walk(items) -> None:
+        for it in items:
+            if isinstance(it, Guarded):
+                walk(it.items)
+            elif isinstance(it, EnvOp) and it.args and it.verb not in ("import", "mkdir"):
+                nm = _NAME.match(it.args[0])
+                if nm:
+                    names.add(nm.group(0))
+
+    for key in keys:
+        if key in data:
+            try:
+                pdef = yamlfmt.from_data(name, {key: data[key]}, name)
+            except yamlfmt.FormatError:
+                continue
+            for body in pdef.hooks.values():
+                if isinstance(body, EnvOps):
+                    walk(body.ops)
+    return names
+
+
+_DEP_HOOKS = ("depends", "build-depends", "tests-depends", "modules")
+
+
+def _related(name: str, data: dict) -> tuple[list[str], list[str]]:
+    """The dependencies (modules of the dependency hooks, all qualifiers,
+    guarded items included; os@- packages and computed names left out)
+    and the inherited plug-ins of a plug-in."""
+    deps: list[str] = []
+
+    def walk(items) -> None:
+        for it in items:
+            if isinstance(it, Guarded):
+                walk(it.items)
+            elif isinstance(it, str):
+                for w in it.split():
+                    if "$" not in w and not w.startswith("os@-"):
+                        deps.append(re.split(r"[/:@]", w, maxsplit=1)[0])
+
+    for key in _DEP_HOOKS:
+        if key in data:
+            try:
+                pdef = yamlfmt.from_data(name, {key: data[key]}, name)
+            except yamlfmt.FormatError:
+                continue
+            for body in pdef.hooks.values():
+                if isinstance(body, Values):
+                    walk(body.items)
+    parents: list[str] = []
+    if "inherit" in data:
+        try:
+            parents = [i.parent for i in yamlfmt.from_data(name, {"inherit": data["inherit"]}, name).inherits]
+        except yamlfmt.FormatError:
+            pass
+    return [d for d in deps if d], parents
+
+
+def dependency_vars(name: str, data: dict, find) -> frozenset[str]:
+    """The variables a plug-in gets from the plug-ins it uses: the ``env``
+    hooks of its dependencies (recursively, the modules of the
+    meta-modules included) and, for its parents (inherit), their variables
+    and environment hooks. ``find(name)``: the YAML file of a plug-in, or
+    None. A union over all the variants: unknown files are ignored."""
+    known: set[str] = set()
+    seen: set[str] = {name}
+
+    def load(n: str):
+        path = find(n)
+        if path is None:
+            return None
+        try:
+            d = yaml.load(Path(path).read_text(errors="replace"), Loader=yamlfmt._Loader)
+        except (OSError, yaml.YAMLError):
+            return None
+        return d if isinstance(d, dict) else None
+
+    #  (plug-in, its data, kind): "dep" gives its env hook, "parent" all
+    todo: list[tuple[str, dict, str]] = [(name, data, "self")]
+    while todo:
+        n, d, kind = todo.pop()
+        if kind == "dep":
+            known |= env_vars(n, d, ("env",))
+        elif kind == "parent":
+            known |= {str(k) for k in (d.get("vars") or {})}
+            known |= env_vars(n, d, ("env", "build-env", "tests-env"))
+        deps, parents = _related(n, d)
+        for m, k in [(p, "parent" if kind in ("self", "parent") else "dep") for p in parents] + \
+                [(m, "dep") for m in deps]:
+            if m in seen:
+                continue
+            seen.add(m)
+            md = load(m)
+            if md is not None:
+                todo.append((m, md, k))
+    return frozenset(known)
 
 
 def _leaf(section: dict, hook: str):

@@ -164,3 +164,21 @@ config: cmake $(config-options) ../src
     assert issues(text) == [(WARNING, "config-options", "variable VAR is not known in this hook")]
     #  set by the environment file
     assert [(i.level, i.where, i.message) for i in lint_text("p", text, known=frozenset({"VAR"}))] == []
+
+
+def test_dependency_vars(tmp_path):
+    from scbi.plugin.lint import dependency_vars
+
+    files = {
+        "a": "plugin: a\nenv:\n  - set-var A 1\n  - if cross: add-to-var A_CROSS x\nbuild-env:\n  - set-var A_BUILD 1\n"
+             "depends:\n  - b/v:1\n  - os@-zlib\n  - $DYN\n",
+        "b": "plugin: b\nenv:\n  _: [set-var B 1]\n  v: [prepend-to-var B_V x]\ndepends: [a, missing]\n",
+        "p": "plugin: p\nvars: {PV: x}\ntests-env: [set-var PT 1]\n",
+    }
+    for n, text in files.items():
+        (tmp_path / f"{n}.yaml").write_text(text)
+    find = lambda n: tmp_path / f"{n}.yaml" if (tmp_path / f"{n}.yaml").is_file() else None
+    data = {"plugin": "m", "inherit": [{"from": "p"}], "build-depends": {"common": ["a"]}}
+    #  env of the dependencies (recursively, cycle a <-> b, all qualifiers
+    #  and guards), not their build-env; vars and env hooks of the parents
+    assert dependency_vars("m", data, find) == {"A", "A_CROSS", "B", "B_V", "PV", "PT"}

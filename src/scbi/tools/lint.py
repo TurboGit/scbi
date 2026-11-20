@@ -9,8 +9,11 @@ from __future__ import annotations
 import subprocess
 import sys
 
+import yaml
+
 from scbi.bashcompat import words
-from scbi.plugin.lint import ERROR, lint_text
+from scbi.plugin import yamlfmt
+from scbi.plugin.lint import ERROR, dependency_vars, lint_text
 from scbi.tools.plugins import display, resolve
 
 USAGE = """
@@ -55,9 +58,17 @@ def main(driver, args: list[str]) -> int:
             print()
             print(f"========== Handle {display(driver, path)}")
         plugin = path.name[: -len(".yaml")]
-        #  the variables given to the hooks by the environment file
+        text = path.read_text(errors="replace")
+        #  the variables given to the hooks by the environment file and by
+        #  the plug-ins used (env of the dependencies, inherited plug-ins)
         known = frozenset(driver.envfile.settings) | frozenset(driver.envfile.passthrough)
-        for issue in lint_text(plugin, path.read_text(errors="replace"), str(path), known):
+        try:
+            data = yaml.load(text, Loader=yamlfmt._Loader)
+        except yaml.YAMLError:
+            data = None
+        if isinstance(data, dict):
+            known |= dependency_vars(plugin, data, lambda n: resolve(driver, n)[0])
+        for issue in lint_text(plugin, text, str(path), known):
             if issue.level == ERROR:
                 print(f"   error:   ({issue.where}) {issue.message}")
                 status = 1
