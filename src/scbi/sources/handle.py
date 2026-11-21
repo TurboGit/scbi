@@ -91,9 +91,10 @@ class Sources:
     # ------------------------------------------------------------ vcs
 
     def internal_get_branch(self, name: str, proxy: str, options: str, kind: str, ref: str,
-                            dir: str, quiet: bool = False) -> int:
+                            dir: str, quiet: bool = False, fetched: bool = False) -> int:
         """``_internal_get-branch`` (``quiet``: its output to /dev/null,
-        the branch commands still write to the log)."""
+        the branch commands still write to the log; ``fetched``: the
+        repository has just been updated from its remote)."""
         impl = registry.get(name)
         #  quiet: the console output goes to /dev/null, the report log is
         #  still written
@@ -107,7 +108,7 @@ class Sources:
         if kind == "DEV":
             return 0
         with open(self.get("log"), "a") as log:
-            if impl.branch(self.run(log, proxy), options, self.module, ref, dir) != 0:
+            if impl.branch(self.run(log, proxy), options, self.module, ref, dir, fetched=fetched) != 0:
                 ilog(f"error: cannot switch to branch {ref}")
                 return 1
         return 0
@@ -122,6 +123,10 @@ class Sources:
         if impl is None:
             self.ilog("build", f"error: unknown vcs {name}")
             return 1
+        #  an existing clone is updated from its remote by checkout (a new
+        #  clone may lack the tags not on a branch: fetched again by branch)
+        repo = dir or _basename(url, ".git")
+        fetched = os.path.isdir(f"{self.get('SCBI_BDIR')}/.vcs/{repo}")
         with open(log_path, "a") as log:
             rc = impl.checkout(self.run(log, proxy), url, options, self.module, dir)
         if rc != 0:
@@ -131,7 +136,7 @@ class Sources:
                 self.ilog("build", f"error: tool {impl.tool} not installed")
             self.ilog("build", f"error: see {log_path}")
             return 1
-        return self.internal_get_branch(name, proxy, options, self.kind, self.ref, dir)
+        return self.internal_get_branch(name, proxy, options, self.kind, self.ref, dir, fetched=fetched)
 
     def get_branch(self) -> int:
         """``get-branch ... &> /dev/null``."""

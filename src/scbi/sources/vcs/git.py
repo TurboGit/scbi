@@ -83,10 +83,13 @@ class Git(Vcs):
             return 1
         return r.run("ln", "-s", f"../.vcs/{repo}", "vcs")
 
-    def branch(self, r: VcsRun, options: str, module: str, branch: str, dir: str) -> int:
+    def branch(self, r: VcsRun, options: str, module: str, branch: str, dir: str,
+               *, fetched: bool = False) -> int:
         r.cd(f"{r.bdir}/{module}/vcs")
         r.run("git", "checkout", "--force", "master")
-        r.run("git", "fetch", "--tags")
+        if not fetched:
+            #  after checkout (git fetch --force --tags): the tags are there
+            r.run("git", "fetch", "--tags")
 
         if branch == "NONE":
             _, defbr = r.output("git", "rev-parse", "--abbrev-ref", "origin/HEAD")

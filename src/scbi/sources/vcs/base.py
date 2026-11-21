@@ -42,9 +42,12 @@ class Vcs(ABC):
         link it as $SCBI_BDIR/<name>/vcs."""
 
     @abstractmethod
-    def branch(self, r: VcsRun, options: str, module: str, branch: str, dir: str) -> int:
+    def branch(self, r: VcsRun, options: str, module: str, branch: str, dir: str,
+               *, fetched: bool = False) -> int:
         """``<vcs>-branch``: switch the checkout to the branch, tag or
-        revision ``branch`` (NONE: the default one)."""
+        revision ``branch`` (NONE: the default one); ``fetched``: the
+        repository has just been updated from its remote (checkout), no
+        need to fetch again."""
 
     @abstractmethod
     def commit_id(self, short: bool, dir: str, env: dict[str, str]) -> str:
