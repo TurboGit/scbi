@@ -339,6 +339,7 @@ The build is controlled by a set of variables (the environment). SCBI comes with
 
 	\item[SCBI\_JOBS] The number of parallel jobs of a build, to be used in the plug-ins (\code{make -j\$SCBI\_JOBS}). \\Default is the number of cores. It can be changed with the \ddash{}jobs option.
 	\label{njobs}
+	\item[SCBI\_PREFETCH\_JOBS] \index{prefetch}The number of jobs fetching the sources ahead with \ddash{}update:prefetch (\seeref{prefetch}). \\Default is 4; 0 disables the prefetch.
 	\item[SCBI\_HALF\_JOBS] Half the number of parallel jobs, to be used in the plug-ins. \\Default is the number of cores divided by 2. It can be changed with the \ddash{}jobs option.\label{half-njobs}
 
 	\item[SCBI\_TMP] The directory of the standalone archives (\seeref{standalone}). \\Default is \file{/tmp}.
@@ -702,6 +703,19 @@ The following options are supported:
 	commits fetched last time (a module whose reference changes, in the build
 	plan or on the command line, is updated).
 
+	\item[\ddash{}update:prefetch] \label{prefetch}\index{prefetch}As
+	\ddash{}update, the network part of the update done ahead: when the
+	build starts, background jobs (\code{SCBI\_PREFETCH\_JOBS}, default 4)
+	update the git clones (\code{git fetch}, or the clone) and download
+	the archives of the modules of the build, in build order, while the
+	modules before them are built. When a module is reached, its sources
+	are only switched to its reference or extracted; nothing is fetched
+	again. The result and the messages are those of \ddash{}update. A job
+	never asks for a password: a repository needing one, or a failing
+	job, is updated by the build as with \ddash{}update (with its usual
+	errors). Only the git repositories and the archives are prefetched
+	(not Subversion nor Mercurial).
+
 	\item[-s | \ddash{}setup] Does the setup step (default).
 
 	\item[-c | \ddash{}config] Does the config step (default).
@@ -783,7 +797,7 @@ The following keys are supported in the ini files:
 \begin{itemize}
 	\item \code{env}, \code{plan}, \code{target}: as the options of the same name;
 	\item \code{root-dir}, \code{plugins}, \code{prefix}, \code{build-dir}, \code{git-repo}, \code{svn-repo}, \code{hg-repo}, \code{archives}, \code{patch}, \code{log}, \code{jobs}: the directories and settings \code{SCBI\_ROOT}, \code{SCBI\_PLUGINS}, \code{SCBI\_PREFIX}, \code{SCBI\_BDIR}, \code{SCBI\_GIT\_REPO}, \code{SCBI\_SVN\_REPO}, \code{SCBI\_HG\_REPO}, \code{SCBI\_ARCHIVES}, \code{SCBI\_PATCH}, \code{SCBI\_LOGS}, \code{SCBI\_JOBS};
-	\item \code{setup}, \code{config}, \code{build}, \code{install}, \code{wrapup}, \code{color}, \code{quiet}, \code{force}, \code{update}, \code{purge}, \code{archive}, \code{stat}: the options of the same name (\code{yes} or \code{no}, or the value of the option);
+	\item \code{setup}, \code{config}, \code{build}, \code{install}, \code{wrapup}, \code{color}, \code{quiet}, \code{force}, \code{update}, \code{purge}, \code{archive}, \code{stat}: the options of the same name (\code{yes} or \code{no}, or the value of the option; \code{update = prefetch} for \ddash{}update:prefetch);
 	\item \code{safe}, \code{tar}, \code{no-patch}, \code{clear-cache}: the options of the same name when set to \code{yes};
 	\item \code{deps}: \code{yes} for \ddash{}deps;
 	\item \code{modules}: the modules to build, as on the command line;

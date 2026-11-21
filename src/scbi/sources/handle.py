@@ -126,10 +126,15 @@ class Sources:
         #  an existing clone is updated from its remote by checkout (git fetch
         #  --tags); a new clone may lack the tags not on a branch: fetched by
         #  branch
+        #  already fetched by the prefetch (--update:prefetch, waiting for its
+        #  job first): no fetch at all
+        prefetcher = getattr(self.b, "prefetcher", None)
+        prefetched = prefetcher is not None and impl.names[0] == "git" \
+            and prefetcher.vcs_result(dir, url, log_path) is not None
         repo = dir or _basename(url, ".git")
-        fetch = not os.path.isdir(f"{self.get('SCBI_BDIR')}/.vcs/{repo}")
+        fetch = not prefetched and not os.path.isdir(f"{self.get('SCBI_BDIR')}/.vcs/{repo}")
         with open(log_path, "a") as log:
-            rc = impl.checkout(self.run(log, proxy), url, options, self.module, dir)
+            rc = impl.checkout(self.run(log, proxy), url, options, self.module, dir, fetch=not prefetched)
         if rc != 0:
             if check_tool(impl.tool, self.d.base_env()):
                 self.ilog("build", f"error: cannot get sources from {url}")

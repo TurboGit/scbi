@@ -43,7 +43,8 @@ class Git(Vcs):
     tool = "git"
     marker = ".git"
 
-    def checkout(self, r: VcsRun, url: str, options: str, name: str, dir: str) -> int:
+    def checkout(self, r: VcsRun, url: str, options: str, name: str, dir: str,
+                 *, fetch: bool = True) -> int:
         repo = dir or _basename(url, ".git")
         lopts = option_list(options)
         #  HAS_LFS is set to "true" but tested against "yes" in Bash: the
@@ -75,7 +76,7 @@ class Git(Vcs):
             if r.isfile(".gitmodules"):
                 set_submodule_url(r, options)
                 res = r.run("git", "submodule", "update", *gopts1)
-            if res == 0:
+            if res == 0 and fetch:
                 res = r.run("git", "fetch", "origin", "--force", "--tags", *gopts2)
         if res != 0:
             return res

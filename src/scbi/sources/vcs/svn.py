@@ -23,7 +23,8 @@ class Subversion(Vcs):
     tool = "svn"
     marker = ".svn"
 
-    def checkout(self, r: VcsRun, url: str, options: str, name: str, dir: str) -> int:
+    def checkout(self, r: VcsRun, url: str, options: str, name: str, dir: str,
+                 *, fetch: bool = True) -> int:
         url = url[:-1] if url.endswith("/") else url
         repo = dir or url.rsplit("/", 1)[-1]
         os.makedirs(f"{r.bdir}/.vcs", exist_ok=True)

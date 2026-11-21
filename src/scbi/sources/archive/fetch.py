@@ -57,14 +57,20 @@ def get_archive(builder, module: str, variant: str, version: str, log: str,
     options = taropts.replace(",", " ", 1) if taropts.upper() != "NONE" else ""
     archives = d.get("SCBI_ARCHIVES")
     bdir = d.get("SCBI_BDIR")
+    #  already downloaded by the prefetch (--update:prefetch): its result
+    prefetcher = getattr(builder, "prefetcher", None)
+    done = prefetcher.archive_result(f"{archives}/{tarsrc}", tarurl, log) if prefetcher else None
     with open(log, "a") as errlog:
         logger = dataclasses.replace(d.log, stderr=errlog)
         return _get_archive(builder, module, variant, tar, proxy, options, tarcp, tarurl, tarsrc, tardir,
-                            archives, bdir, log, logger, out)
+                            archives, bdir, log, logger, out,
+                            downloaded=done.downloaded if done is not None else None)
 
 
 def _get_archive(builder, module, variant, tar, proxy, options, tarcp, tarurl, tarsrc, tardir,
-                 archives, bdir, log, logger, out) -> int:
+                 archives, bdir, log, logger, out, downloaded: int | None = None) -> int:
+    """``downloaded``: the archive already checked / downloaded by the
+    prefetch (0: unchanged, 1: downloaded), None: done here."""
     def elog(*msg: str) -> None:
         logger.stderr.flush()
         logger.elog(module, *msg)
@@ -74,7 +80,9 @@ def _get_archive(builder, module, variant, tar, proxy, options, tarcp, tarurl, t
     io = _Io(log, env)
     cwd = os.getcwd()
 
-    if tarcp.upper() != "NONE" and tarurl.upper() != "NONE":
+    if downloaded is not None:
+        pass
+    elif tarcp.upper() != "NONE" and tarurl.upper() != "NONE":
         if not check_tool(tarcp, env):
             elog("Required", "tool", *words(tarcp), "missing")
             return 1
@@ -124,11 +132,12 @@ def _get_archive(builder, module, variant, tar, proxy, options, tarcp, tarurl, t
 
 
 def _download(io: _Io, cwd: str, tarcp: str, options: str, tarurl: str, tarsrc: str,
-              archives: str, elog) -> int:
+              archives: str, elog, tmp_dir: str = "/tmp") -> int:
     """The sub-shell of get-archive: 0 when the archive was already there
-    and up-to-date, 1 when downloaded (or tried)."""
+    and up-to-date, 1 when downloaded (or tried); the SHA-1 downloaded in
+    ``tmp_dir``."""
     proto = registry.get(tarcp)
-    tmp_sha1 = f"/tmp/{tarsrc}.sha1"
+    tmp_sha1 = f"{tmp_dir}/{tarsrc}.sha1"
     do_download = 0
 
     #  the SHA-1 if present

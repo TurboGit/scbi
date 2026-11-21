@@ -66,6 +66,7 @@ USAGE_OPTIONS = """
    -I | --no-install        skip install
    -W | --no-wrapup         skip wrapup
    -u | --update            do update
+      | --update:prefetch   do update, the sources fetched ahead in parallel
    -s | --setup             do setup
    -c | --config            do config
    -b | --build             do build
@@ -102,7 +103,7 @@ INI_SKIP = (",setup,config,build,install,wrapup,force,modules,stat,"
 
 GETOPT_SHORT = "j:adefSIuscbilnpqvwWh"
 GETOPT_LONG = [
-    "no-setup,no-install,update,setup,config",
+    "no-setup,no-install,update,update:prefetch,setup,config",
     "build,build-target:,install,clean-install,create-archive",
     "log,log:yes,log:no,log:on-failure,purge,purge:only",
     "prefix:,deps,deps:warning,archive,force,env:,no-patch",
@@ -136,6 +137,8 @@ class Driver:
         self.ini_modules: list[str] = []
         self.ini_options: list[str] = []
         self.ini_subcmd = ""
+        #  the modules of the build (planned_modules)
+        self._planned: list[tuple[str, str, str, str, str]] | None = None
         #  the YAML environment file (settings and functions)
         self.envfile = envyaml.EnvFile()
         self.plan = PlanState()
@@ -221,7 +224,7 @@ class Driver:
             os.makedirs(cache, exist_ok=True)
         for name, value in {
             "DO_PURGE": "no", "SCBI_PREFIX": "", "SCBI_DEFAULT_PREFIX": "yes", "DO_QUIET": "no",
-            "DO_UPDATE": "no", "DO_ARCHIVE": "no", "DO_FORCE": "no", "DO_STAT": "no",
+            "DO_UPDATE": "no", "DO_PREFETCH": "no", "DO_ARCHIVE": "no", "DO_FORCE": "no", "DO_STAT": "no",
             "DO_FLAT": "no", "DO_DEPS": "no", "DO_CLEAN_INSTALL": "no", "DO_PLAN": "no",
             "DO_SUBCMD": "no", "DO_CLEAR_CACHE": "no", "DEPS": "no", "SCBI_ISOOT": "true",
             "DO_PATCH": "yes", "STEPS": "", "BUILD_SCBI_TARGET": "", "SCBI_PLAN": "",
@@ -281,6 +284,10 @@ class Driver:
         for opt in ("setup", "config", "build", "install", "wrapup", "color",
                     "quiet", "force", "update", "purge", "archive", "stat"):
             o = self.ini_get(section, opt)
+            if opt == "update" and o == "prefetch":
+                #  update = prefetch: --update:prefetch
+                self.set("DO_PREFETCH", "yes", export=True)
+                o = "yes"
             if o:
                 self.set(f"DO_{opt.upper()}", o, export=True)
 
@@ -432,6 +439,9 @@ class Driver:
                 s("DO_INSTALL", "no")
             elif a in ("-u", "--update"):
                 s("DO_UPDATE", "yes")
+            elif a == "--update:prefetch":
+                s("DO_UPDATE", "yes")
+                s("DO_PREFETCH", "yes")
             elif a in ("-s", "--setup"):
                 self.do_clear_steps()
                 s("DO_SETUP", "forced")
@@ -1034,9 +1044,13 @@ class Driver:
                 self.modules = order
         restore = self.start_progress(builder)
         try:
+            self.start_prefetch(builder)
             for module in self.modules:
                 builder.handle_module("@root", module, "default", "no")
         finally:
+            if builder.prefetcher is not None:
+                builder.prefetcher.shutdown()
+                builder.prefetcher = None
             self.progress.close()
             restore()
 
@@ -1087,21 +1101,45 @@ class Driver:
         self.progress = Progress(status, self.progress_total(builder))
         return restore
 
+    def start_prefetch(self, builder) -> None:
+        """--update:prefetch: the network part of the update of the sources
+        of the modules of the build done ahead, by SCBI_PREFETCH_JOBS
+        threads (default 4, 0: no prefetch)."""
+        if self.get("DO_PREFETCH") != "yes" or self.get("DO_UPDATE") != "yes":
+            return
+        from scbi.sources.prefetch import DEFAULT_JOBS, Prefetcher
+
+        try:
+            jobs = int(self.get("SCBI_PREFETCH_JOBS") or DEFAULT_JOBS)
+        except ValueError:
+            jobs = DEFAULT_JOBS
+        if jobs <= 0:
+            return
+        builder.prefetcher = Prefetcher(builder, jobs)
+        builder.prefetcher.start(self.planned_modules(builder))
+
     def progress_total(self, builder) -> int:
-        """The number of modules the build will handle: the modules of the
+        """The number of modules the build will handle (planned_modules)."""
+        return len(self.planned_modules(builder))
+
+    def planned_modules(self, builder) -> list[tuple[str, str, str, str, str]]:
+        """The modules the build will handle, in order: the modules of the
         command line, the modules of their meta-modules and, with --deps,
-        their dependencies (plug-ins only, not the skipped ones)."""
+        their dependencies (plug-ins only, not the skipped ones), as
+        (formodule, module, variant, kind, ref). Computed once."""
+        if self._planned is not None:
+            return self._planned
         from scbi.walker import Walker
 
-        keys: set[str] = set()
+        found: dict[str, tuple[str, str, str, str, str]] = {}
         prefix, target = self.get("SCBI_PREFIX"), self.get("SCBI_TARGET")
 
         def metas(walker: Walker, modref: str, formodule: str) -> None:
-            module, variant, _kind, ref = walker.module_info(modref, formodule)
+            module, variant, kind, ref = walker.module_info(modref, formodule)
             key = f"{module}+{variant}+{ref}"
-            if ref == "skip" or key in keys or not walker.load_module(modref):
+            if ref == "skip" or key in found or not walker.load_module(modref):
                 return
-            keys.add(key)
+            found[key] = (formodule, module, variant, kind, ref)
             for m in words("\n".join(self.runner().variant_values(
                     module, variant, "modules", [prefix, target, variant], self.plan, builder.modules_list))):
                 metas(walker, m, module)
@@ -1117,16 +1155,17 @@ class Driver:
                     a = argv + [""] * 5
                     if a[4] == "true":  # an external package
                         return 0
-                    m, v, _kind, ref = walker.module_info(a[1], a[0])
+                    m, v, kind, ref = walker.module_info(a[1], a[0])
                     if ref != "skip":
-                        keys.add(f"{m}+{v}+{ref}")
+                        found.setdefault(f"{m}+{v}+{ref}", (a[0], m, v, kind, ref))
                     return 0
 
                 walker.walk("for-all-modules-with-meta-ext", callback, module)
         except Exit:
             #  reported when the module is built
             pass
-        return len(keys)
+        self._planned = list(found.values())
+        return self._planned
 
     def clean_up(self) -> None:
         for v in ("SCBI_HANDLED", "SCBI_LINE_SEP"):

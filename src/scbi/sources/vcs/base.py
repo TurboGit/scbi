@@ -37,9 +37,11 @@ class Vcs(ABC):
     marker = ""
 
     @abstractmethod
-    def checkout(self, r: VcsRun, url: str, options: str, name: str, dir: str) -> int:
+    def checkout(self, r: VcsRun, url: str, options: str, name: str, dir: str,
+                 *, fetch: bool = True) -> int:
         """``<vcs>-co``: clone or update the repository in $SCBI_BDIR/.vcs and
-        link it as $SCBI_BDIR/<name>/vcs."""
+        link it as $SCBI_BDIR/<name>/vcs; ``fetch``: update an existing
+        clone from its remote (not when already done by the prefetch)."""
 
     @abstractmethod
     def branch(self, r: VcsRun, options: str, module: str, branch: str, dir: str,

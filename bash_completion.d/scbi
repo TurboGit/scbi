@@ -3,7 +3,7 @@
 _SCBI_COMMON="-h --help -v --version --plugins="
 
 _SCBI_ARGS="${_SCBI_COMMON} -t -S --no-setup -W --no-wrapup -I
---no-install -u --update -s --setup -c --config -b --build -i
+--no-install -u --update --update:prefetch -s --setup -c --config -b --build -i
 --install -r --tests -v -q --quiet -l --no-log -p --purge -P
 --purge:only -d --deps -a --create-archive -h --help -j --jobs=
 --target= --ini= --env= -e --tests:only --plan= -n --no-patch

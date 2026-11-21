@@ -76,6 +76,8 @@ class Builder:
         self.modules_dir: dict[str, str] = {}
         self.flatdir: dict[str, str] = {}
         self.ftdir = 1
+        #  the sources fetched ahead (--update:prefetch: scbi.sources.prefetch)
+        self.prefetcher = None
 
     # ------------------------------------------------------------ helpers
 
