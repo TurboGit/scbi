@@ -697,7 +697,10 @@ The following options are supported:
 
 	\item[-I | \ddash{}no-install] Skips the install step.
 
-	\item[-u | \ddash{}update] Updates the repositories before building.
+	\item[-u | \ddash{}update] Updates the repositories before building. Without it the
+	repositories already cloned are not accessed: a module is built from the
+	commits fetched last time (a module whose reference changes, in the build
+	plan or on the command line, is updated).
 
 	\item[-s | \ddash{}setup] Does the setup step (default).
 

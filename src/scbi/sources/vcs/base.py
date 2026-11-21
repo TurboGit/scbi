@@ -43,11 +43,11 @@ class Vcs(ABC):
 
     @abstractmethod
     def branch(self, r: VcsRun, options: str, module: str, branch: str, dir: str,
-               *, fetched: bool = False) -> int:
+               *, fetch: bool = True) -> int:
         """``<vcs>-branch``: switch the checkout to the branch, tag or
-        revision ``branch`` (NONE: the default one); ``fetched``: the
-        repository has just been updated from its remote (checkout), no
-        need to fetch again."""
+        revision ``branch`` (NONE: the default one); ``fetch``: get the
+        new tags from the remote first (not when the repository has just
+        been updated from it, nor without --update)."""
 
     @abstractmethod
     def commit_id(self, short: bool, dir: str, env: dict[str, str]) -> str:

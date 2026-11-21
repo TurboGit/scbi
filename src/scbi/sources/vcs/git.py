@@ -76,7 +76,7 @@ class Git(Vcs):
                 set_submodule_url(r, options)
                 res = r.run("git", "submodule", "update", *gopts1)
             if res == 0:
-                res = r.run("git", "fetch", "--force", "--tags", *gopts2)
+                res = r.run("git", "fetch", "origin", "--force", "--tags", *gopts2)
         if res != 0:
             return res
         if not r.cd(f"{r.bdir}/{name}"):
@@ -84,12 +84,11 @@ class Git(Vcs):
         return r.run("ln", "-s", f"../.vcs/{repo}", "vcs")
 
     def branch(self, r: VcsRun, options: str, module: str, branch: str, dir: str,
-               *, fetched: bool = False) -> int:
+               *, fetch: bool = True) -> int:
         r.cd(f"{r.bdir}/{module}/vcs")
         r.run("git", "checkout", "--force", "master")
-        if not fetched:
-            #  after checkout (git fetch --force --tags): the tags are there
-            r.run("git", "fetch", "--tags")
+        if fetch:
+            r.run("git", "fetch", "origin", "--tags")
 
         if branch == "NONE":
             _, defbr = r.output("git", "rev-parse", "--abbrev-ref", "origin/HEAD")

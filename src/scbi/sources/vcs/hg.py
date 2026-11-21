@@ -40,7 +40,7 @@ class Mercurial(Vcs):
         return r.run("ln", "-s", f"../.vcs/{repo}", "vcs")
 
     def branch(self, r: VcsRun, options: str, module: str, branch: str, dir: str,
-               *, fetched: bool = False) -> int:
+               *, fetch: bool = True) -> int:
         r.cd(f"{r.bdir}/{module}/vcs")
         r.run("hg", "pull")
         if branch == "NONE":

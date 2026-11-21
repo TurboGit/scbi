@@ -30,14 +30,14 @@ class FakeRun:
         pass
 
 
-def fetches(fetched: bool) -> list[tuple[str, ...]]:
+def fetches(fetch: bool) -> list[tuple[str, ...]]:
     r = FakeRun()
-    assert Git().branch(r, "", "m", "main", "", fetched=fetched) == 0
+    assert Git().branch(r, "", "m", "main", "", fetch=fetch) == 0
     return [c for c in r.calls if c[:2] == ("git", "fetch")]
 
 
-def test_branch_fetches_the_tags_unless_just_fetched():
-    #  after the checkout of an existing clone (git fetch --force --tags):
-    #  no second fetch
-    assert fetches(False) == [("git", "fetch", "--tags")]
-    assert fetches(True) == []
+def test_branch_fetches_the_tags_of_origin_only_when_asked():
+    #  not after the checkout of an existing clone (git fetch --force
+    #  --tags), nor without --update
+    assert fetches(True) == [("git", "fetch", "origin", "--tags")]
+    assert fetches(False) == []
