@@ -285,6 +285,7 @@ class Linter:
 
     def check_shell(self, label: str, script: str, known: set[str], other_params: bool,
                     hook: str = "") -> None:
+        script = _write_blocks(script)
         text = _strip_single_quotes(script)
         self.check_names(label, referenced(text), known, assigned(text), other_params, hook)
         for line in _bad_log_levels(script):
@@ -334,6 +335,31 @@ def _unused_assignments(script: str, used: set[str]) -> list[tuple[int, str]]:
 
     walk(body)
     return [(line, name) for name, line in found.items()]
+
+
+_WRITE = re.compile(r"^(\s*)(write|append|write-raw|append-raw)\s+.+:\s*$")
+
+
+def _write_blocks(script: str) -> str:
+    """The body with the text of its write blocks as the linter sees it:
+    nothing in a raw block (write-raw, append-raw: no expansion), the
+    quotes of the other ones made blanks (literal there, as in a
+    here-document: not the start of a quoted string). The lines are kept
+    (the line numbers of the messages)."""
+    lines = script.split("\n")
+    out: list[str] = []
+    block: tuple[int, bool] | None = None  # indentation of the header, raw
+    for line in lines:
+        indent = len(line) - len(line.lstrip())
+        if block is not None and (not line.strip() or indent > block[0]):
+            out.append("" if block[1] else line.replace("'", " ").replace('"', " "))
+            continue
+        block = None
+        m = _WRITE.match(line)
+        if m:
+            block = (len(m.group(1)), m.group(2).endswith("-raw"))
+        out.append(line)
+    return "\n".join(out)
 
 
 def _bad_log_levels(script: str) -> list[int]:

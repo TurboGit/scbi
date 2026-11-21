@@ -247,3 +247,26 @@ build:
     #  YAML error: its own position
     [issue] = lint_text("p", "a: [\n")
     assert (issue.where, issue.line, issue.column) == ("yaml", 2, 1)
+
+
+def test_write_blocks():
+    #  no expansion in write-raw / append-raw: $NAME is not a variable;
+    #  in a write block the quotes are literal (an apostrophe does not hide
+    #  the next lines)
+    text = """
+plugin: p
+build: |-
+  write-raw run.sh:
+      #!/bin/sh
+      echo "$HOME $RAWVAR"
+  append-raw run.sh:
+      exit $STATUS_RAW
+  write README:
+      don't use $UNKNOWN1
+  echo $UNKNOWN2
+"""
+    assert issues(text) == [(WARNING, "build", "variable UNKNOWN1 is not known in this hook"),
+                            (WARNING, "build", "variable UNKNOWN2 is not known in this hook")]
+    #  a variable only written in a raw block is not read
+    text = "plugin: p\nbuild: |-\n  X = 1\n  write-raw f:\n      $X\n"
+    assert issues(text) == [(WARNING, "build", "line 1: variable X is set but never used")]
