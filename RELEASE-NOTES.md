@@ -1,0 +1,192 @@
+# SCBI — the Python driver
+
+Release notes of the Python driver (branch `po/python-driver`), compared
+with the Bash driver of the `master` branch. The reference manual
+(`doc/scbi.tex`) describes every feature in detail.
+
+## Highlights
+
+- **A new driver in Python**, with no Bash at all: the driver, the hooks
+  and the steps run without a shell. It is faster and its errors are
+  reported with the plug-in file and the line.
+- **YAML plug-ins and environment files**: a declarative format, a small
+  command language for the steps, checked by `scbi lint` and written in a
+  canonical form by `scbi format`. The 107 plug-ins of `scripts.d` are
+  converted.
+- **Faster updates**: one network access per module with `--update`, none
+  without it, and `--update:prefetch` fetching the sources ahead, in
+  parallel, while the modules before them are built.
+- **Better builds**: a progress bar, one report log per module, the build
+  order of the command line computed from the dependencies, interrupted
+  builds redone, fewer needless rebuilds.
+- **Editor support**: a VSCode extension (lint, format, completion and
+  help of the plug-ins, highlighting and completion of the build plans,
+  the ini sections as build tasks).
+
+## Requirements and installation
+
+- Python 3.11 or later and PyYAML (`apt install python3-yaml`).
+- `make` installs the driver in `~/.local/lib/scbi` with the command
+  `~/.local/bin/scbi`, the plug-ins in `~/.config/scbi` and the Bash
+  completion. The old Bash tools (`scbi-lint`, `scbi-show`...) are
+  removed from `~/.local/bin`.
+- SCBI is now distributed under the GNU GPL, version 3 or later.
+
+## Upgrading from the Bash driver
+
+- **Plug-ins**: the driver reads YAML plug-ins only (`<name>.yaml`). A
+  Bash plug-in is converted once with
+
+      python3 -m scbi.convert <plug-in>
+
+  The converter writes `<name>.yaml` (canonical form) and reports what it
+  cannot convert (code at the top level, loops after a pipe, `case`...),
+  to be rewritten by hand. A Bash plug-in found by the driver is refused
+  with this hint.
+- **Environment files**: `.env-<name>` becomes `.env-<name>.yaml`, converted
+  with `python3 -m scbi.envconvert .env-<name>` (settings to `vars`,
+  `source` to `inherit`; functions and commands to rewrite by hand).
+- **Renamed**: the `os-variants` key is now `with-variants`.
+- **Removed**: the `gprbuild-project` built-in (use `ok("gprbuild ...")` in
+  a condition), the Bash runtime files.
+- **First build**: the build identifier of a module is now computed from
+  its resolved plug-in (see below): the modules are rebuilt once after the
+  upgrade.
+
+## Plug-ins (YAML)
+
+- A plug-in maps the hooks to their definition; a hook is a body or a
+  mapping of qualifiers: `common`, `_` (the plain hook), `default`, a
+  variant, `cross` (nested qualifiers when cross-compiling).
+- Three kinds of hooks: command hooks (`config`, `build`...: the command
+  language), value hooks (`depends`, `config-options`...: lists) and
+  environment hooks (`env`, `build-env`...: lists of actions such as
+  `set-var`, `add-to-var`). The items of a list can be guarded with
+  `if <condition>:` (`if cross:`, `if on deb,12:`, `if enabled(doc):`,
+  `if version(c-gcc) >= 13:`...).
+- `vcs` and `archive` as records (`proxy`, `options`, `protocol`, `url`,
+  `file`, `dir`).
+- `inherit` (the hooks of other plug-ins), `with-variants` (variants using
+  the OS packages, e.g. `native`), `variants` (a variant including
+  others), `functions` (reusable functions in the command language),
+  `vars`.
+- **Plug-in variables** (`vars`) are expanded in the context of each hook
+  (e.g. `DEBUG: $(is-enabled debug ON OFF)`) and available in all the
+  hooks, value and environment hooks included; the inherited ones too.
+- `build-<target>` hooks: the build step used with
+  `--build-target=<target>`.
+- An item of `config-options` expanding to nothing is dropped.
+
+## The command language
+
+The command hooks and the functions are run by the driver, without a
+shell: one command per line, `&&`, `||`, pipes and redirections,
+variables (`$VAR`, `${VAR:-default}`, `${VAR%pattern}`...).
+
+- Blocks: `if <condition>:` / `elif` / `else`, `for NAME in <words>:` (also
+  with several names), `write FILE:` / `append FILE:` (a text, expanded),
+  `write-raw FILE:` / `append-raw FILE:` (not expanded).
+- Built-in commands: `cd`, `echo`, `export`, `unset`, `return`, `copy`
+  (recursive, replaces `cp`), `delete` and `delete-tree` (replace `rm`),
+  `check-versions`, `apply-var`, and `log <level> <message>` (a message of
+  the driver for the module, on the console and in the report log).
+- Functions, as `$(...)` in a word or `NAME = <function> <args>` in an
+  assignment: `config-options`, `get-version [<plug-in>]`,
+  `get-build-type`, `is-enabled`, `if <condition> then ... else ...`,
+  `output` / `output-words` (the output of a command), `command-path`,
+  `uppercase`, `lowercase`, `replace`, `first-line`, `basename`, `dirname`,
+  `ls`, `last-modified-directory`, `get-os-lib`, `get-os-bin`...,
+  `store-key`, `hook-output`, `all-variants`, `all-modules`.
+- Each step writes a replay file: `scbi replay <step>.cmd` reruns the
+  step alone, `--trace` shows each command, `--script` (or
+  `--script:inline`) writes an equivalent shell script.
+
+## Environment files (YAML)
+
+`.env-<name>.yaml` (and the local `.scbi-env*.yaml`): `inherit`, `vars`,
+`passthrough`, `functions`, and the hooks of the driver (`define-var`,
+`rewrite-vcs`, `rewrite-archive`, `proxy`, `module-final-step`), in the
+command language.
+
+## Builds
+
+- **Progress**: `[n/N] module` with the elapsed time, in a status bar on
+  the last row of the terminal (`--progress[:bar|line|no]`,
+  `SCBI_PROGRESS`); the bar takes the whole width, the time on the right.
+- **Build order**: without `--deps`, the modules of the command line are
+  built after their dependencies (the order is displayed when changed).
+- **Report log**: one report log per module, complete (no more
+  truncation) and without color codes.
+- **Interrupted builds**: a build interrupted or failed (Ctrl-C, a change
+  of `out-of-tree`...) is redone at the next run, meta-modules included.
+- **Build identifier**: computed from the resolved plug-in (the hooks
+  selected for the variant and the target, the functions, the variables)
+  and the environment of the dependencies. Reformatting a plug-in,
+  reordering its keys, its variables, its functions or its dependencies,
+  or changing its own `env` hook no longer triggers a rebuild.
+- **Aggregation**: the dependencies of the modules aggregated by a direct
+  aggregate meta-module are not aggregated; a `build-depends` on a
+  meta-module never uses the aggregated mode.
+
+## Sources and updates
+
+- Git, Subversion, Mercurial and archives (download with `cp`, `scp`,
+  `curl`, `wget`, `ftp`), with the proxy settings of the environment file.
+- **`--update`**: one fetch per git module (the tags were fetched twice).
+- **Without `--update` the remote is not accessed**: a module is built from
+  the commits fetched last time (the Bash driver fetched the tags, and so
+  the new commits, at every build). A module whose reference changes is
+  still updated. The fetches use `origin` only.
+- **`--update:prefetch`** (or `update = prefetch` in an ini file): the git
+  clones and the archives of the modules of the build are updated ahead,
+  in parallel (`SCBI_PREFETCH_JOBS`, default 4), while the modules before
+  them are built; a module then only switches to its reference or
+  extracts its archive. The result and the messages are those of
+  `--update`. On a large project (143 modules, all up-to-date) the update
+  went from 42 s to 15 s with the single fetch alone.
+
+## Sub-commands
+
+- `scbi lint`: checks the YAML plug-ins: unknown hooks and keys (with the
+  closest name), structure, values, conditions, environment actions;
+  warnings for empty hooks, `out-of-tree` in a meta-module, variables not
+  known in a hook (knowing the variables of the environment file, of the
+  dependencies — their `env` hooks and `with-variants` — and of the
+  inherited plug-ins; not the text of the raw blocks), variables set but
+  never used, invalid `log` levels. `--json` (issues with their line and
+  column) and `--stdin` for the editors.
+- `scbi format`: the canonical form (key order, `common` first, a body of
+  one line inline); `--replace`, `--stdin`.
+- `scbi show --resolved`: the plug-in of a module as the driver uses it
+  for a variant and a target.
+- `scbi schema`: the JSON Schema of the plug-ins (completion and help in
+  the editors).
+- `scbi ini`: the sections of the ini files (`--json`).
+- `scbi replay`: see *The command language*.
+- `scbi store`, `scbi shell` (honours the `run` key of the ini files),
+  `scbi source-archive`: ported.
+
+## VSCode extension
+
+In `editors/vscode` (`make vscode` builds the `.vsix`):
+
+- plug-ins: diagnostics of `scbi lint` while typing, *Format Document* with
+  `scbi format`, completion and help of the hooks (with the YAML
+  extension);
+- build plans (`.plan-*`, `.scbi-plan-*`): highlighting (directives,
+  groups and barriers, variants and versions) and completion;
+- the sections of the `.scbi` ini files as tasks (`Ctrl+Shift+B`), the
+  selected section and a run button in the status bar, an *SCBI Shell*
+  terminal.
+
+## OS packages
+
+The `.pkgs-<distrib>` lists (Debian, Ubuntu, Fedora, CentOS, Red Hat,
+MinGW) are synchronized with the Debian one; MinGW uses the UCRT64
+packages.
+
+## Testsuite (contributors)
+
+The regression testsuite is now pytest (`make test`, drivers
+`tests/drivers/testNNN.py`, parallel with pytest-xdist), with unit tests
+(`make unit`); `make lint` checks the plug-ins of `scripts.d`.
