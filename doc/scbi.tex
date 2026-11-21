@@ -70,7 +70,7 @@
 \lstdefinelanguage{yaml}
 {
 	alsoletter={-},
-	keywords={true,false,yes,no,plugin,depends,with-variants,vcs,build-depends,out-of-tree,options,protocol,packages,config-options,cross,variants,patches,for,in,if,then,else,version,write,append,setup,wrapup,archive,file,tests-depends,common,plan,modules,functions,params,run,proxy,inherit,hooks,name,from,no-variant,vars,passthrough,echo,prefix},
+	keywords={true,false,yes,no,plugin,depends,with-variants,vcs,build-depends,options,protocol,packages,config-options,cross,variants,patches,for,in,if,then,else,version,write,append,setup,wrapup,archive,file,plan,modules,functions,params,run,proxy,inherit,hooks,name,from,no-variant,vars,passthrough,echo,prefix},
 	keywordstyle=\color{black}\bfseries,
 	sensitive=false,
 	comment=[l]{\#},
@@ -85,8 +85,10 @@
 	  {only-explicit-build:}{{\bfseries\textcolor{black}{only-explicit-build:}}}{20}
 	  {out-of-tree:}{{\bfseries\textcolor{black}{out-of-tree:}}}{12}
 	  {build-env:}{{\bfseries\textcolor{black}{build-env:}}}{10}
+	  {tests-depends:}{{\bfseries\textcolor{black}{tests-depends:}}}{14}
 	  {build:}{{\bfseries\textcolor{black}{build:}}}{6}
 	  {env:}{{\bfseries\textcolor{black}{env:}}}{4}
+	  {common:}{{\bfseries\textcolor{black}{common:}}}{7}
 	  {url:}{{\bfseries\textcolor{black}{url:}}}{4}
 	  {config:}{{\bfseries\textcolor{black}{config:}}}{7}
 	  {config-options:}{{\bfseries\textcolor{black}{config-options:}}}{15}
@@ -1664,7 +1666,7 @@ config-options:
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 	Example:
-\begin{lstlisting}
+\begin{lstlisting}[language={yaml}]
 build: make -j$SCBI_JOBS
 \end{lstlisting}
 
