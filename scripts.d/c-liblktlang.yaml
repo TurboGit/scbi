@@ -17,6 +17,7 @@ build-depends:
   - c-langkit-support
 
 env:
+  - add-to-var PATH $PREFIX/bin
   - add-to-var PYTHONPATH $PREFIX/python
   - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
   - add-to-var LD_LIBRARY_PATH $PREFIX/lib

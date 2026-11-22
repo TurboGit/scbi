@@ -20,7 +20,7 @@ build-depends:
 
 env:
   - add-to-var PATH $PREFIX/local/bin
-  - add-to-var PYTHONPATH $(last-modified-directory $PREFIX/local/lib/python*/dist-packages)
+  - add-to-var PYTHONPATH $(last-modified-directory $PREFIX/lib/python*/site-packages)
   - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
   - add-to-var LD_LIBRARY_PATH $PREFIX/lib
 

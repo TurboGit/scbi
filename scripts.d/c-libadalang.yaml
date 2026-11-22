@@ -46,28 +46,26 @@ config: lkm generate
 
 build:
   _: |-
-    GOPTS = "-p -m -j$SCBI_JOBS"
+    GOPTS = -p -m -j$SCBI_JOBS
     for KIND in ${SCBI_LAL_LIBS}:
         gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND -XGPR2_LIBRARY_TYPE=static ./build/libadalang.gpr || return 1
   cross:
     _: |-
-      GOPTS = "-p -m -j$SCBI_JOBS --target=$TARGET"
+      GOPTS = -p -m -j$SCBI_JOBS --target=$TARGET
       for KIND in ${SCBI_LAL_LIBS}:
           gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND -XGPR2_LIBRARY_TYPE=static ./build/libadalang.gpr || return 1
 
 pre-install: |-
-  gprinstall --prefix=$PREFIX --uninstall libadalang
-  true
+  gprinstall --prefix=$PREFIX --uninstall libadalang || true
 
 install:
   _: |-
-    BV = "--build-var=LIBRARY_TYPE --build-var=LIBADALANG_BUILD"
-    GOPTS = "-p --prefix=$PREFIX --target=$TARGET $BV"
+    GOPTS = -p --prefix=$PREFIX --target=$TARGET
+    GOPTS += --build-var=LIBRARY_TYPE --build-var=LIBADALANG_BUILD
     for KIND in ${SCBI_LAL_LIBS}:
         gprinstall $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND --build-name=$KIND ./build/libadalang.gpr || return 1
   cross:
     pre: |-
-      gprinstall --prefix=$PREFIX --target=$TARGET --uninstall libadalang
-      true
+      gprinstall --prefix=$PREFIX --target=$TARGET --uninstall libadalang || true
 
 prefix: NONE
