@@ -327,6 +327,21 @@ class _Translator:
         return out
 
     def assign(self, s: Assign, ind: str) -> list[str]:
+        if s.append:
+            #  NAME += value: the value in a temporary array, appended
+            import dataclasses
+
+            tmp = "_SCBI_ADD"
+            lines = self.assign(dataclasses.replace(s, name=tmp, export=False, append=False), ind)
+            add = f'"${{{tmp}[@]}}"' if tmp in self.lists else f'${{{tmp}:+"${tmp}"}}'
+            name = s.name
+            cur = f'${{{name}[@]+"${{{name}[@]}}"}}' if name in self.lists else f'${{{name}:+"${name}"}}'
+            lines.append(f"{ind}{name}=({cur} {add})")
+            self.lists.add(name)
+            self.dynamic.add(name)
+            if s.export:
+                lines += [ind + ln for ln in self.export_list(name)]
+            return lines
         name, export = s.name, "export " if s.export else ""
         first = cmdlang._word_text(s.words[0]) if s.words else ""
         quoted = s.words and any(qt for _, qt in s.words[0].parts)
@@ -369,9 +384,15 @@ class _Translator:
                 self.lists.discard(name)
         self.dynamic.add(name)
         if export:
-            ref = f'"${{{name}[*]}}"' if name in self.lists else f'"${name}"'
-            lines.append(f"export {name}={ref}" if name in self.lists else f"export {name}")
+            lines += self.export_list(name) if name in self.lists else [f"export {name}"]
         return [ind + ln for ln in lines]
+
+    def export_list(self, name: str) -> list[str]:
+        """``export NAME`` of a list: bash does not export arrays, the
+        variable becomes its words separated by blanks (as the value the
+        interpreter gives to the environment)."""
+        self.lists.discard(name)
+        return [f'_SCBI_EXP="${{{name}[*]}}"', f"unset {name}", f'export {name}="$_SCBI_EXP"']
 
     def assign_if(self, name: str, text: str, ind: str) -> list[str]:
         cond, then, other = _split_if("if " + text, text)

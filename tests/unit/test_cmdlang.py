@@ -448,3 +448,23 @@ def test_write_breaks_hard_links(tmp_path, text, expected):
     assert src.read_text() == "orig\n"
     assert (tmp_path / "f").stat().st_nlink == 1
     assert (tmp_path / "f").stat().st_mode & 0o777 == 0o640
+
+
+def test_append_assignment(tmp_path):
+    #  NAME += value: the words added to the current value
+    _, out, state = run(tmp_path, "G = -g -m\nG += -x\nprintf '<%s>' $G\necho")
+    assert out == "<-g><-m><-x>\n"
+    assert state.vars["G"] == ["-g", "-m", "-x"]
+    #  an unset variable: the value alone; a single word stays a word
+    _, _, state = run(tmp_path, "A += x\nB = one\nB += two\nC = c\nC +=\nD += a b")
+    assert state.vars["A"] == "x"
+    assert state.vars["B"] == ["one", "two"]
+    assert state.vars["C"] == "c"
+    assert state.vars["D"] == ["a", "b"]
+    #  a function, export
+    _, out, state = run(tmp_path, "V = v\nV += uppercase x\nexport E = a\nexport E += b\nsh -c 'echo $E'")
+    assert state.vars["V"] == ["v", "X"]
+    assert out == "a b\n"
+    #  operators: only after output, as with =
+    with pytest.raises(CmdSyntaxError):
+        parse("X += a | b", 1)

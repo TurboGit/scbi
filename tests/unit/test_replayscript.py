@@ -69,6 +69,11 @@ BODIES = [
     "mkdir -p d/e\ntouch d/f\ndelete d/e || echo dir\ndelete-tree d/e d/nope\nls d\ndelete d/f\nls d\n"
     "delete-tree /tmp || echo refused\nls -d d",
     "echo $(replace 3.12 . _) $(replace a-b -)\nX = output echo 1.2\necho $(replace $X . _) $(replace $X .)",
+    #  NAME += value
+    "G = -g -m\nG += -x\nprintf '<%s>' $G\necho\nN += a b\nN += c\nprintf '<%s>' $N\necho",
+    "O = -O2\nO += config-options\nprintf '<%s>' $O\necho\nS = one\nS += two\necho $S",
+    "export E = a\nexport E += b\nsh -c 'echo $E'\nK = k\nK +=\necho $K",
+    "export L = a b\nsh -c 'echo $L'",
 ]
 
 

@@ -67,7 +67,7 @@ _READ = re.compile(r"(?:^|[\s;&|(])read((?:\s+-[A-Za-z]+)*)\s+([A-Za-z_][A-Za-z0
 _FOR = re.compile(r"(?:^|[\s;&|(])(?:for|select)\s+((?:[A-Za-z_][A-Za-z0-9_]*\s+)+)in\b")
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*")
 #  command language: VAR = value, export VAR = value
-_CMD_ASSIGN = re.compile(r"(?m)^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+=(?:\s|$)")
+_CMD_ASSIGN = re.compile(r"(?m)^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+\+?=(?:\s|$)")
 
 
 def _strip_single_quotes(script: str) -> str:

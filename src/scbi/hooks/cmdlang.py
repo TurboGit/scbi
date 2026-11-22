@@ -76,7 +76,8 @@ COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "uns
             "check-versions", "copy", "delete", "delete-tree", "apply-var", "log")
 
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
-_ASSIGN = re.compile(r"^(export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+=(?:\s+(.*)|\s*)$")
+#  NAME = value, NAME += value (appended), export NAME = value
+_ASSIGN = re.compile(r"^(export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+(\+?)=(?:\s+(.*)|\s*)$")
 _ENV_WORD = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$", re.S)
 _HEADER = re.compile(r"^(if|elif)\s+(.+):$|^else\s*:$|^for\s+([A-Za-z_]\w*(?:\s+[A-Za-z_]\w*)*)\s+in\s+(.*):$|"
                      r"^(write|append|write-raw|append-raw)\s+(.+):$")
@@ -163,6 +164,7 @@ class Assign:
     export: bool
     words: tuple[Word, ...]
     text: str  # right-hand side as written (for "output <command line>")
+    append: bool = False  # NAME += value
 
 
 @dataclass(frozen=True)
@@ -451,7 +453,7 @@ def _block(lines, pos: int, indent: int) -> tuple[tuple, int]:
             continue
         a = _ASSIGN.match(s)
         if a:
-            rhs = a.group(3) or ""
+            rhs = a.group(4) or ""
             words = tuple(w for w in tokenize(rhs, number) if isinstance(w, Word))
             if any(not isinstance(t, Word) for t in tokenize(rhs, number)) and \
                     not (words and _word_text(words[0]) in ("output", "output-words")):
@@ -463,7 +465,7 @@ def _block(lines, pos: int, indent: int) -> tuple[tuple, int]:
                     check(f"$({rhs.strip()})")
                 except ExpandError as e:
                     raise CmdSyntaxError(number, str(e)) from None
-            steps.append(Assign(number, a.group(2), bool(a.group(1)), words, rhs))
+            steps.append(Assign(number, a.group(2), bool(a.group(1)), words, rhs, bool(a.group(3))))
             pos += 1
             continue
         first = s.split()[0].rstrip(":")
@@ -831,6 +833,13 @@ class Runner:
             value = values[0] if len(values) == 1 else ("" if not values else values)
         if value is None:
             return
+        if step.append:
+            #  NAME += value: the words added to the current value
+            cur = state.vars.get(step.name)
+            old = cur if isinstance(cur, list) else ([cur] if cur else [])
+            new = value if isinstance(value, list) else ([value] if value != "" else [])
+            both = old + new
+            value = both[0] if len(both) == 1 else ("" if not both else both)
         if self.trace is not None:
             shown = " ".join(_xq(v) for v in value) if isinstance(value, list) else _xq(value)
             self.trace(f"_TRACE: {step.name}={shown}")

@@ -1278,7 +1278,10 @@ only. \code{\&\&}, \code{||}, pipes \code{|} and the redirections
 
 \textbf{Assignments.} \code{NAME = <words>} sets a variable of the hook
 (one word gives a value, several a list); \code{NAME = <function> <args>}
-sets it to the result of a function (\seeref{yaml-functions}). The
+sets it to the result of a function (\seeref{yaml-functions});
+\code{NAME += <words>} (or \code{NAME += <function> <args>}) adds the words
+to the current value of the variable (\code{GOPTS += -x} for
+\code{GOPTS = \$GOPTS -x}). The
 variables are local to the hook call; \code{export NAME = ...} also puts
 the variable in the environment of the following commands.
 
