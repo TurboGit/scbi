@@ -252,9 +252,10 @@ class Linter:
         for key, body in tree.hooks.items():
             label = "source-tree" + (".cross" if key.cross else "") + (f".{key.qualifier}" if key.qualifier else "")
             found = list(entries(body.items))
-            own = own or any(not e.from_ for e in found)
+            #  the module itself: no from, or its name
+            own = own or any(not e.from_ or e.from_ == self.name for e in found)
             for e in found:
-                if e.from_ and "$" not in e.from_ and e.from_ not in deps:
+                if e.from_ and "$" not in e.from_ and e.from_ != self.name and e.from_ not in deps:
                     self.error(label, f"{e.from_} is not a dependency (depends, build-depends)")
             targets = [e.to for e in found]
             for to in sorted({t for t in targets if targets.count(t) > 1}):
@@ -266,7 +267,8 @@ class Linter:
                                      f" the later entry of {later.from_ or 'the module'} ({later.to})")
                         break
         if not own and ("vcs" in self.data or "archive" in self.data):
-            self.warning("source-tree", "no entry for the sources of the module (an entry without from): unused")
+            self.warning("source-tree", "no entry for the sources of the module (from the module or no from):"
+                         " unused")
 
     def _env_defined(self) -> set[str]:
         """Variables set by the environment actions of the plug-in."""

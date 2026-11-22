@@ -231,15 +231,16 @@ class Generic:
         the directory of the module's own sources ("" if none)."""
         deps = self.dependency_names(prefix, target)
         for e in entries:
-            if e.from_ and e.from_ not in deps:
+            if e.from_ and e.from_ != self.module and e.from_ not in deps:
                 self.elog("source-tree:", e.from_, "is not a dependency (depends, build-depends)")
                 return 1, ""
         own = ""
         for i, e in enumerate(entries):
-            if e.from_:
-                src = self.b.modules_dir.get(f"{e.from_}@src", "")
-            else:
+            mine = not e.from_ or e.from_ == self.module
+            if mine:
                 src = "src"
+            else:
+                src = self.b.modules_dir.get(f"{e.from_}@src", "")
             if not src or not os.path.isdir(src):
                 self.elog("source-tree:", "no", "sources", "for", e.from_ or self.module)
                 return 1, ""
@@ -249,7 +250,7 @@ class Generic:
             opts = ["--delete", "--exclude=.hg", "--exclude=CVS"] + [f"--exclude=/{x}" for x in excludes]
             if self.sync_dir(f"{src}/.", f"{dst}/", *opts) != 0:
                 return 1, ""
-            if not e.from_:
+            if mine:
                 own = dst
         return 0, own
 

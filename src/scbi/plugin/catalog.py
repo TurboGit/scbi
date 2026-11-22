@@ -90,7 +90,7 @@ DESCRIPTIONS = {
     "archive": "The archive of the module sources: proxy, options, protocol, url, file [, dir].",
     "patches": "The patch files to apply (in $SCBI_PATCH); REF is the version of the module.",
     "source-tree": "The source tree of the build made of the sources of several modules, in order:"
-                   " entries from (a dependency; none: this module), to, exclude.",
+                   " entries from (a dependency, or this plug-in: its name or none), to, exclude.",
     "version": "Prints the version of the installed module.",
     "only-explicit-build": "true: the module is only built when on the command line, not as a dependency"
                            " (default false).",

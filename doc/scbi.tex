@@ -1513,9 +1513,10 @@ archive:
 	\begin{description}[font=\texttt]
 		\item[from] A module whose sources are copied: it must be a
 		dependency of the module (\code{depends} or \code{build-depends},
-		for its variant and the target), an error otherwise. Without
-		\code{from} the entry copies the sources of the module itself (its
-		patches are applied there).
+		for its variant and the target), an error otherwise. The name of
+		the plug-in itself, or no \code{from}, copies the sources of the
+		module (its patches are applied there); without \code{from} the
+		entry still works when the plug-in is inherited by another one.
 		\item[to] Where the sources go in the source tree (default \code{.}).
 		\item[exclude] Paths relative to the root of the sources of the
 		entry, not copied.

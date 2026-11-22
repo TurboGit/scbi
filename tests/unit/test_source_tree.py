@@ -104,4 +104,7 @@ source-tree:
     found = issues(text)
     assert (ERROR, "source-tree", "several entries copied to x") in found
     assert (WARNING, "source-tree", "the entry of a (y/z) is replaced by the later entry of b (y)") in found
-    assert (WARNING, "source-tree", "no entry for the sources of the module (an entry without from): unused") in found
+    assert (WARNING, "source-tree", "no entry for the sources of the module (from the module or no from):"
+            " unused") in found
+    #  the module itself by its name: not a dependency, its own sources
+    assert issues(GNAT.replace("  - to: gcc/ada", "  - from: p\n    to: gcc/ada")) == []

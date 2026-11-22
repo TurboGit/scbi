@@ -58,7 +58,8 @@ _SOURCE_ENTRY = {
     "additionalProperties": False,
     "properties": {
         "from": {"type": "string", "description": "A dependency of the module (depends, build-depends) whose"
-                                                  " sources are copied; none: the sources of this module."},
+                                                  " sources are copied; the name of this plug-in, or no from:"
+                                                  " the sources of this module."},
         "to": {"type": "string", "description": "The target in the source tree of the build (default .)."},
         "exclude": {"anyOf": [{"type": "string"}, _STRING_LIST],
                     "description": "Paths relative to the root of the sources, not copied."},
