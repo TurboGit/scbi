@@ -210,6 +210,13 @@ class Linter:
         if "source-tree" in data:
             self.check_source_tree()
 
+        #  the variables used in the values of vars (expanded in every
+        #  hook: all the hook parameters are known)
+        for name, value in (data.get("vars") or {}).items():
+            texts = [str(i) for i in value] if isinstance(value, list) else [str(value or "")]
+            for text in texts:
+                self.check_names(f"vars.{name}", referenced(text), set(ALL_PARAMS), set(), other_params=False)
+
         #  a meta-module (modules, no sources) is not built: out-of-tree
         #  has no use
         if "modules" in data and "out-of-tree" in data and not ({"vcs", "archive"} & set(map(str, data))):

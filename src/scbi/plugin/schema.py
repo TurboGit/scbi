@@ -108,7 +108,8 @@ def schema() -> dict:
     props: dict = {
         "plugin": {"type": "string", "description": catalog.description("plugin")},
         "vars": {"type": "object", "description": catalog.description("vars"),
-                 "additionalProperties": {"type": ["string", "number", "boolean", "null"]}},
+                 "additionalProperties": {"anyOf": [{"type": ["string", "number", "boolean", "null"]},
+                                                    {"type": "array", "items": {"type": ["string", "number"]}}]}},
         "variants": {"type": "object", "description": catalog.description("variants"),
                      "additionalProperties": _STRING_LIST},
         "inherit": {

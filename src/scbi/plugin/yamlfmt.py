@@ -242,7 +242,14 @@ def from_data(name: str, data: dict, where: str = "") -> PluginDef:
     pdef = PluginDef(name)
 
     for k, v in (data.get("vars") or {}).items():
-        pdef.variables[str(k)] = "" if v is None else str(v)
+        if isinstance(v, list):
+            if not all(isinstance(i, (str, int, float)) and not isinstance(i, bool) for i in v):
+                raise _err(f"{where}.vars.{k}", "a text or a list of texts is expected")
+            pdef.variables[str(k)] = tuple(str(i) for i in v)
+        elif isinstance(v, dict):
+            raise _err(f"{where}.vars.{k}", "a text or a list of texts is expected")
+        else:
+            pdef.variables[str(k)] = "" if v is None else str(v)
 
     for vname, members in (data.get("variants") or {}).items():
         w = f"{where}.variants.{vname}"
@@ -351,7 +358,7 @@ def to_data(pdef: PluginDef) -> dict:
             lst.append(d)
         data["inherit"] = lst
     if pdef.variables:
-        data["vars"] = dict(pdef.variables)
+        data["vars"] = {k: list(v) if isinstance(v, tuple) else v for k, v in pdef.variables.items()}
     if pdef.functions:
         data["functions"] = {
             n: ({"params": list(f.params)} if f.params else {}) | {"run": f.script}

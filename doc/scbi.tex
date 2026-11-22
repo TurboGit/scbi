@@ -873,6 +873,23 @@ are hook names (including \code{pre-<step>} and \code{post-<step>}):
 	the previous variables, the hook parameters or the built-ins, e.g.
 	\code{DEBUG: \$(is-enabled debug ON OFF)}. A local variable or a hook
 	parameter of the same name hides a variable of the plug-in.
+
+	A value can be a list: a list variable, a word per item in the
+	command hooks, its items separated by blanks in the values and the
+	environment actions. Each item is expanded, an item expanding to
+	nothing is dropped. For example, options shared by several hooks, a
+	hook adding its own ones with \code{+=}:
+
+	\begin{lstlisting}[language={yaml}]
+vars:
+  GOPTS: [-XBUILD=PROD, --target=$TARGET]
+
+build: gprbuild -p $GOPTS lib.gpr
+
+install: |-
+  GOPTS += -p -f --prefix=$PREFIX
+  gprinstall $GOPTS lib.gpr
+	\end{lstlisting}
 	\item[variants] Variants including other variants
 	(\seeref{yaml-variants}), \code{\{all: [ai, hdr, jxl]\}}.
 	\item[inherit] List of inherited plug-ins (\seeref{inheritance}), each

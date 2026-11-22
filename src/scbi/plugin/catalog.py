@@ -119,7 +119,7 @@ DESCRIPTIONS = {
     "plugin": "The name of the plug-in (optional): it must match the file name.",
     "inherit": "Plug-ins whose hooks are inherited: from, hooks, custom-hooks, no-variant, name.",
     "with-variants": "Variants using OS packages, with no build step: {<variant>: {packages: [...], env: [...]}}.",
-    "vars": "Variables of the plug-in, {NAME: value}, expanded in all its hooks.",
+    "vars": "Variables of the plug-in, {NAME: value} or {NAME: [values]} (a list), expanded in all its hooks.",
     "functions": "Functions callable from the command hooks: {name: {params: [A, B], run: <commands>}}.",
     "variants": "Variants including other variants: {all: [ai, hdr]}.",
 }

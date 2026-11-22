@@ -216,7 +216,8 @@ class HookKey:
 @dataclass
 class PluginDef:
     name: str
-    variables: dict[str, str] = field(default_factory=dict)
+    #  vars: a text, or a list of texts (a list variable: a word per item)
+    variables: dict[str, str | tuple[str, ...]] = field(default_factory=dict)
     inherits: list[Inherit] = field(default_factory=list)
     with_variants: list[WithVariant] = field(default_factory=list)
     #  Variants including other variants: {"all": ("ai", "hdr", "jxl")}.

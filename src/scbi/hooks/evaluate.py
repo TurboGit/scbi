@@ -91,14 +91,23 @@ def _select(items, ctx: HookContext):
             yield it
 
 
-def set_plugin_vars(ctx: HookContext, variables: dict[str, str]) -> dict[str, str]:
+def set_plugin_vars(ctx: HookContext, variables: dict) -> dict[str, str | list[str]]:
     """Set the variables of the plug-in (``vars``) of the hook: each
     value expanded in the context of the hook, in order (a value may use
-    the previous variables); returns them."""
+    the previous variables). A list (a tuple in the model) is expanded item
+    by item, the empty items dropped: it is a list for the command hooks
+    (the returned values), its items joined by blanks for the expansions
+    of the values and environment actions (``ctx.plugin_vars``)."""
     ctx.plugin_vars = {}
+    values: dict[str, str | list[str]] = {}
     for name, value in variables.items():
-        ctx.plugin_vars[name] = expand(value, ctx)
-    return ctx.plugin_vars
+        if isinstance(value, (tuple, list)):
+            items = [v for v in (expand(i, ctx) for i in value) if v != ""]
+            values[name] = items
+            ctx.plugin_vars[name] = " ".join(items)
+        else:
+            values[name] = ctx.plugin_vars[name] = expand(value, ctx)
+    return values
 
 
 def eval_values(values: Values, ctx: HookContext) -> list[str]:

@@ -67,7 +67,7 @@ class Hook:
                                                           [prefix, target, variant], self.d.plan, self.b.modules_list)
                 if v != ""]
 
-    def variables(self, ctx=None) -> dict[str, str]:
+    def variables(self, ctx=None) -> dict[str, str | list[str]]:
         """The variables of the plug-in (``vars``) expanded in the context
         of the hook (``ctx``, default: the one of the run)."""
         if ctx is None:
