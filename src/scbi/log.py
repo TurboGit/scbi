@@ -276,13 +276,13 @@ def display_log_stat(logs: Path, module: str = "") -> str:
         for mod, duration in log_stat_file(path):
             stats.setdefault(mod, []).append(duration)
 
-    def mmss(seconds: int) -> str:
-        return time.strftime("%M:%S", time.localtime(seconds))
+    def hmmss(seconds: int) -> str:
+        return time.strftime("%H:%M:%S", time.localtime(seconds))[1:]
 
     rows = []
     for key, values in stats.items():
         avg = abs(sum(values)) // len(values) * (1 if sum(values) >= 0 else -1)
-        rows.append(f"{key:<55} : {mmss(min(min(values), 999999))}   {mmss(avg)}   {mmss(max(max(values), 0))}\n")
+        rows.append(f"{key:<50} : {hmmss(min(min(values), 999999))}   {hmmss(avg)}   {hmmss(max(max(values), 0))}\n")
     text = "".join(rows)
     if text:
         text = subprocess.run(["sort"], input=text, capture_output=True, text=True).stdout
