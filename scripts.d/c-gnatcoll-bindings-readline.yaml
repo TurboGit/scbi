@@ -28,7 +28,7 @@ env:
 out-of-tree: false
 
 build: |-
-  GOPTS = "-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
+  GOPTS = -j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET
   for kind in static relocatable static-pic:
       gprbuild $GOPTS -XLIBRARY_TYPE=$kind readline/gnatcoll_readline.gpr || return 1
 
@@ -43,13 +43,13 @@ pre-install:
 
 install:
   _: |-
-    GOPTS = "-p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET"
-    GOPTS = "$GOPTS --build-var=LIBRARY_TYPE"
+    GOPTS = -p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET
+    GOPTS += --build-var=LIBRARY_TYPE
     for kind in static relocatable static-pic:
         gprinstall $GOPTS -XLIBRARY_TYPE=$kind --build-var=GNATCOLL.READLINE_BUILD --install-name=gnatcoll_readline --build-name=$kind readline/gnatcoll_readline.gpr || return 1
   cross:
     _: |-
-      GOPTS = "-p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET"
-      GOPTS = "$GOPTS --build-var=LIBRARY_TYPE --target=$TARGET"
+      GOPTS = -p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET
+      GOPTS += --build-var=LIBRARY_TYPE --target=$TARGET
       for kind in static relocatable static-pic:
           gprinstall $GOPTS -XLIBRARY_TYPE=$kind --build-var=GNATCOLL.READLINE_BUILD --install-name=gnatcoll_readline --build-name=$kind readline/gnatcoll_readline.gpr || return 1

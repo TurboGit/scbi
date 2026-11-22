@@ -29,14 +29,14 @@ build-env:
 out-of-tree: false
 
 build: |-
-  GOPTS = "-j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET"
+  GOPTS = -j$SCBI_JOBS -p -XBUILD=PROD --target=$TARGET
   for kind in static relocatable static-pic:
       gprbuild $GOPTS -XLIBRARY_TYPE=$kind iconv/gnatcoll_iconv.gpr || return 1
   true
 
 install: |-
-  GOPTS = "-p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET"
-  GOPTS = "$GOPTS --build-var=LIBRARY_TYPE"
+  GOPTS = -p -f --prefix=$PREFIX -XBUILD=PROD --target=$TARGET
+  GOPTS += --build-var=LIBRARY_TYPE
   PM = $PREFIX/share/gpr/manifests
   if is-file($PM/gnatcoll_iconv):
       gprinstall $GOPTS --uninstall gnatcoll_iconv
