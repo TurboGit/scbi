@@ -1388,6 +1388,11 @@ more than it.
 	\code{append}, the body not expanded.
 \end{description}
 
+A file written by a block or a redirection (\code{>}, \code{>>}...) is
+first made a file of its own when it has several hard links (the source
+tree of the build is hard-linked to the sources of the modules): the
+sources of the modules are never changed by the hooks.
+
 \textbf{Status.} The status of a body is the status of its last step: a
 failing command does not stop the body, unless the next one is chained with
 \code{\&\&}. An error message gives the plug-in file, the hook and the

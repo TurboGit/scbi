@@ -424,3 +424,27 @@ log 1 glob *.so , quoted "*.so"
     assert status == 0 and out == ""
     assert logged == [(2, "step 2 of /p"), (1, "defa none DEFAULT"), (1, "kept    spaces x y"),
                       (1, "glob a.so , quoted *.so")]
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("write f:\n    new\n", "new\n"),
+    ("append f:\n    more\n", "orig\nmore\n"),
+    ("write-raw f:\n    $X\n", "$X\n"),
+    ("echo new > f", "new\n"),
+    ("echo more >> f", "orig\nmore\n"),
+    ("printf 'new\\n' > f", "new\n"),             # an external command
+    ("printf 'more\\n' >> f", "orig\nmore\n"),
+])
+def test_write_breaks_hard_links(tmp_path, text, expected):
+    #  the source tree of a build is hard-linked to the sources of the
+    #  modules: writing to a file of the tree never changes the other link
+    src = tmp_path / "checkout.txt"
+    src.write_text("orig\n")
+    src.chmod(0o640)
+    os.link(src, tmp_path / "f")
+    status, out, _ = run(tmp_path, text)
+    assert status == 0, out
+    assert (tmp_path / "f").read_text() == expected
+    assert src.read_text() == "orig\n"
+    assert (tmp_path / "f").stat().st_nlink == 1
+    assert (tmp_path / "f").stat().st_mode & 0o777 == 0o640

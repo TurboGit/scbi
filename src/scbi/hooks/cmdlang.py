@@ -50,6 +50,7 @@ import glob as _glob
 import os
 import re
 import shutil
+import stat
 import subprocess
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -514,6 +515,33 @@ class State:
     status: int = 0
 
 
+def _unshare(path: str, keep: bool) -> None:
+    """Before writing to ``path``: a file with several hard links (the
+    source tree of a build is hard-linked to the sources of the modules,
+    rsync --link-dest) becomes a file of its own, so the other links (a
+    checkout) are not changed; ``keep``: its content kept (append)."""
+    try:
+        st = os.lstat(path)
+    except OSError:
+        return
+    if not stat.S_ISREG(st.st_mode) or st.st_nlink < 2:
+        return
+    if keep:
+        tmp = f"{path}.scbi-unshare"
+        shutil.copy2(path, tmp)
+        os.replace(tmp, path)
+    else:
+        os.unlink(path)
+        #  the new file with the permissions of the old one
+        os.close(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, stat.S_IMODE(st.st_mode)))
+
+
+def _open_write(path: str, mode: str):
+    """``open`` for writing (w, a, wb, ab) a file not shared by hard links."""
+    _unshare(path, keep=mode.startswith("a"))
+    return open(path, mode)
+
+
 def _copy_file(src: str, dst: str) -> None:
     """A file or symbolic link (kept as a link), replacing ``dst``."""
     if os.path.lexists(dst) and (os.path.islink(dst) or not os.path.isdir(dst)):
@@ -627,7 +655,7 @@ class Runner:
             path = self._path(self.expand_words((step.path,), state, glob=False)[0], state)
             text = step.text if step.raw else self.expand_text(step.text, state, step.line)
             try:
-                with open(path, "a" if step.append else "w") as f:
+                with _open_write(path, "a" if step.append else "w") as f:
                     f.write(text)
                 state.status = 0
             except OSError as e:
@@ -1153,7 +1181,7 @@ class Runner:
             target = self.expand_words((r.target,), state, glob=False)[0]
             path = self._path(target, state)
             try:
-                f = open(path, "a" if r.op.endswith(">>") else "w")
+                f = _open_write(path, "a" if r.op.endswith(">>") else "w")
             except OSError as e:
                 state.err(f"{self.where}: line {line}: {target}: {e.strerror}\n")
                 close()
@@ -1184,7 +1212,7 @@ class Runner:
             path = self._path(self.expand_words((r.target,), state, glob=False)[0], state)
             mode = {"<": "rb", ">": "wb", ">>": "ab", "2>": "wb", "2>>": "ab", "&>": "wb"}[r.op]
             try:
-                f = open(path, mode)
+                f = open(path, mode) if mode == "rb" else _open_write(path, mode)
             except OSError as e:
                 state.err(f"{self.where}: line {line}: {path}: {e.strerror}\n")
                 for o in opened:
