@@ -398,7 +398,7 @@ Or using an environment variable:
 \subsection{Discriminants}
 \label{discriminants}
 \index{discriminants}
-\index{plan|discriminants}
+\index{plan!discriminants}
 
 A list of discriminants is computed for each build. They depend on the host and the target, and are used in the barriers of build plans (\seeref{plan-barrier}), in \code{@on} directives and in the conditions of plug-ins (\code{on <discriminants>}) to tune the build.
 
@@ -2009,7 +2009,7 @@ functions:
 \index{variable!unset}
 \index{variable!prepend}
 \index{variable!append}
-\index{variable|delete}
+\index{variable!delete}
 \index{helpers!define-var}
 \index{helpers!add-to-var}
 \index{helpers!prepend-to-var}
@@ -2394,7 +2394,7 @@ So \code{.pkgs-deb\textasciitilde{}10} can add entries or override the ones of \
 
 \subsection{Private Store}
 \index{Private Store}
-\index{API|Private Store}
+\index{API!Private Store}
 
 The private store (\seeref{store}) keeps private values, such as license keys, out of the plug-ins. In a plug-in, \code{\$(store-key <key>)} gives the value of a key; a command hook can also run the \code{scbi store} sub-command:
 
@@ -2629,7 +2629,7 @@ installed packages are those of \code{SCBI\_TEST\_PKGS} (\code{"name=version
 \label{listing}
 \label{show}
 \index{show}
-\index{tools|show}
+\index{tools!show}
 
 The \code{show} sub-command lists the build plan and the dependencies, and shows module references.
 
@@ -2664,7 +2664,7 @@ The following options are supported:
 \subsection{Shell}
 \label{shell}
 \index{shell}
-\index{tools|shell}
+\index{tools!shell}
 
 The \code{shell} sub-command starts a shell (\code{\$SHELL}), or runs a command, in the environment of the modules: to build or test by hand in the very environment SCBI uses for these modules.
 
@@ -2695,7 +2695,7 @@ The following options are supported:
 \label{private store}
 \label{store}
 \index{private store}
-\index{tools|store}
+\index{tools!store}
 
 Some modules need private information, such as license keys, which cannot be written in a plug-in that may be public. SCBI keeps such values in a private store, handled with the \code{store} sub-command:
 
