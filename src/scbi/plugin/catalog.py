@@ -20,7 +20,7 @@ from dataclasses import dataclass
 
 #  Canonical order (SCBI_ALL_HOOKS, also used by scbi-format)
 ALL_HOOKS = (
-    "plan", "vcs", "archive", "patches", "version", "only-explicit-build",
+    "plan", "vcs", "archive", "patches", "source-tree", "version", "only-explicit-build",
     "out-of-tree", "modules", "aggregate", "propagate-version", "build-depends",
     "tests-depends", "depends", "external-env", "build-env", "tests-env", "env",
     "setup", "config-options", "config", "build", "install", "wrapup", "prefix",
@@ -51,6 +51,8 @@ _SPECS = [
     HookSpec("vcs", VALUE, ()),
     HookSpec("archive", VALUE, ("VERSION",)),
     HookSpec("patches", VALUE, STD_PARAMS + ("KIND", "REF"), cumulative=True),
+    #  entries (from, to, exclude): the sources of several modules combined
+    HookSpec("source-tree", VALUE),
     HookSpec("version", COMMAND),
     HookSpec("only-explicit-build", VALUE),
     HookSpec("out-of-tree", VALUE),
@@ -87,6 +89,8 @@ DESCRIPTIONS = {
     "vcs": "The VCS of the module sources: proxy, options, protocol, url [, dir].",
     "archive": "The archive of the module sources: proxy, options, protocol, url, file [, dir].",
     "patches": "The patch files to apply (in $SCBI_PATCH); REF is the version of the module.",
+    "source-tree": "The source tree of the build made of the sources of several modules, in order:"
+                   " entries from (a dependency; none: this module), to, exclude.",
     "version": "Prints the version of the installed module.",
     "only-explicit-build": "true: the module is only built when on the command line, not as a dependency"
                            " (default false).",
@@ -146,7 +150,7 @@ FINAL_STEP = HookSpec(
 HEADER_KEYS = ("plugin", "inherit", "with-variants", "vars", "functions", "variants")
 _ORDER = (
     "modules", "aggregate", "propagate-version", "plan",
-    "vcs", "archive", "patches",
+    "vcs", "archive", "patches", "source-tree",
     "depends", "build-depends", "tests-depends",
     "env", "build-env", "tests-env", "external-env",
     "setup", "out-of-tree", "only-explicit-build", "config-options",

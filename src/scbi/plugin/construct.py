@@ -26,6 +26,7 @@ from scbi.plugin.model import (
     Function,
     Guarded,
     LocalAssign,
+    SourceEntry,
     Values,
     unknown_builtins,
 )
@@ -86,6 +87,50 @@ def local_assign(text: str) -> LocalAssign | None:
 def value(text: str) -> str | LocalAssign:
     """An item of a value hook."""
     return local_assign(text) or check_builtins(text)
+
+
+#  The fields of an entry of the source-tree hook, in order
+SOURCE_FIELDS = ("from", "to", "exclude")
+
+
+def is_source_entry(hook: str, fields) -> bool:
+    """``fields`` (names) are those of an entry of source-tree."""
+    return hook == "source-tree" and bool(fields) and set(fields) <= set(SOURCE_FIELDS)
+
+
+def _tree_path(what: str, path: str) -> str:
+    """A relative path in a source tree: no .., not absolute; normalized
+    (no trailing /, "" is ".")."""
+    p = path.strip()
+    if p.startswith("/"):
+        raise DefinitionError(f"{what} {path!r}: a path relative to the source tree is expected")
+    if ".." in p.split("/"):
+        raise DefinitionError(f"{what} {path!r}: '..' is not allowed")
+    p = "/".join(c for c in p.split("/") if c not in ("", "."))
+    return p or "."
+
+
+def source_entry(fields: dict) -> SourceEntry:
+    """An entry of the source-tree hook: from (a module, empty: the module
+    itself), to (default .), exclude (a path or a list of paths)."""
+    unknown = [k for k in fields if k not in SOURCE_FIELDS]
+    if unknown:
+        raise DefinitionError(f"unknown keys {unknown} in a source-tree entry (from, to, exclude)")
+    frm = fields.get("from")
+    if frm is not None and (not isinstance(frm, str) or not frm.strip() or len(frm.split()) != 1):
+        raise DefinitionError(f"from: a module name is expected, not {frm!r}")
+    to = fields.get("to", ".")
+    if not isinstance(to, str):
+        raise DefinitionError(f"to: a path is expected, not {to!r}")
+    exclude = fields.get("exclude") or []
+    if isinstance(exclude, str):
+        exclude = [exclude]
+    if not isinstance(exclude, list) or not all(isinstance(e, str) for e in exclude):
+        raise DefinitionError(f"exclude: a list of paths is expected, not {exclude!r}")
+    excl = tuple(_tree_path("exclude", e) for e in exclude)
+    if "." in excl:
+        raise DefinitionError("exclude: the root of the sources cannot be excluded")
+    return SourceEntry((frm or "").strip(), _tree_path("to", to), excl)
 
 
 def env_action(text: str) -> EnvOp | LocalAssign:

@@ -70,7 +70,7 @@
 \lstdefinelanguage{yaml}
 {
 	alsoletter={-},
-	keywords={true,false,yes,no,plugin,depends,with-variants,vcs,build-depends,options,protocol,packages,config-options,cross,variants,patches,for,in,if,then,else,version,write,append,setup,wrapup,archive,file,plan,modules,functions,params,run,proxy,inherit,hooks,name,from,no-variant,vars,passthrough,echo,prefix},
+	keywords={true,false,yes,no,plugin,depends,with-variants,vcs,build-depends,options,protocol,packages,config-options,cross,variants,patches,for,in,if,then,else,version,write,append,setup,wrapup,archive,file,plan,modules,functions,params,run,proxy,inherit,hooks,name,from,no-variant,vars,passthrough,echo,prefix,source-tree,to,exclude},
 	keywordstyle=\color{black}\bfseries,
 	sensitive=false,
 	comment=[l]{\#},
@@ -93,6 +93,7 @@
 	  {config:}{{\bfseries\textcolor{black}{config:}}}{7}
 	  {config-options:}{{\bfseries\textcolor{black}{config-options:}}}{15}
 	  {config-options}{{\bfseries\textcolor{black}{config-options}}}{14}
+	  {source-tree:}{{\bfseries\textcolor{black}{source-tree:}}}{12}
 	  {rewrite-vcs:}{{\bfseries\textcolor{black}{rewrite-vcs:}}}{12}
 	  {rewrite-archive:}{{\bfseries\textcolor{black}{rewrite-archive:}}}{14}
 	  {module-final-step:}{{\bfseries\textcolor{black}{module-final-step:}}}{18}
@@ -1498,6 +1499,49 @@ archive:
 		\end{enumerate}
 	\end{description}
 
+	\item[source-tree {[}<variant>{]}] \index{hook!source-tree}\label{source-tree}The source
+	tree of the build made of the sources of several modules, for a module
+	whose sources are spread over several repositories. A list of entries,
+	applied in order at the setup step into the source tree of the build
+	(\file{<target>-<variant>/src}), each one with:
+
+	\begin{description}[font=\texttt]
+		\item[from] A module whose sources are copied: it must be a
+		dependency of the module (\code{depends} or \code{build-depends},
+		for its variant and the target), an error otherwise. Without
+		\code{from} the entry copies the sources of the module itself (its
+		patches are applied there).
+		\item[to] Where the sources go in the source tree (default \code{.}).
+		\item[exclude] Paths relative to the root of the sources of the
+		entry, not copied.
+	\end{description}
+
+	Each entry makes its target an exact copy of its sources: a file
+	removed upstream is removed, a directory is replaced, the unchanged
+	files keep their time (no needless rebuild). The VCS directories are
+	not copied, nor the targets of the following entries placed inside it
+	(filled by them). Without this hook the source tree of the build is a
+	copy of the sources of the module. For example, a patched Ada tree:
+	GCC at the top, the sources of the module (Ada) in \file{gcc/ada} and
+	gcc-interface in \file{gcc/ada/gcc-interface}:
+
+	\begin{lstlisting}[language={yaml}]
+source-tree:
+  - from: p-gcc
+  - to: gcc/ada
+  - from: p-gcc-interfaces
+    to: gcc/ada/gcc-interface
+
+depends:
+  - p-gcc
+  - p-gcc-interfaces
+	\end{lstlisting}
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
+		\item[return] \tabto{2cm} array of entries (\code{from}, \code{to}, \code{exclude})
+	\end{description}
+
 	\item[version {[}<variant>{]}] \index{hook!version}A command hook printing the version of the installed module.
 	\begin{description}[font=\textit,style=standard]
 		\item[parameter] \tabto{2cm} \code{\$PREFIX \$TARGET \$VARIANT}
@@ -2710,6 +2754,10 @@ All the problems found are reported:
 	recursive or no) and \code{propagate-version} (version, variant, both
 	or no), conditions, functions in values and environment actions, a
 	literal level of \code{log} which is not an integer >= 1;
+	\item in \code{source-tree}: an entry whose \code{from} is not a
+	dependency (\code{depends}, \code{build-depends}), two entries with the
+	same target (errors); an entry replaced by a later one, no entry for
+	the sources of a module having some (warnings);
 	\item warnings: empty hooks, \code{out-of-tree} in a meta-module
 	(\code{modules} and no sources: it is not built), and variables used by a hook (shell code,
 	values, environment actions; not the text of the \code{write-raw}

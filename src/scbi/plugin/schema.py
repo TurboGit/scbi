@@ -52,7 +52,23 @@ def _value_body(hook: str) -> dict:
     return body
 
 
+_SOURCE_ENTRY = {
+    "type": "object",
+    "minProperties": 1,
+    "additionalProperties": False,
+    "properties": {
+        "from": {"type": "string", "description": "A dependency of the module (depends, build-depends) whose"
+                                                  " sources are copied; none: the sources of this module."},
+        "to": {"type": "string", "description": "The target in the source tree of the build (default .)."},
+        "exclude": {"anyOf": [{"type": "string"}, _STRING_LIST],
+                    "description": "Paths relative to the root of the sources, not copied."},
+    },
+}
+
+
 def _body(hook: str) -> dict:
+    if hook == "source-tree":
+        return _list_body(_SOURCE_ENTRY)
     kind = catalog.spec(hook).kind
     if kind == catalog.COMMAND:
         return {"type": "string"}

@@ -169,6 +169,8 @@ def _keys_order(path: tuple, value: dict):
         return _field_order(INHERIT_ORDER)
     if construct.is_record(top, value):
         return _field_order(construct.RECORDS[top])
+    if construct.is_source_entry(top, value):
+        return _field_order(construct.SOURCE_FIELDS)
     if catalog.is_hook(top) and yamlfmt._is_qualifier_map(top, value):
         return _qualifier_rank
     return None

@@ -20,7 +20,7 @@ from dataclasses import dataclass
 import yaml
 
 from scbi.plugin import catalog, yamlfmt
-from scbi.plugin.model import EnvOp, EnvOps, Guarded, Commands, LocalAssign, Values
+from scbi.plugin.model import EnvOp, EnvOps, Guarded, Commands, LocalAssign, SourceEntry, Values
 
 ERROR = "error"
 WARNING = "warning"
@@ -207,6 +207,9 @@ class Linter:
                 continue
             self.check_hook(key, value)
 
+        if "source-tree" in data:
+            self.check_source_tree()
+
         #  a meta-module (modules, no sources) is not built: out-of-tree
         #  has no use
         if "modules" in data and "out-of-tree" in data and not ({"vcs", "archive"} & set(map(str, data))):
@@ -217,6 +220,53 @@ class Linter:
                 known = set(f.params) | set(ALL_PARAMS)
                 self.check_shell(f"function {fname}", f.script, known, other_params=False)
         return self.issues
+
+    def check_source_tree(self) -> None:
+        """source-tree: each from a dependency (depends, build-depends, any
+        qualifier), no two entries with the same target, no entry replaced
+        by a later one, the sources of the module used."""
+        def entries(items):
+            for it in items:
+                if isinstance(it, Guarded):
+                    yield from entries(it.items)
+                elif isinstance(it, SourceEntry):
+                    yield it
+
+        try:
+            tree = yamlfmt.from_data(self.name, {"source-tree": self.data["source-tree"]}, self.name)
+        except yamlfmt.FormatError:
+            return  # reported by check_hook
+        deps: set[str] = set()
+        for key in ("depends", "build-depends"):
+            if key not in self.data:
+                continue
+            try:
+                pdef = yamlfmt.from_data(self.name, {key: self.data[key]}, self.name)
+            except yamlfmt.FormatError:
+                continue
+            for body in pdef.hooks.values():
+                for text in _texts(body.items if isinstance(body, Values) else ()):
+                    for w in text.split():
+                        deps.add(re.split(r"[/:]", w, maxsplit=1)[0])
+        own = False
+        for key, body in tree.hooks.items():
+            label = "source-tree" + (".cross" if key.cross else "") + (f".{key.qualifier}" if key.qualifier else "")
+            found = list(entries(body.items))
+            own = own or any(not e.from_ for e in found)
+            for e in found:
+                if e.from_ and "$" not in e.from_ and e.from_ not in deps:
+                    self.error(label, f"{e.from_} is not a dependency (depends, build-depends)")
+            targets = [e.to for e in found]
+            for to in sorted({t for t in targets if targets.count(t) > 1}):
+                self.error(label, f"several entries copied to {to}")
+            for i, e in enumerate(found):
+                for later in found[i + 1:]:
+                    if later.to != e.to and (later.to == "." or e.to.startswith(f"{later.to}/")):
+                        self.warning(label, f"the entry of {e.from_ or 'the module'} ({e.to}) is replaced by"
+                                     f" the later entry of {later.from_ or 'the module'} ({later.to})")
+                        break
+        if not own and ("vcs" in self.data or "archive" in self.data):
+            self.warning("source-tree", "no entry for the sources of the module (an entry without from): unused")
 
     def _env_defined(self) -> set[str]:
         """Variables set by the environment actions of the plug-in."""
@@ -536,6 +586,8 @@ def _texts(items) -> list[str]:
                 out.append(it.args[0])
         elif isinstance(it, LocalAssign):
             out.append(it.text)
+        elif isinstance(it, SourceEntry):
+            out += [it.from_, it.to, *it.exclude]
         elif isinstance(it, str):
             out.append(it)
     return out

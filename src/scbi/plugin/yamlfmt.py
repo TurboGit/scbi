@@ -53,6 +53,7 @@ from scbi.plugin.model import (
     Inherit,
     WithVariant,
     PluginDef,
+    SourceEntry,
     Values,
 )
 
@@ -138,6 +139,16 @@ def _value_item(item, where: str):
     raise _err(where, f"unexpected value {item!r}")
 
 
+def _source_item(item, where: str):
+    """An entry of the source-tree hook (a mapping from/to/exclude) or a
+    guarded list of entries."""
+    if isinstance(item, dict) and len(item) == 1 and str(next(iter(item))).startswith("if "):
+        return _guarded(item, where, _source_item)
+    if isinstance(item, dict):
+        return _built(where, construct.source_entry, item)
+    raise _err(where, f"a source-tree entry (from, to, exclude) is expected, not {item!r}")
+
+
 def _env_item(item, where: str):
     if isinstance(item, dict):
         return _guarded(item, where, _env_item)
@@ -169,6 +180,8 @@ def _body(hook: str, value, where: str):
     kind = catalog.spec(hook).kind
     if kind == COMMAND:
         return _commands(value, where)
+    if hook == "source-tree":
+        return Values(tuple(_source_item(i, where) for i in _as_list(value, where)))
     if kind == VALUE:
         if isinstance(value, dict) and construct.is_record(hook, value):
             return _built(where, construct.record, hook, value)
@@ -179,7 +192,7 @@ def _body(hook: str, value, where: str):
 def _is_qualifier_map(hook: str, value) -> bool:
     if not isinstance(value, dict):
         return False
-    if construct.is_record(hook, value):
+    if construct.is_record(hook, value) or construct.is_source_entry(hook, value):
         return False
     #  a guarded single item is a list item, not a qualifier map
     return not (len(value) == 1 and str(next(iter(value))).startswith("if "))
@@ -293,6 +306,13 @@ def _dump_items(items) -> list:
             out.append({f"if {it.cond}": inner[0] if len(inner) == 1 else inner})
         elif isinstance(it, EnvOp):
             out.append(" ".join((it.verb,) + it.args))
+        elif isinstance(it, SourceEntry):
+            entry: dict = {"from": it.from_} if it.from_ else {}
+            if it.to != "." or not it.from_:
+                entry["to"] = it.to
+            if it.exclude:
+                entry["exclude"] = list(it.exclude)
+            out.append(entry)
         else:
             out.append(str(it))
     return out

@@ -66,8 +66,20 @@ _ASTS: dict[tuple[str, int], tuple] = {}
 @dataclass(frozen=True)
 class Values:
     #  str (a line, may use $VAR and built-in $(function ...)), Guarded or
-    #  LocalAssign
+    #  LocalAssign; SourceEntry for the source-tree hook
     items: tuple
+
+
+@dataclass(frozen=True)
+class SourceEntry:
+    """An entry of the source-tree hook: the sources of ``from_`` (a
+    dependency; empty: the module itself) copied to ``to`` in the source
+    tree of the build, without the paths ``exclude`` (relative to the
+    root of the sources)."""
+
+    from_: str = ""
+    to: str = "."
+    exclude: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

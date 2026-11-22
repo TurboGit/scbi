@@ -28,6 +28,20 @@ from scbi.sources import buildid
 STEPS = ("setup", "pre-install", "install", "purge")
 
 
+
+def later_targets(entries, i: int) -> list[str]:
+    """The targets of the source-tree entries after the i-th one inside its
+    target, relative to it: not copied by the i-th entry (filled by the
+    later ones)."""
+    to = entries[i].to
+    out: list[str] = []
+    for later in entries[i + 1:]:
+        if to == "." and later.to != ".":
+            out.append(later.to)
+        elif later.to.startswith(f"{to}/"):
+            out.append(later.to[len(to) + 1:])
+    return out
+
 class Tee:
     """``2>&1 | tee [-a] FILE``: text to the console and to FILE."""
 
@@ -174,6 +188,71 @@ class Generic:
                 res = 1
         return res
 
+    # ---------------------------------------------------------- source-tree
+
+    def source_tree(self, prefix: str, target: str):
+        """The entries of the source-tree hook of the module (guards and
+        values evaluated), None without the hook."""
+        from scbi.hooks.evaluate import eval_source_tree, set_plugin_vars
+        from scbi.plugin.model import Values
+        from scbi.plugin.resolve import get_hook
+
+        runner = self.d.runner()
+        fct = get_hook(self.d.registry, self.module, self.variant, "source-tree", runner.cross)
+        body = self.d.registry.functions.get(fct) if fct else None
+        if not isinstance(body, Values):
+            return None
+        ctx = runner.context(self.module, self.variant, "source-tree", [prefix, target, self.variant],
+                             self.d.plan, self.b.modules_list)
+        set_plugin_vars(ctx, self.d.registry.plugin_variables(self.module))
+        return eval_source_tree(body, ctx)
+
+    def dependency_names(self, prefix: str, target: str) -> set[str]:
+        """The modules of the depends and build-depends hooks of the module
+        (for its variant and the target), without variant nor version."""
+        import re
+
+        runner = self.d.runner()
+        names: set[str] = set()
+        for hook in ("depends", "build-depends"):
+            values = runner.variant_values(self.module, self.variant, hook, [prefix, target, self.variant],
+                                           self.d.plan, self.b.modules_list)
+            for w in words("\n".join(values)):
+                if not w.startswith("os@-"):
+                    names.add(re.split(r"[/:]", w.split("=", 1)[-1], maxsplit=1)[0])
+        return names
+
+    def assemble(self, entries, root: str, prefix: str, target: str) -> tuple[int, str]:
+        """The source tree ``root`` made of the entries, in order: each one
+        mirrors its sources into its target (rsync --delete: the files
+        removed upstream are removed, the unchanged ones keep their time),
+        without its excludes, the VCS directories and the targets of the
+        later entries inside it (filled by them). Returns the status and
+        the directory of the module's own sources ("" if none)."""
+        deps = self.dependency_names(prefix, target)
+        for e in entries:
+            if e.from_ and e.from_ not in deps:
+                self.elog("source-tree:", e.from_, "is not a dependency (depends, build-depends)")
+                return 1, ""
+        own = ""
+        for i, e in enumerate(entries):
+            if e.from_:
+                src = self.b.modules_dir.get(f"{e.from_}@src", "")
+            else:
+                src = "src"
+            if not src or not os.path.isdir(src):
+                self.elog("source-tree:", "no", "sources", "for", e.from_ or self.module)
+                return 1, ""
+            dst = root if e.to == "." else f"{root}/{e.to}"
+            excludes = list(e.exclude) + later_targets(entries, i)
+            os.makedirs(dst, exist_ok=True)
+            opts = ["--delete", "--exclude=.hg", "--exclude=CVS"] + [f"--exclude=/{x}" for x in excludes]
+            if self.sync_dir(f"{src}/.", f"{dst}/", *opts) != 0:
+                return 1, ""
+            if not e.from_:
+                own = dst
+        return 0, own
+
     def setup(self, prefix: str, target: str, oot: str) -> int:
         """``module-setup`` (run from $SCBI_BDIR/<module>)."""
         cached = self.cached()
@@ -181,7 +260,24 @@ class Generic:
         tvdir = self.realpath_relative(self.tvdir, ".") or ""
         res = 0
         hassrc = True
-        if os.path.exists(f"src{lnk}") or os.path.isdir("src"):
+        entries = self.source_tree(prefix, target)
+        if entries is not None:
+            #  the source tree made of the sources of several modules
+            if not cached:
+                res, own = self.assemble(entries, f"{tvdir}/src", prefix, target)
+                if res != 0:
+                    return res
+                if os.path.isfile(f"source-id-{self.variant}"):
+                    self.cp(f"source-id-{self.variant}", f"{tvdir}/source-id")
+                if self.get("DO_PATCH") == "yes":
+                    cwd = os.getcwd()
+                    #  the patches of the module: in its own sources
+                    os.chdir(own or f"{tvdir}/src")
+                    try:
+                        res = self.patch(prefix, target, self.module)
+                    finally:
+                        os.chdir(cwd)
+        elif os.path.exists(f"src{lnk}") or os.path.isdir("src"):
             if os.path.islink("module-src"):
                 srcdir, opt = "module-src", ""
             else:

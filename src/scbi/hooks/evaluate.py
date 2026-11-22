@@ -14,7 +14,7 @@ from scbi.hooks import builtins
 from scbi.hooks.context import HookContext
 from scbi.hooks.expand import expand
 from scbi.plugin import expr
-from scbi.plugin.model import EnvOp, EnvOps, Guarded, LocalAssign, Values
+from scbi.plugin.model import EnvOp, EnvOps, Guarded, LocalAssign, SourceEntry, Values
 
 
 class EvalError(Exception):
@@ -108,8 +108,27 @@ def eval_values(values: Values, ctx: HookContext) -> list[str]:
     for it in _select(values.items, ctx):
         if isinstance(it, LocalAssign):
             ctx.locals[it.name] = expand(it.text, ctx)
+        elif isinstance(it, SourceEntry):
+            continue  # source-tree: eval_source_tree
         else:
             out.append(expand(it, ctx))
+    return out
+
+
+def eval_source_tree(values: Values, ctx: HookContext) -> list[SourceEntry]:
+    """The entries of a source-tree hook selected by their guards, their
+    fields expanded."""
+    from scbi.plugin import construct
+
+    out: list[SourceEntry] = []
+    for it in _select(values.items, ctx):
+        if isinstance(it, LocalAssign):
+            ctx.locals[it.name] = expand(it.text, ctx)
+        elif isinstance(it, SourceEntry):
+            fields: dict = {"to": expand(it.to, ctx), "exclude": [expand(e, ctx) for e in it.exclude]}
+            if it.from_:
+                fields["from"] = expand(it.from_, ctx)
+            out.append(construct.source_entry(fields))
     return out
 
 
