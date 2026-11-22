@@ -13,11 +13,7 @@ version: force
 #  %.pdf: %.tex $(DIF) $(BIB)
 
 $(PDF): $(TEX) $(DIF) $(BIB) version
-	-latex $(TEX)
-	-bibtex $(NAM)
-	-makeindex $(NAM)
-	-latex $(TEX)
-	pdflatex $(TEX)
+	latexmk -pdf -interaction=nonstopmode $(TEX)
 
 clean:
-	rm -f *.bbl *.blg *.log *.out *.toc *.aux $(PDF)
+	latexmk -C
