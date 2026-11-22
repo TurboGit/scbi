@@ -278,12 +278,10 @@ class Generic:
                     finally:
                         os.chdir(cwd)
         elif os.path.exists(f"src{lnk}") or os.path.isdir("src"):
-            if os.path.islink("module-src"):
-                srcdir, opt = "module-src", ""
-            else:
-                srcdir, opt = f"{tvdir}/src", "--delete"
+            #  the sources of the module (several modules: source-tree)
+            srcdir = f"{tvdir}/src"
             if not cached:
-                if self.sync_dir("src/.", f"{srcdir}/", opt) == 0:
+                if self.sync_dir("src/.", f"{srcdir}/", "--delete") == 0:
                     self.cp(f"source-id-{self.variant}", f"{tvdir}/source-id")
                 if self.get("DO_PATCH") == "yes":
                     cwd = os.getcwd()

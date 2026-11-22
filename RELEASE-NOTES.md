@@ -48,7 +48,9 @@ with the Bash driver of the `master` branch. The reference manual
   `source` to `inherit`; functions and commands to rewrite by hand).
 - **Renamed**: the `os-variants` key is now `with-variants`.
 - **Removed**: the `gprbuild-project` built-in (use `ok("gprbuild ...")` in
-  a condition), the Bash runtime files.
+  a condition), the Bash runtime files, the `module-src` link (where a
+  plug-in put its own sources in the source tree): use the `source-tree`
+  hook.
 - **First build**: the build identifier of a module is now computed from
   its resolved plug-in (see below): the modules are rebuilt once after the
   upgrade.
@@ -76,6 +78,12 @@ with the Bash driver of the `master` branch. The reference manual
 - `build-<target>` hooks: the build step used with
   `--build-target=<target>`.
 - An item of `config-options` expanding to nothing is dropped.
+
+- **`source-tree`**: the source tree of the build made of the sources of
+  several modules (e.g. GCC, GNAT in `gcc/ada`, gcc-interface in
+  `gcc/ada/gcc-interface`), entries applied in order, each one an exact
+  copy of its sources (files removed upstream removed); each `from` must
+  be a dependency of the module.
 
 ## The command language
 
