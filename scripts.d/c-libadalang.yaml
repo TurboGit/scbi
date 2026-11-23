@@ -38,8 +38,14 @@ build-depends:
       - p-gnat
       - host@c-gprbuild
       - c-e3
-      #  lkm generate: langkit and liblktlang run on the host
+      #  lkm generate: langkit and liblktlang run on the host, with the
+      #  libraries they need (their dependencies are not walked for a host@)
       - host@c-langkit
+      - host@c-gnatcoll-core
+      - host@c-gnatcoll-bindings-gmp
+      - host@c-gnatcoll-bindings-iconv
+      - host@c-prettier-ada
+      - host@c-vss-text
 
 env:
   - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
@@ -64,8 +70,7 @@ build:
       for KIND in ${SCBI_LAL_LIBS}:
           gprbuild $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND -XGPR2_LIBRARY_TYPE=static ./build/libadalang.gpr || return 1
 
-pre-install: |-
-  gprinstall --prefix=$PREFIX --uninstall libadalang || true
+pre-install: gprinstall --prefix=$PREFIX --uninstall libadalang || true
 
 install:
   _: |-
@@ -74,7 +79,6 @@ install:
     for KIND in ${SCBI_LAL_LIBS}:
         gprinstall $GOPTS -XLIBRARY_TYPE=$KIND -XXMLADA_BUILD=$KIND --build-name=$KIND ./build/libadalang.gpr || return 1
   cross:
-    pre: |-
-      gprinstall --prefix=$PREFIX --target=$TARGET --uninstall libadalang || true
+    pre: gprinstall --prefix=$PREFIX --target=$TARGET --uninstall libadalang || true
 
 prefix: NONE
