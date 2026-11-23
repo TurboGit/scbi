@@ -20,8 +20,12 @@ post-setup:
     echo @@@LIB1-FINS $(module-dir lib1)
     echo @@@LIB1-FSRC $(module-dir lib1 src)
     echo @@@LIB1-FBLD $(module-dir lib1 build)
+    echo @@@LIB1-OPT $(config-options)
 
 out-of-tree: false
+
+config-options:
+  - --lib1=$(module-dir lib1)
 
 build: |-
   delete *.o

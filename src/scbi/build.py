@@ -74,6 +74,8 @@ class Builder:
         self.modules_list: list[str] = []
         self.handled: set[str] = set()
         self.modules_dir: dict[str, str] = {}
+        #  the value hooks see the directories of the modules too
+        driver.runner().modules_dir = lambda: self.modules_dir
         self.flatdir: dict[str, str] = {}
         self.ftdir = 1
         #  the sources fetched ahead (--update:prefetch: scbi.sources.prefetch)

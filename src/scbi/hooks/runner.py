@@ -40,6 +40,9 @@ class HookRunner:
         self.target = target
         self.discriminants = discriminants
         self.cwd = cwd
+        #  the directories of the modules of the build (SCBI_MODULES_DIR),
+        #  given by the builder
+        self.modules_dir: Callable[[], dict[str, str]] = dict
 
     @property
     def cross(self) -> bool:
@@ -54,6 +57,7 @@ class HookRunner:
             env=Environment(ShellVars(dict(sv.values), set(sv.exported))),
             plan=plan, modules_list=list(modules_list or []), host=self.host, target=self.target,
             discriminants=frozenset(self.discriminants()), cwd=self.cwd,
+            arrays={"SCBI_MODULES_DIR": dict(self.modules_dir())},
             scbi_bdir=sv.values.get("SCBI_BDIR", ""),
         )
 

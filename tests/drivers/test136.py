@@ -70,6 +70,8 @@ SCBI_TARGET=$SCBI_HOST
     t.grep(*t.words('"^@@@LIB1-FINS ${LIB1DIR}/install" $LFILE'))
     t.grep(*t.words('"^@@@LIB1-FSRC ${LIB1DIR}/src" $LFILE'))
     t.grep(*t.words('"^@@@LIB1-FBLD ${LIB1DIR}/src" $LFILE'))
+    #  a value hook (config-options) sees the module directories too
+    t.grep(*t.words('"^@@@LIB1-OPT --lib1=${LIB1DIR}/install" $LFILE'))
 
     t.ok('-d $BDIR/install/bin')
     t.ok('-d $BDIR/install/include')
