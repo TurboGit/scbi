@@ -22,7 +22,7 @@ build-depends:
       - host@c-gprbuild
 
 env:
-  - assign LALT $SCBI_BDIR/c-libadalang-tools
+  - LALT = $SCBI_BDIR/c-libadalang-tools
   - add-to-var GPR_PROJECT_PATH $LALT/$TARGET-$VARIANT/build/src
   - add-to-var LD_LIBRARY_PATH $PREFIX/lib
 

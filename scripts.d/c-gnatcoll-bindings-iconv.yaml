@@ -26,7 +26,8 @@ env:
   - add-to-var LD_LIBRARY_PATH $PREFIX/lib
 
 build-env:
-  - set-var GNATCOLL_ICONV_OPT -lc
+  #  the iconv of the libc on GNU/Linux, libiconv (default -liconv) otherwise
+  - if not cross: set-var GNATCOLL_ICONV_OPT -lc
 
 out-of-tree: false
 

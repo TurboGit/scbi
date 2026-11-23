@@ -7,6 +7,7 @@ vcs:
   url: https://github.com/AdaCore/vss-text
 
 build-depends:
+  - c-sandbox
   - p-gnat
   - host@c-gprbuild
 
@@ -16,6 +17,10 @@ env:
 
 out-of-tree: false
 
-build: make -j1 build-all-libs
+build:
+  _: make -j1 build-all-libs
+  cross: make -j1 GPRFLAGS="--target=$TARGET" build-all-libs
 
-install: make -j1 PREFIX=$PREFIX install-all-libs
+install:
+  _: make -j1 PREFIX=$PREFIX install-all-libs
+  cross: make -j1 PREFIX=$PREFIX GPRFLAGS="--target=$TARGET" install-all-libs

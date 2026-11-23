@@ -1,0 +1,58 @@
+diff --git a/Makefile b/Makefile
+index 7ddec3b..2f28596 100644
+--- a/Makefile
++++ b/Makefile
+@@ -10,7 +10,7 @@ TEST_PROGRAMS = testsuite/test_programs/test_programs.gpr
+ 
+ .PHONY: lib
+ lib:
+-	gprbuild \
++	gprbuild $(GPRFLAGS) \
+ 		-v \
+ 		-k \
+ 		-XLIBRARY_TYPE=$(LIBRARY_TYPE) \
+@@ -23,7 +23,7 @@ lib:
+ .PHONY: all
+ all:
+ 	for library_type in $(ALL_LIBRARY_TYPES) ; do \
+-		gprbuild \
++		gprbuild $(GPRFLAGS) \
+ 			-v \
+ 			-k \
+ 			-XPRETTIER_ADA_LIBRARY_TYPE=$$library_type \
+@@ -43,7 +43,7 @@ clean:
+ 
+ .PHONY: install
+ install:
+-	gprinstall \
++	gprinstall $(GPRFLAGS) \
+ 		-XPRETTIER_ADA_LIBRARY_TYPE=$(LIBRARY_TYPE) \
+ 		-XLIBRARY_TYPE=$(LIBRARY_TYPE) \
+ 		-XPRETTIER_ADA_BUILD_MODE=$(BUILD_MODE) \
+@@ -58,7 +58,7 @@ install:
+ .PHONY: install-all
+ install-all:
+ 	for library_type in $(ALL_LIBRARY_TYPES) ; do \
+-		gprinstall \
++		gprinstall $(GPRFLAGS) \
+ 			-XPRETTIER_ADA_LIBRARY_TYPE=$$library_type \
+ 			-XLIBRARY_TYPE=$$library_type \
+ 			-XPRETTIER_ADA_BUILD_MODE=$(BUILD_MODE) \
+@@ -73,7 +73,7 @@ install-all:
+ 
+ .PHONY: test-programs
+ test-programs:
+-	gprbuild \
++	gprbuild $(GPRFLAGS) \
+ 		-v \
+ 		-k \
+ 		-XLIBRARY_TYPE=static \
+@@ -85,7 +85,7 @@ test-programs:
+ 
+ .PHONY: install-test-programs
+ install-test-programs:
+-	gprinstall \
++	gprinstall $(GPRFLAGS) \
+ 		-XLIBRARY_TYPE=static \
+ 		-XPRETTIER_ADA_LIBRARY_TYPE=static \
+ 		-XPRETTIER_ADA_BUILD_MODE=$(BUILD_MODE) \

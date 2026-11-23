@@ -7,8 +7,9 @@ vcs:
   url: https://github.com/AdaCore/gtkada
 
 build-depends:
+  - c-sandbox
   - p-gnat
-  - c-gpr2-tools
+  - host@c-gpr2-tools
 
 build-env:
   - add-to-var GPR_PROJECT_PATH $PREFIX/lib/gnat

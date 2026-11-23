@@ -6,7 +6,7 @@ functions:
       - PREFIX
       - TARGET
       - BUILD
-    run: make $BUILD prefix=$PREFIX GPR2KBDIR=${SCBI_MODULES_DIR[c-gprconfig-kb@src]}/db PYTHON=python3 setup
+    run: make $BUILD prefix=$PREFIX $(if cross then TARGET=$TARGET) GPR2KBDIR=$(module-dir c-gprconfig-kb src)/db PYTHON=python3 setup
 
 vcs:
   proxy: default
@@ -20,6 +20,7 @@ depends:
   - c-gnatcoll-bindings-gmp
 
 build-depends:
+  - c-sandbox
   - p-gnat
   - host@c-gprbuild
   - c-e3
@@ -36,8 +37,13 @@ config:
   _: do-gpr2-lib-config $PREFIX $TARGET "BUILD=release"
   debug: do-gpr2-lib-config $PREFIX $TARGET "BUILD=debug"
 
-build: make build-lib-relocatable build-lib-static-pic build-lib-static
-
-install: make GPRINSTALL=gprinstall install-lib-relocatable install-lib-static-pic install-lib-static
+build:
+  _: make build-lib-relocatable build-lib-static-pic build-lib-static
+  cross:
+    _: make TARGET=$TARGET build-lib-relocatable build-lib-static-pic build-lib-static
+install:
+  _: make GPRINSTALL=gprinstall install-lib-relocatable install-lib-static-pic install-lib-static
+  cross:
+    _: make TARGET=$TARGET GPRINSTALL=gprinstall install-lib-relocatable install-lib-static-pic install-lib-static
 
 prefix: NONE

@@ -21,10 +21,16 @@ build-depends:
   - c-sandbox
 
 env:
-  - add-to-var C_INCLUDE_PATH $PREFIX/include
-  - add-to-var CXX_INCLUDE_PATH $PREFIX/include
-  - add-to-var LD_LIBRARY_PATH $PREFIX/lib
-  - add-to-var LIBRARY_PATH $PREFIX/lib
+  _:
+    - add-to-var C_INCLUDE_PATH $PREFIX/include
+    - add-to-var CXX_INCLUDE_PATH $PREFIX/include
+    - add-to-var LD_LIBRARY_PATH $PREFIX/lib
+    - add-to-var LIBRARY_PATH $PREFIX/lib
+  cross:
+    - add-to-var C_INCLUDE_PATH $PREFIX/$TARGET/include
+    - add-to-var CXX_INCLUDE_PATH $PREFIX/$TARGET/include
+    - add-to-var LD_LIBRARY_PATH $PREFIX/$TARGET/lib
+    - add-to-var LIBRARY_PATH $PREFIX/$TARGET/lib
 
 out-of-tree: false
 
@@ -37,4 +43,9 @@ build: make -j$SCBI_JOBS
 
 install: make install
 
-prefix: NONE
+prefix:
+  _: NONE
+  cross:
+    #  in $SCBI_PREFIX/$TARGET (--prefix=$PREFIX/$TARGET): found by the cross
+    #  compiler
+    _: $SCBI_PREFIX

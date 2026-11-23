@@ -1,0 +1,15 @@
+diff --git a/Makefile b/Makefile
+index 87db83629..c0573c3cd 100644
+--- a/Makefile
++++ b/Makefile
+@@ -140,6 +140,10 @@ endif
+ GPR_OPTIONS := -XGPR2_BUILD=${GPR2_BUILD} \
+                -XBUILD_ROOT="${CURDIR}/${BUILD_ROOT}"
+ 
++ifneq (,$(TARGET))
++GPR_OPTIONS += --target=$(TARGET)
++endif
++
+ BUILDER     := gprbuild -p -j${PROCESSORS} ${GPR_OPTIONS} \
+                ${GPRBUILD_OPTIONS} -XPROFILER=${PROFILER} \
+                ${COVERAGE_BUILD_FLAGS}

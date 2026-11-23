@@ -6,11 +6,15 @@ vcs:
   protocol: git
   url: https://github.com/AdaCore/prettier-ada
 
+patches:
+  cross: cross-prettier-ada.patch
+
 depends:
   - c-vss-text
   - c-gnatcoll-core
 
 build-depends:
+  - c-sandbox
   - p-gnat
   - host@c-gprbuild
 
@@ -20,8 +24,12 @@ env:
 
 out-of-tree: false
 
-build: make all
+build:
+  _: make all
+  cross: make GPRFLAGS="--target=$TARGET" all
 
-install: make PREFIX=$PREFIX install-all
+install:
+  _: make PREFIX=$PREFIX install-all
+  cross: make PREFIX=$PREFIX GPRFLAGS="--target=$TARGET" install-all
 
 prefix: NONE

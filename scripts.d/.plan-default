@@ -1,7 +1,8 @@
 @alias p-gnat use c-sandbox
 @alias p-gnatmem use c-sandbox
 # On GNU/Linux we use the iconv from libc
-@on linux use c-libiconv:skip
+@on linux,native use c-libiconv:skip
+@on linux,native use c-gnatcoll-bindings-iconv:skip
 p-gdb:gdb-head
 # Use 21 as this is the version compatible with c-llvm-bindings
 c-libclang:llvmorg-21.1.8
