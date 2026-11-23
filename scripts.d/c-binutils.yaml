@@ -34,14 +34,15 @@ config-options:
     - --disable-sim
     - --disable-libquadmath
     - --disable-readline
-    - --disable-ld
     - --enable-install-libiberty
   _:
     - --build=$SCBI_HOST
+    - --disable-ld
     - --enable-gold
     - --enable-plugins
   cross:
     _:
+      #  no --disable-ld: the cross compilers need the linker of the target
       - --target=$TARGET
 
 config: ../src/configure $(config-options)
