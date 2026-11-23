@@ -4,7 +4,7 @@ vcs:
   proxy: default
   options: none
   protocol: git
-  url: https://github.com/mirror/mingw-w64.git
+  url: https://github.com/mingw-w64/mingw-w64
 
 depends:
   - c-binutils
@@ -12,15 +12,12 @@ depends:
 env:
   - add-to-var C_INCLUDE_PATH $PREFIX/include
 
-build-env:
-  - no-target-env
-
 setup: |-
   if $TARGET =~ "^(?:.*mingw.*)$":
       true
   else:
       echo $TARGET not supported for mingw.
-      return 1
+      false
 
 out-of-tree: true
 
