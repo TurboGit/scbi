@@ -31,7 +31,12 @@ build-env:
 
 out-of-tree: false
 
-build: make BUILD_MODE=prod bin
+build:
+  _: make BUILD_MODE=prod bin
+  cross:
+    #  the Makefile calls gprbuild without a target: the GPRBUILD variable
+    #  gives it the target
+    _: make BUILD_MODE=prod "GPRBUILD=gprbuild --target=$TARGET -v -k -p -j$SCBI_JOBS" bin
 
 install: |-
   make install-bin-strip ALL_LIBRARY_TYPES="static" DESTDIR=$PREFIX
