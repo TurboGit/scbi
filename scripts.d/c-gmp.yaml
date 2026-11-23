@@ -53,6 +53,6 @@ config:
     _: ./configure --prefix=$PREFIX/$TARGET --build=$SCBI_HOST --host=$TARGET "CC=$TARGET-gcc -std=gnu17"
     vcs: ./configure --enable-maintainer-mode --prefix=$PREFIX/$TARGET --build=$SCBI_HOST --host=$TARGET "CC=$TARGET-gcc -std=gnu17"
 
-build: make -j$JOBS
+build: make -j$SCBI_JOBS
 
 install: make install

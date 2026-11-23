@@ -31,9 +31,9 @@ out-of-tree: false
 config:
   _: ./configure --prefix=$PREFIX
   cross:
-    _: ./configure --prefix=$PREFIX/$TARGET --build=$HOST --host=$TARGET
+    _: ./configure --prefix=$PREFIX/$TARGET --build=$SCBI_HOST --host=$TARGET
 
-build: make -j$JOBS
+build: make -j$SCBI_JOBS
 
 install: make install
 
