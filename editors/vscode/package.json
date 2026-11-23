@@ -141,13 +141,31 @@
         "language": "scbi-plan",
         "scopeName": "source.scbi-plan",
         "path": "./syntaxes/scbi-plan.tmLanguage.json"
+      },
+      {
+        "scopeName": "source.scbi-commands",
+        "path": "./syntaxes/scbi-commands.tmLanguage.json"
+      },
+      {
+        "scopeName": "scbi.yaml-block.injection",
+        "path": "./syntaxes/scbi-yaml-block.injection.json",
+        "injectTo": [
+          "source.yaml"
+        ]
+      },
+      {
+        "scopeName": "scbi.yaml-plain.injection",
+        "path": "./syntaxes/scbi-yaml-plain.injection.json",
+        "injectTo": [
+          "source.yaml"
+        ]
       }
     ]
   },
   "scripts": {
     "compile": "tsc -p .",
     "watch": "tsc -watch -p .",
-    "test": "tsc -p . && node --test out/test/*.test.js && vscode-tmgrammar-test \"test/grammar/*.scbi-plan\"",
+    "test": "tsc -p . && node --test out/test/*.test.js && vscode-tmgrammar-test -g test/grammar/yaml/yaml.tmLanguage.json -g test/grammar/yaml/yaml-1.0.tmLanguage.json -g test/grammar/yaml/yaml-1.1.tmLanguage.json -g test/grammar/yaml/yaml-1.2.tmLanguage.json -g test/grammar/yaml/yaml-1.3.tmLanguage.json -g test/grammar/yaml/yaml-embedded.tmLanguage.json \"test/grammar/*.scbi-plan\" \"test/grammar/*.yaml\"",
     "package": "tsc -p . && vsce package",
     "vscode:prepublish": "tsc -p .",
     "smoke": "tsc -p . && node out/test/smoke/run.js"

@@ -1,0 +1,10 @@
+{
+  "scopeName": "scbi.yaml-plain.injection",
+  "injectionSelector": "L:string.unquoted.plain.out.yaml -entity.name.tag -comment -meta.scbi.region",
+  "comment": "SCBI command language in the YAML plain scalars (source.scbi-commands).",
+  "patterns": [
+    {
+      "include": "source.scbi-commands#plain"
+    }
+  ]
+}

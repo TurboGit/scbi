@@ -47,6 +47,26 @@ has a top-level `plugin:` key.
   `archive`, and on hover what each hook is for, its parameters and its
   kind. The schema comes from your `scbi` (`scbi schema`): it follows its
   version.
+- **Highlighting of the commands**: in the values of the YAML files the
+  command language is highlighted: the variables (`$NAME`, `${NAME%.c}`),
+  the built-ins (`$(get-version m)`, `cd`, `copy`, `VAR = get-version m`),
+  the environment actions (`add-to-var`, `set-var`...), the operators
+  (`&&`, `|`, `2>&1`), and in the bodies (`|` blocks) the comments, the
+  command of each line, `if`/`elif`/`else` with their condition, `for`,
+  `write FILE:` (its text is not a command). A one-line value can be any
+  value (`url: https://...`): only what SCBI knows is highlighted there.
+  The scopes end with `.scbi`; the YAML grammar shows the rest of a value
+  as a string. To have it in the color of the text, in your settings (the
+  `editor.foreground` of your theme):
+
+  ```json
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      { "scope": ["string.unquoted.plain.out.yaml", "string.unquoted.block.yaml"],
+        "settings": { "foreground": "#D4D4D4" } }
+    ]
+  }
+  ```
 
 ### Build plans
 

@@ -1,0 +1,10 @@
+{
+  "scopeName": "scbi.yaml-block.injection",
+  "injectionSelector": "L:string.unquoted.block.yaml -comment -meta.scbi.region",
+  "comment": "SCBI command language in the YAML block scalars (source.scbi-commands).",
+  "patterns": [
+    {
+      "include": "source.scbi-commands#block"
+    }
+  ]
+}

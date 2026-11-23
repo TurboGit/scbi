@@ -1,0 +1,438 @@
+{
+  "scopeName": "source.scbi-commands",
+  "name": "SCBI command language",
+  "comment": "Command hooks of the SCBI YAML plug-ins (src/scbi/hooks/cmdlang.py); injected in the YAML values by scbi-yaml-*.injection.json.",
+  "patterns": [
+    {
+      "include": "#block"
+    }
+  ],
+  "repository": {
+    "block": {
+      "comment": "A line of a block scalar (|): full command lines.",
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#control"
+        },
+        {
+          "include": "#write"
+        },
+        {
+          "include": "#assignment"
+        },
+        {
+          "include": "#env-action"
+        },
+        {
+          "include": "#builtin"
+        },
+        {
+          "include": "#env-prefix"
+        },
+        {
+          "include": "#command"
+        },
+        {
+          "include": "#line"
+        }
+      ]
+    },
+    "plain": {
+      "comment": "A plain one-line value: only what cannot be a plain value (url, proxy...).",
+      "patterns": [
+        {
+          "include": "#assignment"
+        },
+        {
+          "include": "#env-action"
+        },
+        {
+          "include": "#builtin-plain"
+        },
+        {
+          "include": "#env-prefix-plain"
+        },
+        {
+          "include": "#line"
+        }
+      ]
+    },
+    "builtin-plain": {
+      "match": "(?:^|\\G|(?<=&&|\\|\\||\\|))[ \\t]*(check-versions|delete-tree|apply-var|return|export|delete|unset|echo|exit|copy|log|cd)(?=[ \\t;|&<>)]|$)",
+      "captures": {
+        "1": {
+          "name": "support.function.builtin.scbi"
+        }
+      }
+    },
+    "line": {
+      "patterns": [
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#variable"
+        },
+        {
+          "include": "#operator"
+        },
+        {
+          "include": "#after-operator"
+        }
+      ]
+    },
+    "comment": {
+      "match": "(?:^|\\G)[ \\t]*(#.*)$",
+      "captures": {
+        "1": {
+          "name": "comment.line.number-sign.scbi"
+        }
+      }
+    },
+    "control": {
+      "patterns": [
+        {
+          "begin": "(?:^|\\G)[ \\t]*(if|elif)(?=[ \\t(])",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.conditional.scbi"
+            }
+          },
+          "end": "(:)[ \\t]*$|$",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.separator.colon.scbi"
+            }
+          },
+          "name": "meta.condition.scbi meta.scbi.region",
+          "patterns": [
+            {
+              "include": "#guard"
+            }
+          ]
+        },
+        {
+          "match": "(?:^|\\G)[ \\t]*(else)[ \\t]*(:)[ \\t]*$",
+          "captures": {
+            "1": {
+              "name": "keyword.control.conditional.scbi"
+            },
+            "2": {
+              "name": "punctuation.separator.colon.scbi"
+            }
+          }
+        },
+        {
+          "begin": "(?:^|\\G)[ \\t]*(for)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)[ \\t]+(in)(?=[ \\t])",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.loop.scbi"
+            },
+            "2": {
+              "name": "variable.other.loop.scbi"
+            },
+            "3": {
+              "name": "keyword.control.loop.scbi"
+            }
+          },
+          "end": "(:)[ \\t]*$|$",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.separator.colon.scbi"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#string"
+            },
+            {
+              "include": "#variable"
+            }
+          ],
+          "name": "meta.scbi.region"
+        }
+      ]
+    },
+    "guard": {
+      "patterns": [
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#variable"
+        },
+        {
+          "match": "(?<![\\w-])(is-aggregated|depends-kind|is-aggregate|build-type|version|enabled|is-file|is-link|is-meta|exists|is-dir|empty|dir|ok)(?=\\()",
+          "name": "support.function.guard.scbi"
+        },
+        {
+          "match": "(?<![\\w-])(and|or|not|on)(?![\\w-])",
+          "name": "keyword.operator.logical.scbi"
+        },
+        {
+          "match": "(?<![\\w-])(variant|target|status|cross|host|kind|ref)(?![\\w-])",
+          "name": "variable.language.guard.scbi"
+        },
+        {
+          "match": "==|!=|<=|>=|=~|<|>",
+          "name": "keyword.operator.comparison.scbi"
+        }
+      ]
+    },
+    "write": {
+      "patterns": [
+        {
+          "comment": "write-raw FILE: / append-raw FILE: the indented text as is",
+          "begin": "(?:^|\\G)([ \\t]*)(write-raw|append-raw)[ \\t]+(.*?)(:)[ \\t]*$",
+          "beginCaptures": {
+            "2": {
+              "name": "keyword.control.write.scbi"
+            },
+            "3": {
+              "name": "string.unquoted.filename.scbi",
+              "patterns": [
+                {
+                  "include": "#variable"
+                }
+              ]
+            },
+            "4": {
+              "name": "punctuation.separator.colon.scbi"
+            }
+          },
+          "while": "(?:^|\\G)(?=\\1[ \\t]+\\S|[ \\t]*$)",
+          "contentName": "meta.embedded.text.scbi meta.scbi.region",
+          "name": "meta.scbi.region"
+        },
+        {
+          "comment": "write FILE: / append FILE: the indented text, $VAR expanded",
+          "begin": "(?:^|\\G)([ \\t]*)(write|append)[ \\t]+(.*?)(:)[ \\t]*$",
+          "beginCaptures": {
+            "2": {
+              "name": "keyword.control.write.scbi"
+            },
+            "3": {
+              "name": "string.unquoted.filename.scbi",
+              "patterns": [
+                {
+                  "include": "#variable"
+                }
+              ]
+            },
+            "4": {
+              "name": "punctuation.separator.colon.scbi"
+            }
+          },
+          "while": "(?:^|\\G)(?=\\1[ \\t]+\\S|[ \\t]*$)",
+          "contentName": "meta.embedded.text.scbi meta.scbi.region",
+          "patterns": [
+            {
+              "include": "#variable"
+            }
+          ],
+          "name": "meta.scbi.region"
+        }
+      ]
+    },
+    "assignment": {
+      "match": "(?:^|\\G)[ \\t]*(?:(export)[ \\t]+)?([A-Za-z_][A-Za-z0-9_]*)[ \\t]+(\\+?=)(?=[ \\t]|$)(?:[ \\t]+(last-modified-directory|get-build-type|config-options|output-words|command-path|all-variants|get-version|all-modules|hook-output|env-actions|module-name|is-enabled|first-line|module-ref|target-dir|uppercase|lowercase|basename|dirname|replace|output|status|if)(?=[ \\t;|&<>)]|$))?",
+      "captures": {
+        "1": {
+          "name": "storage.modifier.export.scbi"
+        },
+        "2": {
+          "name": "variable.other.assignment.scbi"
+        },
+        "3": {
+          "name": "keyword.operator.assignment.scbi"
+        },
+        "4": {
+          "name": "support.function.builtin.scbi"
+        }
+      }
+    },
+    "env-action": {
+      "match": "(?:^|\\G)[ \\t]*(remove-from-var|system-compiler|prepend-to-var|append-to-var|no-target-env|add-to-var|define-var|target-env|unset-var|set-var|assign|import|local|mkdir)(?=[ \\t;|&<>)]|$)(?:[ \\t]+([A-Za-z_][A-Za-z0-9_]*)(?=[ \\t=]|$))?",
+      "captures": {
+        "1": {
+          "name": "support.function.env-action.scbi"
+        },
+        "2": {
+          "name": "variable.other.scbi"
+        }
+      }
+    },
+    "builtin": {
+      "match": "(?:^|\\G|(?<=&&|\\|\\||\\|))[ \\t]*(check-versions|delete-tree|apply-var|return|export|delete|false|unset|echo|exit|true|copy|log|cd|:)(?=[ \\t;|&<>)]|$)",
+      "captures": {
+        "1": {
+          "name": "support.function.builtin.scbi"
+        }
+      }
+    },
+    "env-prefix": {
+      "comment": "NAME=value... before the command (the command word ends it)",
+      "begin": "(?:^|\\G|(?<=&&|\\|\\||\\|))[ \\t]*(?=[A-Za-z_][A-Za-z0-9_]*=)",
+      "end": "(?<=[ \\t])(?![A-Za-z_][A-Za-z0-9_]*=)([^\\s=$\\\"'#|&<>;()\\\\]+)|(?=[;|&#]|$)",
+      "endCaptures": {
+        "1": {
+          "name": "entity.name.function.command.scbi"
+        }
+      },
+      "patterns": [
+        {
+          "match": "(?<![^ \\t])([A-Za-z_][A-Za-z0-9_]*)(=)",
+          "captures": {
+            "1": {
+              "name": "variable.other.assignment.scbi"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.scbi"
+            }
+          }
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#variable"
+        }
+      ],
+      "name": "meta.scbi.region"
+    },
+    "env-prefix-plain": {
+      "comment": "NAME=value... in a one-line value: the variables only",
+      "match": "(?:^|\\G|(?<=&&|\\|\\||\\|))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)(=)(?=\\S)",
+      "captures": {
+        "1": {
+          "name": "variable.other.assignment.scbi"
+        },
+        "2": {
+          "name": "keyword.operator.assignment.scbi"
+        }
+      }
+    },
+    "command": {
+      "match": "(?:^|\\G|(?<=&&|\\|\\||\\|))[ \\t]*([^\\s=$\\\"'#|&<>;()\\\\]+)(?=[ \\t;|&<>)]|$)",
+      "captures": {
+        "1": {
+          "name": "entity.name.function.command.scbi"
+        }
+      }
+    },
+    "after-operator": {
+      "comment": "the command after && || |",
+      "match": "(?<=&&|\\|\\||\\|)[ \\t]*([^\\s=$\\\"'#|&<>;()\\\\]+)(?=[ \\t;|&<>)]|$)",
+      "captures": {
+        "1": {
+          "name": "entity.name.function.command.scbi"
+        }
+      }
+    },
+    "operator": {
+      "patterns": [
+        {
+          "match": "&&|\\|\\||\\|",
+          "name": "keyword.operator.logical.scbi"
+        },
+        {
+          "match": "2>&1|&>|2>>|2>|>>|>|<",
+          "name": "keyword.operator.redirect.scbi"
+        },
+        {
+          "match": "\\\\$",
+          "name": "constant.character.escape.line-continuation.scbi"
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.quoted.double.scbi meta.scbi.region",
+          "patterns": [
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.scbi"
+            },
+            {
+              "include": "#variable"
+            }
+          ]
+        },
+        {
+          "begin": "'",
+          "end": "'",
+          "name": "string.quoted.single.scbi meta.scbi.region"
+        }
+      ]
+    },
+    "variable": {
+      "patterns": [
+        {
+          "begin": "(\\$\\()[ \\t]*([A-Za-z][\\w-]*)?",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.subshell.begin.scbi"
+            },
+            "2": {
+              "name": "support.function.builtin.scbi"
+            }
+          },
+          "end": "\\)",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.subshell.end.scbi"
+            }
+          },
+          "name": "meta.function-call.substitution.scbi meta.scbi.region",
+          "patterns": [
+            {
+              "include": "#string"
+            },
+            {
+              "include": "#variable"
+            }
+          ]
+        },
+        {
+          "begin": "\\$\\{",
+          "end": "\\}",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.variable.begin.scbi"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.variable.end.scbi"
+            }
+          },
+          "name": "variable.other.bracket.scbi meta.scbi.region",
+          "patterns": [
+            {
+              "match": "%%|##|%|#|:-",
+              "name": "keyword.operator.expansion.scbi"
+            },
+            {
+              "include": "#variable"
+            }
+          ]
+        },
+        {
+          "match": "(\\$)([A-Za-z_][A-Za-z0-9_]*|[0-9@*#?$])",
+          "name": "variable.other.scbi",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.variable.scbi"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

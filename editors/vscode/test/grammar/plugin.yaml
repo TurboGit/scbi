@@ -1,0 +1,76 @@
+# SYNTAX TEST "source.yaml" "SCBI command language in the YAML plug-ins"
+plugin: c-foo
+#       ^^^^^ string.unquoted.plain.out.yaml
+#       ^^^^^ - entity.name.function.command.scbi
+vcs:
+  url: https://example.org/foo
+#      ^^^^^^^^^^^^^^^^^^^^^^^ - entity.name.function.command.scbi
+out-of-tree: false
+#            ^^^^^ - support.function.builtin.scbi
+build-env:
+  - add-to-var PATH $PREFIX/bin
+#   ^^^^^^^^^^ support.function.env-action.scbi
+#              ^^^^ variable.other.scbi
+#                   ^ punctuation.definition.variable.scbi
+#                    ^^^^^^ variable.other.scbi
+build: PROCESSORS=$SCBI_JOBS make && echo done
+#      ^^^^^^^^^^ variable.other.assignment.scbi
+#                ^ keyword.operator.assignment.scbi
+#                 ^^^^^^^^^^ variable.other.scbi
+#                                 ^^ keyword.operator.logical.scbi
+#                                    ^^^^ support.function.builtin.scbi
+install: |-
+  # a comment
+# ^^^^^^^^^^^ comment.line.number-sign.scbi
+  ln -s ${DIR[c-lib@build]}/kb kb
+# ^^ entity.name.function.command.scbi
+#       ^^ punctuation.definition.variable.begin.scbi
+#         ^^^^^^^^^^^^^^^^ variable.other.bracket.scbi
+#                         ^ punctuation.definition.variable.end.scbi
+#                          ^^^^^^^^ - variable.other.bracket.scbi
+  if not (is-dir($DIR)) and version(c-lib) > 1.9:
+# ^^ keyword.control.conditional.scbi
+#    ^^^ keyword.operator.logical.scbi
+#         ^^^^^^ support.function.guard.scbi
+#                ^^^^ variable.other.scbi
+#                       ^^^ keyword.operator.logical.scbi
+#                           ^^^^^^^ support.function.guard.scbi
+#                                          ^ keyword.operator.comparison.scbi
+#                                               ^ punctuation.separator.colon.scbi
+      CC=gcc make -j$JOBS 2>&1 | tee log
+#     ^^ variable.other.assignment.scbi
+#            ^^^^ entity.name.function.command.scbi
+#                 ^^^^^^ - entity.name.function.command.scbi
+#                         ^^^^ keyword.operator.redirect.scbi
+#                              ^ keyword.operator.logical.scbi
+#                                ^^^ entity.name.function.command.scbi
+  else:
+# ^^^^ keyword.control.conditional.scbi
+      export VER = get-version c-lib
+#     ^^^^^^ storage.modifier.export.scbi
+#            ^^^ variable.other.assignment.scbi
+#                ^ keyword.operator.assignment.scbi
+#                  ^^^^^^^^^^^ support.function.builtin.scbi
+      echo "v $VER" > out.txt
+#     ^^^^ support.function.builtin.scbi
+#          ^^^^^^^^ string.quoted.double.scbi
+#             ^^^^ variable.other.scbi
+#                   ^ keyword.operator.redirect.scbi
+  for F in a b $LIST:
+# ^^^ keyword.control.loop.scbi
+#     ^ variable.other.loop.scbi
+#       ^^ keyword.control.loop.scbi
+#              ^^^^^ variable.other.scbi
+      cp $F "${F%.c}.o" $(basename $F)
+#     ^^ entity.name.function.command.scbi
+#               ^ keyword.operator.expansion.scbi
+#                       ^^ punctuation.definition.subshell.begin.scbi
+#                         ^^^^^^^^ support.function.builtin.scbi
+  write main.adb:
+# ^^^^^ keyword.control.write.scbi
+#       ^^^^^^^^ string.unquoted.filename.scbi
+      with $PKG;
+#     ^^^^ - entity.name.function.command.scbi
+#          ^^^^ variable.other.scbi
+  delete-tree .build
+# ^^^^^^^^^^^ support.function.builtin.scbi

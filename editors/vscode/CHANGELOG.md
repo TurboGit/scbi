@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Plug-ins: the command language is highlighted in the YAML values
+  (grammar injected in `source.yaml`): variables, built-ins and functions,
+  environment actions, operators, and in the bodies the comments, the
+  commands, `if`/`else`/`for` with the conditions and `write FILE:`.
+
 ## 0.2.1
 
 - Build plans: the directives and the variants are highlighted with the
