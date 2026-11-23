@@ -315,15 +315,8 @@ class Driver:
         self.ini_options += words(self.ini_get(section, "options"))
 
     def ini_load_files(self) -> None:
-        home = Path(self.get("HOME") or "/")
-        if not self.testsuite:
-            if (home / ".scbi").is_file():
-                self.ini.load_file(home / ".scbi")
-        if Path(".scbi").is_file():
-            self.ini.load_file(Path(".scbi"))
-        ini_file = self.get("SCBI_INI_FILE")
-        if ini_file and Path(ini_file).is_file():
-            self.ini.load_file(Path(ini_file))
+        home = None if self.testsuite else Path(self.get("HOME") or "/")
+        self.ini.load_files(home, Path("."), self.get("SCBI_INI_FILE"))
 
     # --------------------------------------------------------- first pass
 
@@ -1033,6 +1026,8 @@ class Driver:
         from scbi.build import Builder
 
         builder = Builder(self)
+        #  a module given twice is built once
+        self.modules = list(dict.fromkeys(self.modules))
         if self.get("DEPS") != "yes" and len(self.modules) > 1:
             #  without --deps the modules are built in the order of the
             #  command line: a module after its dependencies

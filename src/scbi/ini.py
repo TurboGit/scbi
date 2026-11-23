@@ -66,13 +66,18 @@ class IniDB:
             else:
                 self.db[db_key] = val
 
-    def load_files(self, home: Path, cwd: Path, ini_file: str | None) -> None:
-        """Port of ``ini-load-files``."""
-        for path in (Path(home) / ".scbi", Path(cwd) / ".scbi"):
-            if path.is_file():
+    def load_files(self, home: Path | None, cwd: Path, ini_file: str | None) -> None:
+        """Port of ``ini-load-files``: ``$HOME/.scbi`` (not when ``home``
+        is None), ``./.scbi`` and ``ini_file``. Each file is loaded once:
+        the current directory may be the home directory (or ``ini_file``
+        one of the others) and the multi-valued keys would get their
+        values twice."""
+        loaded: set[Path] = set()
+        for path in (Path(home) / ".scbi" if home else None, Path(cwd) / ".scbi",
+                     Path(ini_file) if ini_file else None):
+            if path is not None and path.is_file() and path.resolve() not in loaded:
+                loaded.add(path.resolve())
                 self.load_file(path)
-        if ini_file and Path(ini_file).is_file():
-            self.load_file(Path(ini_file))
 
     def raw_option(self, section: str, var: str) -> str | None:
         """Raw value selected by ``ini-get-option`` (before expansion)."""
