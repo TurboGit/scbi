@@ -1,0 +1,8 @@
+plugin: logfail
+
+pre-setup:
+  _: |-
+    log 1 logfail is only meant to be used in cross mode
+    false
+
+config: echo config

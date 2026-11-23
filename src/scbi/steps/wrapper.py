@@ -30,6 +30,8 @@ from scbi.steps import interp
 _REPRODUCE = re.compile(r".*(config|build|install|cross-config|cross-build|cross-install)$")
 _HOME_DIR_STEP = re.compile(r"(pre-|post-)*(setup|wrapup)$")
 _TRACE = re.compile(r"^_[_]*TRACE: ")
+#  a driver message (the log command), already shown on the console
+_DRIVER_MSG = re.compile(r"^\d{4}/\d\d/\d\d \d\d:\d\d:\d\d : ")
 
 
 def is_nop(obj) -> bool:
@@ -185,14 +187,15 @@ class StepWrapper:
         return 0
 
     def tail(self, mlog: str) -> None:
-        """``tail -100 $mlog | grep -v "^_[_]*TRACE: "``."""
+        """``tail -100 $mlog | grep -v "^_[_]*TRACE: "``, without the driver
+        messages (already on the console)."""
         try:
             with open(mlog, errors="replace") as f:
                 lines = deque(f, maxlen=100)
         except OSError:
             return
         for line in lines:
-            if not _TRACE.match(line):
+            if not (_TRACE.match(line) or _DRIVER_MSG.match(line)):
                 sys.stdout.write(line if line.endswith("\n") else line + "\n")
         sys.stdout.flush()
 
