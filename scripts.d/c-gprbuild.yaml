@@ -12,8 +12,8 @@ depends:
   - c-gprconfig-kb
 
 build-depends:
-  - p-gnat
   - c-sandbox
+  - p-gnat
 
 env:
   - add-to-var PATH $PREFIX/bin

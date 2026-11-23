@@ -1,3 +1,13 @@
+#  The base environment of a module, first item of its build-depends:
+#    c-sandbox         native: the sandbox (compilers and tools built in it)
+#                      cross (--target): build for the target with the
+#                      cross compiler and binutils of the sandbox
+#    c-sandbox/host    tools running on the host (cross compilers...): the
+#                      native sandbox, also in a cross build
+#    c-sandbox/system  the compiler and tools of the system only
+#  In a cross build the libraries for the target are installed in
+#  $SCBI_PREFIX/$TARGET (prefix hook or --prefix=$PREFIX/$TARGET): the cross
+#  compiler of the sandbox finds them there without compiler paths.
 plugin: c-sandbox
 
 env:
@@ -5,9 +15,31 @@ env:
     - add-to-var PATH $SCBI_BDIR/install/bin
     - add-to-var LD_LIBRARY_PATH $SCBI_BDIR/install/lib
     - add-to-var GPR_PROJECT_PATH $SCBI_BDIR/install/share/gpr
+  host:
+    - add-to-var PATH $SCBI_BDIR/install/bin
+    - add-to-var LD_LIBRARY_PATH $SCBI_BDIR/install/lib
+    - add-to-var GPR_PROJECT_PATH $SCBI_BDIR/install/share/gpr
+  system:
+    #  export: define-var adds to PATH a single existing directory only
+    - export PATH /usr/local/bin:/usr/bin:/bin
+    - unset-var C_INCLUDE_PATH
+    - unset-var CPLUS_INCLUDE_PATH
+    - unset-var LIBRARY_PATH
+    - unset-var LD_LIBRARY_PATH
+    - unset-var ADA_PROJECT_PATH
   cross:
     _:
-      - add-to-var PATH $SCBI_BDIR/install/$TARGET/bin
+      #  $TARGET-gcc, $TARGET-as... (never install/$TARGET/bin: its
+      #  unprefixed as, ld, ar would replace the native ones)
       - add-to-var PATH $SCBI_BDIR/install/bin
-      - add-to-var LD_LIBRARY_PATH $SCBI_BDIR/install/$TARGET/lib
+      #  native libraries of the tools of the sandbox (cross compiler)
+      - add-to-var LD_LIBRARY_PATH $SCBI_BDIR/install/lib
+      #  no compiler paths: the cross compiler uses its $TARGET
+      #  directories, the native one (build tools) its own defaults
+      - unset-var C_INCLUDE_PATH
+      - unset-var CPLUS_INCLUDE_PATH
+      - unset-var LIBRARY_PATH
+      #  pkg-config and gprbuild see the target libraries only
+      - unset-var PKG_CONFIG_PATH
+      - set-var PKG_CONFIG_LIBDIR $SCBI_BDIR/install/$TARGET/lib/pkgconfig:$SCBI_BDIR/install/$TARGET/share/pkgconfig
       - add-to-var GPR_PROJECT_PATH $SCBI_BDIR/install/$TARGET/share/gpr

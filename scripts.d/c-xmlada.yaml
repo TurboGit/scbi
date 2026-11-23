@@ -7,8 +7,8 @@ vcs:
   url: https://github.com/AdaCore/xmlada
 
 build-depends:
-  - p-gnat
   - c-sandbox
+  - p-gnat
 
 env:
   - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr

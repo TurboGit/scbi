@@ -6,8 +6,10 @@ vcs:
   protocol: git
   url: https://github.com/mypaint/libmypaint.git
 
+build-depends:
+  - c-sandbox/system
+
 env:
-  - system-compiler
   - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
 
 out-of-tree: false

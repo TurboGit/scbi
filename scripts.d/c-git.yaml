@@ -6,8 +6,8 @@ vcs:
   protocol: git
   url: git://git.kernel.org/pub/scm/git/git.git
 
-env:
-  - system-compiler
+build-depends:
+  - c-sandbox/system
 
 out-of-tree: false
 

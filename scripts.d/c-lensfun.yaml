@@ -6,8 +6,8 @@ vcs:
   protocol: git
   url: https://github.com/lensfun/lensfun.git
 
-env:
-  - system-compiler
+build-depends:
+  - c-sandbox/system
 
 out-of-tree: false
 

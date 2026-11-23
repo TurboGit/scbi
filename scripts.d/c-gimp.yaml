@@ -21,8 +21,10 @@ depends:
   - libmng-dev
   - libxpm-dev
 
+build-depends:
+  - c-sandbox/system
+
 env:
-  - system-compiler
   - export PERL5LIB .
 
 out-of-tree: false

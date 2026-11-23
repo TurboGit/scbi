@@ -7,6 +7,7 @@ vcs:
   url: https://gcc.gnu.org/git/gcc.git
 
 build-depends:
+  - c-sandbox/system
   - os@-gmp-dev
   - os@-mpc-dev
   - os@-mpfr-dev
@@ -16,9 +17,6 @@ env:
   - add-to-var PATH $PREFIX/bin
   - add-to-var C_INCLUDE_PATH $(last-modified-directory $PREFIX/lib/gcc/$TARGET/*/include)
   - add-to-var C_INCLUDE_PATH $PREFIX/include
-
-build-env:
-  - system-compiler
 
 pre-setup:
   _: |-

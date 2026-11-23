@@ -6,8 +6,10 @@ vcs:
   protocol: git
   url: git://git.gnome.org/gegl
 
+build-depends:
+  - c-sandbox/system
+
 env:
-  - system-compiler
   - add-to-var PKG_CONFIG_PATH $PREFIX/lib/pkgconfig
   - add-to-var PATH $PREFIX/bin
 

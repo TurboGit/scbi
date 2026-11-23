@@ -10,8 +10,8 @@ depends:
   - c-langkit-support
 
 build-depends:
-  - p-gnat
   - c-sandbox
+  - p-gnat
   - c-gprbuild
   - c-e3
   - c-langkit-support

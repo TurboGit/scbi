@@ -9,11 +9,11 @@ vcs:
 depends:
   - libpulse-dev
 
+build-depends:
+  - c-sandbox/system
+
 env:
   - add-to-var PATH $PREFIX/bin
-
-build-env:
-  - system-compiler
 
 config: meson setup --prefix=$PREFIX . ../src
 

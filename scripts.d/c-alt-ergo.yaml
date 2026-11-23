@@ -17,8 +17,10 @@ depends:
   - liblablgtksourceview2-ocaml-dev
   - libdune-ocaml-dev
 
+build-depends:
+  - c-sandbox/system
+
 build-env:
-  - system-compiler
   - import opam env
 
 out-of-tree: false

@@ -6,8 +6,8 @@ vcs:
   protocol: git
   url: http://sourceware.org/git/binutils-gdb.git
 
-build-env:
-  - system-compiler
+build-depends:
+  - c-sandbox/system
 
 config: ../src/configure --prefix=$PREFIX --disable-binutils --disable-gas --disable-ld --disable-gold --disable-gprof
 

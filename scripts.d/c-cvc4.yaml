@@ -12,8 +12,8 @@ depends:
   - libboost-dev
   - python-toml
 
-build-env:
-  - system-compiler
+build-depends:
+  - c-sandbox/system
 
 out-of-tree: false
 

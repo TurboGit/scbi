@@ -6,8 +6,8 @@ vcs:
   protocol: git
   url: http://github.com/mm2/Little-CMS
 
-env:
-  - system-compiler
+build-depends:
+  - c-sandbox/system
 
 out-of-tree: false
 

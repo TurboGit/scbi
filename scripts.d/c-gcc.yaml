@@ -6,8 +6,8 @@ vcs:
   protocol: git
   url: git+ssh://git.adacore.com/gcc
 
-build-env:
-  - system-compiler
+build-depends:
+  - c-sandbox/system
 
 config-options:
   - --prefix=$PREFIX

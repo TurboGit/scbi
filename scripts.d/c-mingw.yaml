@@ -10,6 +10,7 @@ depends:
   - c-mingw-header
 
 build-depends:
+  - c-sandbox
   - c-pgcc
 
 setup: |-

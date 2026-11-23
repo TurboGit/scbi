@@ -13,8 +13,8 @@ depends:
   - c-prettier-ada
 
 build-depends:
-  - p-gnat
   - c-sandbox
+  - p-gnat
   - c-gprbuild
   - c-e3
 

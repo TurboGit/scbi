@@ -13,8 +13,8 @@ depends:
 
 build-depends:
   common:
-    - p-gnat
     - c-sandbox
+    - p-gnat
   _:
     - c-gprbuild
     - c-libadalang-tools
