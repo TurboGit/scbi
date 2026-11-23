@@ -22,8 +22,19 @@ env:
 
 out-of-tree: false
 
-build: make INSTALL_DIR=$PREFIX all-libs
+build:
+  _: make INSTALL_DIR=$PREFIX all-libs
+  cross:
+    _: make INSTALL_DIR=$PREFIX GPRBUILD_ARGS=--target=$TARGET all-libs
 
-install: make INSTALL_DIR=$PREFIX install
+install:
+  _: make INSTALL_DIR=$PREFIX install
+  cross:
+    #  the install rule has no variable to give the target to gprinstall
+    _: |-
+      GOPTS = -p -f --target=$TARGET -XBUILD_MODE=dev --prefix=$PREFIX --build-var=LIBRARY_TYPE
+      for kind in static static-pic relocatable:
+          gprinstall $GOPTS -P adasat.gpr -XLIBRARY_TYPE=$kind --build-name=$kind || return 1
+      true
 
 prefix: NONE

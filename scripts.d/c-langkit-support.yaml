@@ -25,14 +25,28 @@ env:
   - add-to-var LD_LIBRARY_PATH $PREFIX/lib
 
 build-env:
-  - add-to-var PYTHONPATH ${SCBI_MODULES_DIR[c-langkit-support@build]}
+  - add-to-var PYTHONPATH $(module-dir c-langkit-support build)
 
 out-of-tree: false
 
 pre-build: pip3 install . --prefix=$PREFIX
 
-build: python3 manage.py build-langkit-support --library-types=static,static-pic,relocatable
+build:
+  _: python3 manage.py build-langkit-support --library-types=static,static-pic,relocatable
+  cross:
+    _: python3 manage.py build-langkit-support --library-types=static,static-pic,relocatable --gargs=--target=$TARGET
 
-install: python3 manage.py install-langkit-support --library-types=static,static-pic,relocatable $PREFIX
+install:
+  _: python3 manage.py install-langkit-support --library-types=static,static-pic,relocatable $PREFIX
+  cross:
+    #  install-langkit-support has no --gargs to give the target to
+    #  gprinstall: its commands, static first (default library type)
+    _: |-
+      GOPTS = -p -f --target=$TARGET -XBUILD_MODE=dev --prefix=$PREFIX
+      GOPTS += --build-var=LIBRARY_TYPE --build-var=LANGKIT_SUPPORT_LIBRARY_TYPE
+      GOPTS += --sources-subdir=include/langkit_support
+      for kind in static static-pic relocatable:
+          gprinstall $GOPTS -P langkit/support/langkit_support.gpr -XLIBRARY_TYPE=$kind --build-name=$kind || return 1
+      true
 
 prefix: NONE

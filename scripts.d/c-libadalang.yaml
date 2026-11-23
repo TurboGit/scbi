@@ -21,6 +21,11 @@ depends:
     - c-langkit
   stable:
     - c-langkit/stable:stable
+  cross:
+    _:
+      #  the Ada library for the target, the generator is the one of the
+      #  host (build-depends)
+      - c-langkit-support
 
 build-depends:
   _:
@@ -33,6 +38,8 @@ build-depends:
       - p-gnat
       - host@c-gprbuild
       - c-e3
+      #  lkm generate: langkit and liblktlang run on the host
+      - host@c-langkit
 
 env:
   - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr

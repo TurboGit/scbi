@@ -22,12 +22,23 @@ env:
   - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr
   - add-to-var LD_LIBRARY_PATH $PREFIX/lib
 
+build-env:
+  cross:
+    _:
+      #  lkm cannot give the target to gprinstall: gprbuild and gprinstall
+      #  use the configuration for the target (pre-build) of GPR_CONFIG
+      - set-var GPR_CONFIG $(module-dir c-liblktlang build)/$TARGET.cgpr
+
 out-of-tree: false
 
 config: |-
   cd lkt
   delete build
   ln -s bootstrap build
+
+pre-build:
+  cross:
+    _: gprconfig --batch --target=$TARGET --config=Ada --config=C -o $GPR_CONFIG
 
 build: python3 -m langkit.scripts.lkm build -c lkt/langkit.yaml --library-types=static,static-pic,relocatable --disable-all-mains
 
