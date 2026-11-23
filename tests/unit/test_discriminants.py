@@ -46,14 +46,14 @@ def test_debian():
     assert info.version == "12" and info.major_version == "12"
     assert info.as_set() == {
         "deb", "debian", "gnu", "linux", "12", "bookworm", "x86_64",
-        "mybox", "example.org",
+        "mybox", "example.org", "native",
     }
 
 
 def test_cross():
     info = setup_discriminants(host("debian12", ""), "x86_64-linux-gnu", "arm-linux-gnueabi")
     assert {"cross", "target-arm", "target-linux", "target-gnueabi"} <= info.as_set()
-    assert "" not in info.as_set()
+    assert "" not in info.as_set() and "native" not in info.as_set()
 
 
 def test_forced():

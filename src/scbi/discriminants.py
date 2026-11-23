@@ -111,7 +111,9 @@ def setup_discriminants(info: HostInfo, host: str, target: str) -> OsInfo:
             add(major)
         add(codename.lower())
 
-    if host != target:
+    if host == target:
+        add("native")
+    else:
         add("cross")
         for part in target.replace("-", " ").split():
             add(f"target-{part}".lower())
