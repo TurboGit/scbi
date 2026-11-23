@@ -221,6 +221,17 @@ def store_key(ctx: HookContext, key: str = "") -> str:
     return ""
 
 
+def module_dir(ctx: HookContext, module: str = "", kind: str = "") -> str:
+    """``module-dir MODULE [install|src|build]``: the install (default),
+    source or build directory of a module of the build (as
+    ``${SCBI_MODULES_DIR[MODULE[@src|@build]]}``), empty when the module
+    is not in the build."""
+    if kind not in ("", "install", "src", "build"):
+        raise BuiltinError(f"module-dir: {kind}: install, src or build expected")
+    key = module if kind in ("", "install") else f"{module}@{kind}"
+    return ctx.arrays.get("SCBI_MODULES_DIR", {}).get(key, "")
+
+
 def replace(ctx: HookContext, *args: str) -> str:
     """``replace VALUE CHARS1 [CHARS2]``: each character of CHARS1 in VALUE
     replaced by the character at the same position in CHARS2, removed when
@@ -304,6 +315,8 @@ def call(ctx: HookContext, name: str, args: list[str]) -> str:
         return basename(ctx, *args)
     if name == "ls":
         return ls(ctx, *args)
+    if name == "module-dir":
+        return module_dir(ctx, *args[:2])
     if name == "replace":
         return replace(ctx, *args)
     if name == "uppercase":

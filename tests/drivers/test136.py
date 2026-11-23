@@ -67,6 +67,9 @@ SCBI_TARGET=$SCBI_HOST
     t.grep(*t.words('"^@@@LIB1-INS ${LIB1DIR}/install" $LFILE'))
     t.grep(*t.words('"^@@@LIB1-SRC ${LIB1DIR}/src" $LFILE'))
     t.grep(*t.words('"^@@@LIB1-BLD ${LIB1DIR}/src" $LFILE'))
+    t.grep(*t.words('"^@@@LIB1-FINS ${LIB1DIR}/install" $LFILE'))
+    t.grep(*t.words('"^@@@LIB1-FSRC ${LIB1DIR}/src" $LFILE'))
+    t.grep(*t.words('"^@@@LIB1-FBLD ${LIB1DIR}/src" $LFILE'))
 
     t.ok('-d $BDIR/install/bin')
     t.ok('-d $BDIR/install/include')

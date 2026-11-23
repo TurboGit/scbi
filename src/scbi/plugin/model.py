@@ -121,6 +121,7 @@ BUILTINS = (
     "store-key",
     "basename",
     "ls",
+    "module-dir",
     "uppercase",
     "lowercase",
     "if",

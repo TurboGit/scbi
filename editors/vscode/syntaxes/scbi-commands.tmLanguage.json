@@ -238,7 +238,7 @@
       ]
     },
     "assignment": {
-      "match": "(?:^|\\G)[ \\t]*(?:(export)[ \\t]+)?([A-Za-z_][A-Za-z0-9_]*)[ \\t]+(\\+?=)(?=[ \\t]|$)(?:[ \\t]+(last-modified-directory|get-build-type|config-options|output-words|command-path|all-variants|get-version|all-modules|hook-output|env-actions|module-name|is-enabled|first-line|module-ref|target-dir|uppercase|lowercase|basename|dirname|replace|output|status|if)(?=[ \\t;|&<>)]|$))?",
+      "match": "(?:^|\\G)[ \\t]*(?:(export)[ \\t]+)?([A-Za-z_][A-Za-z0-9_]*)[ \\t]+(\\+?=)(?=[ \\t]|$)(?:[ \\t]+(last-modified-directory|get-build-type|config-options|output-words|command-path|all-variants|get-version|all-modules|hook-output|env-actions|module-name|module-dir|is-enabled|first-line|module-ref|target-dir|uppercase|lowercase|basename|dirname|replace|output|status|if)(?=[ \\t;|&<>)]|$))?",
       "captures": {
         "1": {
           "name": "storage.modifier.export.scbi"

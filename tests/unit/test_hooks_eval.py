@@ -40,6 +40,12 @@ def test_expand_variables_and_operators(tmp_path):
     assert expand("$PREFIX/lib:${PREFIX}x:$NOPE.", c) == "/opt/x/lib:/opt/xx:."
     assert expand("${P%%/include*}|${P%/*}|${P#*/}|${P##*/}", c) == "/a|/a/include|a/include/b|b"
     assert expand("${SCBI_MODULES_DIR[lib@build]}/x", c) == "/b/lib/x"
+    c.arrays = {"SCBI_MODULES_DIR": {"lib": "/i/lib", "lib@src": "/s/lib", "lib@build": "/b/lib"}}
+    assert expand("$(module-dir lib)|$(module-dir lib install)|$(module-dir lib src)|$(module-dir lib build)",
+                  c) == "/i/lib|/i/lib|/s/lib|/b/lib"
+    assert expand("[$(module-dir nope)]", c) == "[]"
+    with pytest.raises(ExpandError, match="install, src or build expected"):
+        expand("$(module-dir lib bad)", c)
     assert expand("cost $", c) == "cost $"
 
 

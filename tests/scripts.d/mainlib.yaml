@@ -17,6 +17,9 @@ post-setup:
     echo @@@LIB1-INS ${SCBI_MODULES_DIR[lib1]}
     echo @@@LIB1-SRC ${SCBI_MODULES_DIR[lib1@src]}
     echo @@@LIB1-BLD ${SCBI_MODULES_DIR[lib1@build]}
+    echo @@@LIB1-FINS $(module-dir lib1)
+    echo @@@LIB1-FSRC $(module-dir lib1 src)
+    echo @@@LIB1-FBLD $(module-dir lib1 build)
 
 out-of-tree: false
 

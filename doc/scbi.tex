@@ -301,7 +301,7 @@ The build is controlled by a set of variables (the environment). SCBI comes with
 	\item[SCBI\_BDIR] The build directory, also called the sandbox (\seeref{sandbox}). \\
 	Default is \file{\$SCBI\_ROOT/builds}.
 
-	\item[SCBI\_MODULES\_DIR{[<module-name>[@src|@build]]}] The \emph{install}, \emph{source} or \emph{build} directory of a module (for its variant in the build): \code{\$\{SCBI\_MODULES\_DIR[<module-name>]\}} is the install directory, \code{\$\{SCBI\_MODULES\_DIR[<module-name>@src]\}} the source directory and \code{\$\{SCBI\_MODULES\_DIR[<module-name>@build]\}} the build directory. It can be used in the hooks of the plug-ins (values, environment actions and commands).
+	\item[SCBI\_MODULES\_DIR{[<module-name>[@src|@build]]}] The \emph{install}, \emph{source} or \emph{build} directory of a module (for its variant in the build): \code{\$\{SCBI\_MODULES\_DIR[<module-name>]\}} is the install directory, \code{\$\{SCBI\_MODULES\_DIR[<module-name>@src]\}} the source directory and \code{\$\{SCBI\_MODULES\_DIR[<module-name>@build]\}} the build directory. It can be used in the hooks of the plug-ins (values, environment actions and commands). The function \code{module-dir} gives the same values (\seeref{yaml-functions}).
 
 	\item[SCBI\_CACHE\_DIR] The directory of the build cache, which makes it possible to reuse a previous build instead of rebuilding a module. Set to \code{no} to disable the cache. Default is \file{\$HOME/.cache/scbi}.
 
@@ -1035,7 +1035,8 @@ commands are expanded as follows:
 	The patterns, words and strings of these forms are expanded first: they
 	can use variables, e.g. \code{\$\{VALUE\#\$PREFIX/\}}.
 	\item[{\$\{SCBI\_MODULES\_DIR[<module>[@src|@build]]\}}] The install,
-	source or build directory of a module (\seeref{build-env}).
+	source or build directory of a module (\seeref{build-env}), also given
+	by the function \code{module-dir}.
 	\item[\$(<function> <args>)] The result of a function
 	(\seeref{yaml-functions}). The arguments are expanded as in a shell,
 	including unquoted glob patterns.
@@ -1120,6 +1121,11 @@ spaces, e.g. \code{cmake \$(config-options) ../src}.
 	or directory matching the pattern, empty when none matches.
 	\item[ls <glob>...] The files matching the patterns, one per line (as
 	\code{ls}).
+	\item[module-dir <module> {[install|src|build]}] \index{module-dir}The
+	install (default), source or build directory of a module of the build
+	(for its variant in the build), empty when the module is not in the
+	build: \code{\$(module-dir lib1 src)} is the same as
+	\code{\$\{SCBI\_MODULES\_DIR[lib1@src]\}} (\seeref{build-env}).
 	\item[basename <path>] The last component of the path.
 	\item[dirname <path>] The path without its last component (\code{.}
 	when there is none).

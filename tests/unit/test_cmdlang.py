@@ -74,6 +74,18 @@ printf '<%s>' $OPTS
     assert state.vars["V"] == "x1\nx2"
 
 
+def test_module_dir(tmp_path):
+    dirs = {"SCBI_MODULES_DIR": {"lib1": "/i/lib1", "lib1@src": "/s/lib1", "lib1@build": "/b/lib1"}}
+    runner = make(tmp_path)
+    runner.ctx.arrays = dirs
+    out = []
+    state = State({}, {"PATH": os.environ["PATH"]}, str(tmp_path), out.append, out.append)
+    runner.run(parse("D = module-dir lib1\nS = module-dir lib1 src\n"
+                     "echo $D $S $(module-dir lib1 build) [$(module-dir nope)]", 10), state)
+    assert "".join(out) == "/i/lib1 /s/lib1 /b/lib1 []\n"
+    assert state.vars["D"] == "/i/lib1"
+
+
 def test_inline_builtin_and_env_words(tmp_path):
     status, out, _ = run(tmp_path, "echo -DCMAKE_BUILD_TYPE=$(get-build-type CMAKE Release)\n"
                                    "A=1 B=two env | grep -E '^(A|B)='\nexport C = 3\nprintenv C")
