@@ -11,7 +11,7 @@ depends:
 
 build-depends:
   - p-gnat
-  - c-gprbuild
+  - host@c-gprbuild
 
 env:
   - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr

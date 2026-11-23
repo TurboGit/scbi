@@ -23,7 +23,7 @@ depends:
 
 build-depends:
   - p-gnat
-  - c-gprbuild
+  - host@c-gprbuild
   - c-gprconfig-kb
 
 tests-depends:

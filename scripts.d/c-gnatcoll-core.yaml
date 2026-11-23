@@ -13,11 +13,12 @@ depends:
 build-depends:
   _:
     - p-gnat
-    - c-gprbuild
+    - host@c-gprbuild
   cross:
     _:
       - c-sandbox
       - p-gnat
+      - host@c-gprbuild
 
 env:
   - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr

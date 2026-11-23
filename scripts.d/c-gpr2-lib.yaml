@@ -21,7 +21,7 @@ depends:
 
 build-depends:
   - p-gnat
-  - c-gprbuild
+  - host@c-gprbuild
   - c-e3
   - c-adasat
   - c-gprconfig-kb

@@ -14,7 +14,7 @@ build-depends:
     - c-sandbox
     - p-gnat
   _:
-    - c-gprbuild
+    - host@c-gprbuild
 
 env:
   - add-to-var PATH $PREFIX/bin

@@ -16,7 +16,7 @@ build-depends:
     - c-sandbox
     - p-gnat
   _:
-    - c-gprbuild
+    - host@c-gprbuild
     - c-libadalang-tools
 
 tests-depends:

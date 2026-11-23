@@ -15,7 +15,7 @@ depends:
 
 build-depends:
   - p-gnat
-  - c-gprbuild
+  - host@c-gprbuild
 
 env:
   - add-to-var PATH $PREFIX/bin

@@ -25,12 +25,13 @@ depends:
 build-depends:
   _:
     - p-gnat
-    - c-gprbuild
+    - host@c-gprbuild
     - c-e3
   cross:
     _:
       - c-sandbox
       - p-gnat
+      - host@c-gprbuild
       - c-e3
 
 env:

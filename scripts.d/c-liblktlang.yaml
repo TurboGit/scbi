@@ -12,7 +12,7 @@ depends:
 build-depends:
   - c-sandbox
   - p-gnat
-  - c-gprbuild
+  - host@c-gprbuild
   - c-e3
   - c-langkit-support
 
