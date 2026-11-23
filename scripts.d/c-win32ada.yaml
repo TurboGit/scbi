@@ -10,6 +10,7 @@ build-depends:
   cross:
     _:
       - c-sandbox
+      - p-gnat
 
 out-of-tree: false
 

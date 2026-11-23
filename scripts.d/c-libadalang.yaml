@@ -30,6 +30,7 @@ build-depends:
   cross:
     _:
       - c-sandbox
+      - p-gnat
       - c-e3
 
 env:

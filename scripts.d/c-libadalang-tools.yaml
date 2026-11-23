@@ -18,6 +18,7 @@ build-depends:
   cross:
     _:
       - c-sandbox
+      - p-gnat
 
 env:
   - assign LALT $SCBI_BDIR/c-libadalang-tools

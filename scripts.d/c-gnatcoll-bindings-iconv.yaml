@@ -18,6 +18,7 @@ build-depends:
   cross:
     _:
       - c-sandbox
+      - p-gnat
 
 env:
   - add-to-var GPR_PROJECT_PATH $PREFIX/share/gpr

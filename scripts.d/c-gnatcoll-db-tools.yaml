@@ -19,6 +19,7 @@ build-depends:
   cross:
     _:
       - c-sandbox
+      - p-gnat
 
 env:
   - add-to-var PATH $PREFIX/bin
