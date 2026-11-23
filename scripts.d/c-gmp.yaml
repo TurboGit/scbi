@@ -44,12 +44,14 @@ pre-config:
     ./.bootstrap
     true
 
+#  -std=gnu17: the configure tests of the compiler use K&R declarations,
+#  rejected by default (C23) since GCC 15
 config:
-  _: ./configure --prefix=$PREFIX
-  vcs: ./configure --enable-maintainer-mode --prefix=$PREFIX
+  _: ./configure --prefix=$PREFIX "CC=gcc -std=gnu17"
+  vcs: ./configure --enable-maintainer-mode --prefix=$PREFIX "CC=gcc -std=gnu17"
   cross:
-    _: ./configure --prefix=$PREFIX/$TARGET --build=$SCBI_HOST --host=$TARGET
-    vcs: ./configure --enable-maintainer-mode --prefix=$PREFIX/$TARGET --build=$SCBI_HOST --host=$TARGET
+    _: ./configure --prefix=$PREFIX/$TARGET --build=$SCBI_HOST --host=$TARGET "CC=$TARGET-gcc -std=gnu17"
+    vcs: ./configure --enable-maintainer-mode --prefix=$PREFIX/$TARGET --build=$SCBI_HOST --host=$TARGET "CC=$TARGET-gcc -std=gnu17"
 
 build: make -j$JOBS
 
