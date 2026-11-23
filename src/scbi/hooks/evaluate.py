@@ -171,10 +171,6 @@ def apply_env(ops: EnvOps | tuple, ctx: HookContext, base_env: dict[str, str] | 
             env.vars.values[op.args[0]] = args[1]
         elif verb == "system-compiler":
             env.system_compiler()
-        elif verb in ("target-env", "no-target-env"):
-            prefix, target = (args + ["", ""])[:2]
-            fct = env.target_env if verb == "target-env" else env.no_target_env
-            fct(prefix, target, host=ctx.host, bdir=ctx.scbi_bdir)
         elif verb == "mkdir":
             for d in args:
                 (Path(d) if os.path.isabs(d) else ctx.cwd / d).mkdir(parents=True, exist_ok=True)

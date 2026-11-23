@@ -3,7 +3,7 @@
 Port of the environment helpers of scripts.d/0_runtime: ``define-var``
 (and ``add-to-var``, ``prepend-to-var``, ``append-to-var``,
 ``remove-from-var``, ``set-var``, ``unset-var``), the list helpers they use,
-``system-compiler``, ``target-env``, ``no-target-env`` and
+``system-compiler``, ``target-env`` (the environment of the sandbox) and
 ``set-compiler-paths``.
 
 The Bash code splits and joins the values with unquoted expansions and
@@ -266,16 +266,3 @@ class Environment:
         b = f"{prefix}/bin" if not target else f"{prefix}/{target}/bin"
         self.export("PATH", f"{b}:{self.get('PATH')}")
         self.set_compiler_paths(prefix, target, host, bdir)
-
-    def no_target_env(self, prefix: str, target: str, host: str, bdir: str) -> None:
-        """Port of ``no-target-env [PREFIX [TARGET]]``."""
-        if not prefix:
-            prefix = self._gcc_prefix()
-            #  check if gcc is inside a target specific dir
-            if os.access(f"{prefix}/../bin/gcc", os.X_OK):
-                dn = os.path.dirname(prefix)
-                if dn != "/":
-                    prefix = dn
-        b = f"{prefix}/bin" if not target else f"{prefix}/{target}/bin"
-        self.export("PATH", f"{b}:{self.get('PATH')}")
-        self.set_compiler_paths(prefix, host, host, bdir)

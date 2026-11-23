@@ -24,7 +24,7 @@ Bodies by hook kind:
              may also be given as a mapping of their fields.
     env      list of actions: "<verb> <args>" (add-to-var, prepend-to-var,
              set-var, define-var, unset-var, export, system-compiler,
-             target-env, no-target-env, mkdir, import).
+             mkdir, import).
 
 In value and env lists an item can be guarded: ``{"if <cond>": item}`` or
 ``{"if <cond>": [items]}`` (see scbi.plugin.expr).

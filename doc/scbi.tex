@@ -2085,8 +2085,6 @@ The other actions are:
 \begin{description}[style=nextline]
 	\item[export <VARIABLE> <VALUE>] Sets and exports the variable, without going through the \code{define-var} of the environment file.
 	\item[system-compiler] Uses the compiler of the system: \code{PATH} set to \file{/usr/local/bin:/usr/bin:/bin}, the compiler paths (\code{C\_INCLUDE\_PATH}, \code{CPLUS\_INCLUDE\_PATH}, \code{LIBRARY\_PATH}, \code{LD\_LIBRARY\_PATH}, \code{ADA\_PROJECT\_PATH}) unset.
-	\item[target-env {[<PREFIX> [<TARGET>]]}] Uses the compiler installed in \code{<PREFIX>} (by default the one of the \code{gcc} found in \code{PATH}) for \code{<TARGET>}: its \file{bin} directory put first in \code{PATH} and the compiler paths set to its directories.
-	\item[no-target-env {[<PREFIX> [<TARGET>]]}] As \code{target-env}, but the compiler paths are set for the host (to build native tools during a cross build).
 	\item[mkdir <DIR>] Creates the directory (and its parents).
 	\item[import <COMMAND>] Runs the command (without shell) and applies the variable assignments, \code{export} and \code{unset} statements it prints, as \code{eval \$(opam env)} would.
 	\item[local <NAME> <VALUE>] A variable for the following actions of the hook (also written \code{NAME = <value>}, \seeref{yaml-expansion}).
