@@ -163,3 +163,29 @@ htool
 hlib
 host@htool
 """)
+
+    # =================== host@ an aggregate meta-module: the environment of
+    # its modules built for the host
+    t.sh("""\
+cat > scripts.d/hkit.yaml <<'EOF2'
+plugin: hkit
+
+modules:
+  - htool
+
+aggregate: direct
+EOF2
+cat > scripts.d/hlib2.yaml <<'EOF2'
+plugin: hlib2
+
+build-depends:
+  - host@hkit
+
+build: echo "PATH ${PATH%%:*}" > $SCBI_BDIR/hlib2-$TARGET.txt
+EOF2
+""")
+    t.runs('./scbi --deps -W --target=x86_64-w64-mingw32 hlib2')
+    t.runs('cat .root/builds/hlib2-x86_64-w64-mingw32.txt')
+    t.clean_diff("""\
+PATH <pwd>/.root/builds/hkit/x86_64-linux-gnu-default/install/bin
+""")

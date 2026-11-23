@@ -2239,7 +2239,8 @@ c-gprbuild}). In a cross build a \code{host@} dependency is:
 	\item part of the build id of the module from its build for the host:
 	a new build of the tool for the host rebuilds the module;
 	\item in the environment of the module from its build for the host:
-	its \code{env} hook (its native hooks, \code{\$TARGET} the host),
+	its \code{env} hook (its native hooks, \code{\$TARGET} the host), or
+	the ones of its modules for an aggregate meta-module,
 	\code{\$PREFIX} and \code{module-dir} give the directories of that
 	build. Its own dependencies are the ones of the build for the host,
 	they are not part of the cross build.

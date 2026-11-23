@@ -101,30 +101,41 @@ class ModuleEnv:
             set_plugin_vars(ctx, d.registry.plugin_variables(plugin))
             apply_env(obj, ctx, d.base_env())
 
-    def call_env_hooks(self, formodule: str, modref: str, hook: str, out=None) -> None:
-        """Port of ``plugin-call-env-hooks FORMODULE MODREF ENV``."""
+    def call_env_hooks(self, formodule: str, modref: str, hook: str, out=None, host: bool = False) -> None:
+        """Port of ``plugin-call-env-hooks FORMODULE MODREF ENV``. ``host``:
+        the hooks of the build for the host (a host@ dependency in a cross
+        build), an aggregate meta-module giving the ones of its modules."""
         module, variant, _kind, ref = self.module_info(modref, formodule)
         if ref == "skip":
             return
         mode = "default"
         if self.is_meta_module(modref):
             mode = self.walker.aggregate_mode(modref) or mode
-        tvdir = self.b.target_dir(module, variant)
-        target, prefix = self.d.get("SCBI_TARGET"), self.d.get("SCBI_PREFIX")
+        if host:
+            tvdir = self.b.host_dir(module, variant)
+            target = self.d.get("SCBI_HOST")
+        else:
+            tvdir = self.b.target_dir(module, variant)
+            target = self.d.get("SCBI_TARGET")
+        prefix = self.d.get("SCBI_PREFIX")
         if mode in ("direct", "recursive"):
             mods = words("\n".join(self.d.runner().variant_values(
                 module, variant, "modules", [prefix, target, variant], self.d.plan, self.b.modules_list)))
             for mod in mods:
+                if host and not self.d.registry.loaded.get(mod):
+                    #  the modules of a host@ meta-module are not walked
+                    self.walker.load_module(mod)
                 if mode == "direct":
-                    self.call_variant_hooks(mod, hook, f"{tvdir}/install", target, variant, out)
+                    self.call_variant_hooks(mod, hook, f"{tvdir}/install", target, variant, out, host=host)
                 else:
                     def do_set_env(argv: list[str]) -> None:
                         a = argv + [""] * 2
                         emodule, evariant = self.module_info(a[1], a[0])[:2]
-                        self.call_variant_hooks(emodule, hook, f"{tvdir}/install", target, evariant, out)
+                        self.call_variant_hooks(emodule, hook, f"{tvdir}/install", target, evariant, out,
+                                                host=host)
                     self.walker.walk("for-all-modules-depends-with-meta", do_set_env, mod, name="do-set-env")
         else:
-            self.call_variant_hooks(module, hook, f"{tvdir}/install", target, variant, out)
+            self.call_variant_hooks(module, hook, f"{tvdir}/install", target, variant, out, host=host)
 
     def module_env(self, formodule: str, modref: str, hook: str, out=None) -> None:
         """Port of ``handle-module-env FORMODULE MODREF ENV``."""
@@ -139,8 +150,7 @@ class ModuleEnv:
             self.b.modules_dir[module] = f"{hvdir}/install"
             self.b.modules_dir[f"{module}@src"] = f"{hvdir}/src"
             self.b.modules_dir[f"{module}@build"] = f"{hvdir}/{builddir}"
-            self.call_variant_hooks(module, hook, f"{hvdir}/install", self.d.get("SCBI_HOST"), variant,
-                                    out, host=True)
+            self.call_env_hooks(formodule, modref, hook, out, host=True)
             return
         tvdir = self.b.target_dir(module, variant)
         builddir = "src" if self.d.get("SCBI_ISOOT") == "false" else "build"
