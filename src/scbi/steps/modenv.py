@@ -79,16 +79,19 @@ class ModuleEnv:
     # ------------------------------------------------------------ hooks
 
     def call_variant_hooks(self, plugin: str, hook: str, prefix: str, target: str, variant: str,
-                           out=None) -> None:
+                           out=None, host: bool = False) -> None:
         """``plugin-call-variant-hooks PLUGIN HOOK PREFIX TARGET VARIANT``
         for an environment hook: each selected hook applied to the
-        environment, in order."""
+        environment, in order. ``host``: the hooks of the build for the
+        host (a host@ dependency in a cross build)."""
         d = self.d
-        cross = d.runner().cross
+        cross = d.runner().cross and not host
         args = [prefix, target, variant]
         for fct in variant_hooks(d.registry, plugin, hook, variant, cross):
             obj = d.registry.functions.get(fct)
             ctx = self.b.ctx(plugin, variant, hook)
+            if host:
+                ctx.target = ctx.host
             ctx.env = self.env
             ctx.arrays = {"SCBI_MODULES_DIR": self.b.modules_dir}
             ctx.target_dir = self.b.target_dir
@@ -129,6 +132,16 @@ class ModuleEnv:
         if ref == "skip":
             return
         self._record(f"\n# {modref}\n")
+        if self.b.is_host_dep(modref):
+            #  the build for the host: its directories, its native hooks
+            hvdir = self.b.host_dir(module, variant)
+            builddir = "src" if self.d.get("SCBI_ISOOT") == "false" else "build"
+            self.b.modules_dir[module] = f"{hvdir}/install"
+            self.b.modules_dir[f"{module}@src"] = f"{hvdir}/src"
+            self.b.modules_dir[f"{module}@build"] = f"{hvdir}/{builddir}"
+            self.call_variant_hooks(module, hook, f"{hvdir}/install", self.d.get("SCBI_HOST"), variant,
+                                    out, host=True)
+            return
         tvdir = self.b.target_dir(module, variant)
         builddir = "src" if self.d.get("SCBI_ISOOT") == "false" else "build"
         self.b.modules_dir[module] = f"{tvdir}/install"

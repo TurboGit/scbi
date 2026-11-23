@@ -176,9 +176,13 @@ def show_depends(driver, do_deps: str, do_ext: str, list_ver: str, filt: str) ->
                     mod = module
             else:
                 mod = f"{module}:{ref}"
+            if builder.is_host_dep(modref):
+                #  the build for the host in a cross build
+                mod = f"host@{mod}"
         found.extend(words(mod))
 
-    walker = Walker(Builder(driver))
+    builder = Builder(driver)
+    walker = Walker(builder)
     res = 0
     for module in words(" ".join(driver.modules)):
         res = walker.walk("for-all-modules-with-meta-ext", callback, module,
@@ -273,6 +277,7 @@ def definition_depends_hooks(module: str, path: Path, found: list[str]) -> None:
     """The hooks of a plug-in definition (any format) listing ``module`` (in
     a value, guarded or not), named as get-deps-hooks names those of a Bash
     plug-in."""
+    from scbi.modref import strip_host
     from scbi.plugin import formats
     from scbi.plugin.model import PLAIN, Guarded, Values
 
@@ -294,7 +299,8 @@ def definition_depends_hooks(module: str, path: Path, found: list[str]) -> None:
     for key, body in pdef.hooks.items():
         if key.hook not in _DEPENDS_FOR or not isinstance(body, Values):
             continue
-        if module not in [v.strip() for v in values(body.items)]:
+        #  host@<module>: the module too (its build for the host)
+        if module not in [strip_host(v.strip()) for v in values(body.items)]:
             continue
         tag = "cross" if key.cross else ""
         if key.qualifier not in (PLAIN, "common"):

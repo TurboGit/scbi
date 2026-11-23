@@ -4,7 +4,9 @@ from scbi.modref import (
     ModuleRef,
     all_variants,
     has_variant,
+    is_host_prefixed,
     parse_module_ref,
+    strip_host,
 )
 
 
@@ -21,6 +23,8 @@ from scbi.modref import (
         ("lcms2:dev", ModuleRef("lcms2", "default", "DEV", "dev")),
         ("lcms2:skip", ModuleRef("lcms2", "default", "BRANCH", "skip")),
         ("mod/mpi.openmp", ModuleRef("mod", "mpi.openmp", "NONE", "NONE")),
+        ("host@gpr", ModuleRef("gpr", "default", "NONE", "NONE", True)),
+        ("host@gpr/v:#1.0", ModuleRef("gpr", "v", "VERSION", "1.0", True)),
     ],
 )
 def test_parse_module_ref(ref, expected):
@@ -39,3 +43,10 @@ def test_variants():
 
 def test_to_bash_array_drops_empty_fields():
     assert parse_module_ref("a:").to_bash_array() == ["a", "default", "BRANCH"]
+
+
+def test_host_prefix():
+    assert is_host_prefixed("host@gpr/v") and not is_host_prefixed("gpr")
+    assert strip_host("host@gpr/v:1") == "gpr/v:1" and strip_host("gpr") == "gpr"
+    #  host@ is not part of the module name
+    assert parse_module_ref("host@gpr").to_bash_array() == ["gpr", "default", "NONE", "NONE"]

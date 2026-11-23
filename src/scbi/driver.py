@@ -977,6 +977,11 @@ class Driver:
         self.ini_load_files()
         self.ini_apply_values("")
         self.first_pass(args)
+        if self.environ.get("SCBI_NESTED") == "yes":
+            #  a run of the driver for a host@ dependency (scbi.build): only
+            #  the modules of its command line, no stats
+            self.ini_modules = []
+            self.set("DO_STAT", "no")
         self.modules += self.ini_modules
 
         subcmd = self.ini_subcmd or (self.modules[0] if self.modules else "")
@@ -1149,6 +1154,8 @@ class Driver:
                 def callback(argv: list[str], walker=walker) -> int:
                     a = argv + [""] * 5
                     if a[4] == "true":  # an external package
+                        return 0
+                    if builder.is_host_dep(a[1]):  # built by a run for the host
                         return 0
                     m, v, kind, ref = walker.module_info(a[1], a[0])
                     if ref != "skip":

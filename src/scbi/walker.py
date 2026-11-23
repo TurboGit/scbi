@@ -168,6 +168,14 @@ class Walker:
                                          *words(depends_kind), *words(ext), *words(is_meta),
                                          *words(is_agg), *[w for x in rest for w in words(x)]])
 
+        if self.b.is_host_dep(modref):
+            #  host@ in a cross build: the build of the module for the host,
+            #  its dependencies are the ones of that build (not walked)
+            ext = "false"
+            self.load_module(modref)
+            emit(modref)
+            return 0
+
         if self.load_module(modref):
             ext = "false"
             self.rectree.append(module)
@@ -262,7 +270,8 @@ def build_order(builder, modrefs: list[str]) -> list[str]:
         def callback(argv: list[str]) -> None:
             a = argv + [""] * max(0, 5 - len(argv))
             formodule, dep, is_ext = a[0], a[1], a[4]
-            if is_ext != "true":
+            #  a host@ dependency of a cross build is not built for the target
+            if is_ext != "true" and not builder.is_host_dep(dep):
                 found.add(name(dep, formodule))
 
         try:

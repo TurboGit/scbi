@@ -19,6 +19,7 @@ from dataclasses import dataclass
 
 import yaml
 
+from scbi.modref import strip_host
 from scbi.plugin import catalog, yamlfmt
 from scbi.plugin.model import EnvOp, EnvOps, Guarded, Commands, LocalAssign, SourceEntry, Values
 
@@ -495,7 +496,8 @@ _DEP_HOOKS = ("depends", "build-depends", "tests-depends", "modules")
 
 def _related(name: str, data: dict) -> tuple[list[str], list[str]]:
     """The dependencies (modules of the dependency hooks, all qualifiers,
-    guarded items included; os@- packages and computed names left out)
+    guarded items included; os@- packages and computed names left out,
+    host@ removed)
     and the inherited plug-ins of a plug-in."""
     deps: list[str] = []
 
@@ -506,7 +508,7 @@ def _related(name: str, data: dict) -> tuple[list[str], list[str]]:
             elif isinstance(it, str):
                 for w in it.split():
                     if "$" not in w and not w.startswith("os@-"):
-                        deps.append(re.split(r"[/:@]", w, maxsplit=1)[0])
+                        deps.append(re.split(r"[/:@]", strip_host(w), maxsplit=1)[0])
 
     for key in _DEP_HOOKS:
         if key in data:

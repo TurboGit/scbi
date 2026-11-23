@@ -204,11 +204,13 @@ We'll see how to achieve that in this document.
 
 A module is described by an SCBI plug-in (one plug-in per file). It can be referenced in different places (as a dependency in other plug-ins, in a build plan, etc.) with the following format, called a \emph{module reference}:
 
-\code{[for\_module=]name[/variant][:version]}
+\code{[for\_module=][host@]name[/variant][:version]}
 \label{dev}
 
 \begin{description}[style=nextline]
 	\item[for\_module] The name of the plug-in depending on this module. This is optional and can be used to select a specific variant or version when the plug-in \code{name} is a dependency of \code{for\_module}. In a build plan an alternative syntax can be used, see \code{@for} (\seeref{formodule}).
+
+	\item[host@] \index{host prefix (dependency)}In a dependency (\code{depends}, \code{build-depends}, \code{tests-depends}): the build of the module for the host, whatever the target. In a native build it is the module itself; in a cross build the module is not built for the target, its build for the host is used (\seeref{host-deps}).
 
 	\item[name] The name of the plug-in. This is the main reference for the plug-in. The corresponding plug-in file (\file{<name>.yaml}) must be located in \code{\$SCBI\_PLUGINS}.
 
@@ -2211,6 +2213,41 @@ In a cross build the libraries built for the target are installed in
 cross compiler of the sandbox finds them. The tools of the target
 installed with unprefixed names (\file{<target>/bin/as}...) are never put
 in \code{PATH}: they would replace the native ones.
+
+\label{host-deps}\index{host prefix (dependency)}
+A tool needed to build a module, running on the host and able to build for
+any target (\code{gprbuild}...), is referenced with the prefix
+\code{host@} (\seeref{modref}): in a cross build the module uses the build
+of the tool for the host instead of building it for the target.
+
+\begin{lstlisting}[language={yaml}]
+build-depends:
+  - c-sandbox
+  - host@c-gprbuild
+\end{lstlisting}
+
+The tool can still be built for the target when a module needs it there
+(\code{c-gprbuild} without \code{host@}, or \code{scbi \ddash{}target=...
+c-gprbuild}). In a cross build a \code{host@} dependency is:
+
+\begin{itemize}
+	\item built for the host with \ddash{}deps, by a run of the driver
+	without \ddash{}target (\code{scbi \ddash{}deps <module>}, with the
+	plug-ins, build directory, environment, plan, jobs and update options
+	of the build), once per build; without \ddash{}deps its build for the
+	host must exist;
+	\item part of the build id of the module from its build for the host:
+	a new build of the tool for the host rebuilds the module;
+	\item in the environment of the module from its build for the host:
+	its \code{env} hook (its native hooks, \code{\$TARGET} the host),
+	\code{\$PREFIX} and \code{module-dir} give the directories of that
+	build. Its own dependencies are the ones of the build for the host,
+	they are not part of the cross build.
+\end{itemize}
+
+The run of the driver for the host has \code{SCBI\_NESTED=yes} in its
+environment (internal): it ignores the \code{modules} of the ini files and
+displays no statistics.
 
 \subsection{Setting a proxy}
 \label{proxy}

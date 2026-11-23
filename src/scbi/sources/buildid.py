@@ -77,6 +77,9 @@ def depends_build_id(builder, modref: str) -> str:
                 out.append((" ".join(words(pkgs.get(m, ""))) + "\n").encode())
             else:
                 path = f"{d.get('SCBI_BDIR')}/{m}/build-id-{v}"
+                if builder.is_host_dep(ref):
+                    #  host@ in a cross build: the build for the host
+                    path = builder.host_dir(m, v, "build-id")
                 if os.path.isfile(path):
                     with open(path, "rb") as f:
                         chunk = f.read()

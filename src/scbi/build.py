@@ -24,6 +24,7 @@ from scbi.bashenv import ShellVars
 from scbi.env import Environment
 from scbi.errors import Exit, NotImplementedYet
 from scbi.hooks.context import HookContext
+from scbi.modref import is_host_prefixed, strip_host
 from scbi.plugin.model import Commands
 from scbi.plugin.resolve import get_hook
 from scbi.sources import handle as sources
@@ -73,6 +74,8 @@ class Builder:
         self.d = driver
         self.modules_list: list[str] = []
         self.handled: set[str] = set()
+        #  the host@ dependencies built for the host in this run
+        self.host_built: set[str] = set()
         self.modules_dir: dict[str, str] = {}
         #  the value hooks see the directories of the modules too
         driver.runner().modules_dir = lambda: self.modules_dir
@@ -187,6 +190,18 @@ class Builder:
                 real = os.path.realpath(tdf)
                 shutil.rmtree(real, ignore_errors=True)
                 os.unlink(tdf)
+        return val + (f"/{file}" if file else "")
+
+    def is_host_dep(self, modref: str) -> bool:
+        """A ``host@`` dependency in a cross build: the build of the module
+        for the host is used (in a native build it is the module itself)."""
+        return is_host_prefixed(modref) and self.get("SCBI_HOST") != self.get("SCBI_TARGET")
+
+    def host_dir(self, module: str, variant: str, file: str = "") -> str:
+        """The target directory of the build of ``module`` for the host (no
+        change made, the flat link followed)."""
+        tdf = f"{self.get('SCBI_BDIR')}/{module}/{self.get('SCBI_HOST')}-{variant}"
+        val = os.path.realpath(tdf) if os.path.islink(tdf) else tdf
         return val + (f"/{file}" if file else "")
 
     def hook_value(self, module: str, variant: str, hook: str) -> str | None:
@@ -485,6 +500,8 @@ class Builder:
             finally:
                 d.sv, cwd = saved
                 os.chdir(cwd)
+        else:
+            self.check_host_depends(module, variant)
 
         self.progress_next(module, variant)
 
@@ -738,6 +755,85 @@ class Builder:
             if not dry:
                 self.d.log.line_sep()
 
+    # ------------------------------------------------------------ host@
+
+    def host_depends(self, module: str, variant: str) -> list[str]:
+        """The host@ dependencies of a module in a cross build."""
+        hooks = ["build-depends", "depends"] + (["tests-depends"] if self.get("DO_TEST") != "no" else [])
+        return [m for hook in hooks for m in self.get_all_depends(module, variant, hook) if self.is_host_dep(m)]
+
+    def check_host_depends(self, module: str, variant: str) -> None:
+        """Without --deps: the host@ dependencies must be built for the host."""
+        for modref in self.host_depends(module, variant):
+            hmodule, hvariant = (self.d.plan.module_ref(modref, module) + ["", ""])[:2]
+            if not os.path.isfile(self.host_dir(hmodule, hvariant, "build-id")):
+                self.elog(module, f"{modref}: not built for {self.get('SCBI_HOST')},",
+                          f"run scbi {strip_host(modref)} or use --deps")
+                raise Exit(1)
+
+    def handle_host_depends(self, modref: str, module: str, variant: str, drefs: Path) -> int:
+        """A host@ dependency with --deps in a cross build: the module built
+        for the host by a driver run without --target (once per run), its
+        build id recorded for the dependent. Returns the status."""
+        key = f"{module}/{variant}"
+        if key not in self.host_built:
+            self.host_built.add(key)
+            self.ilog(module, "%BBuilding", f"%t{strip_host(modref)}%c", "for the host",
+                      self.get("SCBI_HOST"))
+            if self.run_host_build(strip_host(modref)) != 0:
+                self.elog(module, "build for the host failed")
+                return 1
+        bid = Path(self.host_dir(module, variant, "build-id"))
+        if bid.is_file():
+            with open(drefs, "a") as f:
+                f.write(f"{_read_first_line(bid)} {module}\n")
+        elif self.get("DRY_RUN") != "yes":
+            self.elog(module, f"not built for {self.get('SCBI_HOST')}")
+            return 1
+        return 0
+
+    def run_host_build(self, modref: str) -> int:
+        """``scbi --deps MODREF`` for the host: the options of this run
+        that select what is built (plug-ins, build directory, environment,
+        plan, jobs, update...), without the target and the ini sections
+        (their modules). Its output is the one of this run."""
+        import scbi
+
+        d = self.d
+        args = [sys.executable, "-m", "scbi", "--deps", "--progress:no",
+                f"--plugins={self.get('SCBI_PLUGINS')}", f"--build-dir={self.get('SCBI_BDIR')}",
+                f"--jobs={self.get('SCBI_JOBS')}", f"--color:{self.get('DO_COLOR') or 'no'}"]
+        if d.cmdline.get("ENV_NAME"):
+            args.append(f"--env={d.cmdline['ENV_NAME']}")
+        if self.get("SCBI_PLAN"):
+            args.append(f"--plan={self.get('SCBI_PLAN')}")
+        if self.get("DO_UPDATE") == "yes":
+            args.append("--update")
+        if self.get("DO_WARNING_EXTERNAL") == "yes":
+            args.append("--deps:warning")
+        if self.get("DRY_RUN") == "yes":
+            args.append("--dry-run")
+        args.append(modref)
+        env = dict(os.environ)
+        pkg = str(Path(scbi.__file__).resolve().parent.parent)
+        env["PYTHONPATH"] = pkg + (f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else "")
+        #  a nested run: no ini modules, no stats
+        env["SCBI_NESTED"] = "yes"
+        sys.stdout.flush()
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                                cwd=os.getcwd(), env=env)
+        assert proc.stdout is not None
+        #  the blank lines at the end (separator) are the ones of this run
+        blanks = 0
+        for line in proc.stdout:
+            if not line.strip():
+                blanks += 1
+                continue
+            sys.stdout.write("\n" * blanks + line)
+            blanks = 0
+        sys.stdout.flush()
+        return proc.wait()
+
     def record_dref(self, module: str, variant: str, file: Path) -> None:
         """Port of ``record-dref``."""
         biv = Path(self.get("SCBI_BDIR"), module, f"build-id-{variant}")
@@ -773,6 +869,9 @@ class Builder:
         finfo = (d.plan.module_ref(formodule) + [""] * 4)[:4]
         fmodule, fvariant = finfo[0], finfo[1]
         drefs = Path(self.get("SCBI_BDIR"), fmodule, f"build-deps-{fvariant}")
+
+        if self.is_host_dep(modref):
+            return self.handle_host_depends(modref, module, variant, drefs)
 
         if kind == "DEV":
             self.handle_module(formodule, modref, depends_kind, is_aggregated)

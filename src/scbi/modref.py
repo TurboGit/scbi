@@ -1,6 +1,7 @@
 """Module references.
 
-A module reference has the form ``[for_module=]name[/variants][:version]``
+A module reference has the form
+``[for_module=][host@]name[/variants][:version]``
 (see doc/scbi.tex, section "Module reference"). This is the port of
 ``parse-module-ref``, ``all-variants``, ``all-variants-v`` and ``has-variant``
 from scripts.d/0_runtime.
@@ -8,6 +9,9 @@ from scripts.d/0_runtime.
 Note that, as in the Bash implementation, ``parse_module_ref`` does not
 handle the ``for_module=`` prefix: it stays part of the module name and is
 interpreted when registering a plan (``SCBI_MODVER`` keys).
+
+``host@`` (a dependency): the build of the module for the host, whatever
+the target. It is not part of the module name (``ModuleRef.host``).
 """
 
 from __future__ import annotations
@@ -22,6 +26,9 @@ KIND_DEV = "DEV"
 KIND_VERSION = "VERSION"  # archive version (``:#1.0``)
 KIND_BRANCH = "BRANCH"  # VCS reference (branch, tag, SHA-1) or keyword
 
+#  Prefix of a dependency built for the host
+HOST_PREFIX = "host@"
+
 
 @dataclass(frozen=True)
 class ModuleRef:
@@ -29,6 +36,8 @@ class ModuleRef:
     variant: str = DEFAULT_VARIANT
     kind: str = KIND_NONE
     version: str = "NONE"
+    #  host@: the build of the module for the host
+    host: bool = False
 
     @property
     def variants(self) -> list[str]:
@@ -44,7 +53,11 @@ class ModuleRef:
 
 
 def parse_module_ref(modref: str) -> ModuleRef:
-    """Port of ``parse-module-ref`` (scripts.d/0_runtime)."""
+    """Port of ``parse-module-ref`` (scripts.d/0_runtime), plus the
+    ``host@`` prefix."""
+    host = is_host_prefixed(modref)
+    if host:
+        modref = modref[len(HOST_PREFIX):]
     if ":" not in modref:
         kind = KIND_NONE
         version = "NONE"
@@ -65,7 +78,17 @@ def parse_module_ref(modref: str) -> ModuleRef:
         variant = module.split("/", 1)[1]  # ${module#*/}
         module = module.rsplit("/", 1)[0]  # ${module%/*}
 
-    return ModuleRef(module, variant, kind, version)
+    return ModuleRef(module, variant, kind, version, host)
+
+
+def is_host_prefixed(modref: str) -> bool:
+    """A ``host@`` reference (the dependency built for the host)."""
+    return modref.startswith(HOST_PREFIX)
+
+
+def strip_host(modref: str) -> str:
+    """The reference without its ``host@`` prefix."""
+    return modref[len(HOST_PREFIX):] if is_host_prefixed(modref) else modref
 
 
 def all_variants(variants: str) -> list[str]:
