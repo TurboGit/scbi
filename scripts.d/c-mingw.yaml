@@ -4,18 +4,13 @@ vcs:
   proxy: default
   options: none
   protocol: git
-  url: https://github.com/mirror/mingw-w64.git
+  url: https://github.com/mingw-w64/mingw-w64
 
 depends:
   - c-mingw-header
 
 build-depends:
   - c-pgcc
-
-build-env:
-  - CROSSCOMP = $SCBI_BDIR/c-pgcc/$TARGET-$VARIANT/install
-  - target-env $CROSSCOMP
-  - add-to-var C_INCLUDE_PATH $(last-modified-directory $CROSSCOMP/lib/gcc/$TARGET/*/include)
 
 setup: |-
   if $TARGET =~ "^(?:.*mingw.*)$":
@@ -31,13 +26,15 @@ config-options:
   - --host=$TARGET
   - --build=$SCBI_HOST
   - --enable-wildcard
+  #  the compiler (c-pgcc) is not multilib: only the libraries of the
+  #  target, this also avoids dlltool temporary files clashes between the
+  #  lib32 and lib64 libraries built in parallel (same --temp-prefix)
+  - if target =~ ^x86_64: --disable-lib32
+  - if target =~ ^i686: --disable-lib64
 
 config: ../src/mingw-w64-crt/configure $(config-options)
 
-build: |-
-  sed -i 's/^winrt32_DATA/#winrt32_DATA/' Makefile
-  sed -i 's/^winrt64_DATA/#winrt64_DATA/' Makefile
-  make -j$SCBI_JOBS
+build: make -j$SCBI_JOBS
 
 install: make install
 
