@@ -27,6 +27,4 @@ build: make -j$SCBI_JOBS
 
 install: make install
 
-version: return $VERSION_ERROR
-
 prefix: $SCBI_PREFIX/$TARGET
