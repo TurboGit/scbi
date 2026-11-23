@@ -12,8 +12,12 @@ version: force
 
 #  %.pdf: %.tex $(DIF) $(BIB)
 
-$(PDF): $(TEX) $(DIF) $(BIB) version
+$(PDF): $(TEX) $(DIF) $(BIB) version scbi-logo.pdf
 	latexmk -pdf -interaction=nonstopmode $(TEX)
+
+#  The logo (the SVG is the source) for the title page
+scbi-logo.pdf: scbi-logo.svg
+	inkscape --export-type=pdf --export-filename=$@ $<
 
 clean:
 	latexmk -C
