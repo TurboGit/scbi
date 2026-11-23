@@ -41,6 +41,9 @@ config-options:
   - --disable-sjlj-exceptions
   - --enable-large-address-aware
   - --enable-languages=c
+  #  the assembler of the target: installed in its own prefix, gcc would
+  #  use the native as found in PATH
+  - --with-as=$(module-dir c-binutils)/$TARGET/bin/as
 
 pre-config: delete-tree ../src/gcc/ada
 
