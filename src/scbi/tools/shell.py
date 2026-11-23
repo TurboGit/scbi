@@ -109,9 +109,6 @@ def main(driver, args: list[str]) -> int:
     curcd = os.getcwd()
 
     env = Environment(driver.sv.copy())
-    if driver.get("SCBI_HOST") != target:
-        env.target_env(f"{driver.get('SCBI_BDIR')}/install", target, driver.get("SCBI_HOST"),
-                       driver.get("SCBI_BDIR"))
     me = ModuleEnv(builder, env)
     me.env.export("SCBI_SHELL", f"{mode}:{shl_module}")
     rc = me.run(setup_env(modref, modules[:-1], docd))

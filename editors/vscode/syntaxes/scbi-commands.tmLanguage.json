@@ -255,7 +255,7 @@
       }
     },
     "env-action": {
-      "match": "(?:^|\\G)[ \\t]*(remove-from-var|system-compiler|prepend-to-var|append-to-var|add-to-var|define-var|unset-var|set-var|assign|import|local|mkdir)(?=[ \\t;|&<>)]|$)(?:[ \\t]+([A-Za-z_][A-Za-z0-9_]*)(?=[ \\t=]|$))?",
+      "match": "(?:^|\\G)[ \\t]*(remove-from-var|prepend-to-var|append-to-var|add-to-var|define-var|unset-var|set-var|assign|import|local|mkdir)(?=[ \\t;|&<>)]|$)(?:[ \\t]+([A-Za-z_][A-Za-z0-9_]*)(?=[ \\t=]|$))?",
       "captures": {
         "1": {
           "name": "support.function.env-action.scbi"

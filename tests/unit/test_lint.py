@@ -122,7 +122,7 @@ env:
 
 def test_build_target_hook():
     assert issues("build: make\nbuild-runtime: make rts\n") == []
-    assert issues("build-env: [system-compiler]\nbuild-x-build-y: make\n")[0][0] == ERROR
+    assert issues("build-env: [unset-var X]\nbuild-x-build-y: make\n")[0][0] == ERROR
 
 
 def test_log_level():

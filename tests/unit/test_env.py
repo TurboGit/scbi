@@ -60,10 +60,3 @@ def test_record(tmp_path):
     e.set_var("A", "x  y")
     e.unset_var("A")
     assert rec.read_text() == 'define-var SET A "x y"\ndefine-var UNSET A ""\n'
-
-
-def test_system_compiler():
-    e = env(PATH="/opt/bin", C_INCLUDE_PATH="/x", OTHER="o")
-    e.system_compiler()
-    assert e.get("PATH") == "/usr/local/bin:/usr/bin:/bin"
-    assert "C_INCLUDE_PATH" not in e.vars.values and e.get("OTHER") == "o"

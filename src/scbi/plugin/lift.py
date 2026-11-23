@@ -371,6 +371,9 @@ class _BodyLifter:
                     self.locals[m.group(1)] = value
                 i += 1
                 continue
+            verb = line.split(None, 1)[0]
+            if verb in _COMPILER_ENV:
+                raise _Unliftable(f"unsupported line: {line} ({_COMPILER_ENV[verb]})")
             raise _Unliftable(f"unsupported line: {line}")
         return items, i
 
@@ -426,6 +429,14 @@ def _env_item(line: str, locals_: dict[str, str]):
 
 
 re_ws = re.compile(r"\s")
+
+#  The compiler environment helpers of the Bash runtime: the environment
+#  comes from a c-sandbox variant, first item of the build-depends
+_COMPILER_ENV = {
+    "system-compiler": "use c-sandbox/system in build-depends",
+    "target-env": "use c-sandbox in build-depends",
+    "no-target-env": "use c-sandbox/host in build-depends",
+}
 
 
 def _words(text: str) -> list[str]:

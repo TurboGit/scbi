@@ -165,6 +165,16 @@ def test_value_lifting_salome_idioms():
                    EnvOp("set-var", ("X", "$W")))
 
 
+def test_compiler_env_helpers_not_lifted():
+    #  the compiler environment comes from a c-sandbox variant
+    from scbi.plugin.lift import _Unliftable, lift_env
+
+    for line, hint in (("system-compiler", "c-sandbox/system"), ("target-env", "c-sandbox in"),
+                       ("no-target-env /p", "c-sandbox/host")):
+        with pytest.raises(_Unliftable, match=hint):
+            lift_env([line, "add-to-var PATH /x"])
+
+
 def test_rm_lifted_to_delete():
     assert lift_commands(["rm -fr build/kb", "rm -rf a b && make", "rm -f x", "rm y *.o", "rm -fr -v y",
                           "rm -r z | cat", "rm -i w"]) == (

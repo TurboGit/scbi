@@ -873,10 +873,6 @@ class Builder:
             if rc != 0:
                 return 1, "no"
 
-        if self.get("SCBI_HOST") != self.get("SCBI_TARGET"):
-            Environment(d.sv).target_env(f"{bdir}/install", self.get("SCBI_TARGET"),
-                                         self.get("SCBI_HOST"), bdir)
-
         self.modules_dir = {}
         is_uptodate, msg = "no", ""
         status = self.is_module_up_to_date(modref, formodule, module, variant, ref)

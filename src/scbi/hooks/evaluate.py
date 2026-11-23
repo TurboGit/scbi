@@ -169,8 +169,6 @@ def apply_env(ops: EnvOps | tuple, ctx: HookContext, base_env: dict[str, str] | 
         elif verb == "assign":
             ctx.locals.pop(op.args[0], None)
             env.vars.values[op.args[0]] = args[1]
-        elif verb == "system-compiler":
-            env.system_compiler()
         elif verb == "mkdir":
             for d in args:
                 (Path(d) if os.path.isabs(d) else ctx.cwd / d).mkdir(parents=True, exist_ok=True)

@@ -147,7 +147,6 @@ ENV_VERBS = {
     "export": 2,  # export VAR=VALUE
     "local": 2,  # local VAR VALUE: variable for the following actions only
     "assign": 2,  # assign VAR VALUE: shell variable (VAR=VALUE), exported if it was
-    "system-compiler": 0,
     "mkdir": 1,
     "import": -1,  # import <command>: run and import printed variables
 }

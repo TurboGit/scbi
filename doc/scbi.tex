@@ -2084,7 +2084,6 @@ The other actions are:
 
 \begin{description}[style=nextline]
 	\item[export <VARIABLE> <VALUE>] Sets and exports the variable, without going through the \code{define-var} of the environment file.
-	\item[system-compiler] Uses the compiler of the system: \code{PATH} set to \file{/usr/local/bin:/usr/bin:/bin}, the compiler paths (\code{C\_INCLUDE\_PATH}, \code{CPLUS\_INCLUDE\_PATH}, \code{LIBRARY\_PATH}, \code{LD\_LIBRARY\_PATH}, \code{ADA\_PROJECT\_PATH}) unset.
 	\item[mkdir <DIR>] Creates the directory (and its parents).
 	\item[import <COMMAND>] Runs the command (without shell) and applies the variable assignments, \code{export} and \code{unset} statements it prints, as \code{eval \$(opam env)} would.
 	\item[local <NAME> <VALUE>] A variable for the following actions of the hook (also written \code{NAME = <value>}, \seeref{yaml-expansion}).
@@ -2151,6 +2150,67 @@ functions:
 To get the actions of a module without changing the build environment
 (to write a launch script for example), use \code{\$(env-actions)} in
 \code{module-final-step} instead (\seeref{module-final-step}).
+
+\subsection{Build environment and cross compilation}
+\label{build-environment}
+\index{cross compilation}\index{environment!build}\index{c-sandbox}
+
+The driver adds no compiler environment of its own, for native or cross
+builds: the environment of a module is the one of the user (reduced to the
+base variables, \seeref{hookenv}) changed by the environment actions of its
+build dependencies, of its dependencies and by its own \code{build-env},
+applied in this order:
+
+\begin{enumerate}
+	\item the \code{env} hooks of the \code{build-depends}, in the order of
+	the list;
+	\item the \code{env} hooks of the \code{depends} (direct or not);
+	\item the \code{build-env} hook of the module.
+\end{enumerate}
+
+The base environment is given by the plug-in \code{c-sandbox}, used as the
+\emph{first} item of the \code{build-depends}: the dependencies then add
+to it. Its variants give the four environments of a build:
+
+\begin{description}[style=nextline]
+	\item[c-sandbox] For a native build, the sandbox: the programs and
+	libraries installed in \file{\$SCBI\_BDIR/install} (a compiler built in
+	the sandbox comes first). For a cross build (\ddash{}target), the target:
+	the cross compiler and binutils of the sandbox (\code{<target>-gcc},
+	\code{<target>-ar}...) in \code{PATH}, no compiler paths
+	(\code{C\_INCLUDE\_PATH}, \code{LIBRARY\_PATH}...: the cross compiler
+	finds the target headers and libraries in its own directories, the
+	native compiler used for the build tools keeps its defaults), and
+	\code{pkg-config} and \code{gprbuild} set for the target libraries only.
+	\item[c-sandbox/host] The native sandbox, also in a cross build: for the
+	tools running on the host, such as a cross compiler built with the
+	native compiler of the sandbox (the cross binutils already installed in
+	the sandbox are in \code{PATH}).
+	\item[c-sandbox/system] The compiler and tools of the system only:
+	\code{PATH} set to \file{/usr/local/bin:/usr/bin:/bin}, the compiler
+	paths unset. For the modules bootstrapping the sandbox (binutils, gcc)
+	or not built with its compiler.
+\end{description}
+
+For example:
+
+\begin{lstlisting}[language={yaml}]
+# a library, native or for the target with --target
+build-depends:
+  - c-sandbox
+
+# a cross compiler
+build-depends:
+  - c-sandbox/host
+  - c-binutils
+\end{lstlisting}
+
+In a cross build the libraries built for the target are installed in
+\file{\$SCBI\_PREFIX/<target>} (\code{prefix} hook, or
+\code{\ddash{}prefix=\$PREFIX/\$TARGET} given to \code{configure}) where the
+cross compiler of the sandbox finds them. The tools of the target
+installed with unprefixed names (\file{<target>/bin/as}...) are never put
+in \code{PATH}: they would replace the native ones.
 
 \subsection{Setting a proxy}
 \label{proxy}

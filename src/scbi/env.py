@@ -2,9 +2,9 @@
 
 Port of the environment helpers of scripts.d/0_runtime: ``define-var``
 (and ``add-to-var``, ``prepend-to-var``, ``append-to-var``,
-``remove-from-var``, ``set-var``, ``unset-var``), the list helpers they use,
-``system-compiler``, ``target-env`` (the environment of the sandbox) and
-``set-compiler-paths``.
+``remove-from-var``, ``set-var``, ``unset-var``) and the list helpers they
+use. The compiler environment of a build comes from the plug-ins (the
+c-sandbox variants), not from the driver.
 
 The Bash code splits and joins the values with unquoted expansions and
 compares entries with glob patterns; this is reproduced so that the
@@ -14,7 +14,6 @@ resulting environment is identical (checked by tests/unit/test_env.py).
 from __future__ import annotations
 
 import os
-import shutil
 import subprocess
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -211,58 +210,3 @@ class Environment:
 
     def unset_var(self, var: str) -> None:
         self.define_var("UNSET", var, "")
-
-    # ------------------------------------------------------- compiler setup
-
-    def system_compiler(self) -> None:
-        """Port of ``system-compiler``."""
-        self.export("PATH", "/usr/local/bin:/usr/bin:/bin")
-        for v in ("C_INCLUDE_PATH", "CPLUS_INCLUDE_PATH", "LIBRARY_PATH",
-                  "LD_LIBRARY_PATH", "ADA_PROJECT_PATH"):
-            self.unset(v)
-
-    def _gcc_prefix(self) -> str:
-        gcc = shutil.which("gcc", path=self.get("PATH")) or ""
-        return os.path.dirname(os.path.dirname(gcc)) if gcc else "."
-
-    def _gcc_version(self) -> str:
-        if self.windows:
-            return "1"
-        try:
-            return subprocess.run(
-                ["gcc", "-dumpversion"], capture_output=True, text=True, env=self.environ()
-            ).stdout.strip()
-        except OSError:
-            return ""
-
-    def set_compiler_paths(self, prefix: str, target: str, host: str, bdir: str) -> None:
-        """Port of ``set-compiler-paths``."""
-        ver = self._gcc_version()
-        if not target:
-            i1, i2 = f"{prefix}/include/{host}", f"{prefix}/include"
-            i3, i4 = f"{prefix}/lib/gcc/{host}/{ver}/include", f"{prefix}/local/include"
-            ip1, ip2 = f"{prefix}/include/c++/{ver}", ""
-            p = f"{prefix}/{host}/share/gpr:{prefix}/share/gpr"
-            lib = f"{prefix}/lib/{host}:{prefix}/lib"
-        else:
-            i1, i2 = f"{prefix}/lib/gcc/{target}/{ver}/include", f"{prefix}/include/{target}"
-            i3, i4 = f"{prefix}/include", f"{prefix}/local/include"
-            ip1, ip2 = f"{prefix}/include/{target}/c++/{ver}", f"{prefix}/include/c++/{ver}"
-            p = f"{prefix}/{target}/share/gpr"
-            lib = f"{prefix}/lib/{target}"
-            ic = f"{bdir}/c-libiconv/x86_64-linux-gnu-default/install/lib"
-            if os.path.isdir(ic):
-                lib = f"{lib}:{ic}"
-        self.export("C_INCLUDE_PATH", f"{i1}:{i2}:{i3}:{i4}")
-        self.export("CPLUS_INCLUDE_PATH", f"{ip1}:{ip2}:{i1}:{i2}:{i3}:{i4}")
-        self.export("LIBRARY_PATH", f"{lib}:/usr/lib")
-        self.export("LD_LIBRARY_PATH", f"{lib}:/usr/lib")
-        self.export("ADA_PROJECT_PATH", p)
-
-    def target_env(self, prefix: str, target: str, host: str, bdir: str) -> None:
-        """Port of ``target-env [PREFIX [TARGET]]``."""
-        if not prefix:
-            prefix = self._gcc_prefix()
-        b = f"{prefix}/bin" if not target else f"{prefix}/{target}/bin"
-        self.export("PATH", f"{b}:{self.get('PATH')}")
-        self.set_compiler_paths(prefix, target, host, bdir)
