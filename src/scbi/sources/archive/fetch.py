@@ -12,7 +12,9 @@ truncated its per-variant log with ``> $log`` for some commands).
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import os
+import re
 import shutil
 import subprocess
 from collections.abc import Callable
@@ -86,7 +88,8 @@ def _get_archive(builder, module, variant, tar, proxy, options, tarcp, tarurl, t
         if not check_tool(tarcp, env):
             elog("Required", "tool", *words(tarcp), "missing")
             return 1
-        downloaded = _download(io, cwd, tarcp, options, tarurl, tarsrc, archives, elog)
+        downloaded = _download(io, cwd, tarcp, options, tarurl, tarsrc, archives, elog,
+                               update=builder.d.get("DO_UPDATE") == "yes")
     else:
         downloaded = 1
 
@@ -132,40 +135,91 @@ def _get_archive(builder, module, variant, tar, proxy, options, tarcp, tarurl, t
 
 
 def _download(io: _Io, cwd: str, tarcp: str, options: str, tarurl: str, tarsrc: str,
-              archives: str, elog, tmp_dir: str = "/tmp") -> int:
+              archives: str, elog, tmp_dir: str = "/tmp", update: bool = True) -> int:
     """The sub-shell of get-archive: 0 when the archive was already there
     and up-to-date, 1 when downloaded (or tried); the SHA-1 downloaded in
-    ``tmp_dir``."""
+    ``tmp_dir``.
+
+    Without ``update`` a local archive matching its local SHA-1 (or without
+    one) is used as is, nothing is downloaded. The local archive and its
+    SHA-1 are only replaced by a successful download: a failed one (archive
+    removed from the server, server down) keeps them."""
+    local = f"{archives}/{tarsrc}"
+    local_sha1 = f"{local}.sha1"
+    if not update and _local_archive_ok(local, local_sha1):
+        return 0
+
     proto = registry.get(tarcp)
     tmp_sha1 = f"{tmp_dir}/{tarsrc}.sha1"
     do_download = 0
 
-    #  the SHA-1 if present
+    #  the SHA-1 if present (an error page is not a SHA-1)
+    _rm_f(tmp_sha1)
     if proto is not None:
         rc = io.run(proto.command(tarcp, options, f"{tarurl}/{tarsrc}.sha1", tmp_sha1), cwd)
     else:
         rc = 1
-    if rc == 0:
-        if not _same_file(f"{archives}/{tarsrc}.sha1", tmp_sha1):
-            do_download = 1
-
-    if do_download == 1 or not os.path.isfile(f"{archives}/{tarsrc}"):
+    if rc != 0 or _sha1_value(tmp_sha1) is None:
+        _rm_f(tmp_sha1)
+    elif not _same_file(local_sha1, tmp_sha1):
         do_download = 1
+
+    if do_download == 1 or not os.path.isfile(local):
+        do_download = 1
+        part = f"{local}.part"
+        _rm_f(part)
         if proto is not None:
-            rc = io.run(proto.command(tarcp, options, f"{tarurl}/{tarsrc}", f"{archives}/{tarsrc}"), cwd)
+            rc = io.run(proto.command(tarcp, options, f"{tarurl}/{tarsrc}", part), cwd)
         else:
             elog("unknown", "tar", "protocol", *words(tarcp))
             rc = 1
-        if rc != 0:
-            for f in (f"{archives}/{tarsrc}", f"{archives}/{tarsrc}.sha1"):
-                _rm_f(f)
+        if rc == 0 and os.path.isfile(part):
+            os.replace(part, local)
+            if os.path.isfile(tmp_sha1):
+                shutil.copyfile(tmp_sha1, local_sha1)
+        else:
+            _rm_f(part)
             elog("cannot", "get", "archive:", *words(tarcp))
             elog("from", *words(f"{tarurl}/{tarsrc}"))
-        elif os.path.isfile(tmp_sha1):
-            shutil.copyfile(tmp_sha1, f"{archives}/{tarsrc}.sha1")
+            if os.path.isfile(local):
+                elog("using", "local", "archive", *words(local))
+                do_download = 0
 
     _rm_f(tmp_sha1)
     return do_download
+
+
+def _sha1_value(path: str) -> str | None:
+    """The SHA-1 of a ``.sha1`` file (``sha1sum`` output: its first word),
+    None when not a SHA-1 (missing file, error page...)."""
+    try:
+        with open(path, "rb") as f:
+            first = f.read(4096).split(maxsplit=1)
+    except OSError:
+        return None
+    if not first:
+        return None
+    value = first[0].decode("ascii", errors="replace").lower()
+    return value if re.fullmatch(r"[0-9a-f]{40}", value) else None
+
+
+def _local_archive_ok(archive: str, sha1: str) -> bool:
+    """The local archive is there and matches its local SHA-1 (if any)."""
+    if not os.path.isfile(archive):
+        return False
+    if not os.path.exists(sha1):
+        return True
+    expected = _sha1_value(sha1)
+    if expected is None:
+        return False
+    h = hashlib.sha1()
+    try:
+        with open(archive, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+    except OSError:
+        return False
+    return h.hexdigest() == expected
 
 
 class _Lines:

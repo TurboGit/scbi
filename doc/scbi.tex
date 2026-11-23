@@ -1497,6 +1497,19 @@ archive:
   file: cmake-$VERSION.tar.gz
 \end{lstlisting}
 
+	The archive is kept in \code{\$SCBI\_ARCHIVES} with its SHA-1
+	(\file{<file>.sha1}, downloaded from URL when the server has
+	one). With \ddash{}update, the archive is downloaded again when
+	missing or when the SHA-1 of the server differs from the local
+	one. Without \ddash{}update, a local archive matching its local
+	SHA-1 (or without one) is used as is, the server is not
+	accessed. The local archive and its SHA-1 are only replaced by a
+	successful download: when the download fails (archive removed
+	from the server, server down, HTTP error) the local archive, if
+	any, is used. The \emph{curl} protocol is run with
+	\code{\ddash{}fail}, an HTTP error page is never saved as the
+	archive.
+
 	The \code{archive} hook of a given variant can be selected by the environment:
 
 	\begin{description}[style=standard]
