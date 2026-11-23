@@ -49,9 +49,10 @@ config: ../src/configure $(config-options)
 build: |-
   DEBUG = get-build-type MAKE false
   if $DEBUG == true:
-      CFLAGS = "-O0 -g -Wno-error"
+      CFLAGS = -O0
   else:
-      CFLAGS = "-O2 -g -Wno-error"
+      CFLAGS = -O2
+  CFLAGS += -g -Wno-error
   make -j$SCBI_JOBS CFLAGS="$CFLAGS" CC=gcc
 
 install: make install
