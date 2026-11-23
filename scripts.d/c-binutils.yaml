@@ -60,9 +60,13 @@ install: make install
 version: |-
   TOOL = ld
   if cross:
-      TOOL = ${TARGET}-ld
+      TOOL = ${TARGET}-as
+      _S1 = command-path $TOOL
+      if $_S1 == "":
+        TOOL = ${PREFIX}/bin/$TOOL
   _S1 = command-path $TOOL
   if $_S1 == "":
+      log 1 $TOOL not found
       echo $VERSION_ERROR
   else:
       V = output $TOOL --version | head -1
