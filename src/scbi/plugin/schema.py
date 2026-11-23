@@ -72,7 +72,9 @@ def _body(hook: str) -> dict:
         return _list_body(_SOURCE_ENTRY)
     kind = catalog.spec(hook).kind
     if kind == catalog.COMMAND:
-        return {"type": "string"}
+        #  a plain scalar (true, a number) is a command too: the reader
+        #  reads all the scalars as strings, the formatter writes them plain
+        return {"type": ["string", "number", "boolean"]}
     if kind == catalog.VALUE:
         return _value_body(hook)
     return _list_body({"type": "string"})

@@ -30,6 +30,9 @@ def test_plugins_valid(validator):
     for f in files:
         data = yaml.load(f.read_text(), Loader=yamlfmt._Loader)
         assert [e.message for e in validator.iter_errors(data)] == [], f
+        #  as an editor reads them: plain true, false, numbers are typed
+        data = yaml.safe_load(f.read_text())
+        assert [e.message for e in validator.iter_errors(data)] == [], f
 
 
 @pytest.mark.parametrize("data", [
