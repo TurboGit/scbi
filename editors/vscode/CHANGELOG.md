@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 
 - Plug-ins: the command language is highlighted in the YAML values
   (grammar injected in `source.yaml`): variables, built-ins and functions,
