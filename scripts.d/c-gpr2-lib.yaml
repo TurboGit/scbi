@@ -14,6 +14,9 @@ vcs:
   protocol: git
   url: https://github.com/AdaCore/gpr
 
+patches:
+  cross: cross-gpr.patch
+
 depends:
   - c-gnatcoll-core
   - c-gnatcoll-bindings-iconv
@@ -41,6 +44,7 @@ build:
   _: make build-lib-relocatable build-lib-static-pic build-lib-static
   cross:
     _: make TARGET=$TARGET build-lib-relocatable build-lib-static-pic build-lib-static
+
 install:
   _: make GPRINSTALL=gprinstall install-lib-relocatable install-lib-static-pic install-lib-static
   cross:
