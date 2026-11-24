@@ -26,7 +26,7 @@
 #     $ make doc
 #
 
-.SILENT: test sort-pkgs sync-os-deps
+.SILENT: test sort-pkgs sync-os-deps lint
 
 .PHONY: unit test vscode vscode-smoke
 
