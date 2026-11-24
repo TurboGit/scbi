@@ -70,7 +70,7 @@
 \lstdefinelanguage{yaml}
 {
 	alsoletter={-},
-	keywords={true,false,yes,no,plugin,depends,with-variants,vcs,build-depends,options,protocol,packages,config-options,cross,variants,patches,for,in,if,then,else,version,write,append,setup,wrapup,archive,file,plan,modules,functions,params,run,proxy,inherit,hooks,name,from,no-variant,vars,passthrough,echo,prefix,source-tree,to,exclude},
+	keywords={true,false,yes,no,plugin,depends,vcs,options,protocol,packages,config-options,cross,variants,patches,for,in,if,then,else,version,write,append,setup,wrapup,archive,file,plan,modules,functions,params,run,proxy,inherit,hooks,name,from,no-variant,vars,passthrough,echo,prefix,source-tree,exclude},
 	keywordstyle=\color{black}\bfseries,
 	sensitive=false,
 	comment=[l]{\#},
@@ -84,10 +84,13 @@
 	  {=}{{\bfseries\textcolor{black}{=}}}{1}
 	  {only-explicit-build:}{{\bfseries\textcolor{black}{only-explicit-build:}}}{20}
 	  {out-of-tree:}{{\bfseries\textcolor{black}{out-of-tree:}}}{12}
+	  {with-variants:}{{\bfseries\textcolor{black}{with-variants:}}}{14}
 	  {build-env:}{{\bfseries\textcolor{black}{build-env:}}}{10}
+	  {build-depends:}{{\bfseries\textcolor{black}{build-depends:}}}{14}
 	  {tests-depends:}{{\bfseries\textcolor{black}{tests-depends:}}}{14}
 	  {build:}{{\bfseries\textcolor{black}{build:}}}{6}
 	  {env:}{{\bfseries\textcolor{black}{env:}}}{4}
+	  {to:}{{\bfseries\textcolor{black}{to:}}}{3}
 	  {common:}{{\bfseries\textcolor{black}{common:}}}{7}
 	  {url:}{{\bfseries\textcolor{black}{url:}}}{4}
 	  {config:}{{\bfseries\textcolor{black}{config:}}}{7}
@@ -97,7 +100,7 @@
 	  {rewrite-vcs:}{{\bfseries\textcolor{black}{rewrite-vcs:}}}{12}
 	  {rewrite-archive:}{{\bfseries\textcolor{black}{rewrite-archive:}}}{14}
 	  {module-final-step:}{{\bfseries\textcolor{black}{module-final-step:}}}{18}
-	  {custom-hooks:}{{\bfseries\textcolor{black}{config-hooks:}}}{13}
+	  {custom-hooks:}{{\bfseries\textcolor{black}{custom-hooks:}}}{13}
 	  {no-variant:}{{\bfseries\textcolor{black}{no-variant:}}}{11}
 	  {install:}{{\bfseries\textcolor{black}{install:}}}{8}
 }
@@ -303,7 +306,14 @@ The build is controlled by a set of variables (the environment). SCBI comes with
 	\item[SCBI\_BDIR] The build directory, also called the sandbox (\seeref{sandbox}). \\
 	Default is \file{\$SCBI\_ROOT/builds}.
 
-	\item[SCBI\_MODULES\_DIR{[<module-name>[@src|@build]]}] The \emph{install}, \emph{source} or \emph{build} directory of a module (for its variant in the build): \code{\$\{SCBI\_MODULES\_DIR[<module-name>]\}} is the install directory, \code{\$\{SCBI\_MODULES\_DIR[<module-name>@src]\}} the source directory and \code{\$\{SCBI\_MODULES\_DIR[<module-name>@build]\}} the build directory. It can be used in the hooks of the plug-ins (values, environment actions and commands). The function \code{module-dir} gives the same values (\seeref{yaml-functions}).
+	\item[SCBI\_MODULES\_DIR{[<module-name>[@src|@build]]}] The \emph{install}, \emph{source} or \emph{build} directory of a module (for its variant in the build):
+	
+	\begin{description}
+		\item[\code{\$\{SCBI\_MODULES\_DIR[<module-name>]\}}] the install directory
+		\item[\code{\$\{SCBI\_MODULES\_DIR[<module-name>@src]\}}] the source directory
+		\item[\code{\$\{SCBI\_MODULES\_DIR[<module-name>@build]\}}] the build directory
+	\end{description}
+	It can be used in the hooks of the plug-ins (values, environment actions and commands). The function \code{module-dir} gives the same values (\seeref{yaml-functions}).
 
 	\item[SCBI\_CACHE\_DIR] The directory of the build cache, which makes it possible to reuse a previous build instead of rebuilding a module. Set to \code{no} to disable the cache. Default is \file{\$HOME/.cache/scbi}.
 
@@ -417,6 +427,7 @@ The discriminants are:
 	\item the code name of the OS;
 	\item the architecture (e.g. \code{x86\_64}, \code{i686});
 	\item the words of the OS description (e.g. \code{debian}, \code{gnu}, \code{linux});
+	\item for a native build, the \code{native} discriminant;
 	\item for a cross build, the \code{cross} discriminant and each part of the target triplet prefixed with \code{target-} (e.g. \code{target-mingw32}, \code{target-arm}).
 \end{itemize}
 
@@ -702,13 +713,13 @@ The following options are supported:
 
 	\item[-I | \ddash{}no-install] Skips the install step.
 
-	\item[-u | \ddash{}update] Updates the repositories before building. Without it the
+	\item[-u | \ddash{}update{[}:<prefetch>{]}] Updates the repositories before building. Without it the
 	repositories already cloned are not accessed: a module is built from the
 	commits fetched last time (a module whose reference changes, in the build
 	plan or on the command line, is updated).
 
-	\item[\ddash{}update:prefetch] \label{prefetch}\index{prefetch}As
-	\ddash{}update, the network part of the update done ahead: when the
+	\label{prefetch}\index{prefetch}with \code{prefetch} sub-option the network part of
+	the update done ahead: when the
 	build starts, background jobs (\code{SCBI\_PREFETCH\_JOBS}, default 4)
 	update the git clones (\code{git fetch}, or the clone) and download
 	the archives of the modules of the build, in build order, while the
@@ -1741,7 +1752,7 @@ only-explicit-build: false
 	\end{description}
 	Example:
 \begin{lstlisting}[language={yaml}]
-config: 
+config:
   cmake $(config-options) ../src
 \end{lstlisting}
 
@@ -2183,7 +2194,7 @@ to it. Its variants give the four environments of a build:
 	(\code{C\_INCLUDE\_PATH}, \code{LIBRARY\_PATH}...: the cross compiler
 	finds the target headers and libraries in its own directories, the
 	native compiler used for the build tools keeps its defaults), and
-	\code{pkg-config} and \code{gprbuild} set for the target libraries only.
+	\code{pkg-config} and \code{cmake} set for the target libraries only.
 	\item[c-sandbox/host] The native sandbox, also in a cross build: for the
 	tools running on the host, such as a cross compiler built with the
 	native compiler of the sandbox (the cross binutils already installed in
@@ -2223,18 +2234,18 @@ of the tool for the host instead of building it for the target.
 \begin{lstlisting}[language={yaml}]
 build-depends:
   - c-sandbox
-  - host@c-gprbuild
+  - host@c-cmake
 \end{lstlisting}
 
 The tool can still be built for the target when a module needs it there
-(\code{c-gprbuild} without \code{host@}, or \code{scbi \ddash{}target=...
-c-gprbuild}). In a cross build a \code{host@} dependency is:
+(\code{c-cmake} without \code{host@}, or \code{scbi \ddash{}target=...
+c-cmake}). In a cross build a \code{host@} dependency is:
 
 \begin{itemize}
-	\item built for the host with \ddash{}deps, by a run of the driver
-	without \ddash{}target (\code{scbi \ddash{}deps <module>}, with the
+	\item built for the host with \code{\ddash{}deps}, by a run of the driver
+	without \code{\ddash{}target} (\code{scbi \ddash{}deps <module>}, with the
 	plug-ins, build directory, environment, plan, jobs and update options
-	of the build), once per build; without \ddash{}deps its build for the
+	of the build), once per build; without \code{\ddash{}deps} its build for the
 	host must exist;
 	\item part of the build id of the module from its build for the host:
 	a new build of the tool for the host rebuilds the module;
@@ -2728,7 +2739,7 @@ pasted in a terminal: \code{( cd <dir> || exit 1; export A=... B=...;
 
 \subsection{Standalone archives}
 
-A standalone source archive (\ddash{}standalone, \seeref{standalone})
+A standalone source archive (\code{\ddash{}standalone}, \seeref{standalone})
 contains the driver (the Python package in \file{lib}, the command
 \file{bin/scbi}), the plug-ins of the modules and an environment file
 (\file{.scbi-env-std.yaml}).
@@ -2752,7 +2763,7 @@ from the environment, uses the rsync checksum mode and logs the sync
 messages; the harness (\file{tests/harness.py}) gives it the test
 directories (\code{SCBI\_ROOT}\ldots) through the environment. With \code{SCBI\_OS\_NAME=test} the
 installed packages are those of \code{SCBI\_TEST\_PKGS} (\code{"name=version
-..."}), checked as Debian packages. With \code{SCBI\_TEST\_PROGRESS=yes} each step of the build progress (\ddash{}progress) is printed on a line, \code{progress [n/N] module}.
+..."}), checked as Debian packages. With \code{SCBI\_TEST\_PROGRESS=yes} each step of the build progress (\code{\ddash{}progress}) is printed on a line, \code{progress [n/N] module}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
 
@@ -2791,7 +2802,7 @@ The following options are supported:
 
 	\cmd{scbi \ddash{}target=x86\_64-w64-mingw32 show \ddash{}resolved c-gmp}
 
-	\item[\ddash{}stat] Displays the setup (see the \ddash{}stat option).
+	\item[\ddash{}stat] Displays the setup (see the \code{\ddash{}stat} option).
 \end{description}
 
 \subsection{Shell}
@@ -2922,13 +2933,13 @@ All the problems found are reported:
 	not reported.
 \end{itemize}
 
-The option \ddash{}error only reports the errors. The exit status is 1 when an error is found.
+The option \code{\ddash{}error} only reports the errors. The exit status is 1 when an error is found.
 
-For the editors, the option \ddash{}json reports the issues as a JSON
+For the editors, the option \code{\ddash{}json} reports the issues as a JSON
 list, each one an object with the keys \code{file}, \code{line} and
 \code{column} (1-based: the key of the hook, the line of a command body
 or the variable the issue is about), \code{level} (\code{error} or
-\code{warning}), \code{hook} and \code{message}. With \ddash{}stdin the
+\code{warning}), \code{hook} and \code{message}. With \code{\ddash{}stdin} the
 text of the plug-in (a single one) is read from the standard input,
 e.g. the unsaved content of an editor buffer; the plug-in name or path
 given is used for its name and its dependencies:
@@ -2962,7 +2973,7 @@ hooks in a canonical order, no trailing blanks, no duplicate blank lines.
 \cmd{scbi format lcms2}
 
 The formatted plug-in is displayed, or written back to the file with the
-option \ddash{}replace. With \ddash{}stdin the text of the plug-in (a
+option \code{\ddash{}replace}. With \code{\ddash{}stdin} the text of the plug-in (a
 single one, whose name is given) is read from the standard input and
 the formatted text written to the standard output (an editor
 formatting an unsaved buffer). An invalid plug-in is not formatted (see
@@ -2971,6 +2982,8 @@ formatting an unsaved buffer). An invalid plug-in is not formatted (see
 \begin{itemize}
 	\item the keys in this order: \code{plugin}, \code{inherit},
 	\code{vars}, \code{functions}, \code{variants}, \code{with-variants};
+	the meta-module hooks \code{modules}, \code{aggregate},
+	\code{propagate-version}, \code{plan};
 	the sources \code{vcs}, \code{archive}, \code{patches}; the
 	dependencies \code{depends}, \code{build-depends},
 	\code{tests-depends}; the environment \code{env}, \code{build-env},
@@ -2978,9 +2991,7 @@ formatting an unsaved buffer). An invalid plug-in is not formatted (see
 	\code{out-of-tree}, \code{only-explicit-build}, \code{config-options},
 	\code{config}, \code{build}, \code{install}, \code{wrapup},
 	\code{tests} (each step between its \code{pre-} and \code{post-}
-	hooks); then \code{run}, \code{version}, \code{prefix}; and the
-	meta-module hooks \code{modules}, \code{aggregate},
-	\code{propagate-version}, \code{plan};
+	hooks); and then \code{run}, \code{version}, \code{prefix};
 	\item inside a hook the qualifiers \code{common} (always first),
 	\code{\_}, \code{default}, the variants in alphabetical order, then
 	\code{cross} (inside it the same order);
