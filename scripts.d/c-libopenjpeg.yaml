@@ -19,8 +19,8 @@ archive:
   file: $VERSION.tar.gz
 
 env:
-  - local INCD $(last-modified-directory $PREFIX/include/open*)
-  - local CMKD $(last-modified-directory $PREFIX/lib/cmake/open*)
+  - INCD = $(last-modified-directory $PREFIX/include/open*)
+  - CMKD = $(last-modified-directory $PREFIX/lib/cmake/open*)
   - add-to-var PATH $PREFIX/bin
   - add-to-var CMAKE_PREFIX_PATH $CMKD
   - add-to-var C_INCLUDE_PATH $INCD

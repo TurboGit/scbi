@@ -1,7 +1,7 @@
 plugin: c-python3-modules
 
 env:
-  - local PYDIR $(last-modified-directory $PREFIX/local/lib/python*)
+  - PYDIR = $(last-modified-directory $PREFIX/local/lib/python*)
   - add-to-var PYTHONPATH $PYDIR/dist-packages
 
 out-of-tree: false
