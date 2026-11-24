@@ -5,4 +5,4 @@ inherit:
     hooks:
       - build
       - setup
-    no-variant: true
+    variants: no

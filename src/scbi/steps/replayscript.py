@@ -66,14 +66,16 @@ _scbi_delete()
 {
     #  [-r] PATH...: rm -f (rm -fr with -r), only when each path is in the
     #  sandbox, a directory only with -r
-    local bdir=@SANDBOX@ sandbox p name real opt=-f
-    local reals=()
+    local bdir=@SANDBOX@ prefix=@PREFIX@ sandbox p name real r ok opt=-f
+    local reals=() roots=()
     if [[ $1 == -r ]]; then
         opt=-fr
         shift
     fi
     [[ -n $bdir ]] || { echo "delete: no sandbox, nothing deleted" >&2; return 1; }
     sandbox=$(realpath -m -- "$bdir") || return 1
+    roots=("$sandbox")
+    [[ -z $prefix ]] || roots+=("$(realpath -m -- "$prefix")")
     for p in "$@"; do
         name=$(basename -- "$p")
         if [[ $name == . || $name == .. ]]; then
@@ -81,7 +83,9 @@ _scbi_delete()
         else
             real=$(realpath -m -- "$(dirname -- "$p")")/$name
         fi
-        if [[ $real != "$sandbox"/* ]]; then
+        ok=no
+        for r in "${roots[@]}"; do [[ $real != "$r"/* ]] || ok=yes; done
+        if [[ $ok == no ]]; then
             echo "delete: '$p' ($real) is not in the sandbox $sandbox, nothing deleted" >&2
             return 1
         fi
@@ -92,6 +96,31 @@ _scbi_delete()
         reals+=("$real")
     done
     rm $opt -- "${reals[@]}"
+}
+"""
+
+#  copy: cp -r only when the sources (symbolic links resolved) and the
+#  destination are in the sandbox ($SCBI_BDIR, the install prefix), as the
+#  built-in
+_COPY_HELPER = """\
+_scbi_copy()
+{
+    local bdir=@SANDBOX@ prefix=@PREFIX@ sandbox p real r ok
+    local roots=()
+    [[ -n $bdir ]] || { echo "copy: no sandbox, nothing copied" >&2; return 1; }
+    sandbox=$(realpath -m -- "$bdir") || return 1
+    roots=("$sandbox")
+    [[ -z $prefix ]] || roots+=("$(realpath -m -- "$prefix")")
+    for p in "$@"; do
+        real=$(realpath -m -- "$p") || return 1
+        ok=no
+        for r in "${roots[@]}"; do [[ $real != "$r"/* ]] || ok=yes; done
+        if [[ $ok == no ]]; then
+            echo "copy: '$p' ($real) is not in the sandbox $sandbox, nothing copied" >&2
+            return 1
+        fi
+    done
+    cp -r -- "$@"
 }
 """
 
@@ -300,7 +329,8 @@ class _Translator:
         if first in ("return", "exit"):
             words[0] = "return" if self.in_function and first == "return" else "exit"
         elif first == "copy":
-            words[0] = "cp -r"
+            self.helpers.add("copy")
+            words[0] = "_scbi_copy"
         elif first in ("delete", "delete-tree"):
             self.helpers.add("delete")
             words[0] = "_scbi_delete" + (" -r" if first == "delete-tree" else "")
@@ -562,6 +592,16 @@ class _Translator:
 
     # -------------------------------------------------------------- main
 
+    @staticmethod
+    def _sandboxed(helper: str, r) -> list[str]:
+        """The lines of a helper with the sandbox ($SCBI_BDIR) and the
+        install prefix ($SCBI_PREFIX) of the replayed step."""
+        def get(name: str) -> str:
+            return r.driver.get(name) or r.environment.get(name, "")
+
+        text = helper.replace("@SANDBOX@", q(get("SCBI_BDIR"))).replace("@PREFIX@", q(get("SCBI_PREFIX")))
+        return text.rstrip("\n").split("\n")
+
     def script(self) -> str:
         r = self.r
         body = self.body(cmdlang.parse(r.run, r.line), 0)
@@ -587,9 +627,10 @@ class _Translator:
             helpers += _VERSIONS_HELPER.rstrip("\n").split("\n")
         if "log" in self.helpers:
             helpers += _LOG_HELPER.rstrip("\n").split("\n")
+        if "copy" in self.helpers:
+            helpers += self._sandboxed(_COPY_HELPER, r)
         if "delete" in self.helpers:
-            sandbox = r.driver.get("SCBI_BDIR") or r.environment.get("SCBI_BDIR", "")
-            helpers += _DELETE_HELPER.replace("@SANDBOX@", q(sandbox)).rstrip("\n").split("\n")
+            helpers += self._sandboxed(_DELETE_HELPER, r)
         if self.inline:
             parts = [f"cd {q(r.cwd)} || exit 1"]
             if env:

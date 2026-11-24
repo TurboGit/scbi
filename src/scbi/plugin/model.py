@@ -145,8 +145,6 @@ ENV_VERBS = {
     "define-var": 3,
     "unset-var": 1,
     "export": 2,  # export VAR=VALUE
-    "local": 2,  # local VAR VALUE: variable for the following actions only
-    "assign": 2,  # assign VAR VALUE: shell variable (VAR=VALUE), exported if it was
     "mkdir": 1,
     "import": -1,  # import <command>: run and import printed variables
 }
@@ -182,7 +180,7 @@ class Inherit:
     parent: str
     hooks: tuple[str, ...] = ()
     custom_hooks: tuple[str, ...] = ()
-    no_variant: bool = False
+    variants: bool = True  # False: only the plain hooks are inherited (variants: no)
     name: str | None = None
 
 

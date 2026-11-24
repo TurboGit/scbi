@@ -350,6 +350,9 @@ class Linter:
         self.check_names(label, referenced(text), known, assigned(text), other_params, hook)
         for line in _bad_log_levels(script):
             self.error(label, f"line {line}: log: level must be an integer >= 1")
+        for line, tool, builtin in _builtin_candidates(script):
+            self.warning(label, f"line {line}: {tool} could be the built-in {builtin}"
+                                " (restricted to the sandbox)")
         #  a variable set and never read (the functions of the plug-in see
         #  the variables of their caller: one read there counts)
         used = set(referenced(script)) | self.function_refs
@@ -420,6 +423,56 @@ def _write_blocks(script: str) -> str:
             block = (len(m.group(1)), m.group(2).endswith("-raw"))
         out.append(line)
     return "\n".join(out)
+
+
+def _builtin_candidate(texts: list[str]) -> str | None:
+    """The built-in replacing the command ``texts`` (its words): ``copy``
+    for ``cp [-r|-R] SOURCE... DEST``, ``delete`` for ``rm [-f] PATH...``,
+    ``delete-tree`` for ``rm -r|-fr... PATH...``; None for other options."""
+    tool = texts[0] if texts else ""
+    opts = [w for w in texts[1:] if w.startswith("-")]
+    args = [w for w in texts[1:] if not w.startswith("-")]
+    flags = "".join(o[1:] for o in opts)
+    if any(o == "-" or o.startswith("--") for o in opts):
+        return None
+    if tool == "cp" and len(args) >= 2 and set(flags) <= {"r", "R"}:
+        return "copy"
+    if tool == "rm" and args and set(flags) <= {"f", "r", "R"}:
+        return "delete-tree" if set(flags) & {"r", "R"} else "delete"
+    return None
+
+
+def _builtin_candidates(script: str) -> list[tuple[int, str, str]]:
+    """The ``cp`` and ``rm`` commands (alone in their pipeline, without
+    redirection) which the built-ins ``copy``, ``delete`` and
+    ``delete-tree`` can replace: (line, command, built-in)."""
+    from scbi.hooks import cmdlang
+
+    try:
+        body = cmdlang.parse(script, 1)
+    except cmdlang.CmdSyntaxError:
+        return []
+    found: list[tuple[int, str, str]] = []
+
+    def walk(steps) -> None:
+        for step in steps or ():
+            if isinstance(step, cmdlang.AndOr):
+                for pipeline in (step.first, *(p for _, p in step.rest)):
+                    if len(pipeline.commands) != 1 or pipeline.commands[0].redirects:
+                        continue
+                    texts = [cmdlang._word_text(w) for w in pipeline.commands[0].words]
+                    builtin = _builtin_candidate(texts)
+                    if builtin:
+                        found.append((step.line, texts[0], builtin))
+            elif isinstance(step, cmdlang.If):
+                for _, b in step.branches:
+                    walk(b)
+                walk(step.orelse)
+            elif isinstance(step, cmdlang.For):
+                walk(step.body)
+
+    walk(body)
+    return found
 
 
 def _bad_log_levels(script: str) -> list[int]:

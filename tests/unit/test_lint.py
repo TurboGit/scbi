@@ -270,3 +270,25 @@ build: |-
     #  a variable only written in a raw block is not read
     text = "plugin: p\nbuild: |-\n  X = 1\n  write-raw f:\n      $X\n"
     assert issues(text) == [(WARNING, "build", "line 1: variable X is set but never used")]
+
+
+def test_cp_rm_could_be_builtins():
+    text = """\
+plugin: p
+build: |
+  cp a b
+  rm -rf x
+  rm -f y && cp -R d e
+  cp -a a b
+  rm x | cat
+  rm -i z
+  cp a > log
+  if cross:
+      rm z
+"""
+    msg = "could be the built-in {} (restricted to the sandbox)"
+    assert issues(text) == [(WARNING, "build", f"line 1: cp {msg.format('copy')}"),
+                            (WARNING, "build", f"line 2: rm {msg.format('delete-tree')}"),
+                            (WARNING, "build", f"line 3: rm {msg.format('delete')}"),
+                            (WARNING, "build", f"line 3: cp {msg.format('copy')}"),
+                            (WARNING, "build", f"line 9: rm {msg.format('delete')}")]

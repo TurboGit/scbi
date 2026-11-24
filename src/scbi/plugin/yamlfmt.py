@@ -5,7 +5,7 @@ A plug-in ``<name>.yaml`` is a mapping. Reserved keys:
     plugin:       the plug-in name (optional, must match the file name)
     vars:         global variables {NAME: value}
     variants:     variants including other variants {all: [ai, hdr, jxl]}
-    inherit:      [{from: P, hooks: [..], custom-hooks: [..], no-variant: true,
+    inherit:      [{from: P, hooks: [..], custom-hooks: [..], variants: no,
                     name: N}]
     with-variants:  {native: {packages: [os@-x:[v], ...], env: [<env op>...]}}
     functions:    {name: {params: [A, B], run: <shell>}}
@@ -265,7 +265,7 @@ def from_data(name: str, data: dict, where: str = "") -> PluginDef:
                 inh["from"],
                 tuple(_as_list(inh.get("hooks"), where)),
                 tuple(_as_list(inh.get("custom-hooks"), where)),
-                str(inh.get("no-variant", "false")).lower() in ("true", "yes"),
+                str(inh.get("variants", "yes")).lower() in ("true", "yes"),
                 inh.get("name"),
             )
         )
@@ -350,8 +350,8 @@ def to_data(pdef: PluginDef) -> dict:
                 d["hooks"] = list(inh.hooks)
             if inh.custom_hooks:
                 d["custom-hooks"] = list(inh.custom_hooks)
-            if inh.no_variant:
-                d["no-variant"] = "true"
+            if not inh.variants:
+                d["variants"] = False
             if inh.name:
                 d["name"] = inh.name
             lst.append(d)

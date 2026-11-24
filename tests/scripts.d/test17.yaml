@@ -1,7 +1,7 @@
 plugin: test17
 
 build-env:
-  - assign PATH /bin:/usr/bin
+  - export PATH /bin:/usr/bin
   - add-to-var PATH toto
   - add-to-var ROOT_DIR /this/is/it
   - add-to-var ROOT_DIR /this/is/it

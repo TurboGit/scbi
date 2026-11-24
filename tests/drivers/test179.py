@@ -15,22 +15,24 @@ def test(t):
 
     t.is_('"$(./scbi --stat replay --script $TVDIR/logs/install.cmd | head -1)"', '==', '"#!/bin/bash"')
 
-    t.runs('grep -E -e "^(PREFIX=|cd |mkdir|cp|#!)" $TVDIR/install.sh')
+    t.runs('grep -E -e "^(PREFIX=|cd |mkdir|cp|_scbi_copy [^(]|#!)" $TVDIR/install.sh')
 
     #  the parameters and driver variables replaced by their values
     t.clean_diff("""\
 #!/bin/bash
 cd <pwd>/.root/builds/test2/x86_64-linux-gnu-default/src || exit 1
 mkdir -p <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/bin <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/include
-cp -r main <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/bin
-cp -r incl.h <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/include
+_scbi_copy main <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/bin
+_scbi_copy incl.h <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/include
 """)
 
     #  --script:inline: a single line, in a sub-shell
     t.runs('./scbi replay --script:inline $TVDIR/logs/install.cmd')
-    t.runs("./scbi replay --script:inline $TVDIR/logs/install.cmd | sed -e 's/; export [^;]*;/; export ...;/'")
+    #  copy runs through the helper _scbi_copy (sandbox check), defined in the line
+    t.runs("./scbi replay --script:inline $TVDIR/logs/install.cmd | grep -o '_scbi_copy [a-z.]* [^;]*' | sed -e 's/^_scbi_copy //'")
     t.clean_diff("""\
-( cd <pwd>/.root/builds/test2/x86_64-linux-gnu-default/src || exit 1; export ...; mkdir -p <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/bin <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/include; cp -r main <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/bin; cp -r incl.h <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/include )
+main <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/bin
+incl.h <pwd>/.root/builds/test2/x86_64-linux-gnu-default/install/include )
 """)
 
     #  the script installs the module again, with an empty environment

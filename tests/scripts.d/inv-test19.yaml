@@ -2,4 +2,4 @@ plugin: inv-test19
 
 inherit:
   - from: test19
-    no-variant: true
+    variants: no

@@ -24,6 +24,7 @@ from scbi.plugin.model import (
     EnvOp,
     EnvOps,
     Function,
+    LocalAssign,
     Guarded,
     HookKey,
     Inherit,
@@ -417,7 +418,7 @@ def _env_item(line: str, locals_: dict[str, str]):
     if m:
         return EnvOp("import", (m.group(1).strip(),))
     verb = line.split(None, 1)[0] if line.split() else ""
-    if verb not in ENV_VERBS or verb in ("export", "mkdir", "import", "local", "assign"):
+    if verb not in ENV_VERBS or verb in ("export", "mkdir", "import"):
         return None
     args = _words(line)[1:]
     arity = ENV_VERBS[verb]
@@ -472,7 +473,7 @@ def lift_values(lines: list[str]) -> Values:
 
 def lift_env(lines: list[str]) -> EnvOps:
     ops = _BodyLifter(
-        lines, _env_item, lambda local, n, v: EnvOp("local" if local else "assign", (n, v))
+        lines, _env_item, lambda local, n, v: LocalAssign(n, v)
     ).run()
     _check_builtins(ops)
     return EnvOps(ops)
@@ -507,7 +508,7 @@ def lift(trace: PluginTrace, names: set[str] | None = None) -> LiftResult:
                     o.parent,
                     tuple(h for h in re.split(r"[|,]", o.hooks) if h),
                     tuple(h for h in re.split(r"[|,]", o.custom_hooks) if h),
-                    o.no_variant,
+                    not o.no_variant,
                     o.name,
                 )
             )

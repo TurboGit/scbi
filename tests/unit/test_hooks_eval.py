@@ -18,7 +18,7 @@ from scbi.hooks.expand import ExpandError, check, expand
 from scbi.plan import PlanState
 from scbi.plugin import catalog
 from scbi.plugin.lift import lift
-from scbi.plugin.model import EnvOp, EnvOps, Guarded, Values
+from scbi.plugin.model import EnvOp, EnvOps, Guarded, LocalAssign, Values
 from scbi.plugin.registry import Registry
 
 HOST = "x86_64-linux-gnu"
@@ -105,7 +105,7 @@ def test_values_and_env_actions(tmp_path):
     vals = Values(("a", Guarded("ref =~ ^7.8", ("fix.diff",)), Guarded("version(lib2) < 1.9", ("old",))))
     assert eval_values(vals, c) == ["a", "fix.diff"]
     apply_env(EnvOps((
-        EnvOp("local", ("L", "$PREFIX/lib")),
+        LocalAssign("L", "$PREFIX/lib"),
         EnvOp("add-to-var", ("A", "$L")),
         EnvOp("export", ("B", "${L%/lib}")),
         EnvOp("mkdir", ("out/dir",)),

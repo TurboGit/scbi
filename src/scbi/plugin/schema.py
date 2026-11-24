@@ -119,7 +119,7 @@ def schema() -> dict:
             "items": {"type": "object", "required": ["from"], "additionalProperties": False,
                       "properties": {"from": {"type": "string"}, "hooks": _STRING_LIST,
                                      "custom-hooks": _STRING_LIST,
-                                     "no-variant": {"type": ["boolean", "string"]},
+                                     "variants": {"type": ["boolean", "string"]},
                                      "name": {"type": "string"}}},
         },
         "with-variants": {

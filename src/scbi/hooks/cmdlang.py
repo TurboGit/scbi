@@ -54,6 +54,7 @@ import stat
 import subprocess
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from scbi.bashenv import quote
 from scbi.hooks import builtins as _builtins
@@ -73,7 +74,12 @@ FUNCTIONS = (
 )
 #  Built-in commands
 COMMANDS = ("cd", "echo", "return", "exit", "true", "false", ":", "export", "unset",
-            "check-versions", "copy", "delete", "delete-tree", "apply-var", "log")
+            "check-versions", "copy", "delete", "delete-tree", "store-set-key", "apply-var", "log")
+
+def _inside(real: str, roots: list[str]) -> bool:
+    """``real`` (a real path) is under one of the ``roots``."""
+    return any(real.startswith(r + os.sep) for r in roots)
+
 
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 #  NAME = value, NAME += value (appended), export NAME = value
@@ -1065,6 +1071,9 @@ class Runner:
             if name in ("delete", "delete-tree"):
                 return self.delete(args, state, lambda m: err(f"{self.where}: line {line}: {name}: {m}\n"),
                                    tree=name == "delete-tree")
+            if name == "store-set-key":
+                return self.store_set_key(args, state,
+                                          lambda m: err(f"{self.where}: line {line}: {name}: {m}\n"))
             #  a plug-in function
             params, body = self.functions[name]
             saved = {p: state.vars.get(p) for p in params}
@@ -1085,7 +1094,7 @@ class Runner:
         """``delete PATH...``: files and symbolic links removed (as ``rm
         -f``, a directory is an error); ``delete-tree PATH...``: files and
         directories removed recursively (as ``rm -fr``). Only under the
-        sandbox ($SCBI_BDIR): the location of each path (its directory
+        sandbox ($SCBI_BDIR, the install prefix): the location of each path (its directory
         with ``..`` and symbolic links resolved, then its name) must be in
         the sandbox. All the paths are checked first: on an error nothing
         is deleted. A symbolic link is removed, not its target. A missing
@@ -1096,11 +1105,11 @@ class Runner:
         if not args:
             error("missing operand")
             return 1
-        bdir = self.ctx.env.get("SCBI_BDIR") if self.ctx.env is not None else ""
-        if not bdir:
+        roots = self._sandbox()
+        if not roots:
             error("no sandbox (SCBI_BDIR not set), nothing deleted")
             return 1
-        sandbox = os.path.realpath(bdir)
+        sandbox = roots[0]
         paths = []
         for a in args:
             p = self._path(a, state).rstrip(os.sep) or os.sep
@@ -1110,7 +1119,7 @@ class Runner:
                 real = os.path.realpath(p)
             else:
                 real = os.path.join(os.path.realpath(os.path.dirname(p)), name)
-            if not real.startswith(sandbox + os.sep):
+            if not _inside(real, roots):
                 error(f"'{a}' ({real}) is not in the sandbox {sandbox}, nothing deleted")
                 return 1
             if not tree and os.path.isdir(real) and not os.path.islink(real):
@@ -1129,11 +1138,54 @@ class Runner:
                 status = 1
         return status
 
+    def _sandbox(self) -> list[str]:
+        """The real paths of the sandbox: $SCBI_BDIR and the install
+        prefix ($SCBI_PREFIX, given by --prefix outside $SCBI_BDIR); empty
+        without $SCBI_BDIR."""
+        env = self.ctx.env
+        bdir = env.get("SCBI_BDIR") if env is not None else ""
+        if not bdir:
+            return []
+        roots = [os.path.realpath(bdir)]
+        prefix = env.get("SCBI_PREFIX") or ""
+        if prefix:
+            roots.append(os.path.realpath(prefix))
+        return roots
+
+    def store_set_key(self, args: list[str], state: State, error) -> int:
+        """``store-set-key KEY VALUE``: records KEY in the private store
+        ($SCBI_PLUGINS/.store), replacing its value (as ``scbi store KEY
+        VALUE``); read back with ``$(store-key KEY)``. KEY is one word."""
+        if len(args) != 2:
+            error("KEY and VALUE expected, nothing recorded")
+            return 1
+        key, value = args
+        if not key or len(key.split()) != 1:
+            error(f"'{key}' is not a key (one word expected), nothing recorded")
+            return 1
+        plugins = self.ctx.env.get("SCBI_PLUGINS") if self.ctx.env is not None else ""
+        if not plugins:
+            error("no plug-ins directory (SCBI_PLUGINS not set), nothing recorded")
+            return 1
+        from scbi.tools.store import Store
+
+        store = Store(Path(plugins) / ".store")
+        try:
+            store.load()
+            store.data[key] = value
+            store.save()
+        except OSError as e:
+            error(f"cannot record '{key}': {e.strerror or e}")
+            return 1
+        return 0
+
     def copy(self, args: list[str], state: State, error) -> int:
         """``copy SOURCE... DEST``: files and directories (recursively,
         symbolic links kept as links) copied as ``cp -r`` does: into DEST
         when it is a directory (or for several sources), else to DEST.
-        Existing files are replaced, existing directories merged."""
+        Existing files are replaced, existing directories merged. The
+        sources (symbolic links resolved) and the destination must be in the
+        sandbox: on an error nothing is copied."""
         if any(a.startswith("-") for a in args):
             error(f"no option supported: {' '.join(a for a in args if a.startswith('-'))}")
             return 1
@@ -1142,6 +1194,17 @@ class Runner:
             return 1
         *sources, dest = args
         dpath = self._path(dest, state)
+        #  the sources (their real location: nothing read outside) and the
+        #  destination only in the sandbox, all checked first
+        roots = self._sandbox()
+        if not roots:
+            error("no sandbox (SCBI_BDIR not set), nothing copied")
+            return 1
+        for a in [*sources, dest]:
+            real = os.path.realpath(self._path(a, state))
+            if not _inside(real, roots):
+                error(f"'{a}' ({real}) is not in the sandbox {roots[0]}, nothing copied")
+                return 1
         into = os.path.isdir(dpath)
         if len(sources) > 1 and not into:
             error(f"target '{dest}' is not a directory")

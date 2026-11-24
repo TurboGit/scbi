@@ -31,15 +31,10 @@ _SCBI_HOOKS="((pre|post)-)?(cross-)?(archive|vcs|build-depends|depends|out-of-tr
 
 _SCBI_MODE=std
 
-_gnat_ini()
+_scbi_ini()
 {
-    local ROOT r b
-    local IFS=$'\n'
-
-    if [[ -f $HOME/.scbi ]]; then
-        egrep '^\[.*\]' $HOME/.scbi |
-            sed 's/\[//;s/\]//'
-    fi
+    #  the sections of the ini files, as listed by scbi ini (name first)
+    scbi ini 2>/dev/null | awk '{ print $1 }'
 }
 
 _gnat_targets()
@@ -316,7 +311,7 @@ _scbi()
 
     case "$cur" in
         --ini=*)
-            _scbicomp "$(_gnat_ini)" "" "${cur##--ini=}"
+            _scbicomp "$(_scbi_ini)" "" "${cur##--ini=}"
             return 0
             ;;
         --target=*)

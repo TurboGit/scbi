@@ -2,4 +2,4 @@ plugin: libinh1
 
 inherit:
   - from: lib1
-    no-variant: true
+    variants: no

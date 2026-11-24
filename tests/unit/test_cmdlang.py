@@ -261,6 +261,7 @@ def test_if_assign_syntax_error():
 
 
 def test_copy(tmp_path):
+    sb = {"SCBI_BDIR": str(tmp_path)}  # the whole test directory is the sandbox
     (tmp_path / "d" / "sub").mkdir(parents=True)
     (tmp_path / "d" / "sub" / "f").write_text("f")
     (tmp_path / "d" / "lnk").symlink_to("sub/f")
@@ -275,7 +276,7 @@ copy d out
 copy d newdir
 copy d newdir
 """
-    status, out, _ = run(tmp_path, text)
+    status, out, _ = run(tmp_path, text, env=sb)
     assert (status, out) == (0, "")
     assert (tmp_path / "one.h").read_text() == "a"
     assert sorted(p.name for p in (tmp_path / "out").iterdir()) == ["a.h", "b.h", "d", "one.h"]
@@ -286,7 +287,37 @@ copy d newdir
     assert (tmp_path / "newdir" / "sub" / "f").is_file() and (tmp_path / "newdir" / "d" / "sub" / "f").is_file()
     #  existing file replaced
     (tmp_path / "one.h").write_text("old")
-    assert run(tmp_path, "copy b.h one.h")[0] == 0 and (tmp_path / "one.h").read_text() == "b"
+    assert run(tmp_path, "copy b.h one.h", env=sb)[0] == 0 and (tmp_path / "one.h").read_text() == "b"
+
+
+def test_copy_only_in_the_sandbox(tmp_path):
+    sandbox = tmp_path / "bdir"
+    sandbox.mkdir()
+    (sandbox / "a.h").write_text("a")
+    (tmp_path / "secret").write_text("s")
+    (sandbox / "lnk").symlink_to(tmp_path / "secret")
+    env = {"SCBI_BDIR": str(sandbox)}
+    #  sources and destination in the sandbox: fine
+    assert run(sandbox, "copy a.h b.h", env=env)[0] == 0 and (sandbox / "b.h").read_text() == "a"
+    #  destination outside the sandbox (also through ..): error, nothing copied
+    for dest in (str(tmp_path / "outside.h"), "../escape.h"):
+        status, out, _ = run(sandbox, f"copy a.h {dest}", env=env)
+        assert status == 1 and "not in the sandbox" in out and "nothing copied" in out
+    assert not (tmp_path / "outside.h").exists() and not (tmp_path / "escape.h").exists()
+    #  a source outside the sandbox, directly or through a symbolic link:
+    #  error, nothing copied (not even the other sources)
+    for src in (str(tmp_path / "secret"), "lnk"):
+        status, out, _ = run(sandbox, f"copy a.h {src} out.h", env=env)
+        assert status == 1 and "not in the sandbox" in out
+    assert not (sandbox / "out.h").exists()
+    #  the install prefix (--prefix outside the sandbox) is part of it
+    prefix = tmp_path / "opt"
+    prefix.mkdir()
+    env2 = {**env, "SCBI_PREFIX": str(prefix)}
+    assert run(sandbox, f"copy a.h {prefix}/a.h", env=env2)[0] == 0 and (prefix / "a.h").is_file()
+    #  no sandbox at all: error
+    status, out, _ = run(sandbox, "copy a.h c.h")
+    assert status == 1 and "SCBI_BDIR" in out and not (sandbox / "c.h").exists()
 
 
 @pytest.mark.parametrize("text, message", [
@@ -299,7 +330,7 @@ def test_copy_errors(tmp_path, text, message):
     (tmp_path / "a.h").write_text("a")
     (tmp_path / "b.h").write_text("b")
     (tmp_path / "out").mkdir()
-    status, out, _ = run(tmp_path, text)
+    status, out, _ = run(tmp_path, text, env={"SCBI_BDIR": str(tmp_path)})
     assert status == 1 and out == f"m.yaml: config: line 10: {message}\n"
 
 
@@ -480,3 +511,21 @@ def test_append_assignment(tmp_path):
     #  operators: only after output, as with =
     with pytest.raises(CmdSyntaxError):
         parse("X += a | b", 1)
+
+
+def test_store_set_key(tmp_path):
+    plugins = tmp_path / "plugins"
+    plugins.mkdir()
+    env = {"SCBI_PLUGINS": str(plugins)}
+    assert run(tmp_path, "store-set-key LICKEY 89AX", env=env)[0] == 0
+    assert (plugins / ".store").read_text() == "LICKEY 89AX\n"
+    #  replaces the value, the other keys kept
+    assert run(tmp_path, "store-set-key LICKEY 1234", env=env)[0] == 0
+    assert run(tmp_path, "store-set-key OTHER x", env=env)[0] == 0
+    assert sorted((plugins / ".store").read_text().splitlines()) == ["LICKEY 1234", "OTHER x"]
+    #  errors: wrong number of arguments, a key which is not one word
+    status, out, _ = run(tmp_path, "store-set-key LICKEY", env=env)
+    assert status == 1 and "nothing recorded" in out
+    status, out, _ = run(tmp_path, "store-set-key 'A B' x", env=env)
+    assert status == 1 and "not a key" in out
+    assert sorted((plugins / ".store").read_text().splitlines()) == ["LICKEY 1234", "OTHER x"]

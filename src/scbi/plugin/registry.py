@@ -246,7 +246,7 @@ class Registry:
             if inh.custom_hooks:
                 hooks += "|" + "|".join(inh.custom_hooks)
             self.inherits.setdefault(pdef.name, []).append(inh.parent)
-            self._inherit(inh.no_variant, hooks, inh.parent, inh.name or pdef.name)
+            self._inherit(inh.variants, hooks, inh.parent, inh.name or pdef.name)
         for variant in pdef.with_variants:
             self.functions.update(with_variants_functions(pdef.name, variant))
         if pdef.variants:
@@ -284,25 +284,25 @@ class Registry:
             if opts.custom_hooks:
                 hooks += "|" + opts.custom_hooks
             self.inherits.setdefault(plugin, []).append(opts.parent)
-            self._inherit(opts.no_variant, hooks.replace(",", "|"), opts.parent, opts.name or plugin)
+            self._inherit(not opts.no_variant, hooks.replace(",", "|"), opts.parent, opts.name or plugin)
         elif call.name == "with-variant":
             if not call.args:
                 raise PluginError(f"with-variant without variant name in {plugin}")
             self.functions.update(with_variant_functions(plugin, call.args[0], call.args[1:]))
 
-    def _inherit(self, no_variant: bool, hooks: str, parent: str, plugin: str) -> None:
+    def _inherit(self, variants: bool, hooks: str, parent: str, plugin: str) -> None:
         """Port of ``_inherit-plugin_internal``."""
         self.load_module(parent)
 
         #  Variants including other variants are inherited with the hooks
         #  (own definitions take precedence)
-        if not no_variant and parent in self.variant_aliases:
+        if variants and parent in self.variant_aliases:
             own = self.variant_aliases.setdefault(plugin, {})
             for v, members in self.variant_aliases[parent].items():
                 own.setdefault(v, members)
 
         regexp = f"({hooks})$"
-        if no_variant:
+        if not variants:
             regexp = f"^{parent}(-pre|-post|-cross)*-({hooks})$"
         pattern = re.compile(regexp)
 

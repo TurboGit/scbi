@@ -136,7 +136,7 @@ def test_and_group_lifted():
 
 def test_value_lifting_salome_idioms():
     from scbi.plugin.lift import lift_env, lift_values
-    from scbi.plugin.model import EnvOp, Guarded
+    from scbi.plugin.model import EnvOp, Guarded, LocalAssign
 
     items = lift_values([
         "local DISDOC=$(is-enabled no-doc)",
@@ -161,7 +161,7 @@ def test_value_lifting_salome_idioms():
         '-DVTK=$(last-modified-directory "$P/lib/cmake/paraview-*")',
     )
     ops = lift_env(["unset PYTHONHOME", "local W=$(cygpath -w $PREFIX)", "set-var X $W"]).ops
-    assert ops == (EnvOp("unset-var", ("PYTHONHOME",)), EnvOp("local", ("W", "$(output cygpath -w $PREFIX)")),
+    assert ops == (EnvOp("unset-var", ("PYTHONHOME",)), LocalAssign("W", "$(output cygpath -w $PREFIX)"),
                    EnvOp("set-var", ("X", "$W")))
 
 

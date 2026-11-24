@@ -508,8 +508,12 @@ class Driver:
         offset = 8 if self.get("SCBI_IS_WINDOWS") == "yes" else 0
         color = self.get("DO_COLOR")
         t = self.tput
+        #  the default text color is only set on a terminal: not in the
+        #  output of a pipe (scbi ini, scbi show... read by other tools)
+        tty = sys.stdout.isatty()
         if color == "dark":
-            sys.stdout.write(t("setaf", "7"))
+            if tty:
+                sys.stdout.write(t("setaf", "7"))
             bold = t("bold") + t("setaf", "252")
             self.set("SCBI_CBOLD", bold)
             self.set("SCBI_CTEXT", t("setaf", "15"))
@@ -518,7 +522,8 @@ class Driver:
             self.set("SCBI_CBLUE", bold + t("setaf", str(12 - offset)))
             self.set("SCBI_CGREEN", bold + t("setaf", str(10 - offset)))
         elif color == "light":
-            sys.stdout.write(t("setaf", "0"))
+            if tty:
+                sys.stdout.write(t("setaf", "0"))
             bold = t("bold") + t("setaf", "239")
             self.set("SCBI_CBOLD", bold)
             self.set("SCBI_CTEXT", t("setaf", "0"))

@@ -70,7 +70,7 @@
 \lstdefinelanguage{yaml}
 {
 	alsoletter={-},
-	keywords={true,false,yes,no,plugin,depends,vcs,options,protocol,packages,config-options,cross,variants,patches,for,in,if,then,else,version,write,append,setup,wrapup,archive,file,plan,modules,functions,params,run,proxy,inherit,hooks,name,from,no-variant,vars,passthrough,echo,prefix,source-tree,exclude},
+	keywords={true,false,yes,no,plugin,depends,vcs,options,protocol,packages,config-options,cross,variants,patches,for,in,if,then,else,version,write,append,setup,wrapup,archive,file,plan,modules,functions,params,run,proxy,inherit,hooks,name,from,variants,vars,passthrough,echo,prefix,source-tree,exclude},
 	keywordstyle=\color{black}\bfseries,
 	sensitive=false,
 	comment=[l]{\#},
@@ -101,8 +101,7 @@
 	  {rewrite-archive:}{{\bfseries\textcolor{black}{rewrite-archive:}}}{14}
 	  {module-final-step:}{{\bfseries\textcolor{black}{module-final-step:}}}{18}
 	  {custom-hooks:}{{\bfseries\textcolor{black}{custom-hooks:}}}{13}
-	  {no-variant:}{{\bfseries\textcolor{black}{no-variant:}}}{11}
-	  {install:}{{\bfseries\textcolor{black}{install:}}}{8}
+	  	  {install:}{{\bfseries\textcolor{black}{install:}}}{8}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMMANDS
@@ -908,7 +907,7 @@ install: |-
 	(\seeref{yaml-variants}), \code{\{all: [ai, hdr, jxl]\}}.
 	\item[inherit] List of inherited plug-ins (\seeref{inheritance}), each
 	one a mapping with the keys \code{from}, \code{hooks},
-	\code{custom-hooks}, \code{no-variant} and \code{name}.
+	\code{custom-hooks}, \code{variants} and \code{name}.
 	\item[with-variants] Variants with no build step, which only depend on
 	other modules or OS packages (e.g. a \code{native} variant using the OS
 	libraries, \seeref{native variant}):
@@ -1354,19 +1353,33 @@ function of the plug-in.
 	\code{<destination>}. Existing files are replaced, existing
 	directories merged. It has no option; the system \code{cp} is still
 	available for other options (\code{cp -a}...).
+
+	The sources and the destination are restricted to the sandbox (see
+	below), so that no data of the computer is copied into a build: a
+	source is checked at its real location (symbolic links resolved, a
+	link to a file outside the sandbox is an error); the symbolic links
+	inside a copied directory are copied as links, not followed.
 	\item[delete <path>...] \index{delete}Deletes files and symbolic links,
 	as \code{rm -f}. A directory is an error (use \code{delete-tree}), so
 	that a path which turns out to be a directory (an empty variable in
 	\code{\$DIR/\$NAME}...) is not deleted.
 	\item[delete-tree <path>...] \index{delete-tree}Deletes files and
 	directories, directories recursively, as \code{rm -fr}.
+	\item[store-set-key <key> <value>] \index{store-set-key}Records the key in the private store, replacing its value (as \code{scbi store <key> <value>}). The key is one word; nothing is recorded and the command fails if the store cannot be written.
 
-	Both delete only in the sandbox (\code{\$SCBI\_BDIR}): the location of
-	each path (its directory with \code{..} and symbolic links resolved,
-	then its name) must be under the sandbox. All the paths are checked
-	first: on an error nothing is deleted and the command fails. A symbolic
-	link is deleted, not its target; a missing path is not an error. They
-	have no option.
+	\textbf{Safe behavior.} \code{copy}, \code{delete} and
+	\code{delete-tree} only work in the sandbox: under \code{\$SCBI\_BDIR}
+	or under the install prefix when it is elsewhere
+	(\code{\$SCBI\_PREFIX}, \ddash{}prefix). For \code{delete} and
+	\code{delete-tree} the location of each path (its directory with
+	\code{..} and symbolic links resolved, then its name) must be in the
+	sandbox, for \code{copy} the real location of each source and of the
+	destination. All the paths are checked first: otherwise the command
+	fails with an error and nothing is deleted or copied. The system
+	\code{cp} and \code{rm} are not restricted (the linter reports the
+	ones the built-ins can replace, \seeref{linter}). A symbolic link is
+	deleted, not its target; a missing path is not an error. They have no
+	option.
 	\item[log <level> <message>] \index{log}Displays a message for the
 	user, as a message of the driver: with the time-stamp and indented by
 	two spaces per level (\code{<level>}, an integer >= 1), on the console
@@ -2093,14 +2106,12 @@ environment file when it is defined (\seeref{define-var-override}).
 	\item[unset-var <VARIABLE>] Short for \code{define-var UNSET <VARIABLE>}.
 \end{description}
 
-The other actions are:
+The other actions are (to set a variable for the following actions of the hook, write \code{NAME = <value>}, \seeref{yaml-expansion}):
 
 \begin{description}[style=nextline]
 	\item[export <VARIABLE> <VALUE>] Sets and exports the variable, without going through the \code{define-var} of the environment file.
 	\item[mkdir <DIR>] Creates the directory (and its parents).
 	\item[import <COMMAND>] Runs the command (without shell) and applies the variable assignments, \code{export} and \code{unset} statements it prints, as \code{eval \$(opam env)} would.
-	\item[local <NAME> <VALUE>] A variable for the following actions of the hook (also written \code{NAME = <value>}, \seeref{yaml-expansion}).
-	\item[assign <NAME> <VALUE>] Sets a variable of the driver, part of the environment if it is already exported.
 \end{description}
 
 Example:
@@ -2415,13 +2426,13 @@ inherit:
   - from: <name>
     hooks: [<hook1>, <hook2>]
     custom-hooks: [<hook1>, <hook2>]
-    no-variant: false
+    variants: yes
     name: <name>
 \end{lstlisting}
 
 \begin{description}
 	\item[from] The plug-in to inherit from.
-	\item[no-variant] When \code{true}, the variant hooks are not inherited, only the plain ones.
+	\item[variants] \code{yes} (the default): the variant hooks are inherited with the plain ones. \code{no}: only the plain hooks are inherited, not the variant hooks.
 	\item[hooks] The hooks to inherit; all of them when not given.
 	\item[custom-hooks] The functions of the plug-in to inherit.
 	\item[name] The name under which the inherited hooks are known (the hook \code{post-install} of a plug-in inherited with \code{name: base} is called \code{base-post-install}). This makes it possible to inherit the same hook from several plug-ins and call them in turn.
@@ -2546,7 +2557,7 @@ The private store (\seeref{store}) keeps private values, such as license keys, o
 config-options:
   - --license=$(store-key LICKEY)
 wrapup: |
-  scbi store LICKEY 89AXCDPPP6BGG
+  store-set-key LICKEY 89AXCDPPP6BGG
 \end{lstlisting}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION
@@ -2885,7 +2896,7 @@ Some examples:
     \cmd{scbi store \ddash{}delete LICKEY}
 \end{itemize}
 
-The keys are stored in the file \file{\$SCBI\_PLUGINS/.store} (\file{\$HOME/.config/scbi/.store} by default). A plug-in reads a key with \code{\$(store-key <key>)} (\seeref{yaml-functions}).
+The keys are stored in the file \file{\$SCBI\_PLUGINS/.store} (\file{\$HOME/.config/scbi/.store} by default). A plug-in reads a key with \code{\$(store-key <key>)} (\seeref{yaml-functions}) and a command hook records one with \code{store-set-key <key> <value>} (\seeref{yaml-command-language}).
 
 \subsection{Linter}
 \label{linter}
@@ -2930,7 +2941,11 @@ All the problems found are reported:
 	plug-in, which see the variables of their caller), e.g. the result of
 	\code{CDEBUG = is-enabled cmake-debug} not used; a variable set with
 	\code{export NAME = ...} is used by the commands run after it and is
-	not reported.
+	not reported; the commands \code{cp} and \code{rm} (alone, without
+	pipe nor redirection, \code{cp} with no option but \code{-r},
+	\code{rm} with no option but \code{-f} and \code{-r}) which the
+	built-ins \code{copy}, \code{delete} and \code{delete-tree},
+	restricted to the sandbox, can replace.
 \end{itemize}
 
 The option \code{\ddash{}error} only reports the errors. The exit status is 1 when an error is found.
@@ -3610,7 +3625,7 @@ The YAML equivalents of the Bash constructs:
 	\item[\code{\$(get-build-type <kind> <default>)}] the same function (\seeref{yaml-functions}).
 	\item[\code{check-tool}, \code{check-tools}, \code{command -v}] \code{command-path}.
 	\item[\code{get-module-version}, \code{check-module-version}] \code{\$(get-version <plug-in>)}, \code{version(<plug-in>)} in conditions, \code{check-versions}.
-	\item[\code{scbi-store-get-key}, \code{scbi-store-set-key}] \code{\$(store-key <key>)}, the \code{scbi store} sub-command.
+	\item[\code{scbi-store-get-key}, \code{scbi-store-set-key}] \code{\$(store-key <key>)} and \code{store-set-key <key> <value>}.
 	\item[\code{cp -r}, \code{rm -f}, \code{rm -fr}] the built-in commands \code{copy}, \code{delete} and \code{delete-tree}.
 	\item[\code{\$(command args)}] \code{\$(output command args)}.
 	\item[\code{scbi-rewrite-vcs}, \code{scbi-rewrite-archive}, \code{proxy-<name>}, \code{module-final-step}, a redefinition of \code{define-var}] the functions \code{rewrite-vcs}, \code{rewrite-archive}, \code{proxy}, \code{module-final-step} and \code{define-var} of the environment file (\seeref{env-files}).

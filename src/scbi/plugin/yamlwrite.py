@@ -28,7 +28,7 @@ from scbi.plugin import catalog, construct, yamlfmt
 
 #  common first (applied to all the variants), then the plain hook
 QUALIFIER_RANK = {"common": 0, yamlfmt.PLAIN_KEY: 1, "default": 2}
-INHERIT_ORDER = ("from", "hooks", "custom-hooks", "no-variant", "name")
+INHERIT_ORDER = ("from", "hooks", "custom-hooks", "variants", "name")
 FUNCTION_ORDER = ("params", "run")
 OS_VARIANT_ORDER = ("packages", "env")
 
