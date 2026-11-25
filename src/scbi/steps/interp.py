@@ -183,7 +183,8 @@ class Hook:
                         functions=self.functions(), trace=trace, all_modules=self.all_modules,
                         hook_function=self.hook_function, hook_values=self.hook_values,
                         refresh_functions=self.functions,
-                        log=log if log is not None else self.log_message)
+                        log=log if log is not None else self.log_message,
+                        fatal=lambda m: self.d.log.elog_raw(self.module, m))
         state = State(variables, self.environment(), self.cwd, out,
                       out if err is None else err)
         return runner.run(self.body.ast, state)

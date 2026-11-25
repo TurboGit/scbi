@@ -207,6 +207,17 @@ class Logger:
         self._append(module, printf_format(f"{ts} : {self.message(*words, colors=False)}\n"))
         self._set_sep("0")
 
+    def elog_raw(self, module: str, text: str) -> None:
+        """An error message as given (no printf escapes): ``elog`` of a
+        message holding paths (a ``%`` or ``\\`` kept as is)."""
+        c = self.colors
+        ts = self._ts()
+        self.stderr.write(f"{ts} : {c.get('CBOLD', '')}{c.get('CTEXT', '')}{module}{c.get('CCLEAR', '')} "
+                          f"{c.get('CRED', '')}(FAILED){c.get('CCLEAR', '')} {text}\n")
+        self.stderr.flush()
+        self._append(module, f"{ts} : {text}\n")
+        self._set_sep("0")
+
     def clog(self, module: str) -> None:
         self._append(module, "\n")
 

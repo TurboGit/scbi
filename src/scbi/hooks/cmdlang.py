@@ -512,6 +512,17 @@ class _Return(Exception):
         self.status = status
 
 
+class _Fatal(Exception):
+    """A refusal of a safe built-in (copy, delete, delete-tree outside the
+    sandbox...): an error of the plug-in, the whole hook stops (not only
+    the plug-in function or the $(...) being run)."""
+
+    def __init__(self, status: int, message: str):
+        super().__init__(message)
+        self.status = status
+        self.message = message
+
+
 @dataclass
 class State:
     """The state of a hook call."""
@@ -606,16 +617,31 @@ class Runner:
     #  called with a "_TRACE: ..." line for each command and assignment (as
     #  Bash xtrace does)
     trace: Callable[[str], None] | None = None
+    #  a refusal of copy/delete/delete-tree (the message, already written
+    #  to the errors of the hook): reported to the user, the hook stops
+    fatal: Callable[[str], None] | None = None
     #  line of the step being run (messages of $(function ...) in words)
     line: int = field(default=0, init=False)
+    #  nesting of run (plug-in functions, $(...), ok(...)): a refusal stops
+    #  the outermost one
+    _depth: int = field(default=0, init=False)
 
     # ------------------------------------------------------------ entry
 
     def run(self, body: tuple, state: State) -> int:
+        self._depth += 1
         try:
             self.block(body, state)
         except _Return as r:
             state.status = r.status
+        except _Fatal as f:
+            if self._depth > 1:
+                raise
+            if self.fatal is not None:
+                self.fatal(f.message)
+            state.status = f.status
+        finally:
+            self._depth -= 1
         return state.status
 
     def block(self, body: tuple, state: State) -> None:
@@ -824,6 +850,8 @@ class Runner:
 
         try:
             return expr.evaluate(cond, _Ctx(self.hook_ctx(state)))
+        except _Fatal:
+            raise
         except (expr.ExprError, ExpandError, Exception) as e:  # noqa: BLE001
             self.error(state, line, f"condition {cond!r}: {e}")
             return False
@@ -1048,7 +1076,7 @@ class Runner:
                 a, op, b = (args + ["", "", ""])[:3]
                 return 0 if check_versions(a, op, b) else 1
             if name == "copy":
-                return self.copy(args, state, lambda m: err(f"{self.where}: line {line}: copy: {m}\n"))
+                return self.copy(args, state, self._reporter(err, line, name))
             if name == "apply-var":
                 if self.apply_var is None:
                     err(f"{self.where}: line {line}: apply-var: only in the define-var of an environment file\n")
@@ -1070,7 +1098,7 @@ class Runner:
                     out("  " * int(level) + message + "\n")
                 return 0
             if name in ("delete", "delete-tree"):
-                return self.delete(args, state, lambda m: err(f"{self.where}: line {line}: {name}: {m}\n"),
+                return self.delete(args, state, self._reporter(err, line, name),
                                    tree=name == "delete-tree")
             if name == "store-set-key":
                 return self.store_set_key(args, state,
@@ -1091,6 +1119,19 @@ class Runner:
         finally:
             close()
 
+    def _reporter(self, err: Callable[[str], None], line: int, name: str):
+        """The error function of a safe built-in: ``error(message)``
+        writes the message to the errors of the hook, ``error(message,
+        refuse=True)`` also stops the hook (_Fatal)."""
+
+        def error(message: str, refuse: bool = False) -> None:
+            text = f"{self.where}: line {line}: {name}: {message}"
+            err(text + "\n")
+            if refuse:
+                raise _Fatal(1, text)
+
+        return error
+
     def delete(self, args: list[str], state: State, error, tree: bool = False) -> int:
         """``delete PATH...``: files and symbolic links removed (as ``rm
         -f``, a directory is an error); ``delete-tree PATH...``: files and
@@ -1098,7 +1139,8 @@ class Runner:
         sandbox ($SCBI_BDIR, the install prefix): the location of each path (its directory
         with ``..`` and symbolic links resolved, then its name) must be in
         the sandbox. All the paths are checked first: on an error nothing
-        is deleted. A symbolic link is removed, not its target. A missing
+        is deleted and the hook stops (a refusal is an error of the
+        plug-in). A symbolic link is removed, not its target. A missing
         path is not an error."""
         if any(a.startswith("-") for a in args):
             error(f"no option supported: {' '.join(a for a in args if a.startswith('-'))}")
@@ -1108,8 +1150,7 @@ class Runner:
             return 1
         roots = self._sandbox()
         if not roots:
-            error("no sandbox (SCBI_BDIR not set), nothing deleted")
-            return 1
+            error("no sandbox (SCBI_BDIR not set), nothing deleted", refuse=True)
         sandbox = roots[0]
         paths = []
         for a in args:
@@ -1121,11 +1162,9 @@ class Runner:
             else:
                 real = os.path.join(os.path.realpath(os.path.dirname(p)), name)
             if not _inside(real, roots):
-                error(f"'{a}' ({real}) is not in the sandbox {sandbox}, nothing deleted")
-                return 1
+                error(f"'{a}' ({real}) is not in the sandbox {sandbox}, nothing deleted", refuse=True)
             if not tree and os.path.isdir(real) and not os.path.islink(real):
-                error(f"'{a}' is a directory (use delete-tree), nothing deleted")
-                return 1
+                error(f"'{a}' is a directory (use delete-tree), nothing deleted", refuse=True)
             paths.append(real)
         status = 0
         for a, real in zip(args, paths):
@@ -1187,7 +1226,8 @@ class Runner:
         Existing files are replaced, existing directories merged. The
         sources (symbolic links resolved) must be in the sandbox or in the
         plug-ins directory ($SCBI_PLUGINS, read only), the destination in
-        the sandbox: on an error nothing is copied."""
+        the sandbox: otherwise nothing is copied and the hook stops (a
+        refusal is an error of the plug-in)."""
         if any(a.startswith("-") for a in args):
             error(f"no option supported: {' '.join(a for a in args if a.startswith('-'))}")
             return 1
@@ -1201,20 +1241,17 @@ class Runner:
         #  sandbox, all checked first
         roots = self._sandbox()
         if not roots:
-            error("no sandbox (SCBI_BDIR not set), nothing copied")
-            return 1
+            error("no sandbox (SCBI_BDIR not set), nothing copied", refuse=True)
         plugins = self.ctx.env.get("SCBI_PLUGINS") if self.ctx.env is not None else ""
         src_roots = roots + ([os.path.realpath(plugins)] if plugins else [])
         for a in sources:
             real = os.path.realpath(self._path(a, state))
             if not _inside(real, src_roots):
                 where = f"the sandbox {roots[0]}" + (f" or the plug-ins directory {src_roots[-1]}" if plugins else "")
-                error(f"'{a}' ({real}) is not in {where}, nothing copied")
-                return 1
+                error(f"'{a}' ({real}) is not in {where}, nothing copied", refuse=True)
         real = os.path.realpath(dpath)
         if not _inside(real, roots):
-            error(f"'{dest}' ({real}) is not in the sandbox {roots[0]}, nothing copied")
-            return 1
+            error(f"'{dest}' ({real}) is not in the sandbox {roots[0]}, nothing copied", refuse=True)
         into = os.path.isdir(dpath)
         if len(sources) > 1 and not into:
             error(f"target '{dest}' is not a directory")

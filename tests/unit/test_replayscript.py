@@ -66,8 +66,11 @@ BODIES = [
     "X = $(if cross then a else b)\necho $X",
     "echo one\nreturn 3\necho never",
     r"""echo 'single $V' "double $V" a\;b""",
-    "mkdir -p d/e\ntouch d/f\ndelete d/e || echo dir\ndelete-tree d/e d/nope\nls d\ndelete d/f\nls d\n"
-    "delete-tree /tmp || echo refused\nls -d d",
+    "mkdir -p d/e\ntouch d/f\ndelete-tree d/e d/nope\nls d\ndelete d/f\nls d\ncp -r /dev/null n\ndelete n",
+    #  a refusal stops the hook (status 1)
+    "mkdir -p d/e\necho before\ndelete d/e || echo never\necho never",
+    "echo before\ndelete-tree /tmp || echo never\necho never",
+    "echo before\ncopy /etc/hostname h || echo never\necho never",
     "echo $(replace 3.12 . _) $(replace a-b -)\nX = output echo 1.2\necho $(replace $X . _) $(replace $X .)",
     #  NAME += value
     "G = -g -m\nG += -x\nprintf '<%s>' $G\necho\nN += a b\nN += c\nprintf '<%s>' $N\necho",
@@ -92,11 +95,12 @@ def test_script_same_as_interpreter(tmp_path, body, inline):
     assert (sb, outb.replace(str(b), "@")) == (sa, outa.replace(str(a), "@"))
 
 
+@pytest.mark.parametrize("refused", ["copy f.h $P/g.h", "copy /etc/hostname h"])
 @pytest.mark.parametrize("inline", [False, True], ids=["script", "inline"])
-def test_copy_from_the_plugins_directory(tmp_path, inline):
-    #  the sources may be in $SCBI_PLUGINS, not the destination
-    body = ("copy $P/f.h f.h && cat f.h\ncopy f.h $P/g.h || echo refused\n"
-            "copy /etc/hostname h || echo outside\nls $P")
+def test_copy_from_the_plugins_directory(tmp_path, inline, refused):
+    #  the sources may be in $SCBI_PLUGINS, not the destination; a refusal
+    #  stops the hook
+    body = f"copy $P/f.h f.h && cat f.h\nls $P\n{refused} || echo never\necho never"
     results = []
     for name, run_it in (("a", interpreted), ("b", lambda r: scripted(r, inline))):
         d = tmp_path / name
@@ -107,7 +111,7 @@ def test_copy_from_the_plugins_directory(tmp_path, inline):
         r = make(d, body, variables={"P": str(plugins)},
                  driver={"SCBI_BDIR": str(d), "SCBI_PLUGINS": str(plugins)})
         results.append(run_it(r))
-    assert results[0] == results[1] == (0, "from plug-ins\nrefused\noutside\nf.h\n")
+    assert results[0] == results[1] == (1, "from plug-ins\nf.h\n")
 
 
 def test_functions_and_header(tmp_path):

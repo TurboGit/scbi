@@ -1377,8 +1377,15 @@ function of the plug-in.
 	\code{delete-tree} the location of each path (its directory with
 	\code{..} and symbolic links resolved, then its name) must be in the
 	sandbox, for \code{copy} the real location of each source (also
-	allowed in \code{\$SCBI\_PLUGINS}) and of the destination. All the paths are checked first: otherwise the command
-	fails with an error and nothing is deleted or copied. The system
+	allowed in \code{\$SCBI\_PLUGINS}) and of the destination. All the
+	paths are checked first. A refused path (outside the allowed
+	directories, no \code{\$SCBI\_BDIR}, a directory given to
+	\code{delete}) is an error of the plug-in: nothing is deleted or
+	copied, the hook stops at once (also from a plug-in function or a
+	\code{\$(...)}) and the step fails, with the message on the console.
+	The other errors (a missing source, a file which cannot be
+	written...) make the command fail as \code{cp} and \code{rm} do,
+	and the hook goes on. The system
 	\code{cp} and \code{rm} are not restricted (the linter reports the
 	ones the built-ins can replace, \seeref{linter}). A symbolic link is
 	deleted, not its target; a missing path is not an error. They have no

@@ -356,6 +356,35 @@ def test_copy_errors(tmp_path, text, message):
     (tmp_path / "out").mkdir()
     status, out, _ = run(tmp_path, text, env={"SCBI_BDIR": str(tmp_path)})
     assert status == 1 and out == f"m.yaml: config: line 10: {message}\n"
+    #  not a refusal: the hook goes on (as with cp)
+    status, out, _ = run(tmp_path, f"{text}\necho after", env={"SCBI_BDIR": str(tmp_path)})
+    assert status == 0 and out.endswith("\nafter\n")
+
+
+@pytest.mark.parametrize("text", [
+    "copy /etc/hostname h || echo never\necho never",
+    "copy a.h ../out.h\necho never",
+    "delete-tree / || echo never\necho never",
+    "delete d\necho never",
+    #  in a plug-in function, $(output ...), ok(...), a word: the whole hook stops
+    "f\necho never",
+    "X = output f\necho never",
+    "if ok(\"f\"):\n    echo never\necho never",
+    "echo $(output f) never",
+])
+def test_refusal_stops_the_hook(tmp_path, text):
+    sandbox = tmp_path / "bdir"
+    (sandbox / "d").mkdir(parents=True)
+    (sandbox / "a.h").write_text("a")
+    reported = []
+    status, out, _ = run(sandbox, "echo before\n" + text, env={"SCBI_BDIR": str(sandbox)},
+                         functions={"f": ((), parse("copy /etc/hostname h || echo never\necho never", 1))},
+                         fatal=reported.append)
+    assert status == 1 and out.startswith("before\n") and "never" not in out, out
+    #  the message, once to the errors of the hook, once to the fatal callback
+    assert len(reported) == 1 and out == f"before\n{reported[0]}\n"
+    assert "is not in the sandbox" in reported[0] or "use delete-tree" in reported[0]
+    assert not (sandbox / "h").exists() and (sandbox / "d").is_dir()
 
 
 def test_ok_external_command(tmp_path):

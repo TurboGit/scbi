@@ -60,7 +60,8 @@ _LOG_HELPER = r"""_scbi_log()
 }
 """
 
-#  delete: rm -fr only in the sandbox ($SCBI_BDIR), as the built-in
+#  delete: rm -fr only in the sandbox ($SCBI_BDIR), as the built-in (a
+#  refusal stops the hook: exit)
 _DELETE_HELPER = """\
 _scbi_delete()
 {
@@ -72,7 +73,7 @@ _scbi_delete()
         opt=-fr
         shift
     fi
-    [[ -n $bdir ]] || { echo "delete: no sandbox, nothing deleted" >&2; return 1; }
+    [[ -n $bdir ]] || { echo "delete: no sandbox, nothing deleted" >&2; exit 1; }
     sandbox=$(realpath -m -- "$bdir") || return 1
     roots=("$sandbox")
     [[ -z $prefix ]] || roots+=("$(realpath -m -- "$prefix")")
@@ -87,11 +88,11 @@ _scbi_delete()
         for r in "${roots[@]}"; do [[ $real != "$r"/* ]] || ok=yes; done
         if [[ $ok == no ]]; then
             echo "delete: '$p' ($real) is not in the sandbox $sandbox, nothing deleted" >&2
-            return 1
+            exit 1
         fi
         if [[ $opt == -f && -d $real && ! -L $real ]]; then
             echo "delete: '$p' is a directory (use delete-tree), nothing deleted" >&2
-            return 1
+            exit 1
         fi
         reals+=("$real")
     done
@@ -101,13 +102,14 @@ _scbi_delete()
 
 #  copy: cp -r only when the sources (symbolic links resolved) are in the
 #  sandbox ($SCBI_BDIR, the install prefix) or the plug-ins directory
-#  ($SCBI_PLUGINS) and the destination in the sandbox, as the built-in
+#  ($SCBI_PLUGINS) and the destination in the sandbox, as the built-in (a
+#  refusal stops the hook: exit)
 _COPY_HELPER = """\
 _scbi_copy()
 {
     local bdir=@SANDBOX@ prefix=@PREFIX@ plugins=@PLUGINS@ sandbox p real r ok n=0
     local roots=() src_roots=()
-    [[ -n $bdir ]] || { echo "copy: no sandbox, nothing copied" >&2; return 1; }
+    [[ -n $bdir ]] || { echo "copy: no sandbox, nothing copied" >&2; exit 1; }
     sandbox=$(realpath -m -- "$bdir") || return 1
     roots=("$sandbox")
     [[ -z $prefix ]] || roots+=("$(realpath -m -- "$prefix")")
@@ -128,7 +130,7 @@ _scbi_copy()
             else
                 echo "copy: '$p' ($real) is not in the sandbox $sandbox, nothing copied" >&2
             fi
-            return 1
+            exit 1
         fi
     done
     cp -r -- "$@"

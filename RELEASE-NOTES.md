@@ -103,11 +103,13 @@ variables (`$VAR`, `${VAR:-default}`, `${VAR%pattern}`...).
 - **Safe `copy`, `delete` and `delete-tree`**: they only work in the
   sandbox (`$SCBI_BDIR`, and the install prefix when it is elsewhere).
   Every path is checked first, at its real location (symbolic links
-  resolved): a path outside the sandbox is an error and nothing is copied
-  or deleted. `copy` may also read from the plug-ins directory
+  resolved): a path outside the sandbox is an error of the plug-in,
+  nothing is copied or deleted, the hook stops and the step fails, with
+  the message on the console. `copy` may also read from the plug-ins directory
   (`$SCBI_PLUGINS`, never written), to copy a file shipped with the
   plug-ins. `delete` refuses a directory (an empty variable in
-  `$DIR/$NAME` does not remove a whole tree): use `delete-tree`.
+  `$DIR/$NAME` does not remove a whole tree, the hook stops): use
+  `delete-tree`.
   `scbi lint` reports the `cp` and `rm` commands these built-ins can
   replace.
 - Functions, as `$(...)` in a word or `NAME = <function> <args>` in an
