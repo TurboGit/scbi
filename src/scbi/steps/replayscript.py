@@ -46,6 +46,35 @@ _scbi_check_versions()
 }
 """
 
+#  COMMAND ARG...: the command run with the argument following each
+#  --scbi-g expanded as the interpreter does an unquoted variable: one
+#  word (no word splitting, IFS empty), a glob pattern; after --scbi-G
+#  the matches of a pattern between --scbi-glob and --scbi-end (delete
+#  skips the directories they match)
+_GLOB_HELPER = r"""_scbi_glob()
+{
+    local _scbi_a _scbi_c= _scbi_argv=() _scbi_m IFS=
+    for _scbi_a in "$@"; do
+        if [[ -z $_scbi_c && ( $_scbi_a == --scbi-g || $_scbi_a == --scbi-G ) ]]; then
+            _scbi_c=$_scbi_a
+            continue
+        fi
+        if [[ -z $_scbi_c ]]; then
+            _scbi_argv+=("$_scbi_a")
+        elif [[ $_scbi_c == --scbi-G && $_scbi_a == *[*?[]* ]]; then
+            _scbi_m=($_scbi_a)
+            _scbi_argv+=(--scbi-glob "${_scbi_m[@]}" --scbi-end)
+        else
+            _scbi_m=($_scbi_a)
+            _scbi_argv+=("${_scbi_m[@]}")
+        fi
+        _scbi_c=
+    done
+    IFS=$' \t\n'
+    "${_scbi_argv[@]}"
+}
+"""
+
 #  log LEVEL MESSAGE: the message indented by 2 x LEVEL spaces (as the
 #  interpreter does without the driver: no time-stamp)
 _LOG_HELPER = r"""_scbi_log()
@@ -344,6 +373,11 @@ class _Translator:
 
     def simple(self, cmd: Simple) -> str:
         words = [self.word(w) for w in cmd.words]
+        #  the assignments before the command (NAME=value cmd ...)
+        n_env = 0
+        while n_env < len(cmd.words) and cmd.words[n_env].parts and cmd.words[n_env].parts[0][1] == "" \
+                and cmdlang._ENV_WORD.match(cmd.words[n_env].parts[0][0]):
+            n_env += 1
         first = cmdlang._word_text(cmd.words[0]) if cmd.words else ""
         if first in ("return", "exit"):
             words[0] = "return" if self.in_function and first == "return" else "exit"
@@ -354,9 +388,11 @@ class _Translator:
             self.helpers.add("delete")
             words[0] = "_scbi_delete" + (" -r" if first == "delete-tree" else "")
             #  the paths of a glob pattern between --scbi-glob and
-            #  --scbi-end: delete skips the directories they match
+            #  --scbi-end: delete skips the directories they match (an
+            #  unquoted variable: by _scbi_glob, if its value is a pattern)
             for k, w in enumerate(cmd.words[1:], 1):
-                if any(quote == "" and cmdlang._GLOB.search(text) for text, quote in w.parts):
+                if any(quote == "" and cmdlang._GLOB.search(text) for text, quote in w.parts) \
+                        and not self.globbed_var(w):
                     words[k] = f"--scbi-glob {words[k]} --scbi-end"
         elif first == "log":
             self.helpers.add("log")
@@ -366,10 +402,66 @@ class _Translator:
             words[0] = "_scbi_check_versions"
         elif first in self.r.functions:
             self.called.add(first)
+        #  unquoted variables or $(...) in an argument: a glob pattern, not
+        #  split (as the interpreter does), by _scbi_glob
+        flagged = [k for k, w in enumerate(cmd.words) if k > n_env and self.globbed_var(w)]
+        if first not in ("return", "exit") and flagged:
+            self.helpers.add("glob")
+            for k in flagged:
+                words[k] = ("--scbi-G " if first == "delete" else "--scbi-g ") + (words[k] or "''")
+            words[n_env] = "_scbi_glob " + words[n_env]
         out = " ".join(words)
         for r in cmd.redirects:
             out += f" {r.op}" + (f" {self.word(r.target)}" if r.target is not None else "")
         return out
+
+    def globbed_var(self, w: Word) -> bool:
+        """A word with an unquoted variable or $(...) expanded by the
+        interpreter as a glob pattern (not a whole-word list or function,
+        given as several words)."""
+        unquoted = [text for text, quote in w.parts if quote == ""]
+        if not any(self.may_glob(text) for text in unquoted):
+            return False
+        if len(w.parts) == 1 and w.parts[0][1] == "":
+            text = w.parts[0][0]
+            m = re.fullmatch(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?", text)
+            if m and ((self.is_static_var(m.group(1)) and isinstance(self.r.variables.get(m.group(1)), list))
+                      or m.group(1) in self.lists):
+                return False
+            m = re.fullmatch(r"\$\((.*)\)", text, re.S)
+            if m and _balanced(m.group(1)):
+                return False
+        return True
+
+    def may_glob(self, text: str) -> bool:
+        """An unquoted word part whose value may hold a glob pattern: a
+        variable set by the hook, a $(...) known when the hook runs, a
+        known value with *, ? or [."""
+        i = 0
+        while (i := text.find("$", i)) >= 0:
+            if text.startswith("$(", i):
+                j = _closing(text, i + 1)
+                inner = text[i + 2 : j]
+                name = (inner.split(None, 1) or [""])[0]
+                if self.uses_dynamic(inner) or name in ("output", "output-words", "status"):
+                    return True
+                try:
+                    value = self.static_function(name, inner) if name != "config-options" else ""
+                except ScriptError:
+                    return True
+                if cmdlang._GLOB.search(" ".join(value) if isinstance(value, list) else value):
+                    return True
+                i = j + 1
+                continue
+            m = re.compile(r"\$(?:\{[^}]*\}|[A-Za-z_][A-Za-z0-9_]*)").match(text, i)
+            if m:
+                name = re.match(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)", m.group(0)).group(1)
+                if not self.is_static_var(name) or cmdlang._GLOB.search(self.static_value(m.group(0))):
+                    return True
+                i = m.end()
+                continue
+            i += 1
+        return False
 
     def pipeline(self, p: Pipeline) -> str:
         return " | ".join(self.simple(c) for c in p.commands)
@@ -649,6 +741,8 @@ class _Translator:
 
         env = {k: v for k, v in sorted(r.environment.items()) if _exported(k)}
         helpers: list[str] = []
+        if "glob" in self.helpers:
+            helpers += _GLOB_HELPER.rstrip("\n").split("\n")
         if "versions" in self.helpers:
             helpers += _VERSIONS_HELPER.rstrip("\n").split("\n")
         if "log" in self.helpers:

@@ -73,6 +73,12 @@ BODIES = [
     #  delete with a glob pattern: the directories matched skipped
     "mkdir -p d/e g\ntouch d/f d/g g/h\ndelete d/* 'g'/[h]\nls d g\necho done",
     "echo before\ncopy /etc/hostname h || echo never\necho never",
+    #  an unquoted variable: a glob pattern, not split, removed when empty
+    "mkdir -p d/e\ntouch d/f d/g 'd/x y'\nP = 'd/*'\nprintf '<%s>' $P\necho\nS = 'd/x y'\nprintf '<%s>' $S x$P\necho\n"
+    "E =\nprintf '<%s>' $E end\necho\nN = 'd/nope*'\nprintf '<%s>' $N \"$P\" '$P' d/*\necho",
+    "mkdir -p d/e\ntouch d/f\nP = 'd/*'\nX = output echo $P\nprintf '<%s>' $X $(output echo $P)\necho",
+    "mkdir -p d/e\ntouch d/f\nP = 'd/*'\ndelete $P\nls d\nQ = d/e\ndelete $Q || echo never\necho never",
+    "mkdir -p d/e\nP = d/e\nA=1 ls $P",
     "echo $(replace 3.12 . _) $(replace a-b -)\nX = output echo 1.2\necho $(replace $X . _) $(replace $X .)",
     #  NAME += value
     "G = -g -m\nG += -x\nprintf '<%s>' $G\necho\nN += a b\nN += c\nprintf '<%s>' $N\necho",
@@ -132,7 +138,8 @@ def test_values_written(tmp_path):
     r = make(tmp_path, "cmake -DP=$PREFIX $(config-options) -j$SCBI_JOBS ../src\nX = output date\necho $X")
     lines = script(r).splitlines()
     assert f"cmake -DP={tmp_path}/inst -DA=1 '-DB=x y' -j4 ../src" in lines
-    assert 'echo "$X"' in lines
+    #  a variable of the hook, unquoted: a glob pattern, one word
+    assert '_scbi_glob echo --scbi-g "$X"' in lines
     inline = script(r, inline=True)
     assert inline.startswith(f"( cd {tmp_path} || exit 1; export ") and inline.endswith(" )\n")
     assert inline.count("\n") == 1

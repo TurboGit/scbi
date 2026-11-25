@@ -2752,7 +2752,11 @@ variables set by the hook stay Bash. The variables of the user's terminal
 the shell running it are used. The script can be edited and run with
 \code{bash step.sh}. \code{all-modules} and \code{hook-output} are not
 available in a replay; \code{log} writes its message indented, without
-time-stamp (as \code{scbi replay}).
+time-stamp (as \code{scbi replay}). A command with an unquoted variable
+set by the hook (or a \code{\$(...)} known only when it runs) in its
+arguments is run by the helper \code{\_scbi\_glob}, which expands
+these arguments as the hook does: one word each (no word splitting), a
+glob pattern.
 
 \cmd{scbi replay \ddash{}script:inline <step>.cmd}
 
