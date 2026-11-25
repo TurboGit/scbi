@@ -462,6 +462,31 @@ def test_delete_only_in_the_sandbox(tmp_path):
     assert (sandbox / "m").exists()
 
 
+def test_delete_glob_skips_directories(tmp_path):
+    sandbox = tmp_path / "bdir"
+    (sandbox / "d" / "sub").mkdir(parents=True)
+    (sandbox / "d" / "sub" / "f").write_text("x")
+    (sandbox / "d" / "a").write_text("x")
+    (sandbox / "d" / "b.la").write_text("x")
+    (sandbox / "d" / "lnk").symlink_to("sub")
+    env = {"SCBI_BDIR": str(sandbox)}
+    #  delete d/*: the files and links, the directories matched skipped
+    status, out, _ = run(sandbox, "delete d/*\necho after", env=env)
+    assert (status, out) == (0, "after\n")
+    assert [p.name for p in (sandbox / "d").iterdir()] == ["sub"]
+    assert (sandbox / "d" / "sub" / "f").exists()
+    #  a directory written as such (or from a variable) is still refused
+    for text in ("delete d/sub", "D = d/sub\ndelete $D", "delete 'd/*'"):
+        (sandbox / "d" / "*").mkdir(exist_ok=True)
+        status, out, _ = run(sandbox, f"{text}\necho never", env=env)
+        assert status == 1 and "is a directory (use delete-tree)" in out and "never" not in out, text
+    #  a glob matching only directories: nothing deleted, no error
+    assert run(sandbox, "delete d/s*", env=env)[:2] == (0, "")
+    #  delete-tree d/*: the directories too
+    assert run(sandbox, "delete-tree d/*", env=env)[:2] == (0, "")
+    assert list((sandbox / "d").iterdir()) == []
+
+
 def test_replace(tmp_path):
     status, out, _ = run(tmp_path, "echo $(replace 3.12.1 . _) $(replace a-b_c -_)\nX = replace 'a b' ' ' :\necho $X")
     assert (status, out) == (0, "3_12_1 abc\na:b\n")

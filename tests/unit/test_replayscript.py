@@ -70,6 +70,8 @@ BODIES = [
     #  a refusal stops the hook (status 1)
     "mkdir -p d/e\necho before\ndelete d/e || echo never\necho never",
     "echo before\ndelete-tree /tmp || echo never\necho never",
+    #  delete with a glob pattern: the directories matched skipped
+    "mkdir -p d/e g\ntouch d/f d/g g/h\ndelete d/* 'g'/[h]\nls d g\necho done",
     "echo before\ncopy /etc/hostname h || echo never\necho never",
     "echo $(replace 3.12 . _) $(replace a-b -)\nX = output echo 1.2\necho $(replace $X . _) $(replace $X .)",
     #  NAME += value

@@ -66,8 +66,9 @@ _DELETE_HELPER = """\
 _scbi_delete()
 {
     #  [-r] PATH...: rm -f (rm -fr with -r), only when each path is in the
-    #  sandbox, a directory only with -r
-    local bdir=@SANDBOX@ prefix=@PREFIX@ sandbox p name real r ok opt=-f
+    #  sandbox, a directory only with -r (skipped when matched by a glob
+    #  pattern: the paths between --scbi-glob and --scbi-end)
+    local bdir=@SANDBOX@ prefix=@PREFIX@ sandbox p name real r ok opt=-f globbed=no
     local reals=() roots=()
     if [[ $1 == -r ]]; then
         opt=-fr
@@ -78,6 +79,10 @@ _scbi_delete()
     roots=("$sandbox")
     [[ -z $prefix ]] || roots+=("$(realpath -m -- "$prefix")")
     for p in "$@"; do
+        case $p in
+            --scbi-glob) globbed=yes; continue;;
+            --scbi-end) globbed=no; continue;;
+        esac
         name=$(basename -- "$p")
         if [[ $name == . || $name == .. ]]; then
             real=$(realpath -m -- "$p")
@@ -91,12 +96,13 @@ _scbi_delete()
             exit 1
         fi
         if [[ $opt == -f && -d $real && ! -L $real ]]; then
+            [[ $globbed == no ]] || continue
             echo "delete: '$p' is a directory (use delete-tree), nothing deleted" >&2
             exit 1
         fi
         reals+=("$real")
     done
-    rm $opt -- "${reals[@]}"
+    [[ ${#reals[@]} -eq 0 ]] || rm $opt -- "${reals[@]}"
 }
 """
 
@@ -347,6 +353,11 @@ class _Translator:
         elif first in ("delete", "delete-tree"):
             self.helpers.add("delete")
             words[0] = "_scbi_delete" + (" -r" if first == "delete-tree" else "")
+            #  the paths of a glob pattern between --scbi-glob and
+            #  --scbi-end: delete skips the directories they match
+            for k, w in enumerate(cmd.words[1:], 1):
+                if any(quote == "" and cmdlang._GLOB.search(text) for text, quote in w.parts):
+                    words[k] = f"--scbi-glob {words[k]} --scbi-end"
         elif first == "log":
             self.helpers.add("log")
             words[0] = "_scbi_log"

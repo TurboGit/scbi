@@ -91,6 +91,12 @@ _HEADER = re.compile(r"^(if|elif)\s+(.+):$|^else\s*:$|^for\s+([A-Za-z_]\w*(?:\s+
 _GLOB = re.compile(r"[*?\[]")
 
 
+class _Globbed(str):
+    """A word given by the expansion of a glob pattern (``delete dir/*``
+    skips the directories it matches, a directory written as such is an
+    error)."""
+
+
 def _heredoc_pieces(text: str) -> list[str]:
     """The text of a write block split as re.split(r"\\\\([$`\\\\])"): text
     to expand and escaped characters alternately; an escape inside
@@ -720,7 +726,9 @@ class Runner:
             self.error(state, line, str(e))
             return ""
 
-    def expand_words(self, words, state: State, glob: bool = True) -> list[str]:
+    def expand_words(self, words, state: State, glob: bool = True, mark: bool = False) -> list[str]:
+        """The words expanded; ``mark``: the matches of a glob pattern as
+        _Globbed (the arguments of a command, for delete)."""
         out: list[str] = []
         ctx = self.hook_ctx(state)
         for w in words:
@@ -757,7 +765,8 @@ class Runner:
                 continue
             if glob and globbing:
                 matches = sorted(glob_in("".join(pattern), state.cwd))
-                out += matches or [value]
+                out += [_Globbed(m) for m in matches] if mark else matches
+                out += [] if matches else [value]
             else:
                 out.append(value)
         return out
@@ -1016,7 +1025,7 @@ class Runner:
             env[m.group(1)] = "".join(self.expand_words((first,), state, glob=False)) if \
                 _word_text(first) else ""
             words.pop(0)
-        argv = self.expand_words(words, state)
+        argv = self.expand_words(words, state, mark=True)
         if self.trace is not None:
             self.trace("_TRACE: " + " ".join([f"{k}={_xq(v)}" for k, v in env.items()]
                                              + [_xq(a) for a in argv]))
@@ -1134,7 +1143,8 @@ class Runner:
 
     def delete(self, args: list[str], state: State, error, tree: bool = False) -> int:
         """``delete PATH...``: files and symbolic links removed (as ``rm
-        -f``, a directory is an error); ``delete-tree PATH...``: files and
+        -f``, a directory is an error, a directory matched by a glob pattern
+        skipped: ``delete dir/*``); ``delete-tree PATH...``: files and
         directories removed recursively (as ``rm -fr``). Only under the
         sandbox ($SCBI_BDIR, the install prefix): the location of each path (its directory
         with ``..`` and symbolic links resolved, then its name) must be in
@@ -1164,10 +1174,12 @@ class Runner:
             if not _inside(real, roots):
                 error(f"'{a}' ({real}) is not in the sandbox {sandbox}, nothing deleted", refuse=True)
             if not tree and os.path.isdir(real) and not os.path.islink(real):
+                if isinstance(a, _Globbed):
+                    continue
                 error(f"'{a}' is a directory (use delete-tree), nothing deleted", refuse=True)
-            paths.append(real)
+            paths.append((a, real))
         status = 0
-        for a, real in zip(args, paths):
+        for a, real in paths:
             try:
                 if os.path.isdir(real) and not os.path.islink(real):
                     shutil.rmtree(real)

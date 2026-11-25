@@ -109,7 +109,8 @@ variables (`$VAR`, `${VAR:-default}`, `${VAR%pattern}`...).
   (`$SCBI_PLUGINS`, never written), to copy a file shipped with the
   plug-ins. `delete` refuses a directory (an empty variable in
   `$DIR/$NAME` does not remove a whole tree, the hook stops): use
-  `delete-tree`.
+  `delete-tree`. The directories matched by a glob pattern are skipped
+  (`delete dir/*` deletes the files of `dir` only).
   `scbi lint` reports the `cp` and `rm` commands these built-ins can
   replace.
 - Functions, as `$(...)` in a word or `NAME = <function> <args>` in an

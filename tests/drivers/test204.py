@@ -45,6 +45,31 @@ xxxx/xx/xx xx:xx:xx : refcopy (FAILED) wrapup failed with error 1
     t.grep("copy: '/etc/hostname'")
     t.ngrep("never")
 
+    # delete dir/*: the files, the directories matched skipped (not an
+    # error); a directory given as such is refused
+    t.sh("""\
+cat > scripts.d/globdel.yaml <<'END'
+plugin: globdel
+
+config: echo config
+
+wrapup: |-
+  mkdir -p d/sub
+  touch d/a d/b d/sub/c
+  delete d/*
+  ls d d/sub
+END
+""")
+    t.runs('./scbi globdel')
+    t.sh('ls .root/builds/globdel/d .root/builds/globdel/d/sub > $TEST_OUTPUT')
+    t.diff("""\
+.root/builds/globdel/d:
+sub
+
+.root/builds/globdel/d/sub:
+c
+""")
+
     t.nruns('./scbi refdel')
     t.grep("refdel (FAILED) refdel.yaml: wrapup: line 7: delete: 'd' is a directory"
            " (use delete-tree), nothing deleted")

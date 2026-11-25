@@ -1365,7 +1365,9 @@ function of the plug-in.
 	\item[delete <path>...] \index{delete}Deletes files and symbolic links,
 	as \code{rm -f}. A directory is an error (use \code{delete-tree}), so
 	that a path which turns out to be a directory (an empty variable in
-	\code{\$DIR/\$NAME}...) is not deleted.
+	\code{\$DIR/\$NAME}...) is not deleted. The directories matched by a
+	glob pattern are skipped: \code{delete dir/*} deletes the files of
+	\code{dir}, not its sub-directories.
 	\item[delete-tree <path>...] \index{delete-tree}Deletes files and
 	directories, directories recursively, as \code{rm -fr}.
 	\item[store-set-key <key> <value>] \index{store-set-key}Records the key in the private store, replacing its value (as \code{scbi store <key> <value>}). The key is one word; nothing is recorded and the command fails if the store cannot be written.
