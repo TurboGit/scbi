@@ -86,17 +86,20 @@ clean.install:
 	fi
 	rm -f $(HOME)/.bash_completion.d/scbi
 
+#  The Python used by lint and the tests (make test PYTHON=python3.9)
+PYTHON ?= python3
+
 lint:
-	PYTHONPATH=src python3 -m scbi lint --error scripts.d/c-*.yaml
+	PYTHONPATH=src $(PYTHON) -m scbi lint --error scripts.d/c-*.yaml
 	echo No problem detected
 
 #  Unit tests of the driver
-PYTEST=python3 -m pytest
+PYTEST=$(PYTHON) -m pytest
 
 #  Regression testsuite (tests/drivers/testNNN.py, see tests/harness.py),
 #  in parallel when pytest-xdist is installed; T="test001 test092" runs
 #  some drivers. JUnit XML report in tests/junit.xml.
-XDIST := $(shell python3 -c 'import xdist' 2>/dev/null && echo "-n auto")
+XDIST := $(shell $(PYTHON) -c 'import xdist' 2>/dev/null && echo "-n auto")
 DRIVERS = $(if $(T),$(foreach d,$(T),tests/drivers/$(d).py),tests/drivers)
 
 test:

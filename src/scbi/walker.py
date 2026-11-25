@@ -20,12 +20,13 @@ Bash semantics kept on purpose:
 
 from __future__ import annotations
 
-from typing import Callable
+from typing import Callable, Optional
 
 from scbi.bashcompat import words
 from scbi.errors import Exit
 
-Callback = Callable[[list[str]], int | None]
+#  Optional: a runtime alias, X | None needs Python 3.10
+Callback = Callable[[list[str]], Optional[int]]
 
 #  WITH_META WITH_DEPS WITH_EXT DEPTH(None: 99999 or 2 if --deps direct)
 #  DEPENDS_KIND, per for-all-modules* entry point

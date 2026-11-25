@@ -56,6 +56,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from scbi.bashcompat import glob_in
 from scbi.bashenv import quote
 from scbi.hooks import builtins as _builtins
 from scbi.hooks.context import HookContext
@@ -729,7 +730,7 @@ class Runner:
             if not value and not quoted:
                 continue
             if glob and globbing:
-                matches = sorted(_glob.glob("".join(pattern), root_dir=state.cwd))
+                matches = sorted(glob_in("".join(pattern), state.cwd))
                 out += matches or [value]
             else:
                 out.append(value)

@@ -17,7 +17,7 @@ import subprocess
 from collections.abc import Callable
 from pathlib import Path
 
-from scbi.bashcompat import read_lines
+from scbi.bashcompat import glob_in, read_lines
 from scbi.bashenv import ShellVars
 
 #  Keys whose values are accumulated (space separated) instead of replaced
@@ -196,7 +196,7 @@ def _fields(value: str, getvar, cwd: str) -> list[str]:
                 globbing = globbing or bool(_GLOB.search(piece))
         end()
         for text, pat, globbing in word_fields:
-            matches = sorted(_glob.glob(pat, root_dir=cwd)) if globbing else []
+            matches = sorted(glob_in(pat, cwd)) if globbing else []
             fields += matches or [text]
     return fields
 

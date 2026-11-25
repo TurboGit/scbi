@@ -8,6 +8,9 @@ arrays; they are gathered here.
 
 from __future__ import annotations
 
+import glob as _glob
+import os
+
 _IFS_WS = " \t\n"
 
 
@@ -25,6 +28,17 @@ class ShellSyntaxError(ValueError):
 
 
 GLOB_CHARS = frozenset("*?[")
+
+
+def glob_in(pattern: str, root_dir=None) -> list[str]:
+    """``glob.glob(pattern, root_dir=root_dir)`` (root_dir is Python 3.10+):
+    a relative pattern is matched in ``root_dir`` (None: the current
+    directory) and the matches are relative to it."""
+    if root_dir is None or os.path.isabs(pattern):
+        return _glob.glob(pattern)
+    root = os.fspath(root_dir)
+    prefix = len(os.path.join(root, ""))
+    return [m[prefix:] for m in _glob.glob(os.path.join(_glob.escape(root), pattern))]
 
 
 def shell_words(text: str) -> list[str]:

@@ -14,14 +14,13 @@ unquoted globs, done by the caller as Bash does when calling a function).
 
 from __future__ import annotations
 
-import glob as _glob
 import os
 import re
 import shutil
 import subprocess
 from pathlib import Path
 
-from scbi.bashcompat import GLOB_CHARS, words
+from scbi.bashcompat import GLOB_CHARS, glob_in, words
 from scbi.hooks.context import HookContext
 
 
@@ -36,7 +35,7 @@ def bash_glob(pattern: str, cwd: Path) -> list[str]:
     """Pathname expansion of one word (no match: the word itself)."""
     if not GLOB_CHARS & set(pattern):
         return [pattern]
-    matches = _glob.glob(pattern, root_dir=None if os.path.isabs(pattern) else cwd)
+    matches = glob_in(pattern, cwd)
     return sorted(matches) if matches else [pattern]
 
 

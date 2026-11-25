@@ -164,7 +164,9 @@ directive or sub-command needs a matching update there (also check
 
 ## Conventions
 
-- Python driver: Python >= 3.11, PyYAML only, no shell (`subprocess` with
+- Python driver: Python >= 3.9 (no 3.10+ syntax or library features:
+  `match`, runtime `X | Y` types, `glob(root_dir=)`, `zip(strict=)`...;
+  `tests/unit/test_py39.py` checks some), PyYAML only, no shell (`subprocess` with
   argument lists); report through `scbi.log` (`ilog`, `elog`...) so
   messages reach the build logs.
 - Test drivers: Python (pytest, `tests/harness.py`), expected outputs as
