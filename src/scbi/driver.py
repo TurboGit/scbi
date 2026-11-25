@@ -48,46 +48,45 @@ USAGE_OPTIONS = """
    modulen  <name>:#<ver>    build from tarball version <ver>
    modulen  <name>:dev       build from user's repository current branch
 
-   -h | --help              this help message
-   -v | --version           display driver & plug-ins versions
-   -q | --quiet             do not display information log
-      | --color:[n]         use colored output (no, dark, light)
-      | --ini=<section>     load ini file given section
-      | --prefix=<dir>      the global install directory
-      | --build-dir=<dir>   the root build directory.
-      | --flat              use a flatter directory structure
-   -e | --env=<name>        environment file .env-<name>.yaml
-      | --plan=<name>       a build plan for modules
-      | --enable-<name>     enable feature name
-   -t | --target=<name>     the target to build for ({target})
-      | --plugins=<dir>     specify the modules/plugins directory
-   -j | --jobs=<n>          max compilation jobs, set $SCBI_JOBS
-   -S | --no-setup          skip setup
-   -I | --no-install        skip install
-   -W | --no-wrapup         skip wrapup
-   -u | --update            do update
-      | --update:prefetch   do update, the sources fetched ahead in parallel
-   -s | --setup             do setup
-   -c | --config            do config
-   -b | --build             do build
-        --build-target=<t>  build with the build-<t> hook
-   -i | --install           do install
-   -w | --wrapup            do wrapup
-      | --clean-install     clean installation directory
-      | --archive           check for archive only if explicitly specified
-      | --tests[:only][=O]  run the testsuite, eventually build
-   -d | --deps[:warning]    check/build dependencies
-   -a | --create-archive    build binary archive
-      | --standalone        create a standalone source archive
-   -l | --log:n             log display control yes|no|on-failure
-   -f | --force             force rebuild, do not check build id
-   -p | --purge[:only]      remove build directory, build eventually
-      | --safe              clean-up build directory before configure
-      | --dry-run           only list modules handled
-      | --stat[:short|full] display some status of current setup
-      | --progress[:bar|line|no]  build progress on the terminal (bar)
-   -n | --no-patch          do not apply patches
-      | --clear-cache       remove cached module's versions"""
+   -h | --help                   this help message
+   -v | --version                display driver & plug-ins versions
+   -q | --quiet                  do not display information log
+      | --color:[n]              use colored output (no, dark, light)
+      | --ini=<section>          load ini file given section
+      | --prefix=<dir>           the global install directory
+      | --build-dir=<dir>        the root build directory.
+      | --flat                   use a flatter directory structure
+   -e | --env=<name>             environment file .env-<name>.yaml
+      | --plan=<name>            a build plan for modules
+      | --enable-<name>          enable feature name
+   -t | --target=<name>          the target to build for ({target})
+      | --plugins=<dir>          specify the modules/plugins directory
+   -j | --jobs=<n>               max compilation jobs, set $SCBI_JOBS
+   -S | --no-setup               skip setup
+   -I | --no-install             skip install
+   -W | --no-wrapup              skip wrapup
+   -u | --update[:prefetch]      do update, sources fetched ahead in parallel
+   -s | --setup                  do setup
+   -c | --config                 do config
+   -b | --build                  do build
+        --build-target=<t>       build with the build-<t> hook
+   -i | --install                do install
+   -w | --wrapup                 do wrapup
+      | --clean-install          clean installation directory
+      | --archive                check for archive only if explicitly specified
+      | --tests[:only][=O]       run the testsuite, eventually build
+   -d | --deps[:warning]         check/build dependencies
+   -a | --create-archive         build binary archive
+      | --standalone             create a standalone source archive
+   -l | --log:n                  log display control yes|no|on-failure
+   -f | --force                  force rebuild, do not check build id
+   -p | --purge[:only]           remove build directory, build eventually
+      | --safe                   clean-up build directory before configure
+      | --dry-run                only list modules handled
+      | --stat[:short|full]      display some status of current setup
+      | --progress[:bar|line|no] build progress on the terminal (bar)
+   -n | --no-patch               do not apply patches
+      | --clear-cache            remove cached module's versions"""
 
 #  ini key -> driver variable (ini-apply-values)
 INI_KV = {
