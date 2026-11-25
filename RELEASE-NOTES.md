@@ -25,7 +25,7 @@ with the Bash driver of the `master` branch. The reference manual
 
 ## Requirements and installation
 
-- Python 3.11 or later and PyYAML (`apt install python3-yaml`).
+- Python 3.9 or later and PyYAML (`apt install python3-yaml`).
 - `make` installs the driver in `~/.local/lib/scbi` with the command
   `~/.local/bin/scbi`, the plug-ins in `~/.config/scbi` and the Bash
   completion. The old Bash tools (`scbi-lint`, `scbi-show`...) are
@@ -96,15 +96,29 @@ variables (`$VAR`, `${VAR:-default}`, `${VAR%pattern}`...).
   `write-raw FILE:` / `append-raw FILE:` (not expanded).
 - Built-in commands: `cd`, `echo`, `export`, `unset`, `return`, `copy`
   (recursive, replaces `cp`), `delete` and `delete-tree` (replace `rm`),
-  `check-versions`, `apply-var`, and `log <level> <message>` (a message of
-  the driver for the module, on the console and in the report log).
+  `check-versions`, `apply-var`, `store-set-key <key> <value>` (records a
+  key in the private store, read back with `$(store-key <key>)`), and
+  `log <level> <message>` (a message of the driver for the module, on the
+  console and in the report log).
+- **Safe `copy`, `delete` and `delete-tree`**: they only work in the
+  sandbox (`$SCBI_BDIR`, and the install prefix when it is elsewhere).
+  Every path is checked first, at its real location (symbolic links
+  resolved): a path outside the sandbox is an error and nothing is copied
+  or deleted. `copy` may also read from the plug-ins directory
+  (`$SCBI_PLUGINS`, never written), to copy a file shipped with the
+  plug-ins. `delete` refuses a directory (an empty variable in
+  `$DIR/$NAME` does not remove a whole tree): use `delete-tree`.
+  `scbi lint` reports the `cp` and `rm` commands these built-ins can
+  replace.
 - Functions, as `$(...)` in a word or `NAME = <function> <args>` in an
   assignment: `config-options`, `get-version [<plug-in>]`,
   `get-build-type`, `is-enabled`, `if <condition> then ... else ...`,
   `output` / `output-words` (the output of a command), `command-path`,
   `uppercase`, `lowercase`, `replace`, `first-line`, `basename`, `dirname`,
   `ls`, `last-modified-directory`, `get-os-lib`, `get-os-bin`...,
-  `store-key`, `hook-output`, `all-variants`, `all-modules`.
+  `store-key`, `hook-output`, `all-variants`, `all-modules`, and
+  `module-dir <module> [install|src|build]` (a directory of a module of
+  the build, as `${SCBI_MODULES_DIR[<module>@<kind>]}`).
 - Each step writes a replay file: `scbi replay <step>.cmd` reruns the
   step alone, `--trace` shows each command, `--script` (or
   `--script:inline`) writes an equivalent shell script.
@@ -135,6 +149,32 @@ command language.
 - **Aggregation**: the dependencies of the modules aggregated by a direct
   aggregate meta-module are not aggregated; a `build-depends` on a
   meta-module never uses the aggregated mode.
+
+## Cross compilation
+
+- **The environment comes from the plug-ins only**: the driver adds no
+  compiler environment of its own (the `system-compiler` setting and the
+  driver cross environment are removed). The plug-in `c-sandbox`, first
+  item of the `build-depends`, gives the base environment with its
+  variants: `c-sandbox` (the native sandbox, or the target with
+  `--target`: the cross compiler and binutils of the sandbox, `pkg-config`
+  and `cmake` set for the target libraries), `c-sandbox/host` (the tools
+  running on the host, e.g. to build a cross compiler) and
+  `c-sandbox/system` (the compiler and tools of the system only).
+- **`host@` dependencies**: as the `:native` build dependencies of Debian,
+  `host@<module>` in `depends`, `build-depends` or `tests-depends` is a
+  tool running on the build machine (`host@c-gprbuild`, `host@c-cmake`).
+  In a native build it is the module itself; in a cross build the module
+  is not built for the target, its build for the host is used: its
+  environment, `$PREFIX` and `module-dir`, and its build id (a new build
+  of the tool rebuilds the module). With `--deps` it is built for the
+  host by a run of the driver without `--target`; a `host@` aggregate
+  meta-module gives the environment of its modules.
+- **`native` discriminant**: set for a native build, as `cross` for a
+  cross build: `if on native:` in a plug-in, `@on native use ...` or a
+  barrier in a build plan.
+- Many plug-ins fixed for cross builds (binutils, GNAT tools, AWS,
+  libadalang-tools, gpr2...).
 
 ## Sources and updates
 
