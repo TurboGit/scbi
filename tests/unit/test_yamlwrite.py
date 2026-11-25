@@ -126,3 +126,60 @@ depends:
     _:
       - d
 """
+
+
+def test_os_depends_first():
+    text = """\
+plugin: p
+build-depends:
+  common:
+    - os@-python3
+    # the build tool
+    - c-cmake  # inline of c-cmake
+    - os@-intltool  # inline of intltool
+    - if cross: [os@-z, c-b, os@-a]
+    # before xsltproc
+    - os@-xsltproc
+  clang:
+    - os@-llvm-$V
+    - os@-clang-$V
+depends:
+  - c-zlib
+  - os@-b
+  - os@-c c-x
+  - c-a
+modules:
+  - os@-b
+  - os@-a
+"""
+    out = format_text("p", text)
+    assert out == """\
+plugin: p
+
+modules:
+  - os@-b
+  - os@-a
+
+depends:
+  - os@-b
+  - c-zlib
+  - os@-c c-x
+  - c-a
+
+build-depends:
+  common:
+    - os@-intltool  # inline of intltool
+    - os@-python3
+    # before xsltproc
+    - os@-xsltproc
+    # the build tool
+    - c-cmake  # inline of c-cmake
+    - if cross:
+        - os@-a
+        - os@-z
+        - c-b
+  clang:
+    - os@-clang-$V
+    - os@-llvm-$V
+"""
+    assert format_text("p", out) == out

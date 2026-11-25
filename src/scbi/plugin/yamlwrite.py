@@ -4,6 +4,9 @@ The canonical form:
 - keys in the order of catalog.FORMAT_ORDER; inside a hook the
   qualifiers ``common``, ``_``, ``default``, the variants (alphabetical),
   then ``cross``; the fields of vcs/archive in their order;
+- in the lists of the dependency hooks (depends, build-depends,
+  tests-depends, at any level), the OS packages (``os@-<name>``) first,
+  sorted, then the other items in their order;
 - block style, mappings indented by 2, list items "  - " under their key;
   multi-line strings as literal blocks; scalars quoted only when needed;
 - one blank line between the top-level keys, none inside.
@@ -31,6 +34,7 @@ QUALIFIER_RANK = {"common": 0, yamlfmt.PLAIN_KEY: 1, "default": 2}
 INHERIT_ORDER = ("from", "hooks", "custom-hooks", "variants", "name")
 FUNCTION_ORDER = ("params", "run")
 OS_VARIANT_ORDER = ("packages", "env")
+DEPENDS_HOOKS = ("depends", "build-depends", "tests-depends")
 
 
 class WriteError(Exception):
@@ -176,6 +180,33 @@ def _keys_order(path: tuple, value: dict):
     return None
 
 
+def _is_os_dep(item) -> bool:
+    """An OS package dependency: a string whose words are all os@-<name>."""
+    if not isinstance(item, str):
+        return False
+    words = item.split()
+    return bool(words) and all(w.startswith("os@-") for w in words)
+
+
+def _list_order(path: tuple, items: list) -> list[int]:
+    """The order (indexes) of the items of the list at ``path``: in a
+    dependency hook the OS packages first, sorted, then the other items."""
+    indexes = list(range(len(items)))
+    if not path or str(path[0]) not in DEPENDS_HOOKS:
+        return indexes
+    os_deps = sorted((i for i in indexes if _is_os_dep(items[i])), key=lambda i: items[i])
+    return os_deps + [i for i in indexes if not _is_os_dep(items[i])]
+
+
+def canonical_data(data, path: tuple = ()):
+    """``data`` with the lists ordered as in the canonical form."""
+    if isinstance(data, dict):
+        return {k: canonical_data(v, path + (k,)) for k, v in data.items()}
+    if isinstance(data, list):
+        return [canonical_data(data[i], path + (i,)) for i in _list_order(path, data)]
+    return data
+
+
 # ------------------------------------------------------------ emitter
 
 
@@ -260,7 +291,9 @@ class _Writer:
 
     def sequence(self, data: list, path: tuple, indent: int) -> None:
         pad = " " * indent
-        for i, item in enumerate(data):
+        #  the comments are attached to the original index of the item
+        for i in _list_order(path, data):
+            item = data[i]
             p = path + (i,)
             self.comments_before(p, indent)
             if isinstance(item, dict) and item:
@@ -312,6 +345,6 @@ def format_text(name: str, text: str) -> str:
         raise yamlfmt.FormatError(f"{name}: a mapping is expected")
     yamlfmt.from_data(name, data, name)
     result = write(data, collect_comments(text))
-    if load_data(result) != data:
+    if load_data(result) != canonical_data(data):
         raise WriteError(f"{name}: internal error, the formatted plug-in differs")
     return result
