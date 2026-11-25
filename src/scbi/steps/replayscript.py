@@ -99,24 +99,35 @@ _scbi_delete()
 }
 """
 
-#  copy: cp -r only when the sources (symbolic links resolved) and the
-#  destination are in the sandbox ($SCBI_BDIR, the install prefix), as the
-#  built-in
+#  copy: cp -r only when the sources (symbolic links resolved) are in the
+#  sandbox ($SCBI_BDIR, the install prefix) or the plug-ins directory
+#  ($SCBI_PLUGINS) and the destination in the sandbox, as the built-in
 _COPY_HELPER = """\
 _scbi_copy()
 {
-    local bdir=@SANDBOX@ prefix=@PREFIX@ sandbox p real r ok
-    local roots=()
+    local bdir=@SANDBOX@ prefix=@PREFIX@ plugins=@PLUGINS@ sandbox p real r ok n=0
+    local roots=() src_roots=()
     [[ -n $bdir ]] || { echo "copy: no sandbox, nothing copied" >&2; return 1; }
     sandbox=$(realpath -m -- "$bdir") || return 1
     roots=("$sandbox")
     [[ -z $prefix ]] || roots+=("$(realpath -m -- "$prefix")")
+    src_roots=("${roots[@]}")
+    [[ -z $plugins ]] || src_roots+=("$(realpath -m -- "$plugins")")
     for p in "$@"; do
+        n=$((n + 1))
         real=$(realpath -m -- "$p") || return 1
         ok=no
-        for r in "${roots[@]}"; do [[ $real != "$r"/* ]] || ok=yes; done
+        if [[ $n -lt $# ]]; then
+            for r in "${src_roots[@]}"; do [[ $real != "$r"/* ]] || ok=yes; done
+        else
+            for r in "${roots[@]}"; do [[ $real != "$r"/* ]] || ok=yes; done
+        fi
         if [[ $ok == no ]]; then
-            echo "copy: '$p' ($real) is not in the sandbox $sandbox, nothing copied" >&2
+            if [[ $n -lt $# && -n $plugins ]]; then
+                echo "copy: '$p' ($real) is not in the sandbox $sandbox or the plug-ins directory ${src_roots[-1]}, nothing copied" >&2
+            else
+                echo "copy: '$p' ($real) is not in the sandbox $sandbox, nothing copied" >&2
+            fi
             return 1
         fi
     done
@@ -594,12 +605,14 @@ class _Translator:
 
     @staticmethod
     def _sandboxed(helper: str, r) -> list[str]:
-        """The lines of a helper with the sandbox ($SCBI_BDIR) and the
-        install prefix ($SCBI_PREFIX) of the replayed step."""
+        """The lines of a helper with the sandbox ($SCBI_BDIR), the
+        install prefix ($SCBI_PREFIX) and the plug-ins directory
+        ($SCBI_PLUGINS) of the replayed step."""
         def get(name: str) -> str:
             return r.driver.get(name) or r.environment.get(name, "")
 
         text = helper.replace("@SANDBOX@", q(get("SCBI_BDIR"))).replace("@PREFIX@", q(get("SCBI_PREFIX")))
+        text = text.replace("@PLUGINS@", q(get("SCBI_PLUGINS")))
         return text.rstrip("\n").split("\n")
 
     def script(self) -> str:

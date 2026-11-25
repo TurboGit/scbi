@@ -1355,10 +1355,13 @@ function of the plug-in.
 	available for other options (\code{cp -a}...).
 
 	The sources and the destination are restricted to the sandbox (see
-	below), so that no data of the computer is copied into a build: a
-	source is checked at its real location (symbolic links resolved, a
-	link to a file outside the sandbox is an error); the symbolic links
-	inside a copied directory are copied as links, not followed.
+	below), so that no data of the computer is copied into a build; a
+	source may also be in the plug-ins directory (\code{\$SCBI\_PLUGINS},
+	read only: never a destination), to copy a file shipped with the
+	plug-ins. A source is checked at its real location (symbolic links
+	resolved, a link to a file outside the allowed directories is an
+	error); the symbolic links inside a copied directory are copied as
+	links, not followed.
 	\item[delete <path>...] \index{delete}Deletes files and symbolic links,
 	as \code{rm -f}. A directory is an error (use \code{delete-tree}), so
 	that a path which turns out to be a directory (an empty variable in
@@ -1373,8 +1376,8 @@ function of the plug-in.
 	(\code{\$SCBI\_PREFIX}, \ddash{}prefix). For \code{delete} and
 	\code{delete-tree} the location of each path (its directory with
 	\code{..} and symbolic links resolved, then its name) must be in the
-	sandbox, for \code{copy} the real location of each source and of the
-	destination. All the paths are checked first: otherwise the command
+	sandbox, for \code{copy} the real location of each source (also
+	allowed in \code{\$SCBI\_PLUGINS}) and of the destination. All the paths are checked first: otherwise the command
 	fails with an error and nothing is deleted or copied. The system
 	\code{cp} and \code{rm} are not restricted (the linter reports the
 	ones the built-ins can replace, \seeref{linter}). A symbolic link is

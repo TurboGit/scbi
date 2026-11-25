@@ -92,6 +92,24 @@ def test_script_same_as_interpreter(tmp_path, body, inline):
     assert (sb, outb.replace(str(b), "@")) == (sa, outa.replace(str(a), "@"))
 
 
+@pytest.mark.parametrize("inline", [False, True], ids=["script", "inline"])
+def test_copy_from_the_plugins_directory(tmp_path, inline):
+    #  the sources may be in $SCBI_PLUGINS, not the destination
+    body = ("copy $P/f.h f.h && cat f.h\ncopy f.h $P/g.h || echo refused\n"
+            "copy /etc/hostname h || echo outside\nls $P")
+    results = []
+    for name, run_it in (("a", interpreted), ("b", lambda r: scripted(r, inline))):
+        d = tmp_path / name
+        (d / "inst").mkdir(parents=True)
+        plugins = tmp_path / f"plugins-{name}"
+        plugins.mkdir()
+        (plugins / "f.h").write_text("from plug-ins\n")
+        r = make(d, body, variables={"P": str(plugins)},
+                 driver={"SCBI_BDIR": str(d), "SCBI_PLUGINS": str(plugins)})
+        results.append(run_it(r))
+    assert results[0] == results[1] == (0, "from plug-ins\nrefused\noutside\nf.h\n")
+
+
 def test_functions_and_header(tmp_path):
     r = make(tmp_path, "greet world", functions={"greet": {"params": ["WHO"], "run": "echo hello $WHO\nreturn 0\n"}})
     text = script(r)

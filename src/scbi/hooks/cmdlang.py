@@ -1185,8 +1185,9 @@ class Runner:
         symbolic links kept as links) copied as ``cp -r`` does: into DEST
         when it is a directory (or for several sources), else to DEST.
         Existing files are replaced, existing directories merged. The
-        sources (symbolic links resolved) and the destination must be in the
-        sandbox: on an error nothing is copied."""
+        sources (symbolic links resolved) must be in the sandbox or in the
+        plug-ins directory ($SCBI_PLUGINS, read only), the destination in
+        the sandbox: on an error nothing is copied."""
         if any(a.startswith("-") for a in args):
             error(f"no option supported: {' '.join(a for a in args if a.startswith('-'))}")
             return 1
@@ -1195,17 +1196,25 @@ class Runner:
             return 1
         *sources, dest = args
         dpath = self._path(dest, state)
-        #  the sources (their real location: nothing read outside) and the
-        #  destination only in the sandbox, all checked first
+        #  the sources (their real location: nothing read outside) in the
+        #  sandbox or the plug-ins directory, the destination only in the
+        #  sandbox, all checked first
         roots = self._sandbox()
         if not roots:
             error("no sandbox (SCBI_BDIR not set), nothing copied")
             return 1
-        for a in [*sources, dest]:
+        plugins = self.ctx.env.get("SCBI_PLUGINS") if self.ctx.env is not None else ""
+        src_roots = roots + ([os.path.realpath(plugins)] if plugins else [])
+        for a in sources:
             real = os.path.realpath(self._path(a, state))
-            if not _inside(real, roots):
-                error(f"'{a}' ({real}) is not in the sandbox {roots[0]}, nothing copied")
+            if not _inside(real, src_roots):
+                where = f"the sandbox {roots[0]}" + (f" or the plug-ins directory {src_roots[-1]}" if plugins else "")
+                error(f"'{a}' ({real}) is not in {where}, nothing copied")
                 return 1
+        real = os.path.realpath(dpath)
+        if not _inside(real, roots):
+            error(f"'{dest}' ({real}) is not in the sandbox {roots[0]}, nothing copied")
+            return 1
         into = os.path.isdir(dpath)
         if len(sources) > 1 and not into:
             error(f"target '{dest}' is not a directory")

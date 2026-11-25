@@ -320,6 +320,30 @@ def test_copy_only_in_the_sandbox(tmp_path):
     assert status == 1 and "SCBI_BDIR" in out and not (sandbox / "c.h").exists()
 
 
+def test_copy_from_the_plugins_directory(tmp_path):
+    sandbox = tmp_path / "bdir"
+    plugins = tmp_path / "scripts.d"
+    (plugins / "patches").mkdir(parents=True)
+    sandbox.mkdir()
+    (plugins / "patches" / "f.h").write_text("p")
+    (plugins / "lnk").symlink_to(tmp_path / "secret")
+    (tmp_path / "secret").write_text("s")
+    env = {"SCBI_BDIR": str(sandbox), "SCBI_PLUGINS": str(plugins)}
+    #  a source in the plug-ins directory (a file, a directory): fine
+    assert run(sandbox, f"copy {plugins}/patches/f.h f.h", env=env)[0] == 0
+    assert (sandbox / "f.h").read_text() == "p"
+    assert run(sandbox, f"copy {plugins}/patches d", env=env)[0] == 0 and (sandbox / "d" / "f.h").is_file()
+    #  the plug-ins directory is read only: not a destination
+    status, out, _ = run(sandbox, f"copy f.h {plugins}/g.h", env=env)
+    assert status == 1 and "not in the sandbox" in out and not (plugins / "g.h").exists()
+    #  a link of the plug-ins directory to a file outside: error
+    status, out, _ = run(sandbox, f"copy {plugins}/lnk s", env=env)
+    assert status == 1 and "or the plug-ins directory" in out and not (sandbox / "s").exists()
+    #  without SCBI_PLUGINS: only the sandbox
+    status, out, _ = run(sandbox, f"copy {plugins}/patches/f.h h.h", env={"SCBI_BDIR": str(sandbox)})
+    assert status == 1 and "not in the sandbox" in out and not (sandbox / "h.h").exists()
+
+
 @pytest.mark.parametrize("text, message", [
     ("copy -r a.h out", "copy: no option supported: -r"),
     ("copy a.h", "copy: missing destination"),
