@@ -68,14 +68,14 @@ depends:
 
 build-depends:
   common:
-    - os@-python3-jsonschema
-    - os@-intltool
-    - os@-xsltproc
     - os@-findbin
+    - os@-intltool
+    - os@-python3-jsonschema
+    - os@-xsltproc
     - c-cmake
   clang:
-    - os@-llvm-$SCBI_CLANG_VERSION
     - os@-clang-$SCBI_CLANG_VERSION
+    - os@-llvm-$SCBI_CLANG_VERSION
     - os@-omp-$SCBI_CLANG_VERSION
 
 env:

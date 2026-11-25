@@ -7,10 +7,10 @@ vcs:
   url: https://gcc.gnu.org/git/gcc.git
 
 build-depends:
-  - c-sandbox/system
   - os@-gmp-dev
   - os@-mpc-dev
   - os@-mpfr-dev
+  - c-sandbox/system
   - c-binutils
 
 env:

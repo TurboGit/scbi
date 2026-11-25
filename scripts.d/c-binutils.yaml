@@ -7,9 +7,9 @@ vcs:
   url: http://sourceware.org/git/binutils-gdb.git
 
 depends:
-  - os@-makeinfo
   - os@-bison
   - os@-flex
+  - os@-makeinfo
 
 build-depends:
   - c-sandbox/system

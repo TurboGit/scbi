@@ -23,8 +23,8 @@ archive:
 
 depends:
   vcs:
-    - os@-autotools-dev
     - os@-automake
+    - os@-autotools-dev
     - os@-libtool
 
 build-depends:
