@@ -1,3 +1,7 @@
+import pytest
+
+
+@pytest.mark.requires("svn")
 def test(t):
     #
     #  Add test for Subversion repository with standard and non standard layout.

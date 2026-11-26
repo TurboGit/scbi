@@ -3,6 +3,7 @@
 which failed are reported when the driver ends."""
 
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -19,6 +20,20 @@ def t(request, tmp_path) -> Driver:
     root.mkdir()
     make_root(root)
     return Driver(root, str(request.path))
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "requires(*tools): skip the driver if an external tool (hg, svn...) is not installed"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    for item in items:
+        for marker in item.iter_markers(name="requires"):
+            missing = [tool for tool in marker.args if shutil.which(tool) is None]
+            if missing:
+                item.add_marker(pytest.mark.skip(reason="not installed: " + ", ".join(missing)))
 
 
 #@pytest.hookimpl(wrapper=True)

@@ -1,3 +1,7 @@
+import pytest
+
+
+@pytest.mark.requires("hg")
 def test(t):
     # simple check for mercurial repository
 

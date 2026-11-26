@@ -101,7 +101,9 @@ python3 -m pytest tests/drivers/test001.py   # one driver directly
   `t.trim_output()`, `t.sort_output()`... Shell steps: `t.sh("...")`
   (variables, exported functions and directory kept, the output as the
   file `$TEST_OUTPUT`), `t.set`, `t.unset`, `t.cd`; `t.text("...")`
-  expands a text as an unquoted here-document.
+  expands a text as an unquoted here-document. A driver using an
+  external tool is marked `@pytest.mark.requires("hg", ...)`: skipped
+  when the tool is not installed.
 - A failing check does not stop the driver: all failures are reported at
   the end with their line and a diff.
 - `tests/scripts.d/` holds the test-only YAML plug-ins (no `c-` prefix),
