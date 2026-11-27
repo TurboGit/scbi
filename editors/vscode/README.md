@@ -63,10 +63,21 @@ has a top-level `plugin:` key.
   "editor.tokenColorCustomizations": {
     "textMateRules": [
       { "scope": ["string.unquoted.plain.out.yaml", "string.unquoted.block.yaml"],
-        "settings": { "foreground": "#D4D4D4" } }
+        "settings": { "foreground": "#D4D4D4" } },
+      { "scope": ["support.function.builtin.scbi", "support.function.env-action.scbi"],
+        "settings": { "fontStyle": "bold" } }
     ]
   }
   ```
+
+  The second rule shows the built-in commands (`cd`, `copy`, `delete`,
+  `echo`...) and the environment actions in bold, with no extra color. It
+  is not set by the extension itself: a user-level
+  `editor.tokenColorCustomizations` replaces any extension default.
+
+  When the Red Hat YAML extension is installed, its grammar replaces the
+  built-in YAML one; the injected command language works with both (tests
+  in `test/grammar` and `test/grammar-redhat`).
 
 ### Build plans
 

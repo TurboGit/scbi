@@ -61,7 +61,7 @@
       ]
     },
     "builtin-plain": {
-      "match": "(?:^|\\G|(?<=&&|\\|\\||\\|))[ \\t]*(check-versions|delete-tree|apply-var|return|export|delete|unset|echo|exit|copy|log|cd)(?=[ \\t;|&<>)]|$)",
+      "match": "(?:^(?=[ \\t])|\\G|(?<=&&|\\|\\||\\|))[ \\t]*(check-versions|delete-tree|store-set-key|apply-var|return|export|delete|unset|echo|exit|copy|log|cd)(?=[ \\t;|&<>)]|$)",
       "captures": {
         "1": {
           "name": "support.function.builtin.scbi"
@@ -85,7 +85,7 @@
       ]
     },
     "comment": {
-      "match": "(?:^|\\G)[ \\t]*(#.*)$",
+      "match": "(?:^(?=[ \\t])|\\G)[ \\t]*(#.*)$",
       "captures": {
         "1": {
           "name": "comment.line.number-sign.scbi"
@@ -95,7 +95,7 @@
     "control": {
       "patterns": [
         {
-          "begin": "(?:^|\\G)[ \\t]*(if|elif)(?=[ \\t(])",
+          "begin": "(?:^(?=[ \\t])|\\G)[ \\t]*(if|elif)(?=[ \\t(])",
           "beginCaptures": {
             "1": {
               "name": "keyword.control.conditional.scbi"
@@ -115,7 +115,7 @@
           ]
         },
         {
-          "match": "(?:^|\\G)[ \\t]*(else)[ \\t]*(:)[ \\t]*$",
+          "match": "(?:^(?=[ \\t])|\\G)[ \\t]*(else)[ \\t]*(:)[ \\t]*$",
           "captures": {
             "1": {
               "name": "keyword.control.conditional.scbi"
@@ -126,7 +126,7 @@
           }
         },
         {
-          "begin": "(?:^|\\G)[ \\t]*(for)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)[ \\t]+(in)(?=[ \\t])",
+          "begin": "(?:^(?=[ \\t])|\\G)[ \\t]*(for)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)[ \\t]+(in)(?=[ \\t])",
           "beginCaptures": {
             "1": {
               "name": "keyword.control.loop.scbi"
@@ -186,7 +186,7 @@
       "patterns": [
         {
           "comment": "write-raw FILE: / append-raw FILE: the indented text as is",
-          "begin": "(?:^|\\G)([ \\t]*)(write-raw|append-raw)[ \\t]+(.*?)(:)[ \\t]*$",
+          "begin": "(?:^(?=[ \\t])|\\G)([ \\t]*)(write-raw|append-raw)[ \\t]+(.*?)(:)[ \\t]*$",
           "beginCaptures": {
             "2": {
               "name": "keyword.control.write.scbi"
@@ -209,7 +209,7 @@
         },
         {
           "comment": "write FILE: / append FILE: the indented text, $VAR expanded",
-          "begin": "(?:^|\\G)([ \\t]*)(write|append)[ \\t]+(.*?)(:)[ \\t]*$",
+          "begin": "(?:^(?=[ \\t])|\\G)([ \\t]*)(write|append)[ \\t]+(.*?)(:)[ \\t]*$",
           "beginCaptures": {
             "2": {
               "name": "keyword.control.write.scbi"
@@ -238,7 +238,7 @@
       ]
     },
     "assignment": {
-      "match": "(?:^|\\G)[ \\t]*(?:(export)[ \\t]+)?([A-Za-z_][A-Za-z0-9_]*)[ \\t]+(\\+?=)(?=[ \\t]|$)(?:[ \\t]+(last-modified-directory|get-build-type|config-options|output-words|command-path|all-variants|get-version|all-modules|hook-output|env-actions|module-name|module-dir|is-enabled|first-line|module-ref|target-dir|uppercase|lowercase|basename|dirname|replace|output|status|if)(?=[ \\t;|&<>)]|$))?",
+      "match": "(?:^(?=[ \\t])|\\G)[ \\t]*(?:(export)[ \\t]+)?([A-Za-z_][A-Za-z0-9_]*)[ \\t]+(\\+?=)(?=[ \\t]|$)(?:[ \\t]+(last-modified-directory|get-build-type|config-options|output-words|command-path|all-variants|get-version|all-modules|hook-output|env-actions|module-name|module-dir|is-enabled|first-line|module-ref|target-dir|uppercase|lowercase|basename|dirname|replace|output|status|if)(?=[ \\t;|&<>)]|$))?",
       "captures": {
         "1": {
           "name": "storage.modifier.export.scbi"
@@ -255,7 +255,7 @@
       }
     },
     "env-action": {
-      "match": "(?:^|\\G)[ \\t]*(remove-from-var|prepend-to-var|append-to-var|add-to-var|define-var|unset-var|set-var|assign|import|local|mkdir)(?=[ \\t;|&<>)]|$)(?:[ \\t]+([A-Za-z_][A-Za-z0-9_]*)(?=[ \\t=]|$))?",
+      "match": "(?:^(?=[ \\t])|\\G)[ \\t]*(remove-from-var|prepend-to-var|append-to-var|add-to-var|define-var|unset-var|set-var|assign|import|local|mkdir)(?=[ \\t;|&<>)]|$)(?:[ \\t]+([A-Za-z_][A-Za-z0-9_]*)(?=[ \\t=]|$))?",
       "captures": {
         "1": {
           "name": "support.function.env-action.scbi"
@@ -266,7 +266,7 @@
       }
     },
     "builtin": {
-      "match": "(?:^|\\G|(?<=&&|\\|\\||\\|))[ \\t]*(check-versions|delete-tree|apply-var|return|export|delete|false|unset|echo|exit|true|copy|log|cd|:)(?=[ \\t;|&<>)]|$)",
+      "match": "(?:^(?=[ \\t])|\\G|(?<=&&|\\|\\||\\|))[ \\t]*(check-versions|delete-tree|store-set-key|apply-var|return|export|delete|false|unset|echo|exit|true|copy|log|cd|:)(?=[ \\t;|&<>)]|$)",
       "captures": {
         "1": {
           "name": "support.function.builtin.scbi"
@@ -275,7 +275,7 @@
     },
     "env-prefix": {
       "comment": "NAME=value... before the command (the command word ends it)",
-      "begin": "(?:^|\\G|(?<=&&|\\|\\||\\|))[ \\t]*(?=[A-Za-z_][A-Za-z0-9_]*=)",
+      "begin": "(?:^(?=[ \\t])|\\G|(?<=&&|\\|\\||\\|))[ \\t]*(?=[A-Za-z_][A-Za-z0-9_]*=)",
       "end": "(?<=[ \\t])(?![A-Za-z_][A-Za-z0-9_]*=)([^\\s=$\\\"'#|&<>;()\\\\]+)|(?=[;|&#]|$)",
       "endCaptures": {
         "1": {
@@ -305,7 +305,7 @@
     },
     "env-prefix-plain": {
       "comment": "NAME=value... in a one-line value: the variables only",
-      "match": "(?:^|\\G|(?<=&&|\\|\\||\\|))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)(=)(?=\\S)",
+      "match": "(?:^(?=[ \\t])|\\G|(?<=&&|\\|\\||\\|))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)(=)(?=\\S)",
       "captures": {
         "1": {
           "name": "variable.other.assignment.scbi"
@@ -316,7 +316,7 @@
       }
     },
     "command": {
-      "match": "(?:^|\\G|(?<=&&|\\|\\||\\|))[ \\t]*([^\\s=$\\\"'#|&<>;()\\\\]+)(?=[ \\t;|&<>)]|$)",
+      "match": "(?:^(?=[ \\t])|\\G|(?<=&&|\\|\\||\\|))[ \\t]*([^\\s=$\\\"'#|&<>;()\\\\]+)(?=[ \\t;|&<>)]|$)",
       "captures": {
         "1": {
           "name": "entity.name.function.command.scbi"

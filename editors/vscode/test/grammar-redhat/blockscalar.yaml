@@ -1,0 +1,17 @@
+# SYNTAX TEST "source.yaml" "Block scalar followed by hooks (Red Hat grammar)"
+plugin: c-foo
+pre-config:
+  vcs: |-
+    ./.bootstrap
+#   ^^^^^^^^^^^^ string.unquoted.block.yaml
+    true
+#   ^^^^ support.function.builtin.scbi
+
+# comment ends the block
+config:
+# <- entity.name.tag.yaml
+  _: ./configure
+  vcs: ./configure --enable-maintainer-mode
+# ^^^ entity.name.tag.yaml
+build: make
+# <- entity.name.tag.yaml

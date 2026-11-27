@@ -165,7 +165,7 @@
   "scripts": {
     "compile": "tsc -p .",
     "watch": "tsc -watch -p .",
-    "test": "tsc -p . && node --test out/test/*.test.js && vscode-tmgrammar-test -g test/grammar/yaml/yaml.tmLanguage.json -g test/grammar/yaml/yaml-1.0.tmLanguage.json -g test/grammar/yaml/yaml-1.1.tmLanguage.json -g test/grammar/yaml/yaml-1.2.tmLanguage.json -g test/grammar/yaml/yaml-1.3.tmLanguage.json -g test/grammar/yaml/yaml-embedded.tmLanguage.json \"test/grammar/*.scbi-plan\" \"test/grammar/*.yaml\"",
+    "test": "tsc -p . && node --test out/test/*.test.js && vscode-tmgrammar-test -g test/grammar/yaml/yaml.tmLanguage.json -g test/grammar/yaml/yaml-1.0.tmLanguage.json -g test/grammar/yaml/yaml-1.1.tmLanguage.json -g test/grammar/yaml/yaml-1.2.tmLanguage.json -g test/grammar/yaml/yaml-1.3.tmLanguage.json -g test/grammar/yaml/yaml-embedded.tmLanguage.json \"test/grammar/*.scbi-plan\" \"test/grammar/*.yaml\" && vscode-tmgrammar-test -g test/grammar-redhat/yaml.tmLanguage.json -g syntaxes/scbi-commands.tmLanguage.json -g syntaxes/scbi-yaml-block.injection.json -g syntaxes/scbi-yaml-plain.injection.json \"test/grammar-redhat/*.yaml\"",
     "package": "tsc -p . && vsce package",
     "vscode:prepublish": "tsc -p .",
     "smoke": "tsc -p . && node out/test/smoke/run.js"
