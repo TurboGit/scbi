@@ -37,9 +37,12 @@ Nix, Bazel...). Most valuable first.
      normalized environment, OS), relocation (text, links, padded C
      strings), file stores (local, NFS) replacing SCBI_CACHE_DIR,
      scbi binary-store --show-key.
-   - phase 2: http(s) stores, transports of the environment file
-     (binary-store-get/put/list), --binary-store=<url>|:pull|:no,
-     patchelf for longer RPATHs, --explain, --list.
+   - [DONE] phase 2: http(s) stores, transports of the environment file
+     (binary-store-get/put/list, binary-key), binary-stores key,
+     --binary-store=<url>|:pull|:no, ini key, --explain, --list.
+   - patchelf for longer RPATHs: left out (not available to test, and
+     patchelf may leave the old RPATH string: a longer local path is a
+     miss, the module is built).
    - phase 3: --gc, --rm, size limit, aggregate meta-modules, signatures.
    The build id is a content hash: look up a binary archive by build id
    (local directory, shared URL) and install it instead of building.

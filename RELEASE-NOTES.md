@@ -159,8 +159,11 @@ command language.
   instead of built, its paths relocated to the sandbox; otherwise its
   installation is written to the store. The key covers the build id, the
   keys of the dependencies, the normalized environment of the build and
-  the OS: builds are shared between sandboxes and users.
-  `scbi binary-store --show-key` displays the keys.
+  the OS: builds are shared between sandboxes and users. Stores: file
+  (local, NFS), http(s) (GET, PUT), or any transport given by functions
+  of the environment file (`binary-stores` key); `--binary-store=<url>`,
+  `--binary-store:pull|:no`. `scbi binary-store --show-key|--list|
+  --explain` (what differs when a build is not shared).
 - **Parallel build**: `--parallel[=k]` (with `--deps`) builds up to k
   independent modules at the same time, one `build` or `tests` step at a
   time (`SCBI_BUILD_SLOTS`), the output of each module printed as one

@@ -12,7 +12,8 @@ The components (kept in the metadata of an entry, to explain a miss):
   variables that do not change a build removed);
 - os: the OS and the host;
 - layout: flat or not;
-- extra: values given by the environment file (SCBI_BINARY_KEY_EXTRA);
+- extra: values given by the environment file (SCBI_BINARY_KEY_EXTRA and
+  the output of its function binary-key MODULE VARIANT TARGET);
 - location (bound key only): the paths of the sandbox and of the prefix.
 
 An unknown difference gives another key: a miss, never a wrong hit.
@@ -89,7 +90,10 @@ def environment(driver, env: dict[str, str]) -> dict[str, str]:
             if k not in ignore and not k.startswith("BASH_FUNC_")}
 
 
-def components(driver, build_id: str, depends: dict[str, str], env: dict[str, str]) -> dict:
+def components(driver, build_id: str, depends: dict[str, str], env: dict[str, str],
+               extra: str = "") -> dict:
+    """``extra``: the output of the binary-key function of the environment
+    file, added to SCBI_BINARY_KEY_EXTRA."""
     g = driver.get
     return {
         "format": FORMAT,
@@ -99,7 +103,7 @@ def components(driver, build_id: str, depends: dict[str, str], env: dict[str, st
         "os": {"id": g("SCBI_OS_ID"), "name": g("SCBI_OS_NAME"), "version": g("SCBI_OS_VERSION"),
                "codename": g("SCBI_OS_CODENAME"), "host": g("SCBI_HOST"), "target": g("SCBI_TARGET")},
         "layout": "flat" if g("DO_FLAT") == "yes" else "tree",
-        "extra": g("SCBI_BINARY_KEY_EXTRA"),
+        "extra": " ".join(x for x in (g("SCBI_BINARY_KEY_EXTRA"), extra.strip()) if x),
     }
 
 

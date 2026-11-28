@@ -136,7 +136,14 @@ class Session:
         if deps is None:
             return False
         env = hook_environment(d.sv.environ(), d.environ, d.envfile.passthrough)
-        self.comps = key.components(d, build_id, deps, env)
+        extra = ""
+        hook = d.envfile.hook("binary_key")
+        if hook is not None:
+            status, extra = hook(self.module, self.variant, d.get("SCBI_TARGET"))
+            if status != 0:
+                self.reason = f"binary-key failed with status {status}"
+                return False
+        self.comps = key.components(d, build_id, deps, env, extra)
         self.kr, self.kb = key.keys(d, self.comps)
         return True
 

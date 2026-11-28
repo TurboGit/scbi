@@ -1,20 +1,37 @@
 """The binary stores: an ordered list of stores, each a URL with a mode
 (rw, the default, or ro).
 
-SCBI_BINARY_STORE: the URLs separated by blanks, ``ro:<url>`` read-only;
-``no``: no store. Not set: ``file://$HOME/.cache/scbi/binaries``.
+The list, the first set of:
+
+- SCBI_BINARY_STORE: the URLs separated by blanks, ``ro:<url>`` read-only;
+  ``no``: no store;
+- the ``binary-stores`` key of the environment file;
+- SCBI_CACHE_DIR (the former build cache);
+- ``file://$HOME/.cache/scbi/binaries``.
+
+For a run: --binary-store=<url> adds a store first, --binary-store:pull
+reads only, --binary-store:no uses none.
 
 A store gives the files of its entries by path (``<target>/<module>/
-<key>.json``...): ``get`` (copy to a local file), ``put`` (atomic: a
-temporary file renamed) and ``list``. The file store is a directory (a
-local disk or a NFS mount).
+<key>.json``...): ``get`` (copy to a local file), ``put`` and ``list``.
+
+- file:// or a path: a directory (a local disk or a NFS mount), atomic
+  writes;
+- http://, https://: GET and PUT with curl (credentials of ~/.netrc,
+  options SCBI_BINARY_STORE_CURL_OPTIONS), list from the directory index
+  of the server;
+- another scheme: the functions binary-store-get URL PATH DEST,
+  binary-store-put URL FILE PATH and binary-store-list URL DIR of the
+  environment file.
 """
 
 from __future__ import annotations
 
 import contextlib
 import os
+import re
 import shutil
+import subprocess
 import tempfile
 
 from scbi.bashcompat import words
@@ -91,6 +108,89 @@ class FileStore(Store):
             return []
 
 
+class HttpStore(Store):
+    """A Web server: GET, and PUT to write (WebDAV, nginx dav, Artifactory:
+    the server creates the directories)."""
+
+    scheme = "http"
+
+    def __init__(self, url: str, mode: str, driver):
+        super().__init__(url.rstrip("/"), mode)
+        self.d = driver
+        self.curl = driver.which("curl")
+
+    def _curl(self, *args: str) -> subprocess.CompletedProcess:
+        if self.curl is None:
+            raise StoreError(f"{self.url}: curl not found")
+        return subprocess.run([self.curl, "-f", "-s", "-S", "-L", "--netrc-optional",
+                               *words(self.d.get("SCBI_BINARY_STORE_CURL_OPTIONS")), *args],
+                              capture_output=True, env=self.d.base_env(), stdin=subprocess.DEVNULL)
+
+    def get(self, rel: str, dest: str) -> bool:
+        proc = self._curl("-o", dest, f"{self.url}/{rel}")
+        if proc.returncode == 0:
+            return True
+        with contextlib.suppress(OSError):
+            os.unlink(dest)
+        #  22: an HTTP error (404: not there)
+        if proc.returncode == 22:
+            return False
+        raise StoreError(f"{self.url}: {proc.stderr.decode(errors='replace').strip()}")
+
+    def put(self, src: str, rel: str) -> None:
+        proc = self._curl("-T", src, f"{self.url}/{rel}")
+        if proc.returncode != 0:
+            raise StoreError(f"{self.url}: {proc.stderr.decode(errors='replace').strip()}")
+
+    def list(self, rel: str) -> list[str]:
+        with tempfile.TemporaryDirectory() as tmp:
+            page = os.path.join(tmp, "index.html")
+            try:
+                if not self.get(rel.rstrip("/") + "/", page):
+                    return []
+            except StoreError:
+                return []
+            with open(page, errors="replace") as f:
+                text = f.read()
+        names = {os.path.basename(h.rstrip("/")) for h in re.findall(r'href="([^"?#]+)"', text)}
+        return sorted(n for n in names if n and not n.startswith("."))
+
+
+class FunctionStore(Store):
+    """A store whose transport is given by the functions of the
+    environment file (binary-store-get/put/list)."""
+
+    def __init__(self, url: str, mode: str, driver):
+        super().__init__(url, mode)
+        self.d = driver
+
+    def _hook(self, name: str):
+        hook = self.d.envfile.hook(name)
+        if hook is None:
+            raise StoreError(f"{self.url}: no function {name.replace('_', '-')} in the environment file")
+        return hook
+
+    def get(self, rel: str, dest: str) -> bool:
+        status = self._hook("binary_store_get")(self.url, rel, dest)
+        if status == 0 and os.path.isfile(dest):
+            return True
+        if status in (0, 1):
+            return False
+        raise StoreError(f"{self.url}: binary-store-get {rel} failed with status {status}")
+
+    def put(self, src: str, rel: str) -> None:
+        status = self._hook("binary_store_put")(self.url, src, rel)
+        if status != 0:
+            raise StoreError(f"{self.url}: binary-store-put {rel} failed with status {status}")
+
+    def list(self, rel: str) -> list[str]:
+        hook = self.d.envfile.hook("binary_store_list")
+        if hook is None:
+            return []
+        status, out = hook(self.url, rel)
+        return sorted(n for n in out.split() if n) if status == 0 else []
+
+
 def default_url(driver) -> str:
     return f"file://{driver.get('HOME')}/.cache/scbi/binaries"
 
@@ -101,27 +201,32 @@ def configured(driver) -> list[tuple[str, str]]:
     run = driver.get("DO_BINARY_STORE")
     if run == "no" or value == "no":
         return []
-    if not value:
+    items: list[tuple[str, str]] = []
+    if value:
+        for item in words(value):
+            items.append((item[len("ro:"):], "ro") if item.startswith("ro:") else (item, "rw"))
+    elif getattr(driver.envfile, "binary_stores", None) is not None:
+        items = list(driver.envfile.binary_stores)
+    else:
         old = driver.get("SCBI_CACHE_DIR")
         if old == "no":
-            return []
-        value = f"file://{old}" if old else default_url(driver)
-    out = []
+            items = []
+        else:
+            items = [(f"file://{old}" if old else default_url(driver), "rw")]
     extra = driver.get("BINARY_STORE_URL")
-    for item in ([extra] if extra else []) + words(value):
-        mode = "rw"
-        if item.startswith("ro:"):
-            mode, item = "ro", item[len("ro:"):]
-        if run == "pull":
-            mode = "ro"
-        out.append((item, mode))
-    return out
+    if extra:
+        items.insert(0, (extra, "rw"))
+    return [(url, "ro" if run == "pull" else mode) for url, mode in items]
 
 
-def make(url: str, mode: str) -> Store | None:
+def make(url: str, mode: str, driver=None) -> Store | None:
     """The store of a URL, None when its transport is not supported."""
     if url.startswith("file://") or url.startswith("/"):
         return FileStore(url, mode)
+    if driver is not None and url.startswith(("http://", "https://")):
+        return HttpStore(url, mode, driver)
+    if driver is not None and driver.envfile.hook("binary_store_get") is not None:
+        return FunctionStore(url, mode, driver)
     return None
 
 
@@ -132,7 +237,7 @@ def stores(driver) -> list[Store]:
         return cached
     out = []
     for url, mode in configured(driver):
-        store = make(url, mode)
+        store = make(url, mode, driver)
         if store is None:
             driver.log.ilog("build", f"warning: binary store {url}: unsupported transport, not used")
             continue

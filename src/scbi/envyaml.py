@@ -15,6 +15,9 @@ All its keys are optional::
     vars:                        # settings, in order
       SCBI_PLAN: ${SCBI_PLAN:-default}
     passthrough: [CC]            # user variables given to the hooks
+    binary-stores:               # the binary stores (scbi.binstore)
+      - file://$HOME/.cache/scbi/binaries
+      - {url: https://ci.example.org/scbi, mode: ro}
     functions:                   # hooks and helpers, command language
       define-var: {params: [ACTION, NAME, VALUE], run: apply-var $ACTION $NAME $VALUE}
       rewrite-vcs: {params: [PROXY, OPTIONS, PROTOCOL, URL, DIR], run: ...}
@@ -47,6 +50,11 @@ All its keys are optional::
     [modref]``, ``module-ref <modref>``, ``module-name <modref>``,
     ``target-dir <module> <variant> [sub]`` (scbi.steps.final).
 
+  - ``binary-store-get URL PATH DEST``, ``binary-store-put URL FILE PATH``,
+    ``binary-store-list URL DIR``: the transport of the binary stores of
+    another scheme than file and http(s); ``binary-key MODULE VARIANT
+    TARGET``: a value added to the binary keys (scbi.binstore).
+
 ``SCBI_ENV_DIR`` is the directory of the file.
 """
 
@@ -63,10 +71,12 @@ import yaml
 
 from scbi.envfile import env_file_name, find_env_file
 
-KEYS = ("inherit", "vars", "passthrough", "functions")
+KEYS = ("inherit", "vars", "passthrough", "binary-stores", "functions")
 #  function name -> name of the hook of the driver
 HOOKS = {"define-var": "define_var", "rewrite-vcs": "rewrite_vcs", "rewrite-archive": "rewrite_archive",
-         "proxy": "proxy", "module-final-step": "module_final_step"}
+         "proxy": "proxy", "module-final-step": "module_final_step",
+         "binary-store-get": "binary_store_get", "binary-store-put": "binary_store_put",
+         "binary-store-list": "binary_store_list", "binary-key": "binary_key"}
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
@@ -79,6 +89,8 @@ class EnvFile:
     path: Path | None = None
     settings: dict[str, str] = field(default_factory=dict)
     passthrough: tuple[str, ...] = ()
+    #  the binary stores: (url, mode)
+    binary_stores: list[tuple[str, str]] | None = None
     #  name -> (params, Function)
     functions: dict[str, object] = field(default_factory=dict)
     hooks: dict[str, Callable] = field(default_factory=dict)
@@ -176,6 +188,8 @@ def read(path: Path, variables: dict[str, str], _stack: tuple[Path, ...] = ()) -
         env.settings.update(base.settings)
         env.passthrough += tuple(p for p in base.passthrough if p not in env.passthrough)
         env.functions.update(base.functions)
+        if base.binary_stores is not None:
+            env.binary_stores = base.binary_stores
 
     values = {**variables, **env.settings, "SCBI_ENV_DIR": str(path.parent)}
     for name, value in (data.get("vars") or {}).items():
@@ -190,6 +204,9 @@ def read(path: Path, variables: dict[str, str], _stack: tuple[Path, ...] = ()) -
         raise EnvFileError(f"{path}: passthrough must be a list of variable names")
     env.passthrough += tuple(p for p in passthrough if p not in env.passthrough)
 
+    if "binary-stores" in data:
+        env.binary_stores = _binary_stores(path, data["binary-stores"], values)
+
     for name, f in (data.get("functions") or {}).items():
         f = {"run": f} if isinstance(f, str) else f
         if not isinstance(f, dict) or not isinstance(f.get("run", ""), str):
@@ -200,6 +217,27 @@ def read(path: Path, variables: dict[str, str], _stack: tuple[Path, ...] = ()) -
         except DefinitionError as e:
             raise EnvFileError(f"{path}: functions: {name}: {e}") from None
     return env
+
+
+def _binary_stores(path: Path, items, values: dict[str, str]) -> list[tuple[str, str]]:
+    """binary-stores: a list of URLs or of {url, mode} (mode rw or ro), the
+    URLs expanded as the settings."""
+    if items is None:
+        return []
+    if not isinstance(items, list):
+        raise EnvFileError(f"{path}: binary-stores must be a list of URLs or of {{url, mode}}")
+    out = []
+    for item in items:
+        if isinstance(item, str):
+            url, mode = item, "rw"
+        elif isinstance(item, dict) and isinstance(item.get("url"), str) and set(item) <= {"url", "mode"}:
+            url, mode = item["url"], str(item.get("mode", "rw"))
+        else:
+            raise EnvFileError(f"{path}: binary-stores: {item!r}: a URL or {{url, mode}} is expected")
+        if mode not in ("rw", "ro"):
+            raise EnvFileError(f"{path}: binary-stores: {url}: mode {mode!r} is not rw or ro")
+        out.append((_expand(path, url, values), mode))
+    return out
 
 
 def _expand(path: Path, value: str, values: dict[str, str]) -> str:
@@ -278,6 +316,23 @@ def _make_hooks(env: EnvFile) -> None:
                 del environ[k]
             environ.update(new)
         env.hooks["proxy"] = proxy
+
+    #  the transports of the binary stores (scbi.binstore.stores): status 0
+    #  done/found, 1 not found, other an error; binary-store-list prints
+    #  the names, binary-key the value added to the keys
+    for fname in ("binary-store-get", "binary-store-put"):
+        if fname in env.functions:
+            def transport(*args, fname=fname):
+                status, _ = _call(env, fname, [str(a) for a in args], out=lambda t: None)
+                return status
+            env.hooks[HOOKS[fname]] = transport
+    for fname in ("binary-store-list", "binary-key"):
+        if fname in env.functions:
+            def output(*args, fname=fname):
+                chunks: list[str] = []
+                status, _ = _call(env, fname, [str(a) for a in args], out=chunks.append)
+                return status, "".join(chunks)
+            env.hooks[HOOKS[fname]] = output
 
     if "module-final-step" in env.functions:
         def module_final_step(ctx):

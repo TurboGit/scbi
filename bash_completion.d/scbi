@@ -8,7 +8,7 @@ _SCBI_ARGS="${_SCBI_COMMON} -t -S --no-setup -W --no-wrapup -I
 --purge:only -d --deps -a --create-archive -h --help -j --jobs=
 --target= --ini= --env= -e --tests:only --plan= -n --no-patch
 --archive --deps:warning --dry-run -w --wrapup --force --enable-
---safe --check-deps --check-deps:error --check-deps:trace --parallel --parallel= --build-dir --build-target= --version --clean-install --log:yes
+--safe --check-deps --check-deps:error --check-deps:trace --parallel --parallel= --binary-store= --binary-store:pull --binary-store:no --build-dir --build-target= --version --clean-install --log:yes
 --log:no --log:on-failure --stat --stat: --progress --progress: --prefix=
 --color:dark --color:light --color:no --clear-cache"
 
@@ -27,7 +27,7 @@ _SCBI_SHO_ARGS="${_SCBI_COMMON} --env= -e --depends: --rdepends --externals --ex
 
 _SCBI_STR_ARGS="${_SCBI_COMMON} --env= -e --list-keys -l --list --list:full -d --delete"
 
-_SCBI_BST_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --plan= --show-key"
+_SCBI_BST_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --plan= --show-key --list --explain"
 
 _SCBI_HOOKS="((pre|post)-)?(cross-)?(archive|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches)"
 

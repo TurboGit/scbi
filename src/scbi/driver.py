@@ -86,6 +86,8 @@ USAGE_OPTIONS = """
       | --stat[:short|full]      display some status of current setup
       | --progress[:bar|line|no] build progress on the terminal (bar)
    -n | --no-patch               do not apply patches
+      | --binary-store=<url>     a binary store for the run (first)
+      | --binary-store:pull|:no  read the binary stores only, or none
       | --check-deps[:error|:trace] report undeclared/unused dependencies
       | --parallel[=<k>]         build k modules at the same time (2)
       | --clear-cache            remove cached module's versions"""
@@ -100,7 +102,7 @@ INI_KV = {
 }
 
 INI_SKIP = (",setup,config,build,install,wrapup,force,modules,stat,"
-            "update,purge,archive,deps,safe,tar,no-patch,enable,run,check_deps,parallel,")
+            "update,purge,archive,deps,safe,tar,no-patch,enable,run,check_deps,parallel,binary_store,")
 
 GETOPT_SHORT = "j:adefSIuscbilnpqvwWh"
 GETOPT_LONG = [
@@ -108,6 +110,7 @@ GETOPT_LONG = [
     "build,build-target:,install,clean-install,create-archive",
     "log,log:yes,log:no,log:on-failure,purge,purge:only",
     "prefix:,deps,deps:warning,archive,force,env:,no-patch",
+    "binary-store:,binary-store:pull,binary-store:no",
     "no-wrapup,wrapup,safe,standalone,check-deps,check-deps:error,check-deps:trace,parallel::",
     "dry-run,jobs:,list-plan:",
     "progress,progress:bar,progress:line,progress:no",
@@ -235,6 +238,7 @@ class Driver:
             "SCBI_CCLEAR": "", "SCBI_CRED": "", "SCBI_CGREEN": "", "SCBI_CBLUE": "",
             "DO_SETUP": "yes", "DO_CONFIG": "yes", "DO_BUILD": "yes", "DO_INSTALL": "yes",
             "DO_TEST": "no", "DO_WRAPUP": "yes", "DO_CHECK_DEPS": "no", "DO_PARALLEL": "no",
+            "DO_BINARY_STORE": "", "BINARY_STORE_URL": "",
         }.items():
             s(name, value)
         for name in ("SCBI_ROOT", "SCBI_BDIR", "SCBI_CLANG_VERSION", "SCBI_GTK_VERSION",
@@ -304,6 +308,11 @@ class Driver:
         o = self.ini_get(section, "parallel")
         if o:
             self.set("DO_PARALLEL", o)
+        o = self.ini_get(section, "binary-store")
+        if o in ("pull", "no"):
+            self.set("DO_BINARY_STORE", o)
+        elif o:
+            self.set("SCBI_BINARY_STORE", o, export=True)
         o = self.ini_get(section, "run")
         if o:
             self.set("DO_RUN", "yes")
@@ -455,6 +464,12 @@ class Driver:
                 i += 1
             elif a in ("-d", "--deps"):
                 s("DEPS", "yes")
+            elif a == "--binary-store":
+                #  a binary store for the run, first (scbi.binstore.stores)
+                s("BINARY_STORE_URL", nxt)
+                i += 1
+            elif a in ("--binary-store:pull", "--binary-store:no"):
+                s("DO_BINARY_STORE", a.split(":", 1)[1])
             elif a == "--deps:warning":
                 s("DEPS", "yes")
                 s("DO_WARNING_EXTERNAL", "yes")

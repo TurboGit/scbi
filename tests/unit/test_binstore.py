@@ -104,3 +104,16 @@ def test_not_relocatable(tmp_path):
     files = relocate.scan(str(tree), ["/home/a/sbx"])
     assert files == [{"path": "data.bin", "kind": "other"}]
     assert not relocate.relocatable(files)
+
+
+def test_env_file_binary_stores(tmp_path):
+    from pathlib import Path
+
+    from scbi import envyaml
+
+    path = Path(tmp_path / ".env.yaml")
+    assert envyaml._binary_stores(path, ["file://$H/a", {"url": "https://x/s", "mode": "ro"}], {"H": "/h"}) == [
+        ("file:///h/a", "rw"), ("https://x/s", "ro")]
+    for bad in ("file:///a", [{"url": "x", "mode": "rx"}], [{"mode": "ro"}]):
+        with pytest.raises(envyaml.EnvFileError):
+            envyaml._binary_stores(path, bad, {})

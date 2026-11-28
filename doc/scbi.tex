@@ -810,6 +810,10 @@ The following options are supported:
 
 	\item[\ddash{}parallel{[}=<k>{]}] \index{parallel build}Builds up to \code{k} modules at the same time (default 2), each by a process of the driver; needs \ddash{}deps (\seeref{parallel}). The ini key \code{parallel} (\code{yes} or a number) sets it too.
 
+	\item[\ddash{}binary-store=<url>] \index{binary store}A binary store for the run, before the other ones (\seeref{binary-store}).
+
+	\item[\ddash{}binary-store:{[}pull|no{]}] The binary stores are only read (\code{pull}), or not used (\code{no}), for the run. The ini key \code{binary-store} sets the stores (as \code{SCBI\_BINARY\_STORE}), or \code{pull} or \code{no}.
+
 	\item[\ddash{}safe] Safe mode: when a module is built, its previous build directory is removed first, so that an old configuration or old build artifacts cannot interfere with the new build.
 
 	\item[\ddash{}plugins=<directory>] The directory of the plug-ins, instead of \code{\$SCBI\_PLUGINS}.
@@ -840,6 +844,7 @@ The following keys are supported in the ini files:
 	\item \code{deps}: \code{yes} for \ddash{}deps;
 	\item \code{check-deps}: \code{yes}, \code{error} or \code{trace}, as \ddash{}check-deps;
 	\item \code{parallel}: \code{yes} or the number of modules, as \ddash{}parallel;
+	\item \code{binary-store}: the binary stores (as \code{SCBI\_BINARY\_STORE}), or \code{pull} or \code{no} as \ddash{}binary-store;
 	\item \code{modules}: the modules to build, as on the command line;
 	\item \code{enable}: the features to enable (comma or blank separated);
 	\item \code{options}: other options, as on the command line;
@@ -2705,6 +2710,10 @@ The file is read once when the driver starts. All its keys are optional:
 	They become driver variables, given to the hooks.
 	\item[passthrough] A list of variables of the user's environment given
 	to the hooks (\seeref{hookenv}).
+	\item[binary-stores] The binary stores, in order (\seeref{binary-store}):
+	a list of URLs or of \code{\{url: <url>, mode: rw|ro\}}, the URLs
+	expanded as the \code{vars}. \code{SCBI\_BINARY\_STORE}, when set,
+	is used instead.
 	\item[functions] Functions in the command language
 	(\seeref{yaml-command-language}), as in the plug-ins (\code{params},
 	\code{run}). Some of them are hooks of the driver:
@@ -2721,6 +2730,11 @@ The file is read once when the driver starts. All its keys are optional:
 		\code{archive} hook (\seeref{proxy}).
 		\item[module-final-step] Run after each module
 		(\seeref{module-final-step}).
+		\item[binary-store-get, binary-store-put, binary-store-list] The
+		transport of the binary stores whose URL scheme is not built in
+		(\seeref{binary-store}).
+		\item[binary-key] (\code{MODULE}, \code{VARIANT}, \code{TARGET})
+		prints a value added to the binary key of the module.
 	\end{description}
 	The other functions can be called by these ones.
 \end{description}
@@ -2802,13 +2816,42 @@ A module whose build is in a binary store is installed from it instead of being 
 
 \subsubsection{The stores}
 
-The stores are an ordered list given by \code{SCBI\_BINARY\_STORE}: URLs separated by blanks, a URL prefixed with \code{ro:} being read-only. Without it, a store in \file{\$HOME/.cache/scbi/binaries} is used: the builds of the user are reused from one sandbox to another without any setting. \code{SCBI\_BINARY\_STORE=no} disables the stores.
+The stores are an ordered list, each a URL with a mode (\code{rw} or \code{ro}). It is the first set of:
+\begin{itemize}
+	\item \code{SCBI\_BINARY\_STORE} (or the ini key \code{binary-store}): URLs separated by blanks, a URL prefixed with \code{ro:} being read-only; \code{no} disables the stores;
+	\item the \code{binary-stores} key of the environment file (\seeref{env-files});
+	\item \code{SCBI\_CACHE\_DIR}, the directory of the former build cache;
+	\item \file{file://\$HOME/.cache/scbi/binaries}: the builds of the user are reused from one sandbox to another without any setting.
+\end{itemize}
 
-\begin{lstlisting}
-export SCBI_BINARY_STORE="file://$HOME/.cache/scbi/binaries file:///nfs/team/scbi-binaries"
+For a team, in the environment file:
+
+\begin{lstlisting}[language={yaml}]
+binary-stores:
+  - file://$HOME/.cache/scbi/binaries      # first: the local cache
+  - file:///nfs/team/scbi-binaries         # the team, read and write
+  - {url: https://ci.example.org/scbi, mode: ro}
 \end{lstlisting}
 
-A store is a directory, \code{file:///path} or a path: a local disk or a NFS mount (files and directories are created group-writable, for a team). An entry is two files, \file{<target>/<module>/<key>.json} (the metadata) and \file{<key>.tar.zst} (or \file{.tar.xz} without \code{zstd}): the installation of the module (\file{install} of its sandbox, as copied to the global installation directory) and, for information, its \file{source-ref}, its build id and the logs of its steps (\file{logs/origin} of the module when installed from the store). The build tree and the sources are not stored.
+For a run, \ddash{}binary-store=<url> adds a store before the others, \ddash{}binary-store:pull only reads the stores and \ddash{}binary-store:no uses none.
+
+The transports of the stores:
+\begin{description}
+	\item[\code{file:///path} or a path] A directory: a local disk or a NFS mount (files and directories are created group-writable, for a team; the writings are atomic).
+	\item[\code{http://}, \code{https://}] A Web server, read with \code{curl} (GET) and written with HTTP PUT (\code{curl -T}: WebDAV, the \code{dav} module of nginx, Artifactory... the server creates the directories). The credentials come from \file{\$HOME/.netrc}, other options of \code{curl} from \code{SCBI\_BINARY\_STORE\_CURL\_OPTIONS}. \ddash{}list and \ddash{}explain read the directory index of the server (autoindex).
+	\item[another scheme] The functions of the environment file (\seeref{env-files}) \code{binary-store-get URL PATH DEST} (copies the file \code{PATH} of the store to \code{DEST}; status 0 when found, 1 when not, another one for an error), \code{binary-store-put URL FILE PATH} and, for \ddash{}list and \ddash{}explain, \code{binary-store-list URL DIR} (prints the names of the files of a directory). For example a transport by \code{rsync} over \code{ssh}, or S3 with \code{aws s3 cp}:
+\begin{lstlisting}[language={yaml}]
+binary-stores:
+  - s3://team-bucket/scbi
+functions:
+  binary-store-get:
+    params: [URL, PATH, DEST]
+    run: aws s3 cp --quiet $URL/$PATH $DEST
+  binary-store-put:
+    params: [URL, FILE, PATH]
+    run: aws s3 cp --quiet $FILE $URL/$PATH
+\end{lstlisting}
+\end{description} An entry is two files, \file{<target>/<module>/<key>.json} (the metadata) and \file{<key>.tar.zst} (or \file{.tar.xz} without \code{zstd}): the installation of the module (\file{install} of its sandbox, as copied to the global installation directory) and, for information, its \file{source-ref}, its build id and the logs of its steps (\file{logs/origin} of the module when installed from the store). The build tree and the sources are not stored.
 
 The stores are looked up in order; a build found in a store is copied into the writable stores before it, so that a first local store acts as a cache of the shared ones. A build is written to all the writable stores. A writing never fails the build (a warning). An entry is never replaced, except by one relocatable to more sandboxes (see below).
 
@@ -2819,7 +2862,7 @@ Two builds share an entry when they have the same \emph{binary key}: the SHA-256
 	\item the build id of the module (\seeref{options}, \ddash{}force): its sources, its reference, its resolved plug-in, its patches, the OS packages and the build ids of its dependencies...;
 	\item the binary keys of its direct dependencies (the modules of a meta-module): a difference in a dependency makes another key;
 	\item the environment of the commands of the build (the variables of the environment file, \code{PATH}, the variables set by the \code{env} hooks of the dependencies, the \code{SCBI\_*} variables...), with the paths of the sandbox, of the global installation directory, of the plug-ins... and of the home directory replaced by placeholders; the variables which do not change a build (\code{SCBI\_JOBS}, \code{TERM}, \code{USER}...) and the ones of \code{SCBI\_BINARY\_KEY\_IGNORE} are left out;
-	\item the OS (identifier, name, version, codename), the host and the target, the layout of the sandbox (\ddash{}flat) and \code{SCBI\_BINARY\_KEY\_EXTRA}.
+	\item the OS (identifier, name, version, codename), the host and the target, the layout of the sandbox (\ddash{}flat), \code{SCBI\_BINARY\_KEY\_EXTRA} and the output of the function \code{binary-key} of the environment file (for example the version of a compiler not packaged by the OS).
 \end{itemize}
 A difference that is not known not to change a build gives another key: a build is not reused rather than reused wrongly.
 
@@ -2847,9 +2890,13 @@ A build installed from a store is reported with the trigger \code{from binary st
 \subsubsection{scbi binary-store}
 \index{tools!binary-store}
 
-\cmd{scbi binary-store \ddash{}show-key [modules]}
+\begin{description}[font=\texttt]
+	\item[\ddash{}show-key {[}modules{]}] For each module of the build and its dependencies, the binary keys recorded by its last build (relocatable, and bound to the sandbox) and the stores having them.
+	\item[\ddash{}list {[}modules{]}] The entries of the stores (of the modules given, or all): variant, reference, kind, size, date, origin sandbox and key.
+	\item[\ddash{}explain <module>] Compares the components of the binary key of the last build of the module with the ones of the entries of the stores for its variant, and displays what differs (a variable of the environment, the key of a dependency, the OS...): why a build is not shared.
+\end{description}
 
-Displays, for each module of the build and its dependencies, the binary keys recorded by its last build (relocatable, and bound to the sandbox) and the stores having them.
+\cmd{scbi binary-store \ddash{}explain c-gmp}
 
 \subsection{Reproducing a step}
 \label{replay}
