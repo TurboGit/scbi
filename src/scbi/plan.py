@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from scbi.bashcompat import assoc_keys, read_fields, read_lines, words
-from scbi.modref import has_variant, parse_module_ref
+from scbi.modref import PURGE_PREFIX, has_variant, parse_module_ref
 
 
 class PlanError(Exception):
@@ -169,6 +169,14 @@ class PlanState:
         """
         for_module = re.sub(r":.*", "", for_module, count=1, flags=re.S)
         for_module = re.sub(r"/.*", "", for_module, count=1, flags=re.S)
+
+        #  purge@ is removed from the modules of the command line by the
+        #  driver: anywhere else (a dependency, a plan) it is an error
+        name = parse_module_ref(modref).module
+        for ref in (modref, self.modver.get(f"{for_module}={name}", ""), self.modver.get(name, "")):
+            if ref.startswith(PURGE_PREFIX):
+                return [modref, "default", "NONE", "NONE",
+                        *words(f"error: {PURGE_PREFIX} is only allowed on the command line ({ref})")]
 
         info = (parse_module_ref(modref).to_bash_array() + [""] * 4)[:4]
         module = info[0]

@@ -81,6 +81,7 @@ USAGE_OPTIONS = """
    -l | --log:n                  log display control yes|no|on-failure
    -f | --force                  force rebuild, do not check build id
    -p | --purge[:only]           remove build directory, build eventually
+                                 (purge@<module>: this module only)
       | --safe                   clean-up build directory before configure
       | --dry-run                only list modules handled
       | --stat[:short|full]      display some status of current setup
@@ -140,6 +141,9 @@ class Driver:
         self.ini = IniDB()
         self.ini_modules: list[str] = []
         self.ini_options: list[str] = []
+        #  the modules given as purge@<module>[/<variant>]: module -> the
+        #  variants to purge (None: all of them)
+        self.purge_modules: dict[str, set[str] | None] = {}
         self.ini_subcmd = ""
         #  the modules of the build (planned_modules)
         self._planned: list[tuple[str, str, str, str, str]] | None = None
@@ -1066,10 +1070,12 @@ class Driver:
         os.makedirs(f"{self.get('SCBI_LOGS')}/{self.get('TODAY')}", exist_ok=True)
         os.makedirs(self.get("SCBI_ARCHIVES") or ".", exist_ok=True)
 
+        self.split_purge_modules()
         if self.get("DRY_RUN") == "yes":
             for v in ("DO_PURGE", "DO_INSTALL", "DO_ARCHIVE", "DO_UPDATE", "DO_FORCE", "DO_CLEAN_INSTALL"):
                 self.set(v, "no")
             self.set("STEPS", "")
+            self.purge_modules = {}
 
         bdir = Path(self.get("SCBI_BDIR"))
         bdir.mkdir(parents=True, exist_ok=True)
@@ -1120,6 +1126,47 @@ class Driver:
 
             Standalone(builder).create(self.modules)
         return 0
+
+    # --------------------------------------------------------------- purge@
+
+    def split_purge_modules(self) -> None:
+        """The purge@ prefix removed from the modules of the command line
+        (and of the ini file), the modules recorded in purge_modules."""
+        from scbi.modref import parse_module_ref, split_purge
+
+        def add(ref: str) -> None:
+            module = parse_module_ref(ref).module
+            if "/" not in ref.split(":", 1)[0]:
+                self.purge_modules[module] = None
+            elif self.purge_modules.get(module, set()) is not None:
+                self.purge_modules.setdefault(module, set()).add(parse_module_ref(ref).variant)
+
+        #  a worker of a parallel build: the purge@ modules of the main run
+        #  (with --purge:only, the other modules are not purged)
+        from scbi import parallel
+
+        if parallel.is_worker(self):
+            for ref in words(self.environ.get("SCBI_PURGE_MODULES", "")):
+                add(ref)
+        modules = []
+        for m in self.modules:
+            ref, purge = split_purge(m)
+            if purge:
+                add(ref)
+            modules.append(ref)
+        self.modules = modules
+
+    def purge_modules_env(self) -> str:
+        """The purge@ modules for the workers (SCBI_PURGE_MODULES)."""
+        return " ".join(m if v is None else " ".join(f"{m}/{x}" for x in sorted(v))
+                        for m, v in self.purge_modules.items())
+
+    def is_purged(self, module: str, variant: str) -> bool:
+        """A module given as purge@<module>[/<variant>]."""
+        if module not in self.purge_modules:
+            return False
+        variants = self.purge_modules[module]
+        return variants is None or variant in variants
 
     # ------------------------------------------------------------ progress
 

@@ -444,6 +444,10 @@ class Scheduler:
                     "SCBI_RUN_ID": self.d.get("SCBI_RUN_ID"), "PYTHONUNBUFFERED": "1",
                     NEEDED_BY_ENV: " ".join(job.needed_by),
                     KIND_ENV: f"{job.depends_kind} {job.is_aggregated}"})
+        #  the purge@ modules of the run
+        env.pop("SCBI_PURGE_MODULES", None)
+        if self.d.purge_modules:
+            env["SCBI_PURGE_MODULES"] = self.d.purge_modules_env()
         return env
 
     def launch(self, job: Job) -> None:

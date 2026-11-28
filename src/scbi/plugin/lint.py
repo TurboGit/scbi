@@ -19,7 +19,7 @@ from dataclasses import dataclass
 
 import yaml
 
-from scbi.modref import strip_host
+from scbi.modref import PURGE_PREFIX, strip_host
 from scbi.plugin import catalog, yamlfmt
 from scbi.plugin.model import EnvOp, EnvOps, Guarded, Commands, LocalAssign, SourceEntry, Values
 
@@ -208,6 +208,8 @@ class Linter:
                 continue
             self.check_hook(key, value)
 
+        self.check_purge_prefix()
+
         if "source-tree" in data:
             self.check_source_tree()
 
@@ -231,6 +233,21 @@ class Linter:
                 known = set(f.params) | set(ALL_PARAMS)
                 self.check_shell(f"function {fname}", f.script, known, other_params=False)
         return self.issues
+
+    def check_purge_prefix(self) -> None:
+        """purge@ is for the command line only, not in a dependency."""
+        for key in _DEP_HOOKS:
+            if key not in self.data:
+                continue
+            try:
+                pdef = yamlfmt.from_data(self.name, {key: self.data[key]}, self.name)
+            except yamlfmt.FormatError:
+                continue  # reported by check_hook
+            for body in pdef.hooks.values():
+                for text in _texts(body.items if isinstance(body, Values) else ()):
+                    for w in text.split():
+                        if strip_host(w).startswith(PURGE_PREFIX):
+                            self.error(key, f"{w}: {PURGE_PREFIX} is only allowed on the command line")
 
     def check_source_tree(self) -> None:
         """source-tree: each from a dependency (depends, build-depends, any

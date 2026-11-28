@@ -6,6 +6,7 @@ from scbi.modref import (
     has_variant,
     is_host_prefixed,
     parse_module_ref,
+    split_purge,
     strip_host,
 )
 
@@ -50,3 +51,9 @@ def test_host_prefix():
     assert strip_host("host@gpr/v:1") == "gpr/v:1" and strip_host("gpr") == "gpr"
     #  host@ is not part of the module name
     assert parse_module_ref("host@gpr").to_bash_array() == ["gpr", "default", "NONE", "NONE"]
+
+
+def test_purge_prefix():
+    assert split_purge("purge@gpr/v:1") == ("gpr/v:1", True)
+    assert split_purge("gpr") == ("gpr", False)
+    assert split_purge("host@gpr") == ("host@gpr", False)

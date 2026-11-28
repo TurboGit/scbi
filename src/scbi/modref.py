@@ -12,6 +12,10 @@ interpreted when registering a plan (``SCBI_MODVER`` keys).
 
 ``host@`` (a dependency): the build of the module for the host, whatever
 the target. It is not part of the module name (``ModuleRef.host``).
+
+``purge@`` (a module of the command line only): the module purged before
+it is built. It is not part of the reference: removed by the driver
+(``split_purge``) before the reference is used.
 """
 
 from __future__ import annotations
@@ -28,6 +32,8 @@ KIND_BRANCH = "BRANCH"  # VCS reference (branch, tag, SHA-1) or keyword
 
 #  Prefix of a dependency built for the host
 HOST_PREFIX = "host@"
+#  Prefix of a module of the command line purged before its build
+PURGE_PREFIX = "purge@"
 
 
 @dataclass(frozen=True)
@@ -84,6 +90,14 @@ def parse_module_ref(modref: str) -> ModuleRef:
 def is_host_prefixed(modref: str) -> bool:
     """A ``host@`` reference (the dependency built for the host)."""
     return modref.startswith(HOST_PREFIX)
+
+
+def split_purge(modref: str) -> tuple[str, bool]:
+    """The reference without its ``purge@`` prefix, and whether it had
+    one."""
+    if modref.startswith(PURGE_PREFIX):
+        return modref[len(PURGE_PREFIX):], True
+    return modref, False
 
 
 def strip_host(modref: str) -> str:

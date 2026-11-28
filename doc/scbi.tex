@@ -214,6 +214,8 @@ A module is described by an SCBI plug-in (one plug-in per file). It can be refer
 
 	\item[host@] \index{host prefix (dependency)}In a dependency (\code{depends}, \code{build-depends}, \code{tests-depends}): the build of the module for the host, whatever the target. In a native build it is the module itself; in a cross build the module is not built for the target, its build for the host is used (\seeref{host-deps}).
 
+	\item[purge@] \index{purge prefix}On the command line only (and in the \code{modules} of an ini file): the module is purged before it is built, as with \ddash{}purge but for this module only, see \ddash{}purge (\seeref{purge-prefix}). It is not part of the reference: a dependency or a build plan using it is an error.
+
 	\item[name] The name of the plug-in. This is the main reference for the plug-in. The corresponding plug-in file (\file{<name>.yaml}) must be located in \code{\$SCBI\_PLUGINS}.
 
 	\item[variant] \label{variant}A name identifying a build variant of the module. For example an application can be built with different configurations and/or dependencies.
@@ -781,7 +783,9 @@ The following options are supported:
 
 	\index{build id}A module is rebuilt only when its build id changes. The build id is computed from the sources (the revision of the checkout, the archive), the module reference, the target and the OS, the build types, the patches, the values of the \code{external-env} hook, the build ids of the direct dependencies, and the plug-in \emph{resolved} for the module reference (as displayed by \code{scbi show \ddash{}resolved}, \seeref{show}). So a comment, a change of formatting or of the order of the keys (hooks, variables, functions, qualifiers) or of the dependencies (\code{depends}, \code{build-depends}, \code{tests-depends}: the \code{env} hooks of two dependencies setting the same variable are applied in this order, use \ddash{}force after swapping them), a hook of another variant or a guarded item not selected do not rebuild the module, while a change of a hook it uses, of a function or of a variable does, in its plug-in or in the ones it inherits. The \code{env} hook of a module is not part of its own build id: it sets the environment of the modules depending on it, so a change rebuilds these modules (it is part of their build id), not the module itself. The build id of the sandbox is removed when a build starts and written when it completes: an interrupted or failed build is redone at the next run (\code{trigger: not yet built}), even when the build id is the one of the previous build (a change of the plug-in reverted). The same holds for the wrapup of a meta-module.
 
-	\item[-p | \ddash{}purge{[:only]}] Removes the build directory of the module, then builds it unless \code{only} is given.
+	\item[-p | \ddash{}purge{[:only]}] Removes the build directory of the module, then builds it unless \code{only} is given. With \ddash{}deps all the modules handled (the dependencies too) are purged.
+
+	\label{purge-prefix}\index{purge prefix}To purge some modules only, give them on the command line with the \code{purge@} prefix: \code{scbi \ddash{}deps purge@c-gmp c-mpfr} purges \code{c-gmp} (all its variants handled, or the one given: \code{purge@c-gmp/shared}) and builds both modules, \code{c-mpfr} not purged. The module is purged the first time it is handled, also when it is reached as a dependency of another module of the command line. With \ddash{}purge:only, only the \code{purge@} modules are purged and no module is built; with \ddash{}purge, all the modules are purged.
 
 	\item[\ddash{}dry-run] Only lists the modules to handle.
 

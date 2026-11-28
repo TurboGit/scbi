@@ -367,6 +367,18 @@ _scbi()
             _scbicomp "$(_scbi_list)" "" "${cur##--list:}"
             return 0
             ;;
+        purge@*/*)
+            local pcur=${cur#purge@}
+            local mod=${pcur%/*}
+            if [[ -f $HOME/.config/scbi/$mod.yaml ]]; then
+                _scbicomp "$(_scbi_variants "$mod" "")" "purge@$mod/" "${pcur##*/}"
+            fi
+            return 0
+            ;;
+        purge@*)
+            _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*.yaml | sed 's/\.yaml$//')" "purge@" "${cur#purge@}"
+            return 0
+            ;;
         */*)
             local mod=${cur%/*}
             if [[ -f $HOME/.config/scbi/$mod.yaml ]]; then

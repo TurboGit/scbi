@@ -524,7 +524,14 @@ class Builder:
         d.log.clog(module)
 
         purge = self.get("DO_PURGE")
-        if purge in ("yes", "only"):
+        #  purge@<module>: this module purged; with --purge:only, only the
+        #  purge@ modules are purged (none is built)
+        if getattr(d, "purge_modules", None):
+            selected = d.is_purged(module, variant)
+            do_purge = selected or purge == "yes"
+        else:
+            do_purge = purge in ("yes", "only")
+        if do_purge:
             self.ilog(module, "%BPurging", f"%t{module}%c", "for", f"{self.get('SCBI_TARGET')}/{variant}")
             if os.path.isdir(f"{bdir}/{module}"):
                 sys.stdout.flush()
