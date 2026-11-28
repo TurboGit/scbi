@@ -32,8 +32,15 @@ def _list_body(item: dict) -> dict:
     return {"anyOf": [one, {"type": "array", "items": one}]}
 
 
+#  an archive-sha256 item: "<sha256>  <file>" (sha256sum, the * binary
+#  marker accepted), or a text with a variable (known when expanded)
+ARCHIVE_SHA256_PATTERN = r"^([0-9A-Fa-f]{64}\s+\*?\S.*|.*\$.*)$"
+
+
 def _value_body(hook: str) -> dict:
     scalar = {"type": ["string", "number", "boolean"]}
+    if hook == "archive-sha256":
+        scalar = {"type": "string", "pattern": ARCHIVE_SHA256_PATTERN}
     body = _list_body(scalar)
     choices = {"out-of-tree": ["true", "false"], "only-explicit-build": ["true", "false"],
                "aggregate": ["direct", "recursive", "no"],
