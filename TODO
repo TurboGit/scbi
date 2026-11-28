@@ -44,7 +44,9 @@ Nix, Bazel...). Most valuable first.
    - strong: optional isolation (bwrap...) exposing only the declared
      dependencies and the OS packages;
    - [DONE] lighter: warn when a module uses files (headers, libraries)
-     of a module it does not declare as a dependency (--check-deps).
+     of a module it does not declare as a dependency (--check-deps);
+     unused dependencies (notes), Python imports, --check-deps:trace
+     (strace: files opened, programs run).
 
 Smaller items:
 

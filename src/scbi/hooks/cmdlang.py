@@ -83,6 +83,10 @@ def _inside(real: str, roots: list[str]) -> bool:
 
 
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+#  Runs the external commands under another program (--check-deps:trace,
+#  scbi.depcheck): (argv, executable) -> (argv, executable); None: as is
+EXEC_WRAPPER: Callable[[list[str], str], tuple[list[str], str]] | None = None
 #  NAME = value, NAME += value (appended), export NAME = value
 _ASSIGN = re.compile(r"^(export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+(\+?)=(?:\s+(.*)|\s*)$")
 _ENV_WORD = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$", re.S)
@@ -1413,9 +1417,15 @@ class Runner:
                     popen_err = stderr
                 try:
                     #  argv[0] as written (as a shell does), the program found
+                    run_argv, run_exe = argv, exe
+                    if EXEC_WRAPPER is not None:
+                        if not _is_script(exe):
+                            run_argv, run_exe = EXEC_WRAPPER(argv, exe)
+                        else:
+                            run_argv, run_exe = EXEC_WRAPPER(["/bin/sh", exe, *argv[1:]], "/bin/sh")
                     try:
-                        proc = subprocess.Popen(argv, executable=exe, cwd=state.cwd, env=env, stdin=stdin,
-                                                stdout=popen_out, stderr=popen_err)
+                        proc = subprocess.Popen(run_argv, executable=run_exe, cwd=state.cwd, env=env,
+                                                stdin=stdin, stdout=popen_out, stderr=popen_err)
                     except OSError as e:
                         if e.errno != errno.ENOEXEC:
                             raise
@@ -1485,3 +1495,14 @@ class Runner:
                 return 1
             chain.append((cmd, env_extra, argv))
         return self.external(chain, state, line)
+
+
+def _is_script(exe: str) -> bool:
+    """A file without #! line nor binary header (run by /bin/sh when it
+    cannot be executed): the wrapper is given /bin/sh to run it."""
+    try:
+        with open(exe, "rb") as f:
+            head = f.read(4)
+    except OSError:
+        return False
+    return not head.startswith((b"#!", b"\x7fELF")) and bool(head)

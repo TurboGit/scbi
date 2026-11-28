@@ -156,10 +156,13 @@ command language.
 - **Step times**: the wall and CPU time of each step are recorded in
   `<target>-steps.log`; `--stat:full` summarizes the last run (time in
   the steps using many cores, CPU used).
-- **Undeclared dependencies**: `--check-deps[:error]` (ini key
+- **Dependency check**: `--check-deps[:error|:trace]` (ini key
   `check-deps`) reports the files a module uses (dependency files of the
-  compilers and of Ninja, shared libraries of its ELF files) installed by
-  a module of the sandbox which is not one of its dependencies.
+  compilers and of Ninja, shared libraries of its ELF files, imports of
+  its Python files) installed by a module of the sandbox which is not one
+  of its dependencies, and the dependencies none of whose files is used;
+  `:trace` records everything the steps open or run with `strace`
+  (tools, data, Python imports).
 - **Aggregation**: the dependencies of the modules aggregated by a direct
   aggregate meta-module are not aggregated; a `build-depends` on a
   meta-module never uses the aggregated mode.

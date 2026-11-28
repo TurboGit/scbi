@@ -788,12 +788,19 @@ The following options are supported:
 
 	\item[-j | \ddash{}jobs=<n>] The number of parallel jobs, sets \code{SCBI\_JOBS} (\seeref{njobs}).
 
-	\item[\ddash{}check-deps{[}:error{]}] \index{check-deps}\label{check-deps}Reports the undeclared dependencies of the modules built: after the build of a module, the files its build used are compared with the files installed by the other modules of the sandbox (in their install directory in the sandbox or in their global install directory). A file of a module which is neither the module itself nor one of its dependencies (direct or not: \code{depends}, \code{build-depends}, the modules of the meta-modules) is reported, as a warning or, with \code{error}, as an error failing the build. Such a dependency only works because the module happens to be installed, and breaks on another machine or in another build order. The files used are taken from:
+	\item[\ddash{}check-deps{[}:error|:trace{]}] \index{check-deps}\label{check-deps}Checks the dependencies of the modules built: after the build of a module, the files its build used are compared with the files installed by the modules of the sandbox (in their install directory in the sandbox or in their global install directory).
+	\begin{itemize}
+		\item \emph{Undeclared dependencies}: a file of a module which is neither the module itself nor one of its dependencies (direct or not: \code{depends}, \code{build-depends}, \code{tests-depends}, the modules of the meta-modules) is reported, as a warning or, with \code{error}, as an error failing the build. Such a dependency only works because the module happens to be installed, and breaks on another machine or in another build order.
+		\item \emph{Unused dependencies}: a direct dependency (\code{depends}, \code{build-depends}) none of whose files is used, nor the files of its own dependencies, is reported as possibly not needed (a note, never an error). Without \code{trace}, a dependency installing no headers nor libraries, or adding to \code{PATH} in its \code{env} hook, is a tool (its use is not recorded): it is not reported; a module with nothing recorded (no dependency file, ELF file nor Python file) is not checked.
+	\end{itemize}
+	The files used are taken from:
 	\begin{itemize}
 		\item the dependency files of the build tree (\file{*.d}, \file{.deps/*.Po}... written by \code{gcc -MD}, \code{automake}, \code{cmake} with Makefiles) and the dependencies recorded by \code{ninja} (\code{ninja -t deps}, for \code{cmake} and \code{meson});
-		\item the shared libraries needed by the ELF files installed by the module (\code{readelf -d}), when no library of the system has this name.
+		\item the shared libraries needed by the ELF files installed by the module (\code{readelf -d}), when no library of the system has this name;
+		\item for a Python module (a \file{pyproject.toml}, \file{setup.py} or \file{setup.cfg} in its sources or build directory), the modules imported by its Python files, found in the \file{site-packages} (or \file{dist-packages}) directories of the other modules; an import in a \code{try} block is optional: it counts as a use, it is never reported as undeclared;
+		\item with \code{trace}, the files opened and the programs run by the commands of the \code{config}, \code{build}, \code{install} and \code{tests} steps, recorded with \code{strace} in \file{logs/trace} of the module: everything is seen (tools found in \code{PATH}, \file{.pc} files, data, Python imports...), at the price of a slower build. Without \code{strace}, a warning is displayed and the other sources are used.
 	\end{itemize}
-	This is a heuristic: only the files installed by modules of the sandbox are reported, a build without dependency files is not checked. It never changes the build. The ini key \code{check-deps} (\code{yes} or \code{error}) sets it too.
+	This is a heuristic: only the files installed by modules of the sandbox are taken into account. It never changes the build. The ini key \code{check-deps} (\code{yes}, \code{error} or \code{trace}) sets it too.
 
 	\item[\ddash{}parallel{[}=<k>{]}] \index{parallel build}Builds up to \code{k} modules at the same time (default 2), each by a process of the driver; needs \ddash{}deps (\seeref{parallel}). The ini key \code{parallel} (\code{yes} or a number) sets it too.
 
@@ -825,7 +832,7 @@ The following keys are supported in the ini files:
 	\item \code{setup}, \code{config}, \code{build}, \code{install}, \code{wrapup}, \code{color}, \code{quiet}, \code{force}, \code{update}, \code{purge}, \code{archive}, \code{stat}: the options of the same name (\code{yes} or \code{no}, or the value of the option; \code{update = prefetch} for \ddash{}update:prefetch);
 	\item \code{safe}, \code{tar}, \code{no-patch}, \code{clear-cache}: the options of the same name when set to \code{yes};
 	\item \code{deps}: \code{yes} for \ddash{}deps;
-	\item \code{check-deps}: \code{yes} or \code{error}, as \ddash{}check-deps;
+	\item \code{check-deps}: \code{yes}, \code{error} or \code{trace}, as \ddash{}check-deps;
 	\item \code{parallel}: \code{yes} or the number of modules, as \ddash{}parallel;
 	\item \code{modules}: the modules to build, as on the command line;
 	\item \code{enable}: the features to enable (comma or blank separated);

@@ -1149,21 +1149,33 @@ class Builder:
                 self.elog(module, "generic", "module", f"post-{step}", "failed", "with", "error", str(res))
             return res
 
-        from scbi import parallel
+        from scbi import depcheck, parallel
+
+        check_deps = (self.get("DO_CHECK_DEPS") in ("yes", "error", "trace") and is_uptodate == "no"
+                      and self.get("DO_BUILD") != "no" and not keep)
+        trace = False
+        if check_deps and self.get("DO_CHECK_DEPS") == "trace":
+            #  the files of the previous trace removed
+            trace = depcheck.start_trace(self, tvdir)
+            depcheck.stop_trace()
+            if not trace:
+                self.ilog(module, *words("warning: strace not found, --check-deps:trace without trace"))
 
         for step in words(self.get("STEPS")):
             with parallel.heavy_step(d, step):
                 begin = steptime.start()
-                res = run_step(step)
+                if trace and step in depcheck.TRACED_STEPS:
+                    depcheck.start_trace(self, tvdir, keep=True)
+                try:
+                    res = run_step(step)
+                finally:
+                    depcheck.stop_trace()
                 steptime.record(d, module, variant, step, begin, res)
             if res != 0:
                 return res, is_uptodate
 
-        if (self.get("DO_CHECK_DEPS") in ("yes", "error") and is_uptodate == "no"
-                and self.get("DO_BUILD") != "no" and not keep):
-            from scbi import depcheck
-
-            if depcheck.check(self, formodule, modref, module, tvdir) != 0:
+        if check_deps:
+            if depcheck.check(self, formodule, modref, module, variant, tvdir) != 0:
                 return 1, is_uptodate
 
         final = self.d.envfile.hook("module_final_step")

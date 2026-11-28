@@ -8,7 +8,7 @@ _SCBI_ARGS="${_SCBI_COMMON} -t -S --no-setup -W --no-wrapup -I
 --purge:only -d --deps -a --create-archive -h --help -j --jobs=
 --target= --ini= --env= -e --tests:only --plan= -n --no-patch
 --archive --deps:warning --dry-run -w --wrapup --force --enable-
---safe --check-deps --check-deps:error --parallel --parallel= --build-dir --build-target= --version --clean-install --log:yes
+--safe --check-deps --check-deps:error --check-deps:trace --parallel --parallel= --build-dir --build-target= --version --clean-install --log:yes
 --log:no --log:on-failure --stat --stat: --progress --progress: --prefix=
 --color:dark --color:light --color:no --clear-cache"
 

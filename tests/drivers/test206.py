@@ -41,3 +41,79 @@ xxxx/xx/xx xx:xx:xx : End Building undecl [default] (n/a)
     # an error with :error
     t.nruns('./scbi --check-deps:error --force undecl')
     t.grep('error: uses lib1, not a dependency')
+
+    # unused dependencies: a note when none of the files of a dependency
+    # (nor of its dependencies) is used
+    t.sh('''cat > scripts.d/unused.yaml <<'XEOF'
+plugin: unused
+
+depends:
+  - lib1
+
+build: |-
+  write main.d:
+      main.o: /usr/include/stdio.h
+XEOF''')
+    t.runs('./scbi --check-deps unused')
+    t.grep('note: lib1 may not be needed: none of its files used')
+
+    # used: no note
+    t.sh('sed -i "s|/usr/include/stdio.h|\\$SCBI_PREFIX/include/lib1.h|" scripts.d/unused.yaml')
+    t.runs('./scbi --check-deps unused')
+    t.ngrep('may not be needed')
+
+    # no evidence (no dependency file): not checked
+    t.sh('sed -i "/write main.d/,\\$d" scripts.d/unused.yaml; printf "build: echo nothing\\n" >> scripts.d/unused.yaml')
+    t.runs('./scbi --check-deps unused')
+    t.ngrep('may not be needed')
+
+    # a Python module: its imports
+    t.sh('''cat > scripts.d/pylib.yaml <<'XEOF'
+plugin: pylib
+
+install: |-
+  mkdir -p $PREFIX/lib/python3/site-packages/pylib
+  write $PREFIX/lib/python3/site-packages/pylib/__init__.py:
+      VALUE = 1
+XEOF
+cat > scripts.d/pyapp.yaml <<'XEOF'
+plugin: pyapp
+
+depends:
+  ok:
+    - pylib
+  unused:
+    - pylib
+
+build:
+  _: |-
+    write pyproject.toml:
+        [project]
+    write app.py:
+        import os
+        import pylib.sub
+  opt: |-
+    write pyproject.toml:
+        [project]
+    write app.py:
+        try:
+            import pylib
+        except ImportError:
+            pylib = None
+  unused: |-
+    write pyproject.toml:
+        [project]
+    write app.py:
+        import os
+XEOF''')
+    t.runs('./scbi pylib')
+    t.runs('./scbi --check-deps pyapp')
+    t.grep('warning: uses pylib, not a dependency: import pylib')
+    t.runs('./scbi --check-deps pyapp/ok')
+    t.ngrep('not a dependency')
+    t.ngrep('may not be needed')
+    # an optional import is never reported
+    t.runs('./scbi --check-deps pyapp/opt')
+    t.ngrep('not a dependency')
+    t.runs('./scbi --check-deps pyapp/unused')
+    t.grep('note: pylib may not be needed: none of its files used')

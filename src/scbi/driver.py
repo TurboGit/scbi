@@ -86,7 +86,7 @@ USAGE_OPTIONS = """
       | --stat[:short|full]      display some status of current setup
       | --progress[:bar|line|no] build progress on the terminal (bar)
    -n | --no-patch               do not apply patches
-      | --check-deps[:error]     report the undeclared dependencies
+      | --check-deps[:error|:trace] report undeclared/unused dependencies
       | --parallel[=<k>]         build k modules at the same time (2)
       | --clear-cache            remove cached module's versions"""
 
@@ -108,7 +108,7 @@ GETOPT_LONG = [
     "build,build-target:,install,clean-install,create-archive",
     "log,log:yes,log:no,log:on-failure,purge,purge:only",
     "prefix:,deps,deps:warning,archive,force,env:,no-patch",
-    "no-wrapup,wrapup,safe,standalone,check-deps,check-deps:error,parallel::",
+    "no-wrapup,wrapup,safe,standalone,check-deps,check-deps:error,check-deps:trace,parallel::",
     "dry-run,jobs:,list-plan:",
     "progress,progress:bar,progress:line,progress:no",
 ]
@@ -501,6 +501,8 @@ class Driver:
                 s("DO_CHECK_DEPS", "yes")
             elif a == "--check-deps:error":
                 s("DO_CHECK_DEPS", "error")
+            elif a == "--check-deps:trace":
+                s("DO_CHECK_DEPS", "trace")
             elif a == "--parallel":
                 if nxt.isdigit():
                     s("DO_PARALLEL", nxt)
