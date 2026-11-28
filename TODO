@@ -1,0 +1,47 @@
+SCBI — TODO
+===========
+
+Features worth adding, compared with other build systems (Spack, Yocto,
+Nix, Bazel...). Most valuable first.
+
+1. Parallel build of independent modules
+   The modules are built one after the other; only the downloads of
+   --update:prefetch run in the background. A scheduler over the
+   dependency graph would build independent modules at the same time,
+   sharing SCBI_JOBS between them (per-module sandboxes and logs already
+   exist). Biggest wall-clock gain on wide build plans.
+
+2. Archive integrity pinned in the plug-in
+   The archive hook checks a SHA-1 downloaded from the same server as the
+   archive (or nothing). Add an optional sha256 (per version) in the
+   archive hook, fail on mismatch, lint warning when missing.
+
+3. [DONE] Freeze a build plan (lock file)
+   Plans mostly reference branches, so the same plan builds different
+   sources over time. Write a plan where every module reference is
+   pinned to what was actually built (Git SHA-1, archive version,
+   variant), to rebuild exactly what shipped or bisect a whole stack
+   (scbi show --freeze).
+
+4. Binary cache keyed by build id
+   The build id is a content hash: look up a binary archive by build id
+   (local directory, shared URL) and install it instead of building.
+   Shares builds between machines and CI, makes purge/plan switching
+   cheap.
+
+5. Hermetic builds
+   Hooks see the global $PREFIX and the whole system: a missing depends
+   goes unnoticed until another machine or build order.
+   - strong: optional isolation (bwrap...) exposing only the declared
+     dependencies and the OS packages;
+   - [DONE] lighter: warn when a module uses files (headers, libraries)
+     of a module it does not declare as a dependency (--check-deps).
+
+Smaller items:
+
+- Install conflicts: warn when two modules install the same file in the
+  global prefix (the manifests are there).
+- [DONE] Machine-readable graph and SBOM: scbi show --json with name, version,
+  revision, URL, license per module (audits, VSCode extension);
+  scbi show --sbom (CycloneDX), license hook.
+- scbi outdated: list the upstream tags newer than the plan's versions.
