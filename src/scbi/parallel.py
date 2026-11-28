@@ -525,8 +525,14 @@ class Scheduler:
         if st is None or type(st).__name__ == "Lines":
             return
         done = sum(1 for j in self.order if j.state in ("done", "failed"))
-        parts = [f"{w.job.module}: {w.step}" for w in self.running.values()]
-        st.set(f"[{done}/{len(self.order)}] " + " · ".join(parts))
+        items = [(w.job.module, w.step) for w in self.running.values()]
+        try:
+            #  the room of the text on the status bar (the elapsed time on
+            #  the right)
+            room = st.width() - len("  elapsed 0:00:00 ") - 1
+        except Exception:  # noqa: BLE001 - no terminal: no limit
+            room = 0
+        st.set(fit_status(f"[{done}/{len(self.order)}] ", items, room))
 
     # ------------------------------------------------------------- run
 
@@ -554,6 +560,39 @@ class Scheduler:
             if job.state == "waiting":
                 job.state = "cancelled"
         return not self.failed
+
+
+def fit_status(prefix: str, items: list[tuple[str, str]], room: int) -> str:
+    """The modules running and their step on one line of ``room``
+    characters (0: no limit): all of them are shown, the steps then the
+    names shortened when needed."""
+    sep = " · "
+
+    def line(parts: list[str]) -> str:
+        return prefix + sep.join(parts)
+
+    full = line([f"{m}: {s}" for m, s in items])
+    if room <= 0 or len(full) <= room or not items:
+        return full
+    #  the steps shortened: build (waiting) -> waiting
+    steps = ["waiting" if s.endswith("(waiting)") else s for _, s in items]
+    short = line([f"{m}: {s}" for (m, _), s in zip(items, steps)])
+    if len(short) <= room:
+        return short
+    #  the names shortened, the same room for each module; a prefix common
+    #  to all the names (c-...) dropped first
+    names = [m for m, _ in items]
+    common = os.path.commonprefix(names)
+    common = common[:common.rfind("-") + 1] if "-" in common else ""
+    if common and all(len(m) > len(common) for m in names):
+        items = [(m[len(common):], s) for m, s in items]
+    each = (room - len(prefix) - len(sep) * (len(items) - 1)) // len(items)
+    parts = []
+    for (m, _), s in zip(items, steps):
+        keep = max(each - len(s) - 2, 3)
+        name = m if len(m) <= keep else m[:keep - 1] + "…"
+        parts.append(f"{name}: {s}")
+    return line(parts)
 
 
 # ------------------------------------------------------------ the driver
