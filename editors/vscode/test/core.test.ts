@@ -64,6 +64,10 @@ test("schema from the driver", async () => {
   const schema = JSON.parse(res.stdout);
   assert.equal(schema.title, "SCBI plug-in");
   assert.ok(schema.properties.config.description.startsWith("Configures"));
+  //  the hooks of the driver: archive-sha256 lines checked as typed
+  assert.ok(schema.properties["archive-sha256"].description.startsWith("The SHA-256"));
+  assert.ok(JSON.stringify(schema.properties["archive-sha256"]).includes("[0-9A-Fa-f]{64}"));
+  assert.ok(schema.properties.license.description.startsWith("The license"));
 });
 
 test("sections: parse, task and shell arguments", () => {

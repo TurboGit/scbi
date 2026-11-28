@@ -45,8 +45,9 @@ has a top-level `plugin:` key.
   qualifiers (`common`, `_`, `default`, `cross`), the keys of the plug-in
   (`inherit`, `with-variants`, `functions`...), the fields of `vcs` and
   `archive`, and on hover what each hook is for, its parameters and its
-  kind. The schema comes from your `scbi` (`scbi schema`): it follows its
-  version.
+  kind; the `archive-sha256` lines (`<sha256>  <file>`) are checked as
+  you type. The schema comes from your `scbi` (`scbi schema`): it follows
+  its version.
 - **Highlighting of the commands**: in the values of the YAML files the
   command language is highlighted: the variables (`$NAME`, `${NAME%.c}`),
   the built-ins (`$(get-version m)`, `cd`, `copy`, `VAR = get-version m`),
