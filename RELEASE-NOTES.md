@@ -149,6 +149,10 @@ command language.
   and the environment of the dependencies. Reformatting a plug-in,
   reordering its keys, its variables, its functions or its dependencies,
   or changing its own `env` hook no longer triggers a rebuild.
+- **Parallel build**: `--parallel[=k]` (with `--deps`) builds up to k
+  independent modules at the same time, one `build` or `tests` step at a
+  time (`SCBI_BUILD_SLOTS`), the output of each module printed as one
+  block; the build ids are the ones of a sequential build.
 - **Step times**: the wall and CPU time of each step are recorded in
   `<target>-steps.log`; `--stat:full` summarizes the last run (time in
   the steps using many cores, CPU used).

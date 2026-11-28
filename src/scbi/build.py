@@ -10,6 +10,7 @@ command hooks interpreted by scbi.steps.interp).
 
 from __future__ import annotations
 
+import contextlib
 import copy
 import os
 import shutil
@@ -84,6 +85,10 @@ class Builder:
         self.ftdir = 1
         #  the sources fetched ahead (--update:prefetch: scbi.sources.prefetch)
         self.prefetcher = None
+        #  a worker of a parallel build: only its module is built
+        from scbi import parallel
+
+        self.worker = parallel.is_worker(driver)
 
     # ------------------------------------------------------------ helpers
 
@@ -400,8 +405,13 @@ class Builder:
             if not os.access(idir, os.W_OK):
                 sudo = ["sudo"]
             subprocess.run([*sudo, "mkdir", "-p", f"{idir}/"])
-            #  appended to the report log (not truncated)
-            with open(log, "a") as f:
+            from scbi import parallel
+
+            #  appended to the report log (not truncated); one global
+            #  install at a time in a parallel build
+            lock = (parallel.file_lock(f"{bdir}/.install.lock") if self.worker
+                    else contextlib.nullcontext())
+            with lock, open(log, "a") as f:
                 rc = subprocess.run([*sudo, "rsync", "-a", "--force", f"{tvdir}/install/.", f"{idir}/."],
                                     stdout=f, stderr=f).returncode
             return rc == 0, idir
@@ -411,6 +421,11 @@ class Builder:
 
     def handle_module(self, formodule: str, modref: str, depends_kind: str, is_aggregated: str) -> None:
         d = self.d
+        if self.worker and formodule != "@root":
+            #  parallel build: the dependencies and the modules of a
+            #  meta-module are built by other workers, before this one;
+            #  the caller records their build id
+            return
         info = d.plan.module_ref(modref, formodule)
         if len(info) > 4:
             self.elog(info[0], *info[4:])
@@ -823,6 +838,16 @@ class Builder:
         #  its steps are part of this run (scbi.steptime)
         env["SCBI_RUN_ID"] = steptime.run_id(d)
         sys.stdout.flush()
+        if self.worker:
+            #  parallel build: one build of a module for the host at a time
+            from scbi import parallel
+
+            name = strip_host(modref).split(":", 1)[0].split("/", 1)[0]
+            with parallel.file_lock(f"{self.get('SCBI_BDIR')}/.host-{name}.lock"):
+                return self._host_build(args, env)
+        return self._host_build(args, env)
+
+    def _host_build(self, args: list[str], env: dict[str, str]) -> int:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
                                 cwd=os.getcwd(), env=env)
         assert proc.stdout is not None
@@ -1116,10 +1141,13 @@ class Builder:
                 self.elog(module, "generic", "module", f"post-{step}", "failed", "with", "error", str(res))
             return res
 
+        from scbi import parallel
+
         for step in words(self.get("STEPS")):
-            begin = steptime.start()
-            res = run_step(step)
-            steptime.record(d, module, variant, step, begin, res)
+            with parallel.heavy_step(d, step):
+                begin = steptime.start()
+                res = run_step(step)
+                steptime.record(d, module, variant, step, begin, res)
             if res != 0:
                 return res, is_uptodate
 

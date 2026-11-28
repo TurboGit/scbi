@@ -87,6 +87,7 @@ USAGE_OPTIONS = """
       | --progress[:bar|line|no] build progress on the terminal (bar)
    -n | --no-patch               do not apply patches
       | --check-deps[:error]     report the undeclared dependencies
+      | --parallel[=<k>]         build k modules at the same time (2)
       | --clear-cache            remove cached module's versions"""
 
 #  ini key -> driver variable (ini-apply-values)
@@ -99,7 +100,7 @@ INI_KV = {
 }
 
 INI_SKIP = (",setup,config,build,install,wrapup,force,modules,stat,"
-            "update,purge,archive,deps,safe,tar,no-patch,enable,run,check_deps,")
+            "update,purge,archive,deps,safe,tar,no-patch,enable,run,check_deps,parallel,")
 
 GETOPT_SHORT = "j:adefSIuscbilnpqvwWh"
 GETOPT_LONG = [
@@ -107,7 +108,7 @@ GETOPT_LONG = [
     "build,build-target:,install,clean-install,create-archive",
     "log,log:yes,log:no,log:on-failure,purge,purge:only",
     "prefix:,deps,deps:warning,archive,force,env:,no-patch",
-    "no-wrapup,wrapup,safe,standalone,check-deps,check-deps:error",
+    "no-wrapup,wrapup,safe,standalone,check-deps,check-deps:error,parallel::",
     "dry-run,jobs:,list-plan:",
     "progress,progress:bar,progress:line,progress:no",
 ]
@@ -239,7 +240,7 @@ class Driver:
             "SCBI_TESTS_OPTIONS": "", "DO_COLOR": "no", "SCBI_CBOLD": "", "SCBI_CTEXT": "",
             "SCBI_CCLEAR": "", "SCBI_CRED": "", "SCBI_CGREEN": "", "SCBI_CBLUE": "",
             "DO_SETUP": "yes", "DO_CONFIG": "yes", "DO_BUILD": "yes", "DO_INSTALL": "yes",
-            "DO_TEST": "no", "DO_WRAPUP": "yes", "DO_CHECK_DEPS": "no",
+            "DO_TEST": "no", "DO_WRAPUP": "yes", "DO_CHECK_DEPS": "no", "DO_PARALLEL": "no",
         }.items():
             s(name, value)
         for name in ("SCBI_ROOT", "SCBI_BDIR", "SCBI_CLANG_VERSION", "SCBI_GTK_VERSION",
@@ -306,6 +307,9 @@ class Driver:
         o = self.ini_get(section, "check-deps")
         if o:
             self.set("DO_CHECK_DEPS", o)
+        o = self.ini_get(section, "parallel")
+        if o:
+            self.set("DO_PARALLEL", o)
         o = self.ini_get(section, "run")
         if o:
             self.set("DO_RUN", "yes")
@@ -497,6 +501,12 @@ class Driver:
                 s("DO_CHECK_DEPS", "yes")
             elif a == "--check-deps:error":
                 s("DO_CHECK_DEPS", "error")
+            elif a == "--parallel":
+                if nxt.isdigit():
+                    s("DO_PARALLEL", nxt)
+                    i += 1
+                else:
+                    s("DO_PARALLEL", "yes")
             elif a == "--standalone":
                 s("DO_STANDALONE", "yes")
             elif a == "--clean-install":
@@ -821,7 +831,14 @@ class Driver:
         cached_plan = Path(f"{bdir}/.cache/plan-{planmd5}.json")
 
         plan_cached = False
-        if cached_plan.is_file():
+        from scbi import parallel
+
+        worker = parallel.is_worker(self)
+        if worker and self.environ.get(parallel.STATE_ENV):
+            #  a worker of a parallel build: the plan of the main process
+            plan_cached = True
+            parallel.load_state(self, self.environ[parallel.STATE_ENV])
+        elif cached_plan.is_file():
             plan_cached = True
             self.load_cached_plan(cached_plan)
         elif self.get("SCBI_PLAN"):
@@ -874,7 +891,7 @@ class Driver:
         self.modules = words(" ".join(smt))
 
         if plan_cached:
-            if (not subcmd or stat != "no") and self.plan.modver:
+            if (not subcmd or stat != "no") and self.plan.modver and not worker:
                 self.log.ilog("build", f"Using cached module plan ({planmd5[:20]})")
                 self.log.line_sep()
         else:
@@ -991,6 +1008,9 @@ class Driver:
     # ---------------------------------------------------------------- main
 
     def main(self, args: list[str]) -> int:
+        #  given to the workers of a parallel build (scbi.parallel)
+        self.raw_args = list(args)
+        self.start_cwd = os.getcwd()
         self.init_globals()
         self.ini_load_files()
         self.ini_apply_values("")
@@ -1062,9 +1082,12 @@ class Driver:
                 self.modules = order
         restore = self.start_progress(builder)
         try:
-            self.start_prefetch(builder)
-            for module in self.modules:
-                builder.handle_module("@root", module, "default", "no")
+            from scbi import parallel
+
+            if not parallel.run(self, builder):
+                self.start_prefetch(builder)
+                for module in self.modules:
+                    builder.handle_module("@root", module, "default", "no")
         finally:
             if builder.prefetcher is not None:
                 builder.prefetcher.shutdown()

@@ -795,6 +795,8 @@ The following options are supported:
 	\end{itemize}
 	This is a heuristic: only the files installed by modules of the sandbox are reported, a build without dependency files is not checked. It never changes the build. The ini key \code{check-deps} (\code{yes} or \code{error}) sets it too.
 
+	\item[\ddash{}parallel{[}=<k>{]}] \index{parallel build}Builds up to \code{k} modules at the same time (default 2), each by a process of the driver; needs \ddash{}deps (\seeref{parallel}). The ini key \code{parallel} (\code{yes} or a number) sets it too.
+
 	\item[\ddash{}safe] Safe mode: when a module is built, its previous build directory is removed first, so that an old configuration or old build artifacts cannot interfere with the new build.
 
 	\item[\ddash{}plugins=<directory>] The directory of the plug-ins, instead of \code{\$SCBI\_PLUGINS}.
@@ -824,6 +826,7 @@ The following keys are supported in the ini files:
 	\item \code{safe}, \code{tar}, \code{no-patch}, \code{clear-cache}: the options of the same name when set to \code{yes};
 	\item \code{deps}: \code{yes} for \ddash{}deps;
 	\item \code{check-deps}: \code{yes} or \code{error}, as \ddash{}check-deps;
+	\item \code{parallel}: \code{yes} or the number of modules, as \ddash{}parallel;
 	\item \code{modules}: the modules to build, as on the command line;
 	\item \code{enable}: the features to enable (comma or blank separated);
 	\item \code{options}: other options, as on the command line;
@@ -2728,6 +2731,30 @@ contains:
 The plug-in variables (\code{vars}) and the hook parameters are
 variables of the body, not environment variables (use \code{export VAR =
 ...} to give one to the commands).
+
+\subsection{Parallel build}
+\label{parallel}
+\index{parallel build}
+
+With \ddash{}parallel the independent modules of a build are handled at the same time. A sequential build leaves cores idle in the steps using one core: the configuration (\code{configure}, \code{cmake}), the installation, the setup of the sources, the end of a build (link); the parallel build runs these steps of a module while another one builds. The time of the steps of the last run, displayed by \ddash{}stat:full (\seeref{options}), tells how much can be gained: the share of the steps using one core.
+
+\begin{itemize}
+	\item A module is started when its dependencies (\code{depends}, \code{build-depends}, \code{tests-depends} with \ddash{}tests, the modules of a meta-module) are built, up to \code{k} at a time, in the order of a sequential build otherwise.
+
+	\item \index{SCBI\_BUILD\_SLOTS}The \code{build} and \code{tests} steps, which use many cores (\code{make -j\$SCBI\_JOBS}), wait for a build slot: \code{SCBI\_BUILD\_SLOTS}, 1 by default, so that one such step runs at a time and the machine is not overloaded. Two testsuites never run at the same time (some need the whole machine, or a fixed port). The other steps run freely.
+
+	\item Two modules sharing their directory in the sandbox (two variants of a module) or their VCS checkout are never handled at the same time. The global installations and the builds for the host (\code{host@}) are done one at a time.
+
+	\item Each module is built by a process of the driver with the options of the run and its build plan. The output of a module is displayed as one block when it ends, the modules in progress and their step in the status bar (\ddash{}progress). The report logs and the step logs are the ones of a sequential build.
+
+	\item On a failure, no new module is started; the modules in progress finish, then the build fails.
+
+	\item The build ids are the ones of a sequential build: a module built in parallel is up to date for a sequential build, and conversely.
+\end{itemize}
+
+The build is sequential, with a message, without \ddash{}deps, with \ddash{}dry-run, with a meta-module having a \code{plan} or an \code{aggregate} hook, when the global installation directory is not writable (\code{sudo} cannot ask for a password) and on Windows. With \ddash{}update:prefetch, each module updates its sources when it starts (as \ddash{}update).
+
+\cmd{scbi \ddash{}parallel=3 -d \ddash{}plan=ver mysoft}
 
 \subsection{Reproducing a step}
 \label{replay}

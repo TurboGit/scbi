@@ -4,7 +4,7 @@ SCBI — TODO
 Features worth adding, compared with other build systems (Spack, Yocto,
 Nix, Bazel...). Most valuable first.
 
-1. Parallel build of independent modules
+1. [DONE] Parallel build of independent modules (--parallel)
    The modules are built one after the other; only the downloads of
    --update:prefetch run in the background. A scheduler over the
    dependency graph would build independent modules at the same time,
@@ -12,9 +12,13 @@ Nix, Bazel...). Most valuable first.
    exist). Biggest wall-clock gain on wide build plans.
    - [DONE] step 0, measurement: wall and CPU time of each step
      (<target>-steps.log), summary of the last run in --stat:full.
-   - plan: modules built by driver subprocesses, one build slot for
-     the build and tests steps (plus a tests lock), the output of a
-     module printed as one block when it ends.
+   - [DONE] phase 1: modules built by driver subprocesses, one build
+     slot for the build and tests steps (plus a tests lock), the output
+     of a module printed as one block when it ends.
+   - phase 2: --keep-going; meta-modules with a plan or aggregate hook;
+     skip the worker of a module already up to date (start-up cost).
+   - phase 3: several build slots sharing a GNU make jobserver (needs a
+     plug-in convention instead of make -j$SCBI_JOBS, ninja >= 1.13).
 
 2. Archive integrity pinned in the plug-in
    The archive hook checks a SHA-1 downloaded from the same server as the
