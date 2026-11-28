@@ -2804,6 +2804,8 @@ With \ddash{}parallel the independent modules of a build are handled at the same
 
 	\item Each module is built by a process of the driver with the options of the run and its build plan. The output of a module is displayed as one block when it ends, the modules in progress and their step in the status bar (\ddash{}progress). The report logs and the step logs are the ones of a sequential build.
 
+	\item At the end, a summary tells how parallel the build was: the share of the time with 1, 2... modules running, the time with a free place but no module ready (the modules waiting for their dependencies: a chain of dependencies cannot be built in parallel), and the time the \code{build} and \code{tests} steps waited for a build slot (with one slot, the builds themselves are done one after the other: only the other steps overlap). The timeline of the build (each module started, its steps, the build slot taken and given back, its end, with the time) is in \file{\$SCBI\_LOGS/<day>/<target>-parallel.log}.
+
 	\item On a failure, no new module is started; the modules in progress finish, then the build fails.
 
 	\item The build ids are the ones of a sequential build: a module built in parallel is up to date for a sequential build, and conversely.

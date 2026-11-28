@@ -53,7 +53,7 @@ done''')
 """)
 
     # pd first, pa last, pb and pc (pX) in any order, each block whole
-    t.runs('grep -E "Building|parallel build" build.out | sed "s/ p[bc] / pX /"')
+    t.runs('grep -E "Building|parallel build: " build.out | sed "s/ p[bc] / pX /"')
     t.clean_diff("""\
 xxxx/xx/xx xx:xx:xx : parallel build: 4 module(s), 3 at a time, 1 build slot(s)
 xxxx/xx/xx xx:xx:xx : Building pd [default] (n/a)
@@ -106,3 +106,19 @@ xxxx/xx/xx xx:xx:xx : End Building pa [default] (n/a)
     t.grep('parallel build: not with --dry-run')
     t.runs('./scbi --parallel -d metaagg')
     t.grep('parallel build: meta-module metaagg (aggregate hook), building sequentially')
+
+    # what the parallel build did: a summary, a timeline
+    t.runs('./scbi --parallel=3 --force -d pa')
+    t.sh('cp $TEST_OUTPUT summary.out')
+    t.runs('grep -A4 "parallel build finished" summary.out | cut -d: -f4- | sed -E "s/[0-9]+:[0-9]+:[0-9]+/H:MM:SS/g; s/[0-9]+%/N%/g"')
+    t.clean_diff("""\
+ parallel build finished in H:MM:SS, 4 module(s)
+   running: 1 module N%, 2 modules N% of the time
+   a free place, the modules waiting for their dependencies: H:MM:SS (N%)
+   build and tests steps waiting for a build slot (SCBI_BUILD_SLOTS=1): H:MM:SS
+   timeline: <pwd>/.root/builds/.logs/x86_64-linux-gnu-parallel.log
+""")
+    t.runs('grep -c "build slot taken" .root/builds/.logs/x86_64-linux-gnu-parallel.log')
+    t.clean_diff("""\
+4
+""")

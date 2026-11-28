@@ -286,6 +286,8 @@ class Worker:
     step: str = "starting"
     slot: bool = False
     start: float = 0.0
+    #  waiting for a build slot since
+    waiting: float = 0.0
 
 
 class Scheduler:
@@ -301,6 +303,15 @@ class Scheduler:
         self.tmp = tempfile.mkdtemp(prefix="scbi-parallel-", dir=self._tmpdir())
         self.fifo = os.path.join(self.tmp, "slots")
         self.state = os.path.join(self.tmp, "plan.json")
+        #  what the build did: the time with n modules running, with a free
+        #  place but no module ready (dependencies), waiting for a slot
+        self.t0 = self.last = time.monotonic()
+        self.running_time: dict[int, float] = {}
+        self.cur_running = 0
+        self.cur_blocked = False
+        self.blocked_time = 0.0
+        self.slot_wait = 0.0
+        self.timeline = None
 
     def _tmpdir(self) -> str:
         bdir = self.d.get("SCBI_BDIR")
@@ -311,6 +322,16 @@ class Scheduler:
     # ------------------------------------------------------------ setup
 
     def prepare(self) -> None:
+        d = self.d
+        path = os.path.join(d.get("SCBI_LOGS"), d.get("TODAY"), f"{d.get('SCBI_TARGET')}-parallel.log")
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            self.timeline = open(path, "w")
+            self.timeline_path = path
+            self.timeline.write(f"# run {d.get('SCBI_RUN_ID')}: {len(self.order)} module(s), {self.width} at a time,"
+                                f" {self.slots} build slot(s)\n")
+        except OSError:
+            self.timeline = None
         plan = self.d.plan
         Path(self.state).write_text(json.dumps({"modver": plan.modver, "hist": plan.plan_hist,
                                                 "alias": plan.module_alias}))
@@ -318,6 +339,51 @@ class Scheduler:
         #  kept open by the main process: the tokens stay in the FIFO
         self.fifo_fd = os.open(self.fifo, os.O_RDWR | os.O_NONBLOCK)
         os.write(self.fifo_fd, b"+" * self.slots)
+
+    def event(self, w: "Worker | None", text: str) -> None:
+        """A line of the timeline: the time since the start, the module."""
+        if self.timeline is not None:
+            name = "" if w is None else (w.job.module if w.job.variant == "default"
+                                         else f"{w.job.module}/{w.job.variant}")
+            self.timeline.write(f"{time.monotonic() - self.t0:9.1f}  {name:<30} {text}\n")
+            self.timeline.flush()
+
+    def tick(self) -> None:
+        """The time since the last change, accounted to the state the build
+        was in; then the new state."""
+        now = time.monotonic()
+        dt = now - self.last
+        self.last = now
+        self.running_time[self.cur_running] = self.running_time.get(self.cur_running, 0.0) + dt
+        if self.cur_blocked:
+            self.blocked_time += dt
+        self.cur_running = len(self.running)
+        self.cur_blocked = (not self.failed and len(self.running) < self.width
+                            and any(j.state == "waiting" for j in self.order))
+
+    def summary(self) -> list[str]:
+        """What the parallel build did, for the user."""
+        total = time.monotonic() - self.t0
+
+        def hms(sec: float) -> str:
+            sec = int(round(sec))
+            return f"{sec // 3600}:{sec // 60 % 60:02d}:{sec % 60:02d}"
+
+        def pct(sec: float) -> str:
+            #  %%: the messages of the driver are printf formats
+            return f"{100 * sec / total:.0f}%%" if total > 0 else "0%%"
+
+        counts = ", ".join(f"{n} {'module' if n == 1 else 'modules'} {pct(t)}"
+                           for n, t in sorted(self.running_time.items()) if n > 0 and t > 0)
+        lines = [f"parallel build finished in {hms(total)}, {len(self.order)} module(s)",
+                 f"  running: {counts or 'none'} of the time",
+                 f"  a free place, the modules waiting for their dependencies: {hms(self.blocked_time)}"
+                 f" ({pct(self.blocked_time)})",
+                 f"  build and tests steps waiting for a build slot (SCBI_BUILD_SLOTS={self.slots}):"
+                 f" {hms(self.slot_wait)}"]
+        if self.timeline is not None:
+            lines.append(f"  timeline: {self.timeline_path}")
+        return lines
 
     def cleanup(self) -> None:
         for w in self.running.values():
@@ -328,6 +394,9 @@ class Scheduler:
         for p in (self.fifo, self.state):
             with contextlib.suppress(OSError):
                 os.unlink(p)
+        if self.timeline is not None:
+            self.event(None, "end")
+            self.timeline.close()
         with contextlib.suppress(OSError):
             os.rmdir(self.tmp)
 
@@ -359,8 +428,12 @@ class Scheduler:
         job.state = "running"
         name = job.module if job.variant == "default" else f"{job.module}/{job.variant}"
         progress = getattr(self.d, "progress", None)
-        if progress is not None:
+        #  the progress lines of the testsuite: one per module started (the
+        #  status bar shows the modules running, show())
+        if progress is not None and type(getattr(progress, "status", None)).__name__ == "Lines":
             progress.next(name)
+        self.event(w, "start")
+        self.tick()
         self.show()
 
     def ready(self) -> list[Job]:
@@ -398,12 +471,21 @@ class Scheduler:
     def _line(self, w: Worker, line: str) -> None:
         if line.startswith(STATUS_MARK):
             text = line[len(STATUS_MARK):]
+            now = time.monotonic()
             if text == "@slot+":
                 w.slot = True
+                if w.waiting:
+                    self.slot_wait += now - w.waiting
+                    w.waiting = 0.0
+                self.event(w, "build slot taken")
             elif text == "@slot-":
                 w.slot = False
+                self.event(w, "build slot given back")
             else:
                 w.step = text
+                if text.endswith("(waiting)"):
+                    w.waiting = now
+                self.event(w, text)
                 self.show()
             return
         w.output.append(line)
@@ -421,6 +503,8 @@ class Scheduler:
         w.job.state = "done" if rc == 0 else "failed"
         if rc != 0:
             self.failed = True
+        self.event(w, w.job.state)
+        self.tick()
         self.print_block(w.output)
         self.show()
 
@@ -458,10 +542,12 @@ class Scheduler:
                         self.launch(job)
                 if not self.running:
                     break
+                self.tick()
                 for key, _ in self.sel.select(timeout=1.0):
                     w = key.data
                     if not self.read(w):
                         self.finish(w)
+            self.tick()
         finally:
             self.cleanup()
         for job in self.order:
@@ -525,6 +611,10 @@ def run(driver, builder) -> bool:
     driver.log.ilog("build", f"parallel build: {len(jobs)} module(s), {k} at a time, "
                              f"{slots} build slot(s)")
     driver.log.line_sep()
-    if not Scheduler(driver, jobs, k, slots).run():
+    scheduler = Scheduler(driver, jobs, k, slots)
+    ok = scheduler.run()
+    for line in scheduler.summary():
+        driver.log.ilog("build", line)
+    if not ok:
         raise Exit(1)
     return True
