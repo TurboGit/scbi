@@ -2908,18 +2908,7 @@ A module is looked up in the stores when it has to be built, for a whole build (
 \end{itemize}
 A build installed from a store is reported with the trigger \code{from binary store <url>} and its steps \code{cached}; a failure (download, SHA-256, relocation) is a warning and the module is built.
 
-\subsubsection{scbi binary-store}
-\index{tools!binary-store}
-
-\begin{description}[font=\texttt]
-	\item[\ddash{}show-key {[}modules{]}] For each module of the build and its dependencies, the binary keys recorded by its last build (relocatable, and bound to the sandbox) and the stores having them.
-	\item[\ddash{}list {[}modules{]}] The entries of the stores (of the modules given, or all): variant, reference, kind, size, date, origin sandbox and key.
-	\item[\ddash{}explain <module>] Compares the components of the binary key of the last build of the module with the ones of the entries of the stores for its variant, and displays what differs (a variable of the environment, the key of a dependency, the OS...): why a build is not shared.
-	\item[\ddash{}gc {[}\ddash{}max-size=<S>{]} {[}\ddash{}older-than=<D>{]}] Removes from the writable stores the entries not used for \code{D} days (or \code{12h}, \code{4w}), and the least recently used ones beyond the size \code{S} (\code{500M}, \code{20G}; \code{SCBI\_BINARY\_STORE\_MAX\_SIZE} without option). An entry is used when written or installed (the time of its metadata in a file store, its date otherwise). With \ddash{}dry-run, the entries are listed, not removed.
-	\item[\ddash{}rm <key>...] Removes the entries of the keys (or of key prefixes of 8 characters at least, as displayed by \ddash{}list) from the writable stores (\ddash{}dry-run: listed only).
-\end{description}
-
-\cmd{scbi binary-store \ddash{}explain c-gmp}
+The stores are inspected and maintained with the \code{binary-store} sub-command (\seeref{binary-store-tool}).
 
 \subsection{Reproducing a step}
 \label{replay}
@@ -3157,6 +3146,53 @@ Some examples:
 \end{itemize}
 
 The keys are stored in the file \file{\$SCBI\_PLUGINS/.store} (\file{\$HOME/.config/scbi/.store} by default). A plug-in reads a key with \code{\$(store-key <key>)} (\seeref{yaml-functions}) and a command hook records one with \code{store-set-key <key> <value>} (\seeref{yaml-command-language}).
+
+\subsection{Binary store}
+\label{binary-store-tool}
+\index{binary store}
+\index{tools!binary-store}
+
+The \code{binary-store} sub-command inspects and maintains the binary stores (\seeref{binary-store}): which keys the modules have, which entries the stores hold, why a build is not shared, and the removal of entries.
+
+\cmd{scbi binary-store [options] [plugins]}
+
+The following options are supported:
+
+\begin{description}[font=\texttt]
+	\item[-h | \ddash{}help] Displays the usage and the options.
+
+	\item[\ddash{}show-key {[}modules{]}] For each module of the build and its dependencies, the binary keys recorded by its last build (relocatable, and bound to the sandbox) and the stores having them.
+
+	\item[\ddash{}list {[}modules{]}] The entries of the stores (of the modules given, or all): variant, reference, kind, size, date, origin sandbox and key.
+
+	\item[\ddash{}explain <module>] Compares the components of the binary key of the last build of the module with the ones of the entries of the stores for its variant, and displays what differs (a variable of the environment, the key of a dependency, the OS...): why a build is not shared.
+
+	\item[\ddash{}gc] Removes from the writable stores the entries not used for the time given by \ddash{}older-than, and the least recently used ones beyond the size given by \ddash{}max-size (\code{SCBI\_BINARY\_STORE\_MAX\_SIZE} without these options). An entry is used when written or installed (the time of its metadata in a file store, its date otherwise).
+
+	\item[\ddash{}max-size=<S>] With \ddash{}gc: the size of a store (\code{500M}, \code{20G}...).
+
+	\item[\ddash{}older-than=<D>] With \ddash{}gc: the entries not used for \code{D} days (or \code{12h}, \code{4w}).
+
+	\item[\ddash{}rm <key>...] Removes the entries of the keys (or of key prefixes of 8 characters at least, as displayed by \ddash{}list) from the writable stores.
+
+	\item[\ddash{}dry-run] With \ddash{}gc and \ddash{}rm: the entries are listed, not removed.
+\end{description}
+
+Some examples:
+
+\begin{itemize}
+	\item To see why \code{c-gmp} is built instead of installed from a store
+
+	\cmd{scbi binary-store \ddash{}explain c-gmp}
+
+	\item To list the entries of the stores for \code{c-gmp}
+
+	\cmd{scbi binary-store \ddash{}list c-gmp}
+
+	\item To see what would be removed to keep the stores under 20 GB, without the entries unused for 4 weeks
+
+	\cmd{scbi binary-store \ddash{}gc \ddash{}max-size=20G \ddash{}older-than=4w \ddash{}dry-run}
+\end{itemize}
 
 \subsection{Linter}
 \label{linter}
