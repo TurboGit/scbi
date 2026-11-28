@@ -20,7 +20,7 @@ Nix, Bazel...). Most valuable first.
    - phase 3: several build slots sharing a GNU make jobserver (needs a
      plug-in convention instead of make -j$SCBI_JOBS, ninja >= 1.13).
 
-2. Archive integrity pinned in the plug-in
+2. [DONE] Archive integrity pinned in the plug-in (archive-sha256)
    The archive hook checks a SHA-1 downloaded from the same server as the
    archive (or nothing). Add an optional sha256 (per version) in the
    archive hook, fail on mismatch, lint warning when missing.

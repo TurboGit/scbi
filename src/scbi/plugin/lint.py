@@ -211,6 +211,9 @@ class Linter:
         if "source-tree" in data:
             self.check_source_tree()
 
+        if "archive-sha256" in data:
+            self.check_archive_sha256()
+
         #  the variables used in the values of vars (expanded in every
         #  hook: all the hook parameters are known)
         for name, value in (data.get("vars") or {}).items():
@@ -277,6 +280,58 @@ class Linter:
         if not own and ("vcs" in self.data or "archive" in self.data):
             self.warning("source-tree", "no entry for the sources of the module (from the module or no from):"
                          " unused")
+
+    def check_archive_sha256(self) -> None:
+        """archive-sha256: "<sha256>  <file>" lines (sha256sum), one SHA-256
+        per file, an archive hook (or inherited)."""
+        from scbi.sources.archive.fetch import parse_sha256
+
+        try:
+            pdef = yamlfmt.from_data(self.name, {"archive-sha256": self.data["archive-sha256"]}, self.name)
+        except yamlfmt.FormatError:
+            return  # reported by check_hook
+        patterns = self._archive_files()
+        for key, body in pdef.hooks.items():
+            label = "archive-sha256" + (".cross" if key.cross else "") + (f".{key.qualifier}" if key.qualifier else "")
+            sums: dict[str, str] = {}
+            for text in _texts(body.items if isinstance(body, Values) else ()):
+                if "$" in text:
+                    continue
+                entry = parse_sha256(text)
+                if entry is None:
+                    self.error(label, f"{text!r} is not '<sha256>  <file>' (as printed by sha256sum)")
+                    continue
+                digest, file = entry
+                if sums.get(file, digest) != digest:
+                    self.error(label, f"two different SHA-256 for {file}")
+                sums[file] = digest
+                if patterns and not any(rx.fullmatch(file) for _, rx in patterns):
+                    files = ", ".join(sorted({p for p, _ in patterns}))
+                    self.error(label, f"{file} is not an archive of the archive hook ({files})")
+        if "archive" not in self.data and "inherit" not in self.data:
+            self.warning("archive-sha256", "no archive hook")
+
+    def _archive_files(self) -> list[tuple[str, re.Pattern]]:
+        """The file fields of the archive hook of the plug-in (all its
+        qualifiers) and their regular expressions: a variable ($VERSION...)
+        or a command substitution matches any text. Empty without archive
+        hook (inherited)."""
+        if "archive" not in self.data:
+            return []
+        try:
+            pdef = yamlfmt.from_data(self.name, {"archive": self.data["archive"]}, self.name)
+        except yamlfmt.FormatError:
+            return []
+        out = []
+        var = re.compile(r"\$\{[^}]*\}|\$\([^)]*\)|\$[A-Za-z_][A-Za-z0-9_]*")
+        for body in pdef.hooks.values():
+            items = body.items if isinstance(body, Values) else ()
+            if len(items) < 5 or not isinstance(items[4], str):
+                continue
+            pattern = items[4]
+            parts = var.split(pattern)
+            out.append((pattern, re.compile(".+".join(re.escape(p) for p in parts))))
+        return out
 
     def _env_defined(self) -> set[str]:
         """Variables set by the environment actions of the plug-in."""

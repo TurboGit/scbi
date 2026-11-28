@@ -38,6 +38,7 @@ SCBI-SHOW {version}
       | --freeze           build plan pinned to the sources last built
       | --json             modules and dependencies graph (JSON)
       | --sbom             software bill of materials (CycloneDX JSON)
+      | --archive-sha256   archive-sha256 lines of the archives
       | --stat             display some status of current setup"""
 
 
@@ -49,7 +50,7 @@ def main(driver, args: list[str]) -> int | None:
          "-l", "build-plan:history::,externals,externals:only,no-version",
          "-l", "filter:all,filter:dev,filter:runtime,module-ref",
          "-l", "module-ref:version,module-ref:variant,module-ref:full,resolved",
-         "-l", "freeze,json,sbom",
+         "-l", "freeze,json,sbom,archive-sha256",
          "--", *words(" ".join(args))],
         capture_output=True, text=True, env=driver.base_env())
     if proc.returncode != 0:
@@ -85,7 +86,7 @@ def main(driver, args: list[str]) -> int | None:
                 plan_filter = nxt
         elif a == "--resolved":
             do_resolved = True
-        elif a in ("--freeze", "--json", "--sbom"):
+        elif a in ("--freeze", "--json", "--sbom", "--archive-sha256"):
             do_output = a[2:]
         elif a in ("--module-ref", "--module-ref:version", "--module-ref:variant", "--module-ref:full"):
             do_mod_ver = {"--module-ref": "full", "--module-ref:version": "ver",
@@ -109,6 +110,10 @@ def main(driver, args: list[str]) -> int | None:
             from scbi.tools import freeze
 
             return freeze.freeze(driver, builder)
+        if do_output == "archive-sha256":
+            from scbi.tools import archivehash
+
+            return archivehash.show(driver, builder)
         from scbi.tools import sbom
 
         return sbom.show(driver, builder, do_output)

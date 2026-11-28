@@ -1589,6 +1589,31 @@ archive:
 	environment file (\seeref{env-files}) receives the six values of
 	the \code{archive} hook and prints them, possibly rewritten.
 
+	\item[archive-sha256 {[}common|<variant>{]}] \index{hook!archive-sha256}\label{hookarchivesha}The SHA-256 of the archives of the module, one \code{<sha256>  <file>} line per archive, as printed by \code{sha256sum} (the \code{*} binary marker accepted, the digest in upper or lower case): an upstream \file{SHA256SUMS} file can be pasted as is.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} none
+		\item[return] \tabto{2cm} array of \code{<sha256>  <file>}
+	\end{description}
+
+	Example:
+	\begin{lstlisting}[language={yaml}]
+archive:
+  proxy: default
+  options: none
+  protocol: curl
+  url: https://gmplib.org/download/gmp
+  file: gmp-$VERSION.tar.xz
+
+archive-sha256:
+  - a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898  gmp-6.3.0.tar.xz
+  - fd4829912cddd12f84181c3451cc752be224643e87fac497b69edddadc49b4f2  gmp-6.2.1.tar.xz
+\end{lstlisting}
+
+	The line used is the one of the file of the \code{archive} hook for the version built (\code{gmp-6.3.0.tar.xz} for \code{c-gmp:\#6.3.0}), so variants using different archives need nothing special. Before the archive is extracted (downloaded, prefetched or in the archive store), its SHA-256 is compared with this one: when they differ, the build fails (\code{SHA-256 mismatch}), nothing is extracted and an archive that can be downloaded is renamed \file{<file>.bad} (downloaded again at the next run; a local archive, the only copy, is kept). An archive already extracted is checked again only when its file or its SHA-256 in the plug-in changes. Without a line for the file, the archive is used without check, as before.
+
+	The hook is not part of the build id: adding a line does not rebuild the module. The lines of the archives of a build are displayed by \code{scbi show \ddash{}archive-sha256} (\seeref{show}). \code{scbi lint} checks the lines, that a file has only one SHA-256 and that the files are archives of the \code{archive} hook (its \code{file} field, a variable matching any text).
+
 	\item[patches {[}common|<variant>{]}] \index{hook!patches}The patch files to apply (in \code{\$SCBI\_PATCH}). \code{REF} is the version of the module, to apply a patch to some versions only.
 
 	\begin{description}[font=\textit,style=standard]
@@ -2903,13 +2928,17 @@ The following options are supported:
 		\item[name, type] The name of the plug-in or package; \code{module}, \code{meta-module} or \code{os-package}.
 		\item[variant, version] The variant and the version of the module reference (\code{\#<version>} for an archive, empty for the default one); the version of an OS package.
 		\item[license] The \code{license} hook (\seeref{hook-license}), \code{null} without it.
-		\item[source] The origin of the sources, \code{null} without sources: \code{type} (\code{git}, \code{mercurial}, \code{subversion}), \code{url}, \code{ref} and \code{revision} (the commit of the last build), or \code{type} \code{archive}, \code{url}, \code{file}, \code{version} and \code{sha1}. The credentials of the URLs are removed.
+		\item[source] The origin of the sources, \code{null} without sources: \code{type} (\code{git}, \code{mercurial}, \code{subversion}), \code{url}, \code{ref} and \code{revision} (the commit of the last build), or \code{type} \code{archive}, \code{url}, \code{file}, \code{version}, \code{sha1} and \code{sha256} (of the archive in the store). The credentials of the URLs are removed.
 		\item[built] Whether the module has been built in the sandbox.
 		\item[root] Whether the module was given on the command line.
 		\item[depends] Its direct dependencies: objects with the keys \code{id} and \code{kind} (\code{default} for \code{depends}, \code{build}, \code{modules} for the modules of a meta-module).
 	\end{description}
 
-	\item[\ddash{}sbom] \index{SBOM}\index{CycloneDX}Displays the software bill of materials of the build, in the CycloneDX 1.5 JSON format: the same modules as \ddash{}json as components, with their version (the reference built), license, hash (archives) and source location, and the dependencies. The time-stamp is the one of \code{SOURCE\_DATE\_EPOCH} when set, the serial number is derived from the content: the same build gives the same document.
+	\item[\ddash{}archive-sha256] \index{archive-sha256}Displays the lines of the \code{archive-sha256} hook (\seeref{hookarchivesha}) of the archives of the modules of the build and of their dependencies, computed from the archive store, preceded by a comment naming the module; an archive not downloaded yet is given as a comment. The lines are to be pasted in the plug-ins:
+
+	\cmd{scbi show \ddash{}archive-sha256 c-gmp:\#6.3.0}
+
+	\item[\ddash{}sbom] \index{SBOM}\index{CycloneDX}Displays the software bill of materials of the build, in the CycloneDX 1.5 JSON format: the same modules as \ddash{}json as components, with their version (the reference built), license, hashes (SHA-1 and SHA-256 of the archives) and source location, and the dependencies. The time-stamp is the one of \code{SOURCE\_DATE\_EPOCH} when set, the serial number is derived from the content: the same build gives the same document.
 
 	\item[\ddash{}stat] Displays the setup (see the \code{\ddash{}stat} option).
 \end{description}

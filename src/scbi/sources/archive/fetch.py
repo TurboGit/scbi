@@ -11,6 +11,7 @@ truncated its per-variant log with ``> $log`` for some commands).
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import hashlib
 import os
@@ -66,11 +67,11 @@ def get_archive(builder, module: str, variant: str, version: str, log: str,
         logger = dataclasses.replace(d.log, stderr=errlog)
         return _get_archive(builder, module, variant, tar, proxy, options, tarcp, tarurl, tarsrc, tardir,
                             archives, bdir, log, logger, out,
-                            downloaded=done.downloaded if done is not None else None)
+                            downloaded=done.downloaded if done is not None else None, version=version)
 
 
 def _get_archive(builder, module, variant, tar, proxy, options, tarcp, tarurl, tarsrc, tardir,
-                 archives, bdir, log, logger, out, downloaded: int | None = None) -> int:
+                 archives, bdir, log, logger, out, downloaded: int | None = None, version: str = "") -> int:
     """``downloaded``: the archive already checked / downloaded by the
     prefetch (0: unchanged, 1: downloaded), None: done here."""
     def elog(*msg: str) -> None:
@@ -98,6 +99,10 @@ def _get_archive(builder, module, variant, tar, proxy, options, tarcp, tarurl, t
         return 1
 
     mdir = f"{bdir}/{module}"
+    #  the SHA-256 given by the plug-in (archive-sha256), if any
+    if not verify_sha256(builder, module, variant, version, archives, tarsrc, mdir, elog,
+                         downloadable=tarcp.upper() != "NONE" and tarurl.upper() != "NONE"):
+        return 1
     if downloaded == 0 and os.path.isdir(f"{mdir}/archive-src"):
         return 0
 
@@ -187,6 +192,85 @@ def _download(io: _Io, cwd: str, tarcp: str, options: str, tarurl: str, tarsrc: 
 
     _rm_f(tmp_sha1)
     return do_download
+
+
+#  an item of the archive-sha256 hook: "<sha256>  <file>" (sha256sum, the
+#  binary marker * accepted)
+SHA256_LINE = re.compile(r"^([0-9A-Fa-f]{64})\s+\*?(\S(?:.*\S)?)\s*$")
+
+
+def parse_sha256(item: str) -> tuple[str, str] | None:
+    """(sha256, file) of an archive-sha256 item, None when invalid."""
+    m = SHA256_LINE.match(item.strip())
+    return (m.group(1).lower(), m.group(2)) if m else None
+
+
+def expected_sha256(builder, module: str, variant: str, version: str, file: str) -> str | None:
+    """The SHA-256 of ``file`` given by the archive-sha256 hook of the
+    module, None when not given."""
+    d = builder.d
+    try:
+        values = d.runner().variant_values(module, variant, "archive-sha256", [], d.plan,
+                                           builder.modules_list)
+    except Exception:  # noqa: BLE001 - reported by scbi lint
+        return None
+    for line in "\n".join(values).splitlines():
+        entry = parse_sha256(line)
+        if entry is not None and entry[1] == file:
+            return entry[0]
+    return None
+
+
+#  the archive checked last (expected SHA-256, file, size, time): not
+#  hashed again while they do not change
+_CHECKED = "archive-sha256-checked"
+
+
+def verify_sha256(builder, module: str, variant: str, version: str, archives: str, tarsrc: str,
+                  mdir: str, elog, downloadable: bool) -> bool:
+    """Checks the archive against the SHA-256 of the plug-in (true without
+    one). On a mismatch the sources extracted are removed and, when it can
+    be downloaded again, the archive is renamed <file>.bad (a local
+    archive, the only copy, is kept)."""
+    expected = expected_sha256(builder, module, variant, version, tarsrc)
+    if expected is None:
+        return True
+    path = os.path.join(archives, tarsrc)
+    try:
+        st = os.stat(path)
+    except OSError:
+        return True
+    stamp = f"{expected} {tarsrc} {st.st_size} {st.st_mtime_ns}\n"
+    checked = os.path.join(mdir, _CHECKED)
+    try:
+        with open(checked) as f:
+            if f.read() == stamp:
+                return True
+    except OSError:
+        pass
+    actual = file_sha256(path)
+    if actual == expected:
+        with contextlib.suppress(OSError):
+            os.makedirs(mdir, exist_ok=True)
+            with open(checked, "w") as f:
+                f.write(stamp)
+        return True
+    elog("archive", *words(tarsrc), "SHA-256", "mismatch", f"(expected {expected},", f"got {actual})")
+    if downloadable:
+        #  not used again: downloaded at the next run
+        with contextlib.suppress(OSError):
+            os.replace(path, f"{path}.bad")
+    for name in ("archive-src", "archive", "archive-sha1", _CHECKED):
+        _rm_rf(os.path.join(mdir, name))
+    return False
+
+
+def file_sha256(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def _sha1_value(path: str) -> str | None:

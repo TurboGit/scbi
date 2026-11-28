@@ -9,6 +9,7 @@ format, for the audit and vulnerability tools.
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 import time
@@ -47,6 +48,11 @@ def _source(driver, builder, node: Node) -> dict | None:
             src["file"] = data[5]
         if sr is not None and sr.id and sr.id != "NONE":
             src["sha1"] = sr.id
+        path = os.path.join(driver.get("SCBI_ARCHIVES"), src.get("file", ""))
+        if src.get("file") and os.path.isfile(path):
+            from scbi.sources.archive.fetch import file_sha256
+
+            src["sha256"] = file_sha256(path)
         return src
     data, rc = vcs_data(builder, node.module, node.variant)
     if rc != 0 or len(data) < 5 or data[3].upper() == "NONE":
@@ -144,8 +150,10 @@ def cyclonedx(driver, doc: dict) -> dict:
             c["version"] = version.lstrip("#")
         if m.get("license"):
             c["licenses"] = [{"expression": m["license"]}]
-        if src.get("sha1"):
-            c["hashes"] = [{"alg": "SHA-1", "content": src["sha1"]}]
+        hashes = [{"alg": alg, "content": src[key]} for alg, key in (("SHA-1", "sha1"), ("SHA-256", "sha256"))
+                  if src.get(key)]
+        if hashes:
+            c["hashes"] = hashes
         refs = []
         if src.get("type") == "archive" and src.get("url"):
             refs.append({"type": "distribution", "url": f"{src['url'].rstrip('/')}/{src.get('file', '')}"})

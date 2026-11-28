@@ -79,6 +79,10 @@ with the Bash driver of the `master` branch. The reference manual
   `--build-target=<target>`.
 - An item of `config-options` expanding to nothing is dropped.
 
+- **`archive-sha256`**: the SHA-256 of the archives (`sha256sum`
+  lines); an archive of a different SHA-256 is not extracted, the build
+  fails. Not part of the build id; checked by `scbi lint` (format, one
+  SHA-256 per file, files of the `archive` hook).
 - **`source-tree`**: the source tree of the build made of the sources of
   several modules (e.g. GCC, GNAT in `gcc/ada`, gcc-interface in
   `gcc/ada/gcc-interface`), entries applied in order, each one an exact
@@ -231,6 +235,8 @@ command language.
   sources, licenses, dependencies); `scbi show --sbom`: a CycloneDX 1.5
   SBOM. The new `license` hook (an SPDX expression) is not part of the
   build id.
+- `scbi show --archive-sha256`: the `archive-sha256` lines of the
+  archives of a build, to paste in the plug-ins.
 - `scbi schema`: the JSON Schema of the plug-ins (completion and help in
   the editors).
 - `scbi ini`: the sections of the ini files (`--json`).

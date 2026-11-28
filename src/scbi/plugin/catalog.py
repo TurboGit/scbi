@@ -20,7 +20,7 @@ from dataclasses import dataclass
 
 #  Canonical order (SCBI_ALL_HOOKS, also used by scbi-format)
 ALL_HOOKS = (
-    "plan", "vcs", "archive", "patches", "source-tree", "version", "only-explicit-build",
+    "plan", "vcs", "archive", "archive-sha256", "patches", "source-tree", "version", "only-explicit-build",
     "out-of-tree", "modules", "aggregate", "propagate-version", "build-depends",
     "tests-depends", "depends", "external-env", "build-env", "tests-env", "env",
     "setup", "config-options", "config", "build", "install", "wrapup", "prefix",
@@ -50,6 +50,8 @@ _SPECS = [
     HookSpec("plan", VALUE, ("PLAN",)),
     HookSpec("vcs", VALUE, ()),
     HookSpec("archive", VALUE, ("VERSION",)),
+    #  "<sha256>  <file>" lines (sha256sum): the archives checked
+    HookSpec("archive-sha256", VALUE, (), cumulative=True),
     HookSpec("patches", VALUE, STD_PARAMS + ("KIND", "REF"), cumulative=True),
     #  entries (from, to, exclude): the sources of several modules combined
     HookSpec("source-tree", VALUE),
@@ -90,6 +92,8 @@ DESCRIPTIONS = {
     "plan": "The name of the build plan of the meta-module.",
     "vcs": "The VCS of the module sources: proxy, options, protocol, url [, dir].",
     "archive": "The archive of the module sources: proxy, options, protocol, url, file [, dir].",
+    "archive-sha256": "The SHA-256 of the archives, '<sha256>  <file>' lines as printed by sha256sum:"
+                      " an archive of a different SHA-256 is not used.",
     "patches": "The patch files to apply (in $SCBI_PATCH); REF is the version of the module.",
     "source-tree": "The source tree of the build made of the sources of several modules, in order:"
                    " entries from (a dependency, or this plug-in: its name or none), to, exclude.",
@@ -154,7 +158,7 @@ HEADER_KEYS = ("plugin", "inherit", "with-variants", "vars", "functions", "varia
 _ORDER = (
     "license",
     "modules", "aggregate", "propagate-version", "plan",
-    "vcs", "archive", "patches", "source-tree",
+    "vcs", "archive", "archive-sha256", "patches", "source-tree",
     "depends", "build-depends", "tests-depends",
     "env", "build-env", "tests-env", "external-env",
     "setup", "out-of-tree", "only-explicit-build", "config-options",

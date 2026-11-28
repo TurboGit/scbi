@@ -18,7 +18,7 @@ import time
 
 from scbi.bashcompat import read_lines_escaped, words
 from scbi.sources import buildid
-from scbi.sources.archive.fetch import check_tool, get_archive
+from scbi.sources.archive.fetch import check_tool, get_archive, verify_sha256
 from scbi.sources.data import archive_data, archive_exists, display_ref, user_co_dir, vcs_data
 from scbi.sources.run import Run, command_env
 from scbi.sources.vcs import registry
@@ -244,6 +244,18 @@ class Sources:
                                         self.out(line.rstrip("\n"))
                         except OSError:
                             pass
+                        self.ilog(module, "cannot", "get/find/extract", "archive", "sources")
+                        return 1
+                else:
+                    #  extracted before: checked again when the SHA-256 of
+                    #  the plug-in or the archive changed
+                    def elog(*msg: str) -> None:
+                        self.d.log.elog(module, *msg)
+
+                    proto, url = (tar + [""] * 5)[3:5]
+                    if not verify_sha256(self.b, module, variant, ref, self.get("SCBI_ARCHIVES"), tarsrc,
+                                         os.getcwd(), elog,
+                                         downloadable=proto.upper() != "NONE" and url.upper() != "NONE"):
                         self.ilog(module, "cannot", "get/find/extract", "archive", "sources")
                         return 1
                 _write(f"source-id-{variant}", f"archive-{ref}")
