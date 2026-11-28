@@ -19,7 +19,6 @@ import os
 import shutil
 import subprocess
 import sys
-import time
 
 from scbi.bashcompat import read_lines_escaped, words
 from scbi.sources import buildid
@@ -388,7 +387,11 @@ class Generic:
                 vid = _md5(self._cat_src())
                 bid = buildid.build_id(self.b, prefix, target, self.formodule, self.module, vid)
             else:
-                bid = _md5((time.strftime("%c") + "").encode())
+                #  no sources (a native variant, a module with no vcs or
+                #  archive): the build id of the module reference, not of
+                #  the time, so that a purge does not change it (and
+                #  rebuild the modules depending on it)
+                bid = buildid.build_id(self.b, prefix, target, self.formodule, self.module, "no-sources")
             with open(f"build-id-{variant}", "w") as f:
                 #  get-build-id prints no newline, md5sum | cut does
                 f.write(bid if os.path.isdir("src") else bid + "\n")

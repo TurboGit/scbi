@@ -47,3 +47,17 @@ def test(t):
     t.grep('purge@ is only allowed on the command line')
     t.nruns('./scbi lint scripts.d/dep1.yaml')
     t.grep('purge@ is only allowed on the command line')
+
+    # a native variant purged: its build id does not change, the modules
+    # depending on it are not rebuilt
+    t.sh("""\
+GVER=$(gcc --version | grep gcc | awk '{print $4}')
+echo "mautov/auto:$GVER" > scripts.d/.plan-np
+printf '\\ndepends:\\n  - mautov\\n' >> scripts.d/lib1.yaml
+""")
+    t.runs('./scbi --no-patch --plan=np --deps lib1')
+    for _ in range(2):
+        t.runs('./scbi --no-patch --plan=np --deps purge@mautov lib1')
+        t.grep('Purging mautov for .*/native')
+        t.ngrep('mautov changed')
+        t.ngrep('build starting')
