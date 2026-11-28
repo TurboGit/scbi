@@ -130,21 +130,31 @@ def test_status_bar():
     #  the whole width (80: not a terminal), the elapsed time on the right
     width = bar.width()
     assert term.getvalue().endswith(
-        f"\x1b7\x1b[{rows};1H\x1b[2K\x1b[7m{'  elapsed 0s ':>{width}}\x1b[0m\x1b8")
+        f"\x1b7\x1b[{rows};1H\x1b[2K\x1b[7m{'  0s ':>{width}}\x1b[0m\x1b8")
     now[0] += 192
     Progress(bar, total=2).next("c-gmp")
     line = bar.line()
-    assert len(line) == width and line.startswith(" [1/2] c-gmp ") and line.endswith("  elapsed 3m12s ")
+    assert len(line) == width and line.startswith(" [1/2] c-gmp ") and line.endswith("  3m12s ")
     assert term.getvalue().endswith(f"\x1b[7m{line}\x1b[0m\x1b8")
     #  the elapsed time at the same place whatever the progress text; a
     #  long text cut before it
     bar.set("[2/2] " + "m" * 200)
-    assert len(bar.line()) == width and bar.line().endswith("m  elapsed 3m12s ")
+    assert len(bar.line()) == width and bar.line().endswith("m  3m12s ")
     bar.set("[2/2] c")
-    assert bar.line().index("elapsed") == line.index("elapsed")
+    assert bar.line().index("3m12s") == line.index("3m12s")
+    #  the room of the text: room for one more digit of the time
+    assert bar.room() == width - len("  3m12s ") - 2
+    #  an animated text: a function of the frame, the next one on each
+    #  refresh
+    bar.set(lambda frame: f"frame {frame}")
+    assert bar.line().startswith(" frame 0 ")
+    bar.frame += 1
+    assert bar.line().startswith(" frame 1 ")
+    #  the spinner: ASCII on a stream without encoding
+    assert bar.spinner() == "|/-\\"
     #  narrower than the elapsed time: its end only
-    bar.width = lambda: 10
-    assert bar.line() == "sed 3m12s "
+    bar.width = lambda: 5
+    assert bar.line() == "3m12s "[-5:]
     #  the output is written as is (it scrolls above the bar)
     size = len(term.getvalue())
     out.write("a line\n")

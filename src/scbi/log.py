@@ -415,15 +415,23 @@ class StatusLine:
 class StatusBar:
     """The ``bar`` mode of the build progress: a status bar on the last
     row of the terminal, the output scrolling above it (scroll region),
-    with the time elapsed since the start of the build, refreshed every
-    second by a thread. The terminal being resized (SIGWINCH) sets the
-    region again."""
+    with the time elapsed since the start of the build, refreshed by a
+    thread (every ``interval`` seconds, the speed of the spinner of a
+    parallel build). The terminal being resized (SIGWINCH) sets the
+    region again.
 
-    def __init__(self, stream: TextIO, clock: Callable[[], float] = time.monotonic, interval: float = 1.0):
+    The text is a string, or a function of the frame number (incremented
+    on each refresh) for an animated text."""
+
+    SPINNER = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+    SPINNER_ASCII = "|/-\\"
+
+    def __init__(self, stream: TextIO, clock: Callable[[], float] = time.monotonic, interval: float = 0.25):
         self.stream = stream
         self.clock = clock
         self.start = clock()
-        self.text = ""
+        self.text: str | Callable[[int], str] = ""
+        self.frame = 0
         self.at_line_start = True
         self.lock = threading.RLock()
         self.rows = 0
@@ -441,6 +449,15 @@ class StatusBar:
         except (OSError, ValueError, AttributeError):
             rows = 0
         return rows if rows >= 3 else 24
+
+    def spinner(self) -> str:
+        """The frames of a spinner: braille ones, ASCII ones when the
+        stream cannot write them."""
+        try:
+            self.SPINNER.encode(getattr(self.stream, "encoding", None) or "ascii")
+        except (UnicodeEncodeError, LookupError):
+            return self.SPINNER_ASCII
+        return self.SPINNER
 
     def elapsed(self) -> str:
         s = int(self.clock() - self.start)
@@ -476,12 +493,21 @@ class StatusBar:
         left (cut when too long), the elapsed time on the right (its place
         does not change with the progress text)."""
         width = self.width()
-        right = f"  elapsed {self.elapsed()} "
-        left = f" {self.text}" if self.text else ""
+        right = self._right()
+        text = self.text(self.frame) if callable(self.text) else self.text
+        left = f" {text}" if text else ""
         room = width - len(right)
         if room < 0:
             return right[-width:]
         return left[:room].ljust(room) + right
+
+    def _right(self) -> str:
+        return f"  {self.elapsed()} "
+
+    def room(self) -> int:
+        """The room of the progress text (the elapsed time on the right,
+        with room for one more digit, and the leading space)."""
+        return self.width() - len(self._right()) - 2
 
     def _draw(self) -> None:
         #  the last column written too: the cursor saved and restored around
@@ -493,6 +519,7 @@ class StatusBar:
     def _tick(self) -> None:
         while not self._stop.wait(self.interval):
             with self.lock:
+                self.frame += 1
                 self._draw()
 
     def resize(self) -> None:
@@ -507,7 +534,7 @@ class StatusBar:
     def draw(self) -> None:
         pass
 
-    def set(self, text: str) -> None:
+    def set(self, text: str | Callable[[int], str]) -> None:
         with self.lock:
             self.text = text
             self._draw()

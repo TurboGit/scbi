@@ -331,8 +331,7 @@ The build is controlled by a set of variables (the environment). SCBI comes with
 	\begin{description}
 		\item[bar] (default) a status bar on the last row of the terminal,
 		the whole width of it (the output scrolls above it), with on the
-		right the time elapsed since the start of the build, refreshed
-		every second;
+		right the time elapsed since the start of the build;
 		\item[line] a transient line after an empty line, at the end of
 		the output, redrawn after each output line and erased at the end;
 		\item[no] no progress (also with \ddash{}quiet).
@@ -2802,7 +2801,7 @@ With \ddash{}parallel the independent modules of a build are handled at the same
 
 	\item Two modules sharing their directory in the sandbox (two variants of a module) or their VCS checkout are never handled at the same time. The global installations and the builds for the host (\code{host@}) are done one at a time.
 
-	\item Each module is built by a process of the driver with the options of the run and its build plan. The output of a module is displayed as one block when it ends, the modules in progress and their step in the status bar (\ddash{}progress). The report logs and the step logs are the ones of a sequential build.
+	\item Each module is built by a process of the driver with the options of the run and its build plan. The output of a module is displayed as one block when it ends, the modules in progress and their step in the status bar (\ddash{}progress), for example \code{[3/42] gmp:B|~~mpfr:B\ldots{}~~isl:C|}: the prefix common to all the names (\code{c-}) is dropped, a step is a letter (\code{S} setup, \code{C} config, \code{B} build, \code{I} install, \code{T} tests, \code{W} wrapup) followed by a spinner while it runs or by \ldots{} while it waits for a build slot (a braille spinner, an ASCII one when the terminal cannot show it). The names are shortened when the line is too long. The report logs and the step logs are the ones of a sequential build.
 
 	\item At the end, a summary tells how parallel the build was: the share of the time with 1, 2... modules running, the time with a free place but no module ready (the modules waiting for their dependencies: a chain of dependencies cannot be built in parallel), and the time the \code{build} and \code{tests} steps waited for a build slot (with one slot, the builds themselves are done one after the other: only the other steps overlap). The timeline of the build (each module started, its steps, the build slot taken and given back, its end, with the time) is in \file{\$SCBI\_LOGS/<day>/<target>-parallel.log}.
 

@@ -45,6 +45,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from scbi.errors import Exit
+from scbi.log import StatusBar
 from scbi.plugin.resolve import get_hook
 
 try:
@@ -556,13 +557,16 @@ class Scheduler:
             return
         done = sum(1 for j in self.order if j.state in ("done", "failed"))
         items = [(w.job.module, w.step) for w in self.running.values()]
-        try:
-            #  the room of the text on the status bar (the elapsed time on
-            #  the right)
-            room = st.width() - len("  elapsed 0:00:00 ") - 1
-        except Exception:  # noqa: BLE001 - no terminal: no limit
-            room = 0
-        st.set(fit_status(f"[{done}/{len(self.order)}] ", items, room))
+        prefix = f"[{done}/{len(self.order)}] "
+        if not isinstance(st, StatusBar):
+            #  the line mode: no room limit, no spinner
+            st.set(fit_status(prefix, items, 0))
+            return
+        #  the room of the text on the status bar (the elapsed time on the
+        #  right), the spinner animated by the bar
+        room = st.room()
+        spinner = st.spinner()
+        st.set(lambda frame: fit_status(prefix, items, room, frame, spinner))
 
     # ------------------------------------------------------------- run
 
@@ -592,36 +596,50 @@ class Scheduler:
         return not self.failed
 
 
-def fit_status(prefix: str, items: list[tuple[str, str]], room: int) -> str:
+#  the steps in the status bar: one letter
+STEP_CODES = {"setup": "S", "config": "C", "build": "B", "install": "I", "tests": "T", "wrapup": "W"}
+
+
+def fit_status(prefix: str, items: list[tuple[str, str]], room: int,
+               frame: int | None = None, spinner: str = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏") -> str:
     """The modules running and their step on one line of ``room``
-    characters (0: no limit): all of them are shown, the steps then the
-    names shortened when needed."""
-    sep = " · "
+    characters (0: no limit): all of them are shown, the names shortened
+    when needed. A step is its letter (STEP_CODES) then a mark: … waiting
+    for a build slot, otherwise the frame ``frame`` of ``spinner`` (a
+    space without frame). The width does not depend on the frame."""
+    sep = "  "
+
+    def step(s: str) -> str:
+        waiting = s.endswith("(waiting)")
+        s = s[:-len("(waiting)")].strip() if waiting else s
+        if waiting:
+            mark = "…"
+        elif frame is None or not spinner:
+            mark = " "
+        else:
+            mark = spinner[frame % len(spinner)]
+        return STEP_CODES.get(s, s) + mark
 
     def line(parts: list[str]) -> str:
-        return prefix + sep.join(parts)
+        return (prefix + sep.join(parts)).rstrip()
 
-    full = line([f"{m}: {s}" for m, s in items])
-    if room <= 0 or len(full) <= room or not items:
-        return full
-    #  the steps shortened: build (waiting) -> waiting
-    steps = ["waiting" if s.endswith("(waiting)") else s for _, s in items]
-    short = line([f"{m}: {s}" for (m, _), s in zip(items, steps)])
-    if len(short) <= room:
-        return short
-    #  the names shortened, the same room for each module; a prefix common
-    #  to all the names (c-...) dropped first
+    #  a prefix common to all the names (c-...) dropped
     names = [m for m, _ in items]
     common = os.path.commonprefix(names)
     common = common[:common.rfind("-") + 1] if "-" in common else ""
     if common and all(len(m) > len(common) for m in names):
-        items = [(m[len(common):], s) for m, s in items]
+        names = [m[len(common):] for m in names]
+    steps = [step(s) for _, s in items]
+    full = line([f"{m}:{s}" for m, s in zip(names, steps)])
+    if room <= 0 or len(full) <= room or not items:
+        return full
+    #  the names shortened, the same room for each module
     each = (room - len(prefix) - len(sep) * (len(items) - 1)) // len(items)
     parts = []
-    for (m, _), s in zip(items, steps):
-        keep = max(each - len(s) - 2, 3)
+    for m, s in zip(names, steps):
+        keep = max(each - len(s) - 1, 3)
         name = m if len(m) <= keep else m[:keep - 1] + "…"
-        parts.append(f"{name}: {s}")
+        parts.append(f"{name}:{s}")
     return line(parts)
 
 
