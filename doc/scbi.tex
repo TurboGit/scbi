@@ -613,6 +613,8 @@ Variants of the build plan, separated with dots, can be given after its name. In
 
 The \code{scbi show \ddash{}build-plan} command lists the resulting build plan (all modules with their variant and version, \seeref{listing}).
 
+A build plan giving branches builds different sources over time. The \code{scbi show \ddash{}freeze} command writes the build plan of the last build with the references pinned (the commits built), to rebuild exactly the same sources later (\seeref{show}).
+
 The build plan file is the first one found in this order:
 
 \begin{description}
@@ -786,6 +788,13 @@ The following options are supported:
 
 	\item[-j | \ddash{}jobs=<n>] The number of parallel jobs, sets \code{SCBI\_JOBS} (\seeref{njobs}).
 
+	\item[\ddash{}check-deps{[}:error{]}] \index{check-deps}\label{check-deps}Reports the undeclared dependencies of the modules built: after the build of a module, the files its build used are compared with the files installed by the other modules of the sandbox (in their install directory in the sandbox or in their global install directory). A file of a module which is neither the module itself nor one of its dependencies (direct or not: \code{depends}, \code{build-depends}, the modules of the meta-modules) is reported, as a warning or, with \code{error}, as an error failing the build. Such a dependency only works because the module happens to be installed, and breaks on another machine or in another build order. The files used are taken from:
+	\begin{itemize}
+		\item the dependency files of the build tree (\file{*.d}, \file{.deps/*.Po}... written by \code{gcc -MD}, \code{automake}, \code{cmake} with Makefiles) and the dependencies recorded by \code{ninja} (\code{ninja -t deps}, for \code{cmake} and \code{meson});
+		\item the shared libraries needed by the ELF files installed by the module (\code{readelf -d}), when no library of the system has this name.
+	\end{itemize}
+	This is a heuristic: only the files installed by modules of the sandbox are reported, a build without dependency files is not checked. It never changes the build. The ini key \code{check-deps} (\code{yes} or \code{error}) sets it too.
+
 	\item[\ddash{}safe] Safe mode: when a module is built, its previous build directory is removed first, so that an old configuration or old build artifacts cannot interfere with the new build.
 
 	\item[\ddash{}plugins=<directory>] The directory of the plug-ins, instead of \code{\$SCBI\_PLUGINS}.
@@ -814,6 +823,7 @@ The following keys are supported in the ini files:
 	\item \code{setup}, \code{config}, \code{build}, \code{install}, \code{wrapup}, \code{color}, \code{quiet}, \code{force}, \code{update}, \code{purge}, \code{archive}, \code{stat}: the options of the same name (\code{yes} or \code{no}, or the value of the option; \code{update = prefetch} for \ddash{}update:prefetch);
 	\item \code{safe}, \code{tar}, \code{no-patch}, \code{clear-cache}: the options of the same name when set to \code{yes};
 	\item \code{deps}: \code{yes} for \ddash{}deps;
+	\item \code{check-deps}: \code{yes} or \code{error}, as \ddash{}check-deps;
 	\item \code{modules}: the modules to build, as on the command line;
 	\item \code{enable}: the features to enable (comma or blank separated);
 	\item \code{options}: other options, as on the command line;
@@ -1879,6 +1889,18 @@ build-runtime: make -C gcc -j$SCBI_JOBS gnatlib
 		\item[return] \tabto{2cm} NONE
 	\end{description}
 
+	\item[license] \index{hook!license}\label{hook-license}The license of the module, as an SPDX license expression (\code{MIT}, \code{GPL-2.0-or-later}, \code{LGPL-2.1-only OR MPL-2.0}...). It is only information, given by \code{scbi show \ddash{}json} and \code{\ddash{}sbom} (\seeref{show}): it is not part of the build id, a change does not rebuild the module.
+
+	\begin{description}[font=\textit,style=standard]
+		\item[parameter] \tabto{2cm} none
+		\item[return] \tabto{2cm} the license expression
+	\end{description}
+
+	Example:
+	\begin{lstlisting}[language={yaml}]
+license: LGPL-2.1-or-later
+\end{lstlisting}
+
 \end{description}
 
 \subsubsection{Calling order}
@@ -2828,6 +2850,32 @@ The following options are supported:
 	\cmd{scbi show \ddash{}resolved c-darktable/all}
 
 	\cmd{scbi \ddash{}target=x86\_64-w64-mingw32 show \ddash{}resolved c-gmp}
+
+	\item[\ddash{}freeze] \index{freeze}\index{build plan!frozen}Writes a build plan (\seeref{build-plan}) where the reference of each module of the build (the modules given, or all the modules of the build plan without any, and their dependencies) is pinned to the sources of its last build in the sandbox, as recorded in its \file{source-ref} file (\seeref{sandbox}): a Git module to the commit built, an archive to its version. The variants are the ones of the build, the \code{auto} variants resolved (\code{native} or not, so the plan is for the same OS). The references which cannot be pinned are kept as they are, with a comment saying why: Mercurial and Subversion modules (their references are branches or tags), the user's checkouts (\code{dev}), the modules not built yet or last built from another reference. The \code{skip} entries and the aliases of the build plan are kept, the OS packages are listed in comments with their version. Each module is preceded by a comment giving the reference it was built from. The number of modules not pinned is reported on the standard error.
+
+	Build, then freeze the plan into a local build plan:
+
+	\cmd{scbi \ddash{}plan=ver -d mysoft}
+
+	\cmd{scbi show \ddash{}plan=ver \ddash{}freeze mysoft > .scbi-plan-ver-2026-11}
+
+	\cmd{scbi \ddash{}plan=ver-2026-11 -d mysoft}
+
+	The last command rebuilds exactly the same sources, at any time.
+
+	\item[\ddash{}json] \index{json}Displays the graph of the build as a JSON document: the modules of the build (as for \ddash{}freeze) and the OS packages, the dependencies first. The document is an object with the keys \code{format} (1, incremented on an incompatible change), \code{plan}, \code{target}, \code{os} (\code{name}, \code{version}), \code{roots} (the modules given) and \code{modules}, a list of objects with the keys:
+	\begin{description}[font=\texttt,style=nextline]
+		\item[id] The identifier of the module in the document: its name, \code{host@<name>} for the build for the host of a cross build, \code{<for-module>=<name>} for a module referenced with \code{@for} in the build plan, \code{os:<package>} for an OS package.
+		\item[name, type] The name of the plug-in or package; \code{module}, \code{meta-module} or \code{os-package}.
+		\item[variant, version] The variant and the version of the module reference (\code{\#<version>} for an archive, empty for the default one); the version of an OS package.
+		\item[license] The \code{license} hook (\seeref{hook-license}), \code{null} without it.
+		\item[source] The origin of the sources, \code{null} without sources: \code{type} (\code{git}, \code{mercurial}, \code{subversion}), \code{url}, \code{ref} and \code{revision} (the commit of the last build), or \code{type} \code{archive}, \code{url}, \code{file}, \code{version} and \code{sha1}. The credentials of the URLs are removed.
+		\item[built] Whether the module has been built in the sandbox.
+		\item[root] Whether the module was given on the command line.
+		\item[depends] Its direct dependencies: objects with the keys \code{id} and \code{kind} (\code{default} for \code{depends}, \code{build}, \code{modules} for the modules of a meta-module).
+	\end{description}
+
+	\item[\ddash{}sbom] \index{SBOM}\index{CycloneDX}Displays the software bill of materials of the build, in the CycloneDX 1.5 JSON format: the same modules as \ddash{}json as components, with their version (the reference built), license, hash (archives) and source location, and the dependencies. The time-stamp is the one of \code{SOURCE\_DATE\_EPOCH} when set, the serial number is derived from the content: the same build gives the same document.
 
 	\item[\ddash{}stat] Displays the setup (see the \code{\ddash{}stat} option).
 \end{description}

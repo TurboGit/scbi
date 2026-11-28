@@ -61,7 +61,7 @@ PLAIN_KEY = "_"
 CROSS_KEY = "cross"
 
 #  Value hooks usually holding a single value, dumped as a scalar
-SCALAR_HOOKS = ("out-of-tree", "only-explicit-build", "prefix", "aggregate", "propagate-version", "plan")
+SCALAR_HOOKS = ("license", "out-of-tree", "only-explicit-build", "prefix", "aggregate", "propagate-version", "plan")
 
 
 class FormatError(PluginFormatError):

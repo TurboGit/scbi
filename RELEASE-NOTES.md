@@ -149,6 +149,10 @@ command language.
   and the environment of the dependencies. Reformatting a plug-in,
   reordering its keys, its variables, its functions or its dependencies,
   or changing its own `env` hook no longer triggers a rebuild.
+- **Undeclared dependencies**: `--check-deps[:error]` (ini key
+  `check-deps`) reports the files a module uses (dependency files of the
+  compilers and of Ninja, shared libraries of its ELF files) installed by
+  a module of the sandbox which is not one of its dependencies.
 - **Aggregation**: the dependencies of the modules aggregated by a direct
   aggregate meta-module are not aggregated; a `build-depends` on a
   meta-module never uses the aggregated mode.
@@ -210,6 +214,13 @@ command language.
   one line inline); `--replace`, `--stdin`.
 - `scbi show --resolved`: the plug-in of a module as the driver uses it
   for a variant and a target.
+- `scbi show --freeze`: the build plan of the last build with every
+  reference pinned (Git commits, archive versions), to rebuild the same
+  sources later; the references not pinned are commented.
+- `scbi show --json`: the graph of the build (modules, versions,
+  sources, licenses, dependencies); `scbi show --sbom`: a CycloneDX 1.5
+  SBOM. The new `license` hook (an SPDX expression) is not part of the
+  build id.
 - `scbi schema`: the JSON Schema of the plug-ins (completion and help in
   the editors).
 - `scbi ini`: the sections of the ini files (`--json`).

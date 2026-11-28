@@ -86,6 +86,7 @@ USAGE_OPTIONS = """
       | --stat[:short|full]      display some status of current setup
       | --progress[:bar|line|no] build progress on the terminal (bar)
    -n | --no-patch               do not apply patches
+      | --check-deps[:error]     report the undeclared dependencies
       | --clear-cache            remove cached module's versions"""
 
 #  ini key -> driver variable (ini-apply-values)
@@ -98,7 +99,7 @@ INI_KV = {
 }
 
 INI_SKIP = (",setup,config,build,install,wrapup,force,modules,stat,"
-            "update,purge,archive,deps,safe,tar,no-patch,enable,run,")
+            "update,purge,archive,deps,safe,tar,no-patch,enable,run,check_deps,")
 
 GETOPT_SHORT = "j:adefSIuscbilnpqvwWh"
 GETOPT_LONG = [
@@ -106,7 +107,7 @@ GETOPT_LONG = [
     "build,build-target:,install,clean-install,create-archive",
     "log,log:yes,log:no,log:on-failure,purge,purge:only",
     "prefix:,deps,deps:warning,archive,force,env:,no-patch",
-    "no-wrapup,wrapup,safe,standalone",
+    "no-wrapup,wrapup,safe,standalone,check-deps,check-deps:error",
     "dry-run,jobs:,list-plan:",
     "progress,progress:bar,progress:line,progress:no",
 ]
@@ -233,7 +234,7 @@ class Driver:
             "SCBI_TESTS_OPTIONS": "", "DO_COLOR": "no", "SCBI_CBOLD": "", "SCBI_CTEXT": "",
             "SCBI_CCLEAR": "", "SCBI_CRED": "", "SCBI_CGREEN": "", "SCBI_CBLUE": "",
             "DO_SETUP": "yes", "DO_CONFIG": "yes", "DO_BUILD": "yes", "DO_INSTALL": "yes",
-            "DO_TEST": "no", "DO_WRAPUP": "yes",
+            "DO_TEST": "no", "DO_WRAPUP": "yes", "DO_CHECK_DEPS": "no",
         }.items():
             s(name, value)
         for name in ("SCBI_ROOT", "SCBI_BDIR", "SCBI_CLANG_VERSION", "SCBI_GTK_VERSION",
@@ -297,6 +298,9 @@ class Driver:
         o = self.ini_get(section, "deps")
         if o:
             self.set("DEPS", o)
+        o = self.ini_get(section, "check-deps")
+        if o:
+            self.set("DO_CHECK_DEPS", o)
         o = self.ini_get(section, "run")
         if o:
             self.set("DO_RUN", "yes")
@@ -484,6 +488,10 @@ class Driver:
                 s("DRY_RUN", "yes")
             elif a == "--safe":
                 s("SAFE_MODE", "yes")
+            elif a == "--check-deps":
+                s("DO_CHECK_DEPS", "yes")
+            elif a == "--check-deps:error":
+                s("DO_CHECK_DEPS", "error")
             elif a == "--standalone":
                 s("DO_STANDALONE", "yes")
             elif a == "--clean-install":

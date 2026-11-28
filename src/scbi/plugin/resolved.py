@@ -155,13 +155,15 @@ def _cache(driver, name: str) -> dict:
 def resolved_md5(driver, module: str, variant: str, kind: str, ref: str) -> str:
     """md5 of the canonical text of the resolved plug-in without its
     ``env`` hook (not used by the build of the module itself: see
-    env_md5)."""
+    env_md5) and its ``license`` hook."""
     target = driver.get("SCBI_TARGET")
     key = (module, variant, kind, ref, target)
     cache = _cache(driver, "plugin")
     if key not in cache:
         pdef = resolve_module(driver, module, variant, kind, ref)
         pdef.hooks.pop(HookKey("env"), None)
+        #  nor its license (information only)
+        pdef.hooks.pop(HookKey("license"), None)
         #  the order of the variables and functions of the file has no
         #  meaning (the hooks are already in the canonical order): moving
         #  them must not change the build id

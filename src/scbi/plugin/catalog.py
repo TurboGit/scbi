@@ -24,7 +24,7 @@ ALL_HOOKS = (
     "out-of-tree", "modules", "aggregate", "propagate-version", "build-depends",
     "tests-depends", "depends", "external-env", "build-env", "tests-env", "env",
     "setup", "config-options", "config", "build", "install", "wrapup", "prefix",
-    "tests", "run",
+    "tests", "run", "license",
 )
 
 #  Kinds
@@ -77,6 +77,8 @@ _SPECS = [
     HookSpec("tests", COMMAND, STD_PARAMS + ("OPTIONS",)),
     #  run: functions called in sequence in a shell by "scbi shell --run"
     HookSpec("run", COMMAND, cumulative=True),
+    #  license: the SPDX license expression of the module (SBOM)
+    HookSpec("license", VALUE, ()),
 ]
 
 HOOKS: dict[str, HookSpec] = {s.name: s for s in _SPECS}
@@ -116,6 +118,7 @@ DESCRIPTIONS = {
     "prefix": "The global install directory of the module: NONE skips the global installation.",
     "tests": "Runs the testsuite of the module (--tests).",
     "run": "The command line run by scbi shell --run without argument.",
+    "license": "The license of the module, an SPDX expression (MIT, GPL-2.0-or-later...): scbi show --sbom.",
     "plugin": "The name of the plug-in (optional): it must match the file name.",
     "inherit": "Plug-ins whose hooks are inherited: from, hooks, custom-hooks, variants, name.",
     "with-variants": "Variants using OS packages, with no build step: {<variant>: {packages: [...], env: [...]}}.",
@@ -149,6 +152,7 @@ FINAL_STEP = HookSpec(
 #  between its pre- and post- hooks), others, meta-modules
 HEADER_KEYS = ("plugin", "inherit", "with-variants", "vars", "functions", "variants")
 _ORDER = (
+    "license",
     "modules", "aggregate", "propagate-version", "plan",
     "vcs", "archive", "patches", "source-tree",
     "depends", "build-depends", "tests-depends",

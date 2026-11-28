@@ -40,7 +40,8 @@ install: make install
 - Hooks: `vcs`, `archive`, `patches`, `depends`, `build-depends`,
   `tests-depends`, `env`, `build-env`, `tests-env`, `external-env`,
   `setup`, `out-of-tree`, `config`, `config-options`, `build`, `install`,
-  `wrapup`, `prefix`, `tests`, `run`, `version`, `pre-<step>`/`post-<step>`;
+  `wrapup`, `prefix`, `tests`, `run`, `version`, `license`,
+  `pre-<step>`/`post-<step>`;
   meta-modules use `modules`, `aggregate`, `propagate-version`, `plan`.
   A hook value is its body or a mapping of qualifiers (`_`, `common`,
   `default`, a variant, `cross:`). See *Hooks* in the doc for parameters

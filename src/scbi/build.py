@@ -1112,6 +1112,13 @@ class Builder:
                 self.elog(module, "generic", "module", f"post-{step}", "failed", "with", "error", str(res))
                 return res, is_uptodate
 
+        if (self.get("DO_CHECK_DEPS") in ("yes", "error") and is_uptodate == "no"
+                and self.get("DO_BUILD") != "no" and not keep):
+            from scbi import depcheck
+
+            if depcheck.check(self, formodule, modref, module, tvdir) != 0:
+                return 1, is_uptodate
+
         final = self.d.envfile.hook("module_final_step")
         if final is not None:
             self.ilog(module, "final", "step", "starting")

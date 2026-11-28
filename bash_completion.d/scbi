@@ -8,7 +8,7 @@ _SCBI_ARGS="${_SCBI_COMMON} -t -S --no-setup -W --no-wrapup -I
 --purge:only -d --deps -a --create-archive -h --help -j --jobs=
 --target= --ini= --env= -e --tests:only --plan= -n --no-patch
 --archive --deps:warning --dry-run -w --wrapup --force --enable-
---safe --build-dir --build-target= --version --clean-install --log:yes
+--safe --check-deps --check-deps:error --build-dir --build-target= --version --clean-install --log:yes
 --log:no --log:on-failure --stat --stat: --progress --progress: --prefix=
 --color:dark --color:light --color:no --clear-cache"
 
@@ -23,7 +23,7 @@ _SCBI_INI_ARGS="--help --json"
 
 _SCBI_SHL_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --mode:use --mode:sandbox --mode:dev --mode:tests --run --stat --stat:"
 
-_SCBI_SHO_ARGS="${_SCBI_COMMON} --env= -e --depends: --rdepends --externals --externals:only --no-version --filter: --build-plan --build-plan:history --module-ref --module-ref:version --module-ref:variant --module-ref:full --resolved --stat --stat:"
+_SCBI_SHO_ARGS="${_SCBI_COMMON} --env= -e --depends: --rdepends --externals --externals:only --no-version --filter: --build-plan --build-plan:history --module-ref --module-ref:version --module-ref:variant --module-ref:full --resolved --freeze --json --sbom --stat --stat:"
 
 _SCBI_STR_ARGS="${_SCBI_COMMON} --env= -e --list-keys -l --list --list:full -d --delete"
 

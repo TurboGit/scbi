@@ -35,6 +35,9 @@ SCBI-SHOW {version}
       | --build-plan:n     list current plan
       | --module-ref:n     display variant/version of specific module
       | --resolved         display the plug-in resolved for the module
+      | --freeze           build plan pinned to the sources last built
+      | --json             modules and dependencies graph (JSON)
+      | --sbom             software bill of materials (CycloneDX JSON)
       | --stat             display some status of current setup"""
 
 
@@ -46,6 +49,7 @@ def main(driver, args: list[str]) -> int | None:
          "-l", "build-plan:history::,externals,externals:only,no-version",
          "-l", "filter:all,filter:dev,filter:runtime,module-ref",
          "-l", "module-ref:version,module-ref:variant,module-ref:full,resolved",
+         "-l", "freeze,json,sbom",
          "--", *words(" ".join(args))],
         capture_output=True, text=True, env=driver.base_env())
     if proc.returncode != 0:
@@ -56,6 +60,7 @@ def main(driver, args: list[str]) -> int | None:
 
     do_deps, do_ext, do_rdeps, list_ver, filt = driver.get("DO_DEPS") or "no", "no", "true", "yes", "all"
     do_plan, plan_filter, do_mod_ver, do_resolved = "no", "", "no", False
+    do_output = ""
     i = 0
     while i < len(opts):
         a = opts[i]
@@ -80,6 +85,8 @@ def main(driver, args: list[str]) -> int | None:
                 plan_filter = nxt
         elif a == "--resolved":
             do_resolved = True
+        elif a in ("--freeze", "--json", "--sbom"):
+            do_output = a[2:]
         elif a in ("--module-ref", "--module-ref:version", "--module-ref:variant", "--module-ref:full"):
             do_mod_ver = {"--module-ref": "full", "--module-ref:version": "ver",
                           "--module-ref:variant": "var", "--module-ref:full": "full"}[a]
@@ -92,6 +99,19 @@ def main(driver, args: list[str]) -> int | None:
 
     if do_ext != "no" and do_deps == "no":
         do_deps = "yes"
+
+    if do_output:
+        from scbi.build import Builder
+
+        driver.set("DO_QUIET", "yes")
+        builder = Builder(driver)
+        if do_output == "freeze":
+            from scbi.tools import freeze
+
+            return freeze.freeze(driver, builder)
+        from scbi.tools import sbom
+
+        return sbom.show(driver, builder, do_output)
 
     if do_deps != "no":
         driver.set("DO_DEPS", do_deps)
