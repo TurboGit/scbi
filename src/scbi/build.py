@@ -1187,7 +1187,10 @@ class Builder:
             if not trace:
                 self.ilog(module, *words("warning: strace not found, --check-deps:trace without trace"))
 
+        progress = getattr(d, "progress", None)
         for step in words(self.get("STEPS")):
+            if progress is not None and not self.worker:
+                progress.step(step)
             with parallel.heavy_step(d, step):
                 begin = steptime.start()
                 if trace and step in depcheck.TRACED_STEPS:

@@ -2811,7 +2811,7 @@ With \ddash{}parallel the independent modules of a build are handled at the same
 	\item The build ids are the ones of a sequential build: a module built in parallel is up to date for a sequential build, and conversely.
 \end{itemize}
 
-The build is sequential, with a message, without \ddash{}deps, with \ddash{}dry-run, with a meta-module having a \code{plan} or an \code{aggregate} hook, when the global installation directory is not writable (\code{sudo} cannot ask for a password) and on Windows. With \ddash{}update:prefetch, each module updates its sources when it starts (as \ddash{}update).
+The build is sequential, with a message (at the start and at the end of the build), without \ddash{}deps, with \ddash{}dry-run, with a meta-module having a \code{plan} or an \code{aggregate} hook, when the global installation directory is not writable (\code{sudo} cannot ask for a password) and on Windows. With \ddash{}update:prefetch, each module updates its sources when it starts (as \ddash{}update).
 
 \cmd{scbi \ddash{}parallel=3 -d \ddash{}plan=ver mysoft}
 

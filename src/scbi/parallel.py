@@ -642,6 +642,8 @@ def run(driver, builder) -> bool:
             reason = "error in the dependencies"
     if reason:
         driver.log.ilog("build", f"parallel build: {reason}, building sequentially")
+        #  repeated at the end of the build (scbi.driver)
+        driver.parallel_fallback = reason
         return False
     try:
         slots = int(driver.get("SCBI_BUILD_SLOTS") or "1")

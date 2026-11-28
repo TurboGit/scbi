@@ -574,10 +574,19 @@ class Progress:
 
     def next(self, name: str) -> None:
         self.count += 1
+        self.name = name
         if self.status is None:
             return
         self.total = max(self.total, self.count)
         self.status.set(f"[{self.count}/{self.total}] {name}")
+
+    def step(self, step: str) -> None:
+        """The step of the module in progress: ``[n/N] module: step``."""
+        name = getattr(self, "name", "")
+        #  not the progress lines of the testsuite (one per module)
+        if self.status is None or not name or type(self.status).__name__ == "Lines":
+            return
+        self.status.set(f"[{self.count}/{self.total}] {name}: {step}")
 
     def close(self) -> None:
         if self.status is not None:

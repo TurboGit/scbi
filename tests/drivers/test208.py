@@ -91,6 +91,9 @@ xxxx/xx/xx xx:xx:xx : End Building pa [default] (n/a)
     # without --deps: sequential
     t.runs('./scbi --parallel pd')
     t.grep('parallel build: needs --deps, building sequentially')
+    # repeated at the end
+    t.sh('tail -1 $TEST_OUTPUT > x; mv x $TEST_OUTPUT')
+    t.grep('parallel build: needs --deps, the build was sequential')
 
     # a meta-module: its modules first, then its wrapup; then nothing to
     # rebuild sequentially

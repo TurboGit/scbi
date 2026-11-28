@@ -1103,6 +1103,11 @@ class Driver:
             self.progress.close()
             restore()
 
+        reason = getattr(self, "parallel_fallback", "")
+        if reason:
+            #  said at the start too: easily missed in a long build
+            self.log.ilog("build", f"parallel build: {reason}, the build was sequential")
+
         if not parallel.is_worker(self) and self.get("DRY_RUN") != "yes":
             #  SCBI_BINARY_STORE_MAX_SIZE: the writable binary stores reduced
             from scbi.binstore import gc
