@@ -40,10 +40,13 @@ Nix, Bazel...). Most valuable first.
    - [DONE] phase 2: http(s) stores, transports of the environment file
      (binary-store-get/put/list, binary-key), binary-stores key,
      --binary-store=<url>|:pull|:no, ini key, --explain, --list.
-   - patchelf for longer RPATHs: left out (not available to test, and
-     patchelf may leave the old RPATH string: a longer local path is a
-     miss, the module is built).
-   - phase 3: --gc, --rm, size limit, aggregate meta-modules, signatures.
+   - [DONE] patchelf for longer RPATHs (patchelf 0.18 leaves no trace of
+     the old one; checked after relocation anyway).
+   - [DONE] phase 3: --gc (--max-size, --older-than, least recently used
+     first), --rm, SCBI_BINARY_STORE_MAX_SIZE, signatures
+     (binary-store-sign/verify), binary-store-delete.
+   - aggregate meta-modules: not stored (their wrapup only copies the
+     installations of their modules, which are in the store).
    The build id is a content hash: look up a binary archive by build id
    (local directory, shared URL) and install it instead of building.
    Shares builds between machines and CI, makes purge/plan switching

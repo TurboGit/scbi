@@ -90,9 +90,10 @@ class RelocationError(Exception):
     """The installation cannot be relocated here."""
 
 
-def relocate(tree: str, files: list[dict], mapping: list[tuple[str, str]]) -> None:
+def relocate(tree: str, files: list[dict], mapping: list[tuple[str, str]], patchelf: str | None = None) -> None:
     """Replaces in the listed files the origin roots by the local ones
-    (mapping: (origin, local) pairs)."""
+    (mapping: (origin, local) pairs). ``patchelf``: its path, to set an
+    ELF RPATH/RUNPATH longer than the origin one."""
     mapping = [(o.rstrip("/"), n.rstrip("/")) for o, n in mapping if o.rstrip("/") != n.rstrip("/")]
     if not mapping:
         return
@@ -115,7 +116,14 @@ def relocate(tree: str, files: list[dict], mapping: list[tuple[str, str]]) -> No
         if kind == TEXT:
             new = sub(data)
         elif kind == BINARY:
-            new = _sub_cstrings(data, pattern, sub)
+            try:
+                new = _sub_cstrings(data, pattern, sub)
+            except RelocationError:
+                if patchelf is None or not data.startswith(b"\x7fELF"):
+                    raise
+                #  a longer RPATH: set by patchelf, the other strings padded
+                data = _set_rpath(patchelf, path, pattern, sub)
+                new = _sub_cstrings(data, pattern, sub)
         else:
             raise RelocationError(f"{entry['path']}: not relocatable")
         if new != data:
@@ -126,6 +134,25 @@ def relocate(tree: str, files: list[dict], mapping: list[tuple[str, str]]) -> No
                 f.write(new)
                 f.truncate()
             os.chmod(path, mode)
+
+
+def _set_rpath(patchelf: str, path: str, pattern: re.Pattern, sub) -> bytes:
+    """The RPATH (or RUNPATH) of an ELF file relocated by patchelf; the new
+    content of the file. RelocationError when it has no origin path."""
+    import subprocess
+
+    proc = subprocess.run([patchelf, "--print-rpath", path], capture_output=True)
+    rpath = proc.stdout.rstrip(b"\n")
+    if proc.returncode != 0 or not pattern.search(rpath):
+        raise RelocationError("the local path is longer than the origin one (in a binary file)")
+    mode = os.stat(path).st_mode
+    os.chmod(path, mode | 0o200)
+    proc = subprocess.run([patchelf, "--set-rpath", sub(rpath), path], capture_output=True)
+    os.chmod(path, mode)
+    if proc.returncode != 0:
+        raise RelocationError(f"patchelf: {proc.stderr.decode(errors='replace').strip()}")
+    with open(path, "rb") as f:
+        return f.read()
 
 
 def _sub_cstrings(data: bytes, pattern: re.Pattern, sub) -> bytes:

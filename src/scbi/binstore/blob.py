@@ -128,7 +128,7 @@ def unpack(driver, meta: dict, tarball: str, tvdir: str, local_roots: dict[str, 
             os.makedirs(install)
         mapping = [(path, local_roots[k]) for k, path in meta["origin"].items()
                    if path and local_roots.get(k)]
-        relocate.relocate(install, meta.get("relocations", []), mapping)
+        relocate.relocate(install, meta.get("relocations", []), mapping, patchelf=driver.which("patchelf"))
         left = relocate.remaining(install, meta.get("relocations", []), mapping)
         if left:
             raise relocate.RelocationError(f"origin paths left in {', '.join(left[:3])}")

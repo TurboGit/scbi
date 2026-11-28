@@ -64,6 +64,19 @@ class Store:
         """The names of the files in the directory ``rel``."""
         return []
 
+    def delete(self, rel: str) -> None:
+        """Removes the file ``rel`` (nothing when it is not there)."""
+        raise StoreError(f"{self.url}: cannot remove files")
+
+    def last_used(self, rel: str) -> float | None:
+        """The time the file was last used (written or read), None when the
+        store does not know it."""
+        return None
+
+    def touch(self, rel: str) -> None:
+        """Records that the file is used (the least recently used entries
+        are removed first by --gc)."""
+
 
 class FileStore(Store):
     """A directory: a local disk or a NFS mount. The directories and the
@@ -106,6 +119,24 @@ class FileStore(Store):
             return sorted(os.listdir(os.path.join(self.root, rel)))
         except OSError:
             return []
+
+    def delete(self, rel: str) -> None:
+        try:
+            os.unlink(os.path.join(self.root, rel))
+        except FileNotFoundError:
+            pass
+        except OSError as e:
+            raise StoreError(f"{self.url}: {e.strerror or e}") from None
+
+    def last_used(self, rel: str) -> float | None:
+        try:
+            return os.stat(os.path.join(self.root, rel)).st_mtime
+        except OSError:
+            return None
+
+    def touch(self, rel: str) -> None:
+        with contextlib.suppress(OSError):
+            os.utime(os.path.join(self.root, rel))
 
 
 class HttpStore(Store):
@@ -155,6 +186,11 @@ class HttpStore(Store):
         names = {os.path.basename(h.rstrip("/")) for h in re.findall(r'href="([^"?#]+)"', text)}
         return sorted(n for n in names if n and not n.startswith("."))
 
+    def delete(self, rel: str) -> None:
+        proc = self._curl("-X", "DELETE", "-o", os.devnull, f"{self.url}/{rel}")
+        if proc.returncode not in (0, 22):
+            raise StoreError(f"{self.url}: {proc.stderr.decode(errors='replace').strip()}")
+
 
 class FunctionStore(Store):
     """A store whose transport is given by the functions of the
@@ -189,6 +225,11 @@ class FunctionStore(Store):
             return []
         status, out = hook(self.url, rel)
         return sorted(n for n in out.split() if n) if status == 0 else []
+
+    def delete(self, rel: str) -> None:
+        status = self._hook("binary_store_delete")(self.url, rel)
+        if status not in (0, 1):
+            raise StoreError(f"{self.url}: binary-store-delete {rel} failed with status {status}")
 
 
 def default_url(driver) -> str:

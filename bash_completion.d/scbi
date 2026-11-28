@@ -27,7 +27,7 @@ _SCBI_SHO_ARGS="${_SCBI_COMMON} --env= -e --depends: --rdepends --externals --ex
 
 _SCBI_STR_ARGS="${_SCBI_COMMON} --env= -e --list-keys -l --list --list:full -d --delete"
 
-_SCBI_BST_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --plan= --show-key --list --explain"
+_SCBI_BST_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --plan= --show-key --list --explain --gc --rm --max-size= --older-than= --dry-run"
 
 _SCBI_HOOKS="((pre|post)-)?(cross-)?(archive|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches)"
 

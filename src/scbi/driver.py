@@ -1103,6 +1103,12 @@ class Driver:
             self.progress.close()
             restore()
 
+        if not parallel.is_worker(self) and self.get("DRY_RUN") != "yes":
+            #  SCBI_BINARY_STORE_MAX_SIZE: the writable binary stores reduced
+            from scbi.binstore import gc
+
+            gc.auto(self)
+
         if self.get("DO_STANDALONE") == "yes":
             from scbi.standalone import Standalone
 

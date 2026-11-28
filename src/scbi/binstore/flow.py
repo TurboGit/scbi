@@ -181,6 +181,8 @@ class Session:
                 try:
                     if not store.get(entry_path(target, self.module, f"{k}.json"), mpath):
                         continue
+                    if not self._verified(store, entry_path(target, self.module, f"{k}.json"), mpath):
+                        continue
                     with open(mpath) as f:
                         meta = json.load(f)
                     if meta.get("key") != k:
@@ -193,8 +195,27 @@ class Session:
                     self.b.ilog(self.module, f"warning: binary store {store.url}: {e}")
                     continue
                 self.hit = (i, meta, tpath)
+                #  used: the least recently used entries are removed first
+                store.touch(entry_path(target, self.module, f"{k}.json"))
                 return True
         return False
+
+    def _verified(self, store, rel: str, path: str) -> bool:
+        """With the function binary-store-verify of the environment file,
+        the metadata of an entry (holding the SHA-256 of its tarball) must
+        have a valid signature (``<key>.json.sig``)."""
+        verify = self.d.envfile.hook("binary_store_verify")
+        if verify is None:
+            return True
+        sig = f"{path}.sig"
+        if not store.get(f"{rel}.sig", sig):
+            self.b.ilog(self.module, f"warning: binary store {store.url}: {os.path.basename(rel)}: not signed")
+            return False
+        if verify(path, sig) != 0:
+            self.b.ilog(self.module, f"warning: binary store {store.url}: {os.path.basename(rel)}: "
+                                     "signature not valid")
+            return False
+        return True
 
     def install(self) -> bool:
         """Installs the entry found; False (a warning, nothing installed)
@@ -268,6 +289,15 @@ class Session:
         jpath = os.path.join(self._workdir(), f"put-{k}.json")
         with open(jpath, "wb") as f:
             f.write(blob.dumps(meta))
+        #  the signature of the metadata (binary-store-sign of the
+        #  environment file)
+        sig = ""
+        sign = self.d.envfile.hook("binary_store_sign")
+        if sign is not None:
+            sig = f"{jpath}.sig"
+            if sign(jpath, sig) != 0 or not os.path.isfile(sig):
+                self.b.ilog(self.module, "warning: binary store: binary-store-sign failed, not written")
+                return
         for store in targets:
             if not store.writable:
                 continue
@@ -276,6 +306,8 @@ class Session:
             try:
                 #  the tarball first: an entry is complete when its JSON is there
                 store.put(tarball, entry_path(target, self.module, f"{k}.tar.{meta['tarball']['compression']}"))
+                if sig:
+                    store.put(sig, entry_path(target, self.module, f"{k}.json.sig"))
                 store.put(jpath, entry_path(target, self.module, f"{k}.json"))
             except stores.StoreError as e:
                 self.b.ilog(self.module, f"warning: binary store: {e}")

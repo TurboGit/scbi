@@ -163,7 +163,10 @@ command language.
   (local, NFS), http(s) (GET, PUT), or any transport given by functions
   of the environment file (`binary-stores` key); `--binary-store=<url>`,
   `--binary-store:pull|:no`. `scbi binary-store --show-key|--list|
-  --explain` (what differs when a build is not shared).
+  --explain` (what differs when a build is not shared), `--gc`
+  (`--max-size`, `--older-than`, least recently used first), `--rm`;
+  `SCBI_BINARY_STORE_MAX_SIZE`; signed entries (`binary-store-sign`,
+  `binary-store-verify`); a longer RPATH relocated with patchelf.
 - **Parallel build**: `--parallel[=k]` (with `--deps`) builds up to k
   independent modules at the same time, one `build` or `tests` step at a
   time (`SCBI_BUILD_SLOTS`), the output of each module printed as one

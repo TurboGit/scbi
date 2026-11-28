@@ -316,6 +316,8 @@ The build is controlled by a set of variables (the environment). SCBI comes with
 
 	\item[SCBI\_BINARY\_STORE] The binary stores: the URLs separated by blanks, \code{ro:<url>} read-only, \code{no} for no store (\seeref{binary-store}). Default is \file{file://\$HOME/.cache/scbi/binaries}. \code{SCBI\_CACHE\_DIR}, the directory of the former build cache, is read as a store when \code{SCBI\_BINARY\_STORE} is not set.
 
+	\item[SCBI\_BINARY\_STORE\_MAX\_SIZE] The size of the writable binary stores (\code{500M}, \code{20G}...): at the end of a build, the least recently used entries are removed beyond it (\seeref{binary-store}).
+
 	\item[SCBI\_BINARY\_KEY\_IGNORE] Variables of the environment of the build left out of the binary keys (blank-separated), for example \code{PATH} for a team whose members have different but equivalent \code{PATH}s.
 
 	\item[SCBI\_BINARY\_KEY\_EXTRA] A value added to the binary keys, for what else must match for two builds to be shared, for example the version of a compiler not packaged by the OS.
@@ -2730,9 +2732,12 @@ The file is read once when the driver starts. All its keys are optional:
 		\code{archive} hook (\seeref{proxy}).
 		\item[module-final-step] Run after each module
 		(\seeref{module-final-step}).
-		\item[binary-store-get, binary-store-put, binary-store-list] The
+		\item[binary-store-get, binary-store-put, binary-store-list, binary-store-delete] The
 		transport of the binary stores whose URL scheme is not built in
 		(\seeref{binary-store}).
+		\item[binary-store-sign, binary-store-verify] (\code{FILE}, \code{SIG})
+		sign the metadata of an entry written to a binary store, and verify
+		the one of an entry found (\seeref{binary-store}).
 		\item[binary-key] (\code{MODULE}, \code{VARIANT}, \code{TARGET})
 		prints a value added to the binary key of the module.
 	\end{description}
@@ -2839,7 +2844,7 @@ The transports of the stores:
 \begin{description}
 	\item[\code{file:///path} or a path] A directory: a local disk or a NFS mount (files and directories are created group-writable, for a team; the writings are atomic).
 	\item[\code{http://}, \code{https://}] A Web server, read with \code{curl} (GET) and written with HTTP PUT (\code{curl -T}: WebDAV, the \code{dav} module of nginx, Artifactory... the server creates the directories). The credentials come from \file{\$HOME/.netrc}, other options of \code{curl} from \code{SCBI\_BINARY\_STORE\_CURL\_OPTIONS}. \ddash{}list and \ddash{}explain read the directory index of the server (autoindex).
-	\item[another scheme] The functions of the environment file (\seeref{env-files}) \code{binary-store-get URL PATH DEST} (copies the file \code{PATH} of the store to \code{DEST}; status 0 when found, 1 when not, another one for an error), \code{binary-store-put URL FILE PATH} and, for \ddash{}list and \ddash{}explain, \code{binary-store-list URL DIR} (prints the names of the files of a directory). For example a transport by \code{rsync} over \code{ssh}, or S3 with \code{aws s3 cp}:
+	\item[another scheme] The functions of the environment file (\seeref{env-files}) \code{binary-store-get URL PATH DEST} (copies the file \code{PATH} of the store to \code{DEST}; status 0 when found, 1 when not, another one for an error), \code{binary-store-put URL FILE PATH} and, for \ddash{}list, \ddash{}explain, \ddash{}gc and \ddash{}rm, \code{binary-store-list URL DIR} (prints the names of the files of a directory, the targets for an empty \code{DIR}) and \code{binary-store-delete URL PATH}. For example a transport by \code{rsync} over \code{ssh}, or S3 with \code{aws s3 cp}:
 \begin{lstlisting}[language={yaml}]
 binary-stores:
   - s3://team-bucket/scbi
@@ -2866,13 +2871,27 @@ Two builds share an entry when they have the same \emph{binary key}: the SHA-256
 \end{itemize}
 A difference that is not known not to change a build gives another key: a build is not reused rather than reused wrongly.
 
+\subsubsection{Signatures}
+
+With the functions \code{binary-store-sign FILE SIG} and \code{binary-store-verify FILE SIG} of the environment file, the metadata of an entry (which holds the SHA-256 of its tarball) is signed when written (\file{<key>.json.sig}), and an entry found is used only when its signature is valid (a warning otherwise, the module is built). For example with \code{ssh-keygen}:
+
+\begin{lstlisting}[language={yaml}]
+functions:
+  binary-store-sign:
+    params: [FILE, SIG]
+    run: sh -c 'ssh-keygen -Y sign -q -f ~/.ssh/scbi -n scbi "$0" && mv "$0.sig" "$1"' $FILE $SIG
+  binary-store-verify:
+    params: [FILE, SIG]
+    run: sh -c 'ssh-keygen -Y verify -q -f $SCBI_ENV_DIR/signers -I ci -n scbi -s "$1" < "$0"' $FILE $SIG
+\end{lstlisting}
+
 \subsubsection{Relocation}
 
 The installed files hold the paths of the sandbox where they were built (the hooks install in \file{\$SCBI\_BDIR/<module>/<target>-<variant>/install} and find their dependencies in their sandbox): \file{.pc}, \file{.la} and CMake files, scripts, the \code{RPATH} of the libraries and programs... When an entry is written, its files are scanned for the paths of the sandbox and of the global installation directory; when it is installed in another sandbox, they are replaced by the local ones:
 \begin{itemize}
 	\item in a text file, at any place;
 	\item in the target of a symbolic link;
-	\item in a binary file, in a NUL-terminated string (\code{RPATH}, a path compiled in), padded with NULs: only when the local path is not longer than the one of the origin, otherwise the module is built.
+	\item in a binary file, in a NUL-terminated string (\code{RPATH}, a path compiled in), padded with NULs: only when the local path is not longer than the one of the origin. A longer \code{RPATH} or \code{RUNPATH} of an ELF file is set by \code{patchelf} when it is installed; otherwise, or for another string, the module is built.
 \end{itemize}
 An entry with an occurrence elsewhere (in a compressed file for example) is not relocatable: it is written with a key bound to the paths of its sandbox, reused there only. The Python byte-code files (\file{*.pyc}), which hold the path of their source, are not stored. A sandbox with a long path (a CI one, for example) writes entries relocatable to more sandboxes: an entry is replaced by the same one of a longer origin path.
 
@@ -2894,6 +2913,8 @@ A build installed from a store is reported with the trigger \code{from binary st
 	\item[\ddash{}show-key {[}modules{]}] For each module of the build and its dependencies, the binary keys recorded by its last build (relocatable, and bound to the sandbox) and the stores having them.
 	\item[\ddash{}list {[}modules{]}] The entries of the stores (of the modules given, or all): variant, reference, kind, size, date, origin sandbox and key.
 	\item[\ddash{}explain <module>] Compares the components of the binary key of the last build of the module with the ones of the entries of the stores for its variant, and displays what differs (a variable of the environment, the key of a dependency, the OS...): why a build is not shared.
+	\item[\ddash{}gc {[}\ddash{}max-size=<S>{]} {[}\ddash{}older-than=<D>{]}] Removes from the writable stores the entries not used for \code{D} days (or \code{12h}, \code{4w}), and the least recently used ones beyond the size \code{S} (\code{500M}, \code{20G}; \code{SCBI\_BINARY\_STORE\_MAX\_SIZE} without option). An entry is used when written or installed (the time of its metadata in a file store, its date otherwise). With \ddash{}dry-run, the entries are listed, not removed.
+	\item[\ddash{}rm <key>...] Removes the entries of the keys (or of key prefixes of 8 characters at least, as displayed by \ddash{}list) from the writable stores (\ddash{}dry-run: listed only).
 \end{description}
 
 \cmd{scbi binary-store \ddash{}explain c-gmp}

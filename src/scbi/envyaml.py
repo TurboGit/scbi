@@ -51,9 +51,12 @@ All its keys are optional::
     ``target-dir <module> <variant> [sub]`` (scbi.steps.final).
 
   - ``binary-store-get URL PATH DEST``, ``binary-store-put URL FILE PATH``,
-    ``binary-store-list URL DIR``: the transport of the binary stores of
-    another scheme than file and http(s); ``binary-key MODULE VARIANT
-    TARGET``: a value added to the binary keys (scbi.binstore).
+    ``binary-store-list URL DIR``, ``binary-store-delete URL PATH``: the
+    transport of the binary stores of another scheme than file and
+    http(s); ``binary-key MODULE VARIANT TARGET``: a value added to the
+    binary keys; ``binary-store-sign FILE SIG`` and ``binary-store-verify
+    FILE SIG``: the signature of the metadata of the entries
+    (scbi.binstore).
 
 ``SCBI_ENV_DIR`` is the directory of the file.
 """
@@ -76,7 +79,9 @@ KEYS = ("inherit", "vars", "passthrough", "binary-stores", "functions")
 HOOKS = {"define-var": "define_var", "rewrite-vcs": "rewrite_vcs", "rewrite-archive": "rewrite_archive",
          "proxy": "proxy", "module-final-step": "module_final_step",
          "binary-store-get": "binary_store_get", "binary-store-put": "binary_store_put",
-         "binary-store-list": "binary_store_list", "binary-key": "binary_key"}
+         "binary-store-list": "binary_store_list", "binary-key": "binary_key",
+         "binary-store-delete": "binary_store_delete", "binary-store-sign": "binary_store_sign",
+         "binary-store-verify": "binary_store_verify"}
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
@@ -320,7 +325,8 @@ def _make_hooks(env: EnvFile) -> None:
     #  the transports of the binary stores (scbi.binstore.stores): status 0
     #  done/found, 1 not found, other an error; binary-store-list prints
     #  the names, binary-key the value added to the keys
-    for fname in ("binary-store-get", "binary-store-put"):
+    for fname in ("binary-store-get", "binary-store-put", "binary-store-delete", "binary-store-sign",
+                  "binary-store-verify"):
         if fname in env.functions:
             def transport(*args, fname=fname):
                 status, _ = _call(env, fname, [str(a) for a in args], out=lambda t: None)

@@ -6,6 +6,11 @@
     scbi binary-store --list [modules]       the entries of the stores
     scbi binary-store --explain <module>     why the entries of the stores
                                              do not match the last build
+    scbi binary-store --gc [--max-size=S] [--older-than=D] [--dry-run]
+                                             remove the least recently used
+                                             entries of the writable stores
+    scbi binary-store --rm <key>...          remove entries (a key prefix of
+                                             at least 8 characters)
 """
 
 from __future__ import annotations
@@ -25,25 +30,49 @@ SCBI-BINARY-STORE {version}
    -h | --help             this help message
       | --show-key         binary keys of the modules and the stores having them
       | --list             entries of the stores (of the modules given)
-      | --explain          what differs between the last build and the entries"""
+      | --explain          what differs between the last build and the entries
+      | --gc               remove the least recently used entries (writable stores)
+      | --max-size=<S>     with --gc: the size of a store (500M, 20G...)
+      | --older-than=<D>   with --gc: entries not used for D days (or 12h, 4w)
+      | --rm               remove the entries of the keys given
+      | --dry-run          with --gc and --rm: display, do not remove"""
 
 
 def main(driver, args: list[str]) -> int:
-    proc = subprocess.run(["getopt", "-o", "", "-l", "show-key,list,explain", "--", *args],
+    proc = subprocess.run(["getopt", "-o", "", "-l", "show-key,list,explain,gc,rm,max-size:,older-than:,dry-run",
+                           "--", *args],
                           capture_output=True, text=True, env=driver.base_env())
     if proc.returncode != 0:
         sys.stdout.write(proc.stderr)
         print('try "scbi binary-store --help" for more information.')
         return 1
     action = ""
-    for a in shlex.split(proc.stdout):
-        if a in ("--show-key", "--list", "--explain"):
+    opts: dict[str, str] = {}
+    parsed = shlex.split(proc.stdout)
+    i = 0
+    while i < len(parsed):
+        a = parsed[i]
+        if a in ("--show-key", "--list", "--explain", "--gc", "--rm"):
             action = a[2:]
+        elif a in ("--max-size", "--older-than"):
+            opts[a[2:]] = parsed[i + 1] if i + 1 < len(parsed) else ""
+            i += 1
+        elif a == "--dry-run":
+            opts["dry-run"] = "yes"
+        elif a == "--":
+            #  the modules (the keys of --rm), after the options
+            driver.modules = parsed[i + 1:]
+            break
+        i += 1
     if driver.get("DO_HELP") == "yes" or not action:
         print(USAGE.format(version=driver.get("SCBI_VERSION"), argv0=driver.argv0))
         return 0
     if action == "list":
         return list_entries(driver)
+    if action == "gc":
+        return garbage_collect(driver, opts)
+    if action == "rm":
+        return remove_keys(driver, opts)
     if action == "explain":
         return explain(driver)
     return show_keys(driver)
@@ -147,6 +176,76 @@ def explain(driver) -> int:
                     print(f"  {line}")
     if not found:
         print(f"{module}: no entry in the stores")
+    return 0
+
+
+def _describe(e) -> str:
+    variant = e.meta.get("variant", "default")
+    name = e.module if variant == "default" else f"{e.module}/{variant}"
+    return f"{name} {e.key[:16]} ({e.size / 1048576:.1f} MB)"
+
+
+def garbage_collect(driver, opts: dict[str, str]) -> int:
+    """--gc: the writable stores reduced (age, size), the least recently
+    used entries first."""
+    from scbi.binstore import gc, stores
+
+    try:
+        max_size = gc.parse_size(opts["max-size"]) if opts.get("max-size") else None
+        older = gc.parse_age(opts["older-than"]) if opts.get("older-than") else None
+    except ValueError as e:
+        print(f"scbi binary-store: {e}")
+        return 1
+    if max_size is None and older is None:
+        value = driver.get("SCBI_BINARY_STORE_MAX_SIZE")
+        if not value:
+            print("scbi binary-store --gc: --max-size or --older-than expected (or SCBI_BINARY_STORE_MAX_SIZE)")
+            return 1
+        max_size = gc.parse_size(value)
+    dry = opts.get("dry-run") == "yes"
+    status = 0
+    for store in stores.stores(driver):
+        if not store.writable:
+            continue
+        removed, kept = gc.collect(store, max_size=max_size, older_than=older)
+        print(f"{store.url}: {len(removed)} entr{'y' if len(removed) == 1 else 'ies'} "
+              f"{'to remove' if dry else 'removed'} ({sum(e.size for e in removed) / 1048576:.1f} MB), "
+              f"{len(kept)} kept ({sum(e.size for e in kept) / 1048576:.1f} MB)")
+        for e in removed:
+            print(f"  {_describe(e)}")
+            if not dry:
+                try:
+                    gc.remove(store, e)
+                except stores.StoreError as err:
+                    print(f"  warning: {err}")
+                    status = 1
+    return status
+
+
+def remove_keys(driver, opts: dict[str, str]) -> int:
+    """--rm: the entries of the keys (prefixes of 8 characters at least) in
+    the writable stores."""
+    from scbi.bashcompat import words
+    from scbi.binstore import gc, stores
+
+    keys = words(" ".join(driver.modules))
+    if not keys or any(len(k) < 8 for k in keys):
+        print("scbi binary-store --rm: keys (8 characters at least) expected")
+        return 1
+    dry = opts.get("dry-run") == "yes"
+    found = 0
+    for store in stores.stores(driver):
+        if not store.writable:
+            continue
+        for e in gc.entries(store):
+            if any(e.key.startswith(k) for k in keys):
+                found += 1
+                print(f"{store.url}: {'to remove' if dry else 'removed'} {_describe(e)}")
+                if not dry:
+                    gc.remove(store, e)
+    if not found:
+        print("scbi binary-store --rm: no entry found")
+        return 1
     return 0
 
 

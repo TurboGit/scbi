@@ -1,6 +1,7 @@
 """The binary store: keys (normalization) and relocation."""
 
 import os
+import shutil
 
 import pytest
 
@@ -117,3 +118,27 @@ def test_env_file_binary_stores(tmp_path):
     for bad in ("file:///a", [{"url": "x", "mode": "rx"}], [{"mode": "ro"}]):
         with pytest.raises(envyaml.EnvFileError):
             envyaml._binary_stores(path, bad, {})
+
+
+@pytest.mark.skipif(not (shutil.which("gcc") and shutil.which("patchelf")), reason="needs gcc and patchelf")
+def test_relocate_longer_rpath_patchelf(tmp_path):
+    import subprocess
+
+    origin = "/s/b"
+    tree = tmp_path / "install"
+    (tree / "bin").mkdir(parents=True)
+    src = tmp_path / "m.c"
+    src.write_text("int main(void){return 0;}\n")
+    exe = tree / "bin" / "m"
+    subprocess.run(["gcc", "-o", str(exe), str(src), f"-Wl,-rpath,{origin}/lib1/install/lib"], check=True)
+    files = relocate.scan(str(tree), [origin])
+    assert files == [{"path": "bin/m", "kind": "binary"}]
+    longer = "/a/much/longer/sandbox"
+    #  without patchelf: refused; with it: the RPATH set
+    with pytest.raises(relocate.RelocationError):
+        relocate.relocate(str(tree), files, [(origin, longer)])
+    relocate.relocate(str(tree), files, [(origin, longer)], patchelf=shutil.which("patchelf"))
+    rpath = subprocess.run(["patchelf", "--print-rpath", str(exe)], capture_output=True, text=True).stdout.strip()
+    assert rpath == f"{longer}/lib1/install/lib"
+    assert relocate.remaining(str(tree), files, [(origin, longer)]) == []
+    assert subprocess.run([str(exe)]).returncode == 0
