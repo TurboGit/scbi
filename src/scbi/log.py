@@ -300,6 +300,69 @@ def display_log_stat(logs: Path, module: str = "") -> str:
     return "\nbuild times (min, average, max):\n\n" + text + "\n"
 
 
+def _hms(seconds: float) -> str:
+    s = int(round(seconds))
+    return f"{s // 3600}:{s // 60 % 60:02d}:{s % 60:02d}"
+
+
+def display_step_stat(logs: Path, target: str) -> str:
+    """The time of the steps of the last run of the driver
+    (``<target>-steps.log`` files, scbi.steptime): wall and CPU time per
+    step, the share of the steps using many cores and the CPU used."""
+    from scbi.steptime import HEAVY_STEPS
+
+    files = sorted(Path(logs).glob(f"*/{target}-steps.log"))
+    #  TODAY empty (testsuite): the logs are at the top
+    if Path(logs, f"{target}-steps.log").is_file():
+        files.append(Path(logs, f"{target}-steps.log"))
+    rows: list[list[str]] = []
+    for path in files[-2:]:
+        try:
+            rows += [line.split("\t") for line in path.read_text(errors="replace").splitlines()]
+        except OSError:
+            pass
+    rows = [r for r in rows if len(r) >= 9]
+    if not rows:
+        return ""
+    run = rows[-1][0]
+    rows = [r for r in rows if r[0] == run]
+    order = ["setup", "config", "build", "install", "tests", "wrapup"]
+    wall: dict[str, float] = {}
+    cpu: dict[str, float] = {}
+    capacity = 0.0
+    cpu_known = True
+    for r in rows:
+        step, w, c, jobs = r[4], float(r[5]), float(r[6]), r[7]
+        wall[step] = wall.get(step, 0.0) + w
+        cpu[step] = cpu.get(step, 0.0) + max(c, 0.0)
+        cpu_known = cpu_known and c >= 0
+        try:
+            capacity += w * max(int(jobs), 1)
+        except ValueError:
+            capacity += w
+        if step not in order:
+            order.append(step)
+    total_wall, total_cpu = sum(wall.values()), sum(cpu.values())
+    modules = len({(r[2], r[3]) for r in rows})
+    out = [f"\nsteps of the last build ({modules} module(s), run {run}):\n",
+           f"{'step':<10} {'wall':>9} {'cpu':>9} {'cores used':>11}"]
+    for step in [s for s in order if s in wall]:
+        used = f"{cpu[step] / wall[step]:.1f}" if wall[step] > 0 and cpu_known else "-"
+        out.append(f"{step:<10} {_hms(wall[step]):>9} {_hms(cpu[step]):>9} {used:>11}")
+    out.append(f"{'total':<10} {_hms(total_wall):>9} {_hms(total_cpu):>9}")
+    heavy = sum(w for s, w in wall.items() if s in HEAVY_STEPS)
+    def pct(value: float, total: float) -> str:
+        return f"{100 * value / total:.0f}%" if total > 0 else "-"
+
+    out.append("")
+    out.append(f"steps using many cores ({', '.join(HEAVY_STEPS)}): {_hms(heavy)}, "
+               f"{pct(heavy, total_wall)} of the time")
+    out.append(f"other steps: {_hms(total_wall - heavy)}, {pct(total_wall - heavy, total_wall)} of the time")
+    if cpu_known:
+        out.append(f"CPU used: {pct(total_cpu, capacity)} of SCBI_JOBS cores during the steps")
+    return "\n".join(out) + "\n\n"
+
+
 # ------------------------------------------------------------- progress
 
 

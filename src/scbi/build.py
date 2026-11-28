@@ -19,6 +19,7 @@ import tempfile
 import time
 from pathlib import Path
 
+from scbi import steptime
 from scbi.bashcompat import assoc_keys, words
 from scbi.bashenv import ShellVars
 from scbi.env import Environment
@@ -819,6 +820,8 @@ class Builder:
         env["PYTHONPATH"] = pkg + (f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else "")
         #  a nested run: no ini modules, no stats
         env["SCBI_NESTED"] = "yes"
+        #  its steps are part of this run (scbi.steptime)
+        env["SCBI_RUN_ID"] = steptime.run_id(d)
         sys.stdout.flush()
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
                                 cwd=os.getcwd(), env=env)
@@ -1088,28 +1091,36 @@ class Builder:
             fct = tfct or fct
             return step_wrapper.StepWrapper(self, module, variant).internal(f"{tvdir}/install", fct)
 
-        for step in words(self.get("STEPS")):
+        def run_step(step: str) -> int:
+            """The pre-, hook and post- parts of a step: its status."""
             if step == "tests":
                 if self.module_environment(module, variant, [
                         ("handle-tests-depends-env", formodule, modref),
                         ("module-env", formodule, modref, "tests-env"),
                         ("module-env", formodule, modref, "env")], hook="tests") != 0:
-                    return 1, is_uptodate
+                    return 1
             res = generic(f"pre-{step}")
             if res != 0:
                 self.elog(module, "generic", "module", f"pre-{step}", "failed", "with", "error", str(res))
-                return res, is_uptodate
+                return res
             if wrapper(f"pre-{step}") != 0 or wrapper(step) != 0:
-                return 1, is_uptodate
+                return 1
             res = generic(step)
             if res != 0:
                 self.elog(module, "generic", "module", step, "failed", "with", "error", str(res))
-                return res, is_uptodate
+                return res
             if wrapper(f"post-{step}") != 0:
-                return 1, is_uptodate
+                return 1
             res = generic(f"post-{step}")
             if res != 0:
                 self.elog(module, "generic", "module", f"post-{step}", "failed", "with", "error", str(res))
+            return res
+
+        for step in words(self.get("STEPS")):
+            begin = steptime.start()
+            res = run_step(step)
+            steptime.record(d, module, variant, step, begin, res)
+            if res != 0:
                 return res, is_uptodate
 
         if (self.get("DO_CHECK_DEPS") in ("yes", "error") and is_uptodate == "no"

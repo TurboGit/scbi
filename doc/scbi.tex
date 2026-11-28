@@ -782,7 +782,7 @@ The following options are supported:
 	the build is shown on a terminal (\code{bar} without argument and by
 	default, see \code{SCBI\_PROGRESS}).
 
-	\item[\ddash{}stat{[}:short|full{]}] Displays the setup (directories, discriminants...) and, without module, the available modules and build plans. With \code{short} only the setup is displayed; with \code{full} the build times of the modules are added.
+	\item[\ddash{}stat{[}:short|full{]}] Displays the setup (directories, discriminants...) and, without module, the available modules and build plans. With \code{short} only the setup is displayed; with \code{full} the build times of the modules are added, and the time of the steps of the last run: the wall and CPU time of each step (all the modules together), the share of the time spent in the steps using many cores (\code{build}, \code{tests}) and the CPU used compared with \code{SCBI\_JOBS} cores. The steps are recorded in \file{\$SCBI\_LOGS/<day>/<target>-steps.log} (\seeref{sandbox}).
 
 	\item[-n | \ddash{}no-patch] Does not apply the patches.
 
@@ -3480,6 +3480,7 @@ This section describes the structure of the sandbox. It is generally not needed 
 	.4 <target>-<module>-report.log \des{the messages of the driver for the module (all its variants, all the runs of the day, without colors) and the output of the VCS, archive and generic commands}.
 	.4 <target>-<module>-<variant>-<step>.log \des{the output of a step (also in <target>-<variant>/logs/<step>.log)}.
 	.4 <target>-<module>-<variant>-env.log \des{the environment of the build}.
+	.4 <target>-steps.log \des{one line per step of a module: run, time, module, variant, step, wall and CPU seconds, SCBI\_JOBS, status (tab-separated)}.
 	.2 \textbf{[<module>]}.
 	.3 build $\rightarrow$ \des{symlink to current/latest target build dir}.
 	.3 build-id-<variant> \des{build id to check for changes}.

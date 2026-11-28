@@ -10,6 +10,11 @@ Nix, Bazel...). Most valuable first.
    dependency graph would build independent modules at the same time,
    sharing SCBI_JOBS between them (per-module sandboxes and logs already
    exist). Biggest wall-clock gain on wide build plans.
+   - [DONE] step 0, measurement: wall and CPU time of each step
+     (<target>-steps.log), summary of the last run in --stat:full.
+   - plan: modules built by driver subprocesses, one build slot for
+     the build and tests steps (plus a tests lock), the output of a
+     module printed as one block when it ends.
 
 2. Archive integrity pinned in the plug-in
    The archive hook checks a SHA-1 downloaded from the same server as the

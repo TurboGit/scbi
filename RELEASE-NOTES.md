@@ -149,6 +149,9 @@ command language.
   and the environment of the dependencies. Reformatting a plug-in,
   reordering its keys, its variables, its functions or its dependencies,
   or changing its own `env` hook no longer triggers a rebuild.
+- **Step times**: the wall and CPU time of each step are recorded in
+  `<target>-steps.log`; `--stat:full` summarizes the last run (time in
+  the steps using many cores, CPU used).
 - **Undeclared dependencies**: `--check-deps[:error]` (ini key
   `check-deps`) reports the files a module uses (dependency files of the
   compilers and of Ninja, shared libraries of its ELF files) installed by

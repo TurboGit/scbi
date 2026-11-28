@@ -215,6 +215,11 @@ class Driver:
             s("SCBI_HALF_JOBS", str(int(self.get("SCBI_JOBS") or "1") // 2), export=True)
         s("SCBI_HANDLED", tempfile.mkstemp(dir="/dev/shm" if os.path.isdir("/dev/shm") else None)[1])
         s("SCBI_CURRENT_MODULE", "", export=True)
+        #  the run of the step times (scbi.steptime), the one of the
+        #  parent for a nested run
+        from scbi import steptime
+
+        steptime.run_id(self)
         s("SCBI_CHECK_BUILD_CACHE", "no")
         if self.get("SCBI_CACHE_DIR") == "no":
             s("SCBI_CACHE_DIR", "")
@@ -952,9 +957,10 @@ class Driver:
 
     def display_log_stat(self) -> None:
         """``display-log-stat``: build times from the report logs."""
-        from scbi.log import display_log_stat
+        from scbi.log import display_log_stat, display_step_stat
 
         sys.stdout.write(display_log_stat(Path(self.get("SCBI_LOGS"))))
+        sys.stdout.write(display_step_stat(Path(self.get("SCBI_LOGS")), self.get("SCBI_TARGET")))
         sys.stdout.flush()
 
     def run_tool(self, subcmd: str) -> int:
