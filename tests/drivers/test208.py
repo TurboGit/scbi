@@ -35,9 +35,25 @@ for m in pd pb pc pa; do
 done''')
 
     t.runs('./scbi --parallel=3 -d pa')
+    t.sh('cp $TEST_OUTPUT build.out')
+
+    # needed by: as in a sequential build (the path of the walk to the
+    # module, the closest first); none for the module of the command line
+    t.sh('sed -n "/Building pd/,/End Building pd/p" build.out > pd.out')
+    t.runs('grep -A2 "needed by:" pd.out | cut -d: -f4-')
+    t.clean_diff("""\
+ needed by:
+   ↳ pb
+   ↳ pa
+""")
+    t.sh('sed -n "/Building pa/,/End Building pa/p" build.out > pa.out')
+    t.runs('grep -c "needed by:" pa.out || true')
+    t.clean_diff("""\
+0
+""")
 
     # pd first, pa last, pb and pc (pX) in any order, each block whole
-    t.sh('grep -E "Building|parallel build" $TEST_OUTPUT | sed "s/ p[bc] / pX /" > x; mv x $TEST_OUTPUT')
+    t.runs('grep -E "Building|parallel build" build.out | sed "s/ p[bc] / pX /"')
     t.clean_diff("""\
 xxxx/xx/xx xx:xx:xx : parallel build: 4 module(s), 3 at a time, 1 build slot(s)
 xxxx/xx/xx xx:xx:xx : Building pd [default] (n/a)

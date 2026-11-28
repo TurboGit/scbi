@@ -55,6 +55,9 @@ except ImportError:  # pragma: no cover - not on Windows
 WORKER_ENV = "SCBI_PARALLEL_WORKER"
 STATE_ENV = "SCBI_PLAN_STATE"
 SLOTS_ENV = "SCBI_BUILD_SLOTS_FIFO"
+#  the modules needing the module of a worker, as a sequential build
+#  displays them (needed by:)
+NEEDED_BY_ENV = "SCBI_NEEDED_BY"
 #  a status line of a worker (not part of its output)
 STATUS_MARK = "\x1escbi-status "
 
@@ -153,6 +156,9 @@ class Job:
     #  the module reference given to the worker
     modref: str
     order: int = 0
+    #  the modules being handled when the walk reached it, the root first
+    #  (Builder.modules_list in a sequential build)
+    needed_by: list[str] = field(default_factory=list)
     deps: set[str] = field(default_factory=set)
     resources: set[str] = field(default_factory=set)
     state: str = "waiting"  # waiting, running, done, failed, cancelled
@@ -179,6 +185,8 @@ def build_graph(driver, builder) -> list[Job]:
     jobs: dict[str, Job] = {}
     active: set[str] = set()
     order: list[str] = []
+    #  the modules being visited (Builder.modules_list)
+    stack: list[str] = []
 
     def visit(formodule: str, modref: str) -> str | None:
         info = plan.module_ref(modref, formodule)
@@ -202,7 +210,8 @@ def build_graph(driver, builder) -> list[Job]:
             wref = format_ref(module, variant, kind, ref[len("keep:"):] if ref.startswith("keep:") else ref)
         else:
             wref = module
-        job = Job(key, module, variant, wref)
+        job = Job(key, module, variant, wref, needed_by=list(stack))
+        stack.append(module if variant == "default" else f"{module}/{variant}")
         job.resources.add(f"module:{module}")
         repo = _repo(builder, module, variant)
         if repo:
@@ -226,6 +235,7 @@ def build_graph(driver, builder) -> list[Job]:
             for hook in hooks:
                 for dmodule in builder.get_all_depends(module, variant, hook):
                     deps.add(visit(modref, dmodule) or "")
+        stack.pop()
         deps.discard("")
         deps.discard(key)
         job.deps = deps
@@ -323,7 +333,7 @@ class Scheduler:
 
     # --------------------------------------------------------- workers
 
-    def env(self) -> dict[str, str]:
+    def env(self, job: Job) -> dict[str, str]:
         import scbi
 
         env = dict(self.d.environ)
@@ -332,14 +342,15 @@ class Scheduler:
         pkg = str(Path(scbi.__file__).resolve().parent.parent)
         env["PYTHONPATH"] = pkg + (f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else "")
         env.update({"SCBI_NESTED": "yes", WORKER_ENV: "yes", STATE_ENV: self.state, SLOTS_ENV: self.fifo,
-                    "SCBI_RUN_ID": self.d.get("SCBI_RUN_ID"), "PYTHONUNBUFFERED": "1"})
+                    "SCBI_RUN_ID": self.d.get("SCBI_RUN_ID"), "PYTHONUNBUFFERED": "1",
+                    NEEDED_BY_ENV: " ".join(job.needed_by)})
         return env
 
     def launch(self, job: Job) -> None:
         args = [sys.executable, "-m", "scbi", *worker_args(self.d, job.modref)]
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 stdin=subprocess.DEVNULL, cwd=getattr(self.d, "start_cwd", os.getcwd()),
-                                env=self.env())
+                                env=self.env(job))
         assert proc.stdout is not None
         os.set_blocking(proc.stdout.fileno(), False)
         w = Worker(job, proc, start=time.monotonic())

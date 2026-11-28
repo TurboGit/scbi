@@ -554,7 +554,7 @@ class Builder:
 
         start = time.monotonic()
 
-        if formodule != "@root":
+        if formodule != "@root" or self.worker:
             self.needed_by(module, log)
 
         if self.get("SCBI_HOST") == self.get("SCBI_TARGET"):
@@ -638,7 +638,7 @@ class Builder:
         start = time.monotonic()
         d.log.line_sep()
         self.ilog(meta, "%BMetamodule", f"%t{meta}%c", f"[%g{vdisp}%c]", "setup")
-        if formodule != "@root":
+        if formodule != "@root" or self.worker:
             self.needed_by(formodule, log)
 
         def internal_wrapper(fct: str) -> int:
@@ -693,7 +693,7 @@ class Builder:
 
         d.log.line_sep()
         self.ilog(meta, "%BMetamodule", f"%t{meta}%c", f"[%g{vdisp}%c]", "wrapup")
-        if formodule != "@root":
+        if formodule != "@root" or self.worker:
             self.needed_by(formodule, log)
 
         if is_utd == "no":
@@ -971,9 +971,17 @@ class Builder:
         return ref.replace("NONE", default, 1) if default else ref
 
     def needed_by(self, module: str, log: str) -> None:
-        if len(self.modules_list) > 1:
+        """The modules being built which need this one, the closest
+        first; in a worker of a parallel build, after the ones of the main
+        process (scbi.parallel, NEEDED_BY_ENV)."""
+        chain = self.modules_list[:-1]
+        if self.worker:
+            from scbi import parallel
+
+            chain = self.d.environ.get(parallel.NEEDED_BY_ENV, "").split() + chain
+        if chain:
             self.ilog(module, "needed by:")
-            for m in reversed(self.modules_list[:-1]):
+            for m in reversed(chain):
                 self.ilog(module, f"  ↳ {m}")
 
     def module_subshell(self, formodule, modref, depends_kind, is_aggregated,
