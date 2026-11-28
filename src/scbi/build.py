@@ -287,10 +287,6 @@ class Builder:
         else:
             ebid = not (tvdir / "build-id").is_file()
             rbid = not _same(mod_dir / f"build-id-{variant}", tvdir / "build-id")
-            cache = self.get("SCBI_CACHE_DIR")
-            if not ebid and rbid and cache:
-                cf = _read_first_line(tvdir / "build-id")
-                Path(cache, cf).unlink(missing_ok=True)
 
         cver = check_versions(nref, ">", mver)
 
@@ -711,6 +707,12 @@ class Builder:
         if Path(f"build-deps-{variant}").is_file():
             shutil.copy(f"build-deps-{variant}", f"{tvdir}/build-deps")
 
+        from scbi.binstore import flow as binflow
+
+        if binflow.enabled(d):
+            #  the key of the meta-module, for the modules depending on it
+            binflow.record_meta(self, meta, variant, tvdir)
+
         if agg_mode != "no" and do_agg_prefix:
             ok, idir = self.handle_prefix(meta, variant, ref, log)
 
@@ -970,6 +972,17 @@ class Builder:
                    "svn": "trunk", "subversion": "trunk"}.get(vcs_name)
         return ref.replace("NONE", default, 1) if default else ref
 
+    def binary_store_lookup(self) -> bool:
+        """A build to look up in the binary stores: a full build (not
+        forced, not partial steps), without testsuite (it needs the build
+        tree)."""
+        return (self.get("SCBI_CHECK_BUILD_CACHE") == "yes" and self.get("DO_FORCE") != "yes"
+                and self.get("DO_TEST") == "no" and self.binary_store_upload())
+
+    def binary_store_upload(self) -> bool:
+        """A build to write to the binary stores: all the steps run."""
+        return all(self.get(v) == "yes" for v in ("DO_SETUP", "DO_CONFIG", "DO_BUILD", "DO_INSTALL"))
+
     def needed_by(self, module: str, log: str) -> None:
         """The modules being built which need this one, the closest
         first; in a worker of a parallel build, after the ones of the main
@@ -1032,24 +1045,8 @@ class Builder:
             msg = f"unknown status {status}"
 
         d.set("SCBI_IS_FROM_CACHE", "no")
-        cache = self.get("SCBI_CACHE_DIR")
-        if cache:
-            cbdir = _read_first_line(Path(bdir, module, f"build-id-{variant}"))
-            if os.path.isfile(f"{cache}/{cbdir}"):
-                if self.get("SCBI_CHECK_BUILD_CACHE") == "yes":
-                    cached_dir = _read_first_line(Path(cache, cbdir))
-                    if cached_dir != tvdir:
-                        bid = _read_first_line(Path(cached_dir, "build-id"))
-                        if bid == cbdir:
-                            self.sync_dir(module, variant, cached_dir, f"{bdir}/{module}")
-                            shutil.copy(f"{cached_dir}/source-id", f"{bdir}/{module}")
-                            msg = "trigger: copy from cache"
-                            d.set("SCBI_IS_FROM_CACHE", "yes")
-                            d.registry.functions[f"{module}-cached"] = Commands("true")
-                        else:
-                            Path(cache, cbdir).unlink(missing_ok=True)
-            elif cbdir:
-                Path(cache, cbdir).write_text(tvdir + "\n")
+        #  set for a build installed from a binary store (one module)
+        d.registry.functions.pop(f"{module}-cached", None)
 
         envtmp = Path(tempfile.mkstemp(dir="/dev/shm" if os.path.isdir("/dev/shm") else None)[1])
         if is_uptodate == "no" or self.get("DO_TEST") != "no":
@@ -1063,6 +1060,26 @@ class Builder:
             if env_rc != 0:
                 envtmp.unlink(missing_ok=True)
                 return env_rc, is_uptodate
+
+        #  the binary store (scbi.binstore): the build looked up, or the key
+        #  of a module up to date recorded for the modules depending on it
+        from scbi.binstore import flow as binflow
+
+        session = None
+        if (binflow.enabled(d) and not keep and variant != "native" and kind != "DEV"
+                and module not in binflow.tree_users(d)):
+            session = binflow.Session(self, formodule, modref, module, variant, ref, tvdir)
+            if is_uptodate == "no":
+                if session.compute() and self.binary_store_lookup() and session.lookup():
+                    msg = f"trigger: from binary store {session.store_name}"
+                    d.registry.functions[f"{module}-cached"] = Commands("true")
+            elif not Path(tvdir, binflow.KEY_FILE).is_file() and Path(tvdir, "build-id").is_file():
+                if self.module_environment(module, variant, [
+                        ("handle-build-depends-env", formodule, modref),
+                        ("handle-env", formodule, modref),
+                        ("module-env", formodule, modref, "build-env")]) == 0 and session.compute():
+                    session.record()
+                session = None
 
         #  the build link points to the variant
         os.chdir(f"{bdir}/{module}") if os.path.isdir(f"{bdir}/{module}") else None
@@ -1085,6 +1102,8 @@ class Builder:
             #  one when the build completes. An interrupted or failed build
             #  is then redone at the next run, even with the same build id.
             Path(tvdir, "build-id").unlink(missing_ok=True)
+            Path(tvdir, "binary-key").unlink(missing_ok=True)
+            Path(tvdir, "binary-key.json").unlink(missing_ok=True)
             if msg:
                 self.ilog(module, *msg.split(" "))
             if status == B_NOT_UPTODATE and Path(tvdir, "build-deps").is_file():
@@ -1101,6 +1120,13 @@ class Builder:
                     and self.get("DO_BUILD") == "yes"):
                 _rm(f"{tvdir}/build{lnk}")
         envtmp.unlink(missing_ok=True)
+
+        if session is not None and session.hit is not None:
+            if session.install():
+                d.set("SCBI_IS_FROM_CACHE", "yes")
+            else:
+                d.registry.functions.pop(f"{module}-cached", None)
+                session.hit = None
 
         def generic(step: str) -> int:
             if step not in generic_steps.STEPS:
@@ -1177,6 +1203,14 @@ class Builder:
         if check_deps:
             if depcheck.check(self, formodule, modref, module, variant, tvdir) != 0:
                 return 1, is_uptodate
+
+        if session is not None:
+            if session.hit is None and self.binary_store_upload():
+                session.upload()
+            elif session.hit is None:
+                session.record()
+            session.cleanup()
+            d.registry.functions.pop(f"{module}-cached", None)
 
         final = self.d.envfile.hook("module_final_step")
         if final is not None:

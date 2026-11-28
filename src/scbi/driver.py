@@ -222,12 +222,6 @@ class Driver:
 
         steptime.run_id(self)
         s("SCBI_CHECK_BUILD_CACHE", "no")
-        if self.get("SCBI_CACHE_DIR") == "no":
-            s("SCBI_CACHE_DIR", "")
-        else:
-            cache = self.get("SCBI_CACHE_DIR") or f"{self.get('HOME')}/.cache/scbi"
-            s("SCBI_CACHE_DIR", cache)
-            os.makedirs(cache, exist_ok=True)
         for name, value in {
             "DO_PURGE": "no", "SCBI_PREFIX": "", "SCBI_DEFAULT_PREFIX": "yes", "DO_QUIET": "no",
             "DO_UPDATE": "no", "DO_PREFETCH": "no", "DO_ARCHIVE": "no", "DO_FORCE": "no", "DO_STAT": "no",
@@ -806,9 +800,6 @@ class Driver:
         bdir = self.get("SCBI_BDIR")
         if self.get("DO_CLEAR_CACHE") == "yes":
             shutil.rmtree(f"{bdir}/.cache", ignore_errors=True)
-            if self.get("SCBI_CACHE_DIR"):
-                for p in Path(self.get("SCBI_CACHE_DIR")).glob("*"):
-                    shutil.rmtree(p, ignore_errors=True) if p.is_dir() else p.unlink()
 
         #  Plan cache key
         planmd5 = self.module_plan_md5(self.get("SCBI_PLAN"))

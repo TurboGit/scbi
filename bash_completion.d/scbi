@@ -27,6 +27,8 @@ _SCBI_SHO_ARGS="${_SCBI_COMMON} --env= -e --depends: --rdepends --externals --ex
 
 _SCBI_STR_ARGS="${_SCBI_COMMON} --env= -e --list-keys -l --list --list:full -d --delete"
 
+_SCBI_BST_ARGS="${_SCBI_COMMON} --env= -e --build-dir= --plan= --show-key"
+
 _SCBI_HOOKS="((pre|post)-)?(cross-)?(archive|vcs|build-depends|depends|out-of-tree|build-env|env|config|build|install|prefix|tests|tests-depends|config-options|modules|version|only-explicit-build|patches)"
 
 _SCBI_MODE=std
@@ -293,6 +295,9 @@ _scbi()
             store)
                 _SCBI_MODE=str
                 ;;
+            binary-store)
+                _SCBI_MODE=bst
+                ;;
             replay)
                 _SCBI_MODE=rpl
                 ;;
@@ -388,6 +393,8 @@ _scbi()
                 _scbicomp "$_SCBI_INI_ARGS"
             elif [[ ${_SCBI_MODE} == str ]]; then
                 _scbicomp "$_SCBI_STR_ARGS"
+            elif [[ ${_SCBI_MODE} == bst ]]; then
+                _scbicomp "$_SCBI_BST_ARGS"
             elif [[ ${_SCBI_MODE} == shl ]]; then
                 _scbicomp "$_SCBI_SHL_ARGS"
             elif [[ ${_SCBI_MODE} == sho ]]; then
@@ -403,7 +410,7 @@ _scbi()
                     return 0
                     ;;
                 *)
-                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*.yaml | sed 's/\.yaml$//') source-archive lint format schema ini shell show store replay"
+                    _scbicomp "$(cd $HOME/.config/scbi; ls [a-z]*.yaml | sed 's/\.yaml$//') source-archive lint format schema ini shell show store binary-store replay"
                     ;;
             esac
     esac

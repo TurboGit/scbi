@@ -112,7 +112,7 @@ def base_env(root: Path) -> dict[str, str]:
         "ROOTDIR": str(root), "TESTREPOS": f"{sroot}/repos",
         "SCBI_TESTSUITE": "yes", "SCBI_ROOT": sroot, "SCBI_ARCHIVES": f"{sroot}/.archives",
         "SCBI_PATCH": f"{sroot}/.patches", "SCBI_GIT_REPO": f"{sroot}/git", "SCBI_SVN_REPO": "",
-        "SCBI_HG_REPO": "", "TODAY": "", "SCBI_EMAIL_NOTIFICATION": "no", "SCBI_CACHE_DIR": "no",
+        "SCBI_HG_REPO": "", "TODAY": "", "SCBI_EMAIL_NOTIFICATION": "no", "SCBI_CACHE_DIR": "no", "SCBI_BINARY_STORE": "no",
     })
     return env
 

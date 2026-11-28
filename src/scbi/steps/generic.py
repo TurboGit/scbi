@@ -318,13 +318,7 @@ class Generic:
 
     def purge_tvdir(self, tvdir: str) -> None:
         """``module-purge-tvdir TVDIR`` (the manifest is kept)."""
-        cache = self.get("SCBI_CACHE_DIR")
-        if cache and os.path.isfile(f"{tvdir}/build-id"):
-            from scbi.sources.handle import read_content
-
-            cbdir = read_content(f"{tvdir}/build-id")
-            _rm_f(f"{cache}/{cbdir}")
-        for f in ("build-id", "source-id", "build-deps"):
+        for f in ("build-id", "source-id", "build-deps", "binary-key", "binary-key.json"):
             _rm_f(f"{tvdir}/{f}")
         for f in ("build", "install", "src"):
             _rm_rf(f"{tvdir}/{f}")

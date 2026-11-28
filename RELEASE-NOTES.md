@@ -153,6 +153,14 @@ command language.
   and the environment of the dependencies. Reformatting a plug-in,
   reordering its keys, its variables, its functions or its dependencies,
   or changing its own `env` hook no longer triggers a rebuild.
+- **Binary store** (replaces the build cache `SCBI_CACHE_DIR`): a module
+  whose build is in a store (`SCBI_BINARY_STORE`, a directory or a NFS
+  mount; `~/.cache/scbi/binaries` by default) is installed from it
+  instead of built, its paths relocated to the sandbox; otherwise its
+  installation is written to the store. The key covers the build id, the
+  keys of the dependencies, the normalized environment of the build and
+  the OS: builds are shared between sandboxes and users.
+  `scbi binary-store --show-key` displays the keys.
 - **Parallel build**: `--parallel[=k]` (with `--deps`) builds up to k
   independent modules at the same time, one `build` or `tests` step at a
   time (`SCBI_BUILD_SLOTS`), the output of each module printed as one

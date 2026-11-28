@@ -1,6 +1,6 @@
 def test(t):
-    #  the drivers of the cache use one
-    t.set("SCBI_CACHE_DIR", "$ROOTDIR/.root/.cache")
+    #  the binary store: a file store of the driver
+    t.set("SCBI_BINARY_STORE", "file://$ROOTDIR/.root/.binaries")
 
     t.runs('./scbi --deps --no-patch mod-meta')
 
@@ -145,9 +145,11 @@ xxxx/xx/xx xx:xx:xx :   ↳ mod-meta
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
-xxxx/xx/xx xx:xx:xx : trigger: copy from cache
-xxxx/xx/xx xx:xx:xx : build cached
-xxxx/xx/xx xx:xx:xx : install cached
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib1 [default] (master)
 
@@ -158,13 +160,10 @@ xxxx/xx/xx xx:xx:xx :   ↳ mod-meta
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps: setup config build install wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
-xxxx/xx/xx xx:xx:xx : trigger: not yet built
-xxxx/xx/xx xx:xx:xx : config starting
-xxxx/xx/xx xx:xx:xx : config completed
-xxxx/xx/xx xx:xx:xx : build starting
-xxxx/xx/xx xx:xx:xx : build completed
-xxxx/xx/xx xx:xx:xx : install starting
-xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : trigger: from binary store file://<pwd>/.root/.binaries
+xxxx/xx/xx xx:xx:xx : config cached
+xxxx/xx/xx xx:xx:xx : build cached
+xxxx/xx/xx xx:xx:xx : install cached
 xxxx/xx/xx xx:xx:xx : copy install into <sandbox>/install
 xxxx/xx/xx xx:xx:xx : End Building lib2 [default] (master)
 
@@ -209,9 +208,11 @@ xxxx/xx/xx xx:xx:xx :   ↳ mod-meta
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
-xxxx/xx/xx xx:xx:xx : trigger: copy from cache
-xxxx/xx/xx xx:xx:xx : build cached
-xxxx/xx/xx xx:xx:xx : install cached
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : tests starting
 main
 liba.C master
@@ -226,10 +227,13 @@ xxxx/xx/xx xx:xx:xx :   ↳ mod-meta
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : get sources from git
-xxxx/xx/xx xx:xx:xx : trigger: copy from cache
-xxxx/xx/xx xx:xx:xx : config cached
-xxxx/xx/xx xx:xx:xx : build cached
-xxxx/xx/xx xx:xx:xx : install cached
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
 xxxx/xx/xx xx:xx:xx : tests starting
 main
 libb.B master (default)
@@ -249,14 +253,20 @@ xxxx/xx/xx xx:xx:xx : Building mod-meta [default] (n/a)
 xxxx/xx/xx xx:xx:xx : native x86_64-linux-gnu
 xxxx/xx/xx xx:xx:xx : steps: setup config build install tests wrapup
 xxxx/xx/xx xx:xx:xx : no sources (vcs or tar)
-xxxx/xx/xx xx:xx:xx : trigger: copy from cache
-xxxx/xx/xx xx:xx:xx : config cached
-xxxx/xx/xx xx:xx:xx : build cached
-xxxx/xx/xx xx:xx:xx : install cached
-xxxx/xx/xx xx:xx:xx : wrapup cached
+xxxx/xx/xx xx:xx:xx : trigger: not yet built
+xxxx/xx/xx xx:xx:xx : config starting
+xxxx/xx/xx xx:xx:xx : config completed
+xxxx/xx/xx xx:xx:xx : build starting
+xxxx/xx/xx xx:xx:xx : build completed
+xxxx/xx/xx xx:xx:xx : install starting
+xxxx/xx/xx xx:xx:xx : install completed
+xxxx/xx/xx xx:xx:xx : wrapup starting
+xxxx/xx/xx xx:xx:xx : wrapup completed
 xxxx/xx/xx xx:xx:xx : End Building mod-meta [default] (n/a)
 """)
 
-    t.set('B2D', '.root/builds-2/lib2/build/build')
+    #  from the binary store: the installation, not the build tree
+    t.set('B2D', '.root/builds-2/lib2/build')
 
-    t.ok('-f $B2D/main2')
+    t.ok('-f $B2D/install/lib/liblib2.so')
+    t.nok('-f $B2D/build/main2')

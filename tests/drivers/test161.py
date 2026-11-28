@@ -1,6 +1,6 @@
 def test(t):
-    #  the drivers of the cache use one
-    t.set("SCBI_CACHE_DIR", "$ROOTDIR/.root/.cache")
+    #  the binary store: a file store of the driver
+    t.set("SCBI_BINARY_STORE", "file://$ROOTDIR/.root/.binaries")
 
     t.runs('./scbi crossmod')
 

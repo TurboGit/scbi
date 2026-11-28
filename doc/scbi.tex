@@ -314,7 +314,11 @@ The build is controlled by a set of variables (the environment). SCBI comes with
 	\end{description}
 	It can be used in the hooks of the plug-ins (values, environment actions and commands). The function \code{module-dir} gives the same values (\seeref{yaml-functions}).
 
-	\item[SCBI\_CACHE\_DIR] The directory of the build cache, which makes it possible to reuse a previous build instead of rebuilding a module. Set to \code{no} to disable the cache. Default is \file{\$HOME/.cache/scbi}.
+	\item[SCBI\_BINARY\_STORE] The binary stores: the URLs separated by blanks, \code{ro:<url>} read-only, \code{no} for no store (\seeref{binary-store}). Default is \file{file://\$HOME/.cache/scbi/binaries}. \code{SCBI\_CACHE\_DIR}, the directory of the former build cache, is read as a store when \code{SCBI\_BINARY\_STORE} is not set.
+
+	\item[SCBI\_BINARY\_KEY\_IGNORE] Variables of the environment of the build left out of the binary keys (blank-separated), for example \code{PATH} for a team whose members have different but equivalent \code{PATH}s.
+
+	\item[SCBI\_BINARY\_KEY\_EXTRA] A value added to the binary keys, for what else must match for two builds to be shared, for example the version of a compiler not packaged by the OS.
 
 	\item[SCBI\_PROGRESS] \index{progress}When the output is a terminal,
 	\code{scbi} shows the progress of the build, \code{[<n>/<total>]
@@ -672,6 +676,8 @@ The following sub-commands are available:
 	\item[schema] Displays the JSON Schema of the YAML plug-ins, for the editors (\seeref{schema}).
 
 	\item[ini] Lists the sections of the ini files (\seeref{inifile}).
+
+	\item[binary-store] The binary stores: the binary keys of the modules and the stores having them (\seeref{binary-store}).
 
 	\item[replay] Reruns a step of a module from its replay file, or displays a script to run it by hand (\seeref{replay}).
 
@@ -2787,6 +2793,63 @@ With \ddash{}parallel the independent modules of a build are handled at the same
 The build is sequential, with a message, without \ddash{}deps, with \ddash{}dry-run, with a meta-module having a \code{plan} or an \code{aggregate} hook, when the global installation directory is not writable (\code{sudo} cannot ask for a password) and on Windows. With \ddash{}update:prefetch, each module updates its sources when it starts (as \ddash{}update).
 
 \cmd{scbi \ddash{}parallel=3 -d \ddash{}plan=ver mysoft}
+
+\subsection{Binary store}
+\label{binary-store}
+\index{binary store}
+
+A module whose build is in a binary store is installed from it instead of being built; otherwise it is built and its installation written to the store. The stores make the builds shared between sandboxes, machines and users.
+
+\subsubsection{The stores}
+
+The stores are an ordered list given by \code{SCBI\_BINARY\_STORE}: URLs separated by blanks, a URL prefixed with \code{ro:} being read-only. Without it, a store in \file{\$HOME/.cache/scbi/binaries} is used: the builds of the user are reused from one sandbox to another without any setting. \code{SCBI\_BINARY\_STORE=no} disables the stores.
+
+\begin{lstlisting}
+export SCBI_BINARY_STORE="file://$HOME/.cache/scbi/binaries file:///nfs/team/scbi-binaries"
+\end{lstlisting}
+
+A store is a directory, \code{file:///path} or a path: a local disk or a NFS mount (files and directories are created group-writable, for a team). An entry is two files, \file{<target>/<module>/<key>.json} (the metadata) and \file{<key>.tar.zst} (or \file{.tar.xz} without \code{zstd}): the installation of the module (\file{install} of its sandbox, as copied to the global installation directory) and, for information, its \file{source-ref}, its build id and the logs of its steps (\file{logs/origin} of the module when installed from the store). The build tree and the sources are not stored.
+
+The stores are looked up in order; a build found in a store is copied into the writable stores before it, so that a first local store acts as a cache of the shared ones. A build is written to all the writable stores. A writing never fails the build (a warning). An entry is never replaced, except by one relocatable to more sandboxes (see below).
+
+\subsubsection{The binary key}
+
+Two builds share an entry when they have the same \emph{binary key}: the SHA-256 of
+\begin{itemize}
+	\item the build id of the module (\seeref{options}, \ddash{}force): its sources, its reference, its resolved plug-in, its patches, the OS packages and the build ids of its dependencies...;
+	\item the binary keys of its direct dependencies (the modules of a meta-module): a difference in a dependency makes another key;
+	\item the environment of the commands of the build (the variables of the environment file, \code{PATH}, the variables set by the \code{env} hooks of the dependencies, the \code{SCBI\_*} variables...), with the paths of the sandbox, of the global installation directory, of the plug-ins... and of the home directory replaced by placeholders; the variables which do not change a build (\code{SCBI\_JOBS}, \code{TERM}, \code{USER}...) and the ones of \code{SCBI\_BINARY\_KEY\_IGNORE} are left out;
+	\item the OS (identifier, name, version, codename), the host and the target, the layout of the sandbox (\ddash{}flat) and \code{SCBI\_BINARY\_KEY\_EXTRA}.
+\end{itemize}
+A difference that is not known not to change a build gives another key: a build is not reused rather than reused wrongly.
+
+\subsubsection{Relocation}
+
+The installed files hold the paths of the sandbox where they were built (the hooks install in \file{\$SCBI\_BDIR/<module>/<target>-<variant>/install} and find their dependencies in their sandbox): \file{.pc}, \file{.la} and CMake files, scripts, the \code{RPATH} of the libraries and programs... When an entry is written, its files are scanned for the paths of the sandbox and of the global installation directory; when it is installed in another sandbox, they are replaced by the local ones:
+\begin{itemize}
+	\item in a text file, at any place;
+	\item in the target of a symbolic link;
+	\item in a binary file, in a NUL-terminated string (\code{RPATH}, a path compiled in), padded with NULs: only when the local path is not longer than the one of the origin, otherwise the module is built.
+\end{itemize}
+An entry with an occurrence elsewhere (in a compressed file for example) is not relocatable: it is written with a key bound to the paths of its sandbox, reused there only. The Python byte-code files (\file{*.pyc}), which hold the path of their source, are not stored. A sandbox with a long path (a CI one, for example) writes entries relocatable to more sandboxes: an entry is replaced by the same one of a longer origin path.
+
+\subsubsection{The modules built}
+
+A module is looked up in the stores when it has to be built, for a whole build (not with \ddash{}force, \ddash{}tests, nor a part of the steps); it is written to the stores after a whole build (\ddash{}force included). The modules never shared:
+\begin{itemize}
+	\item the \code{native} variants (nothing is built) and the user's checkouts (\code{dev});
+	\item a module whose build or source tree is used by a plug-in (\code{\$(module-dir <module> build)}, \code{\$\{SCBI\_MODULES\_DIR[<module>@build]\}}...): its installation is not enough;
+	\item a module installing nothing (nothing to reuse), and the meta-modules (they record a key, for the modules depending on them);
+	\item a module whose dependency has no binary key (a dependency built before the binary store records one at the next run).
+\end{itemize}
+A build installed from a store is reported with the trigger \code{from binary store <url>} and its steps \code{cached}; a failure (download, SHA-256, relocation) is a warning and the module is built.
+
+\subsubsection{scbi binary-store}
+\index{tools!binary-store}
+
+\cmd{scbi binary-store \ddash{}show-key [modules]}
+
+Displays, for each module of the build and its dependencies, the binary keys recorded by its last build (relocatable, and bound to the sandbox) and the stores having them.
 
 \subsection{Reproducing a step}
 \label{replay}

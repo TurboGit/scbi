@@ -33,6 +33,14 @@ Nix, Bazel...). Most valuable first.
    (scbi show --freeze).
 
 4. Binary cache keyed by build id
+   - [DONE] phase 1: binary key (build id, keys of the dependencies,
+     normalized environment, OS), relocation (text, links, padded C
+     strings), file stores (local, NFS) replacing SCBI_CACHE_DIR,
+     scbi binary-store --show-key.
+   - phase 2: http(s) stores, transports of the environment file
+     (binary-store-get/put/list), --binary-store=<url>|:pull|:no,
+     patchelf for longer RPATHs, --explain, --list.
+   - phase 3: --gc, --rm, size limit, aggregate meta-modules, signatures.
    The build id is a content hash: look up a binary archive by build id
    (local directory, shared URL) and install it instead of building.
    Shares builds between machines and CI, makes purge/plan switching
