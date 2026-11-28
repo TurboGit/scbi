@@ -15,7 +15,8 @@ Nix, Bazel...). Most valuable first.
    - [DONE] phase 1: modules built by driver subprocesses, one build
      slot for the build and tests steps (plus a tests lock), the output
      of a module printed as one block when it ends.
-   - phase 2: --keep-going; meta-modules with a plan or aggregate hook;
+   - [DONE] aggregate meta-modules in parallel (their modules first).
+   - phase 2: --keep-going; meta-modules with a plan hook;
      skip the worker of a module already up to date (start-up cost).
    - phase 3: several build slots sharing a GNU make jobserver (needs a
      plug-in convention instead of make -j$SCBI_JOBS, ninja >= 1.13).

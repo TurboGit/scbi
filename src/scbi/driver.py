@@ -1094,8 +1094,9 @@ class Driver:
 
             if not parallel.run(self, builder):
                 self.start_prefetch(builder)
+                kind, aggregated = parallel.worker_kind(self)
                 for module in self.modules:
-                    builder.handle_module("@root", module, "default", "no")
+                    builder.handle_module("@root", module, kind, aggregated)
         finally:
             if builder.prefetcher is not None:
                 builder.prefetcher.shutdown()

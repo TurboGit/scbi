@@ -26,7 +26,7 @@ their VCS checkout are never handled at the same time. On a failure no
 new module is started, the running ones finish, the run fails.
 
 Not handled in parallel (the build is sequential, with a message): a
-meta-module with a plan or an aggregate hook, a build without --deps,
+meta-module with a plan hook, a build without --deps,
 --dry-run, a global install directory not writable (sudo), a platform
 without FIFO.
 """
@@ -58,6 +58,16 @@ SLOTS_ENV = "SCBI_BUILD_SLOTS_FIFO"
 #  the modules needing the module of a worker, as a sequential build
 #  displays them (needed by:)
 NEEDED_BY_ENV = "SCBI_NEEDED_BY"
+#  the depends kind and the aggregate mode of the module of a worker, as a
+#  sequential build gives them (the final step)
+KIND_ENV = "SCBI_DEPENDS_KIND"
+
+
+def worker_kind(driver) -> tuple[str, str]:
+    """(depends kind, is aggregated) of the module of a worker."""
+    value = driver.environ.get(KIND_ENV, "") if is_worker(driver) else ""
+    kind, _, agg = value.partition(" ")
+    return kind or "default", agg or "no"
 #  a status line of a worker (not part of its output)
 STATUS_MARK = "\x1escbi-status "
 
@@ -159,6 +169,9 @@ class Job:
     #  the modules being handled when the walk reached it, the root first
     #  (Builder.modules_list in a sequential build)
     needed_by: list[str] = field(default_factory=list)
+    #  as in a sequential build (the final step of the module)
+    depends_kind: str = "default"
+    is_aggregated: str = "no"
     deps: set[str] = field(default_factory=set)
     resources: set[str] = field(default_factory=set)
     state: str = "waiting"  # waiting, running, done, failed, cancelled
@@ -188,7 +201,10 @@ def build_graph(driver, builder) -> list[Job]:
     #  the modules being visited (Builder.modules_list)
     stack: list[str] = []
 
-    def visit(formodule: str, modref: str) -> str | None:
+    def visit(formodule: str, modref: str, kind_of_dep: str = "default", is_aggregated: str = "no") -> str | None:
+        """``kind_of_dep``, ``is_aggregated``: as given to handle_module by a
+        sequential build (the depends kind, the aggregate mode of the
+        meta-module aggregating it), for the worker (final step)."""
         info = plan.module_ref(modref, formodule)
         if len(info) > 4:
             raise Unsupported(f"{info[0]}: {' '.join(info[4:])}")
@@ -210,7 +226,8 @@ def build_graph(driver, builder) -> list[Job]:
             wref = format_ref(module, variant, kind, ref[len("keep:"):] if ref.startswith("keep:") else ref)
         else:
             wref = module
-        job = Job(key, module, variant, wref, needed_by=list(stack))
+        job = Job(key, module, variant, wref, needed_by=list(stack), depends_kind=kind_of_dep,
+                  is_aggregated=is_aggregated)
         stack.append(module if variant == "default" else f"{module}/{variant}")
         job.resources.add(f"module:{module}")
         repo = _repo(builder, module, variant)
@@ -219,22 +236,34 @@ def build_graph(driver, builder) -> list[Job]:
         deps: set[str] = set()
         cross = driver.runner().cross
         if reg.loaded.get(f"{module}.{variant}") == "meta":
-            for hook in ("plan", "aggregate"):
-                if get_hook(reg, module, variant, hook, cross):
-                    raise Unsupported(f"meta-module {module} ({hook} hook)")
+            if get_hook(reg, module, variant, "plan", cross):
+                #  its modules are resolved with another build plan
+                raise Unsupported(f"meta-module {module} (plan hook)")
+            #  an aggregate: built after its modules (its wrapup copies their
+            #  installations), as the other meta-modules (handle_meta_module)
+            agg_mode = "no"
+            if get_hook(reg, module, variant, "aggregate", cross):
+                agg_mode = driver.runner().hook_value(
+                    module, variant, "aggregate", [prefix, driver.get("TARGET"), variant], plan,
+                    builder.modules_list) or ""
             for dmodule in builder.get_all_depends(module, variant, "build-depends"):
-                deps.add(visit(module, dmodule) or "")
+                deps.add(visit(module, dmodule, "build", "no") or "")
             mods = driver.runner().variant_values(module, variant, "modules", [prefix, target, variant],
                                                   plan, builder.modules_list)
             from scbi.bashcompat import words
 
             for m in words("\n".join(mods)):
-                deps.add(visit(module, m) or "")
+                deps.add(visit(module, m, "default", agg_mode) or "")
         else:
-            hooks = ["build-depends", "depends"] + (["tests-depends"] if driver.get("DO_TEST") != "no" else [])
-            for hook in hooks:
+            #  handle_all_depends: in a direct aggregate, the dependencies of
+            #  its modules are not aggregated
+            dep_agg = "no" if is_aggregated == "direct" else is_aggregated
+            hooks = [("build-depends", "build"), ("depends", "default")]
+            if driver.get("DO_TEST") != "no":
+                hooks.append(("tests-depends", "tests"))
+            for hook, dkind in hooks:
                 for dmodule in builder.get_all_depends(module, variant, hook):
-                    deps.add(visit(modref, dmodule) or "")
+                    deps.add(visit(modref, dmodule, dkind, dep_agg) or "")
         stack.pop()
         deps.discard("")
         deps.discard(key)
@@ -412,7 +441,8 @@ class Scheduler:
         env["PYTHONPATH"] = pkg + (f":{env['PYTHONPATH']}" if env.get("PYTHONPATH") else "")
         env.update({"SCBI_NESTED": "yes", WORKER_ENV: "yes", STATE_ENV: self.state, SLOTS_ENV: self.fifo,
                     "SCBI_RUN_ID": self.d.get("SCBI_RUN_ID"), "PYTHONUNBUFFERED": "1",
-                    NEEDED_BY_ENV: " ".join(job.needed_by)})
+                    NEEDED_BY_ENV: " ".join(job.needed_by),
+                    KIND_ENV: f"{job.depends_kind} {job.is_aggregated}"})
         return env
 
     def launch(self, job: Job) -> None:

@@ -170,7 +170,9 @@ command language.
 - **Parallel build**: `--parallel[=k]` (with `--deps`) builds up to k
   independent modules at the same time, one `build` or `tests` step at a
   time (`SCBI_BUILD_SLOTS`), the output of each module printed as one
-  block; the build ids are the ones of a sequential build. A summary at
+  block; the build ids are the ones of a sequential build; aggregate
+  meta-modules included (a meta-module with a plan hook makes the build
+  sequential). A summary at
   the end (modules running, waiting for dependencies or for the build
   slot) and a timeline (`<target>-parallel.log`) show how parallel it
   was.

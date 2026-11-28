@@ -104,11 +104,36 @@ xxxx/xx/xx xx:xx:xx : End Building pa [default] (n/a)
     t.runs('./scbi -d pall')
     t.ngrep('trigger:')
 
-    # a meta-module with an aggregate hook: sequential
+    # an aggregate meta-module: its modules built in parallel, then its
+    # wrapup (their installations copied); the final step gets the same
+    # status (depends kind, meta, aggregated) as in a sequential build
+    t.sh('''cat > scripts.d/.env-fin.yaml <<'XEOF'
+functions:
+  module-final-step:
+    run: |-
+      append $SCBI_BDIR/final.log:
+          $MODULE $DEPENDS_KIND $IS_META $IS_AGGREGATED
+XEOF''')
+    t.runs('./scbi -e fin --build-dir=$ROOTDIR/.root/seq -d metaagg')
+    t.runs('./scbi -e fin --build-dir=$ROOTDIR/.root/par --parallel -d metaagg')
+    t.ngrep('building sequentially')
+    t.grep('parallel build: 3 module(s)')
+    t.runs('sort .root/seq/final.log > seq.log; sort .root/par/final.log | diff seq.log -')
+    t.runs('cat seq.log')
+    t.clean_diff("""\
+lib1 default no direct
+libenv default no direct
+metaagg default aggregate no
+""")
+    t.ok('-f .root/par/metaagg/x86_64-linux-gnu-default/install/lib/liblib1.so')
+    t.runs('./scbi --build-dir=$ROOTDIR/.root/par -d metaagg')
+    t.ngrep('trigger:')
+
+    # a meta-module with a plan hook: sequential
     t.runs('./scbi --parallel --dry-run -d metaagg')
     t.grep('parallel build: not with --dry-run')
-    t.runs('./scbi --parallel -d metaagg')
-    t.grep('parallel build: meta-module metaagg (aggregate hook), building sequentially')
+    t.runs('./scbi --parallel --no-patch -d supermod/best')
+    t.grep('parallel build: meta-module supermod (plan hook), building sequentially')
 
     # what the parallel build did: a summary, a timeline
     t.runs('./scbi --parallel=3 --force -d pa')

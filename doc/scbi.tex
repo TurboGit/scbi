@@ -2796,7 +2796,7 @@ variables of the body, not environment variables (use \code{export VAR =
 With \ddash{}parallel the independent modules of a build are handled at the same time. A sequential build leaves cores idle in the steps using one core: the configuration (\code{configure}, \code{cmake}), the installation, the setup of the sources, the end of a build (link); the parallel build runs these steps of a module while another one builds. The time of the steps of the last run, displayed by \ddash{}stat:full (\seeref{options}), tells how much can be gained: the share of the steps using one core.
 
 \begin{itemize}
-	\item A module is started when its dependencies (\code{depends}, \code{build-depends}, \code{tests-depends} with \ddash{}tests, the modules of a meta-module) are built, up to \code{k} at a time, in the order of a sequential build otherwise.
+	\item A module is started when its dependencies (\code{depends}, \code{build-depends}, \code{tests-depends} with \ddash{}tests, the modules of a meta-module) are built, up to \code{k} at a time, in the order of a sequential build otherwise. A meta-module, aggregate or not, is handled after its modules (an aggregate copies their installations); the final step (\code{module-final-step}) gets the same parameters as in a sequential build.
 
 	\item \index{SCBI\_BUILD\_SLOTS}The \code{build} and \code{tests} steps, which use many cores (\code{make -j\$SCBI\_JOBS}), wait for a build slot: \code{SCBI\_BUILD\_SLOTS}, 1 by default, so that one such step runs at a time and the machine is not overloaded. Two testsuites never run at the same time (some need the whole machine, or a fixed port). The other steps run freely.
 
@@ -2811,7 +2811,7 @@ With \ddash{}parallel the independent modules of a build are handled at the same
 	\item The build ids are the ones of a sequential build: a module built in parallel is up to date for a sequential build, and conversely.
 \end{itemize}
 
-The build is sequential, with a message (at the start and at the end of the build), without \ddash{}deps, with \ddash{}dry-run, with a meta-module having a \code{plan} or an \code{aggregate} hook, when the global installation directory is not writable (\code{sudo} cannot ask for a password) and on Windows. With \ddash{}update:prefetch, each module updates its sources when it starts (as \ddash{}update).
+The build is sequential, with a message (at the start and at the end of the build), without \ddash{}deps, with \ddash{}dry-run, with a meta-module having a \code{plan} hook (its modules are resolved with another build plan), when the global installation directory is not writable (\code{sudo} cannot ask for a password) and on Windows. With \ddash{}update:prefetch, each module updates its sources when it starts (as \ddash{}update).
 
 \cmd{scbi \ddash{}parallel=3 -d \ddash{}plan=ver mysoft}
 
